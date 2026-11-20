@@ -37,7 +37,8 @@ async function completeFileOf(folder: string): Promise<unknown> {
   if (asset === undefined) {
     throw new Error("The project has no asset");
   }
-  const cacheFolder = `${asset.contentHash}-${String(projectFramesPerSecond)}`;
+  const cacheFolder = `${asset.contentHash.replace("sha256:", "sha256-")}-${String(projectFramesPerSecond)}`;
+  expect(cacheFolder).toMatch(/^sha256-[0-9a-f]{64}-30$/);
   return JSON.parse(
     await readFile(
       join(folder, ".cache", "video-frames", cacheFolder, "complete.json"),

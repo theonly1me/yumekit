@@ -84,12 +84,10 @@ export function createVideoFrameServer(options: {
         endWithStatus({ response, statusCode: 500 });
         return;
       }
-      if (requested.assetFrame >= prepared.value.pictureCount) {
-        endWithStatus({ response, statusCode: 404 });
-        return;
-      }
+      const { folder, pictureCount } = prepared.value;
+      const pictureNumber = Math.min(requested.assetFrame + 1, pictureCount);
       const picture = await readFile(
-        join(prepared.value.folder, pictureFileOf(requested.assetFrame + 1)),
+        join(folder, pictureFileOf(pictureNumber)),
       );
       response.setHeader("Content-Type", "image/jpeg");
       response.end(picture);

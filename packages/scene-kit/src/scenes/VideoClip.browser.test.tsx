@@ -89,6 +89,20 @@ describe("video-clip", () => {
     ]);
   });
 
+  it("puts the caption at the top, out of the caption area of the narration", async () => {
+    const { element, mounted } = await mountKitScene({
+      name: "video-clip",
+      durationFrames: 30,
+      props: { assetId: "clip", caption: "A clip with a caption" },
+      output: tallOutput,
+      assets: { clip },
+    });
+    await mounted.seek(29);
+    const frame = element.getBoundingClientRect();
+    const panel = element.querySelector("p")?.getBoundingClientRect();
+    expect(panel?.bottom).toBeLessThan(frame.top + frame.height / 2);
+  });
+
   it("draws a placeholder and the caption when the asset is missing or is not a video", async () => {
     for (const assetId of ["missing", "photo"]) {
       const { element, mounted } = await mountKitScene({

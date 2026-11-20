@@ -17,9 +17,10 @@ my-project/
   assets/files/<assetId>.words.json   word timings of a speech asset
   renders/                      finished files (not in git)
   .yumekit/                     undo history and cache (not in git)
+  .cache/                       frame pictures of video assets (not in git)
 ```
 
-`createProject` writes a `.gitignore` with `renders/` and `.yumekit/`.
+`createProject` writes a `.gitignore` with `renders/`, `.yumekit/`, and `.cache/`.
 
 ## Schemas
 

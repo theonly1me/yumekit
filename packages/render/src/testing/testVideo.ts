@@ -16,6 +16,7 @@ export interface TestVideo {
   heightPixels: number;
   withAudio: boolean;
   markerX?: string;
+  extraRecordedFrames?: number;
 }
 
 export const movingMarkerVideo: TestVideo = {
@@ -82,9 +83,10 @@ export async function addVideoAsset(options: {
       file,
       widthPixels: options.video.widthPixels,
       heightPixels: options.video.heightPixels,
-      durationFrames: Math.round(
-        options.video.seconds * (options.projectFramesPerSecond ?? 30),
-      ),
+      durationFrames:
+        Math.round(
+          options.video.seconds * (options.projectFramesPerSecond ?? 30),
+        ) + (options.video.extraRecordedFrames ?? 0),
       hasAudio: options.video.withAudio,
       source: { kind: "import", originalName: `${options.assetId}.mp4` },
     },

@@ -42,10 +42,12 @@ The renderer converts a video asset to JPEG pictures at the frame rate of the pr
 ffmpeg -i <asset file> -vf fps=<framesPerSecond> -q:v 2 <cache folder>/%06d.jpg
 ```
 
-- The cache folder is `<project>/.cache/video-frames/<contentHash>-<framesPerSecond>/`. `openProject` ignores `.cache`. A person can delete it at any time.
-- A file `complete.json` in the folder holds the picture count. The renderer writes it last. A folder without it is not complete, and the renderer makes it again.
+- The cache folder is `<project>/.cache/video-frames/<contentHash>-<framesPerSecond>/`. The folder name replaces each character of the content hash outside `[a-z0-9-]` with `-`, so `sha256:abc` becomes `sha256-abc`. `openProject` ignores `.cache`. A person can delete it at any time.
+- `createProject` writes `.cache/` to the `.gitignore` of the project.
+- A file `complete.json` in the folder holds `{ "pictureCount": number }`. The renderer writes it last. A folder without it is not complete, and the renderer makes it again.
+- FFmpeg writes to a temporary folder next to the cache folder. The renderer then renames it into place, so two renders never write the same folder.
 - Picture `000001.jpg` is asset frame 0.
-- The Vite server of the renderer serves a picture at `/asset-frames/<assetId>/<assetFrame>.jpg`. On the first request for an asset, it runs FFmpeg, and each request for that asset waits for it. A request for a frame past the last picture gets status 404.
+- The Vite server of the renderer serves a picture at `/asset-frames/<assetId>/<assetFrame>.jpg`. On the first request for an asset, it runs FFmpeg, and each request for that asset waits for it. A request for a frame at or past the last picture gets the last picture. A request for an asset that is not a video asset of the project gets status 404.
 - If FFmpeg fails, the render returns the failure `video-frames-failed` with the asset id and the last line of the FFmpeg error output.
 
 ### Scene contract
@@ -78,21 +80,22 @@ function VideoFrame(props: {
 ```
 
 - `VideoFrame` draws one `<img>` that fills its parent. The adapter already waits until each image decodes, so `seek` stays exact.
-- `assetFrame` below 0 shows frame 0. `assetFrame` at or past `count` shows the last frame. So a clip that is longer than its video holds the last picture.
+- `assetFrame` below 0 shows frame 0. `assetFrame` at or past `count` shows the last frame. So a clip that is longer than its video holds the last picture. A non-integer `assetFrame` rounds down.
 - `fit` is `cover` by default. `focus` is the point of the picture that stays visible when `cover` cuts it. Each value is from 0 to 1, and the default is the center.
-- An asset id that does not exist, or that is not a video, makes the component throw. The render then returns `scene-failed`, as for each scene error.
+- An asset id that does not exist, or that is not a video, makes the component throw. The render then returns `scene-error`, as for each scene error.
 
-A scene must not use a `<video>` element. `checkSceneCode` rejects scene code that has one, with a message that names `VideoFrame`.
+A scene must not use a `<video>` element. `checkSceneCode` returns `scene-compile-failed` for scene code that has one, with a message that names `VideoFrame`.
 
 ### Kit scene `video-clip`
 
-| Name         | What it shows                                                                       | Props                                                |
-| ------------ | ----------------------------------------------------------------------------------- | ---------------------------------------------------- |
-| `video-clip` | One video asset that fills the picture, with an optional caption line at the bottom | `assetId`, `fit`, `focus`, `startSeconds`, `caption` |
+| Name         | What it shows                                                                    | Props                                                |
+| ------------ | -------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| `video-clip` | One video asset that fills the picture, with an optional caption line at the top | `assetId`, `fit`, `focus`, `startSeconds`, `caption` |
 
 - At scene frame `f`, the scene shows asset frame `f + round(startSeconds * framesPerSecond)`.
 - A wide clip in a tall output is cut with `cover` around `focus`. The agent sets `focus` to the subject.
-- `caption` uses the caption area and the text sizes of document 08.
+- `caption` is at the top of the picture, in the same place and style as the caption of `image-pan`. So it does not cover the captions of `caption-words`.
+- When the asset is missing or is not a video, the scene draws the placeholder color (rule 5 of document 08).
 - The scene has no motion of its own. The clip is the motion.
 
 ## The sound of a clip
@@ -232,5 +235,6 @@ WP11 and WP13 start together.
 - `tools/fal-media` for Seedance 2.5 and other hosted models.
 - Change of an existing clip: extension, edit by prompt, or a new sound.
 - Speed change, reverse play, and a cut inside the frame pictures.
+- Conversion of only the used part of a long video asset. Today the renderer converts the whole file at the first frame that shows it, inside the time limit of a scene.
 - A spend record in dollars for each project (milestone 4).
 - Preview of a clip with sound in the editor (milestone 2).

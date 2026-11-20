@@ -21,9 +21,8 @@ import {
 const durationFrames = 150;
 const checkedFrames = [0, 40, 149];
 const outputs = [wideOutput, tallOutput, squareOutput];
-const sceneNamesWithCaptions = ["caption-words", "video-clip"] as const;
 const sceneNamesWithoutCaptions = kitSceneNames.filter(
-  (name) => !sceneNamesWithCaptions.some((captioned) => captioned === name),
+  (name) => name !== "caption-words",
 );
 
 async function countsAtFrames(options: {
@@ -65,19 +64,17 @@ describe("the caption area at the bottom 16 units", () => {
         });
       }
 
-      for (const name of sceneNamesWithCaptions) {
-        it(`keeps the ${propsName} caption panel of ${name} inside it in ${size}`, async () => {
-          const { counts, texts } = await countsAtFrames({
-            name,
-            props: props[name],
-            output,
-          });
-          expect(counts.map((count) => count.aboveCaptionArea)).toEqual([
-            0, 0, 0,
-          ]);
-          expect(texts).toBeGreaterThan(0);
+      it(`keeps the ${propsName} caption panel of caption-words inside it in ${size}`, async () => {
+        const { counts, texts } = await countsAtFrames({
+          name: "caption-words",
+          props: props["caption-words"],
+          output,
         });
-      }
+        expect(counts.map((count) => count.aboveCaptionArea)).toEqual([
+          0, 0, 0,
+        ]);
+        expect(texts).toBeGreaterThan(0);
+      });
     }
   }
 });

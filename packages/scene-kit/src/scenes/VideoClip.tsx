@@ -41,7 +41,7 @@ export function VideoClip(props: { props: JsonObject }): ReactNode {
         ) : null}
       </div>
       {caption === undefined || caption === "" ? null : (
-        <CaptionPanel placement="bottom">{caption}</CaptionPanel>
+        <CaptionPanel placement="top">{caption}</CaptionPanel>
       )}
     </>
   );

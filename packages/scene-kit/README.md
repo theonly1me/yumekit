@@ -25,7 +25,7 @@ A scene treats its props as untrusted input. It draws a default for a missing or
 
 The `paper` style pack sets the colors, the fonts, the motion, and the sizes. Each scene reads its tokens, so a second pack needs no change to the scenes.
 
-The bottom 16 units of the picture are the caption area. `caption-words` draws paper words on an ink panel inside it. The caption of `video-clip` uses the same panel. Each other scene keeps its text above it.
+The bottom 16 units of the picture are the caption area. `caption-words` draws paper words on an ink panel inside it, and each other scene keeps its text above it.
 
 ## Fonts
 

@@ -21,11 +21,12 @@ export function framePictureFolderOf(options: {
   asset: Asset;
   framesPerSecond: number;
 }): string {
+  const portableHash = options.asset.contentHash.replace(/[^a-z0-9-]/g, "-");
   return join(
     options.projectFolder,
     ".cache",
     "video-frames",
-    `${options.asset.contentHash}-${String(options.framesPerSecond)}`,
+    `${portableHash}-${String(options.framesPerSecond)}`,
   );
 }
 
