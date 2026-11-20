@@ -29,7 +29,7 @@ function fieldsOf(options: { path: string; shape: z.core.$ZodShape }) {
 }
 
 describe("kitSceneSchemas", () => {
-  it("lists the six kit scenes of the design", () => {
+  it("lists the seven kit scenes of the design", () => {
     expect(Object.keys(kitSceneSchemas)).toEqual([
       "title-card",
       "bullet-list",
@@ -37,6 +37,7 @@ describe("kitSceneSchemas", () => {
       "caption-words",
       "bar-chart",
       "quote",
+      "video-clip",
     ]);
   });
 

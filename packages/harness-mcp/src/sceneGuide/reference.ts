@@ -23,8 +23,9 @@ Prefer a kit scene (list_kit_scenes). Write custom code only when no kit scene c
   - \`durationFrames: number\`: the length of the scene in frames.
   - \`layout: "wide" | "tall" | "square"\`: wide when width / height is 1.2 or more, tall when it is 0.8 or less.
   - \`unit: number\`: 1 percent of the shorter side, in pixels.
-  - \`findAsset(assetId: string): SceneAsset | undefined\`. A SceneAsset is \`{ url: string; kind: "image" | "audio" | "video" | "font"; widthPixels?: number; heightPixels?: number; durationFrames?: number; words?: { text: string; startFrame: number; endFrame: number }[] }\`. Use \`url\` as the \`src\` of an \`<img>\`. If it returns undefined, draw a placeholder. Never fail.
+  - \`findAsset(assetId: string): SceneAsset | undefined\`. A SceneAsset is \`{ url: string; kind: "image" | "audio" | "video" | "font"; widthPixels?: number; heightPixels?: number; durationFrames?: number; words?: { text: string; startFrame: number; endFrame: number }[]; framePictures?: { urlPrefix: string; count: number } }\`. Use \`url\` of an image as the \`src\` of an \`<img>\`. A video asset has \`framePictures\`: one picture for each project frame, at \`urlPrefix + n + ".jpg"\`. If it returns undefined, draw a placeholder. Never fail.
 - \`useHold(): { release: () => void }\`. The frame waits until you call \`release\`. You rarely need it: fonts and \`<img>\` elements already make the frame wait.
+- \`<VideoFrame assetId={id} assetFrame={n} fit?={"cover" | "contain"} focus?={{ x, y }} />\`. Draws frame n of a video asset as one \`<img>\` that fills its parent. An assetFrame below 0 shows frame 0, and an assetFrame at or past \`framePictures.count\` shows the last frame. A number that is not whole rounds down. fit is cover by default. focus is the point that stays visible when cover cuts the picture, each value from 0 to 1, and the center by default. Check with findAsset that the asset is a video first, because VideoFrame throws for an asset that is missing or is not a video.
 - \`<FrameWindow startFrame={n} durationFrames={m}>\`. Shows its children only from frame n for m frames (to the end when m is missing). Inside it, \`useFrame()\` starts at 0. Use it to start a part of the scene later.
 
 ## Animation functions from @yumekit/scene
@@ -51,6 +52,7 @@ export const rulesSection = `## What a scene must not do
 | \`useEffect\` or state that changes the picture | A value computed from the frame |
 | A network request, or a URL from the internet | An asset from \`findAsset\` |
 | Audio playback | An audio clip on the timeline |
+| A \`<video>\` element (put_scene rejects it with scene-compile-failed) | \`VideoFrame\` with the id of a video asset |
 | A font from the internet, or a font file in the code | The paper fonts from \`paper.fonts\` |
 
 ## The paper style

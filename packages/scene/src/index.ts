@@ -16,3 +16,4 @@ export { tween } from "./animation/tween.js";
 export { defineReactScene } from "./react/defineReactScene.js";
 export { FrameWindow } from "./react/FrameWindow.js";
 export { useFrame, useHold, useSceneContext } from "./react/hooks.js";
+export { VideoFrame } from "./react/VideoFrame.js";

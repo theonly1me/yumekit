@@ -26,6 +26,24 @@ describe("scene guide", () => {
     }
   });
 
+  it("describes VideoFrame and framePictures, and the rejected <video> element", async () => {
+    expect(sceneGuide).toContain(
+      '<VideoFrame assetId={id} assetFrame={n} fit?={"cover" | "contain"} focus?={{ x, y }} />',
+    );
+    expect(sceneGuide).toContain(
+      "framePictures?: { urlPrefix: string; count: number }",
+    );
+    expect(sceneGuide).toContain(
+      "an assetFrame at or past `framePictures.count` shows the last frame",
+    );
+    expect(sceneGuide).toContain("A `<video>` element (put_scene rejects it");
+    const checked = await checkSceneCode({
+      sceneId: "film",
+      code: 'import { defineReactScene } from "@yumekit/scene";\nexport default defineReactScene(() => <video src="/a.mp4" />);\n',
+    });
+    expect(checked.ok ? "" : checked.failure.kind).toBe("scene-compile-failed");
+  });
+
   it("contains the code of each example", () => {
     for (const example of sceneGuideExamples) {
       expect(sceneGuide).toContain(example.code.trimEnd());

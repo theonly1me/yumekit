@@ -54,9 +54,30 @@ describe("probeMedia", () => {
 
     expect(probed).toMatchObject({
       ok: true,
-      value: { kind: "video", widthPixels: 64, heightPixels: 48 },
+      value: {
+        kind: "video",
+        widthPixels: 64,
+        heightPixels: 48,
+        hasAudio: false,
+      },
     });
     expect(probed.ok && probed.value.durationSeconds).toBeCloseTo(2, 1);
+  });
+
+  it("reads that a video file has sound", async () => {
+    const file = await makeWithFfmpeg({
+      name: "talk.mp4",
+      arguments: [
+        ["-f", "lavfi", "-i", "color=c=blue:s=64x48:r=24:d=1"],
+        ["-f", "lavfi", "-i", "sine=frequency=440:duration=1"],
+        ["-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac"],
+      ].flat(),
+    });
+
+    expect(await probeMedia({ file })).toMatchObject({
+      ok: true,
+      value: { kind: "video", hasAudio: true },
+    });
   });
 
   it("returns media-not-readable for a file that is not media", async () => {

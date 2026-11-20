@@ -37,6 +37,7 @@ export const assetSchema = z.strictObject({
   widthPixels: z.int().min(1).exactOptional(),
   heightPixels: z.int().min(1).exactOptional(),
   durationFrames: frameCountSchema.exactOptional(),
+  hasAudio: z.boolean().exactOptional(),
   hasWords: z.boolean(),
   source: assetSourceSchema,
 });

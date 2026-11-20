@@ -5,6 +5,7 @@ import { captionWordsSchema } from "./captionWords.js";
 import { imagePanSchema } from "./imagePan.js";
 import { quoteSchema } from "./quote.js";
 import { titleCardSchema } from "./titleCard.js";
+import { videoClipSchema } from "./videoClip.js";
 
 export interface KitSceneSchema {
   purpose: string;
@@ -18,4 +19,5 @@ export const kitSceneSchemas = {
   "caption-words": captionWordsSchema,
   "bar-chart": barChartSchema,
   quote: quoteSchema,
+  "video-clip": videoClipSchema,
 } satisfies Record<string, KitSceneSchema>;

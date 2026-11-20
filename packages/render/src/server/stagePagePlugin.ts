@@ -3,6 +3,10 @@ import type { Plugin } from "vite";
 import { stageEntryFile, stagePageEntryFile } from "../packagePaths.js";
 import { isPermittedCompiledSceneImport } from "../sceneCode/permittedImports.js";
 import type { StagePageData } from "../page/stagePageData.js";
+import {
+  assetFramesPath,
+  type VideoFrameServer,
+} from "../videoFrames/videoFrameServer.js";
 
 const stageDataModuleId = "virtual:yumekit-stage-data";
 const resolvedStageDataModuleId = `\0${stageDataModuleId}`;
@@ -38,6 +42,7 @@ function stageDataModuleCode(pageData: StagePageData): string {
 export function stagePagePlugin(options: {
   projectFolder: string;
   pageData: StagePageData;
+  videoFrames: VideoFrameServer;
 }): Plugin {
   const scenesFolder = join(options.projectFolder, "scenes") + sep;
   return {
@@ -70,6 +75,10 @@ export function stagePagePlugin(options: {
         const [, response] = parameters;
         response.setHeader("Content-Type", "text/html; charset=utf-8");
         response.end(stagePageHtml());
+      });
+      server.middlewares.use(assetFramesPath, (...parameters) => {
+        const [request, response, next] = parameters;
+        options.videoFrames.respond({ request, response }).catch(next);
       });
     },
   };
