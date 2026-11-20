@@ -50,16 +50,19 @@ Before `put_scene` sends its edit, the harness checks the scene. For a kit scene
 
 ### Timeline
 
-| Tool            | Input                                        | Edit                |
-| --------------- | -------------------------------------------- | ------------------- |
-| `set_timeline`  | `output_id`, `tracks`                        | `setTimeline`       |
-| `add_clip`      | `output_id`, `track_id`, the clip fields     | `addClip`           |
-| `update_clip`   | `output_id`, `clip_id`, the fields to change | `updateClip`        |
-| `remove_clip`   | `output_id`, `clip_id`                       | `removeClip`        |
-| `copy_timeline` | `from_output_id`, `to_output_id`             | `copyTimeline`      |
-| `undo`, `redo`  | none                                         | The store operation |
+| Tool              | Input                                                    | Edit                                                                                      |
+| ----------------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `set_timeline`    | `output_id`, `tracks`                                    | `setTimeline`                                                                             |
+| `add_clip`        | `output_id`, `track_id`, the clip fields                 | `addClip`                                                                                 |
+| `update_clip`     | `output_id`, `clip_id`, the fields to change             | `updateClip`                                                                              |
+| `remove_clip`     | `output_id`, `clip_id`                                   | `removeClip`                                                                              |
+| `copy_timeline`   | `from_output_id`, `to_output_id`                         | `copyTimeline`                                                                            |
+| `place_narration` | `output_id`, `asset_id`, `start_frame`, `with_captions?` | `addClip` for the audio, and `addClip` for a `caption-words` scene on the top scene track |
+| `undo`, `redo`    | none                                                     | The store operation                                                                       |
 
 `set_timeline` is the usual tool for a first build, because an agent can state the whole timeline in one call. The clip tools serve small changes.
+
+`place_narration` puts a speech asset on the audio track for its full length. With `with_captions`, it also adds a `caption-words` scene and a clip that matches the audio clip, as document 08 requires. It creates the audio track and the caption track when the output has none. All of it is one edit batch, so one undo removes it.
 
 ### Media
 
@@ -98,7 +101,7 @@ The server sends these instructions to the client at the start of a session. The
 3. Add each scene with `put_scene`. Prefer a kit scene. Call `get_scene_guide` before you write custom code.
 4. Make the narration with `generate_asset`. Read the word timings to set the length of each scene.
 5. Make the images with `generate_asset`. Put the style of the bible in each prompt.
-6. Build the timeline with `set_timeline`, one output at a time. Use `copy_timeline` for the next output, then change it.
+6. Build the timeline with `set_timeline`, one output at a time. Add each narration with `place_narration`. Use `copy_timeline` for the next output, then change it.
 7. Check frames with `preview_frames`. Correct each scene that has a defect.
 8. Call `render_video` for each output.
 
