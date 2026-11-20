@@ -1,0 +1,20 @@
+{
+  "name": "@yumekit/cli",
+  "version": "0.0.0",
+  "private": true,
+  "description": "The yumekit command.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "bin": {
+    "yumekit": "./dist/main.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ]
+}
