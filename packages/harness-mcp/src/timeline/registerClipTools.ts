@@ -4,6 +4,7 @@ import { applyEditsResult } from "../applyEditsResult.js";
 import type { HarnessContext } from "../context.js";
 import { durationInput, frameInput, idInput } from "../inputs.js";
 import { failureResult } from "../results.js";
+import { registerUpdateClip } from "./registerUpdateClip.js";
 import { audioClipOf, sceneClipOf } from "./wireTimeline.js";
 
 const addClipInput = {
@@ -92,61 +93,6 @@ function addClip(options: {
         "A scene clip goes on a scene track and an audio clip on an audio track. Call get_timeline to see the kind of each track, and correct the value that the message names.",
     },
   });
-}
-
-function registerUpdateClip(context: HarnessContext): void {
-  context.server.registerTool(
-    "update_clip",
-    {
-      description:
-        "Change the timing or the gain of one clip. Give only the fields to change.",
-      inputSchema: {
-        output_id: idInput("The id of the output."),
-        clip_id: idInput("The id of the clip from get_timeline."),
-        start_frame: frameInput("The new start frame.").optional(),
-        duration_frames: durationInput("The new length.").optional(),
-        scene_start_frame: frameInput(
-          "Scene clip only: the new first frame of the scene.",
-        ).optional(),
-        asset_start_frame: frameInput(
-          "Audio clip only: the new first frame of the asset.",
-        ).optional(),
-        gain_decibels: z
-          .number()
-          .optional()
-          .describe("Audio clip only: the new volume change in decibels."),
-      },
-    },
-    (input) =>
-      applyEditsResult({
-        store: context.store,
-        edits: [
-          {
-            kind: "updateClip",
-            outputId: input.output_id,
-            clipId: input.clip_id,
-            changes: {
-              ...(input.start_frame === undefined
-                ? {}
-                : { startFrame: input.start_frame }),
-              ...(input.duration_frames === undefined
-                ? {}
-                : { durationFrames: input.duration_frames }),
-              ...(input.scene_start_frame === undefined
-                ? {}
-                : { sceneStartFrame: input.scene_start_frame }),
-              ...(input.asset_start_frame === undefined
-                ? {}
-                : { assetStartFrame: input.asset_start_frame }),
-              ...(input.gain_decibels === undefined
-                ? {}
-                : { gainDecibels: input.gain_decibels }),
-            },
-          },
-        ],
-        line: `Clip "${input.clip_id}" changed.`,
-      }),
-  );
 }
 
 export function registerClipTools(context: HarnessContext): void {

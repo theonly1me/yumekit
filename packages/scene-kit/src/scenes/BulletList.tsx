@@ -1,17 +1,15 @@
 import { stagger, type JsonObject } from "@yumekit/scene";
 import type { ReactNode } from "react";
-import { contentBottomUnits } from "../kit/captionArea.js";
-import { FitBox } from "../kit/FitBox.js";
+import { HeadedContent } from "../kit/HeadedContent.js";
 import { riseStyle, useMotionFrame } from "../kit/motion.js";
 import { useSizes } from "../kit/sizes.js";
-import { bodyTextStyle, displayTextStyle } from "../kit/textStyles.js";
+import { bodyTextStyle } from "../kit/textStyles.js";
 import { readBulletListProps } from "../props/readProps.js";
 import { useStylePack } from "../stylePacks/StylePackContext.js";
 
 const headingStartFrame = 4;
 const firstItemStartFrame = 24;
 const itemLineHeight = 1.25;
-const bulletUnits = 3.4;
 const bulletDropShare = 0.06;
 
 export function BulletList(props: { props: JsonObject }): ReactNode {
@@ -28,38 +26,18 @@ export function BulletList(props: { props: JsonObject }): ReactNode {
   const motionFrame = useMotionFrame({ settleFrame });
   const rise = (startFrame: number) =>
     riseStyle({ motionFrame, startFrame, stylePack, unit: sizes.unit });
-  const margin = stylePack.layout.marginUnits;
   const itemUnits = sizes.textUnits("item");
+  const { bulletShareOfItem, itemGapShareOfItem } = stylePack.layout;
+  const bulletUnits = itemUnits * bulletShareOfItem;
   const bulletOffsetUnits =
     (itemUnits * itemLineHeight - bulletUnits) / 2 +
     itemUnits * bulletDropShare;
   return (
-    <FitBox
-      style={{
-        left: sizes.pixels(margin),
-        right: sizes.pixels(margin),
-        top: sizes.pixels(margin + 2),
-        bottom: sizes.pixels(contentBottomUnits(stylePack)),
-        justifyContent: "center",
-      }}
-      contentStyle={{
-        display: "flex",
-        flexDirection: "column",
-        gap: sizes.fitted(4.5),
-      }}
+    <HeadedContent
+      heading={heading}
+      headingStyle={rise(headingStartFrame)}
+      contentStyle={{ gap: sizes.fitted(itemUnits * itemGapShareOfItem) }}
     >
-      {heading === undefined || heading === "" ? null : (
-        <h2
-          style={{
-            ...displayTextStyle(stylePack),
-            fontSize: sizes.text("heading"),
-            lineHeight: 1.1,
-            ...rise(headingStartFrame),
-          }}
-        >
-          {heading}
-        </h2>
-      )}
       {[...items.entries()].map(([index, item]) => (
         <div
           key={`${String(index)}-${item}`}
@@ -99,6 +77,6 @@ export function BulletList(props: { props: JsonObject }): ReactNode {
           </p>
         </div>
       ))}
-    </FitBox>
+    </HeadedContent>
   );
 }

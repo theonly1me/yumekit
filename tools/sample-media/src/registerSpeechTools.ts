@@ -33,7 +33,7 @@ function registerSpeechTool(server: McpServer): void {
     "generate_speech",
     {
       description:
-        "Write a WAV file with a quiet tone, 0.3 seconds for each word, and even word timings. Free, no model.",
+        "Test tool, free, no model. Writes a WAV file with one quiet tone, 0.3 seconds for each word, and even word timings. It makes no voice.",
       inputSchema: speechInput,
     },
     async (input) => {
@@ -81,7 +81,7 @@ function registerAlignTool(server: McpServer): void {
     "align_words",
     {
       description:
-        "Return even word timings over the length of a WAV file. Writes no file.",
+        "Test tool, free, no model. Spreads the words evenly over the length of a WAV file. It does not listen to the audio, and it writes no file.",
       inputSchema: alignInput,
     },
     async (input) => {

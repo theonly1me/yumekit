@@ -14,6 +14,7 @@ const subheadingStartFrame = 22;
 const settleFrame = 40;
 const accentSizeUnits = 46;
 const accentTopUnits = -10;
+const gapBelowAccentUnits = 2.5;
 
 export function TitleCard(props: { props: JsonObject }): ReactNode {
   const { heading, subheading } = readTitleCardProps(props.props);
@@ -49,7 +50,14 @@ export function TitleCard(props: { props: JsonObject }): ReactNode {
         style={{
           left: sizes.pixels(margin),
           right: sizes.pixels(margin),
-          top: sizes.pixels(accentTopUnits + accentSizeUnits + margin / 2),
+          ...(sizes.layout === "wide"
+            ? { maxWidth: sizes.pixels(stylePack.layout.wideTitleUnits) }
+            : {}),
+          top: sizes.pixels(
+            sizes.layout === "wide"
+              ? margin
+              : accentTopUnits + accentSizeUnits + gapBelowAccentUnits,
+          ),
           bottom: sizes.pixels(contentBottomUnits(stylePack)),
           justifyContent: "flex-end",
         }}
@@ -69,9 +77,9 @@ export function TitleCard(props: { props: JsonObject }): ReactNode {
             style={{
               ...bodyTextStyle(stylePack),
               color: stylePack.colors.mutedText,
-              fontSize: sizes.text("subheading"),
+              fontSize: sizes.text("label"),
               lineHeight: 1.3,
-              marginTop: sizes.fitted(3),
+              marginTop: sizes.fitted(2.5),
               ...rise(subheadingStartFrame),
             }}
           >

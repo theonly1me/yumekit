@@ -25,7 +25,7 @@ function imagePathOf(options: {
   return {
     ok: false,
     failure: {
-      kind: "not-found",
+      kind: "asset-not-found",
       message: `The project has no image asset "${assetId}".`,
       hint: `Use one of these image asset ids: ${imageIds.length === 0 ? "none" : imageIds.join(", ")}. Or make the image with generate_asset or import_asset first.`,
     },

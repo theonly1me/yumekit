@@ -53,7 +53,7 @@ function registerListMediaTools(context: HarnessContext): void {
     "list_media_tools",
     {
       description:
-        "List each connected media server and its capabilities (image, speech, align, music, video), and each server that failed to start with the reason. Use a server name as server in generate_asset.",
+        'List each connected media server and its capabilities (image, speech, align, music, video), and each server that failed to start with the reason. Use a server name as server in generate_asset. The server "sample" is a free test server: its image tool draws the prompt as text on a plain color, and its speech tool makes a tone with even word timings, not a voice. Use it to test a project, not for a real video.',
       annotations: readOnly,
     },
     () => {
