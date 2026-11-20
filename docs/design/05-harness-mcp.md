@@ -62,7 +62,14 @@ Before `put_scene` sends its edit, the harness checks the scene. For a kit scene
 | `place_narration` | `output_id`, `asset_id`, `start_frame`, `with_captions?` | `addClip` for the audio, and `addClip` for a `caption-words` scene on the top scene track |
 | `undo`, `redo`    | none                                                     | The store operation                                                                       |
 
-`set_timeline` is the usual tool for a first build, because an agent can state the whole timeline in one call. The clip tools serve small changes.
+`set_timeline` is the usual tool for a first build, because an agent can state the whole timeline in one call. The clip tools serve small changes. `update_clip` can also change the scene of a scene clip or the asset of an audio clip. So one output can show a different scene in the same place.
+
+What the first agent run could not learn from the descriptions, and each description must now say:
+
+- `list_media_tools` marks the sample server as a test server that draws the prompt as text and makes a tone for speech.
+- `image-pan` cuts the image to the shape of the output, so a wide image loses its sides in a tall output.
+- `image-pan` has its own caption at the top. It is not the narration caption.
+- `place_narration` and `copy_timeline` name the tracks and the clip ids that they make.
 
 `place_narration` puts a speech asset on the audio track for its full length. With `with_captions`, it also adds a `caption-words` scene and a clip that matches the audio clip, as document 08 requires. It creates the audio track and the caption track when the output has none. All of it is one edit batch, so one undo removes it.
 
@@ -76,7 +83,7 @@ Before `put_scene` sends its edit, the harness checks the scene. For a kit scene
 
 `generate_asset` saves the tool name, the server that `run` reports, and the input in the asset record. With no `server`, the defaults of the media tools configuration apply.
 
-A media tool needs absolute file paths, and an agent knows only asset ids. So `reference_asset_ids` becomes `reference_image_paths` in the tool input, and `first_frame_asset_id` becomes `first_frame_path`. An id that is not an image asset is the failure `not-found`.
+A media tool needs absolute file paths, and an agent knows only asset ids. So `reference_asset_ids` becomes `reference_image_paths` in the tool input, and `first_frame_asset_id` becomes `first_frame_path`. An id that is not an image asset is the failure `asset-not-found`, the same kind as each other asset lookup.
 
 `import_asset` reads the kind, the size, and the length of the file with `probeMedia` from `@yumekit/render`. So it accepts image, audio, video, and font files. If a speech tool returns word timings, the harness stores them in the same edit. If two calls have the same capability, server, and input, the second call reuses the file of the first and does not call the tool.
 

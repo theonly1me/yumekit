@@ -21,14 +21,14 @@ The scene kit gives an agent ready scenes, so most content needs no custom code.
 
 ## Scenes in milestone 1
 
-| Name            | What it shows                                                                  | Props                                           |
-| --------------- | ------------------------------------------------------------------------------ | ----------------------------------------------- |
-| `title-card`    | A large heading, an optional smaller line, and one accent circle that grows in | `heading`, `subheading`                         |
-| `bullet-list`   | A heading and 1 to 6 items that appear one after another                       | `heading`, `items`                              |
-| `image-pan`     | One image with a slow move across it, and an optional caption at the top       | `assetId`, `caption`, `direction`               |
-| `caption-words` | The words of a narration, each one shown from the frame it is spoken           | `assetId`, `text`                               |
-| `bar-chart`     | A heading and 1 to 8 bars that grow, each with a label and a value             | `heading`, `bars`, `valuePrefix`, `valueSuffix` |
-| `quote`         | A sentence that appears word by word, with an optional source line             | `quote`, `source`                               |
+| Name            | What it shows                                                                                                     | Props                                           |
+| --------------- | ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| `title-card`    | A large heading, an optional smaller line, and one accent circle that grows in                                    | `heading`, `subheading`                         |
+| `bullet-list`   | A heading and 1 to 6 items that appear one after another                                                          | `heading`, `items`                              |
+| `image-pan`     | One image that fills the picture, cut to its shape, with a slow move across it and an optional caption at the top | `assetId`, `caption`, `direction`               |
+| `caption-words` | The words of a narration, each one shown from the frame it is spoken                                              | `assetId`, `text`                               |
+| `bar-chart`     | A heading and 1 to 8 bars that grow, each with a label and a value                                                | `heading`, `bars`, `valuePrefix`, `valueSuffix` |
+| `quote`         | A sentence that appears word by word, with an optional source line                                                | `quote`, `source`                               |
 
 `direction` of `image-pan` is `left`, `right`, `up`, `down`, `in`, or `out`. The default is `in`.
 
@@ -39,7 +39,7 @@ The scene kit gives an agent ready scenes, so most content needs no custom code.
 The panel must read on any scene, also on a paper background and on a photo:
 
 - The panel is ink (`#18203a`) at 92 percent opacity, and the words are paper (`#eef1f4`).
-- The words are 4.5 units tall in `wide` and `square`, and 5 units in `tall`.
+- The words are 5 units tall in `wide` and `square`, and 5.5 units in `tall`.
 - The panel sits inside the caption area, which is the bottom 16 units of the picture.
 
 Each other kit scene keeps its content out of the caption area. So a caption never covers a heading, a list, or a value. A custom scene should do the same, and the scene guide says so.
@@ -71,6 +71,24 @@ A style pack is one module of tokens that each scene reads. `paper` is the only 
 - Text in another script, such as Japanese, falls back to a system font in milestone 1.
 - Text rises a short distance while it fades in, over about 14 frames at 30 frames each second. Items stagger by about 20 frames. Motion lengths are converted to the frame rate of the project.
 - Content is left aligned with a margin of about 8 units. A block of body text is never centered.
+
+### Text sizes
+
+A video is read from a distance and on a phone, so kit text is large. The first real video showed wide text at about 7 units, which reads as a slide in a corner. These sizes are the start value before a scene lowers a size to fit long text. One unit is 1 percent of the shorter side.
+
+| Text                                     | `wide` and `square` | `tall` |
+| ---------------------------------------- | ------------------- | ------ |
+| Heading of `title-card`                  | 13                  | 14     |
+| Sentence of `quote`                      | 11                  | 12     |
+| Heading of `bullet-list` and `bar-chart` | 10                  | 11     |
+| Item of `bullet-list`                    | 7                   | 7.5    |
+| Value of a bar                           | 6.5                 | 7      |
+| Label of a bar, subheading, source line  | 4.5                 | 5      |
+| Caption words                            | 5                   | 5.5    |
+
+- A bar is 7 units tall. A bullet dot is 0.45 of the item size.
+- The content block of `bullet-list`, `bar-chart`, and `quote` is centered between the top margin and the caption area. `title-card` keeps its heading at the lower left, above the caption area.
+- In `wide`, a content block can be up to 84 units wide. So a list or a chart uses the picture and does not sit in a corner.
 
 ## Not in milestone 1
 
