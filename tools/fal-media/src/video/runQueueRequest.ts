@@ -23,7 +23,7 @@ export interface QueueOptions {
 }
 
 export const pollIntervalSeconds = 5;
-export const maximumPolls = 360;
+export const maximumPolls = 110;
 
 const queueUrl = z
   .url()
@@ -73,7 +73,7 @@ async function waitForCompletion(
   }
   return {
     ok: false as const,
-    failure: `fal did not finish in ${String((maximumPolls * pollIntervalSeconds) / 60)} minutes.`,
+    failure: `fal did not finish in ${String(maximumPolls * pollIntervalSeconds)} seconds, so the server stopped waiting. fal can still finish the request and bill it.`,
   };
 }
 

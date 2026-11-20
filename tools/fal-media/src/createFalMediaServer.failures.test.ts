@@ -12,13 +12,15 @@ import { fakeFal, fakeUrls } from "./testing/fakeFal.ts";
 async function callVideo(options: {
   environment: NodeJS.ProcessEnv;
   answer?: (request: Request) => Promise<Response> | undefined;
+  statuses?: string[];
 }) {
   const folder = await temporaryFolder();
   const media = await connectFalMedia({
     environment: options.environment,
-    respond: fakeFal(
-      options.answer === undefined ? {} : { answer: options.answer },
-    ),
+    respond: fakeFal({
+      ...(options.answer === undefined ? {} : { answer: options.answer }),
+      ...(options.statuses === undefined ? {} : { statuses: options.statuses }),
+    }),
   });
   const result = await media.callTool({
     name: "generate_video",
@@ -29,7 +31,7 @@ async function callVideo(options: {
       file_stem: "lake",
     },
   });
-  return { result, requests: media.requests, folder };
+  return { result, requests: media.requests, waits: media.waits, folder };
 }
 
 const withKey = { FAL_KEY: placeholderKey };
@@ -135,5 +137,21 @@ describe("generate_video failures", () => {
     expect(resultText(result)).toBe(
       "fal answered 401: Key [FAL_KEY] is not valid",
     );
+  });
+
+  it("stops after 550 seconds of polls, before the harness time limit, and names the fal request", async () => {
+    const { result, requests, waits } = await callVideo({
+      environment: withKey,
+      statuses: Array.from({ length: 200 }, () => "IN_PROGRESS"),
+    });
+
+    expect(result.isError).toBe(true);
+    expect(resultText(result)).toBe(
+      "fal did not finish in 550 seconds, so the server stopped waiting. fal can still finish the request and bill it. (fal request req-1)",
+    );
+    expect(
+      requests.filter((request) => request.url === fakeUrls.statusUrl),
+    ).toHaveLength(110);
+    expect(waits.reduce((total, seconds) => total + seconds, 0)).toBe(550);
   });
 });

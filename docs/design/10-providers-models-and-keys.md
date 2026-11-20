@@ -202,7 +202,7 @@ The endpoints that the server uses, from `fal.ai/docs/api-reference/inference-ap
 
 - The upload flow is on the page `fal.ai/docs/documentation/model-apis/file-access-controls`. The fal CDN page says that a model takes a file as a URL.
 - The server uses `status_url` and `response_url` from the answer, as the fal documents tell. It sends the key only to `queue.fal.run` and `queue.falrun.com`, and rejects another host.
-- The server polls every 5 seconds, for at most 30 minutes. It sends an MCP progress notification after each poll that is not complete, when the client asks for progress. A failure message names the fal request id.
+- The server polls every 5 seconds, for at most 550 seconds in total (110 polls), so it stops before the default `toolTimeoutSeconds` of 600. The failure then gives the fal request id and says that fal can still finish and bill the request. It sends an MCP progress notification after each poll that is not complete, when the client asks for progress. A failure message names the fal request id.
 - A failure message never holds the key. The server replaces the key value with `[FAL_KEY]` in each failure text.
 - A later change adds a catalog entry for each other fal video model. Each entry needs the model page as its source and a test.
 
@@ -251,3 +251,4 @@ WP13 and WP16 follow WP15 for `describe_media_server` only. Each one can start b
 - A model list that a server reads from the provider at run time.
 - A spend record in dollars for each project (milestone 4).
 - Servers for Replicate, BytePlus, Runway, and other hosts. Each one is a new folder in `tools/` that follows this document.
+- A video call that takes longer than the tool time limit. A later change lets a caller read the result of a request that is still running.
