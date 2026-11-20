@@ -11,7 +11,7 @@ The lead agent read these on 2026-11-21. A price is the price on that date.
 | Provider                       | Model                    | Price for one second at 720p | Clip length  | Shapes                      | Source                                                   |
 | ------------------------------ | ------------------------ | ---------------------------- | ------------ | --------------------------- | -------------------------------------------------------- |
 | Google Gemini API              | `gemini-omni-1.2-flash`  | About 0.07 US dollars        | 3 to 15 s    | 16:9, 9:16                  | `aistudio.google.com/docs/pricing`, `/docs/omni`         |
-| fal                            | Seedance 2.5             | About 0.47 US dollars        | 4 to 30 s    | 21:9 to 9:16, 7 shapes      | `fal.ai/models/bytedance/seedance-2.5/us/image-to-video` |
+| fal                            | Seedance 2.5             | About 0.47 US dollars        | 4 to 30 s    | 21:9 to 9:16, 6 and `auto`  | `fal.ai/models/bytedance/seedance-2.5/us/image-to-video` |
 | Replicate                      | `bytedance/seedance-2.5` | Not shown on the model page  | 4 to 30 s    | Not shown on the model page | `replicate.com/bytedance/seedance-2.5`                   |
 | The computer of the user (MLX) | LTX-2, Wan 2.2           | Free                         | Not measured | Not measured                | `github.com/Blaizzy/mlx-video`                           |
 

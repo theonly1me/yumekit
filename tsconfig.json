@@ -14,6 +14,7 @@
     { "path": "apps/cli" },
     { "path": "tools/sample-media" },
     { "path": "tools/openai-media" },
-    { "path": "tools/gemini-media" }
+    { "path": "tools/gemini-media" },
+    { "path": "tools/fal-media" }
   ]
 }
