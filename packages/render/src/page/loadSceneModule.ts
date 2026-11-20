@@ -1,5 +1,5 @@
 import type { SceneModule } from "./guardScene.js";
-import { messageOf, SceneFailure } from "./sceneFailure.js";
+import { KitSceneNotFound, messageOf, SceneFailure } from "./sceneFailure.js";
 import type { PageSceneSource } from "./stagePageData.js";
 
 function isSceneModule(candidate: unknown): candidate is SceneModule {
@@ -50,15 +50,14 @@ export async function loadSceneModule(options: {
       cause: error,
     });
   }
-  if (!isSceneModule(candidate)) {
-    const what =
-      source?.kind === "kit"
-        ? `The kit has no scene component "${source.component}"`
-        : "The default export is not a SceneModule";
-    throw new SceneFailure({
-      sceneId,
-      message: `${what} (scene "${sceneId}")`,
-    });
+  if (isSceneModule(candidate)) {
+    return candidate;
   }
-  return candidate;
+  if (source?.kind === "kit") {
+    throw new KitSceneNotFound({ sceneId, component: source.component });
+  }
+  throw new SceneFailure({
+    sceneId,
+    message: `The default export is not a SceneModule (scene "${sceneId}")`,
+  });
 }

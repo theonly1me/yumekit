@@ -1,6 +1,7 @@
 import { mkdir } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fail, succeed, type Outcome } from "./outcome.js";
+import { evenSizeOf } from "./png.js";
 import { frameRangeOf } from "./project/frameRange.js";
 import { loadOutput, type LoadedOutput } from "./project/loadOutput.js";
 import type { RenderFailure, RenderScale } from "./renderFailure.js";
@@ -13,6 +14,8 @@ export interface RenderedVideo {
   file: string;
   frameCount: number;
   durationSeconds: number;
+  widthPixels: number;
+  heightPixels: number;
 }
 
 export interface RenderVideoOptions {
@@ -48,19 +51,21 @@ async function renderLoadedVideo(options: {
     loaded,
     scale: request.scale ?? 1,
     use: async (stagePage) => {
-      const repeatable = await checkRepeatable({
+      const pictureSize = await checkRepeatable({
         stagePage,
         range,
         timeline: loaded.timeline,
       });
-      if (!repeatable.ok) {
-        return repeatable;
+      if (!pictureSize.ok) {
+        return pictureSize;
       }
+      const videoSize = evenSizeOf(pictureSize.value);
       const encoded = await encodeRange({
         stagePage,
         loaded,
         range,
         destination,
+        videoSize,
         onProgress: request.onProgress,
       });
       return encoded.ok
@@ -69,6 +74,7 @@ async function renderLoadedVideo(options: {
             frameCount: range.frameCount,
             durationSeconds:
               range.frameCount / loaded.snapshot.project.framesPerSecond,
+            ...videoSize,
           })
         : encoded;
     },

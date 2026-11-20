@@ -4,7 +4,7 @@ import stagePageData, { moduleSceneImports } from "virtual:yumekit-stage-data";
 import { guardScene } from "./guardScene.js";
 import { loadSceneModule } from "./loadSceneModule.js";
 import { createSceneErrorLog } from "./sceneErrorLog.js";
-import { messageOf, SceneFailure } from "./sceneFailure.js";
+import { KitSceneNotFound, messageOf, SceneFailure } from "./sceneFailure.js";
 import type { SeekResult, StagePageApi } from "./stagePageData.js";
 
 const sceneTimeoutMilliseconds = 30_000;
@@ -56,8 +56,18 @@ function startStagePage(): StagePageApi {
       try {
         await stage.seek(frame);
       } catch (error) {
+        if (error instanceof KitSceneNotFound) {
+          return {
+            ok: false,
+            kind: "kit-scene-not-found",
+            sceneId: error.sceneId,
+            component: error.component,
+            message: error.message,
+          };
+        }
         return {
           ok: false,
+          kind: "scene-error",
           sceneId:
             error instanceof SceneFailure
               ? error.sceneId
@@ -69,6 +79,7 @@ function startStagePage(): StagePageApi {
       if (logged !== undefined) {
         return {
           ok: false,
+          kind: "scene-error",
           sceneId: logged.sceneId ?? sceneIdsSeeked[0] ?? "",
           message: `A scene logged an error: ${logged.message}`,
         };

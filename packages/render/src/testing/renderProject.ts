@@ -22,6 +22,7 @@ export interface TestClip {
   sceneId: string;
   startFrame: number;
   durationFrames: number;
+  sceneStartFrame?: number;
 }
 
 export function temporaryFolder(): Promise<string> {
@@ -58,7 +59,7 @@ export function sceneTracks(options: {
         ...[...options.tracks.entries()].map(([trackIndex, clips]) => ({
           id: `track-${String(trackIndex)}`,
           kind: "scene" as const,
-          clips: clips.map((clip) => ({ ...clip, sceneStartFrame: 0 })),
+          clips: clips.map((clip) => ({ sceneStartFrame: 0, ...clip })),
         })),
         ...(options.audioClips === undefined
           ? []

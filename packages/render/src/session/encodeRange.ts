@@ -1,5 +1,6 @@
 import type { StagePage } from "../browser/openStagePage.js";
 import type { Outcome } from "../outcome.js";
+import type { PictureSize } from "../png.js";
 import type { FrameRange } from "../project/frameRange.js";
 import type { LoadedOutput } from "../project/loadOutput.js";
 import type { RenderFailure } from "../renderFailure.js";
@@ -15,6 +16,7 @@ export async function encodeRange(options: {
   loaded: LoadedOutput;
   range: FrameRange;
   destination: string;
+  videoSize: PictureSize;
   onProgress:
     | ((progress: { framesDone: number; frameCount: number }) => void)
     | undefined;
@@ -36,6 +38,7 @@ export async function encodeRange(options: {
       framesPerSecond,
       frameCount: range.frameCount,
       destination: options.destination,
+      videoSize: options.videoSize,
       audioMix: audioMixOf({
         folder: loaded.folder,
         timeline: loaded.timeline,

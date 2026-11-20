@@ -4,6 +4,7 @@ import { fail, succeed, type Outcome } from "../outcome.js";
 import type { FrameRange } from "../project/frameRange.js";
 import { sceneIdsAt } from "../project/sceneIdsAt.js";
 import type { RenderFailure } from "../renderFailure.js";
+import { pngSizeOf, type PictureSize } from "../png.js";
 import { drawFrame } from "./drawFrame.js";
 
 function haveSameBytes(pictures: {
@@ -22,7 +23,7 @@ export async function checkRepeatable(options: {
   stagePage: StagePage;
   range: FrameRange;
   timeline: Timeline;
-}): Promise<Outcome<{ repeatable: true }, RenderFailure>> {
+}): Promise<Outcome<PictureSize, RenderFailure>> {
   const { stagePage, range, timeline } = options;
   const firstFrame = range.firstFrame;
   const middleFrame = range.firstFrame + Math.floor(range.frameCount / 2);
@@ -40,8 +41,11 @@ export async function checkRepeatable(options: {
     { frame: middleFrame, first: middlePicture, second: middleAgain },
   ];
   const differing = pairs.find((pair) => !haveSameBytes(pair));
+  if (differing === undefined && firstPicture !== undefined) {
+    return succeed(pngSizeOf(firstPicture));
+  }
   if (differing === undefined) {
-    return succeed({ repeatable: true });
+    throw new Error("The repeat check drew no picture");
   }
   const sceneIds = sceneIdsAt({ timeline, frame: differing.frame });
   return fail({

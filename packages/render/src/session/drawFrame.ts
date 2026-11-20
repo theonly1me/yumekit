@@ -8,6 +8,14 @@ export async function drawFrame(options: {
 }): Promise<Outcome<Uint8Array, RenderFailure>> {
   const { stagePage, frame } = options;
   const seek = await stagePage.seek(frame);
+  if (!seek.ok && seek.kind === "kit-scene-not-found") {
+    return fail({
+      kind: "kit-scene-not-found",
+      sceneId: seek.sceneId,
+      component: seek.component,
+      message: seek.message,
+    });
+  }
   if (!seek.ok) {
     return fail({
       kind: "scene-error",

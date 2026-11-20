@@ -9,7 +9,15 @@ export interface StagePageData {
 }
 
 export type SeekResult =
-  { ok: true } | { ok: false; sceneId: string; message: string };
+  | { ok: true }
+  | { ok: false; kind: "scene-error"; sceneId: string; message: string }
+  | {
+      ok: false;
+      kind: "kit-scene-not-found";
+      sceneId: string;
+      component: string;
+      message: string;
+    };
 
 export interface StagePageApi {
   seek: (frame: number) => Promise<SeekResult>;

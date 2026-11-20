@@ -17,7 +17,6 @@ import {
   throwingCode,
   unguardedRandomCode,
 } from "./testing/sceneCodes.js";
-import { failureOf } from "./testing/valueOf.js";
 
 function projectWith(code: string) {
   return createRenderProject({
@@ -119,44 +118,5 @@ describe("render failures of scene code", () => {
     await expect(videoOf(guardedRandomCode)).resolves.toMatchObject({
       ok: true,
     });
-  });
-});
-
-describe("render failures of kit scenes", () => {
-  it("returns scene-error when the kit has no scene with that component name", async () => {
-    const folder = await createRenderProject({
-      edits: [
-        {
-          kind: "putScene",
-          scene: {
-            id: "intro",
-            title: "Intro",
-            notes: "",
-            source: { kind: "kit", component: "no-such-scene", props: {} },
-          },
-        },
-        sceneTracks({
-          tracks: [
-            [
-              {
-                id: "open",
-                sceneId: "intro",
-                startFrame: 0,
-                durationFrames: 5,
-              },
-            ],
-          ],
-        }),
-      ],
-    });
-    const failure = failureOf(
-      await renderFrame({ folder, outputId: "wide", frame: 1 }),
-    );
-    expect(failure).toMatchObject({
-      kind: "scene-error",
-      sceneId: "intro",
-      frame: 1,
-    });
-    expect(failure.message).toContain('no scene component "no-such-scene"');
   });
 });

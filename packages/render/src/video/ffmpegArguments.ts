@@ -1,3 +1,4 @@
+import type { PictureSize } from "../png.js";
 import type { AudioMix } from "./audioMix.js";
 import { audioSampleRate } from "./audioMix.js";
 
@@ -19,6 +20,7 @@ export function ffmpegArgumentsOf(options: {
   frameCount: number;
   audioMix: AudioMix | undefined;
   destination: string;
+  videoSize: PictureSize;
 }): string[] {
   const { audioMix } = options;
   const frameRate = String(options.framesPerSecond);
@@ -31,6 +33,10 @@ export function ffmpegArgumentsOf(options: {
   const video = [
     ["-map", "0:v"],
     ["-frames:v", String(options.frameCount)],
+    [
+      "-vf",
+      `crop=${String(options.videoSize.widthPixels)}:${String(options.videoSize.heightPixels)}:0:0`,
+    ],
     videoEncoding,
     ["-r", frameRate],
   ].flat();

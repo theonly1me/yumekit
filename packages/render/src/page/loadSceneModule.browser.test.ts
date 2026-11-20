@@ -36,7 +36,10 @@ describe("loadSceneModule", () => {
       importModuleScene,
     });
     await expect(loaded).rejects.toThrow('no scene component "bar-chart"');
-    await expect(loaded).rejects.toMatchObject({ sceneId: "intro" });
+    await expect(loaded).rejects.toMatchObject({
+      sceneId: "intro",
+      component: "bar-chart",
+    });
   });
 
   it("names the scene when a module scene does not load", async () => {

@@ -40,7 +40,13 @@ describe("renderVideo", () => {
     });
     expect(rendered).toEqual({
       ok: true,
-      value: { file: destination, frameCount: 24, durationSeconds: 0.8 },
+      value: {
+        file: destination,
+        frameCount: 24,
+        durationSeconds: 0.8,
+        widthPixels: 160,
+        heightPixels: 90,
+      },
     });
     expect(progress.at(-1)).toBe(24);
     expect(await probeVideo(destination)).toEqual([
