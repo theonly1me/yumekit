@@ -46,7 +46,9 @@ export interface MediaTools {
   list: () => { server: string; capabilities: Capability[] }[];
   run: (
     request: MediaToolRequest,
-  ) => Promise<Outcome<MediaToolResult, MediaToolFailure>>;
+  ) => Promise<
+    Outcome<{ server: string; result: MediaToolResult }, MediaToolFailure>
+  >;
   failedServers: () => { server: string; message: string }[];
   close: () => Promise<void>;
 }

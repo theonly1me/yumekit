@@ -7,7 +7,7 @@ Prefer a kit scene (list_kit_scenes). Write custom code only when no kit scene c
 1. A custom scene is one TSX file. Send it as \`code\` to put_scene, with \`props\`. The harness checks it before it stores it.
 2. The default export is a SceneModule. Make it with \`defineReactScene(component)\`. The component gets \`{ props }\`: the JSON object that you gave to put_scene.
 3. Treat each prop as untrusted. Check its type with \`typeof\` or \`Array.isArray\`, and give a default for a missing or wrong value. You may read a prop as \`props.title\`.
-4. A scene may import only \`react\`, \`@yumekit/scene\`, and \`@yumekit/scene-kit\`. Any other import fails with scene-import-not-permitted. Most scenes import only \`@yumekit/scene\`.
+4. A scene may import only \`react\`, \`@yumekit/scene\`, and \`@yumekit/scene-kit\`. Any other import fails with scene-import-not-permitted. Most scenes import \`@yumekit/scene\`, and \`paper\` from \`@yumekit/scene-kit\` for colors and fonts.
 5. The code compiles with strict TypeScript. A type error fails with scene-compile-failed and gives the line and the column.
 6. The scene draws inside an element with the exact size of the output in CSS pixels. Use \`position: "absolute", inset: 0\` on the root element to fill it.
 7. The picture of a frame depends only on the frame number. The same frame always gives the same pixels, and frames can be drawn in any order.
@@ -51,25 +51,35 @@ export const rulesSection = `## What a scene must not do
 | \`useEffect\` or state that changes the picture | A value computed from the frame |
 | A network request, or a URL from the internet | An asset from \`findAsset\` |
 | Audio playback | An audio clip on the timeline |
-| The font names "Zen Maru Gothic" or "Zen Kaku Gothic New" | \`fontFamily: "system-ui, sans-serif"\` |
-
-The paper fonts load only when a kit scene is on the page. In a custom scene they make the picture change between renders, and the render fails with scene-not-repeatable.
+| A font from the internet, or a font file in the code | The paper fonts from \`paper.fonts\` |
 
 ## The paper style
 
-Use these values so that a custom scene matches the kit scenes.
+Import \`paper\` from \`@yumekit/scene-kit\` and read colors and fonts from it, so that a custom scene matches the kit scenes:
+
+\`\`\`tsx
+import { paper } from "@yumekit/scene-kit";
+\`\`\`
 
 | Token | Value | Use |
 | --- | --- | --- |
-| Paper | #eef1f4 | Background |
-| Ink | #18203a | Text |
-| Lamp | #f2b33d | Accent shape, and the rule under a quote |
-| Sakura | #e891ab | First of a series |
-| Asagi | #4db6ae | Bullets, and the second of a series |
-| Fuji | #a294e0 | Third of a series |
-| Placeholder | #dfe4ea | An empty image area |
+| \`paper.colors.background\` | #eef1f4 | Background |
+| \`paper.colors.text\` | #18203a | Text |
+| \`paper.colors.mutedText\` | Ink at 75 percent | A smaller second line |
+| \`paper.colors.accent\` | #f2b33d | Accent shape, and the rule under a quote |
+| \`paper.colors.bars\` | #e891ab, #4db6ae, #a294e0 | The items of a series, in this order |
+| \`paper.colors.bullet\` | #4db6ae | Bullets |
+| \`paper.colors.placeholder\` | #dfe4ea | An empty image area |
+| \`paper.fonts.display.family\` | Zen Maru Gothic, weight \`paper.fonts.display.weight\` (700) | Headings and large text |
+| \`paper.fonts.body.family\` | Zen Kaku Gothic New, weight \`paper.fonts.body.weight\` (500) | Items, labels, and small lines |
+
+The stage loads both fonts before the first frame, so a custom scene can name them in \`fontFamily\`.
+
+## The caption area
+
+The bottom 16 units of the picture are the caption area. Narration captions (\`caption-words\`) draw there, above your scene. Keep all text and values of the scene above it: give the root element a bottom padding of at least 24 units, because text rises from below while it fades in. A background or a full picture can fill the caption area.
 
 - Margin: 8 units. Content is left aligned. Never center a block of body text.
-- Text sizes: a title 13 units, a heading 11 units, a list item 7.5 units, a label or a caption 5 units. In the tall layout, make text about 1.25 times larger.
+- Text sizes: a title 13 units, a heading 11 units, a list item 7.5 units, a label 5 units. In the tall layout, make text about 1.25 times larger.
 - Motion: text rises 6 units while it fades in over 14 frames at 30 frames per second. Items start about 20 frames apart. Scale these by framesPerSecond / 30.
 `;

@@ -18,5 +18,6 @@ export type RenderFailure = { message: string; hint?: string } & (
   | { kind: "kit-scene-not-found"; sceneId: string; component: string }
   | { kind: "scene-error"; sceneId: string; frame: number }
   | { kind: "scene-not-repeatable"; sceneIds: string[]; frame: number }
+  | { kind: "media-not-readable"; file: string }
   | { kind: "encode-failed"; stderrTail: string }
 );

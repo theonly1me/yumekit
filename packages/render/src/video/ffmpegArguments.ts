@@ -17,7 +17,6 @@ const videoEncoding = [
 
 export function ffmpegArgumentsOf(options: {
   framesPerSecond: number;
-  frameCount: number;
   audioMix: AudioMix | undefined;
   destination: string;
   videoSize: PictureSize;
@@ -32,7 +31,6 @@ export function ffmpegArgumentsOf(options: {
   ].flat();
   const video = [
     ["-map", "0:v"],
-    ["-frames:v", String(options.frameCount)],
     [
       "-vf",
       `crop=${String(options.videoSize.widthPixels)}:${String(options.videoSize.heightPixels)}:0:0`,

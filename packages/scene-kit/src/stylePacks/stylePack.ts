@@ -16,6 +16,7 @@ export interface StylePack {
     bars: readonly [string, ...string[]];
     placeholder: string;
     captionPanel: string;
+    captionText: string;
   };
   fonts: {
     display: StyleFont;
@@ -31,6 +32,7 @@ export interface StylePack {
   };
   layout: {
     marginUnits: number;
+    captionAreaUnits: number;
     tallTextScale: number;
   };
   textUnits: {
@@ -43,6 +45,7 @@ export interface StylePack {
     label: number;
     subheading: number;
     caption: number;
+    tallCaption: number;
   };
 }
 

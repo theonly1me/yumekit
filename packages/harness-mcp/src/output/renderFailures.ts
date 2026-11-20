@@ -15,7 +15,9 @@ function hintOf(failure: RenderFailure): string {
     case "scene-error":
       return `Scene "${failure.sceneId}" failed at output frame ${String(failure.frame)}. Read it with get_scene, fix it with put_scene, and preview that frame again. For a custom scene, check each prop before use.`;
     case "scene-not-repeatable":
-      return `Scenes ${failure.sceneIds.join(", ")} draw a different picture for the same frame. Remove Date, Math.random, timers, CSS animations, and the paper font names from their code. See get_scene_guide.`;
+      return `Scenes ${failure.sceneIds.join(", ")} draw a different picture for the same frame. Remove Date, Math.random, timers, and CSS animations from their code. See get_scene_guide.`;
+    case "media-not-readable":
+      return "Ask the user for a complete image, audio, or video file, then call import_asset again.";
     case "browser-not-installed":
     case "ffmpeg-not-found":
     case "encode-failed":

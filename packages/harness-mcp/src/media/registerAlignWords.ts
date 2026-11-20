@@ -40,7 +40,7 @@ async function alignWords(options: {
     fileStem: assetId,
   });
   if (!ran.ok) return failureResult(mediaFailureOf(ran.failure));
-  const { words } = ran.value;
+  const { words } = ran.value.result;
   if (words === undefined) {
     return failureResult({
       kind: "media-tool-invalid-result",

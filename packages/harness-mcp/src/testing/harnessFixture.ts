@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -13,7 +13,7 @@ import {
   type Output,
   type ProjectStore,
 } from "@yumekit/project";
-import { connectMediaTools } from "@yumekit/tools";
+import { connectMediaTools, type MediaToolRequest } from "@yumekit/tools";
 import { onTestFinished, vi } from "vitest";
 import { createHarnessServer } from "../index.js";
 
@@ -44,6 +44,7 @@ export interface Harness {
   client: Client;
   store: ProjectStore;
   folder: string;
+  runRequests: MediaToolRequest[];
   call: (request: {
     name: string;
     arguments?: Record<string, unknown>;
@@ -52,6 +53,7 @@ export interface Harness {
 
 export async function startHarness(options?: {
   outputs?: Output[];
+  mediaToolsFile?: object;
 }): Promise<Harness> {
   const root = await mkdtemp(join(tmpdir(), "yumekit-harness-"));
   const home = join(root, "home");
@@ -69,13 +71,29 @@ export async function startHarness(options?: {
   });
   if (!created.ok) throw new Error(created.failure.message);
   const store = created.value;
+  if (options?.mediaToolsFile !== undefined) {
+    await writeFile(
+      join(store.folder, "media-tools.json"),
+      JSON.stringify(options.mediaToolsFile),
+    );
+  }
   const connected = await connectMediaTools({
     projectFolder: store.folder,
     bundledServers: { sample: sampleServerCommand },
   });
   if (!connected.ok) throw new Error(connected.failure.message);
   const mediaTools = connected.value;
-  const server = createHarnessServer({ store, mediaTools });
+  const runRequests: MediaToolRequest[] = [];
+  const server = createHarnessServer({
+    store,
+    mediaTools: {
+      ...mediaTools,
+      run: (request) => {
+        runRequests.push(request);
+        return mediaTools.run(request);
+      },
+    },
+  });
   const client = new Client({ name: "harness-test", version: "0.0.0" });
   const [clientTransport, serverTransport] =
     InMemoryTransport.createLinkedPair();
@@ -91,6 +109,7 @@ export async function startHarness(options?: {
     client,
     store,
     folder: store.folder,
+    runRequests,
     call: async (request) => {
       const result: CallToolResult = CallToolResultSchema.parse(
         await client.callTool(request, undefined, { timeout: 120_000 }),

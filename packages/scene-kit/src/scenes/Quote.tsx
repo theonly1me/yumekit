@@ -1,5 +1,6 @@
 import { stagger, tween, type JsonObject } from "@yumekit/scene";
 import { Fragment, type ReactNode } from "react";
+import { contentBottomUnits } from "../kit/captionArea.js";
 import { FitBox } from "../kit/FitBox.js";
 import { riseStyle, useMotionFrame } from "../kit/motion.js";
 import { useSizes } from "../kit/sizes.js";
@@ -40,7 +41,7 @@ export function Quote(props: { props: JsonObject }): ReactNode {
         left: sizes.pixels(margin),
         right: sizes.pixels(margin),
         top: sizes.pixels(margin + 2),
-        bottom: sizes.pixels(margin + 2),
+        bottom: sizes.pixels(contentBottomUnits(stylePack)),
         justifyContent: "center",
       }}
       contentStyle={{

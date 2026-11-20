@@ -1,3 +1,4 @@
+import { readdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { startHarness } from "../testing/harnessFixture.js";
@@ -117,7 +118,7 @@ describe("media tool failures", () => {
     expect(result.data["hint"]).toContain('align_words with asset_id "tune"');
   });
 
-  it("import_asset explains a missing file, a wrong extension, and audio that it cannot import", async () => {
+  it("import_asset explains a missing file, a wrong extension, and a file that is not media", async () => {
     const harness = await startHarness();
     const importFile = (options: { kind: string; sourcePath: string }) =>
       harness.call({
@@ -134,12 +135,19 @@ describe("media tool failures", () => {
       sourcePath: join(harness.folder, "missing.png"),
     });
     const wrongType = await importFile({ kind: "image", sourcePath: "/a.mp3" });
-    const audio = await importFile({ kind: "audio", sourcePath: "/a.wav" });
+    const notAudio = join(harness.folder, "..", "notes.wav");
+    await writeFile(notAudio, "plain text, not audio");
+    const unreadable = await importFile({
+      kind: "audio",
+      sourcePath: notAudio,
+    });
 
     expect(missing.data).toMatchObject({ kind: "source-not-found" });
     expect(wrongType.data).toMatchObject({ kind: "file-type-not-supported" });
     expect(wrongType.data["hint"]).toContain(".png");
-    expect(audio.data).toMatchObject({ kind: "import-kind-not-supported" });
-    expect(audio.data["hint"]).toContain("generate_asset");
+    expect(unreadable.data).toMatchObject({ kind: "media-not-readable" });
+    expect(unreadable.data["hint"]).toContain("import_asset again");
+    expect(harness.store.read().assets).toEqual([]);
+    expect(await readdir(join(harness.folder, "assets", "files"))).toEqual([]);
   });
 });

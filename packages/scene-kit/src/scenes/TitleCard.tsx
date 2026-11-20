@@ -1,5 +1,6 @@
 import { spring, type JsonObject } from "@yumekit/scene";
 import type { ReactNode } from "react";
+import { contentBottomUnits } from "../kit/captionArea.js";
 import { FitBox } from "../kit/FitBox.js";
 import { riseStyle, useMotionFrame } from "../kit/motion.js";
 import { useSizes } from "../kit/sizes.js";
@@ -30,7 +31,6 @@ export function TitleCard(props: { props: JsonObject }): ReactNode {
   });
   const rise = (startFrame: number) =>
     riseStyle({ motionFrame, startFrame, stylePack, unit: sizes.unit });
-  const bottomUnits = sizes.layout === "tall" ? 2.5 * margin : 2 * margin;
   return (
     <>
       <div
@@ -50,7 +50,7 @@ export function TitleCard(props: { props: JsonObject }): ReactNode {
           left: sizes.pixels(margin),
           right: sizes.pixels(margin),
           top: sizes.pixels(accentTopUnits + accentSizeUnits + margin / 2),
-          bottom: sizes.pixels(bottomUnits),
+          bottom: sizes.pixels(contentBottomUnits(stylePack)),
           justifyContent: "flex-end",
         }}
       >

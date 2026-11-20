@@ -1,5 +1,5 @@
-import type { Capability, MediaToolFailure, MediaTools } from "@yumekit/tools";
-import type { HarnessFailure, Outcome } from "../results.js";
+import type { MediaToolFailure } from "@yumekit/tools";
+import type { HarnessFailure } from "../results.js";
 
 function failureMessage(failure: MediaToolFailure): string {
   switch (failure.kind) {
@@ -41,36 +41,5 @@ export function mediaFailureOf(failure: MediaToolFailure): HarnessFailure {
     kind: failure.kind,
     message: failureMessage(failure),
     hint: failureHint(failure),
-  };
-}
-
-export function resolveServer(options: {
-  mediaTools: MediaTools;
-  capability: Capability;
-  server: string | undefined;
-}): Outcome<string, HarnessFailure> {
-  const { mediaTools, capability, server } = options;
-  if (server !== undefined) return { ok: true, value: server };
-  const candidates = mediaTools
-    .list()
-    .filter((entry) => entry.capabilities.includes(capability))
-    .map((entry) => entry.server);
-  const [only, ...others] = candidates;
-  if (only !== undefined && others.length === 0) {
-    return { ok: true, value: only };
-  }
-  if (only === undefined) {
-    return {
-      ok: false,
-      failure: mediaFailureOf({ kind: "no-server-for-capability", capability }),
-    };
-  }
-  return {
-    ok: false,
-    failure: {
-      kind: "server-required",
-      message: `More than one media server has the capability ${capability}: ${candidates.join(", ")}.`,
-      hint: `Call generate_asset again with server set to one of: ${candidates.join(", ")}.`,
-    },
   };
 }

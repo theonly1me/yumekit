@@ -74,3 +74,26 @@ export function shownTexts(element: HTMLElement): string[] {
   }
   return texts;
 }
+
+export function captionAreaTopOf(element: HTMLElement): number {
+  const frame = element.getBoundingClientRect();
+  const unit = Math.min(frame.width, frame.height) / 100;
+  return frame.bottom - 16 * unit;
+}
+
+export function textRectsInCaptionArea(element: HTMLElement): DOMRect[] {
+  const captionAreaTop = captionAreaTopOf(element);
+  return textRects(element).filter(
+    (rect) => rect.bottom > captionAreaTop + tolerancePixels,
+  );
+}
+
+export function panelRectsAboveCaptionArea(element: HTMLElement): DOMRect[] {
+  const captionAreaTop = captionAreaTopOf(element);
+  const panelRects = [...element.querySelectorAll("p")].map((panel) =>
+    panel.getBoundingClientRect(),
+  );
+  return [...textRects(element), ...panelRects].filter(
+    (rect) => rect.top < captionAreaTop - tolerancePixels,
+  );
+}

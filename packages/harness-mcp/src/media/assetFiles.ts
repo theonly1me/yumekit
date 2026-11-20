@@ -58,7 +58,7 @@ function stableJson(value: JsonValue | undefined): string {
 
 export function findReusableAsset(options: {
   assets: Asset[];
-  server: string;
+  server: string | undefined;
   tool: string;
   input: JsonObject;
 }): Asset | undefined {
@@ -66,7 +66,8 @@ export function findReusableAsset(options: {
   return options.assets.find(
     (asset) =>
       asset.source.kind === "tool" &&
-      asset.source.server === options.server &&
+      (options.server === undefined ||
+        asset.source.server === options.server) &&
       asset.source.tool === options.tool &&
       stableJson(asset.source.input) === inputKey,
   );
