@@ -143,6 +143,7 @@ The client adds `output_directory` and `file_stem` after the fields of `input`, 
 | -------------------- | ----------------------------------- | ------------------------------ | ------------------------------------------------- |
 | `tools/sample-media` | `image`, `speech`, `align`, `music` | Free, no network               | Made for tests and for work on yumekit. See below |
 | `tools/openai-media` | `image`, `speech`, `align`          | The OpenAI API key of the user | Reads `OPENAI_API_KEY`                            |
+| `tools/gemini-media` | `video`                             | The Gemini API key of the user | Reads `GEMINI_API_KEY`. See document 09           |
 
 ### `tools/sample-media`
 

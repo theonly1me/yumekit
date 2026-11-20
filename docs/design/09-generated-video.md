@@ -160,12 +160,35 @@ The default of `toolTimeoutSeconds` stays 600.
 
 - The server accepts a whole `duration_seconds` from 3 to 15.
 - The server asks for 16:9 when the requested width is larger than the requested height, and for 9:16 in each other case. With no size, it asks for 16:9.
-- The server asks for 720p by default. It asks for 1080p only when the optional input `resolution` is `1080p`. 720p costs about 0.07 US dollars for one second, and 1080p about 0.10.
-- `first_frame_path` becomes the image input. `reference_image_paths` accepts up to 6 images. The server rejects `last_frame_path` when `duration_seconds` is more than 10, because the model supports two frames only up to 10 seconds.
+- The server asks for 720p by default. It asks for 1080p only when the optional input `resolution` is `1080p`. 720p costs about 0.07 US dollars for one second, and 1080p about 0.104. The model also offers `360p` and `4k`. The server does not offer them yet.
+- `first_frame_path` becomes the image input. `reference_image_paths` accepts up to 6 images. The server rejects `last_frame_path` when `duration_seconds` is more than 10, because the model supports two frames only up to 10 seconds. It also rejects `last_frame_path` without `first_frame_path`.
 - The server returns `cost_usd` when the response reports the video output tokens. The price for one million tokens is one constant (12 US dollars on 2026-11-21), and the variable `YUMEKIT_GEMINI_VIDEO_USD_PER_MILLION_TOKENS` can replace it. The tool description says that the amount is an estimate.
 - With no key, the tool returns a failure that names `GEMINI_API_KEY` and `passEnvironment`.
 - The server checks the input before any request, so a call that cannot work costs nothing.
-- The builder reads `aistudio.google.com/docs/omni` for the request shape and the way to get the result. The builder writes the endpoint and the fields into this section in the same pull request.
+- The model always makes sound, and the API has no field that turns the sound off. So the server rejects `with_audio` set to false, with a message, and its catalog has no `with_audio` setting. To leave out the sound of a clip, the agent calls `place_video` with `sound_gain_decibels` set to `off`.
+- The catalog gives `duration_seconds` the default 5.
+
+### The Gemini API calls
+
+The builder read these on 2026-11-21 in `aistudio.google.com/docs/omni`, `/docs/background-execution`, `/docs/api-errors`, `/api-reference/interactions-api/create-interaction`, and `/api-reference/models/get-model`.
+
+| Step                | Request                                                                  |
+| ------------------- | ------------------------------------------------------------------------ |
+| Make the clip       | `POST https://generativelanguage.googleapis.com/v1beta/interactions`     |
+| Wait for the result | `GET https://generativelanguage.googleapis.com/v1beta/interactions/{id}` |
+| Download from a URI | `GET` of the `uri` of the video part                                     |
+| `check_key`         | `GET https://generativelanguage.googleapis.com/v1beta/models/{model}`    |
+
+- Each request sends the key in the header `x-goog-api-key`, never in the URL. It also sends `Api-Revision: 2026-05-20`, the revision of the `steps` schema.
+- The body of the first request has `model`, `input`, `response_format`, and `background: true`. With no image, `input` is the prompt. With images, `input` is a list: one part `{ "type": "image", "data": <base64>, "mime_type": <type> }` for each image, then `{ "type": "text", "text": <prompt> }`. The order of the images is the first frame, the last frame, and then the reference images.
+- `response_format` is `{ "type": "video", "aspect_ratio": "16:9" | "9:16", "resolution": "720p" | "1080p", "duration": "<n>s" }`.
+- With a first frame and no reference images, the body also has `generation_config.video_config.task` set to `image_to_video`. The API defines that task as: the first image is the first frame, and the second image is the last frame. With reference images, the body has no task, as in the examples of the documents.
+- While `status` is `in_progress`, the server waits 10 seconds and reads the interaction again. It stops after 55 reads (550 seconds), so it answers before `toolTimeoutSeconds`. It sends an MCP progress notification after each wait. Any other status than `in_progress` or `completed` is a failure that names the status.
+- The video is the last part of type `video` in the steps of type `model_output`. The part has `data` (base64) or `uri`, and `mime_type`. The server sends the key to a `uri` only when its origin is `https://generativelanguage.googleapis.com`.
+- The server reads the width, the height, and the length from the `moov` box of the MP4 file.
+- `cost_usd` comes from `usage.output_tokens_by_modality`, the entry with `modality` set to `video`. The pricing page gives 5,792 tokens for one second at 720p and 8,688 at 1080p.
+- A failure of the API is the status and `error.message` of the body.
+- `check_key` reads the facts of the model. That request is free.
 
 The bundled table of document 06 gets this server. `apps/cli/src/bundledServers.ts` resolves it by the name `gemini`.
 
