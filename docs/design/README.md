@@ -70,3 +70,8 @@ Use these words with these meanings in code and in documents.
 - The cast and style rules for long content (milestone 5).
 - Publishing to a platform (milestone 6).
 - Sign-in in front of an engine that runs on remote infrastructure.
+- Speech after 2027-01-06, when OpenAI shuts down its speech models: a Realtime path, or another speech server.
+- A local align server, before OpenAI shuts down `whisper-1` on 2027-02-26.
+- `tools/codex-images`, after a probe confirms that a `codex exec` run can make an image.
+- Smaller undo history for long projects, and recovery after a crash in the middle of a write.
+- Removal of media files and word timing files that no record references.
