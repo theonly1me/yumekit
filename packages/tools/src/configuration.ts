@@ -3,7 +3,13 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 import { z } from "zod";
 import { capabilities } from "./convention.js";
-import type { Capability, ServerCommand } from "./types.js";
+import { errorMessage } from "./errorMessage.js";
+import type {
+  Capability,
+  ConnectFailure,
+  Outcome,
+  ServerCommand,
+} from "./types.js";
 
 const sampleServerName = "sample";
 const configurationFileName = "media-tools.json";
@@ -35,31 +41,34 @@ function isMissingFile(error: unknown): boolean {
   return error instanceof Error && "code" in error && error.code === "ENOENT";
 }
 
-async function readConfigurationFile(
-  path: string,
-): Promise<ConfigurationFile | undefined> {
-  let text: string;
-  try {
-    text = await readFile(path, "utf8");
-  } catch (error) {
-    if (isMissingFile(error)) return undefined;
-    throw error;
-  }
-  const parsed = configurationFileSchema.safeParse(parseJson({ path, text }));
-  if (!parsed.success) {
-    throw new Error(
-      `${path} is not a valid media tools file: ${z.prettifyError(parsed.error)}`,
-    );
-  }
-  return parsed.data;
+type FileOutcome = Outcome<ConfigurationFile | undefined, ConnectFailure>;
+
+function invalidFile(options: { file: string; message: string }): FileOutcome {
+  return {
+    ok: false,
+    failure: { kind: "invalid-configuration-file", ...options },
+  };
 }
 
-function parseJson(options: { path: string; text: string }): unknown {
+async function readConfigurationFile(file: string): Promise<FileOutcome> {
+  let text: string;
   try {
-    return JSON.parse(options.text);
+    text = await readFile(file, "utf8");
   } catch (error) {
-    throw new Error(`${options.path} is not valid JSON`, { cause: error });
+    if (isMissingFile(error)) return { ok: true, value: undefined };
+    return invalidFile({ file, message: errorMessage(error) });
   }
+  let json: unknown;
+  try {
+    json = JSON.parse(text);
+  } catch (error) {
+    return invalidFile({ file, message: errorMessage(error) });
+  }
+  const parsed = configurationFileSchema.safeParse(json);
+  if (!parsed.success) {
+    return invalidFile({ file, message: z.prettifyError(parsed.error) });
+  }
+  return { ok: true, value: parsed.data };
 }
 
 function resolveServer(options: {
@@ -102,24 +111,31 @@ function bundledSampleOnly(
 export async function readMediaToolsConfiguration(options: {
   projectFolder: string;
   bundledServers: Record<string, ServerCommand>;
-}): Promise<MediaToolsConfiguration> {
-  const userFile = await readConfigurationFile(
+}): Promise<Outcome<MediaToolsConfiguration, ConnectFailure>> {
+  const userRead = await readConfigurationFile(
     join(homedir(), ".config", "yumekit", configurationFileName),
   );
-  const projectFile = await readConfigurationFile(
+  if (!userRead.ok) return userRead;
+  const projectRead = await readConfigurationFile(
     join(options.projectFolder, configurationFileName),
   );
+  if (!projectRead.ok) return projectRead;
+  const userFile = userRead.value;
+  const projectFile = projectRead.value;
   if (!userFile && !projectFile) {
-    return bundledSampleOnly(options.bundledServers);
+    return { ok: true, value: bundledSampleOnly(options.bundledServers) };
   }
   const entries = {
     ...userFile?.mcpServers,
     ...projectFile?.mcpServers,
   };
   return {
-    servers: Object.entries(entries).map(([name, entry]) =>
-      resolveServer({ name, entry, bundledServers: options.bundledServers }),
-    ),
-    defaults: { ...userFile?.defaults, ...projectFile?.defaults },
+    ok: true,
+    value: {
+      servers: Object.entries(entries).map(([name, entry]) =>
+        resolveServer({ name, entry, bundledServers: options.bundledServers }),
+      ),
+      defaults: { ...userFile?.defaults, ...projectFile?.defaults },
+    },
   };
 }

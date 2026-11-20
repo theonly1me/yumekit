@@ -4,7 +4,12 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { onTestFinished, vi } from "vitest";
 import { connectMediaTools } from "../connectMediaTools.js";
-import type { MediaTools, ServerCommand } from "../types.js";
+import type {
+  ConnectFailure,
+  MediaTools,
+  Outcome,
+  ServerCommand,
+} from "../types.js";
 
 export const sampleServerCommand: ServerCommand = {
   command: process.execPath,
@@ -31,11 +36,22 @@ export interface MediaToolsFixture {
   outputDirectory: string;
 }
 
-export async function connectFixture(options: {
-  projectFile?: object;
-  userFile?: object;
+export interface FixtureOptions {
+  projectFile?: object | string;
+  userFile?: object | string;
   bundledServers?: Record<string, ServerCommand>;
-}): Promise<MediaToolsFixture> {
+  toolTimeoutSeconds?: number;
+}
+
+function fileText(content: object | string): string {
+  return typeof content === "string" ? content : JSON.stringify(content);
+}
+
+export async function connectFixtureOutcome(options: FixtureOptions): Promise<{
+  outcome: Outcome<MediaTools, ConnectFailure>;
+  home: string;
+  projectFolder: string;
+}> {
   const root = await mkdtemp(join(tmpdir(), "yumekit-tools-"));
   const home = join(root, "home");
   const projectFolder = join(root, "project");
@@ -49,22 +65,33 @@ export async function connectFixture(options: {
   if (options.userFile) {
     await writeFile(
       join(home, ".config", "yumekit", "media-tools.json"),
-      JSON.stringify(options.userFile),
+      fileText(options.userFile),
     );
   }
   if (options.projectFile) {
     await writeFile(
       join(projectFolder, "media-tools.json"),
-      JSON.stringify(options.projectFile),
+      fileText(options.projectFile),
     );
   }
-  const tools = await connectMediaTools({
+  const outcome = await connectMediaTools({
     projectFolder,
     bundledServers: options.bundledServers ?? { sample: sampleServerCommand },
+    ...(options.toolTimeoutSeconds === undefined
+      ? {}
+      : { toolTimeoutSeconds: options.toolTimeoutSeconds }),
   });
-  onTestFinished(() => tools.close());
+  if (outcome.ok) onTestFinished(() => outcome.value.close());
+  return { outcome, home, projectFolder };
+}
+
+export async function connectFixture(
+  options: FixtureOptions,
+): Promise<MediaToolsFixture> {
+  const { outcome, projectFolder } = await connectFixtureOutcome(options);
+  if (!outcome.ok) throw new Error(outcome.failure.message);
   return {
-    tools,
+    tools: outcome.value,
     projectFolder,
     outputDirectory: join(projectFolder, "assets"),
   };

@@ -1,3 +1,4 @@
+import { join } from "node:path";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
@@ -25,6 +26,28 @@ server.registerTool(
       },
     ],
   }),
+);
+
+server.registerTool(
+  "generate_music",
+  { inputSchema: { output_directory: z.string() } },
+  (input) => ({
+    content: [],
+    structuredContent: {
+      files: [
+        {
+          path: join(input.output_directory, "..", "outside.wav"),
+          kind: "audio",
+        },
+      ],
+    },
+  }),
+);
+
+server.registerTool(
+  "generate_video",
+  { inputSchema: { prompt: z.string() } },
+  () => new Promise<never>(() => undefined),
 );
 
 await server.connect(new StdioServerTransport());

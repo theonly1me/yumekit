@@ -28,6 +28,12 @@ export type MediaToolFailure =
   | { kind: "media-tool-invalid-result"; server: string; message: string }
   | { kind: "media-tool-timeout"; server: string; timeoutSeconds: number };
 
+export interface ConnectFailure {
+  kind: "invalid-configuration-file";
+  file: string;
+  message: string;
+}
+
 export interface MediaToolRequest {
   capability: Capability;
   server?: string;
@@ -41,5 +47,6 @@ export interface MediaTools {
   run: (
     request: MediaToolRequest,
   ) => Promise<Outcome<MediaToolResult, MediaToolFailure>>;
+  failedServers: () => { server: string; message: string }[];
   close: () => Promise<void>;
 }

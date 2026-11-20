@@ -1,6 +1,7 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { capabilitiesOfTools } from "./convention.js";
+import { errorMessage } from "./errorMessage.js";
 import type { Capability, ServerCommand } from "./types.js";
 
 export type ServerConnection =
@@ -11,10 +12,6 @@ export type ServerConnection =
       capabilities: Capability[];
     }
   | { name: string; status: "failed"; message: string };
-
-export function errorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
-}
 
 function passedEnvironment(names: string[]): Record<string, string> {
   const environment: Record<string, string> = {};

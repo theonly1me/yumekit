@@ -3,12 +3,15 @@ import { connectServer, type ServerConnection } from "./connectServer.js";
 import { runTool } from "./runTool.js";
 import type {
   Capability,
+  ConnectFailure,
   MediaToolFailure,
   MediaToolRequest,
   MediaTools,
   Outcome,
   ServerCommand,
 } from "./types.js";
+
+const defaultToolTimeoutSeconds = 600;
 
 type StartedServer = Extract<ServerConnection, { status: "started" }>;
 
@@ -69,8 +72,13 @@ function selectServer(options: {
 export async function connectMediaTools(options: {
   projectFolder: string;
   bundledServers: Record<string, ServerCommand>;
-}): Promise<MediaTools> {
-  const configuration = await readMediaToolsConfiguration(options);
+  toolTimeoutSeconds?: number;
+}): Promise<Outcome<MediaTools, ConnectFailure>> {
+  const configurationRead = await readMediaToolsConfiguration(options);
+  if (!configurationRead.ok) return configurationRead;
+  const configuration = configurationRead.value;
+  const toolTimeoutSeconds =
+    options.toolTimeoutSeconds ?? defaultToolTimeoutSeconds;
   const connections = await Promise.all(
     configuration.servers.map((server) =>
       server.status === "ready"
@@ -83,12 +91,19 @@ export async function connectMediaTools(options: {
     ),
   );
   const startedServers = connections.filter(isStarted);
-  return {
+  const tools: MediaTools = {
     list: () =>
       startedServers.map((connection) => ({
         server: connection.name,
         capabilities: [...connection.capabilities],
       })),
+    failedServers: () =>
+      connections
+        .filter((connection) => connection.status === "failed")
+        .map((connection) => ({
+          server: connection.name,
+          message: connection.message,
+        })),
     run: async (request) => {
       const selected = selectServer({
         connections,
@@ -100,6 +115,7 @@ export async function connectMediaTools(options: {
         server: selected.value.name,
         client: selected.value.client,
         request,
+        toolTimeoutSeconds,
       });
     },
     close: async () => {
@@ -108,4 +124,5 @@ export async function connectMediaTools(options: {
       );
     },
   };
+  return { ok: true, value: tools };
 }

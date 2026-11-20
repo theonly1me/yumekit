@@ -1,7 +1,8 @@
 import type { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { ErrorCode, McpError } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
-import { errorMessage } from "./connectServer.js";
+import { isAbsolute, relative, resolve } from "node:path";
+import { errorMessage } from "./errorMessage.js";
 import {
   mediaToolResultSchema,
   toolNameByCapability,
@@ -15,7 +16,6 @@ import type {
   Outcome,
 } from "./types.js";
 
-const toolTimeoutSeconds = 600;
 const requestTimeoutCode: number = ErrorCode.RequestTimeout;
 
 function toolArguments(request: MediaToolRequest): JsonObject {
@@ -43,12 +43,34 @@ function isTimeout(error: unknown): boolean {
   return error instanceof McpError && error.code === requestTimeoutCode;
 }
 
+function isInside(options: { directory: string; path: string }): boolean {
+  const fromDirectory = relative(
+    resolve(options.directory),
+    resolve(options.path),
+  );
+  return (
+    fromDirectory !== "" &&
+    !fromDirectory.startsWith("..") &&
+    !isAbsolute(fromDirectory)
+  );
+}
+
+function pathsOutside(options: {
+  result: MediaToolResult;
+  outputDirectory: string;
+}): string[] {
+  return options.result.files
+    .map((file) => file.path)
+    .filter((path) => !isInside({ directory: options.outputDirectory, path }));
+}
+
 export async function runTool(options: {
   server: string;
   client: Client;
   request: MediaToolRequest;
+  toolTimeoutSeconds: number;
 }): Promise<Outcome<MediaToolResult, MediaToolFailure>> {
-  const { server, client, request } = options;
+  const { server, client, request, toolTimeoutSeconds } = options;
   let result: Awaited<ReturnType<Client["callTool"]>>;
   try {
     result = await client.callTool(
@@ -97,6 +119,20 @@ export async function runTool(options: {
         kind: "media-tool-invalid-result",
         server,
         message: z.prettifyError(parsed.error),
+      },
+    };
+  }
+  const outside = pathsOutside({
+    result: parsed.data,
+    outputDirectory: request.outputDirectory,
+  });
+  if (outside.length > 0) {
+    return {
+      ok: false,
+      failure: {
+        kind: "media-tool-invalid-result",
+        server,
+        message: `Paths outside ${resolve(request.outputDirectory)}: ${outside.join(", ")}`,
       },
     };
   }

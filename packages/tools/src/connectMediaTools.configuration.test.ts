@@ -1,6 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
+import { join } from "node:path";
 import {
   connectFixture,
+  connectFixtureOutcome,
   fakeServerCommand,
   missingServerCommand,
   sampleServerCommand,
@@ -29,7 +31,10 @@ describe("connectMediaTools configuration", () => {
     });
 
     expect(tools.list()).toEqual([
-      { server: "fake", capabilities: ["image", "speech"] },
+      {
+        server: "fake",
+        capabilities: ["image", "speech", "music", "video"],
+      },
       { server: "sample", capabilities: ["image", "speech", "align", "music"] },
     ]);
   });
@@ -115,11 +120,27 @@ describe("connectMediaTools configuration", () => {
     });
   });
 
-  it("rejects a media tools file that does not match the schema", async () => {
-    await expect(
-      connectFixture({
-        projectFile: { mcpServers: { sample: { args: "x" } } },
-      }),
-    ).rejects.toThrow(/media-tools\.json is not a valid media tools file/);
+  it("returns invalid-configuration-file for a file that does not match the schema", async () => {
+    const { outcome, projectFolder } = await connectFixtureOutcome({
+      projectFile: { mcpServers: { sample: { args: "x" } } },
+    });
+
+    if (outcome.ok) throw new Error("Expected a failure");
+    expect(outcome.failure.kind).toBe("invalid-configuration-file");
+    expect(outcome.failure.file).toBe(join(projectFolder, "media-tools.json"));
+    expect(outcome.failure.message).toMatch(/mcpServers\.sample\.args/);
+  });
+
+  it("returns invalid-configuration-file for a user file that is not JSON", async () => {
+    const { outcome, home } = await connectFixtureOutcome({
+      userFile: "{ not json",
+      projectFile: { mcpServers: { sample: {} } },
+    });
+
+    if (outcome.ok) throw new Error("Expected a failure");
+    expect(outcome.failure).toMatchObject({
+      kind: "invalid-configuration-file",
+      file: join(home, ".config", "yumekit", "media-tools.json"),
+    });
   });
 });

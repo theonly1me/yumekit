@@ -54,15 +54,15 @@ describe("connectMediaTools failures", () => {
       fileStem: "fox",
     });
 
-    if (missing.ok) throw new Error("Expected a failure");
-    expect(missing.failure).toMatchObject({
-      kind: "server-failed-to-start",
-      server: "missing",
-    });
-    expect("message" in missing.failure && missing.failure.message).toMatch(
-      /ENOENT/,
-    );
+    if (missing.ok || missing.failure.kind !== "server-failed-to-start") {
+      throw new Error("Expected server-failed-to-start");
+    }
+    expect(missing.failure.server).toBe("missing");
+    expect(missing.failure.message).toMatch(/ENOENT/);
     expect(tools.list().map((entry) => entry.server)).toEqual(["sample"]);
+    expect(tools.failedServers()).toEqual([
+      { server: "missing", message: missing.failure.message },
+    ]);
     expect(sample.ok).toBe(true);
   });
 

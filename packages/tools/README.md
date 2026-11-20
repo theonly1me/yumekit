@@ -10,10 +10,11 @@ Connections to media MCP servers. Design: [06-media-tools.md](../../docs/design/
 
 ## Interface
 
-`connectMediaTools({ projectFolder, bundledServers })` starts each configured server and returns `MediaTools`:
+`connectMediaTools({ projectFolder, bundledServers, toolTimeoutSeconds })` starts each configured server. It returns an `Outcome` with `MediaTools`, or the failure `invalid-configuration-file`:
 
 - `list()` gives each server that started and its capabilities.
 - `run(request)` calls the tool for one capability and returns an `Outcome` with a `MediaToolResult` or a `MediaToolFailure`.
+- `failedServers()` gives each server that did not start and the reason.
 - `close()` stops each server.
 
 With no `media-tools.json` file, only the bundled server named `sample` starts.
