@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { chooseModel } from "../catalog/catalog.ts";
 import { jsonRequest, missingKeyMessage, requestBytes } from "../openAiApi.ts";
 import type { ToolOptions } from "../toolOptions.ts";
 import {
@@ -12,6 +13,11 @@ import { readWavDurationSeconds } from "./wavDuration.ts";
 export const defaultVoice = "marin";
 
 const speechInput = {
+  model: z
+    .string()
+    .min(1)
+    .optional()
+    .describe("The id of a model from describe_media_server"),
   text: z.string().min(1).max(4096).describe("The words to speak"),
   output_directory: z.string().min(1).describe("Folder for the new file"),
   file_stem: z.string().min(1).describe("Start of the new file name"),
@@ -44,6 +50,13 @@ export function registerSpeechTool(options: ToolOptions): void {
       inputSchema: speechInput,
     },
     async (input) => {
+      const chosen = chooseModel({
+        capability: "speech",
+        activeModel: options.model,
+        requested: input.model,
+      });
+      if (!chosen.ok) return errorResult(chosen.failure);
+      const model = chosen.value;
       if (!options.apiKey) return errorResult(missingKeyMessage);
       const fileStem = checkFileStem(input.file_stem);
       if (!fileStem.ok) return errorResult(fileStem.failure);
@@ -53,7 +66,7 @@ export function registerSpeechTool(options: ToolOptions): void {
           path: "/audio/speech",
           apiKey: options.apiKey,
           body: {
-            model: options.model,
+            model,
             input: input.text,
             voice: input.voice ?? defaultVoice,
             response_format: "wav",

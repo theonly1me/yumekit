@@ -29,7 +29,7 @@ describe("sample media tool descriptions", () => {
     const descriptions = await descriptionsByName();
 
     expect([...descriptions.keys()].toSorted()).toEqual(
-      Object.keys(realOutputByTool).toSorted(),
+      [...Object.keys(realOutputByTool), "describe_media_server"].toSorted(),
     );
     for (const [name, realOutput] of Object.entries(realOutputByTool)) {
       expect(descriptions.get(name)).toMatch(/^Test tool, free, no model\./);

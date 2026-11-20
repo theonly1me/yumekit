@@ -1,5 +1,6 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
+import { modelInput, unknownModelMessage } from "./catalog.ts";
 import { drawPromptImage } from "./image/drawPromptImage.ts";
 import { encodePng } from "./image/png.ts";
 import { errorResult, successResult, writeOutputFile } from "./toolResults.ts";
@@ -10,6 +11,7 @@ const maximumSidePixels = 4096;
 const sidePixels = z.number().int().min(1).max(maximumSidePixels);
 
 const imageInput = {
+  model: modelInput("image"),
   prompt: z.string().min(1).describe("What the image shows"),
   output_directory: z.string().min(1).describe("Folder for the new file"),
   file_stem: z.string().min(1).describe("Start of the new file name"),
@@ -34,6 +36,11 @@ export function registerImageTool(server: McpServer): void {
       inputSchema: imageInput,
     },
     async (input) => {
+      const modelFailure = unknownModelMessage({
+        capability: "image",
+        model: input.model,
+      });
+      if (modelFailure) return errorResult(modelFailure);
       const width = input.width_pixels ?? defaultSidePixels;
       const height = input.height_pixels ?? defaultSidePixels;
       const image = drawPromptImage({

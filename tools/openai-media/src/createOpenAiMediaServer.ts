@@ -1,5 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { registerAlignTool } from "./align/registerAlignTool.ts";
+import { registerCatalogTools } from "./catalog/registerCatalogTools.ts";
 import { registerImageTool } from "./image/registerImageTool.ts";
 import type { SendRequest } from "./openAiApi.ts";
 import { registerSpeechTool } from "./speech/registerSpeechTool.ts";
@@ -36,17 +37,14 @@ export function createOpenAiMediaServer(options: {
     apiKey: environment["OPENAI_API_KEY"],
     sendRequest: options.sendRequest,
   };
-  registerImageTool({
-    ...shared,
-    model: modelFrom({ environment, setting: modelSettings.image }),
-  });
-  registerSpeechTool({
-    ...shared,
-    model: modelFrom({ environment, setting: modelSettings.speech }),
-  });
-  registerAlignTool({
-    ...shared,
-    model: modelFrom({ environment, setting: modelSettings.align }),
-  });
+  const activeModels = {
+    image: modelFrom({ environment, setting: modelSettings.image }),
+    speech: modelFrom({ environment, setting: modelSettings.speech }),
+    align: modelFrom({ environment, setting: modelSettings.align }),
+  };
+  registerCatalogTools({ ...shared, activeModels });
+  registerImageTool({ ...shared, model: activeModels.image });
+  registerSpeechTool({ ...shared, model: activeModels.speech });
+  registerAlignTool({ ...shared, model: activeModels.align });
   return server;
 }

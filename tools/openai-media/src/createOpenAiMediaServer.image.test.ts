@@ -10,13 +10,15 @@ import {
 } from "./testing/connectOpenAiMedia.ts";
 
 describe("generate_image", () => {
-  it("lists the image, speech, and align tools of the convention", async () => {
+  it("lists the description, the key check, and the image, speech, and align tools", async () => {
     const media = await connectOpenAiMedia({
       environment: {},
       respond: () => imageResponse(fakePng({ width: 1, height: 1 })),
     });
 
     expect(await media.listToolNames()).toEqual([
+      "describe_media_server",
+      "check_key",
       "generate_image",
       "generate_speech",
       "align_words",
