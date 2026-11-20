@@ -8,13 +8,19 @@ import {
   testKeyValue,
 } from "./testing/mediaToolsFixture.js";
 
+function bundledSourceServer(folder: string) {
+  return {
+    command: process.execPath,
+    args: [
+      fileURLToPath(
+        new URL(`../../../tools/${folder}/src/main.ts`, import.meta.url),
+      ),
+    ],
+  };
+}
+
 const openAiServerCommand = {
-  command: process.execPath,
-  args: [
-    fileURLToPath(
-      new URL("../../../tools/openai-media/src/main.ts", import.meta.url),
-    ),
-  ],
+  ...bundledSourceServer("openai-media"),
   passEnvironment: ["OPENAI_API_KEY"],
 };
 
@@ -97,5 +103,27 @@ describe("connectMediaTools descriptions", () => {
       ok: false,
       failure: { kind: "server-not-found", server: "nobody" },
     });
+  });
+
+  it("reads a valid description of the gemini and fal servers", async () => {
+    const { tools } = await connectFixture({
+      projectFile: {
+        mcpServers: {
+          gemini: bundledSourceServer("gemini-media"),
+          fal: bundledSourceServer("fal-media"),
+        },
+      },
+    });
+
+    expect(
+      tools.list().map((entry) => ({
+        server: entry.server,
+        failure: entry.descriptionFailure,
+        keys: entry.description?.keys.map((key) => key.variable),
+      })),
+    ).toEqual([
+      { server: "gemini", failure: undefined, keys: ["GEMINI_API_KEY"] },
+      { server: "fal", failure: undefined, keys: ["FAL_KEY"] },
+    ]);
   });
 });
