@@ -5,7 +5,10 @@ import type { HarnessContext } from "../context.js";
 import { successResult } from "../results.js";
 
 export function summaryOf(options: {
-  asset: Pick<Asset, "id" | "kind" | "file" | "durationFrames" | "hasWords">;
+  asset: Pick<
+    Asset,
+    "id" | "kind" | "file" | "durationFrames" | "hasWords" | "hasAudio"
+  >;
   reused: boolean;
 }) {
   const { asset } = options;
@@ -17,6 +20,7 @@ export function summaryOf(options: {
       ? {}
       : { duration_frames: asset.durationFrames }),
     has_words: asset.hasWords,
+    ...(asset.hasAudio === undefined ? {} : { has_audio: asset.hasAudio }),
     reused: options.reused,
   };
 }
@@ -53,6 +57,9 @@ export async function reuseAsset(options: {
           ...(existing.durationFrames === undefined
             ? {}
             : { durationFrames: existing.durationFrames }),
+          ...(existing.hasAudio === undefined
+            ? {}
+            : { hasAudio: existing.hasAudio }),
         },
         ...(words.ok ? { words: words.value } : {}),
       },

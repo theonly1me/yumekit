@@ -7,7 +7,7 @@ import {
 } from "./glyphs.ts";
 import type { RgbaImage } from "./png.ts";
 
-interface Color {
+export interface Color {
   red: number;
   green: number;
   blue: number;
@@ -28,7 +28,7 @@ export function promptColor(prompt: string): Color {
   return { red, green, blue, alpha: opaque };
 }
 
-function contrastingColor(background: Color): Color {
+export function contrastingColor(background: Color): Color {
   const luminance =
     0.2126 * background.red +
     0.7152 * background.green +
@@ -53,7 +53,7 @@ function wrapLines(prompt: string): string[] {
   return lines.slice(0, maximumLines);
 }
 
-function fill(options: { image: RgbaImage; color: Color }): void {
+export function fill(options: { image: RgbaImage; color: Color }): void {
   const { image, color } = options;
   for (let offset = 0; offset < image.pixels.length; offset += 4) {
     image.pixels.set([color.red, color.green, color.blue, color.alpha], offset);
@@ -88,20 +88,13 @@ function drawGlyph(options: {
   }
 }
 
-export function drawPromptImage(options: {
-  prompt: string;
-  width: number;
-  height: number;
-  transparentBackground: boolean;
-}): RgbaImage {
-  const { width, height } = options;
-  const image = { width, height, pixels: new Uint8Array(width * height * 4) };
-  const background = promptColor(options.prompt);
-  const textColor = options.transparentBackground
-    ? background
-    : contrastingColor(background);
-  if (!options.transparentBackground) fill({ image, color: background });
-  const lines = wrapLines(options.prompt);
+export function drawTextLines(options: {
+  image: RgbaImage;
+  lines: string[];
+  color: Color;
+}): void {
+  const { image, lines } = options;
+  const { width, height } = image;
   const longestLine = Math.max(1, ...lines.map((line) => line.length));
   const scale = Math.floor(
     Math.min(
@@ -109,7 +102,7 @@ export function drawPromptImage(options: {
       (height * textAreaShare) / (Math.max(1, lines.length) * glyphCellHeight),
     ),
   );
-  if (scale < 1) return image;
+  if (scale < 1) return;
   const blockTop = Math.floor(
     (height - lines.length * glyphCellHeight * scale) / 2,
   );
@@ -128,9 +121,29 @@ export function drawPromptImage(options: {
         left: lineLeft + characterIndex * glyphCellWidth * scale,
         top: blockTop + lineIndex * glyphCellHeight * scale,
         scale,
-        color: textColor,
+        color: options.color,
       });
     }
   }
+}
+
+export function drawPromptImage(options: {
+  prompt: string;
+  width: number;
+  height: number;
+  transparentBackground: boolean;
+}): RgbaImage {
+  const { width, height } = options;
+  const image = { width, height, pixels: new Uint8Array(width * height * 4) };
+  const background = promptColor(options.prompt);
+  const textColor = options.transparentBackground
+    ? background
+    : contrastingColor(background);
+  if (!options.transparentBackground) fill({ image, color: background });
+  drawTextLines({
+    image,
+    lines: wrapLines(options.prompt),
+    color: textColor,
+  });
   return image;
 }

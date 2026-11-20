@@ -9,6 +9,7 @@ import type {
 
 const captionComponent = "caption-words";
 const idLengthLimit = 64;
+export const videoSoundTrackId = "video-sound";
 
 export function uniqueId(options: { base: string; taken: string[] }): string {
   const { base, taken } = options;
@@ -30,7 +31,10 @@ function isCaptionSceneOf(options: { scene: Scene; assetId: string }): boolean {
   );
 }
 
-function isCaptionTrack(options: { track: Track; scenes: Scene[] }): boolean {
+export function isCaptionTrack(options: {
+  track: Track;
+  scenes: Scene[];
+}): boolean {
   const { track, scenes } = options;
   return (
     track.kind === "scene" &&
@@ -67,7 +71,9 @@ export function planNarration(options: {
   );
   const newTracks: Track[] = [];
   const audioTrack =
-    timeline.tracks.find((track) => track.kind === "audio") ??
+    timeline.tracks.find(
+      (track) => track.kind === "audio" && track.id !== videoSoundTrackId,
+    ) ??
     ({
       id: uniqueId({ base: "narration", taken: trackIds }),
       kind: "audio",

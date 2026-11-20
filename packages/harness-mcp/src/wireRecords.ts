@@ -50,6 +50,7 @@ export function wireAssetOf(asset: Asset) {
       ? {}
       : { duration_frames: asset.durationFrames }),
     has_words: asset.hasWords,
+    ...(asset.hasAudio === undefined ? {} : { has_audio: asset.hasAudio }),
     source: wireSourceOf(asset.source),
   };
 }

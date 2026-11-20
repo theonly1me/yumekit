@@ -1,6 +1,10 @@
 import { kitSceneSchemas } from "@yumekit/scene-kit/schemas";
 import { z } from "zod";
 import type { HarnessContext } from "../context.js";
+import {
+  generatedVideoSecondsOf,
+  roundedSeconds,
+} from "../media/videoLimit.js";
 import { successResult } from "../results.js";
 import { sceneGuide } from "../sceneGuide/index.js";
 
@@ -53,15 +57,25 @@ function registerListMediaTools(context: HarnessContext): void {
     "list_media_tools",
     {
       description:
-        'List each connected media server and its capabilities (image, speech, align, music, video), and each server that failed to start with the reason. Use a server name as server in generate_asset. The server "sample" is a free test server: its image tool draws the prompt as text on a plain color, and its speech tool makes a tone with even word timings, not a voice. Use it to test a project, not for a real video.',
+        'List each connected media server and its capabilities (image, speech, align, music, video), and each server that failed to start with the reason. Use a server name as server in generate_asset. The server "sample" is a free test server: its image tool draws the prompt as text on a plain color, its speech tool makes a tone with even word timings, not a voice, and its video tool makes a plain color with a frame counter and a tone. It costs nothing. Use it to test a project, not for a real video. generated_video gives limit_seconds and used_seconds of generated video in this project.',
       annotations: readOnly,
     },
     () => {
       const servers = context.mediaTools.list();
       const failedServers = context.mediaTools.failedServers();
+      const generatedVideo = {
+        limit_seconds: context.mediaTools.limits().generatedVideoSeconds,
+        used_seconds: roundedSeconds(
+          generatedVideoSecondsOf(context.store.read()),
+        ),
+      };
       return successResult({
-        line: `Media servers connected: ${String(servers.length)}. Failed to start: ${String(failedServers.length)}.`,
-        data: { servers, failed_servers: failedServers },
+        line: `Media servers connected: ${String(servers.length)}. Failed to start: ${String(failedServers.length)}. Generated video: ${String(generatedVideo.used_seconds)} of ${String(generatedVideo.limit_seconds)} seconds used.`,
+        data: {
+          servers,
+          failed_servers: failedServers,
+          generated_video: generatedVideo,
+        },
       });
     },
   );

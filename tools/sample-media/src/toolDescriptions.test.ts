@@ -21,6 +21,7 @@ const realOutputByTool = {
   generate_speech: "one quiet tone",
   generate_music: "one low tone",
   align_words: "Spreads the words evenly",
+  generate_video: "with a frame counter as large text",
 } as const;
 
 describe("sample media tool descriptions", () => {
