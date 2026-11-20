@@ -10,6 +10,7 @@
     { "path": "packages/scene-kit" },
     { "path": "apps/editor" },
     { "path": "apps/cli" },
-    { "path": "tools/sample-media" }
+    { "path": "tools/sample-media" },
+    { "path": "tools/openai-media" }
   ]
 }
