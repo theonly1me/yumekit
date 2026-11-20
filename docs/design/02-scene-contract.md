@@ -18,6 +18,7 @@ type SceneAsset = {
   heightPixels?: number;
   durationFrames?: number;
   words?: SceneWord[];
+  framePictures?: { urlPrefix: string; count: number };
 };
 
 type SceneWord = { text: string; startFrame: number; endFrame: number };

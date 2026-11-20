@@ -4,16 +4,17 @@ These documents are the design of yumekit. Code follows them. If code and a docu
 
 ## Read in this order
 
-| Document                                     | Answers                                                                       |
-| -------------------------------------------- | ----------------------------------------------------------------------------- |
-| [01-architecture.md](01-architecture.md)     | Which processes and packages exist, and which package may use which           |
-| [02-scene-contract.md](02-scene-contract.md) | How a scene draws one frame, and the rules that keep a render repeatable      |
-| [03-project-format.md](03-project-format.md) | Which files a project has, and the edit commands that change them             |
-| [04-renderer.md](04-renderer.md)             | How frames become a video file with sound                                     |
-| [05-harness-mcp.md](05-harness-mcp.md)       | Which MCP tools an agent uses to build content                                |
-| [06-media-tools.md](06-media-tools.md)       | How an image, voice, music, or video tool connects                            |
-| [07-build-plan-m1.md](07-build-plan-m1.md)   | The work packages of milestone 1, with the checks that accept each one        |
-| [08-scene-kit.md](08-scene-kit.md)           | Which ready scenes exist, how captions follow narration, and the default look |
+| Document                                       | Answers                                                                       |
+| ---------------------------------------------- | ----------------------------------------------------------------------------- |
+| [01-architecture.md](01-architecture.md)       | Which processes and packages exist, and which package may use which           |
+| [02-scene-contract.md](02-scene-contract.md)   | How a scene draws one frame, and the rules that keep a render repeatable      |
+| [03-project-format.md](03-project-format.md)   | Which files a project has, and the edit commands that change them             |
+| [04-renderer.md](04-renderer.md)               | How frames become a video file with sound                                     |
+| [05-harness-mcp.md](05-harness-mcp.md)         | Which MCP tools an agent uses to build content                                |
+| [06-media-tools.md](06-media-tools.md)         | How an image, voice, music, or video tool connects                            |
+| [07-build-plan-m1.md](07-build-plan-m1.md)     | The work packages of milestone 1, with the checks that accept each one        |
+| [08-scene-kit.md](08-scene-kit.md)             | Which ready scenes exist, how captions follow narration, and the default look |
+| [09-generated-video.md](09-generated-video.md) | How a clip from a video model gets into a scene, and the limit on its cost    |
 
 ## Product in one paragraph
 
@@ -73,6 +74,8 @@ Use these words with these meanings in code and in documents.
 - Sign-in in front of an engine that runs on remote infrastructure.
 - Speech after 2027-01-06, when OpenAI shuts down its speech models: a Realtime path, or another speech server.
 - A local align server, before OpenAI shuts down `whisper-1` on 2027-02-26.
+- A local video server, after a probe measures LTX-2 with `mlx-video` on the computer of the owner.
+- `tools/fal-media` for Seedance 2.5 and other hosted video models.
 - `tools/codex-images`, after a probe confirms that a `codex exec` run can make an image.
 - Smaller undo history for long projects, and recovery after a crash in the middle of a write.
 - Removal of media files and word timing files that no record references.

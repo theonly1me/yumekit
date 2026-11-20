@@ -37,13 +37,15 @@ yumekit reads two files with the same shape. The project file wins for a server 
 
 A server has a capability when it lists a tool with the name in this table. Wire names use `snake_case`. Time on the wire is in seconds, because a media server does not know the frame rate. The harness converts to frames.
 
-| Capability | Tool name         | Required input                                                | Optional input                                                                     |
-| ---------- | ----------------- | ------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `image`    | `generate_image`  | `prompt`, `output_directory`, `file_stem`                     | `width_pixels`, `height_pixels`, `reference_image_paths`, `transparent_background` |
-| `speech`   | `generate_speech` | `text`, `output_directory`, `file_stem`                       | `voice`, `instructions`, `speed`                                                   |
-| `align`    | `align_words`     | `audio_path`, `text`                                          | `language`                                                                         |
-| `music`    | `generate_music`  | `prompt`, `duration_seconds`, `output_directory`, `file_stem` |                                                                                    |
-| `video`    | `generate_video`  | `prompt`, `duration_seconds`, `output_directory`, `file_stem` | `first_frame_path`, `width_pixels`, `height_pixels`                                |
+| Capability | Tool name         | Required input                                                | Optional input                                                                                                |
+| ---------- | ----------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `image`    | `generate_image`  | `prompt`, `output_directory`, `file_stem`                     | `width_pixels`, `height_pixels`, `reference_image_paths`, `transparent_background`                            |
+| `speech`   | `generate_speech` | `text`, `output_directory`, `file_stem`                       | `voice`, `instructions`, `speed`                                                                              |
+| `align`    | `align_words`     | `audio_path`, `text`                                          | `language`                                                                                                    |
+| `music`    | `generate_music`  | `prompt`, `duration_seconds`, `output_directory`, `file_stem` |                                                                                                               |
+| `video`    | `generate_video`  | `prompt`, `duration_seconds`, `output_directory`, `file_stem` | `first_frame_path`, `last_frame_path`, `reference_image_paths`, `width_pixels`, `height_pixels`, `with_audio` |
+
+Document 09 has the rules for a video server.
 
 A server can accept more optional inputs. The harness passes unknown fields of `input` to the tool unchanged.
 
