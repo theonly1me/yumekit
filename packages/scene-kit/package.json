@@ -9,9 +9,29 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./schemas": {
+      "types": "./dist/schemas.d.ts",
+      "default": "./dist/schemas.js"
     }
   },
   "files": [
-    "dist"
-  ]
+    "dist",
+    "fonts"
+  ],
+  "dependencies": {
+    "@yumekit/scene": "workspace:*",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitest/browser-playwright": "5.1.1",
+    "playwright": "1.65.1",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "peerDependencies": {
+    "react": "^19.3.1"
+  }
 }

@@ -31,7 +31,11 @@ export default defineConfig(
     },
   },
   {
-    files: ["apps/editor/**/*.{ts,tsx}", "packages/scene/src/**/*.{ts,tsx}"],
+    files: [
+      "apps/editor/**/*.{ts,tsx}",
+      "packages/scene/src/**/*.{ts,tsx}",
+      "packages/scene-kit/src/**/*.{ts,tsx}",
+    ],
     extends: [reactHooks.configs.flat.recommended],
     languageOptions: { globals: globals.browser },
   },

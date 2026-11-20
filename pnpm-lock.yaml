@@ -306,7 +306,33 @@ importers:
         specifier: 19.3.1
         version: 19.3.1(react@19.3.1)
 
-  packages/scene-kit: {}
+  packages/scene-kit:
+    dependencies:
+      '@yumekit/scene':
+        specifier: workspace:*
+        version: link:../scene
+      zod:
+        specifier: 4.6.7
+        version: 4.6.7
+    devDependencies:
+      '@types/react':
+        specifier: 19.3.0
+        version: 19.3.0
+      '@types/react-dom':
+        specifier: 19.3.0
+        version: 19.3.0(@types/react@19.3.0)
+      '@vitest/browser-playwright':
+        specifier: 5.1.1
+        version: 5.1.1(playwright@1.65.1)(vite@8.3.8(@types/node@22.20.5))(vitest@5.1.1)
+      playwright:
+        specifier: 1.65.1
+        version: 1.65.1
+      react:
+        specifier: 19.3.1
+        version: 19.3.1
+      react-dom:
+        specifier: 19.3.1
+        version: 19.3.1(react@19.3.1)
 
   packages/stage:
     dependencies:
