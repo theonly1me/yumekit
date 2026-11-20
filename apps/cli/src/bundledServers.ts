@@ -18,6 +18,7 @@ const bundledServersByName: Record<string, BundledServer> = {
       "YUMEKIT_GEMINI_VIDEO_USD_PER_MILLION_TOKENS",
     ],
   },
+  fal: { folder: "fal-media", passEnvironment: ["FAL_KEY"] },
 };
 
 async function isFile(path: string): Promise<boolean> {

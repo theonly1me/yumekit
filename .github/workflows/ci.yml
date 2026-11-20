@@ -11,7 +11,7 @@ jobs:
   check:
     name: Check (Node ${{ matrix.node }})
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     strategy:
       matrix:
         node: [22, 24]
@@ -25,8 +25,15 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
       - run: pnpm typecheck
-      - run: sudo apt-get update && sudo apt-get install --yes ffmpeg
-        timeout-minutes: 5
+      - name: Read the runner image version
+        id: image
+        run: echo "version=$ImageVersion" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v6.1.0
+        with:
+          path: ~/.cache/ffmpeg-debs
+          key: ffmpeg-debs-${{ runner.os }}-${{ runner.arch }}-${{ steps.image.outputs.version }}
+      - run: bash scripts/ci/installFfmpeg.sh "$HOME/.cache/ffmpeg-debs"
+        timeout-minutes: 12
       - name: Read the Playwright version
         id: playwright
         run: echo "version=$(pnpm --filter @yumekit/scene exec playwright --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
@@ -36,10 +43,10 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-chromium-${{ runner.os }}-${{ steps.playwright.outputs.version }}
       - if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: pnpm --filter @yumekit/scene exec playwright install --with-deps chromium
-        timeout-minutes: 5
+        run: bash scripts/ci/retryApt.sh 3 240 pnpm --filter @yumekit/scene exec playwright install --with-deps chromium
+        timeout-minutes: 15
       - if: steps.playwright-cache.outputs.cache-hit == 'true'
-        run: pnpm --filter @yumekit/scene exec playwright install-deps chromium
-        timeout-minutes: 5
+        run: bash scripts/ci/retryApt.sh 3 180 pnpm --filter @yumekit/scene exec playwright install-deps chromium
+        timeout-minutes: 12
       - run: pnpm test
       - run: pnpm build

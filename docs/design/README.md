@@ -83,3 +83,4 @@ Use these words with these meanings in code and in documents.
 - Smaller undo history for long projects, and recovery after a crash in the middle of a write.
 - Removal of media files and word timing files that no record references.
 - A failure with a `kind` and a hint when an input does not match the schema of a harness tool.
+- One paid check of `tools/fal-media` with a real key: a 4 second clip at 480p.

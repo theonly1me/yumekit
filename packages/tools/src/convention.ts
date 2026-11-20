@@ -53,6 +53,7 @@ export const mediaToolResultSchema = z.object({
     )
     .optional(),
   cost_usd: z.number().nonnegative().optional(),
+  cost_is_estimate: z.boolean().optional(),
 });
 
 export type MediaToolResult = z.infer<typeof mediaToolResultSchema>;
