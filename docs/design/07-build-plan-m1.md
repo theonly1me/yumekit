@@ -14,7 +14,7 @@ Each work package is one pull request. A builder agent writes it. The owner's le
 | WP4 | `@yumekit/stage` and `@yumekit/render`, and a lint rule for the dependency table | 01, 04    | WP1, WP2           |
 | WP5 | `@yumekit/scene-kit`: 6 kit scenes and one style pack                            | 02, below | WP1, WP4           |
 | WP6 | `@yumekit/harness-mcp` and the `yumekit` command                                 | 05        | WP2, WP3, WP4, WP5 |
-| WP7 | `tools/openai-media` and `tools/codex-images`                                    | 06        | WP3                |
+| WP7 | `tools/openai-media`                                                             | 06        | WP3                |
 | WP8 | The acceptance content                                                           | below     | all                |
 
 WP1, WP2, and WP3 start together. WP4 and WP7 start next. WP5 follows WP4. WP6 follows WP5.
@@ -70,7 +70,7 @@ The tests in document 06, number 7. The manual check for each server is one imag
 1. An agent with only the harness connected builds an explainer about yumekit: a script, a bible, 8 or more scenes, narration, images, and two timelines.
 2. `render_video` gives a 16:9 file of 55 to 65 seconds and a 9:16 file of 20 to 35 seconds. `ffprobe` confirms size, frame rate, and an audio stream.
 3. The lead agent watches both files and lists each defect. A defect in yumekit becomes an issue or a fix. A defect in the content is the job of the agent that built it.
-4. The run uses `tools/openai-media` and `tools/codex-images`. The total paid cost stays under 3 US dollars.
+4. The run uses `tools/openai-media`. The total paid cost stays under 3 US dollars.
 
 ## Dogfood that costs almost nothing
 
