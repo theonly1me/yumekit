@@ -46,7 +46,7 @@ describe("connectMediaTools with the sample server", () => {
     });
 
     if (!outcome.ok) throw new Error(outcome.failure.kind);
-    const file = onlyFile(outcome.value.files);
+    const file = onlyFile(outcome.value.result.files);
     expect(file).toMatchObject({
       kind: "image",
       width_pixels: 320,
@@ -72,7 +72,7 @@ describe("connectMediaTools with the sample server", () => {
         fileStem: options.fileStem,
       });
       if (!outcome.ok) throw new Error(outcome.failure.kind);
-      return readFile(onlyFile(outcome.value.files).path);
+      return readFile(onlyFile(outcome.value.result.files).path);
     };
 
     const first = await makeImage({ prompt: "a red fox", fileStem: "first" });
@@ -97,11 +97,11 @@ describe("connectMediaTools with the sample server", () => {
     });
 
     if (!outcome.ok) throw new Error(outcome.failure.kind);
-    const file = onlyFile(outcome.value.files);
+    const file = onlyFile(outcome.value.result.files);
     expect(file.kind).toBe("audio");
     expect(file.duration_seconds).toBeCloseTo(1.2, 6);
     expect(wavDurationSeconds(await readFile(file.path))).toBeCloseTo(1.2, 6);
-    expect(roundedTimings(outcome.value.words)).toEqual([
+    expect(roundedTimings(outcome.value.result.words)).toEqual([
       ["one", 0, 0.3],
       ["two", 0.3, 0.6],
       ["three", 0.6, 0.9],
@@ -122,7 +122,7 @@ describe("connectMediaTools with the sample server", () => {
     const outcome = await tools.run({
       capability: "align",
       input: {
-        audio_path: onlyFile(speech.value.files).path,
+        audio_path: onlyFile(speech.value.result.files).path,
         text: "hello world",
       },
       outputDirectory,
@@ -130,8 +130,8 @@ describe("connectMediaTools with the sample server", () => {
     });
 
     if (!outcome.ok) throw new Error(outcome.failure.kind);
-    expect(outcome.value.files).toEqual([]);
-    expect(roundedTimings(outcome.value.words)).toEqual([
+    expect(outcome.value.result.files).toEqual([]);
+    expect(roundedTimings(outcome.value.result.words)).toEqual([
       ["hello", 0, 0.6],
       ["world", 0.6, 1.2],
     ]);
@@ -148,7 +148,7 @@ describe("connectMediaTools with the sample server", () => {
     });
 
     if (!outcome.ok) throw new Error(outcome.failure.kind);
-    const file = onlyFile(outcome.value.files);
+    const file = onlyFile(outcome.value.result.files);
     expect(basename(file.path)).toBe("theme.wav");
     expect(wavDurationSeconds(await readFile(file.path))).toBeCloseTo(2.5, 6);
   });

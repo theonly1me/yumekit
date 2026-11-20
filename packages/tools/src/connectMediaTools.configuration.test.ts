@@ -62,7 +62,21 @@ describe("connectMediaTools configuration", () => {
 
     const outcome = await tools.run({ ...speechRequest, outputDirectory });
 
-    expect(outcome.ok).toBe(true);
+    expect(outcome.ok && outcome.value.server).toBe("sample");
+  });
+
+  it("reports the default server that it used for a request with no server", async () => {
+    const { tools, outputDirectory } = await connectFixture({
+      projectFile: {
+        mcpServers: { fake: fakeServerCommand, sample: {} },
+        defaults: { speech: "sample" },
+      },
+    });
+
+    const outcome = await tools.run({ ...speechRequest, outputDirectory });
+
+    expect(outcome.ok && outcome.value.server).toBe("sample");
+    expect(outcome.ok && outcome.value.result.files).toHaveLength(1);
   });
 
   it("passes only the environment variables that passEnvironment names", async () => {
