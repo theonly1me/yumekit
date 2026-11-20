@@ -5,8 +5,7 @@ import { useSizes } from "./sizes.js";
 import { bodyTextStyle } from "./textStyles.js";
 
 const paddingUnits = 3;
-const wideBottomUnits = 6;
-const tallBottomUnits = 24;
+const bottomInsetUnits = 2.5;
 
 export function CaptionPanel(props: {
   placement: "top" | "bottom";
@@ -16,16 +15,21 @@ export function CaptionPanel(props: {
   const stylePack = useStylePack();
   const sizes = useSizes();
   const margin = stylePack.layout.marginUnits;
-  const bottomUnits =
-    sizes.layout === "tall" ? tallBottomUnits : wideBottomUnits;
+  const { captionAreaUnits } = stylePack.layout;
+  const captionUnits =
+    sizes.layout === "tall"
+      ? stylePack.textUnits.tallCaption
+      : stylePack.textUnits.caption;
   const isTop = props.placement === "top";
   return (
     <FitBox
       style={{
         left: sizes.pixels(margin - paddingUnits),
         right: sizes.pixels(margin - paddingUnits),
-        top: isTop ? sizes.pixels(margin - paddingUnits) : "50%",
-        bottom: isTop ? "50%" : sizes.pixels(bottomUnits),
+        top: isTop
+          ? sizes.pixels(margin - paddingUnits)
+          : `calc(100% - ${sizes.pixels(captionAreaUnits)})`,
+        bottom: isTop ? "50%" : sizes.pixels(bottomInsetUnits),
         justifyContent: isTop ? "flex-start" : "flex-end",
         alignItems: "flex-start",
       }}
@@ -33,11 +37,12 @@ export function CaptionPanel(props: {
       <p
         style={{
           ...bodyTextStyle(stylePack),
-          fontSize: sizes.text("caption"),
+          fontSize: sizes.fitted(captionUnits),
           lineHeight: 1.35,
-          padding: `${sizes.fitted(1.6)} ${sizes.fitted(paddingUnits)}`,
+          padding: `${sizes.fitted(1.4)} ${sizes.fitted(paddingUnits)}`,
           borderRadius: sizes.fitted(2),
           background: stylePack.colors.captionPanel,
+          color: stylePack.colors.captionText,
           ...props.style,
         }}
       >

@@ -17,7 +17,8 @@ export const paperStylePack: StylePack = {
     bullet: asagi,
     bars: [sakura, asagi, fuji],
     placeholder: "#dfe4ea",
-    captionPanel: "rgb(238 241 244 / 0.92)",
+    captionPanel: "rgb(24 32 58 / 0.92)",
+    captionText: paper,
   },
   fonts: {
     display: {
@@ -49,6 +50,7 @@ export const paperStylePack: StylePack = {
   },
   layout: {
     marginUnits: 8,
+    captionAreaUnits: 16,
     tallTextScale: 1.25,
   },
   textUnits: {
@@ -60,6 +62,7 @@ export const paperStylePack: StylePack = {
     value: 7,
     label: 5,
     subheading: 5.5,
-    caption: 5,
+    caption: 4.5,
+    tallCaption: 5,
   },
 };

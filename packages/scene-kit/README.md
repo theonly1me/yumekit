@@ -5,6 +5,8 @@ Ready scene components and style packs. Documents 01 and 02 in `docs/design` are
 ## Interface
 
 - `kitScenes` from `@yumekit/scene-kit`: a `SceneModule` for each kit scene, keyed by its component name. It runs in the browser.
+- `paper` from `@yumekit/scene-kit`: the tokens of the default style pack. Custom scene code reads its colors, such as `paper.colors.text`, and its font family names, such as `paper.fonts.display.family`.
+- `loadStylePackFonts(paper)` from `@yumekit/scene-kit`: loads the fonts of a style pack. The stage page calls it before the first frame.
 - `kitSceneSchemas` from `@yumekit/scene-kit/schemas`: the purpose and the `zod` props schema of each kit scene. It has no browser code, so Node code can load it.
 
 | Component       | What it shows                                                    |
@@ -21,6 +23,8 @@ A scene treats its props as untrusted input. It draws a default for a missing or
 ## Style pack
 
 The `paper` style pack sets the colors, the fonts, the motion, and the sizes. Each scene reads its tokens, so a second pack needs no change to the scenes.
+
+The bottom 16 units of the picture are the caption area. `caption-words` draws paper words on an ink panel inside it, and each other scene keeps its text above it.
 
 ## Fonts
 

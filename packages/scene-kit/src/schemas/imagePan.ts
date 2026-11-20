@@ -25,7 +25,7 @@ export const imagePanSchema = {
       .string()
       .max(imagePanLimits.caption)
       .optional()
-      .describe("An optional short caption at the bottom of the picture."),
+      .describe("An optional short caption at the top of the picture."),
     direction: z
       .enum(panDirections)
       .optional()
