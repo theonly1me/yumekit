@@ -28,7 +28,7 @@ yumekit reads two files with the same shape. The project file wins for a server 
 }
 ```
 
-- `passEnvironment` lists the names of environment variables that the server gets. The file never holds a secret value.
+- `passEnvironment` lists the names of environment variables that the server gets. The file never holds a secret value. Document 10 says where a key lives and how a server describes its models.
 - `defaults` names the server for each capability when a tool call gives no server.
 - The `yumekit` command passes the commands of the bundled servers as `bundledServers`. A file can use a bundled server by its name with no `command`.
 - With no file, yumekit connects only the bundled sample server.
@@ -62,6 +62,7 @@ type MediaToolResult = {
   }[];
   words?: { text: string; start_seconds: number; end_seconds: number }[];
   cost_usd?: number;
+  cost_is_estimate?: boolean;
 };
 ```
 
@@ -166,7 +167,7 @@ OpenAI retires models often. The table gives the models that the documents suppo
 - No newer transcription model documents word timestamps. A local align server is the planned replacement.
 - `generate_speech` asks for WAV output and reads the length from the file.
 - `generate_speech` returns no `words`. The agent calls `align_words` after it.
-- The server returns `cost_usd` only when the response gives an amount in dollars. It has no price table.
+- The server returns `cost_usd` from the response when it gives an amount in dollars. If it gives none, the server can return an estimate from its model catalog, with `cost_is_estimate: true` (document 10).
 - The server checks the input before any request, so a call that cannot work costs nothing.
 - With no key, each tool returns a failure that names `OPENAI_API_KEY` and `passEnvironment`.
 
