@@ -39,6 +39,33 @@ export async function addAsset(options: {
   });
 }
 
+export function setAssetWords(options: {
+  state: ProjectState;
+  edit: EditOfKind<"setAssetWords">;
+}): EditResult {
+  const { state, edit } = options;
+  const asset = state.assets.find((candidate) => candidate.id === edit.assetId);
+  if (asset === undefined) {
+    return problem({
+      kind: "not-found",
+      message: `The asset "${edit.assetId}" does not exist.`,
+    });
+  }
+  if (asset.kind !== "audio") {
+    return problem({
+      kind: "invalid-value",
+      message: `The asset "${asset.id}" is of kind ${asset.kind}. Only an audio asset has word timings.`,
+    });
+  }
+  return succeed({
+    ...state,
+    assets: state.assets.map((candidate) =>
+      candidate === asset ? { ...asset, hasWords: true } : candidate,
+    ),
+    words: { ...state.words, [asset.id]: edit.words },
+  });
+}
+
 function referencesToAsset(options: {
   state: ProjectState;
   assetId: string;

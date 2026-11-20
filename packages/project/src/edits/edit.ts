@@ -44,6 +44,11 @@ export const editSchema = z.discriminatedUnion("kind", [
     asset: assetInputSchema,
     words: wordTimingsSchema.exactOptional(),
   }),
+  z.strictObject({
+    kind: z.literal("setAssetWords"),
+    assetId: idSchema,
+    words: wordTimingsSchema,
+  }),
   z.strictObject({ kind: z.literal("removeAsset"), assetId: idSchema }),
   z.strictObject({ kind: z.literal("setTimeline"), timeline: timelineSchema }),
   z.strictObject({

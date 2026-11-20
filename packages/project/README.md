@@ -13,6 +13,6 @@ The project folder format, its schemas, and the store that changes it.
 
 - `createProject` makes a new project folder and returns a `ProjectStore`.
 - `openProject` reads a project folder and returns a `ProjectStore`.
-- `ProjectStore` has `read`, `applyEdits`, `undo`, `redo`, and `subscribe`.
+- `ProjectStore` has `read`, `applyEdits`, `undo`, `redo`, `readAssetWords`, and `subscribe`.
 
 `applyEdits` is the only way to change a project.

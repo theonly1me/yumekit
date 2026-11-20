@@ -110,4 +110,26 @@ describe("openProject failures", () => {
       file: "scenes/custom/scene.tsx",
     });
   });
+  it("returns invalid-file for an audio asset without durationFrames", async () => {
+    const failure = await damagedProject({
+      file: "assets/index.json",
+      content: JSON.stringify({
+        assets: [
+          {
+            id: "voice",
+            kind: "audio",
+            file: "assets/files/voice.wav",
+            contentHash: "sha256:00",
+            hasWords: false,
+            source: { kind: "import", originalName: "voice.wav" },
+          },
+        ],
+      }),
+    });
+    expect(failure).toMatchObject({
+      kind: "invalid-file",
+      file: "assets/index.json",
+    });
+    expect(failure?.message).toContain("durationFrames");
+  });
 });

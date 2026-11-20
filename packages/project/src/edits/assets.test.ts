@@ -154,4 +154,27 @@ describe("asset edits", () => {
     expect(result.ok || result.failure.message).toContain('clip "line"');
     expect(result.ok || result.failure.message).toContain('cast member "host"');
   });
+  it.each(["audio", "video"] as const)(
+    "addAsset refuses an asset of kind %s without durationFrames",
+    async (kind) => {
+      const store = await createTestProject();
+      await writeProjectFile({
+        folder: store.folder,
+        file: "assets/files/clip.bin",
+        content: "abc",
+      });
+      const result = await store.applyEdits([
+        {
+          kind: "addAsset",
+          asset: {
+            id: "clip",
+            kind,
+            file: "assets/files/clip.bin",
+            source: { kind: "import", originalName: "clip.bin" },
+          },
+        },
+      ]);
+      expect(result.ok || result.failure.kind).toBe("invalid-value");
+    },
+  );
 });

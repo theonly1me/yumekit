@@ -7,6 +7,7 @@ import { filesSource } from "../folder/fileSources.js";
 import { projectFilesOf, type ProjectFiles } from "../folder/projectFiles.js";
 import { readState } from "../folder/readState.js";
 import { syncFiles } from "../folder/syncFiles.js";
+import type { WordTimings } from "../format/asset.js";
 import type { ProjectSnapshot, ProjectState } from "../format/state.js";
 import {
   deleteSteps,
@@ -28,6 +29,9 @@ export interface ProjectStore {
   ) => Promise<Outcome<{ revision: number }, EditFailure>>;
   undo: () => Promise<Outcome<{ revision: number }, "nothing-to-undo">>;
   redo: () => Promise<Outcome<{ revision: number }, "nothing-to-redo">>;
+  readAssetWords: (
+    assetId: string,
+  ) => Promise<Outcome<WordTimings, "not-found">>;
   subscribe: (listener: (snapshot: ProjectSnapshot) => void) => () => void;
 }
 
@@ -161,6 +165,14 @@ export function createProjectStore(options: {
     applyEdits: (edits) => serialize(() => applyEdits(edits)),
     undo: () => serialize(undo),
     redo: () => serialize(redo),
+    readAssetWords: (assetId) => {
+      const words = Object.entries(state.words).find(
+        ([wordsAssetId]) => wordsAssetId === assetId,
+      );
+      return Promise.resolve(
+        words === undefined ? fail("not-found") : succeed(words[1]),
+      );
+    },
     subscribe: (listener) => {
       listeners.add(listener);
       return () => {
