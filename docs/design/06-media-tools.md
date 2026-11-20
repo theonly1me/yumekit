@@ -86,6 +86,7 @@ type MediaTools = {
     outputDirectory: string;
     fileStem: string;
   }) => Promise<Outcome<MediaToolResult, MediaToolFailure>>;
+  failedServers: () => { server: string; message: string }[];
   close: () => Promise<void>;
 };
 
@@ -98,12 +99,36 @@ type ServerCommand = {
 function connectMediaTools(options: {
   projectFolder: string;
   bundledServers: { [name: string]: ServerCommand };
-}): Promise<MediaTools>;
+  toolTimeoutSeconds?: number;
+}): Promise<Outcome<MediaTools, ConnectFailure>>;
+
+type ConnectFailure = {
+  kind: "invalid-configuration-file";
+  file: string;
+  message: string;
+};
 ```
 
 `MediaToolFailure` kinds: `no-server-for-capability`, `server-not-found`, `server-failed-to-start`, `media-tool-failed` (with the message of the server), `media-tool-invalid-result`, `media-tool-timeout`.
 
-A server that fails to start does not stop the others. `list` shows only the servers that started, and `yumekit mcp` prints the reason for each one that did not.
+A server that fails to start does not stop the others. `list` shows only the servers that started. `failedServers` gives the reason for each one that did not, and `yumekit mcp` prints those reasons.
+
+A configuration file that is not valid is the failure `invalid-configuration-file`, with the file path and the schema error. `connectMediaTools` starts no server in that case.
+
+`toolTimeoutSeconds` is the limit for one tool call. The default is 600. A call that passes the limit is the failure `media-tool-timeout`.
+
+How `run` selects a server:
+
+1. It uses `server` from the request. If the request has none, it uses the entry of `defaults` for the capability.
+2. If neither names a server, it uses the first started server, in configuration order, that has the capability.
+3. A name that no file defines is `server-not-found`. A server that started without the tool is `no-server-for-capability`.
+
+How the files merge:
+
+- An entry with no `command` uses the bundled server of the same name. `args` and `passEnvironment` from the file replace the bundled values.
+- `defaults` merge one capability at a time, and the project file wins.
+
+The client adds `output_directory` and `file_stem` after the fields of `input`, so a caller cannot replace them. The client also checks that each returned path is inside `outputDirectory`. A path outside it is `media-tool-invalid-result`.
 
 ## Bundled servers in milestone 1
 
@@ -134,5 +159,8 @@ The server asks the `codex` CLI to make an image with the built-in image tool of
 
 1. The client tests start the sample server as a real child process and call each capability.
 2. A fake server with a wrong result shape proves the failure `media-tool-invalid-result`.
-3. A server command that does not exist proves `server-failed-to-start` and that other servers still work.
-4. Tests of `openai-media` and `codex-images` replace the network call and the `codex` process at that outside boundary. They never spend money. One manual check for each server, with a real key or plan, goes in the pull request evidence.
+3. A server command that does not exist proves `server-failed-to-start`, that `failedServers` names it, and that other servers still work.
+4. A fake server that never answers, with `toolTimeoutSeconds` set to 1, proves `media-tool-timeout`.
+5. A file that is not valid proves `invalid-configuration-file`.
+6. A fake server that returns a path outside the output directory proves `media-tool-invalid-result`.
+7. Tests of `openai-media` and `codex-images` replace the network call and the `codex` process at that outside boundary. They never spend money. One manual check for each server, with a real key or plan, goes in the pull request evidence.
