@@ -24,6 +24,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
       - run: pnpm typecheck
+      - run: sudo apt-get update && sudo apt-get install --yes ffmpeg
       - run: pnpm --filter @yumekit/scene exec playwright install --with-deps chromium
       - run: pnpm test
       - run: pnpm build

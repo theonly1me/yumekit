@@ -1,0 +1,25 @@
+{
+  "name": "@yumekit/stage",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Draws one output of a project at one frame in the browser.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@yumekit/project": "workspace:*",
+    "@yumekit/scene": "workspace:*"
+  },
+  "devDependencies": {
+    "@vitest/browser-playwright": "5.1.1",
+    "playwright": "1.65.1"
+  }
+}

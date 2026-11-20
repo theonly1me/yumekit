@@ -3,6 +3,7 @@
   "references": [
     { "path": "packages/scene" },
     { "path": "packages/project" },
+    { "path": "packages/stage" },
     { "path": "packages/render" },
     { "path": "packages/tools" },
     { "path": "packages/brain" },
