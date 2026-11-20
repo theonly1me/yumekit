@@ -23,6 +23,13 @@ export const generateAssetInput = {
     .describe(
       "The media server from list_media_tools. Leave it out to use the default server of the capability.",
     ),
+  model: z
+    .string()
+    .min(1)
+    .optional()
+    .describe(
+      "The id of a model of the server, from the description of the server in list_media_tools. Leave it out to use the default model.",
+    ),
   input: jsonObjectInput.describe(
     "The input of the media tool, with snake_case names and time in seconds. image: prompt (required), width_pixels, height_pixels, transparent_background. speech: text (required), voice, instructions, speed. music: prompt and duration_seconds (both required). video: prompt and duration_seconds (both required), width_pixels, height_pixels, with_audio (default true). The harness adds output_directory and file_stem. Give reference images and a first frame as asset ids in the fields below, not as paths.",
   ),

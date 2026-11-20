@@ -26,6 +26,19 @@ export const sampleServerCommand = {
   ],
 };
 
+export const keyedServerCommand = {
+  command: process.execPath,
+  args: [
+    fileURLToPath(
+      new URL(
+        "../../../tools/src/testing/keyedMediaServer.ts",
+        import.meta.url,
+      ),
+    ),
+  ],
+  passEnvironment: ["YUMEKIT_TEST_KEY"],
+};
+
 export const smallOutput: Output = {
   id: "wide",
   label: "Wide",
@@ -54,11 +67,13 @@ export interface Harness {
 export async function startHarness(options?: {
   outputs?: Output[];
   mediaToolsFile?: object;
+  beforeConnect?: () => Promise<unknown>;
 }): Promise<Harness> {
   const root = await mkdtemp(join(tmpdir(), "yumekit-harness-"));
   const home = join(root, "home");
   await mkdir(home);
   vi.stubEnv("HOME", home);
+  vi.stubEnv("YUMEKIT_CONFIG_DIRECTORY", join(home, ".config", "yumekit"));
   onTestFinished(async () => {
     vi.unstubAllEnvs();
     await rm(root, { recursive: true, force: true });
@@ -77,6 +92,7 @@ export async function startHarness(options?: {
       JSON.stringify(options.mediaToolsFile),
     );
   }
+  await options?.beforeConnect?.();
   const connected = await connectMediaTools({
     projectFolder: store.folder,
     bundledServers: { sample: sampleServerCommand },

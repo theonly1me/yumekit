@@ -6,6 +6,7 @@ import {
   roundedSeconds,
 } from "../media/videoLimit.js";
 import { successResult } from "../results.js";
+import { wireMediaServerOf } from "./mediaServerList.js";
 import { sceneGuide } from "../sceneGuide/index.js";
 
 const readOnly = { readOnlyHint: true } as const;
@@ -57,11 +58,13 @@ function registerListMediaTools(context: HarnessContext): void {
     "list_media_tools",
     {
       description:
-        'List each connected media server and its capabilities (image, speech, align, music, video), and each server that failed to start with the reason. Use a server name as server in generate_asset. The server "sample" is a free test server: its image tool draws the prompt as text on a plain color, its speech tool makes a tone with even word timings, not a voice, and its video tool makes a plain color with a frame counter and a tone. It costs nothing. Use it to test a project, not for a real video. generated_video gives limit_seconds and used_seconds of generated video in this project.',
+        'List each connected media server and its capabilities (image, speech, align, music, video), and each server that failed to start with the reason. Use a server name as server in generate_asset. The server "sample" is a free test server: its image tool draws the prompt as text on a plain color, its speech tool makes a tone with even word timings, not a voice, and its video tool makes a plain color with a frame counter and a tone. It costs nothing. Use it to test a project, not for a real video. A server with a description gives its label, where it runs, and its models with the settings, the prices in US dollars with the date they were read, and the default model of each capability. Use a model id as model in generate_asset. keys gives each key that the server needs, its source (environment, key-file, or missing), get_key_url, and steps. Never ask for the value of a key: if one is missing, tell the person the steps and to add the key in the editor under Tools or with yumekit keys set. generated_video gives limit_seconds and used_seconds of generated video in this project.',
       annotations: readOnly,
     },
-    () => {
-      const servers = context.mediaTools.list();
+    async () => {
+      const servers = await Promise.all(
+        context.mediaTools.list().map(wireMediaServerOf),
+      );
       const failedServers = context.mediaTools.failedServers();
       const generatedVideo = {
         limit_seconds: context.mediaTools.limits().generatedVideoSeconds,

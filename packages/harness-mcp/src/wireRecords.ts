@@ -30,8 +30,12 @@ function wireSourceOf(source: Asset["source"]) {
     kind: source.kind,
     server: source.server,
     tool: source.tool,
+    ...(source.model === undefined ? {} : { model: source.model }),
     input: source.input,
     ...(source.costUsd === undefined ? {} : { cost_usd: source.costUsd }),
+    ...(source.costIsEstimate === undefined
+      ? {}
+      : { cost_is_estimate: source.costIsEstimate }),
   };
 }
 
