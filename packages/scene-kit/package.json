@@ -1,0 +1,17 @@
+{
+  "name": "@yumekit/scene-kit",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Scene components and style packs.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ]
+}
