@@ -152,6 +152,6 @@ describe("generate_video failures", () => {
     expect(
       requests.filter((request) => request.url === fakeUrls.statusUrl),
     ).toHaveLength(110);
-    expect(waits.reduce((total, seconds) => total + seconds, 0)).toBe(550);
+    expect(waits).toEqual(Array.from({ length: 110 }, () => 5));
   });
 });
