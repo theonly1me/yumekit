@@ -82,14 +82,14 @@ Each id is a string that the caller can supply. If the caller gives no id, the s
 
 ## Technology choices
 
-| Need                              | Choice                                                       | Reason                                                |
-| --------------------------------- | ------------------------------------------------------------ | ----------------------------------------------------- |
-| Schemas and validation            | `zod`                                                        | One definition gives the type and the runtime check   |
-| Scene bundling and the stage page | `vite`                                                       | It serves TSX to Chromium now and to the editor later |
-| Headless browser                  | `playwright-core` with Chromium                              | One driver for the renderer and for browser tests     |
-| Video and audio encoding          | `ffmpeg` and `ffprobe` from the `PATH`                       | Standard, free, and already on most creator machines  |
-| MCP server and client             | `@modelcontextprotocol/sdk`                                  | The reference SDK                                     |
-| Tests                             | `vitest`. Browser tests use its browser mode with Playwright | Already in the repository                             |
+| Need                              | Choice                                                       | Reason                                                         |
+| --------------------------------- | ------------------------------------------------------------ | -------------------------------------------------------------- |
+| Schemas and validation            | `zod`                                                        | One definition gives the type and the runtime check            |
+| Scene bundling and the stage page | `vite`                                                       | It serves TSX to Chromium now and to the editor later          |
+| Headless browser                  | `playwright-core` with Chromium                              | One driver for the renderer and for browser tests              |
+| Video and audio encoding          | `ffmpeg` and `ffprobe` from the `PATH`                       | Standard, free, and already on most creator machines           |
+| MCP server and client             | `@modelcontextprotocol/sdk`                                  | The reference SDK. Use the 1.x line, which npm marks as latest |
+| Tests                             | `vitest`. Browser tests use its browser mode with Playwright | Already in the repository                                      |
 
 The builder of each work package reads the current documents of a library before use. Versions come from the registry, never from memory.
 

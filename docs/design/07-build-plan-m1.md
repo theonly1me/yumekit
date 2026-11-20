@@ -42,7 +42,7 @@ A work package is complete only when each of its checks passes in CI, and the pu
 
 ### WP3 tools and sample media
 
-The tests in document 06, numbers 1 to 3.
+The tests in document 06, numbers 1 to 6. The root test configuration also finds tests in `tools/*`.
 
 ### WP4 stage and render
 
@@ -63,7 +63,7 @@ The tests in document 05. Also: `yumekit init`, `yumekit mcp`, `yumekit render`,
 
 ### WP7 paid tool servers
 
-The tests in document 06, number 4. The manual check for each server is one image and one sentence of speech.
+The tests in document 06, number 7. The manual check for each server is one image and one sentence of speech.
 
 ### WP8 acceptance content
 
