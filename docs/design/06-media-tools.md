@@ -163,10 +163,12 @@ The client adds `output_directory` and `file_stem` after the fields of `input`, 
 
 ## Bundled servers in milestone 1
 
-| Folder               | Capabilities                                 | Cost                           | Notes                                             |
-| -------------------- | -------------------------------------------- | ------------------------------ | ------------------------------------------------- |
-| `tools/sample-media` | `image`, `speech`, `align`, `music`, `video` | Free, no network               | Made for tests and for work on yumekit. See below |
-| `tools/openai-media` | `image`, `speech`, `align`                   | The OpenAI API key of the user | Reads `OPENAI_API_KEY`                            |
+| Folder               | Capabilities                                 | Cost                           | Notes                                                                                                                                       |
+| -------------------- | -------------------------------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tools/sample-media` | `image`, `speech`, `align`, `music`, `video` | Free, no network               | Made for tests and for work on yumekit. See below                                                                                           |
+| `tools/openai-media` | `image`, `speech`, `align`                   | The OpenAI API key of the user | Reads `OPENAI_API_KEY`                                                                                                                      |
+| `tools/gemini-media` | `video`                                      | The Gemini API key of the user | Reads `GEMINI_API_KEY`. See document 09. Not tested with a real key yet. Tests use recorded shapes from the documents of 2026-11-21.        |
+| `tools/fal-media`    | `video`                                      | The fal API key of the user    | Reads `FAL_KEY`. Document 10 has its endpoints. Not tested with a real key yet. Tests use recorded shapes from the documents of 2026-11-21. |
 
 ### `tools/sample-media`
 

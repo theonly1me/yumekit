@@ -184,9 +184,42 @@ Document 09 named one video server. With decision P1, yumekit bundles three, and
 
 - fal hosts many video models behind one key. The server has one catalog entry for each fal endpoint that it supports. A catalog entry maps the convention inputs to the fields of that endpoint.
 - The first entries are `bytedance/seedance-2.5/us/text-to-video` and `bytedance/seedance-2.5/us/image-to-video`. The server selects the image endpoint when the request has `first_frame_path`.
-- Facts of 2026-11-21 from the fal model page: `duration` is 4 to 30 seconds, `resolution` is `480p`, `720p`, `1080p`, or `4k`, `generate_audio` is true by default, and `end_image_url` is the last frame. The price for one second is about 0.22 US dollars at 480p, 0.47 at 720p, 1.16 at 1080p, and 1.84 at 4K.
-- The server uploads a local image with the upload interface of fal, because the endpoint takes an image URL.
-- The builder reads the fal documents for the queue interface and the upload interface, and writes the endpoints into this section in the same pull request.
+- Facts of 2026-11-21 from the fal model pages and their `llms.txt` pages: `duration` is a string from `"4"` to `"30"`, or `"auto"`. `resolution` is `480p`, `720p` (the default), `1080p`, or `4k`. `generate_audio` is true by default. `end_image_url` is the last frame, and only the image endpoint has it. The text endpoint takes `aspect_ratio` as `auto`, `21:9`, `16:9`, `4:3`, `1:1`, `3:4`, or `9:16`. The image endpoint always uses `auto`, so the clip takes the shape of the first frame. Neither endpoint takes reference images.
+- The price for one second is 0.2205 US dollars at 480p, 0.4730 at 720p, 1.164 at 1080p, and 1.840 at 4K. The price is the same with and without sound.
+- The result has `video.url` and `seed`, and no size or length. The server reads the size and the length from the header of the MP4 file. If it cannot read them, it reports the requested length and no size.
+
+How the server maps the convention inputs:
+
+| Convention input                | fal field        | Rule                                                                                 |
+| ------------------------------- | ---------------- | ------------------------------------------------------------------------------------ |
+| `prompt`                        | `prompt`         | Unchanged                                                                            |
+| `duration_seconds`              | `duration`       | A whole number from 4 to 30, sent as a string. Other values are rejected             |
+| `resolution`                    | `resolution`     | One of the four values. `720p` by default                                            |
+| `with_audio`                    | `generate_audio` | True by default                                                                      |
+| `width_pixels`, `height_pixels` | `aspect_ratio`   | Text endpoint only. The nearest shape by the ratio of the sides. `16:9` with no size |
+| `first_frame_path`              | `image_url`      | Uploaded first. Selects the image endpoint                                           |
+| `last_frame_path`               | `end_image_url`  | Uploaded first. Needs `first_frame_path`                                             |
+| `reference_image_paths`         | none             | Rejected                                                                             |
+
+The server always sends `output_format: "mp4"`. It reads each image file before the first request, and rejects a file that is not PNG, JPEG, or WebP, or that is larger than 30 MB.
+
+The endpoints that the server uses, from `fal.ai/docs/api-reference/inference-api` and its queue pages:
+
+| Step           | Request                                                                                                                                                              |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Authentication | Header `Authorization: Key <FAL_KEY>` on each request to `queue.fal.run`, `rest.fal.ai`, and `api.fal.ai`                                                            |
+| Upload, step 1 | `POST https://rest.fal.ai/storage/upload/initiate?storage_type=fal-cdn-v3` with `{ "file_name", "content_type" }`. The answer has `upload_url` and `file_url`        |
+| Upload, step 2 | `PUT <upload_url>` with the bytes and `Content-Type`, and with no key. `file_url` is the value for the model                                                         |
+| Submit         | `POST https://queue.fal.run/<endpoint id>` with the fields as JSON. The answer has `request_id`, `status_url`, and `response_url`                                    |
+| Status         | `GET <status_url>`. Status 202 with `IN_QUEUE` or `IN_PROGRESS`, then 200 with `COMPLETED`. A failed request is also `COMPLETED`                                     |
+| Result         | `GET <response_url>`. It returns the output, or the error of the model (for example 422 with a `detail` list)                                                        |
+| Download       | `GET <video.url>` with no key                                                                                                                                        |
+| `check_key`    | `GET https://api.fal.ai/v1/models/pricing?endpoint_id=<text endpoint id>`. It needs a key with any permission, and it runs no model. 401 or 403 means a rejected key |
+
+- The upload flow is on the page `fal.ai/docs/documentation/model-apis/file-access-controls`. The fal CDN page says that a model takes a file as a URL.
+- The server uses `status_url` and `response_url` from the answer, as the fal documents tell. It sends the key only to `queue.fal.run` and `queue.falrun.com`, and rejects another host.
+- The server polls every 5 seconds, for at most 550 seconds in total (110 polls), so it stops before the default `toolTimeoutSeconds` of 600. The failure then gives the fal request id and says that fal can still finish and bill the request. It sends an MCP progress notification after each poll that is not complete, when the client asks for progress. A failure message names the fal request id.
+- A failure message never holds the key. The server replaces the key value with `[FAL_KEY]` in each failure text.
 - A later change adds a catalog entry for each other fal video model. Each entry needs the model page as its source and a test.
 
 ### `tools/local-video`
@@ -234,3 +267,4 @@ WP13 and WP16 follow WP15 for `describe_media_server` only. Each one can start b
 - A model list that a server reads from the provider at run time.
 - A spend record in dollars for each project (milestone 4).
 - Servers for Replicate, BytePlus, Runway, and other hosts. Each one is a new folder in `tools/` that follows this document.
+- A video call that takes longer than the tool time limit. A later change lets a caller read the result of a request that is still running.
