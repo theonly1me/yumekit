@@ -30,7 +30,7 @@ function createHarnessServer(options: {
 | `get_scene`        | `scene_id`  | The scene record, and the code of a module scene                                                                            |
 | `get_timeline`     | `output_id` | All tracks and clips of the output                                                                                          |
 | `list_assets`      | `kind?`     | Each asset record. Word timings are not included                                                                            |
-| `get_asset_words`  | `asset_id`  | The word timings of a speech asset                                                                                          |
+| `get_asset_words`  | `asset_id`  | The word timings of a speech asset, from `readAssetWords`                                                                   |
 | `list_kit_scenes`  | none        | Each kit scene: name, purpose, and the schema of its props                                                                  |
 | `get_scene_guide`  | none        | The reference for custom scene code: the contract, the hooks, the animation functions, the rules, and two examples          |
 | `list_media_tools` | none        | Each connected media server and its capabilities                                                                            |
@@ -63,11 +63,11 @@ Before `put_scene` sends its edit, the harness checks the scene. For a kit scene
 
 ### Media
 
-| Tool             | Input                                                                              | What it does                                                     |
-| ---------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| `generate_asset` | `asset_id`, `capability` (`image`, `speech`, `music`, `video`), `server?`, `input` | Calls the media tool, then adds the asset with its source record |
-| `import_asset`   | `asset_id`, `kind`, `source_path`                                                  | Copies a file of the user into the project and adds the asset    |
-| `align_words`    | `asset_id`, `text`                                                                 | Makes word timings for a speech asset that has none              |
+| Tool             | Input                                                                              | What it does                                                                                       |
+| ---------------- | ---------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `generate_asset` | `asset_id`, `capability` (`image`, `speech`, `music`, `video`), `server?`, `input` | Calls the media tool, then adds the asset with its source record                                   |
+| `import_asset`   | `asset_id`, `kind`, `source_path`                                                  | Copies a file of the user into the project and adds the asset                                      |
+| `align_words`    | `asset_id`, `text`                                                                 | Makes word timings for a speech asset that has none, and stores them with the edit `setAssetWords` |
 
 `generate_asset` saves the tool name, the server, and the input in the asset record. If a speech tool returns word timings, the harness stores them in the same edit. If two calls have the same capability, server, and input, the second call reuses the file of the first and does not call the tool.
 

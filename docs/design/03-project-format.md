@@ -117,6 +117,8 @@ type WordTimings = {
 6. A scene with source `module` has a `scene.tsx` file.
 7. Nothing is removed while another record references it. The failure names each reference.
 8. `file` in an asset record is a path inside `assets/files/`.
+9. An asset of kind `audio` or `video` has `durationFrames`.
+10. A clip id is unique within its timeline, across all tracks.
 
 How a timeline reads:
 
@@ -146,6 +148,9 @@ type ProjectStore = {
   ) => Promise<Outcome<{ revision: number }, EditFailure>>;
   undo: () => Promise<Outcome<{ revision: number }, "nothing-to-undo">>;
   redo: () => Promise<Outcome<{ revision: number }, "nothing-to-redo">>;
+  readAssetWords: (
+    assetId: string,
+  ) => Promise<Outcome<WordTimings, "not-found">>;
   subscribe: (listener: (snapshot: ProjectSnapshot) => void) => () => void;
 };
 
@@ -161,7 +166,10 @@ function openProject(options: {
 }): Promise<Outcome<ProjectStore, OpenFailure>>;
 ```
 
-- `applyEdits` is atomic. The store applies each edit in order to a copy, validates the result, and writes the files only if all rules hold. One call is one undo step.
+- `applyEdits` is atomic. The store applies each edit in order to a copy and checks the rules after each edit, so a failure names the exact edit. It writes the files only if all edits pass. One call is one undo step.
+- A call that changes no file returns the current revision and records no undo step.
+- A revision number only goes up. `undo` and `redo` each make a new revision.
+- `CreateFailure` kinds: `folder-not-empty` and `invalid-value`. An empty folder that exists is accepted.
 - A write goes to a temporary file first and then replaces the target with a rename.
 - `read` returns an immutable snapshot. A caller never changes it.
 - `undo` restores the files of the previous revision from `.yumekit/history/`. The store keeps the last 200 steps.
@@ -171,26 +179,29 @@ function openProject(options: {
 
 ## Edits
 
-`Edit` is a closed union on the field `kind`. These are all the ways to change a project.
+`Edit` is a closed union on the field `kind`. These 15 kinds are all the ways to change a project.
 
-| Kind             | Fields                          | Effect                                                          |
-| ---------------- | ------------------------------- | --------------------------------------------------------------- |
-| `setProjectName` | `name`                          | Changes the name                                                |
-| `addOutput`      | `output`                        | Adds an output and an empty timeline                            |
-| `removeOutput`   | `outputId`                      | Removes an output and its timeline                              |
-| `setScript`      | `script`                        | Replaces `script.md`                                            |
-| `setBible`       | `bible`                         | Replaces `bible.json`                                           |
-| `putScene`       | `scene`, `code?`                | Adds or replaces a scene. `code` is required for a module scene |
-| `removeScene`    | `sceneId`                       | Removes a scene and its folder                                  |
-| `addAsset`       | `asset`, `words?`               | Adds a record for a file that is already in `assets/files/`     |
-| `removeAsset`    | `assetId`                       | Removes the record                                              |
-| `setTimeline`    | `timeline`                      | Replaces the timeline of one output                             |
-| `addClip`        | `outputId`, `trackId`, `clip`   | Adds one clip                                                   |
-| `updateClip`     | `outputId`, `clipId`, `changes` | Changes the timing or the gain of one clip                      |
-| `removeClip`     | `outputId`, `clipId`            | Removes one clip                                                |
-| `copyTimeline`   | `fromOutputId`, `toOutputId`    | Replaces one timeline with a copy of another                    |
+| Kind             | Fields                          | Effect                                                                                                           |
+| ---------------- | ------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `setProjectName` | `name`                          | Changes the name                                                                                                 |
+| `addOutput`      | `output`                        | Adds an output and an empty timeline                                                                             |
+| `removeOutput`   | `outputId`                      | Removes an output and its timeline                                                                               |
+| `setScript`      | `script`                        | Replaces `script.md`                                                                                             |
+| `setBible`       | `bible`                         | Replaces `bible.json`                                                                                            |
+| `putScene`       | `scene`, `code?`                | Adds or replaces a scene. `code` is required for a module scene                                                  |
+| `removeScene`    | `sceneId`                       | Removes a scene and its folder                                                                                   |
+| `addAsset`       | `asset`, `words?`               | Adds a record for a file that is already in `assets/files/`. The caller gives no `contentHash` and no `hasWords` |
+| `setAssetWords`  | `assetId`, `words`              | Adds or replaces the word timings of an audio asset                                                              |
+| `removeAsset`    | `assetId`                       | Removes the record                                                                                               |
+| `setTimeline`    | `timeline`                      | Replaces the timeline of one output                                                                              |
+| `addClip`        | `outputId`, `trackId`, `clip`   | Adds one clip                                                                                                    |
+| `updateClip`     | `outputId`, `clipId`, `changes` | Changes the timing or the gain of one clip                                                                       |
+| `removeClip`     | `outputId`, `clipId`            | Removes one clip                                                                                                 |
+| `copyTimeline`   | `fromOutputId`, `toOutputId`    | Replaces one timeline with a copy of another                                                                     |
 
-The store computes `contentHash` and checks that the file exists when it applies `addAsset`. It does not check that scene code compiles. The harness does that before it sends a `putScene` edit (document 05).
+The store computes `contentHash` as `sha256:` plus the hex digest, and checks that the file exists, when it applies `addAsset`. It sets `hasWords` from the word timings.
+
+The props of a scene can hold an asset id that the store cannot see. Rule 7 does not protect that reference, so a scene must draw correctly when `findAsset` returns nothing. It does not check that scene code compiles. The harness does that before it sends a `putScene` edit (document 05).
 
 ## Not in milestone 1
 

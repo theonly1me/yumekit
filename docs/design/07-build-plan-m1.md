@@ -34,7 +34,7 @@ A work package is complete only when each of its checks passes in CI, and the pu
 ### WP2 project
 
 1. `createProject` then `openProject` gives an equal snapshot.
-2. Each edit kind has a test for its effect and a test for each rule in document 03 that can reject it.
+2. Each of the 15 edit kinds has a test for its effect and a test for each rule in document 03 that can reject it.
 3. A batch with one invalid edit changes no file.
 4. `undo` and `redo` restore the exact file contents, including scene code.
 5. Each `OpenFailure` kind has a test with a damaged folder.
