@@ -1,0 +1,199 @@
+# 03 Project format
+
+A project is one folder. Package `@yumekit/project` is the only code that writes the files below.
+
+## Files
+
+```
+my-project/
+  project.json                  name, frame rate, outputs
+  script.md                     the script, free text
+  bible.json                    style, palette, cast, voice
+  scenes/<sceneId>/scene.json   one scene
+  scenes/<sceneId>/scene.tsx    custom code, only for a module scene
+  timelines/<outputId>.json     tracks and clips of one output
+  assets/index.json             one record for each asset
+  assets/files/<assetId>.<ext>  the media file
+  assets/files/<assetId>.words.json   word timings of a speech asset
+  renders/                      finished files (not in git)
+  .yumekit/                     undo history and cache (not in git)
+```
+
+`createProject` writes a `.gitignore` with `renders/` and `.yumekit/`.
+
+## Schemas
+
+All time is in whole frames. All sizes are in pixels. Each JSON file is written with sorted keys, 2 spaces, and a final newline, so a git diff shows only real changes.
+
+```ts
+type Project = {
+  formatVersion: 1;
+  name: string;
+  framesPerSecond: 24 | 25 | 30 | 50 | 60;
+  outputs: Output[];
+};
+
+type Output = {
+  id: string;
+  label: string;
+  widthPixels: number;
+  heightPixels: number;
+};
+
+type Bible = {
+  style: string;
+  palette: string[];
+  cast: CastMember[];
+  voice: string;
+};
+type CastMember = {
+  id: string;
+  name: string;
+  description: string;
+  referenceAssetIds: string[];
+};
+
+type Scene = { id: string; title: string; notes: string; source: SceneSource };
+type SceneSource =
+  | { kind: "kit"; component: string; props: JsonObject }
+  | { kind: "module"; props: JsonObject };
+
+type Timeline = { outputId: string; tracks: Track[] };
+type Track =
+  | { id: string; kind: "scene"; clips: SceneClip[] }
+  | { id: string; kind: "audio"; clips: AudioClip[] };
+
+type SceneClip = {
+  id: string;
+  sceneId: string;
+  startFrame: number;
+  durationFrames: number;
+  sceneStartFrame: number;
+};
+
+type AudioClip = {
+  id: string;
+  assetId: string;
+  startFrame: number;
+  durationFrames: number;
+  assetStartFrame: number;
+  gainDecibels: number;
+};
+
+type AssetIndex = { assets: Asset[] };
+type Asset = {
+  id: string;
+  kind: "image" | "audio" | "video" | "font";
+  file: string;
+  contentHash: string;
+  widthPixels?: number;
+  heightPixels?: number;
+  durationFrames?: number;
+  hasWords: boolean;
+  source: AssetSource;
+};
+type AssetSource =
+  | { kind: "import"; originalName: string }
+  | {
+      kind: "tool";
+      server: string;
+      tool: string;
+      input: JsonObject;
+      costUsd?: number;
+    };
+
+type WordTimings = {
+  words: { text: string; startFrame: number; endFrame: number }[];
+};
+```
+
+## Rules that the store enforces
+
+1. Each id matches `^[a-z0-9][a-z0-9-]{0,63}$` and is unique within its list.
+2. Output width and height are even numbers from 16 to 7680.
+3. A clip references a scene or an asset that exists. An audio clip references an asset of kind `audio`.
+4. Two clips on one track do not overlap. `durationFrames` is 1 or more. `startFrame`, `sceneStartFrame`, and `assetStartFrame` are 0 or more.
+5. An audio clip does not read past the end of its asset.
+6. A scene with source `module` has a `scene.tsx` file.
+7. Nothing is removed while another record references it. The failure names each reference.
+8. `file` in an asset record is a path inside `assets/files/`.
+
+How a timeline reads:
+
+- Scene tracks draw in list order. The first track is at the back.
+- At frame `f`, a scene clip is visible when `startFrame <= f < startFrame + durationFrames`. The scene gets the frame `f - startFrame + sceneStartFrame`.
+- The length of an output is the largest clip end over all of its tracks.
+
+## The store
+
+```ts
+type ProjectSnapshot = {
+  revision: number;
+  project: Project;
+  script: string;
+  bible: Bible;
+  scenes: Scene[];
+  sceneCode: { [sceneId: string]: string };
+  timelines: Timeline[];
+  assets: Asset[];
+};
+
+type ProjectStore = {
+  folder: string;
+  read: () => ProjectSnapshot;
+  applyEdits: (
+    edits: Edit[],
+  ) => Promise<Outcome<{ revision: number }, EditFailure>>;
+  undo: () => Promise<Outcome<{ revision: number }, "nothing-to-undo">>;
+  redo: () => Promise<Outcome<{ revision: number }, "nothing-to-redo">>;
+  subscribe: (listener: (snapshot: ProjectSnapshot) => void) => () => void;
+};
+
+function createProject(options: {
+  folder: string;
+  name: string;
+  framesPerSecond: Project["framesPerSecond"];
+  outputs: Output[];
+}): Promise<Outcome<ProjectStore, CreateFailure>>;
+
+function openProject(options: {
+  folder: string;
+}): Promise<Outcome<ProjectStore, OpenFailure>>;
+```
+
+- `applyEdits` is atomic. The store applies each edit in order to a copy, validates the result, and writes the files only if all rules hold. One call is one undo step.
+- A write goes to a temporary file first and then replaces the target with a rename.
+- `read` returns an immutable snapshot. A caller never changes it.
+- `undo` restores the files of the previous revision from `.yumekit/history/`. The store keeps the last 200 steps.
+- Undo never deletes a media file. `removeAsset` removes only the record.
+- `EditFailure` is `{ kind, editIndex, message }`. Example kinds: `id-in-use`, `not-found`, `still-referenced`, `clips-overlap`, `invalid-value`.
+- `OpenFailure` kinds: `folder-not-found`, `not-a-project`, `invalid-file` (with the file and the schema error), `unsupported-format-version`.
+
+## Edits
+
+`Edit` is a closed union on the field `kind`. These are all the ways to change a project.
+
+| Kind             | Fields                          | Effect                                                          |
+| ---------------- | ------------------------------- | --------------------------------------------------------------- |
+| `setProjectName` | `name`                          | Changes the name                                                |
+| `addOutput`      | `output`                        | Adds an output and an empty timeline                            |
+| `removeOutput`   | `outputId`                      | Removes an output and its timeline                              |
+| `setScript`      | `script`                        | Replaces `script.md`                                            |
+| `setBible`       | `bible`                         | Replaces `bible.json`                                           |
+| `putScene`       | `scene`, `code?`                | Adds or replaces a scene. `code` is required for a module scene |
+| `removeScene`    | `sceneId`                       | Removes a scene and its folder                                  |
+| `addAsset`       | `asset`, `words?`               | Adds a record for a file that is already in `assets/files/`     |
+| `removeAsset`    | `assetId`                       | Removes the record                                              |
+| `setTimeline`    | `timeline`                      | Replaces the timeline of one output                             |
+| `addClip`        | `outputId`, `trackId`, `clip`   | Adds one clip                                                   |
+| `updateClip`     | `outputId`, `clipId`, `changes` | Changes the timing or the gain of one clip                      |
+| `removeClip`     | `outputId`, `clipId`            | Removes one clip                                                |
+| `copyTimeline`   | `fromOutputId`, `toOutputId`    | Replaces one timeline with a copy of another                    |
+
+The store computes `contentHash` and checks that the file exists when it applies `addAsset`. It does not check that scene code compiles. The harness does that before it sends a `putScene` edit (document 05).
+
+## Not in milestone 1
+
+- Migration between format versions. Version 1 is the only version.
+- A watch on the folder for changes from another program.
+- Removal of media files that no record references.
