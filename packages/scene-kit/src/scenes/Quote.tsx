@@ -1,6 +1,6 @@
 import { stagger, tween, type JsonObject } from "@yumekit/scene";
 import { Fragment, type ReactNode } from "react";
-import { contentBottomUnits } from "../kit/captionArea.js";
+import { centeredContentBoxStyle } from "../kit/captionArea.js";
 import { FitBox } from "../kit/FitBox.js";
 import { riseStyle, useMotionFrame } from "../kit/motion.js";
 import { useSizes } from "../kit/sizes.js";
@@ -34,16 +34,9 @@ export function Quote(props: { props: JsonObject }): ReactNode {
     from: 0,
     to: ruleUnits,
   });
-  const margin = stylePack.layout.marginUnits;
   return (
     <FitBox
-      style={{
-        left: sizes.pixels(margin),
-        right: sizes.pixels(margin),
-        top: sizes.pixels(margin + 2),
-        bottom: sizes.pixels(contentBottomUnits(stylePack)),
-        justifyContent: "center",
-      }}
+      style={centeredContentBoxStyle({ stylePack, sizes })}
       contentStyle={{
         display: "flex",
         flexDirection: "column",
@@ -90,7 +83,7 @@ export function Quote(props: { props: JsonObject }): ReactNode {
           style={{
             ...bodyTextStyle(stylePack),
             color: stylePack.colors.mutedText,
-            fontSize: sizes.text("subheading"),
+            fontSize: sizes.text("label"),
             lineHeight: 1.3,
             ...riseStyle({
               motionFrame,

@@ -33,7 +33,7 @@ describe("caption-words panel", () => {
     });
   });
 
-  it("draws words 4.5 units tall in wide and square, and 5 units in tall", async () => {
+  it("draws words 5 units tall in wide and square, and 5.5 units in tall", async () => {
     const unitPixels = 1080 / 100;
 
     const sizes = [
@@ -42,8 +42,8 @@ describe("caption-words panel", () => {
       (await panelStyleOf(tallOutput)).fontSizePixels,
     ];
 
-    expect(sizes[0]).toBeCloseTo(4.5 * unitPixels, 1);
-    expect(sizes[1]).toBeCloseTo(4.5 * unitPixels, 1);
-    expect(sizes[2]).toBeCloseTo(5 * unitPixels, 1);
+    expect(sizes[0]).toBeCloseTo(5 * unitPixels, 1);
+    expect(sizes[1]).toBeCloseTo(5 * unitPixels, 1);
+    expect(sizes[2]).toBeCloseTo(5.5 * unitPixels, 1);
   });
 });

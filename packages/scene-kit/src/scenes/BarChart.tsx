@@ -1,6 +1,6 @@
 import { stagger, tween, type JsonObject } from "@yumekit/scene";
 import type { ReactNode } from "react";
-import { contentBottomUnits } from "../kit/captionArea.js";
+import { centeredContentBoxStyle } from "../kit/captionArea.js";
 import { FitBox } from "../kit/FitBox.js";
 import { riseStyle, useMotionFrame } from "../kit/motion.js";
 import { useSizes } from "../kit/sizes.js";
@@ -29,16 +29,9 @@ export function BarChart(props: { props: JsonObject }): ReactNode {
   const rise = (startFrame: number) =>
     riseStyle({ motionFrame, startFrame, stylePack, unit: sizes.unit });
   const largestValue = Math.max(0, ...bars.map((bar) => bar.value));
-  const margin = stylePack.layout.marginUnits;
   return (
     <FitBox
-      style={{
-        left: sizes.pixels(margin),
-        right: sizes.pixels(margin),
-        top: sizes.pixels(margin + 1),
-        bottom: sizes.pixels(contentBottomUnits(stylePack)),
-        justifyContent: "center",
-      }}
+      style={centeredContentBoxStyle({ stylePack, sizes })}
       contentStyle={{
         display: "flex",
         flexDirection: "column",
@@ -49,7 +42,7 @@ export function BarChart(props: { props: JsonObject }): ReactNode {
         <h2
           style={{
             ...displayTextStyle(stylePack),
-            fontSize: sizes.text("chartHeading"),
+            fontSize: sizes.text("heading"),
             lineHeight: 1.1,
             ...rise(headingStartFrame),
           }}
@@ -94,7 +87,7 @@ export function BarChart(props: { props: JsonObject }): ReactNode {
               <div
                 style={{
                   flex: "none",
-                  height: sizes.fitted(7),
+                  height: sizes.fitted(stylePack.layout.barUnits),
                   width: `${String(grow(share * barTrackPercent))}%`,
                   minWidth: sizes.fitted(0.6),
                   borderRadius: sizes.fitted(1.2),

@@ -4,7 +4,7 @@ import { CaptionPanel } from "../kit/CaptionPanel.js";
 import { readCaptionWordsProps } from "../props/readProps.js";
 import { pageAt, pagesOf, timedWordsOf } from "./captionPages.js";
 
-const pageCharactersByLayout = { wide: 60, square: 44, tall: 30 } as const;
+const pageCharactersByLayout = { wide: 60, square: 34, tall: 30 } as const;
 
 export function CaptionWords(props: { props: JsonObject }): ReactNode {
   const { assetId, text } = readCaptionWordsProps(props.props);

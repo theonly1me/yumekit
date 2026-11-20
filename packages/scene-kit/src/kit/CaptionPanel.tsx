@@ -16,10 +16,6 @@ export function CaptionPanel(props: {
   const sizes = useSizes();
   const margin = stylePack.layout.marginUnits;
   const { captionAreaUnits } = stylePack.layout;
-  const captionUnits =
-    sizes.layout === "tall"
-      ? stylePack.textUnits.tallCaption
-      : stylePack.textUnits.caption;
   const isTop = props.placement === "top";
   return (
     <FitBox
@@ -37,7 +33,7 @@ export function CaptionPanel(props: {
       <p
         style={{
           ...bodyTextStyle(stylePack),
-          fontSize: sizes.fitted(captionUnits),
+          fontSize: sizes.text("caption"),
           lineHeight: 1.35,
           padding: `${sizes.fitted(1.4)} ${sizes.fitted(paddingUnits)}`,
           borderRadius: sizes.fitted(2),

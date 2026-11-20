@@ -5,6 +5,16 @@ export interface StyleFont {
   file: URL;
 }
 
+export interface TextUnits {
+  title: number;
+  quote: number;
+  heading: number;
+  item: number;
+  value: number;
+  label: number;
+  caption: number;
+}
+
 export interface StylePack {
   name: string;
   colors: {
@@ -33,19 +43,13 @@ export interface StylePack {
   layout: {
     marginUnits: number;
     captionAreaUnits: number;
-    tallTextScale: number;
+    wideContentUnits: number;
+    barUnits: number;
+    bulletShareOfItem: number;
   };
   textUnits: {
-    title: number;
-    heading: number;
-    chartHeading: number;
-    quote: number;
-    item: number;
-    value: number;
-    label: number;
-    subheading: number;
-    caption: number;
-    tallCaption: number;
+    wideAndSquare: TextUnits;
+    tall: TextUnits;
   };
 }
 

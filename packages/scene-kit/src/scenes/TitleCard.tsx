@@ -69,9 +69,9 @@ export function TitleCard(props: { props: JsonObject }): ReactNode {
             style={{
               ...bodyTextStyle(stylePack),
               color: stylePack.colors.mutedText,
-              fontSize: sizes.text("subheading"),
+              fontSize: sizes.text("label"),
               lineHeight: 1.3,
-              marginTop: sizes.fitted(3),
+              marginTop: sizes.fitted(2.5),
               ...rise(subheadingStartFrame),
             }}
           >
