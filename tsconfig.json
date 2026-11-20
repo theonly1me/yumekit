@@ -1,6 +1,7 @@
 {
   "files": [],
   "references": [
+    { "path": "packages/scene" },
     { "path": "packages/project" },
     { "path": "packages/render" },
     { "path": "packages/tools" },

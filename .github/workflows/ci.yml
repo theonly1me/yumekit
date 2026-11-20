@@ -24,5 +24,6 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
       - run: pnpm typecheck
+      - run: pnpm --filter @yumekit/scene exec playwright install --with-deps chromium
       - run: pnpm test
       - run: pnpm build
