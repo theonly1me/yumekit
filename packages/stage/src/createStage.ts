@@ -59,7 +59,7 @@ export function createStage(options: StageOptions): Stage {
         element: box,
         output: project.output,
         framesPerSecond: project.framesPerSecond,
-        durationFrames: clip.durationFrames,
+        durationFrames: clip.sceneStartFrame + clip.durationFrames,
         props,
         findAsset: (assetId) => assets.get(assetId),
       });

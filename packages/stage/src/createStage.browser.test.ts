@@ -45,9 +45,9 @@ describe("createStage", () => {
     ]);
   });
 
-  it("gives each scene the frame inside its clip, counted from sceneStartFrame", async () => {
+  it("starts the scene at sceneStartFrame and mounts it long enough for the last frame of the clip", async () => {
     const events: SceneEvent[] = [];
-    const { stage } = stageForTest({
+    const { element, stage } = stageForTest({
       project: stageProject([
         [
           clip({
@@ -65,11 +65,12 @@ describe("createStage", () => {
       mode: "preview",
     });
     await stage.seek(20);
-    await stage.seek(25);
+    await stage.seek(29);
     const seekFrames = events.flatMap((event) =>
       event.event === "seek" ? [event.frame] : [],
     );
-    expect(seekFrames).toEqual([4, 9]);
+    expect(seekFrames).toEqual([4, 13]);
+    expect(element.querySelector("p")?.dataset["durationFrames"]).toBe("14");
   });
 
   it("draws the first track at the back and gives each clip its own length", async () => {
