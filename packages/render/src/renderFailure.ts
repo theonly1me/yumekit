@@ -20,4 +20,5 @@ export type RenderFailure = { message: string; hint?: string } & (
   | { kind: "scene-not-repeatable"; sceneIds: string[]; frame: number }
   | { kind: "media-not-readable"; file: string }
   | { kind: "encode-failed"; stderrTail: string }
+  | { kind: "video-frames-failed"; assetId: string; stderrTail: string }
 );

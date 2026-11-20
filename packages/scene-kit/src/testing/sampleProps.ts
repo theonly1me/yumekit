@@ -10,6 +10,7 @@ export const kitSceneNames = [
   "caption-words",
   "bar-chart",
   "quote",
+  "video-clip",
 ] as const;
 
 export const typicalProps: Record<(typeof kitSceneNames)[number], JsonObject> =
@@ -39,6 +40,11 @@ export const typicalProps: Record<(typeof kitSceneNames)[number], JsonObject> =
       valuePrefix: "$",
     },
     quote: { quote: "Every frame stays editable.", source: "The yumekit team" },
+    "video-clip": {
+      assetId: "clip",
+      caption: "A generated clip",
+      focus: { x: 0.5, y: 0.4 },
+    },
   };
 
 export const longProps: Record<(typeof kitSceneNames)[number], JsonObject> = {
@@ -59,6 +65,7 @@ export const longProps: Record<(typeof kitSceneNames)[number], JsonObject> = {
     valueSuffix: " total",
   },
   quote: { quote: longText, source: longText },
+  "video-clip": { assetId: "clip", caption: longText },
 };
 
 export async function testImageAsset(): Promise<SceneAsset> {

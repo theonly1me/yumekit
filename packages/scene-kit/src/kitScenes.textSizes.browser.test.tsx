@@ -11,7 +11,8 @@ import { typicalProps } from "./testing/sampleProps.js";
 const unitPixels = 1080 / 100;
 const durationFrames = 150;
 
-type MeasuredScene = "title-card" | "bullet-list" | "bar-chart" | "quote";
+type MeasuredScene =
+  "title-card" | "bullet-list" | "bar-chart" | "quote" | "video-clip";
 
 const measuredTexts: {
   name: MeasuredScene;
@@ -72,6 +73,12 @@ const measuredTexts: {
     text: "label",
     find: (element) => element.querySelector("p") ?? undefined,
     units: { wide: 5.5, square: 5, tall: 5.5 },
+  },
+  {
+    name: "video-clip",
+    text: "caption",
+    find: (element) => element.querySelector("p") ?? undefined,
+    units: { wide: 5, square: 5, tall: 5.5 },
   },
 ];
 

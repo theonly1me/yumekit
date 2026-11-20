@@ -1,10 +1,14 @@
 import type { Browser, Page } from "playwright-core";
-import type { RenderScale } from "../renderFailure.js";
+import type { RenderFailure, RenderScale } from "../renderFailure.js";
 import type { SeekResult } from "../page/stagePageData.js";
 
-export interface StagePage {
+export interface BrowserStagePage {
   seek: (frame: number) => Promise<SeekResult>;
   screenshot: () => Promise<Uint8Array>;
+}
+
+export interface StagePage extends BrowserStagePage {
+  videoFramesFailure: () => RenderFailure | undefined;
 }
 
 const pageReadyMilliseconds = 60_000;
@@ -30,7 +34,7 @@ export async function openStagePage(options: {
   origin: string;
   output: { widthPixels: number; heightPixels: number };
   scale: RenderScale;
-}): Promise<StagePage> {
+}): Promise<BrowserStagePage> {
   const { browser, origin, output, scale } = options;
   const context = await browser.newContext({
     viewport: { width: output.widthPixels, height: output.heightPixels },

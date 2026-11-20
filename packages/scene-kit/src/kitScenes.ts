@@ -9,6 +9,7 @@ import { CaptionWords } from "./scenes/CaptionWords.js";
 import { ImagePan } from "./scenes/ImagePan.js";
 import { Quote } from "./scenes/Quote.js";
 import { TitleCard } from "./scenes/TitleCard.js";
+import { VideoClip } from "./scenes/VideoClip.js";
 import { paperStylePack } from "./stylePacks/paper.js";
 import type { StylePack } from "./stylePacks/stylePack.js";
 
@@ -19,6 +20,7 @@ const kitSceneDefinitions: Record<string, KitSceneDefinition> = {
   "caption-words": { component: CaptionWords, paintsBackground: false },
   "bar-chart": { component: BarChart, paintsBackground: true },
   quote: { component: Quote, paintsBackground: true },
+  "video-clip": { component: VideoClip, paintsBackground: true },
 };
 
 function kitScenesFor(stylePack: StylePack): Record<string, SceneModule> {
