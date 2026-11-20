@@ -1,1 +1,1 @@
-export const packageName = "@yumekit/scene-kit";
+export { kitScenes } from "./kitScenes.js";
