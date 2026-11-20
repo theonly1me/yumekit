@@ -100,8 +100,10 @@ type AssetSource =
       kind: "tool";
       server: string;
       tool: string;
+      model?: string;
       input: JsonObject;
       costUsd?: number;
+      costIsEstimate?: boolean;
     };
 
 type WordTimings = {

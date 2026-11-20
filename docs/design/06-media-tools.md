@@ -30,7 +30,8 @@ yumekit reads two files with the same shape. The project file wins for a server 
 ```
 
 - `passEnvironment` lists the names of environment variables that the server gets. The file never holds a secret value. Document 10 says where a key lives and how a server describes its models.
-- `defaults` names the server for each capability when a tool call gives no server.
+- The user file is in the configuration folder: `~/.config/yumekit`, or the folder in the environment variable `YUMEKIT_CONFIG_DIRECTORY` (document 10).
+- `defaults` names the server for each capability when a tool call gives no server. An entry is a server name, or `{ "server": "...", "model": "..." }` (document 10).
 - `limits` is optional. `generatedVideoSeconds` is the limit of document 09, a number of 0 or more, and 30 by default. The project file wins over the user file. `MediaTools.limits()` gives the merged value.
 - The `yumekit` command passes the commands of the bundled servers as `bundledServers`. A file can use a bundled server by its name with no `command`.
 - With no file, yumekit connects only the bundled sample server.
@@ -48,6 +49,8 @@ A server has a capability when it lists a tool with the name in this table. Wire
 | `video`    | `generate_video`  | `prompt`, `duration_seconds`, `output_directory`, `file_stem` | `first_frame_path`, `last_frame_path`, `reference_image_paths`, `width_pixels`, `height_pixels`, `with_audio` |
 
 Document 09 has the rules for a video server.
+
+Each generate tool and `align_words` also accept the optional input `model` (document 10).
 
 A server can accept more optional inputs. The harness passes unknown fields of `input` to the tool unchanged.
 
@@ -83,16 +86,28 @@ The harness validates each result against the schema. A result that does not mat
 type Capability = "image" | "speech" | "align" | "music" | "video";
 
 type MediaTools = {
-  list: () => { server: string; capabilities: Capability[] }[];
+  list: () => {
+    server: string;
+    capabilities: Capability[];
+    description?: MediaServerDescription;
+    descriptionFailure?: { kind: "media-tool-invalid-result"; message: string };
+  }[];
   run: (request: {
     capability: Capability;
     server?: string;
+    model?: string;
     input: JsonObject;
     outputDirectory: string;
     fileStem: string;
   }) => Promise<
-    Outcome<{ server: string; result: MediaToolResult }, MediaToolFailure>
+    Outcome<
+      { server: string; model?: string; result: MediaToolResult },
+      MediaToolFailure
+    >
   >;
+  checkKey: (
+    server: string,
+  ) => Promise<Outcome<{ valid: boolean; message: string }, CheckKeyFailure>>;
   failedServers: () => { server: string; message: string }[];
   limits: () => { generatedVideoSeconds: number };
   close: () => Promise<void>;
@@ -117,7 +132,13 @@ type ConnectFailure = {
 };
 ```
 
-`MediaToolFailure` kinds: `no-server-for-capability`, `server-not-found`, `server-failed-to-start`, `media-tool-failed` (with the message of the server), `media-tool-invalid-result`, `media-tool-timeout`.
+`MediaToolFailure` kinds: `no-server-for-capability`, `server-not-found`, `server-failed-to-start`, `media-tool-failed` (with the message of the server), `media-tool-invalid-result`, `media-tool-timeout`, `media-key-missing` (with `server`, `variable`, `getKeyUrl`, and `steps`, document 10).
+
+`CheckKeyFailure` kinds: `server-not-found`, `server-failed-to-start`, `media-tool-failed`, `media-tool-invalid-result`, `media-tool-timeout`, and `no-check-key-tool` for a server that lists no `check_key`.
+
+- At the start, the client calls `describe_media_server` of each server that lists it. `list` gives the description, or `descriptionFailure` when the result does not match the schema.
+- `run` passes `model` to the tool. With no `model`, it uses the model of the `defaults` entry of the selected server. The result reports that model, or the default model of the description when neither names one.
+- Before a call, `run` and `checkKey` start a server again when a value of its `passEnvironment` changed since it started. No other server stops.
 
 A server that fails to start does not stop the others. `list` shows only the servers that started. `failedServers` gives the reason for each one that did not, and `yumekit mcp` prints those reasons.
 
@@ -129,7 +150,7 @@ A configuration file that is not valid is the failure `invalid-configuration-fil
 
 How `run` selects a server:
 
-1. It uses `server` from the request. If the request has none, it uses the entry of `defaults` for the capability.
+1. It uses `server` from the request. If the request has none, it uses the server of the `defaults` entry for the capability.
 2. If neither names a server, it uses the first started server, in configuration order, that has the capability.
 3. A name that no file defines is `server-not-found`. A server that started without the tool is `no-server-for-capability`.
 
