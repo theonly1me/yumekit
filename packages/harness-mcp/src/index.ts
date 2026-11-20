@@ -1,1 +1,1 @@
-export const packageName = "@yumekit/harness-mcp";
+export { createHarnessServer } from "./createHarnessServer.js";

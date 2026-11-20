@@ -206,7 +206,27 @@ importers:
         specifier: 5.1.1
         version: 5.1.1(@types/node@22.20.5)(@vitest/browser-playwright@5.1.1)(@vitest/ui@5.1.1)(vite@8.3.8(@types/node@22.20.5))
 
-  apps/cli: {}
+  apps/cli:
+    dependencies:
+      '@modelcontextprotocol/sdk':
+        specifier: 1.32.2
+        version: 1.32.2(zod@4.6.7)
+      '@yumekit/harness-mcp':
+        specifier: workspace:*
+        version: link:../../packages/harness-mcp
+      '@yumekit/project':
+        specifier: workspace:*
+        version: link:../../packages/project
+      '@yumekit/render':
+        specifier: workspace:*
+        version: link:../../packages/render
+      '@yumekit/tools':
+        specifier: workspace:*
+        version: link:../../packages/tools
+    devDependencies:
+      '@types/node':
+        specifier: 22.20.5
+        version: 22.20.5
 
   apps/editor:
     dependencies:
@@ -234,7 +254,30 @@ importers:
 
   packages/engine: {}
 
-  packages/harness-mcp: {}
+  packages/harness-mcp:
+    dependencies:
+      '@modelcontextprotocol/sdk':
+        specifier: 1.32.2
+        version: 1.32.2(zod@4.6.7)
+      '@yumekit/project':
+        specifier: workspace:*
+        version: link:../project
+      '@yumekit/render':
+        specifier: workspace:*
+        version: link:../render
+      '@yumekit/scene-kit':
+        specifier: workspace:*
+        version: link:../scene-kit
+      '@yumekit/tools':
+        specifier: workspace:*
+        version: link:../tools
+      zod:
+        specifier: 4.6.7
+        version: 4.6.7
+    devDependencies:
+      '@types/node':
+        specifier: 22.20.5
+        version: 22.20.5
 
   packages/project:
     dependencies:

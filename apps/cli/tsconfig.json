@@ -5,5 +5,11 @@
     "outDir": "dist",
     "types": ["node"]
   },
-  "include": ["src"]
+  "include": ["src"],
+  "references": [
+    { "path": "../../packages/project" },
+    { "path": "../../packages/render" },
+    { "path": "../../packages/tools" },
+    { "path": "../../packages/harness-mcp" }
+  ]
 }

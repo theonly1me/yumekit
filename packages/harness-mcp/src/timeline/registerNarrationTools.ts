@@ -1,0 +1,128 @@
+import { z } from "zod";
+import { applyEditsResult } from "../applyEditsResult.js";
+import type { HarnessContext } from "../context.js";
+import { frameInput, idInput } from "../inputs.js";
+import { findAsset, findOutput } from "../lookups.js";
+import { failureResult, successResult } from "../results.js";
+import { planNarration } from "./narrationPlan.js";
+
+function registerPlaceNarration(context: HarnessContext): void {
+  context.server.registerTool(
+    "place_narration",
+    {
+      description:
+        "Put a speech asset on the audio track of an output for its full length. With with_captions, also add a caption-words scene on a caption track above the other scenes, timed to the same frames. It creates the audio and caption tracks when they are missing. One undo removes all of it.",
+      inputSchema: {
+        output_id: idInput("The id of the output."),
+        asset_id: idInput("The id of a speech asset from generate_asset."),
+        start_frame: frameInput(
+          "The frame of the output where the narration starts.",
+        ),
+        with_captions: z
+          .boolean()
+          .optional()
+          .describe(
+            "Also show the words as captions. Needs word timings. Default false.",
+          ),
+      },
+    },
+    ({ output_id, asset_id, start_frame, with_captions }) => {
+      const snapshot = context.store.read();
+      const output = findOutput({ snapshot, outputId: output_id });
+      if (!output.ok) return failureResult(output.failure);
+      const asset = findAsset({ snapshot, assetId: asset_id });
+      if (!asset.ok) return failureResult(asset.failure);
+      const { durationFrames } = asset.value;
+      if (asset.value.kind !== "audio" || durationFrames === undefined) {
+        return failureResult({
+          kind: "asset-not-audio",
+          message: `The asset "${asset_id}" is of kind ${asset.value.kind}. Narration needs an audio asset.`,
+          hint: 'Make speech with generate_asset and capability "speech", then call place_narration with that asset_id.',
+        });
+      }
+      const withCaptions = with_captions ?? false;
+      if (withCaptions && !asset.value.hasWords) {
+        return failureResult({
+          kind: "asset-has-no-words",
+          message: `The asset "${asset_id}" has no word timings, so captions cannot follow it.`,
+          hint: `Call align_words with asset_id "${asset_id}" and the spoken text, then call place_narration again. Or set with_captions to false.`,
+        });
+      }
+      const plan = planNarration({
+        snapshot,
+        timeline: output.value.timeline,
+        asset: { ...asset.value, durationFrames },
+        startFrame: start_frame,
+        withCaptions,
+      });
+      return applyEditsResult({
+        store: context.store,
+        edits: plan.edits,
+        line: `Narration "${asset_id}" placed on "${output_id}" from frame ${String(start_frame)} to ${String(start_frame + durationFrames)}${withCaptions ? " with captions" : ""}.`,
+        data: {
+          audio_clip_id: plan.audioClipId,
+          ...(plan.captionClipId === undefined
+            ? {}
+            : { caption_clip_id: plan.captionClipId }),
+          ...(plan.captionSceneId === undefined
+            ? {}
+            : { caption_scene_id: plan.captionSceneId }),
+          start_frame,
+          duration_frames: durationFrames,
+          end_frame: start_frame + durationFrames,
+        },
+        hints: {
+          "clips-overlap": `Another clip already uses frames ${String(start_frame)} to ${String(start_frame + durationFrames - 1)} on the audio or caption track. Call get_timeline, then choose a start_frame after the last narration, or remove the old clip with remove_clip.`,
+        },
+      });
+    },
+  );
+}
+
+function registerHistoryTools(context: HarnessContext): void {
+  context.server.registerTool(
+    "undo",
+    {
+      description:
+        "Undo the last change to the project. Each tool call that changed the project is one step.",
+    },
+    async () => {
+      const undone = await context.store.undo();
+      return undone.ok
+        ? successResult({
+            line: "Undone.",
+            data: { revision: undone.value.revision },
+          })
+        : failureResult({
+            kind: "nothing-to-undo",
+            message: "There is no change to undo.",
+            hint: "Call get_project to see the current state.",
+          });
+    },
+  );
+  context.server.registerTool(
+    "redo",
+    { description: "Redo the last change that undo reverted." },
+    async () => {
+      const redone = await context.store.redo();
+      return redone.ok
+        ? successResult({
+            line: "Redone.",
+            data: { revision: redone.value.revision },
+          })
+        : failureResult({
+            kind: "nothing-to-redo",
+            message:
+              "There is no undone change to redo. A new change clears the redo steps.",
+            hint: "Call get_project to see the current state.",
+          });
+    },
+  );
+}
+
+export function registerNarrationAndHistoryTools(
+  context: HarnessContext,
+): void {
+  registerPlaceNarration(context);
+  registerHistoryTools(context);
+}
