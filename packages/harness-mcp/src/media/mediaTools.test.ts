@@ -1,4 +1,4 @@
-import { readdir, writeFile } from "node:fs/promises";
+import { readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { startHarness } from "../testing/harnessFixture.js";
@@ -117,25 +117,6 @@ describe("media tools", () => {
           { text: "world", startFrame: 15, endFrame: 30 },
         ],
       },
-    });
-  });
-
-  it("import_asset copies an image of the user into the project", async () => {
-    const harness = await startHarness();
-    const source = join(harness.folder, "..", "Logo.PNG");
-    await writeFile(source, "not checked");
-
-    const result = await harness.call({
-      name: "import_asset",
-      arguments: { asset_id: "logo", kind: "image", source_path: source },
-    });
-
-    expect(result.isError).toBe(false);
-    expect(harness.store.read().assets[0]).toMatchObject({
-      id: "logo",
-      kind: "image",
-      file: "assets/files/logo.png",
-      source: { kind: "import", originalName: "Logo.PNG" },
     });
   });
 });

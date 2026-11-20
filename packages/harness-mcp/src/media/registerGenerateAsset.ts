@@ -1,5 +1,5 @@
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import type { Edit, JsonObject } from "@yumekit/project";
+import type { Edit } from "@yumekit/project";
 import { z } from "zod";
 import { applyEditsResult } from "../applyEditsResult.js";
 import type { HarnessContext } from "../context.js";
@@ -12,7 +12,8 @@ import {
   projectFileOf,
   wordsInFrames,
 } from "./assetFiles.js";
-import { mediaFailureOf, resolveServer } from "./mediaFailures.js";
+import { mediaFailureOf } from "./mediaFailures.js";
+import { recordedInputOf, referencePathsInput } from "./referencePaths.js";
 import { reuseAsset, summaryOf } from "./reuseAsset.js";
 
 const toolNameByCapability = {
@@ -35,11 +36,23 @@ const generateAssetInput = {
     .string()
     .optional()
     .describe(
-      "The media server from list_media_tools. Needed only when more than one server has the capability.",
+      "The media server from list_media_tools. Leave it out to use the default server of the capability.",
     ),
   input: jsonObjectInput.describe(
-    "The input of the media tool, with snake_case names and time in seconds. image: prompt (required), width_pixels, height_pixels, transparent_background. speech: text (required), voice, instructions, speed. music: prompt and duration_seconds (both required). video: prompt and duration_seconds (both required), width_pixels, height_pixels. The harness adds output_directory and file_stem.",
+    "The input of the media tool, with snake_case names and time in seconds. image: prompt (required), width_pixels, height_pixels, transparent_background. speech: text (required), voice, instructions, speed. music: prompt and duration_seconds (both required). video: prompt and duration_seconds (both required), width_pixels, height_pixels. The harness adds output_directory and file_stem. Give reference images and a first frame as asset ids in the fields below, not as paths.",
   ),
+  reference_asset_ids: z
+    .array(z.string())
+    .optional()
+    .describe(
+      "Image asset ids for the image tool to follow, for example a character sheet. The harness gives the tool their file paths as reference_image_paths.",
+    ),
+  first_frame_asset_id: z
+    .string()
+    .optional()
+    .describe(
+      "An image asset id for the first frame of a video. The harness gives the tool its file path as first_frame_path.",
+    ),
 };
 
 type GenerateAssetInput = z.infer<z.ZodObject<typeof generateAssetInput>>;
@@ -50,17 +63,18 @@ async function generateAsset(options: {
 }): Promise<CallToolResult> {
   const { context, request } = options;
   const snapshot = context.store.read();
-  const server = resolveServer({
-    mediaTools: context.mediaTools,
-    capability: request.capability,
-    server: request.server,
-  });
-  if (!server.ok) return failureResult(server.failure);
+  const projectFolder = context.store.folder;
+  const ids = {
+    referenceAssetIds: request.reference_asset_ids,
+    firstFrameAssetId: request.first_frame_asset_id,
+  };
+  const paths = referencePathsInput({ snapshot, projectFolder, ids });
+  if (!paths.ok) return failureResult(paths.failure);
   const tool = toolNameByCapability[request.capability];
-  const input: JsonObject = request.input;
+  const input = recordedInputOf({ input: request.input, ids });
   const existing = findReusableAsset({
     assets: snapshot.assets,
-    server: server.value,
+    server: request.server,
     tool,
     input,
   });
@@ -73,20 +87,20 @@ async function generateAsset(options: {
       hint: "Choose another asset_id. Call list_assets to see the ids in use.",
     });
   }
-  const projectFolder = context.store.folder;
   const ran = await context.mediaTools.run({
     capability: request.capability,
-    server: server.value,
-    input,
+    ...(request.server === undefined ? {} : { server: request.server }),
+    input: { ...request.input, ...paths.value },
     outputDirectory: assetFilesFolder(projectFolder),
     fileStem: request.asset_id,
   });
   if (!ran.ok) return failureResult(mediaFailureOf(ran.failure));
-  const [file] = ran.value.files;
+  const { server, result } = ran.value;
+  const [file] = result.files;
   if (file === undefined) {
     return failureResult({
       kind: "media-tool-invalid-result",
-      message: `The media server "${server.value}" returned no file.`,
+      message: `The media server "${server}" returned no file.`,
       hint: "Call again, or use another server from list_media_tools.",
     });
   }
@@ -108,15 +122,13 @@ async function generateAsset(options: {
     ...(durationFrames === undefined ? {} : { durationFrames }),
     source: {
       kind: "tool" as const,
-      server: server.value,
+      server,
       tool,
       input,
-      ...(ran.value.cost_usd === undefined
-        ? {}
-        : { costUsd: ran.value.cost_usd }),
+      ...(result.cost_usd === undefined ? {} : { costUsd: result.cost_usd }),
     },
   };
-  const { words } = ran.value;
+  const { words } = result;
   const edit: Edit = {
     kind: "addAsset",
     asset,
@@ -133,7 +145,7 @@ async function generateAsset(options: {
   return applyEditsResult({
     store: context.store,
     edits: [edit],
-    line: `Asset "${request.asset_id}" made by ${server.value}${lengthText}${wordsText}.`,
+    line: `Asset "${request.asset_id}" made by ${server}${lengthText}${wordsText}.`,
     data: summaryOf({
       asset: { ...asset, hasWords: words !== undefined },
       reused: false,

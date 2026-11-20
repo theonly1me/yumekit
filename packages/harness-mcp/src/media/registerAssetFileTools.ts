@@ -1,4 +1,4 @@
-import { copyFile } from "node:fs/promises";
+import { copyFile, rm } from "node:fs/promises";
 import { basename, extname, isAbsolute, join } from "node:path";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
@@ -7,18 +7,14 @@ import type { HarnessContext } from "../context.js";
 import { idInput } from "../inputs.js";
 import { failureResult } from "../results.js";
 import { assetFilesFolder, projectFileOf } from "./assetFiles.js";
-
-const extensionsByKind = {
-  image: [".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg"],
-  font: [".woff2", ".woff", ".ttf", ".otf"],
-} as const;
+import { extensionsByKind, importedMediaOf } from "./importedMedia.js";
 
 const importAssetInput = {
   asset_id: idInput("The id of the new asset."),
   kind: z
     .enum(["image", "font", "audio", "video"])
     .describe(
-      "The kind of the file. In milestone 1, only image and font can be imported.",
+      "The kind of the file. The harness reads the size of an image and the length of audio and video.",
     ),
   source_path: z
     .string()
@@ -38,13 +34,6 @@ async function importAsset(options: {
   request: ImportAssetInput;
 }): Promise<CallToolResult> {
   const { context, request } = options;
-  if (request.kind === "audio" || request.kind === "video") {
-    return failureResult({
-      kind: "import-kind-not-supported",
-      message: `import_asset cannot import ${request.kind} yet, because the harness cannot measure its length.`,
-      hint: 'Make audio with generate_asset and capability "speech" or "music". Import only image and font files.',
-    });
-  }
   const extension = extname(request.source_path).toLowerCase();
   const permitted: readonly string[] = extensionsByKind[request.kind];
   if (!permitted.includes(extension)) {
@@ -84,6 +73,16 @@ async function importAsset(options: {
       hint: "Check the path with the user, then call import_asset again.",
     });
   }
+  const imported = await importedMediaOf({
+    file: destination,
+    extension,
+    kind: request.kind,
+    framesPerSecond: context.store.read().project.framesPerSecond,
+  });
+  if (!imported.ok) {
+    await rm(destination, { force: true });
+    return failureResult(imported.failure);
+  }
   return applyEditsResult({
     store: context.store,
     edits: [
@@ -96,6 +95,7 @@ async function importAsset(options: {
             projectFolder: context.store.folder,
             path: destination,
           }),
+          ...imported.value,
           source: {
             kind: "import",
             originalName: basename(request.source_path),
@@ -104,7 +104,13 @@ async function importAsset(options: {
       },
     ],
     line: `File "${basename(request.source_path)}" imported as asset "${request.asset_id}".`,
-    data: { asset_id: request.asset_id },
+    data: {
+      asset_id: request.asset_id,
+      kind: request.kind,
+      ...(imported.value.durationFrames === undefined
+        ? {}
+        : { duration_frames: imported.value.durationFrames }),
+    },
   });
 }
 
@@ -113,7 +119,7 @@ export function registerImportAsset(context: HarnessContext): void {
     "import_asset",
     {
       description:
-        "Copy an image or font file of the user into the project and add it as an asset. Use the asset id in scene props, for example assetId of image-pan.",
+        "Copy an image, audio, video, or font file of the user into the project and add it as an asset. Use the asset id in scene props, for example assetId of image-pan. The result gives duration_frames for audio and video.",
       inputSchema: importAssetInput,
     },
     (request) => importAsset({ context, request }),
