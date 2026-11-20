@@ -23,14 +23,14 @@ The lead agent read these on 2026-11-21. A price is the price on that date.
 
 ## Decisions
 
-| Id  | Decision                                                                          | Why                                                                                                                 |
-| --- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| V1  | A scene shows a video file as a row of still pictures, one for each project frame | A `<video>` element does not seek to an exact frame, and the Chromium that Playwright installs has no H.264 decoder |
-| V2  | The renderer makes those pictures on first use and keeps them in a cache folder   | A project stays small, and a second render is fast                                                                  |
-| V3  | An audio clip can read the sound of a video asset                                 | The sound of a generated clip is part of what makes it real                                                         |
-| V4  | The first video server is `tools/gemini-media`                                    | It is the lowest confirmed price, at about one seventh of Seedance 2.5 on fal                                       |
-| V5  | A project has a limit in seconds of generated video, and the default is 30        | One call costs real money. Seconds need no price table and are the same for each provider                           |
-| V6  | The agent makes a still image first, and then makes the clip from that image      | A still costs little. The person sees and corrects the look before the costly step                                  |
+| Id  | Decision                                                                                  | Why                                                                                                                 |
+| --- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| V1  | A scene shows a video file as a row of still pictures, one for each project frame         | A `<video>` element does not seek to an exact frame, and the Chromium that Playwright installs has no H.264 decoder |
+| V2  | The renderer makes those pictures on first use and keeps them in a cache folder           | A project stays small, and a second render is fast                                                                  |
+| V3  | An audio clip can read the sound of a video asset                                         | The sound of a generated clip is part of what makes it real                                                         |
+| V4  | yumekit bundles a video server for each provider that it supports. Document 10 lists them | The person chooses the model. `tools/gemini-media` is built first, because it has the lowest confirmed price        |
+| V5  | A project has a limit in seconds of generated video, and the default is 30                | One call costs real money. Seconds need no price table and are the same for each provider                           |
+| V6  | The agent makes a still image first, and then makes the clip from that image              | A still costs little. The person sees and corrects the look before the costly step                                  |
 
 ## A video file in a scene
 
@@ -188,7 +188,7 @@ Each work package is one pull request, as in document 07.
 | WP13 | `tools/gemini-media`                                                                                                                                |            |
 | WP14 | The acceptance content                                                                                                                              | WP12, WP13 |
 
-WP11 and WP13 start together.
+WP11 and WP13 start together. Document 10 adds WP15 to WP17: keys and model descriptions, `tools/fal-media`, and `tools/local-video`.
 
 ### WP11 checks
 
@@ -228,8 +228,6 @@ WP11 and WP13 start together.
 
 ## Not in this design
 
-- A local video server. A probe on the computer of the owner measures LTX-2 with `mlx-video` first.
-- `tools/fal-media` for Seedance 2.5 and other hosted models.
 - Change of an existing clip: extension, edit by prompt, or a new sound.
 - Speed change, reverse play, and a cut inside the frame pictures.
 - A spend record in dollars for each project (milestone 4).
