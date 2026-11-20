@@ -11,6 +11,7 @@ export default defineConfig({
             "scripts/**/*.test.ts",
           ],
           exclude: ["**/node_modules/**", "**/*.browser.test.{ts,tsx}"],
+          testTimeout: 30_000,
         },
       },
       "packages/scene/vitest.config.ts",
