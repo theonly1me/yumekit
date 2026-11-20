@@ -30,7 +30,7 @@ describe("connectMediaTools with the sample server", () => {
   it("lists the sample server with image, speech, align, and music when no file exists", async () => {
     const { tools } = await connectFixture({});
 
-    expect(tools.list()).toEqual([
+    expect(tools.list()).toMatchObject([
       {
         server: "sample",
         capabilities: ["image", "speech", "align", "music", "video"],

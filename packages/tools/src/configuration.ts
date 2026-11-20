@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
-import { homedir } from "node:os";
 import { join } from "node:path";
 import { z } from "zod";
+import { configurationDirectory } from "./configurationDirectory.js";
 import { capabilities } from "./convention.js";
 import { errorMessage } from "./errorMessage.js";
 import type {
@@ -26,9 +26,20 @@ const limitsSchema = z.object({
   generatedVideoSeconds: z.number().nonnegative().optional(),
 });
 
+const defaultEntrySchema = z
+  .union([
+    z.string().min(1),
+    z.object({ server: z.string().min(1), model: z.string().min(1) }),
+  ])
+  .transform((entry): MediaDefault =>
+    typeof entry === "string" ? { server: entry } : entry,
+  );
+
 const configurationFileSchema = z.object({
   mcpServers: z.record(z.string(), serverEntrySchema).default({}),
-  defaults: z.partialRecord(z.enum(capabilities), z.string()).default({}),
+  defaults: z
+    .partialRecord(z.enum(capabilities), defaultEntrySchema)
+    .default({}),
   limits: limitsSchema.default({}),
 });
 
@@ -39,9 +50,14 @@ export type ConfiguredServer =
   | { name: string; status: "ready"; command: ServerCommand }
   | { name: string; status: "invalid"; message: string };
 
+export interface MediaDefault {
+  server: string;
+  model?: string;
+}
+
 export interface MediaToolsConfiguration {
   servers: ConfiguredServer[];
-  defaults: Partial<Record<Capability, string>>;
+  defaults: Partial<Record<Capability, MediaDefault>>;
   limits: MediaLimits;
 }
 
@@ -118,16 +134,19 @@ function bundledSampleOnly(
 }
 
 export async function readMediaToolsConfiguration(options: {
-  projectFolder: string;
+  projectFolder: string | undefined;
   bundledServers: Record<string, ServerCommand>;
 }): Promise<Outcome<MediaToolsConfiguration, ConnectFailure>> {
   const userRead = await readConfigurationFile(
-    join(homedir(), ".config", "yumekit", configurationFileName),
+    join(configurationDirectory(), configurationFileName),
   );
   if (!userRead.ok) return userRead;
-  const projectRead = await readConfigurationFile(
-    join(options.projectFolder, configurationFileName),
-  );
+  const projectRead: FileOutcome =
+    options.projectFolder === undefined
+      ? { ok: true, value: undefined }
+      : await readConfigurationFile(
+          join(options.projectFolder, configurationFileName),
+        );
   if (!projectRead.ok) return projectRead;
   const userFile = userRead.value;
   const projectFile = projectRead.value;

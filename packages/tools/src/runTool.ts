@@ -18,16 +18,22 @@ import type {
 
 const requestTimeoutCode: number = ErrorCode.RequestTimeout;
 
-function toolArguments(request: MediaToolRequest): JsonObject {
-  if (!writesFiles(request.capability)) return request.input;
+function toolArguments(options: {
+  request: MediaToolRequest;
+  model: string | undefined;
+}): JsonObject {
+  const { request, model } = options;
+  const input =
+    model === undefined ? request.input : { ...request.input, model };
+  if (!writesFiles(request.capability)) return input;
   return {
-    ...request.input,
+    ...input,
     output_directory: request.outputDirectory,
     file_stem: request.fileStem,
   };
 }
 
-function textOfContent(content: unknown): string {
+export function textOfContent(content: unknown): string {
   const items = z
     .array(z.object({ type: z.string(), text: z.string().optional() }))
     .safeParse(content);
@@ -39,7 +45,7 @@ function textOfContent(content: unknown): string {
   return text || "The media tool failed with no message";
 }
 
-function isTimeout(error: unknown): boolean {
+export function isTimeout(error: unknown): boolean {
   return error instanceof McpError && error.code === requestTimeoutCode;
 }
 
@@ -68,15 +74,16 @@ export async function runTool(options: {
   server: string;
   client: Client;
   request: MediaToolRequest;
+  model: string | undefined;
   toolTimeoutSeconds: number;
 }): Promise<Outcome<MediaToolResult, MediaToolFailure>> {
-  const { server, client, request, toolTimeoutSeconds } = options;
+  const { server, client, request, model, toolTimeoutSeconds } = options;
   let result: Awaited<ReturnType<Client["callTool"]>>;
   try {
     result = await client.callTool(
       {
         name: toolNameByCapability[request.capability],
-        arguments: toolArguments(request),
+        arguments: toolArguments({ request, model }),
       },
       undefined,
       { timeout: toolTimeoutSeconds * 1000 },

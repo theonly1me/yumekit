@@ -132,11 +132,13 @@ describe("asset and reference read tools", () => {
 
     const { data } = await harness.call({ name: "list_media_tools" });
 
-    expect(data).toEqual({
+    expect(data).toMatchObject({
       servers: [
         {
           server: "sample",
           capabilities: ["image", "speech", "align", "music", "video"],
+          runs: "on-this-computer",
+          keys: [],
         },
       ],
       failed_servers: [],

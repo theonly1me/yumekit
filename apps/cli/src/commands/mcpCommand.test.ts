@@ -1,38 +1,9 @@
 import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { CallToolResultSchema } from "@modelcontextprotocol/sdk/types.js";
-import { describe, expect, it, onTestFinished } from "vitest";
-import { builtMainFile, createCliWorkspace } from "../testing/runCli.js";
-
-async function connectToMcp(options: {
-  folder: string;
-  environment: NodeJS.ProcessEnv;
-}) {
-  const transport = new StdioClientTransport({
-    command: process.execPath,
-    args: [builtMainFile, "mcp", "--project", options.folder],
-    env: Object.fromEntries(
-      Object.entries(options.environment).flatMap(([name, value]) =>
-        value === undefined ? [] : [[name, value]],
-      ),
-    ),
-    stderr: "pipe",
-  });
-  const stderrChunks: string[] = [];
-  transport.stderr?.on("data", (chunk: Buffer) => {
-    stderrChunks.push(chunk.toString());
-  });
-  const transportErrors: Error[] = [];
-  const client = new Client({ name: "cli-test", version: "0.0.0" });
-  client.onerror = (error) => {
-    transportErrors.push(error);
-  };
-  await client.connect(transport);
-  onTestFinished(() => client.close());
-  return { client, transportErrors, stderr: () => stderrChunks.join("") };
-}
+import { describe, expect, it } from "vitest";
+import { connectToMcp } from "../testing/connectToMcp.js";
+import { createCliWorkspace } from "../testing/runCli.js";
 
 describe("yumekit mcp", () => {
   it("serves the harness over stdio with the bundled sample server and nothing else on stdout", async () => {

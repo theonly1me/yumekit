@@ -10,6 +10,9 @@ export const toolNameByCapability = {
   video: "generate_video",
 } as const satisfies Record<Capability, string>;
 
+export const describeToolName = "describe_media_server";
+export const checkKeyToolName = "check_key";
+
 export const capabilities = [
   "image",
   "speech",

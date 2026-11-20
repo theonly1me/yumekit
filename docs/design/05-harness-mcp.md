@@ -26,16 +26,16 @@ function createHarnessServer(options: {
 
 ### Read
 
-| Tool               | Input       | Result                                                                                                                         |
-| ------------------ | ----------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `get_project`      | none        | Name, frame rate, outputs, script, bible, a list of scenes (id, title, kind), the length of each timeline, and the revision    |
-| `get_scene`        | `scene_id`  | The scene record, and the code of a module scene                                                                               |
-| `get_timeline`     | `output_id` | All tracks and clips of the output                                                                                             |
-| `list_assets`      | `kind?`     | Each asset record. Word timings are not included                                                                               |
-| `get_asset_words`  | `asset_id`  | The word timings of a speech asset, from `readAssetWords`                                                                      |
-| `list_kit_scenes`  | none        | Each kit scene: name, purpose, and the schema of its props                                                                     |
-| `get_scene_guide`  | none        | The reference for custom scene code: the contract, the hooks, the animation functions, the rules, and two examples             |
-| `list_media_tools` | none        | Each connected media server and its capabilities, and `generated_video` with `limit_seconds` and `used_seconds` of document 09 |
+| Tool               | Input       | Result                                                                                                                          |
+| ------------------ | ----------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `get_project`      | none        | Name, frame rate, outputs, script, bible, a list of scenes (id, title, kind), the length of each timeline, and the revision     |
+| `get_scene`        | `scene_id`  | The scene record, and the code of a module scene                                                                                |
+| `get_timeline`     | `output_id` | All tracks and clips of the output                                                                                              |
+| `list_assets`      | `kind?`     | Each asset record. Word timings are not included                                                                                |
+| `get_asset_words`  | `asset_id`  | The word timings of a speech asset, from `readAssetWords`                                                                       |
+| `list_kit_scenes`  | none        | Each kit scene: name, purpose, and the schema of its props                                                                      |
+| `get_scene_guide`  | none        | The reference for custom scene code: the contract, the hooks, the animation functions, the rules, and two examples              |
+| `list_media_tools` | none        | Each connected media server, its capabilities, its description, and the state of each key, and `generated_video` of document 09 |
 
 ### Write the story
 
@@ -78,13 +78,15 @@ What the first agent run could not learn from the descriptions, and each descrip
 
 ### Media
 
-| Tool             | Input                                                                                                                               | What it does                                                                                       |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `generate_asset` | `asset_id`, `capability` (`image`, `speech`, `music`, `video`), `server?`, `input`, `reference_asset_ids?`, `first_frame_asset_id?` | Calls the media tool, then adds the asset with its source record                                   |
-| `import_asset`   | `asset_id`, `kind`, `source_path`                                                                                                   | Copies a file of the user into the project and adds the asset                                      |
-| `align_words`    | `asset_id`, `text`                                                                                                                  | Makes word timings for a speech asset that has none, and stores them with the edit `setAssetWords` |
+| Tool             | Input                                                                                                                                         | What it does                                                                                       |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `generate_asset` | `asset_id`, `capability` (`image`, `speech`, `music`, `video`), `server?`, `model?`, `input`, `reference_asset_ids?`, `first_frame_asset_id?` | Calls the media tool, then adds the asset with its source record                                   |
+| `import_asset`   | `asset_id`, `kind`, `source_path`                                                                                                             | Copies a file of the user into the project and adds the asset                                      |
+| `align_words`    | `asset_id`, `text`                                                                                                                            | Makes word timings for a speech asset that has none, and stores them with the edit `setAssetWords` |
 
-`generate_asset` saves the tool name, the server that `run` reports, and the input in the asset record. With no `server`, the defaults of the media tools configuration apply.
+`generate_asset` saves the tool name, the server and the model that `run` reports, the input, `costUsd`, and `costIsEstimate` in the asset record. With no `server`, the defaults of the media tools configuration apply. A repeated call reuses a file only when the model also matches, if the call names one.
+
+For each server with a description, `list_media_tools` gives `label`, `runs`, `models`, and `keys`. Each key has `variable`, `label`, `get_key_url`, `steps`, and `source` (`environment`, `key-file`, or `missing`). It never gives a value. A server with a description that does not match the schema has `description_failure`. Before a call to a server with a missing key, `generate_asset` and `align_words` return `media-key-missing` with `server`, `variable`, `get_key_url`, and `steps`, and call no tool.
 
 A media tool needs absolute file paths, and an agent knows only asset ids. So `reference_asset_ids` becomes `reference_image_paths` in the tool input, and `first_frame_asset_id` becomes `first_frame_path`. An id that is not an image asset is the failure `asset-not-found`, the same kind as each other asset lookup.
 
@@ -127,7 +129,7 @@ The server sends these instructions to the client at the start of a session. The
 ## What the harness does not do
 
 - It does not run shell commands for the agent.
-- It does not hold API keys. A media server reads its own key from its environment.
+- It does not hold API keys. A media server reads its own key from its environment, which `@yumekit/tools` fills from the key file of document 10. No harness tool reads, sets, or removes a key.
 - It does not choose a model. The MCP client is the brain.
 
 ## Tests

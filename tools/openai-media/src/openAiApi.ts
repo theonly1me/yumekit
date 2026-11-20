@@ -6,7 +6,7 @@ export type SendRequest = (request: Request) => Promise<Response>;
 export const openAiApiUrl = "https://api.openai.com/v1";
 
 export const missingKeyMessage =
-  "OPENAI_API_KEY is not set. Create a key at https://platform.openai.com/api-keys, set OPENAI_API_KEY in your shell, and list it in passEnvironment of this server in media-tools.json.";
+  "OPENAI_API_KEY is not set. Create a key at https://platform.openai.com/api-keys, then run `yumekit keys set OPENAI_API_KEY`. Or set OPENAI_API_KEY in your shell, and list it in passEnvironment of this server in media-tools.json.";
 
 const apiErrorBody = z.object({
   error: z.object({ message: z.string() }),

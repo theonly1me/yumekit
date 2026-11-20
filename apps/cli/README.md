@@ -10,6 +10,11 @@ The `yumekit` command.
 | `yumekit mcp --project <folder>`                                                            | Serves the harness MCP tools over stdio, with the bundled media servers      |
 | `yumekit render --project <folder> --output <id> [--scale] [--first-frame] [--frame-count]` | Writes `renders/<id>.mp4`                                                    |
 | `yumekit frame --project <folder> --output <id> --frame <n> [--scale]`                      | Writes `renders/<id>-frame-<n>.png`                                          |
+| `yumekit keys`                                                                              | Lists each media server, each key it needs, and the state of the key         |
+| `yumekit keys set <VARIABLE>`                                                               | Reads the value from a hidden prompt or from standard input, and saves it    |
+| `yumekit keys remove <VARIABLE>`                                                            | Removes the key from the key file                                            |
+
+The value of a key is never a command argument, because a shell keeps arguments in its history. `yumekit keys set` writes `~/.config/yumekit/keys.json` with mode `0600`.
 
 `yumekit mcp` writes only MCP messages to stdout. It prints each media server that failed to start to stderr.
 

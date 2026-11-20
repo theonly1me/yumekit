@@ -39,6 +39,7 @@ async function generateAsset(options: {
   const existing = findReusableAsset({
     assets: snapshot.assets,
     server: request.server,
+    model: request.model,
     tool,
     input,
   });
@@ -62,12 +63,13 @@ async function generateAsset(options: {
   const ran = await context.mediaTools.run({
     capability: request.capability,
     ...(request.server === undefined ? {} : { server: request.server }),
+    ...(request.model === undefined ? {} : { model: request.model }),
     input: { ...request.input, ...paths.value },
     outputDirectory: assetFilesFolder(projectFolder),
     fileStem: request.asset_id,
   });
   if (!ran.ok) return failureResult(mediaFailureOf(ran.failure));
-  const { server, result } = ran.value;
+  const { server, model, result } = ran.value;
   const [file] = result.files;
   if (file === undefined) {
     return failureResult({
@@ -88,8 +90,12 @@ async function generateAsset(options: {
       kind: "tool" as const,
       server,
       tool,
+      ...(model === undefined ? {} : { model }),
       input,
       ...(result.cost_usd === undefined ? {} : { costUsd: result.cost_usd }),
+      ...(result.cost_is_estimate === undefined
+        ? {}
+        : { costIsEstimate: result.cost_is_estimate }),
     },
   };
   const { words } = result;

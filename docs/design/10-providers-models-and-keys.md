@@ -82,12 +82,28 @@ Rules:
 
 A model catalog is a constant in the server package. The price rule of document 06 changes: a server can return `cost_usd` as an estimate from its catalog when the response of the provider gives no amount. The result then has `cost_is_estimate: true`.
 
+### The catalog of `tools/openai-media`
+
+Facts of 2026-11-21 from the OpenAI pricing page and the speech guide:
+
+| Model                 | Settings in the catalog                                    | Price in the catalog                   |
+| --------------------- | ---------------------------------------------------------- | -------------------------------------- |
+| `gpt-image-2.5-flare` | `transparent_background`, `reference_image_paths`          | None. The page gives token prices only |
+| `gpt-4o-mini-tts`     | `voice`, one of the 13 built-in voices, `marin` by default | None. The page gives token prices only |
+| `whisper-1`           | None                                                       | 0.006 US dollars for each minute       |
+
+- A price in tokens does not fit `MediaModelPrice`, so the image and speech models have an empty `prices` list.
+- `align_words` returns `cost_usd` from the `duration` of the response and the catalog price, with `cost_is_estimate: true`.
+- When a `YUMEKIT_OPENAI_*_MODEL` variable names a model, that model is the default of its capability. A model that is not in the catalog gets an entry with no settings and no prices.
+
 ## Keys
 
 ### The key file
 
 - The file is `~/.config/yumekit/keys.json`. It holds one object from variable name to value: `{ "GEMINI_API_KEY": "..." }`.
-- yumekit creates the file with mode `0600` and its folder with mode `0700`. If the file has a wider mode, yumekit corrects it and continues.
+- The environment variable `YUMEKIT_CONFIG_DIRECTORY` replaces the folder `~/.config/yumekit`, for the key file and for the user `media-tools.json`. Tests set it to a temporary folder, so no test reads or writes the real files.
+- A key file that yumekit cannot read, or that is not one object from names to text values, gives the state `missing` for each of its keys. `saveKey` and `removeKey` then return `key-file-not-writable` with the path and do not replace the file.
+- yumekit creates the file with mode `0600` and its folder with mode `0700`. If the file has a wider mode, yumekit corrects it and continues. When yumekit writes the file, it also sets an existing folder to mode `0700`.
 - yumekit never writes a key to a project folder, a log, a tool result, a failure message, or an asset source record.
 - A later change can move the values to the keychain of the operating system. The interface below does not change.
 
@@ -100,7 +116,7 @@ When yumekit starts a server, it gives each variable in `passEnvironment` of tha
 
 A variable that neither one has is not set. `passEnvironment` of a bundled server lists each `variable` of its `keys`, so a person never edits `media-tools.json` for a bundled server.
 
-After a key changes, yumekit starts that server again. No other server stops.
+After a key changes, yumekit starts that server again. No other server stops. The client compares the values that a server got with the current values before each call to `run` and `checkKey`. A change starts that server again before the call, so a key that `yumekit keys set` saves reaches a running `yumekit mcp` at its next call.
 
 ### The key interface
 
@@ -148,7 +164,7 @@ The editor is milestone 2. These rules are its input. The engine gives the edito
 
 1. **Tools page.** One row for each server: its label, where it runs, what it makes, and its state (ready, needs a key, or failed to start with the reason).
 2. **Key guide.** A server that needs a key shows `steps`, a button that opens `get_key_url`, and one field for the value. The field hides the value. After the save, the editor shows only that the key is set, and where it comes from.
-3. **Test.** A button calls `describe_media_server` and one free request of the provider that proves the key, when the server has one. The tool for it is `check_key`. It has no input and returns `{ valid: boolean, message: string }`. A server without `check_key` shows no test button.
+3. **Test.** A button calls `describe_media_server` and one free request of the provider that proves the key, when the server has one. The tool for it is `check_key`. It has no input and returns `{ valid: boolean, message: string }`. A server without `check_key` shows no test button. The client call is `MediaTools.checkKey(server)` of document 06. `tools/openai-media` sends `GET /v1/models` with the key: status 200 is valid, 401 or 403 is not valid, and each other answer is a failure.
 4. **Model picker.** Where a person makes or remakes an asset, the editor shows each model of that capability from each ready server, grouped by server. A model of a server that needs a key is visible and opens the key guide.
 5. **Settings form.** The form comes from `settings` of the selected model. Next to the button, the editor shows the price for the selected values, from `prices`.
 6. **Try again with another model.** An asset record keeps its server, model, and input. A person can select another model or other settings and make the asset again. The clips that use the asset keep their place.

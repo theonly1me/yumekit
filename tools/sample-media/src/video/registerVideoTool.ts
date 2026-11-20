@@ -1,5 +1,6 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
+import { modelInput, unknownModelMessage } from "../catalog.ts";
 import {
   errorResult,
   prepareOutputPath,
@@ -19,6 +20,7 @@ const maximumSidePixels = 4096;
 const sidePixels = z.number().int().min(1).max(maximumSidePixels);
 
 const videoInput = {
+  model: modelInput("video"),
   prompt: z.string().min(1).describe("What the video shows"),
   duration_seconds: z
     .number()
@@ -60,6 +62,11 @@ export function registerVideoTool(server: McpServer): void {
       inputSchema: videoInput,
     },
     async (input) => {
+      const modelFailure = unknownModelMessage({
+        capability: "video",
+        model: input.model,
+      });
+      if (modelFailure) return errorResult(modelFailure);
       const prepared = await prepareOutputPath({
         outputDirectory: input.output_directory,
         fileStem: input.file_stem,
