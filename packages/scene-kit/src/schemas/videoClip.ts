@@ -6,7 +6,7 @@ const share = z.number().min(0).max(1);
 
 export const videoClipSchema = {
   purpose:
-    "One video asset that fills the picture, with an optional caption line at the bottom. The clip is the motion, so the scene adds none. A clip that is longer than its video holds the last picture. The scene cuts a wide video in a tall output, so set focus to the subject.",
+    "One video asset that fills the picture, with an optional caption line of its own at the top. The clip is the motion, so the scene adds none. A clip that is longer than its video holds the last picture. The scene cuts a wide video in a tall output, so set focus to the subject.",
   props: z.strictObject({
     assetId: z
       .string()
@@ -41,7 +41,7 @@ export const videoClipSchema = {
       .max(videoClipLimits.caption)
       .optional()
       .describe(
-        "An optional short caption line in the caption area at the bottom of the picture. Leave it out when narration captions cover the clip.",
+        "An optional short caption of this scene, on a panel at the top of the picture. It is not the narration caption, which place_narration puts at the bottom.",
       ),
   }),
 };

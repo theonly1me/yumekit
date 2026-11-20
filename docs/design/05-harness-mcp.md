@@ -26,16 +26,16 @@ function createHarnessServer(options: {
 
 ### Read
 
-| Tool               | Input       | Result                                                                                                                      |
-| ------------------ | ----------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `get_project`      | none        | Name, frame rate, outputs, script, bible, a list of scenes (id, title, kind), the length of each timeline, and the revision |
-| `get_scene`        | `scene_id`  | The scene record, and the code of a module scene                                                                            |
-| `get_timeline`     | `output_id` | All tracks and clips of the output                                                                                          |
-| `list_assets`      | `kind?`     | Each asset record. Word timings are not included                                                                            |
-| `get_asset_words`  | `asset_id`  | The word timings of a speech asset, from `readAssetWords`                                                                   |
-| `list_kit_scenes`  | none        | Each kit scene: name, purpose, and the schema of its props                                                                  |
-| `get_scene_guide`  | none        | The reference for custom scene code: the contract, the hooks, the animation functions, the rules, and two examples          |
-| `list_media_tools` | none        | Each connected media server and its capabilities                                                                            |
+| Tool               | Input       | Result                                                                                                                         |
+| ------------------ | ----------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `get_project`      | none        | Name, frame rate, outputs, script, bible, a list of scenes (id, title, kind), the length of each timeline, and the revision    |
+| `get_scene`        | `scene_id`  | The scene record, and the code of a module scene                                                                               |
+| `get_timeline`     | `output_id` | All tracks and clips of the output                                                                                             |
+| `list_assets`      | `kind?`     | Each asset record. Word timings are not included                                                                               |
+| `get_asset_words`  | `asset_id`  | The word timings of a speech asset, from `readAssetWords`                                                                      |
+| `list_kit_scenes`  | none        | Each kit scene: name, purpose, and the schema of its props                                                                     |
+| `get_scene_guide`  | none        | The reference for custom scene code: the contract, the hooks, the animation functions, the rules, and two examples             |
+| `list_media_tools` | none        | Each connected media server and its capabilities, and `generated_video` with `limit_seconds` and `used_seconds` of document 09 |
 
 ### Write the story
 
@@ -52,15 +52,16 @@ Before `put_scene` sends its edit, the harness checks the scene. For a kit scene
 
 ### Timeline
 
-| Tool              | Input                                                    | Edit                                                                                      |
-| ----------------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| `set_timeline`    | `output_id`, `tracks`                                    | `setTimeline`                                                                             |
-| `add_clip`        | `output_id`, `track_id`, the clip fields                 | `addClip`                                                                                 |
-| `update_clip`     | `output_id`, `clip_id`, the fields to change             | `updateClip`                                                                              |
-| `remove_clip`     | `output_id`, `clip_id`                                   | `removeClip`                                                                              |
-| `copy_timeline`   | `from_output_id`, `to_output_id`                         | `copyTimeline`                                                                            |
-| `place_narration` | `output_id`, `asset_id`, `start_frame`, `with_captions?` | `addClip` for the audio, and `addClip` for a `caption-words` scene on the top scene track |
-| `undo`, `redo`    | none                                                     | The store operation                                                                       |
+| Tool              | Input                                                                                        | Edit                                                                                      |
+| ----------------- | -------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `set_timeline`    | `output_id`, `tracks`                                                                        | `setTimeline`                                                                             |
+| `add_clip`        | `output_id`, `track_id`, the clip fields                                                     | `addClip`                                                                                 |
+| `update_clip`     | `output_id`, `clip_id`, the fields to change                                                 | `updateClip`                                                                              |
+| `remove_clip`     | `output_id`, `clip_id`                                                                       | `removeClip`                                                                              |
+| `copy_timeline`   | `from_output_id`, `to_output_id`                                                             | `copyTimeline`                                                                            |
+| `place_narration` | `output_id`, `asset_id`, `start_frame`, `with_captions?`                                     | `addClip` for the audio, and `addClip` for a `caption-words` scene on the top scene track |
+| `place_video`     | `output_id`, `asset_id`, `start_frame`, `duration_frames?`, `focus?`, `sound_gain_decibels?` | `putScene` for a `video-clip` scene, `addClip` for the scene, and `addClip` for the sound |
+| `undo`, `redo`    | none                                                                                         | The store operation                                                                       |
 
 `set_timeline` is the usual tool for a first build, because an agent can state the whole timeline in one call. The clip tools serve small changes. `update_clip` can also change the scene of a scene clip or the asset of an audio clip. So one output can show a different scene in the same place.
 
@@ -71,7 +72,9 @@ What the first agent run could not learn from the descriptions, and each descrip
 - `image-pan` has its own caption at the top. It is not the narration caption.
 - `place_narration` and `copy_timeline` name the tracks and the clip ids that they make.
 
-`place_narration` puts a speech asset on the audio track for its full length. With `with_captions`, it also adds a `caption-words` scene and a clip that matches the audio clip, as document 08 requires. It creates the audio track and the caption track when the output has none. All of it is one edit batch, so one undo removes it.
+`place_narration` puts a speech asset on the first audio track other than `video-sound`, for its full length. With `with_captions`, it also adds a `caption-words` scene and a clip that matches the audio clip, as document 08 requires. It creates the audio track and the caption track when the output has none. All of it is one edit batch, so one undo removes it.
+
+`place_video` shows a video asset in an output, as document 09 says. The scene id is `video-` followed by the asset id. The scene clip goes on the first scene track that is not a caption track, or on a new scene track `scenes` below the others. The sound clip goes on the audio track `video-sound`, at -12 decibels by default, and is never longer than the video. `sound_gain_decibels` set to `off`, or an asset without `hasAudio`, adds no sound clip. All of it is one edit batch.
 
 ### Media
 
@@ -84,6 +87,8 @@ What the first agent run could not learn from the descriptions, and each descrip
 `generate_asset` saves the tool name, the server that `run` reports, and the input in the asset record. With no `server`, the defaults of the media tools configuration apply.
 
 A media tool needs absolute file paths, and an agent knows only asset ids. So `reference_asset_ids` becomes `reference_image_paths` in the tool input, and `first_frame_asset_id` becomes `first_frame_path`. An id that is not an image asset is the failure `asset-not-found`, the same kind as each other asset lookup.
+
+For a video, `generate_asset` reads `hasAudio` with `probeMedia`. It uses the size and the length of the probe only when the server reports none. Before a video call, it checks the limit `limits.generatedVideoSeconds` of document 09. A call past the limit is the failure `generated-video-limit-reached` with `used_seconds`, `requested_seconds`, and `limit_seconds`, and the harness calls no tool. `list_assets` shows `has_audio` for a video asset.
 
 `import_asset` reads the kind, the size, and the length of the file with `probeMedia` from `@yumekit/render`. So it accepts image, audio, video, and font files. If a speech tool returns word timings, the harness stores them in the same edit. If two calls have the same capability, server, and input, the second call reuses the file of the first and does not call the tool.
 
@@ -114,9 +119,10 @@ The server sends these instructions to the client at the start of a session. The
 3. Add each scene with `put_scene`. Prefer a kit scene. Call `get_scene_guide` before you write custom code.
 4. Make the narration with `generate_asset`. Read the word timings to set the length of each scene.
 5. Make the images with `generate_asset`. Put the style of the bible in each prompt.
-6. Build the timeline with `set_timeline`, one output at a time. Add each narration with `place_narration`. Use `copy_timeline` for the next output, then change it.
-7. Check frames with `preview_frames`. Correct each scene that has a defect.
-8. Call `render_video` for each output.
+6. For a shot that code cannot draw, make a still image first. Check it with the person or with `preview_frame`. Then call `generate_asset` with the capability `video` and `first_frame_asset_id`, and add the clip with `place_video`.
+7. Build the timeline with `set_timeline`, one output at a time. Add each narration with `place_narration`. Use `copy_timeline` for the next output, then change it.
+8. Check frames with `preview_frames`. Correct each scene that has a defect.
+9. Call `render_video` for each output.
 
 ## What the harness does not do
 

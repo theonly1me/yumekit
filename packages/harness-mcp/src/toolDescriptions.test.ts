@@ -51,4 +51,41 @@ describe("tool descriptions say what the first agent run could not learn", () =>
       expect.arrayContaining(["scene_id", "asset_id"]),
     );
   });
+
+  it("generate_asset says that video costs money, has a limit, and starts from a checked still", async () => {
+    const description = (await descriptionsByName()).get("generate_asset");
+
+    expect(description).toContain("costs money for each second");
+    expect(description).toContain("limits.generatedVideoSeconds");
+    expect(description).toContain("generated-video-limit-reached");
+    expect(description).toContain("Make a still image first");
+    expect(description).toContain("select a wide or tall shape");
+    expect(description).toContain("the result gives the real size and length");
+    expect(description).toContain("Speech has no length input");
+    expect(description).toContain("about 2.5 words for one second");
+  });
+
+  it("place_video names the scene, the tracks, and the clip ids that it makes", async () => {
+    const description = (await descriptionsByName()).get("place_video");
+
+    expect(description).toContain('"video-<asset_id>"');
+    expect(description).toContain('audio track "video-sound"');
+    expect(description).toContain('"video-sound-<asset_id>"');
+    expect(description).toContain("call place_video once for each asset");
+    expect(description).toContain(
+      'the "video-sound" track appears only when a sound clip is added',
+    );
+  });
+
+  it("list_kit_scenes says that video-clip has its own caption at the top", async () => {
+    const harness = await startHarness();
+    const listed = await harness.call({ name: "list_kit_scenes" });
+
+    const videoClip = /"name":"video-clip".*/.exec(
+      JSON.stringify(listed.data),
+    )?.[0];
+    expect(videoClip).toContain("optional caption line of its own at the top");
+    expect(videoClip).toContain("It is not the narration caption");
+    expect(videoClip).not.toContain("caption line at the bottom");
+  });
 });

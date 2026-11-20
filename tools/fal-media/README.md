@@ -2,6 +2,8 @@
 
 A media tool server that makes video clips with models that fal hosts. It uses the fal API key of the user, so each second of video costs money.
 
+Not tested with a real key yet. Tests use recorded shapes from the documents of 2026-11-21.
+
 | Tool                    | Result                                                                                         |
 | ----------------------- | ---------------------------------------------------------------------------------------------- |
 | `generate_video`        | An MP4 clip from a prompt, with an optional first frame and last frame. Sound is on by default |

@@ -42,6 +42,10 @@ export interface MediaToolRequest {
   fileStem: string;
 }
 
+export interface MediaLimits {
+  generatedVideoSeconds: number;
+}
+
 export interface MediaTools {
   list: () => { server: string; capabilities: Capability[] }[];
   run: (
@@ -50,5 +54,6 @@ export interface MediaTools {
     Outcome<{ server: string; result: MediaToolResult }, MediaToolFailure>
   >;
   failedServers: () => { server: string; message: string }[];
+  limits: () => MediaLimits;
   close: () => Promise<void>;
 }

@@ -12,7 +12,7 @@ function registerListAssets(context: HarnessContext): void {
     "list_assets",
     {
       description:
-        "List the asset records: id, kind, file, size, duration_frames, has_words, and the source. Word timings are not included; read them with get_asset_words.",
+        "List the asset records: id, kind, file, size, duration_frames, has_words, has_audio for a video, and the source. Word timings are not included; read them with get_asset_words.",
       inputSchema: {
         kind: z
           .enum(["image", "audio", "video", "font"])
