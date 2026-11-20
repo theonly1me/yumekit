@@ -89,6 +89,7 @@ type Asset = {
   widthPixels?: number;
   heightPixels?: number;
   durationFrames?: number;
+  hasAudio?: boolean;
   hasWords: boolean;
   source: AssetSource;
 };
@@ -111,7 +112,7 @@ type WordTimings = {
 
 1. Each id matches `^[a-z0-9][a-z0-9-]{0,63}$` and is unique within its list.
 2. Output width and height are even numbers from 16 to 7680.
-3. A clip references a scene or an asset that exists. An audio clip references an asset of kind `audio`.
+3. A clip references a scene or an asset that exists. An audio clip references an asset of kind `audio`, or an asset of kind `video` with `hasAudio`.
 4. Two clips on one track do not overlap. `durationFrames` is 1 or more. `startFrame`, `sceneStartFrame`, and `assetStartFrame` are 0 or more.
 5. An audio clip does not read past the end of its asset.
 6. A scene with source `module` has a `scene.tsx` file.
