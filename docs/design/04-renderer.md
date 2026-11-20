@@ -64,6 +64,15 @@ function renderVideo(options: {
 >;
 ```
 
+```ts
+function checkSceneCode(options: {
+  sceneId: string;
+  code: string;
+}): Promise<Outcome<{ checked: true }, RenderFailure>>;
+```
+
+`checkSceneCode` compiles the code of a custom scene and checks its imports. It starts no browser. The harness calls it before it stores a module scene.
+
 - `scale` changes only the pixel density. The layout is the same at each scale. At 0.25, a 1920 by 1080 output gives a 480 by 270 picture. Use it for fast checks.
 - A caller gives a folder and gets a file. The caller never starts a browser, a bundler, or FFmpeg.
 
@@ -92,17 +101,18 @@ Before a video render, the renderer draws the first frame and the middle frame t
 
 `RenderFailure` is `{ kind, message, hint? }` plus the fields below.
 
-| Kind                         | Extra fields            | When                                                                      |
-| ---------------------------- | ----------------------- | ------------------------------------------------------------------------- |
-| `project-invalid`            | the open failure        | The project does not open                                                 |
-| `output-not-found`           | `outputId`              | No output has that id                                                     |
-| `frame-out-of-range`         | `frame`, `frameCount`   | The frame or the range is outside the output                              |
-| `browser-not-installed`      |                         | Chromium is missing. The hint gives the install command                   |
-| `ffmpeg-not-found`           |                         | `ffmpeg` is not on the `PATH`. The hint gives install commands            |
-| `scene-import-not-permitted` | `sceneId`, `importName` | Scene code imports a package that is not permitted                        |
-| `scene-error`                | `sceneId`, `frame`      | Scene code threw, or logged an error, or `seek` took more than 30 seconds |
-| `scene-not-repeatable`       | `sceneIds`, `frame`     | The repeat check failed                                                   |
-| `encode-failed`              | `stderrTail`            | FFmpeg exited with an error                                               |
+| Kind                         | Extra fields                | When                                                                      |
+| ---------------------------- | --------------------------- | ------------------------------------------------------------------------- |
+| `project-invalid`            | the open failure            | The project does not open                                                 |
+| `output-not-found`           | `outputId`                  | No output has that id                                                     |
+| `frame-out-of-range`         | `frame`, `frameCount`       | The frame or the range is outside the output                              |
+| `browser-not-installed`      |                             | Chromium is missing. The hint gives the install command                   |
+| `ffmpeg-not-found`           |                             | `ffmpeg` is not on the `PATH`. The hint gives install commands            |
+| `scene-import-not-permitted` | `sceneId`, `importName`     | Scene code imports a package that is not permitted                        |
+| `scene-compile-failed`       | `sceneId`, `line`, `column` | Scene code has an error that stops the bundler                            |
+| `scene-error`                | `sceneId`, `frame`          | Scene code threw, or logged an error, or `seek` took more than 30 seconds |
+| `scene-not-repeatable`       | `sceneIds`, `frame`         | The repeat check failed                                                   |
+| `encode-failed`              | `stderrTail`                | FFmpeg exited with an error                                               |
 
 ## Tests
 

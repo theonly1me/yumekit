@@ -30,7 +30,8 @@ yumekit reads two files with the same shape. The project file wins for a server 
 
 - `passEnvironment` lists the names of environment variables that the server gets. The file never holds a secret value.
 - `defaults` names the server for each capability when a tool call gives no server.
-- With no file, yumekit connects only the sample server.
+- The `yumekit` command passes the commands of the bundled servers as `bundledServers`. A file can use a bundled server by its name with no `command`.
+- With no file, yumekit connects only the bundled sample server.
 
 ## The convention
 
@@ -88,8 +89,15 @@ type MediaTools = {
   close: () => Promise<void>;
 };
 
+type ServerCommand = {
+  command: string;
+  args: string[];
+  passEnvironment?: string[];
+};
+
 function connectMediaTools(options: {
   projectFolder: string;
+  bundledServers: { [name: string]: ServerCommand };
 }): Promise<MediaTools>;
 ```
 

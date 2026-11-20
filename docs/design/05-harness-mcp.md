@@ -46,7 +46,7 @@ function createHarnessServer(options: {
 | `put_scene`     | `scene_id`, `title`, `notes?`, then either `kit_component` and `props`, or `code` and `props` | `putScene`     |
 | `remove_scene`  | `scene_id`                                                                                    | `removeScene`  |
 
-Before `put_scene` sends its edit, the harness checks the scene. For a kit scene, it validates the props against the schema of the component. For a module scene, it compiles the code and checks the imports. If the check fails, the tool returns the compiler message and changes nothing.
+Before `put_scene` sends its edit, the harness checks the scene. For a kit scene, it validates the props against the schema from `@yumekit/scene-kit/schemas`. For a module scene, it calls `checkSceneCode` from `@yumekit/render`. If the check fails, the tool returns the compiler message and changes nothing.
 
 ### Timeline
 

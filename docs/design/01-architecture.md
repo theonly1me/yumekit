@@ -29,36 +29,36 @@ In milestone 1 the engine is the process that `yumekit mcp` starts. It serves on
 
 ## Packages
 
-| Package                | Runs in | Owns                                                                       | Public interface                                                                                               |
-| ---------------------- | ------- | -------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Package                | Runs in | Owns                                                                       | Public interface                                                                                                                                    |
+| ---------------------- | ------- | -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `@yumekit/scene`       | Browser | The scene contract, the React adapter, the animation functions             | `SceneModule`, `defineReactScene`, `useFrame`, `useSceneContext`, `useHold`, `FrameWindow`, `tween`, `spring`, `stagger`, `easings`, `seededRandom` |
-| `@yumekit/scene-kit`   | Browser | Ready scene components and style packs                                     | `kitScenes` for the browser, and `kitSceneSchemas` from the entry `@yumekit/scene-kit/schemas`, which has no browser code                                                                  |
-| `@yumekit/project`     | Node    | The folder format, schemas, validation, edit commands, undo, change events | `createProject`, `openProject`, and the `ProjectStore` it returns                                              |
-| `@yumekit/stage`       | Browser | Drawing one output at one frame from project data and scene modules        | `createStage`                                                                                                  |
-| `@yumekit/render`      | Node    | Frames and video files. Hides Chromium, the bundler, and FFmpeg            | `renderFrame`, `renderVideo`                                                                                   |
-| `@yumekit/tools`       | Node    | Connections to media MCP servers and the media tool convention             | `connectMediaTools`                                                                                            |
-| `@yumekit/harness-mcp` | Node    | The MCP tools that map to edits, media jobs, and renders                   | `createHarnessServer`                                                                                          |
-| `@yumekit/brain`       | Node    | Start and stop of agent CLI sessions (milestone 2)                         | Not designed yet                                                                                               |
-| `@yumekit/engine`      | Node    | The editor server and the job queue (milestone 2)                          | Not designed yet                                                                                               |
-| `apps/cli`             | Node    | The `yumekit` command                                                      | `yumekit init`, `yumekit mcp`, `yumekit render`, `yumekit frame`                                               |
-| `apps/editor`          | Browser | The web editor (milestone 2)                                               | Not designed yet                                                                                               |
-| `tools/*`              | Node    | Bundled media tool servers, one folder for each                            | One MCP server each                                                                                            |
+| `@yumekit/scene-kit`   | Browser | Ready scene components and style packs                                     | `kitScenes` for the browser, and `kitSceneSchemas` from the entry `@yumekit/scene-kit/schemas`, which has no browser code                           |
+| `@yumekit/project`     | Node    | The folder format, schemas, validation, edit commands, undo, change events | `createProject`, `openProject`, and the `ProjectStore` it returns                                                                                   |
+| `@yumekit/stage`       | Browser | Drawing one output at one frame from project data and scene modules        | `createStage`                                                                                                                                       |
+| `@yumekit/render`      | Node    | Frames and video files. Hides Chromium, the bundler, and FFmpeg            | `renderFrame`, `renderVideo`, `checkSceneCode`                                                                                                      |
+| `@yumekit/tools`       | Node    | Connections to media MCP servers and the media tool convention             | `connectMediaTools`                                                                                                                                 |
+| `@yumekit/harness-mcp` | Node    | The MCP tools that map to edits, media jobs, and renders                   | `createHarnessServer`                                                                                                                               |
+| `@yumekit/brain`       | Node    | Start and stop of agent CLI sessions (milestone 2)                         | Not designed yet                                                                                                                                    |
+| `@yumekit/engine`      | Node    | The editor server and the job queue (milestone 2)                          | Not designed yet                                                                                                                                    |
+| `apps/cli`             | Node    | The `yumekit` command                                                      | `yumekit init`, `yumekit mcp`, `yumekit render`, `yumekit frame`                                                                                    |
+| `apps/editor`          | Browser | The web editor (milestone 2)                                               | Not designed yet                                                                                                                                    |
+| `tools/*`              | Node    | Bundled media tool servers, one folder for each                            | One MCP server each                                                                                                                                 |
 
 ## Dependency rules
 
 A package may import only the packages in its row. CI must fail on any other import between packages.
 
-| Package       | May import                                  |
-| ------------- | ------------------------------------------- |
-| `scene`       | nothing from yumekit                        |
-| `scene-kit`   | `scene`                                     |
-| `project`     | nothing from yumekit                        |
-| `stage`       | `scene`, and types only from `project`      |
-| `render`      | `project`, `stage`, `scene-kit`             |
-| `tools`       | nothing from yumekit                        |
-| `harness-mcp` | `project`, `render`, `tools`                |
-| `apps/cli`    | `project`, `render`, `tools`, `harness-mcp` |
-| `tools/*`     | nothing from yumekit                        |
+| Package       | May import                                            |
+| ------------- | ----------------------------------------------------- |
+| `scene`       | nothing from yumekit                                  |
+| `scene-kit`   | `scene`                                               |
+| `project`     | nothing from yumekit                                  |
+| `stage`       | `scene`, and types only from `project`                |
+| `render`      | `project`, `stage`, `scene-kit`                       |
+| `tools`       | nothing from yumekit                                  |
+| `harness-mcp` | `project`, `render`, `tools`, and `scene-kit/schemas` |
+| `apps/cli`    | `project`, `render`, `tools`, `harness-mcp`           |
+| `tools/*`     | nothing from yumekit                                  |
 
 Two more rules:
 
