@@ -10,6 +10,9 @@ export const toolNameByCapability = {
   video: "generate_video",
 } as const satisfies Record<Capability, string>;
 
+export const describeToolName = "describe_media_server";
+export const checkKeyToolName = "check_key";
+
 export const capabilities = [
   "image",
   "speech",
@@ -53,6 +56,7 @@ export const mediaToolResultSchema = z.object({
     )
     .optional(),
   cost_usd: z.number().nonnegative().optional(),
+  cost_is_estimate: z.boolean().optional(),
 });
 
 export type MediaToolResult = z.infer<typeof mediaToolResultSchema>;

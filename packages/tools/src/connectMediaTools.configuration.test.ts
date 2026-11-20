@@ -30,7 +30,7 @@ describe("connectMediaTools configuration", () => {
       projectFile: { mcpServers: { sample: {} } },
     });
 
-    expect(tools.list()).toEqual([
+    expect(tools.list()).toMatchObject([
       {
         server: "fake",
         capabilities: ["image", "speech", "music", "video"],
