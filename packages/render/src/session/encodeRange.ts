@@ -36,7 +36,6 @@ export async function encodeRange(options: {
   const encoder = startEncoder(
     ffmpegArgumentsOf({
       framesPerSecond,
-      frameCount: range.frameCount,
       destination: options.destination,
       videoSize: options.videoSize,
       audioMix: audioMixOf({

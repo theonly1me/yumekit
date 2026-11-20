@@ -34,6 +34,30 @@ export async function probeVideo(file: string) {
   return probeSchema.parse(JSON.parse(stdout)).streams;
 }
 
+const durationsSchema = z.object({
+  streams: z.array(
+    z.object({ codec_type: z.string(), duration: z.coerce.number() }),
+  ),
+});
+
+export async function streamSeconds(
+  file: string,
+): Promise<{ video: number | undefined; audio: number | undefined }> {
+  const { stdout } = await runFile("ffprobe", [
+    "-v",
+    "error",
+    "-show_entries",
+    "stream=codec_type,duration",
+    "-of",
+    "json",
+    file,
+  ]);
+  const { streams } = durationsSchema.parse(JSON.parse(stdout));
+  const secondsOf = (codecType: string) =>
+    streams.find((stream) => stream.codec_type === codecType)?.duration;
+  return { video: secondsOf("video"), audio: secondsOf("audio") };
+}
+
 export async function decodeAudio(file: string): Promise<Int16Array> {
   const { stdout } = await runFile(
     "ffmpeg",
