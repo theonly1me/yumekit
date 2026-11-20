@@ -132,11 +132,10 @@ The client adds `output_directory` and `file_stem` after the fields of `input`, 
 
 ## Bundled servers in milestone 1
 
-| Folder               | Capabilities                        | Cost                                 | Notes                                             |
-| -------------------- | ----------------------------------- | ------------------------------------ | ------------------------------------------------- |
-| `tools/sample-media` | `image`, `speech`, `align`, `music` | Free, no network                     | Made for tests and for work on yumekit. See below |
-| `tools/openai-media` | `image`, `speech`, `align`          | The OpenAI API key of the user       | Reads `OPENAI_API_KEY`                            |
-| `tools/codex-images` | `image`                             | The ChatGPT plan of the user, no key | Runs the `codex` CLI of the user                  |
+| Folder               | Capabilities                        | Cost                           | Notes                                             |
+| -------------------- | ----------------------------------- | ------------------------------ | ------------------------------------------------- |
+| `tools/sample-media` | `image`, `speech`, `align`, `music` | Free, no network               | Made for tests and for work on yumekit. See below |
+| `tools/openai-media` | `image`, `speech`, `align`          | The OpenAI API key of the user | Reads `OPENAI_API_KEY`                            |
 
 ### `tools/sample-media`
 
@@ -149,11 +148,25 @@ The sample server gives the same file for the same input, with no model.
 
 ### `tools/openai-media`
 
-The builder reads the current OpenAI API documents before any code. OpenAI retires models often, so the documents decide the model names. Each model name is one constant with a way to override it from an environment variable. `align_words` uses a transcription model that returns word timestamps. `cost_usd` comes from the usage data of the response when the API gives it.
+OpenAI retires models often. The table gives the models that the documents supported on 2026-11-20. Each model name is one constant, and an environment variable can replace it. A user lists that variable in `passEnvironment`.
+
+| Tool              | Endpoint                                                              | Default model         | Variable                      | Note                                       |
+| ----------------- | --------------------------------------------------------------------- | --------------------- | ----------------------------- | ------------------------------------------ |
+| `generate_image`  | `/v1/images/generations`, or `/v1/images/edits` with reference images | `gpt-image-2.5-flare` | `YUMEKIT_OPENAI_IMAGE_MODEL`  | No shutdown date                           |
+| `generate_speech` | `/v1/audio/speech`                                                    | `gpt-4o-mini-tts`     | `YUMEKIT_OPENAI_SPEECH_MODEL` | OpenAI shuts this model down on 2027-01-06 |
+| `align_words`     | `/v1/audio/transcriptions` with word timestamps                       | `whisper-1`           | `YUMEKIT_OPENAI_ALIGN_MODEL`  | OpenAI shuts this model down on 2027-02-26 |
+
+- OpenAI names a Realtime model as the replacement for speech. It uses a different transport, so it needs its own design before 2027-01-06.
+- No newer transcription model documents word timestamps. A local align server is the planned replacement.
+- `generate_speech` asks for WAV output and reads the length from the file.
+- `generate_speech` returns no `words`. The agent calls `align_words` after it.
+- The server returns `cost_usd` only when the response gives an amount in dollars. It has no price table.
+- The server checks the input before any request, so a call that cannot work costs nothing.
+- With no key, each tool returns a failure that names `OPENAI_API_KEY` and `passEnvironment`.
 
 ### `tools/codex-images`
 
-The server asks the `codex` CLI to make an image with the built-in image tool of Codex, then copies the file to `output_directory`. The builder first confirms in the Codex documents that a non-interactive run can make an image on a ChatGPT plan. If the documents do not support it, the builder reports that and does not ship a workaround.
+This server is not in milestone 1 yet. The Codex documents describe image generation only for an interactive session. They do not say that a `codex exec` run can make an image, or where the file goes. The lead agent runs one probe on the plan of the owner. If the probe gives an image in a known place, a later change adds the server with a test for that contract.
 
 ## Tests
 
@@ -163,4 +176,4 @@ The server asks the `codex` CLI to make an image with the built-in image tool of
 4. A fake server that never answers, with `toolTimeoutSeconds` set to 1, proves `media-tool-timeout`.
 5. A file that is not valid proves `invalid-configuration-file`.
 6. A fake server that returns a path outside the output directory proves `media-tool-invalid-result`.
-7. Tests of `openai-media` and `codex-images` replace the network call and the `codex` process at that outside boundary. They never spend money. One manual check for each server, with a real key or plan, goes in the pull request evidence.
+7. Tests of `openai-media` replace the network call at that outside boundary. They never spend money. They cover each tool, a missing key, an API error, and the conversion of word timestamps. One manual check with a real key goes in the pull request evidence.
