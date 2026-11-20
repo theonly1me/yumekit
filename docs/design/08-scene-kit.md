@@ -39,7 +39,7 @@ The scene kit gives an agent ready scenes, so most content needs no custom code.
 The panel must read on any scene, also on a paper background and on a photo:
 
 - The panel is ink (`#18203a`) at 92 percent opacity, and the words are paper (`#eef1f4`).
-- The words are 5 units tall in `wide` and `square`, and 5.5 units in `tall`.
+- The words are 5 units tall in `wide` and `square`, and 5.5 units in `tall`. A page of caption words stays on one line.
 - The panel sits inside the caption area, which is the bottom 16 units of the picture.
 
 Each other kit scene keeps its content out of the caption area. So a caption never covers a heading, a list, or a value. A custom scene should do the same, and the scene guide says so.
@@ -72,23 +72,40 @@ A style pack is one module of tokens that each scene reads. `paper` is the only 
 - Text rises a short distance while it fades in, over about 14 frames at 30 frames each second. Items stagger by about 20 frames. Motion lengths are converted to the frame rate of the project.
 - Content is left aligned with a margin of about 8 units. A block of body text is never centered.
 
-### Text sizes
+### Text sizes and layout
 
-A video is read from a distance and on a phone, so kit text is large. The first real video showed wide text at about 7 units, which reads as a slide in a corner. These sizes are the start value before a scene lowers a size to fit long text. One unit is 1 percent of the shorter side.
+One unit is 1 percent of the shorter side of the picture. A wide picture is 177.8 units by 100. A tall picture is 100 units by 177.8. Each size in this table is a font size in units, before a scene lowers it to fit long text.
 
-| Text                                     | `wide` and `square` | `tall` |
-| ---------------------------------------- | ------------------- | ------ |
-| Heading of `title-card`                  | 13                  | 14     |
-| Sentence of `quote`                      | 11                  | 12     |
-| Heading of `bullet-list` and `bar-chart` | 10                  | 11     |
-| Item of `bullet-list`                    | 7                   | 7.5    |
-| Value of a bar                           | 6.5                 | 7      |
-| Label of a bar, subheading, source line  | 4.5                 | 5      |
-| Caption words                            | 5                   | 5.5    |
+| Text                                     | `wide` | `square` | `tall` |
+| ---------------------------------------- | ------ | -------- | ------ |
+| Heading of `title-card`                  | 15     | 13       | 14     |
+| Sentence of `quote`                      | 13     | 12       | 12.5   |
+| Heading of `bullet-list` and `bar-chart` | 12     | 11       | 12     |
+| Item of `bullet-list`                    | 8      | 7.5      | 8      |
+| Value of a bar                           | 7.5    | 7        | 7.5    |
+| Label of a bar, subheading, source line  | 5.5    | 5        | 5.5    |
+| Caption words                            | 5      | 5        | 5.5    |
 
-- A bar is 7 units tall. A bullet dot is 0.45 of the item size.
-- The content block of `bullet-list`, `bar-chart`, and `quote` is centered between the top margin and the caption area. `title-card` keeps its heading at the lower left, above the caption area.
-- In `wide`, a content block can be up to 84 units wide. So a list or a chart uses the picture and does not sit in a corner.
+The first real video showed the problem of a wide picture: one narrow column at the left, and an empty right half. So a wide picture uses two columns, and a tall or square picture uses one.
+
+Wide layout:
+
+- The margin is 8 units on each side, so the content area is 161.8 units wide.
+- `bullet-list` and `bar-chart` have two columns. The heading is in the left column, 62 units wide. The items or the bars are in the right column, which starts 78 units from the left edge and runs to the right margin.
+- The heading and the right column are centered on the same horizontal line, between the top margin and the caption area.
+- A bar track uses the full width of the right column. The longest bar fills 80 percent of it, so its value fits beside it.
+- The sentence of `quote` can be up to 130 units wide. It is centered between the top margin and the caption area.
+- `title-card` keeps its heading at the lower left, above the caption area, up to 120 units wide.
+
+Tall and square layout:
+
+- One column from margin to margin. The heading is above the items or the bars.
+- The content block is centered between the top margin and the caption area. `title-card` keeps its heading at the lower left.
+
+In each layout:
+
+- A bar is 8 units tall. A bullet dot is 0.45 of the item size. The space between two items is 0.55 of the item size.
+- A heading breaks into balanced lines. A heading of two short words stays on one line when it fits its column.
 
 ## Not in milestone 1
 
