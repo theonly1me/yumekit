@@ -31,7 +31,10 @@ describe("connectMediaTools with the sample server", () => {
     const { tools } = await connectFixture({});
 
     expect(tools.list()).toEqual([
-      { server: "sample", capabilities: ["image", "speech", "align", "music"] },
+      {
+        server: "sample",
+        capabilities: ["image", "speech", "align", "music", "video"],
+      },
     ]);
   });
 

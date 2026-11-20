@@ -9,6 +9,7 @@ import {
   startStageServer,
   type StageServer,
 } from "../server/startStageServer.js";
+import { createVideoFrameServer } from "../videoFrames/videoFrameServer.js";
 
 export async function withStagePage<Value>(options: {
   loaded: LoadedOutput;
@@ -28,15 +29,27 @@ export async function withStagePage<Value>(options: {
   const browser = launched.value;
   let server: StageServer | undefined;
   try {
-    server = await startStageServer({ projectFolder: loaded.folder, pageData });
-    const stagePage = await openStagePage({
+    const videoFrames = createVideoFrameServer({
+      projectFolder: loaded.folder,
+      framesPerSecond: loaded.snapshot.project.framesPerSecond,
+      assets: loaded.snapshot.assets,
+    });
+    server = await startStageServer({
+      projectFolder: loaded.folder,
+      pageData,
+      videoFrames,
+    });
+    const browserPage = await openStagePage({
       browser,
       pageUrl: server.pageUrl,
       origin: server.origin,
       output: loaded.output,
       scale,
     });
-    return await options.use(stagePage);
+    return await options.use({
+      ...browserPage,
+      videoFramesFailure: videoFrames.failure,
+    });
   } finally {
     await browser.close();
     await server?.close();

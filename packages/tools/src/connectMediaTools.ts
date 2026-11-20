@@ -104,6 +104,7 @@ export async function connectMediaTools(options: {
           server: connection.name,
           message: connection.message,
         })),
+    limits: () => ({ ...configuration.limits }),
     run: async (request) => {
       const selected = selectServer({
         connections,

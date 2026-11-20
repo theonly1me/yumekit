@@ -21,6 +21,7 @@ export interface ImportedMedia {
   widthPixels?: number;
   heightPixels?: number;
   durationFrames?: number;
+  hasAudio?: boolean;
 }
 
 export async function importedMediaOf(options: {
@@ -64,6 +65,9 @@ export async function importedMediaOf(options: {
               framesPerSecond: options.framesPerSecond,
             }),
           }),
+      ...(media.hasAudio === undefined || kind !== "video"
+        ? {}
+        : { hasAudio: media.hasAudio }),
     },
   };
 }

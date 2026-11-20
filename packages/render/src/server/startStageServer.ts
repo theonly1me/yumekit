@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { createServer, searchForWorkspaceRoot } from "vite";
 import { renderPackageDirectory } from "../packagePaths.js";
 import type { StagePageData } from "../page/stagePageData.js";
+import type { VideoFrameServer } from "../videoFrames/videoFrameServer.js";
 import { stagePagePath, stagePagePlugin } from "./stagePagePlugin.js";
 
 export interface StageServer {
@@ -28,6 +29,7 @@ function isAddressInfo(address: unknown): address is AddressInfo {
 export async function startStageServer(options: {
   projectFolder: string;
   pageData: StagePageData;
+  videoFrames: VideoFrameServer;
 }): Promise<StageServer> {
   const cacheDir = await mkdtemp(join(tmpdir(), "yumekit-render-"));
   const server = await createServer({

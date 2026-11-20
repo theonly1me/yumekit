@@ -16,6 +16,8 @@ A media tool server that makes video clips with sound with Gemini Omni Flash. It
 
 The Gemini API has no free tier for video. `cost_usd` in a result is an estimate: the video tokens of the response at 12 US dollars for one million tokens. The variable `YUMEKIT_GEMINI_VIDEO_USD_PER_MILLION_TOKENS` replaces that price.
 
+Not tested with a real key yet. Tests use recorded shapes from the documents of 2026-11-21.
+
 The model always makes sound. The tool rejects `with_audio` set to false.
 
 ## Setup

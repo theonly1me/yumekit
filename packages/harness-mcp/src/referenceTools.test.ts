@@ -77,7 +77,7 @@ describe("asset and reference read tools", () => {
     });
   });
 
-  it("list_kit_scenes gives the six kit scenes with a JSON schema of the props", async () => {
+  it("list_kit_scenes gives the seven kit scenes with a JSON schema of the props", async () => {
     const harness = await startHarness();
 
     const { data } = await harness.call({ name: "list_kit_scenes" });
@@ -90,6 +90,7 @@ describe("asset and reference read tools", () => {
       "caption-words",
       "bar-chart",
       "quote",
+      "video-clip",
     ]);
     expect(kitScenes[0]?.props).toMatchObject({
       type: "object",
@@ -135,10 +136,11 @@ describe("asset and reference read tools", () => {
       servers: [
         {
           server: "sample",
-          capabilities: ["image", "speech", "align", "music"],
+          capabilities: ["image", "speech", "align", "music", "video"],
         },
       ],
       failed_servers: [],
+      generated_video: { limit_seconds: 30, used_seconds: 0 },
     });
   });
 });

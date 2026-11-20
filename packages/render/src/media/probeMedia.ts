@@ -12,6 +12,7 @@ export interface ProbedMedia {
   durationSeconds?: number;
   widthPixels?: number;
   heightPixels?: number;
+  hasAudio?: boolean;
 }
 
 const probeSchema = z.object({
@@ -57,7 +58,8 @@ function probedMediaOf(probe: Probe): ProbedMedia | undefined {
   if (picture !== undefined && isSinglePictureFormat(probe.format.format_name))
     return { kind: "image", ...size };
   const length = durationSeconds === undefined ? {} : { durationSeconds };
-  if (picture !== undefined) return { kind: "video", ...length, ...size };
+  if (picture !== undefined)
+    return { kind: "video", ...length, ...size, hasAudio };
   if (hasAudio) return { kind: "audio", ...length };
   return undefined;
 }

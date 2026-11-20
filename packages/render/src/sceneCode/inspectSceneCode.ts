@@ -7,6 +7,7 @@ import {
 } from "./permittedImports.js";
 import { sceneCompilerOptions, sceneFileName } from "./sceneCompilerOptions.js";
 import { sceneImportsOf } from "./sceneImports.js";
+import { firstVideoElementOf } from "./videoElements.js";
 
 export function compileFailure(options: {
   sceneId: string;
@@ -65,6 +66,24 @@ export function inspectSceneCode(options: {
       importName,
       message: `The code of scene "${sceneId}" imports "${importName}". A scene may import only ${permittedSceneImports.join(", ")}.`,
     });
+  }
+  const videoElement = firstVideoElementOf(sourceFile);
+  if (videoElement !== undefined) {
+    return fail(
+      compileFailure({
+        sceneId,
+        sourceFile,
+        diagnostic: {
+          category: ts.DiagnosticCategory.Error,
+          code: 0,
+          file: sourceFile,
+          start: videoElement.getStart(sourceFile),
+          length: videoElement.getWidth(sourceFile),
+          messageText:
+            "A scene must not use a <video> element, because it does not seek to an exact frame. Use VideoFrame from @yumekit/scene with the id of a video asset.",
+        },
+      }),
+    );
   }
   return succeed({ checked: true });
 }

@@ -24,12 +24,14 @@ yumekit reads two files with the same shape. The project file wins for a server 
     },
     "sample": { "command": "yumekit-sample-media", "args": [] }
   },
-  "defaults": { "image": "openai", "speech": "openai", "align": "openai" }
+  "defaults": { "image": "openai", "speech": "openai", "align": "openai" },
+  "limits": { "generatedVideoSeconds": 30 }
 }
 ```
 
 - `passEnvironment` lists the names of environment variables that the server gets. The file never holds a secret value. Document 10 says where a key lives and how a server describes its models.
 - `defaults` names the server for each capability when a tool call gives no server.
+- `limits` is optional. `generatedVideoSeconds` is the limit of document 09, a number of 0 or more, and 30 by default. The project file wins over the user file. `MediaTools.limits()` gives the merged value.
 - The `yumekit` command passes the commands of the bundled servers as `bundledServers`. A file can use a bundled server by its name with no `command`.
 - With no file, yumekit connects only the bundled sample server.
 
@@ -92,6 +94,7 @@ type MediaTools = {
     Outcome<{ server: string; result: MediaToolResult }, MediaToolFailure>
   >;
   failedServers: () => { server: string; message: string }[];
+  limits: () => { generatedVideoSeconds: number };
   close: () => Promise<void>;
 };
 
@@ -139,11 +142,11 @@ The client adds `output_directory` and `file_stem` after the fields of `input`, 
 
 ## Bundled servers in milestone 1
 
-| Folder               | Capabilities                        | Cost                           | Notes                                             |
-| -------------------- | ----------------------------------- | ------------------------------ | ------------------------------------------------- |
-| `tools/sample-media` | `image`, `speech`, `align`, `music` | Free, no network               | Made for tests and for work on yumekit. See below |
-| `tools/openai-media` | `image`, `speech`, `align`          | The OpenAI API key of the user | Reads `OPENAI_API_KEY`                            |
-| `tools/gemini-media` | `video`                             | The Gemini API key of the user | Reads `GEMINI_API_KEY`. See document 09           |
+| Folder               | Capabilities                                 | Cost                           | Notes                                                                                                                                |
+| -------------------- | -------------------------------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `tools/sample-media` | `image`, `speech`, `align`, `music`, `video` | Free, no network               | Made for tests and for work on yumekit. See below                                                                                    |
+| `tools/openai-media` | `image`, `speech`, `align`                   | The OpenAI API key of the user | Reads `OPENAI_API_KEY`                                                                                                               |
+| `tools/gemini-media` | `video`                                      | The Gemini API key of the user | Reads `GEMINI_API_KEY`. See document 09. Not tested with a real key yet. Tests use recorded shapes from the documents of 2026-11-21. |
 
 ### `tools/sample-media`
 
@@ -153,6 +156,7 @@ The sample server gives the same file for the same input, with no model.
 - `generate_speech` writes a WAV file with a quiet tone. Its length is 0.3 seconds for each word. It returns word timings that divide the length evenly.
 - `align_words` returns even word timings over the length of the audio file.
 - `generate_music` writes a WAV file with a low tone of the requested length.
+- `generate_video` writes an MP4 file with FFmpeg, as document 09 says. It accepts a `duration_seconds` up to 60.
 
 ### `tools/openai-media`
 

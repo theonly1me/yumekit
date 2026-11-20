@@ -143,6 +143,7 @@ Before a video render, the renderer draws the first frame and the middle frame t
 | `scene-not-repeatable`       | `sceneIds`, `frame`         | The repeat check failed                                                                                       |
 | `media-not-readable`         | `file`                      | `probeMedia` cannot read the file                                                                             |
 | `encode-failed`              | `stderrTail`                | FFmpeg exited with an error                                                                                   |
+| `video-frames-failed`        | `assetId`, `stderrTail`     | FFmpeg cannot make the frame pictures of a video asset. `stderrTail` is the last line of its error output     |
 
 ## Tests
 

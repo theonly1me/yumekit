@@ -13,6 +13,7 @@ import { registerReferenceTools } from "./read/registerReferenceTools.js";
 import { registerPutScene } from "./story/registerPutScene.js";
 import { registerStoryTools } from "./story/registerStoryTools.js";
 import { registerNarrationAndHistoryTools } from "./timeline/registerNarrationTools.js";
+import { registerPlaceVideo } from "./timeline/registerPlaceVideo.js";
 import { registerTimelineTools } from "./timeline/registerTimelineTools.js";
 
 export function createHarnessServer(options: {
@@ -31,6 +32,7 @@ export function createHarnessServer(options: {
   registerPutScene(context);
   registerTimelineTools(context);
   registerNarrationAndHistoryTools(context);
+  registerPlaceVideo(context);
   registerGenerateAsset(context);
   registerImportAsset(context);
   registerAlignWords(context);

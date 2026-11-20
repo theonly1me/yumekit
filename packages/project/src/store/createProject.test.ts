@@ -32,10 +32,10 @@ describe("createProject", () => {
     });
   });
 
-  it("writes a .gitignore that keeps renders and the undo history out of git", async () => {
+  it("writes a .gitignore that keeps renders, the undo history, and the cache out of git", async () => {
     const store = await createTestProject();
     expect(await readProjectFile({ store, file: ".gitignore" })).toBe(
-      "renders/\n.yumekit/\n",
+      "renders/\n.yumekit/\n.cache/\n",
     );
   });
 

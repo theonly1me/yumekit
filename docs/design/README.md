@@ -67,6 +67,7 @@ Use these words with these meanings in code and in documents.
 
 ## Follow-ups that have no design yet
 
+- One paid check of `tools/gemini-media` with a real key: a 3 second clip at 720p, and confirmation that background mode works for the model.
 - The web editor (milestones 2 and 3).
 - The brain runner that starts an agent CLI from the editor (milestone 2).
 - The cost guard and the budget cap (milestone 4).

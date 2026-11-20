@@ -17,6 +17,7 @@ Ready scene components and style packs. Documents 01 and 02 in `docs/design` are
 | `caption-words` | The words of a narration, each from the frame where it is spoken |
 | `bar-chart`     | A heading and 1 to 8 bars that grow, each with a label and value |
 | `quote`         | A sentence that appears word by word, with an optional source    |
+| `video-clip`    | One video asset that fills the picture, and an optional caption  |
 
 A scene treats its props as untrusted input. It draws a default for a missing or wrong value and never throws.
 

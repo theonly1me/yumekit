@@ -5,6 +5,7 @@ export type {
   ConnectFailure,
   JsonObject,
   JsonValue,
+  MediaLimits,
   MediaToolFailure,
   MediaToolRequest,
   MediaTools,
