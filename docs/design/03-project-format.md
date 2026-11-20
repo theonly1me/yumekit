@@ -182,23 +182,23 @@ function openProject(options: {
 
 `Edit` is a closed union on the field `kind`. These 15 kinds are all the ways to change a project.
 
-| Kind             | Fields                          | Effect                                                                                                           |
-| ---------------- | ------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `setProjectName` | `name`                          | Changes the name                                                                                                 |
-| `addOutput`      | `output`                        | Adds an output and an empty timeline                                                                             |
-| `removeOutput`   | `outputId`                      | Removes an output and its timeline                                                                               |
-| `setScript`      | `script`                        | Replaces `script.md`                                                                                             |
-| `setBible`       | `bible`                         | Replaces `bible.json`                                                                                            |
-| `putScene`       | `scene`, `code?`                | Adds or replaces a scene. `code` is required for a module scene                                                  |
-| `removeScene`    | `sceneId`                       | Removes a scene and its folder                                                                                   |
-| `addAsset`       | `asset`, `words?`               | Adds a record for a file that is already in `assets/files/`. The caller gives no `contentHash` and no `hasWords` |
-| `setAssetWords`  | `assetId`, `words`              | Adds or replaces the word timings of an audio asset                                                              |
-| `removeAsset`    | `assetId`                       | Removes the record                                                                                               |
-| `setTimeline`    | `timeline`                      | Replaces the timeline of one output                                                                              |
-| `addClip`        | `outputId`, `trackId`, `clip`   | Adds one clip                                                                                                    |
-| `updateClip`     | `outputId`, `clipId`, `changes` | Changes the timing or the gain of one clip                                                                       |
-| `removeClip`     | `outputId`, `clipId`            | Removes one clip                                                                                                 |
-| `copyTimeline`   | `fromOutputId`, `toOutputId`    | Replaces one timeline with a copy of another                                                                     |
+| Kind             | Fields                          | Effect                                                                                                                            |
+| ---------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `setProjectName` | `name`                          | Changes the name                                                                                                                  |
+| `addOutput`      | `output`                        | Adds an output and an empty timeline                                                                                              |
+| `removeOutput`   | `outputId`                      | Removes an output and its timeline                                                                                                |
+| `setScript`      | `script`                        | Replaces `script.md`                                                                                                              |
+| `setBible`       | `bible`                         | Replaces `bible.json`                                                                                                             |
+| `putScene`       | `scene`, `code?`                | Adds or replaces a scene. `code` is required for a module scene                                                                   |
+| `removeScene`    | `sceneId`                       | Removes a scene and its folder                                                                                                    |
+| `addAsset`       | `asset`, `words?`               | Adds a record for a file that is already in `assets/files/`. The caller gives no `contentHash` and no `hasWords`                  |
+| `setAssetWords`  | `assetId`, `words`              | Adds or replaces the word timings of an audio asset                                                                               |
+| `removeAsset`    | `assetId`                       | Removes the record                                                                                                                |
+| `setTimeline`    | `timeline`                      | Replaces the timeline of one output                                                                                               |
+| `addClip`        | `outputId`, `trackId`, `clip`   | Adds one clip                                                                                                                     |
+| `updateClip`     | `outputId`, `clipId`, `changes` | Changes the timing, the gain, or the target of one clip. The target is `sceneId` for a scene clip and `assetId` for an audio clip |
+| `removeClip`     | `outputId`, `clipId`            | Removes one clip                                                                                                                  |
+| `copyTimeline`   | `fromOutputId`, `toOutputId`    | Replaces one timeline with a copy of another                                                                                      |
 
 The store computes `contentHash` as `sha256:` plus the hex digest, and checks that the file exists, when it applies `addAsset`. It sets `hasWords` from the word timings.
 
