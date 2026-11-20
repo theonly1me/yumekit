@@ -69,7 +69,7 @@ describe("generate_asset servers and references", () => {
     });
   });
 
-  it("returns not-found for a reference that is not an image asset, before it calls the tool", async () => {
+  it("returns asset-not-found for a reference that is not an image asset, before it calls the tool", async () => {
     const harness = await startHarness();
     await harness.call({
       name: "generate_asset",
@@ -94,9 +94,9 @@ describe("generate_asset servers and references", () => {
       arguments: { asset_id: "fox", ...foxImage, first_frame_asset_id: "none" },
     });
 
-    expect(audioReference.data).toMatchObject({ kind: "not-found" });
+    expect(audioReference.data).toMatchObject({ kind: "asset-not-found" });
     expect(audioReference.data["message"]).toContain("voice");
-    expect(missingFirstFrame.data).toMatchObject({ kind: "not-found" });
+    expect(missingFirstFrame.data).toMatchObject({ kind: "asset-not-found" });
     expect(missingFirstFrame.data["hint"]).toContain("generate_asset");
     expect(harness.runRequests).toHaveLength(requestsBefore);
   });

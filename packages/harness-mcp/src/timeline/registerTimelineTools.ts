@@ -55,7 +55,7 @@ function registerCopyTimeline(context: HarnessContext): void {
     "copy_timeline",
     {
       description:
-        "Replace the timeline of one output with a copy of another. Use it to make a tall or square version of a finished wide timeline, then change it. Kit scenes adapt their layout to each size.",
+        "Replace the timeline of one output with a copy of another. Use it to make a tall or square version of a finished wide timeline, then change it. The copy keeps the track ids and the clip ids of the source, so a clip id names the same clip in both outputs. To show another scene in one output, call update_clip with the output_id of that output, the clip_id, and scene_id. Kit scenes adapt their layout to each size.",
       inputSchema: {
         from_output_id: idInput("The output to copy from."),
         to_output_id: idInput("The output whose timeline is replaced."),
