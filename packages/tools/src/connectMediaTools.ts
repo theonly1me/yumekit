@@ -111,12 +111,14 @@ export async function connectMediaTools(options: {
         request,
       });
       if (!selected.ok) return selected;
-      return runTool({
-        server: selected.value.name,
+      const server = selected.value.name;
+      const ran = await runTool({
+        server,
         client: selected.value.client,
         request,
         toolTimeoutSeconds,
       });
+      return ran.ok ? { ok: true, value: { server, result: ran.value } } : ran;
     },
     close: async () => {
       await Promise.all(

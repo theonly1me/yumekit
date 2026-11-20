@@ -15,11 +15,16 @@ function changeClipOnTrack(options: {
 }): TrackChange {
   const { track, clipId } = options;
   if (track.kind === "scene") {
-    const { assetStartFrame, gainDecibels, ...sceneChanges } = options.changes;
-    if (assetStartFrame !== undefined || gainDecibels !== undefined) {
+    const { assetStartFrame, gainDecibels, assetId, ...sceneChanges } =
+      options.changes;
+    if (
+      assetStartFrame !== undefined ||
+      gainDecibels !== undefined ||
+      assetId !== undefined
+    ) {
       return problem({
         kind: "invalid-value",
-        message: `The scene clip "${clipId}" has no assetStartFrame and no gainDecibels.`,
+        message: `The scene clip "${clipId}" has no assetStartFrame, no gainDecibels, and no assetId.`,
       });
     }
     return {
@@ -32,11 +37,11 @@ function changeClipOnTrack(options: {
       },
     };
   }
-  const { sceneStartFrame, ...audioChanges } = options.changes;
-  if (sceneStartFrame !== undefined) {
+  const { sceneStartFrame, sceneId, ...audioChanges } = options.changes;
+  if (sceneStartFrame !== undefined || sceneId !== undefined) {
     return problem({
       kind: "invalid-value",
-      message: `The audio clip "${clipId}" has no sceneStartFrame.`,
+      message: `The audio clip "${clipId}" has no sceneStartFrame and no sceneId.`,
     });
   }
   return {

@@ -25,6 +25,8 @@ export const clipChangesSchema = z.strictObject({
   sceneStartFrame: frameCountSchema.exactOptional(),
   assetStartFrame: frameCountSchema.exactOptional(),
   gainDecibels: z.number().exactOptional(),
+  sceneId: idSchema.exactOptional(),
+  assetId: idSchema.exactOptional(),
 });
 
 export const editSchema = z.discriminatedUnion("kind", [

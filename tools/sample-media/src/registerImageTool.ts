@@ -30,7 +30,7 @@ export function registerImageTool(server: McpServer): void {
     "generate_image",
     {
       description:
-        "Draw a PNG with a color from a hash of the prompt and the prompt as text. Free, no model.",
+        "Test tool, free, no model. Draws a PNG of one plain color from a hash of the prompt, with the prompt written on it as text. It draws no picture of the prompt.",
       inputSchema: imageInput,
     },
     async (input) => {

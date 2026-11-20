@@ -44,13 +44,13 @@ type SceneModule = {
 ## Rules for `mount`
 
 1. `element` is empty and has the exact size of the output in CSS pixels. The scene draws only inside it.
-2. `durationFrames` is the length of the clip that shows the scene. A scene must draw correctly for any length of 1 frame or more.
+2. `durationFrames` is the length of the scene. It is `sceneStartFrame` plus the length of the clip that shows the scene. A scene must draw correctly for any length of 1 frame or more.
 3. `props` come from `scene.json`. The scene treats them as untrusted input and gives a default for each missing value.
 4. `words` on a speech asset are relative to the start of that asset, in frames.
 
 ## Rules for `seek`
 
-1. `frame` is a whole number from 0 to `durationFrames - 1`. Frame 0 is the first frame of the clip.
+1. `frame` is a whole number from 0 to `durationFrames - 1`. Frame 0 is the first frame of the scene. A clip with `sceneStartFrame` 15 starts the scene at frame 15.
 2. `seek` resolves when the picture for that frame is complete. Fonts are loaded, images are decoded, and each hold is released.
 3. The stage can call `seek` with frames in any order. The picture for a frame must not depend on an earlier call.
 4. Two calls with the same frame give the same pixels.

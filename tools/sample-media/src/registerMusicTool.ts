@@ -23,7 +23,7 @@ export function registerMusicTool(server: McpServer): void {
     "generate_music",
     {
       description:
-        "Write a WAV file with a low tone of the requested length. Free, no model.",
+        "Test tool, free, no model. Writes a WAV file with one low tone of the requested length. It makes no music.",
       inputSchema: musicInput,
     },
     async (input) => {

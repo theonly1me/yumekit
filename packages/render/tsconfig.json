@@ -1,8 +1,15 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "lib": ["es2024", "dom", "dom.iterable"],
     "rootDir": "src",
-    "outDir": "dist"
+    "outDir": "dist",
+    "types": ["node"]
   },
-  "include": ["src"]
+  "include": ["src"],
+  "references": [
+    { "path": "../project" },
+    { "path": "../stage" },
+    { "path": "../scene-kit" }
+  ]
 }

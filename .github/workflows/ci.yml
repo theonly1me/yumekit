@@ -11,6 +11,7 @@ jobs:
   check:
     name: Check (Node ${{ matrix.node }})
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     strategy:
       matrix:
         node: [22, 24]
@@ -24,6 +25,21 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
       - run: pnpm typecheck
-      - run: pnpm --filter @yumekit/scene exec playwright install --with-deps chromium
+      - run: sudo apt-get update && sudo apt-get install --yes ffmpeg
+        timeout-minutes: 5
+      - name: Read the Playwright version
+        id: playwright
+        run: echo "version=$(pnpm --filter @yumekit/scene exec playwright --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v6.1.0
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ runner.os }}-${{ steps.playwright.outputs.version }}
+      - if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: pnpm --filter @yumekit/scene exec playwright install --with-deps chromium
+        timeout-minutes: 5
+      - if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: pnpm --filter @yumekit/scene exec playwright install-deps chromium
+        timeout-minutes: 5
       - run: pnpm test
       - run: pnpm build

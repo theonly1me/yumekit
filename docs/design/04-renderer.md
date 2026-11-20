@@ -27,7 +27,9 @@ On `seek(frame)` the stage does these steps:
 
 1. It finds the visible clip of each scene track.
 2. It mounts each scene that became visible and disposes each scene that is no longer visible.
-3. It calls `seek` on each visible scene with the frame inside its clip, and waits for all of them.
+3. It calls `seek` on each visible scene with the frame `f - startFrame + sceneStartFrame`, and waits for all of them.
+
+The stage mounts a scene with `durationFrames` equal to `sceneStartFrame` plus the length of its clip.
 
 In `render` mode the stage applies the guards from document 02: a fixed clock, a seeded `Math.random`, no CSS animations or transitions, and no network.
 
@@ -58,11 +60,33 @@ function renderVideo(options: {
   onProgress?: (progress: { framesDone: number; frameCount: number }) => void;
 }): Promise<
   Outcome<
-    { file: string; frameCount: number; durationSeconds: number },
+    {
+      file: string;
+      frameCount: number;
+      durationSeconds: number;
+      widthPixels: number;
+      heightPixels: number;
+    },
     RenderFailure
   >
 >;
 ```
+
+```ts
+function probeMedia(options: { file: string }): Promise<
+  Outcome<
+    {
+      kind: "image" | "audio" | "video";
+      durationSeconds?: number;
+      widthPixels?: number;
+      heightPixels?: number;
+    },
+    RenderFailure
+  >
+>;
+```
+
+`probeMedia` reads the kind, the length, and the size of a media file with `ffprobe`. The harness calls it when a person imports a file. A file that `ffprobe` cannot read is the failure `media-not-readable`.
 
 ```ts
 function checkSceneCode(options: {
@@ -75,6 +99,8 @@ function checkSceneCode(options: {
 
 - `scale` changes only the pixel density. The layout is the same at each scale. At 0.25, a 1920 by 1080 output gives a 480 by 270 picture. Use it for fast checks.
 - A caller gives a folder and gets a file. The caller never starts a browser, a bundler, or FFmpeg.
+- `destination` is the full path of the file to write. The renderer creates its folder.
+- A scaled picture can have an odd width or height, for example 1080 by 1350 at scale 0.25. `renderFrame` returns that picture as it is. `renderVideo` cuts one pixel from an odd side, because the video format needs even sides. The result reports the real size.
 
 ## Steps of a render
 
@@ -93,6 +119,8 @@ Audio: FFmpeg reads each audio clip of the output as an input. For each clip it 
 
 A render of a frame range includes only the audio inside that range.
 
+The audio stream has the same length as the video stream, within one frame. Silence fills each part with no clip. A test checks the length of the audio stream with `ffprobe`.
+
 ## Repeat check
 
 Before a video render, the renderer draws the first frame and the middle frame two times each, in the order first, middle, middle, first. If the two pictures of a frame differ, it returns `scene-not-repeatable` with the scene ids that were visible. This costs 4 frames and catches a scene that reads a clock or depends on call order.
@@ -101,18 +129,20 @@ Before a video render, the renderer draws the first frame and the middle frame t
 
 `RenderFailure` is `{ kind, message, hint? }` plus the fields below.
 
-| Kind                         | Extra fields                | When                                                                      |
-| ---------------------------- | --------------------------- | ------------------------------------------------------------------------- |
-| `project-invalid`            | the open failure            | The project does not open                                                 |
-| `output-not-found`           | `outputId`                  | No output has that id                                                     |
-| `frame-out-of-range`         | `frame`, `frameCount`       | The frame or the range is outside the output                              |
-| `browser-not-installed`      |                             | Chromium is missing. The hint gives the install command                   |
-| `ffmpeg-not-found`           |                             | `ffmpeg` is not on the `PATH`. The hint gives install commands            |
-| `scene-import-not-permitted` | `sceneId`, `importName`     | Scene code imports a package that is not permitted                        |
-| `scene-compile-failed`       | `sceneId`, `line`, `column` | Scene code has an error that stops the bundler                            |
-| `scene-error`                | `sceneId`, `frame`          | Scene code threw, or logged an error, or `seek` took more than 30 seconds |
-| `scene-not-repeatable`       | `sceneIds`, `frame`         | The repeat check failed                                                   |
-| `encode-failed`              | `stderrTail`                | FFmpeg exited with an error                                               |
+| Kind                         | Extra fields                | When                                                                                                          |
+| ---------------------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `project-invalid`            | `openFailure`               | The project does not open                                                                                     |
+| `output-not-found`           | `outputId`                  | No output has that id                                                                                         |
+| `frame-out-of-range`         | `frame`, `frameCount`       | The frame or the range is outside the output                                                                  |
+| `browser-not-installed`      |                             | Chromium is missing. The hint gives the install command                                                       |
+| `ffmpeg-not-found`           |                             | `ffmpeg` is not on the `PATH`. The hint gives install commands                                                |
+| `scene-import-not-permitted` | `sceneId`, `importName`     | Scene code imports a package that is not permitted                                                            |
+| `scene-compile-failed`       | `sceneId`, `line`, `column` | Scene code has an error that stops the bundler                                                                |
+| `kit-scene-not-found`        | `sceneId`, `component`      | A kit scene names a component that the kit does not have                                                      |
+| `scene-error`                | `sceneId`, `frame`          | Scene code threw, or logged an error, or `seek` took more than 30 seconds. `frame` is the frame of the output |
+| `scene-not-repeatable`       | `sceneIds`, `frame`         | The repeat check failed                                                                                       |
+| `media-not-readable`         | `file`                      | `probeMedia` cannot read the file                                                                             |
+| `encode-failed`              | `stderrTail`                | FFmpeg exited with an error                                                                                   |
 
 ## Tests
 
@@ -122,7 +152,7 @@ The tests use real Chromium and real FFmpeg. They do not compare against stored 
 2. The same frame rendered two times gives identical bytes.
 3. A scene that uses `Math.random` without the guard, or that depends on call order, fails with `scene-not-repeatable`.
 4. A rendered video has the expected size, frame count, and frame rate. The test reads them with `ffprobe`.
-5. A project with a tone at a known time gives a video with an audio stream. The decoded audio is silent before the clip and not silent inside it.
+5. A project with a tone at a known time gives a video with an audio stream. The decoded audio is silent before the clip and not silent inside it. The audio stream is as long as the video stream, for a full render and for a frame range.
 6. Each failure kind in the table has a test that triggers it.
 
 CI installs Chromium with Playwright and installs FFmpeg.
