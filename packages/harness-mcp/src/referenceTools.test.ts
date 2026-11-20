@@ -140,6 +140,7 @@ describe("asset and reference read tools", () => {
         },
       ],
       failed_servers: [],
+      generated_video: { limit_seconds: 30, used_seconds: 0 },
     });
   });
 });

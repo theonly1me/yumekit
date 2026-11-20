@@ -136,7 +136,8 @@ The server instructions of document 05 get one step after step 5: "For a shot th
 - Before a call with the capability `video`, the harness adds the length of each video asset with a source of kind `tool` to `duration_seconds` of the request. If the sum is larger than the limit, the harness makes no call and returns the failure `generated-video-limit-reached` with the seconds used, the seconds requested, and the limit.
 - A repeated request that reuses a file does not count again.
 - The message of the failure tells the agent to ask the person, and names the field that the person changes.
-- The limit counts the assets that are in the project. If the agent removes a clip, its seconds are free again. The cost guard of milestone 4 replaces this limit with a spend record.
+- The limit counts each generated video asset in the project, placed or not. Undo of the `generate_asset` call frees its seconds. The cost guard of milestone 4 replaces this limit with a spend record.
+- `list_media_tools` returns `generated_video: { limit_seconds, used_seconds }`. `used_seconds` is counted in the same way as the limit check, so the agent sees the limit before it asks for a clip.
 
 ## The convention for `generate_video`
 

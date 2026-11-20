@@ -26,16 +26,16 @@ function createHarnessServer(options: {
 
 ### Read
 
-| Tool               | Input       | Result                                                                                                                      |
-| ------------------ | ----------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `get_project`      | none        | Name, frame rate, outputs, script, bible, a list of scenes (id, title, kind), the length of each timeline, and the revision |
-| `get_scene`        | `scene_id`  | The scene record, and the code of a module scene                                                                            |
-| `get_timeline`     | `output_id` | All tracks and clips of the output                                                                                          |
-| `list_assets`      | `kind?`     | Each asset record. Word timings are not included                                                                            |
-| `get_asset_words`  | `asset_id`  | The word timings of a speech asset, from `readAssetWords`                                                                   |
-| `list_kit_scenes`  | none        | Each kit scene: name, purpose, and the schema of its props                                                                  |
-| `get_scene_guide`  | none        | The reference for custom scene code: the contract, the hooks, the animation functions, the rules, and two examples          |
-| `list_media_tools` | none        | Each connected media server and its capabilities                                                                            |
+| Tool               | Input       | Result                                                                                                                         |
+| ------------------ | ----------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `get_project`      | none        | Name, frame rate, outputs, script, bible, a list of scenes (id, title, kind), the length of each timeline, and the revision    |
+| `get_scene`        | `scene_id`  | The scene record, and the code of a module scene                                                                               |
+| `get_timeline`     | `output_id` | All tracks and clips of the output                                                                                             |
+| `list_assets`      | `kind?`     | Each asset record. Word timings are not included                                                                               |
+| `get_asset_words`  | `asset_id`  | The word timings of a speech asset, from `readAssetWords`                                                                      |
+| `list_kit_scenes`  | none        | Each kit scene: name, purpose, and the schema of its props                                                                     |
+| `get_scene_guide`  | none        | The reference for custom scene code: the contract, the hooks, the animation functions, the rules, and two examples             |
+| `list_media_tools` | none        | Each connected media server and its capabilities, and `generated_video` with `limit_seconds` and `used_seconds` of document 09 |
 
 ### Write the story
 

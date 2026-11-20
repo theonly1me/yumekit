@@ -7,11 +7,11 @@ export type VideoLimitFailure = HarnessFailure & {
   limit_seconds: number;
 };
 
-function roundedSeconds(seconds: number): number {
+export function roundedSeconds(seconds: number): number {
   return Math.round(seconds * 100) / 100;
 }
 
-function generatedVideoSeconds(snapshot: ProjectSnapshot): number {
+export function generatedVideoSecondsOf(snapshot: ProjectSnapshot): number {
   const secondsByFile = new Map<string, number>();
   for (const asset of snapshot.assets) {
     if (asset.kind !== "video" || asset.source.kind !== "tool") continue;
@@ -33,7 +33,7 @@ export function videoLimitFailureOf(options: {
   const { limitSeconds } = options;
   const requestedValue = options.input["duration_seconds"];
   const requested = typeof requestedValue === "number" ? requestedValue : 0;
-  const used = roundedSeconds(generatedVideoSeconds(options.snapshot));
+  const used = roundedSeconds(generatedVideoSecondsOf(options.snapshot));
   const isTurnedOff = limitSeconds === 0;
   if (!isTurnedOff && used + requested <= limitSeconds) return undefined;
   const limitText = isTurnedOff
