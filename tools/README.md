@@ -5,5 +5,6 @@ This folder holds the bundled media tool servers. Each server has its own folder
 | Folder         | Command                | Capabilities                        |
 | -------------- | ---------------------- | ----------------------------------- |
 | `sample-media` | `yumekit-sample-media` | `image`, `speech`, `align`, `music` |
+| `gemini-media` | `yumekit-gemini-media` | `video`                             |
 
 The servers import nothing from the yumekit packages.
