@@ -8,6 +8,10 @@ yumekit is in early development. Small and focused changes are easiest to review
 2. Run `pnpm lint`, `pnpm typecheck`, `pnpm test`, and `pnpm build`. All checks must pass.
 3. Add a test for each behavior that you add or change.
 
+## Design first
+
+Read `docs/design/README.md` before a change. `AGENTS.md` has the full rules for code, tests, and pull requests.
+
 ## Code rules
 
 - Use strict TypeScript. Do not use `any`, the non-null `!`, or `as` casts. `as const` is permitted.

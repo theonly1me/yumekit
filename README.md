@@ -6,14 +6,14 @@ yumekit turns an idea into editable content for YouTube, TikTok, Instagram, and 
 
 ## Status
 
-Early development. The repository has the package structure only. No feature works yet.
+Early development. The design is in `docs/design`. Milestone 1 is in progress, and no feature works yet.
 
 ## How it works
 
-- An agent CLI is the brain. yumekit supports `claude`, `codex`, and `cursor-agent`.
+- Any MCP client is the brain, for example Claude Code, Codex, Cursor, or Grok.
 - Each media tool is an MCP server.
 - A project is a folder of plain files. It works with git.
-- The render is code (HyperFrames and FFmpeg), so each frame stays editable.
+- The render is code on our own open stack (headless Chromium and FFmpeg), so each frame stays editable.
 - The agent and the person change a project through the same edit operations.
 
 ## Package map
@@ -21,7 +21,7 @@ Early development. The repository has the package structure only. No feature wor
 | Folder                 | What it owns                                                          |
 | ---------------------- | --------------------------------------------------------------------- |
 | `packages/project`     | The project folder format, the schema, validation, undo, and events.  |
-| `packages/render`      | Frames and video files from scenes. Hides HyperFrames and FFmpeg.     |
+| `packages/render`      | Frames and video files from scenes. Hides Chromium and FFmpeg.        |
 | `packages/tools`       | Connections to media MCP servers, cost estimates, and the budget cap. |
 | `packages/brain`       | Agent CLI detection, sessions, and the event stream.                  |
 | `packages/harness-mcp` | The MCP tools that map to project edits and jobs.                     |
@@ -30,6 +30,10 @@ Early development. The repository has the package structure only. No feature wor
 | `apps/editor`          | The React web editor.                                                 |
 | `apps/cli`             | The `yumekit` command.                                                |
 | `tools/`               | Bundled MCP tool servers, one folder for each.                        |
+
+## Design
+
+Read `docs/design/README.md` first. Agents also read `AGENTS.md`.
 
 ## Requirements
 
