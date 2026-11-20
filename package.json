@@ -11,8 +11,9 @@
   },
   "scripts": {
     "build": "tsc --build && pnpm --filter @yumekit/editor run build",
-    "typecheck": "tsc --build --noEmit",
-    "lint": "eslint . && prettier --check .",
+    "typecheck": "tsc --build && tsc -p scripts/importRules",
+    "lint": "eslint . && prettier --check . && pnpm run check-imports",
+    "check-imports": "node --experimental-strip-types scripts/importRules/checkImports.ts",
     "test": "vitest run",
     "format": "prettier --write ."
   },
