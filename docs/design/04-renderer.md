@@ -73,6 +73,22 @@ function renderVideo(options: {
 ```
 
 ```ts
+function probeMedia(options: { file: string }): Promise<
+  Outcome<
+    {
+      kind: "image" | "audio" | "video";
+      durationSeconds?: number;
+      widthPixels?: number;
+      heightPixels?: number;
+    },
+    RenderFailure
+  >
+>;
+```
+
+`probeMedia` reads the kind, the length, and the size of a media file with `ffprobe`. The harness calls it when a person imports a file. A file that `ffprobe` cannot read is the failure `media-not-readable`.
+
+```ts
 function checkSceneCode(options: {
   sceneId: string;
   code: string;
@@ -103,6 +119,8 @@ Audio: FFmpeg reads each audio clip of the output as an input. For each clip it 
 
 A render of a frame range includes only the audio inside that range.
 
+The audio stream has the same length as the video stream, within one frame. Silence fills each part with no clip. A test checks the length of the audio stream with `ffprobe`.
+
 ## Repeat check
 
 Before a video render, the renderer draws the first frame and the middle frame two times each, in the order first, middle, middle, first. If the two pictures of a frame differ, it returns `scene-not-repeatable` with the scene ids that were visible. This costs 4 frames and catches a scene that reads a clock or depends on call order.
@@ -123,6 +141,7 @@ Before a video render, the renderer draws the first frame and the middle frame t
 | `kit-scene-not-found`        | `sceneId`, `component`      | A kit scene names a component that the kit does not have                                                      |
 | `scene-error`                | `sceneId`, `frame`          | Scene code threw, or logged an error, or `seek` took more than 30 seconds. `frame` is the frame of the output |
 | `scene-not-repeatable`       | `sceneIds`, `frame`         | The repeat check failed                                                                                       |
+| `media-not-readable`         | `file`                      | `probeMedia` cannot read the file                                                                             |
 | `encode-failed`              | `stderrTail`                | FFmpeg exited with an error                                                                                   |
 
 ## Tests
@@ -133,7 +152,7 @@ The tests use real Chromium and real FFmpeg. They do not compare against stored 
 2. The same frame rendered two times gives identical bytes.
 3. A scene that uses `Math.random` without the guard, or that depends on call order, fails with `scene-not-repeatable`.
 4. A rendered video has the expected size, frame count, and frame rate. The test reads them with `ffprobe`.
-5. A project with a tone at a known time gives a video with an audio stream. The decoded audio is silent before the clip and not silent inside it.
+5. A project with a tone at a known time gives a video with an audio stream. The decoded audio is silent before the clip and not silent inside it. The audio stream is as long as the video stream, for a full render and for a frame range.
 6. Each failure kind in the table has a test that triggers it.
 
 CI installs Chromium with Playwright and installs FFmpeg.

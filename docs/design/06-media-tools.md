@@ -85,7 +85,9 @@ type MediaTools = {
     input: JsonObject;
     outputDirectory: string;
     fileStem: string;
-  }) => Promise<Outcome<MediaToolResult, MediaToolFailure>>;
+  }) => Promise<
+    Outcome<{ server: string; result: MediaToolResult }, MediaToolFailure>
+  >;
   failedServers: () => { server: string; message: string }[];
   close: () => Promise<void>;
 };
@@ -116,6 +118,8 @@ A server that fails to start does not stop the others. `list` shows only the ser
 A configuration file that is not valid is the failure `invalid-configuration-file`, with the file path and the schema error. `connectMediaTools` starts no server in that case.
 
 `toolTimeoutSeconds` is the limit for one tool call. The default is 600. A call that passes the limit is the failure `media-tool-timeout`.
+
+`run` returns the name of the server that it used, so a caller can record the source of an asset.
 
 How `run` selects a server:
 

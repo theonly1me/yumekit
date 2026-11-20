@@ -16,9 +16,11 @@ function createHarnessServer(options: {
 1. A tool states an intent. No tool reads or writes an arbitrary file.
 2. A tool that changes the project builds edits and calls `applyEdits` one time. It has no other way to change files.
 3. A result has `structuredContent` with the data and one short text line for a person.
-4. A failure is a result with `isError: true` and `{ kind, message, hint }`. The hint tells the agent what to do next.
-5. Input names use `snake_case`. Time is in frames. A tool that takes seconds says so in the field name.
-6. Each input has a schema with a description. The agent learns the tool from the schema, so the description states units and limits.
+4. A failure is a result with `isError: true` and `{ kind, message, hint }`. The hint tells the agent what to do next. One exception: when an input does not match the schema of a tool, the MCP SDK answers before the tool runs. That answer has a message that names the field, and no `kind`.
+5. Each field name in a result uses `snake_case`, so an agent can send a result back as an input. Kit props keep the names of their schema.
+6. A success result has the data as `structuredContent` and also as JSON text, because some clients show only text to the model.
+7. Input names use `snake_case`. Time is in frames. A tool that takes seconds says so in the field name.
+8. Each input has a schema with a description. The agent learns the tool from the schema, so the description states units and limits.
 
 ## Tools
 
@@ -66,13 +68,17 @@ Before `put_scene` sends its edit, the harness checks the scene. For a kit scene
 
 ### Media
 
-| Tool             | Input                                                                              | What it does                                                                                       |
-| ---------------- | ---------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `generate_asset` | `asset_id`, `capability` (`image`, `speech`, `music`, `video`), `server?`, `input` | Calls the media tool, then adds the asset with its source record                                   |
-| `import_asset`   | `asset_id`, `kind`, `source_path`                                                  | Copies a file of the user into the project and adds the asset                                      |
-| `align_words`    | `asset_id`, `text`                                                                 | Makes word timings for a speech asset that has none, and stores them with the edit `setAssetWords` |
+| Tool             | Input                                                                                                                               | What it does                                                                                       |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `generate_asset` | `asset_id`, `capability` (`image`, `speech`, `music`, `video`), `server?`, `input`, `reference_asset_ids?`, `first_frame_asset_id?` | Calls the media tool, then adds the asset with its source record                                   |
+| `import_asset`   | `asset_id`, `kind`, `source_path`                                                                                                   | Copies a file of the user into the project and adds the asset                                      |
+| `align_words`    | `asset_id`, `text`                                                                                                                  | Makes word timings for a speech asset that has none, and stores them with the edit `setAssetWords` |
 
-`generate_asset` saves the tool name, the server, and the input in the asset record. If a speech tool returns word timings, the harness stores them in the same edit. If two calls have the same capability, server, and input, the second call reuses the file of the first and does not call the tool.
+`generate_asset` saves the tool name, the server that `run` reports, and the input in the asset record. With no `server`, the defaults of the media tools configuration apply.
+
+A media tool needs absolute file paths, and an agent knows only asset ids. So `reference_asset_ids` becomes `reference_image_paths` in the tool input, and `first_frame_asset_id` becomes `first_frame_path`. An id that is not an image asset is the failure `not-found`.
+
+`import_asset` reads the kind, the size, and the length of the file with `probeMedia` from `@yumekit/render`. So it accepts image, audio, video, and font files. If a speech tool returns word timings, the harness stores them in the same edit. If two calls have the same capability, server, and input, the second call reuses the file of the first and does not call the tool.
 
 ### See the result
 
