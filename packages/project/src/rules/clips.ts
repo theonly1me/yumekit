@@ -27,6 +27,13 @@ function checkOverlap(options: {
   return undefined;
 }
 
+function hasSound(asset: Asset): boolean {
+  return (
+    asset.kind === "audio" ||
+    (asset.kind === "video" && asset.hasAudio === true)
+  );
+}
+
 function checkAudioClip(options: {
   clip: AudioClip;
   assets: Asset[];
@@ -43,10 +50,13 @@ function checkAudioClip(options: {
       file,
     };
   }
-  if (asset.kind !== "audio") {
+  if (!hasSound(asset)) {
     return {
       kind: "invalid-value",
-      message: `The audio clip "${clip.id}" references the asset "${asset.id}" of kind ${asset.kind}. It must be of kind audio.`,
+      message:
+        asset.kind === "video"
+          ? `The audio clip "${clip.id}" references the video asset "${asset.id}", which has no sound.`
+          : `The audio clip "${clip.id}" references the asset "${asset.id}" of kind ${asset.kind}. It must be of kind audio, or of kind video with sound.`,
       file,
     };
   }

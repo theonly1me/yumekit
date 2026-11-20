@@ -2,6 +2,7 @@ import { join } from "node:path";
 import type { Asset, Scene } from "@yumekit/project";
 import type { StageProject } from "@yumekit/stage";
 import type { PageSceneSource, StagePageData } from "../page/stagePageData.js";
+import { assetFramesUrlPrefixOf } from "../videoFrames/videoFrameServer.js";
 import type { LoadedOutput } from "./loadOutput.js";
 
 type SceneAsset = StageProject["assets"][string];
@@ -31,6 +32,14 @@ async function sceneAssetOf(options: {
       ? {}
       : { durationFrames: asset.durationFrames }),
     ...(words?.ok === true ? { words: words.value.words } : {}),
+    ...(asset.kind === "video" && asset.durationFrames !== undefined
+      ? {
+          framePictures: {
+            urlPrefix: assetFramesUrlPrefixOf(asset.id),
+            count: asset.durationFrames,
+          },
+        }
+      : {}),
   };
 }
 

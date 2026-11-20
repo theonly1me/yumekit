@@ -1,5 +1,10 @@
 import { onTestFinished } from "vitest";
-import type { JsonObject, SceneModule, SceneOutput } from "../index.js";
+import type {
+  JsonObject,
+  SceneAsset,
+  SceneModule,
+  SceneOutput,
+} from "../index.js";
 
 const wideOutput: SceneOutput = {
   id: "wide",
@@ -12,8 +17,10 @@ export async function mountForTest(options: {
   durationFrames: number;
   output?: SceneOutput;
   props?: JsonObject;
+  assets?: Record<string, SceneAsset>;
 }) {
   const output = options.output ?? wideOutput;
+  const assets = new Map(Object.entries(options.assets ?? {}));
   const element = document.createElement("div");
   element.style.width = `${String(output.widthPixels)}px`;
   element.style.height = `${String(output.heightPixels)}px`;
@@ -24,7 +31,7 @@ export async function mountForTest(options: {
     framesPerSecond: 30,
     durationFrames: options.durationFrames,
     props: options.props ?? {},
-    findAsset: () => undefined,
+    findAsset: (assetId) => assets.get(assetId),
   });
   onTestFinished(() => {
     mounted.dispose();

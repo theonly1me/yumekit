@@ -13,6 +13,7 @@ import { captionWordsSchema } from "../schemas/captionWords.js";
 import { imagePanLimits, imagePanSchema } from "../schemas/imagePan.js";
 import { quoteLimits, quoteSchema } from "../schemas/quote.js";
 import { titleCardLimits, titleCardSchema } from "../schemas/titleCard.js";
+import { videoClipLimits, videoClipSchema } from "../schemas/videoClip.js";
 import { keepValidItems, readField, shortenText } from "./readField.js";
 
 export const defaultTexts = {
@@ -144,6 +145,38 @@ export function readQuoteProps(props: JsonObject) {
       value: props["source"],
       fallback: undefined,
       repair: shortenText(quoteLimits.source),
+    }),
+  };
+}
+
+export function readVideoClipProps(props: JsonObject) {
+  const { shape } = videoClipSchema.props;
+  return {
+    assetId: readField({
+      field: shape.assetId,
+      value: props["assetId"],
+      fallback: "",
+    }),
+    fit: readField({
+      field: shape.fit,
+      value: props["fit"],
+      fallback: undefined,
+    }),
+    focus: readField({
+      field: shape.focus,
+      value: props["focus"],
+      fallback: undefined,
+    }),
+    startSeconds: readField({
+      field: shape.startSeconds,
+      value: props["startSeconds"],
+      fallback: undefined,
+    }),
+    caption: readField({
+      field: shape.caption,
+      value: props["caption"],
+      fallback: undefined,
+      repair: shortenText(videoClipLimits.caption),
     }),
   };
 }

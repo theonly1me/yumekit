@@ -25,6 +25,7 @@ const defaultTextsByScene: Record<(typeof kitSceneNames)[number], string[]> = {
   "caption-words": [],
   "bar-chart": ["Value", "1"],
   quote: ["Quote"],
+  "video-clip": [],
 };
 
 afterEach(() => {
