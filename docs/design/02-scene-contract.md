@@ -89,7 +89,8 @@ function useHold(): { release: () => void };
 
 - `layout` is `wide` when width divided by height is 1.2 or more, `tall` when it is 0.8 or less, and `square` for the rest.
 - `unit` is 1 percent of the shorter side in pixels. A scene sizes text and spacing in units, so it reads the same at each output size.
-- `useHold` makes `seek` wait until the scene calls `release`. Use it for work that finishes later, such as a decoded image.
+- `useHold` makes `seek` wait until the scene calls `release`. Use it for work that finishes later, such as loaded data. A hold belongs to its component. After `release`, later seeks do not wait for it. A hold stops when its component unmounts.
+- An image that cannot decode makes `seek` reject. A frame outside the clip and a `seek` after `dispose` also reject, because each one is a defect in the caller.
 - On each `seek`, the adapter renders the component for that frame with `flushSync`. It then waits for `document.fonts.ready`, for each image in the element to decode, and for each hold.
 
 A helper limits a part of a scene to a window of frames:
@@ -97,12 +98,12 @@ A helper limits a part of a scene to a window of frames:
 ```ts
 function FrameWindow(props: {
   startFrame: number;
-  durationFrames: number;
+  durationFrames?: number;
   children: ReactNode;
 }): ReactNode;
 ```
 
-Inside `FrameWindow`, `useFrame` starts at 0 at `startFrame`. The children draw only while the frame is inside the window.
+Inside `FrameWindow`, `useFrame` starts at 0 at `startFrame`. The children draw only while the frame is inside the window. With no `durationFrames`, the window lasts to the end of the clip.
 
 ## Animation functions
 
@@ -154,7 +155,8 @@ const easings: {
 ```
 
 - `tween` returns `from` before `startFrame` and `to` after `endFrame`. The default easing is `easeInOut`.
-- `spring` returns `from` before `startFrame`. It solves the spring equation in closed form, so frame 500 costs the same as frame 5.
+- `easeIn`, `easeOut`, and `easeInOut` are the CSS curves: (0.42, 0, 1, 1), (0, 0, 0.58, 1), and (0.42, 0, 0.58, 1).
+- `spring` returns `from` before `startFrame`. It solves the spring equation in closed form, so frame 500 costs the same as frame 5. The defaults are stiffness 100, damping 10, and mass 1.
 - `stagger` returns the start frame for item `index` of a list.
 
 ## Custom scene code
@@ -178,7 +180,7 @@ export default defineReactScene(({ props }) => {
 });
 ```
 
-A custom scene may import only `react`, `@yumekit/scene`, and `@yumekit/scene-kit`. The bundler rejects any other import with the failure `scene-import-not-permitted`. A later design adds a list of extra packages for a project, for example a 3D library.
+A custom scene may import only `react`, `@yumekit/scene`, and `@yumekit/scene-kit`. The bundler rejects any other import with the failure `scene-import-not-permitted`. Custom scene code compiles with strict TypeScript, but it may read a prop as `props.title`. A later design adds a list of extra packages for a project, for example a 3D library.
 
 ## Not in milestone 1
 
