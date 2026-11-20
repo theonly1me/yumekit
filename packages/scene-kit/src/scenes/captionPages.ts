@@ -7,10 +7,23 @@ export interface TimedWord {
 
 const sentenceEnd = /[.!?。！？]$/;
 
+function sortedByStartFrame(words: readonly TimedWord[]): TimedWord[] {
+  const sorted: TimedWord[] = [];
+  for (const word of words) {
+    const laterIndex = sorted.findIndex(
+      (placed) => placed.startFrame > word.startFrame,
+    );
+    sorted.splice(laterIndex === -1 ? sorted.length : laterIndex, 0, word);
+  }
+  return sorted;
+}
+
 function spokenWords(words: readonly SceneWord[]): TimedWord[] {
-  return words
-    .map((word) => ({ text: word.text.trim(), startFrame: word.startFrame }))
-    .filter((word) => word.text !== "" && Number.isFinite(word.startFrame));
+  return sortedByStartFrame(
+    words
+      .map((word) => ({ text: word.text.trim(), startFrame: word.startFrame }))
+      .filter((word) => word.text !== "" && Number.isFinite(word.startFrame)),
+  );
 }
 
 function evenlySpreadWords(options: {

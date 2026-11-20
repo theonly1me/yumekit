@@ -76,4 +76,19 @@ describe("caption-words", () => {
     await mounted.seek(12);
     expect(shownTexts(element)).toEqual(["Later"]);
   });
+
+  it("orders word timings by start frame when the asset lists them out of order", async () => {
+    const { element, mounted } = await mountKitScene({
+      name: "caption-words",
+      durationFrames: 40,
+      props: { assetId: "shuffled" },
+      assets: {
+        shuffled: { ...speech, words: speech.words.toReversed() },
+      },
+    });
+    await mounted.seek(10);
+    expect(shownTexts(element).join(" ")).toBe("Every frame");
+    await mounted.seek(39);
+    expect(shownTexts(element).join(" ")).toBe("Every frame stays editable.");
+  });
 });

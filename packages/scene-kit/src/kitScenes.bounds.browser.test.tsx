@@ -4,6 +4,7 @@ import { kitScenes } from "./index.js";
 import { rectsOutside, textRectCount } from "./testing/contentBoxes.js";
 import {
   mountKitScene,
+  squareOutput,
   tallOutput,
   wideOutput,
 } from "./testing/mountKitScene.js";
@@ -17,7 +18,7 @@ import {
 
 const durationFrames = 150;
 const checkedFrames = [0, 40, 149];
-const outputs = [wideOutput, tallOutput];
+const outputs = [wideOutput, tallOutput, squareOutput];
 
 async function outsideAtFrames(options: {
   name: string;

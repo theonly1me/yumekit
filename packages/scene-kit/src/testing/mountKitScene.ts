@@ -8,6 +8,12 @@ export const wideOutput: SceneOutput = {
   heightPixels: 1080,
 };
 
+export const squareOutput: SceneOutput = {
+  id: "square",
+  widthPixels: 1080,
+  heightPixels: 1080,
+};
+
 export const tallOutput: SceneOutput = {
   id: "tall",
   widthPixels: 1080,
