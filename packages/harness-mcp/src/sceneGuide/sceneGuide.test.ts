@@ -15,6 +15,17 @@ describe("scene guide", () => {
     },
   );
 
+  it("tells agents to take colors and fonts from paper and to keep text out of the caption area", () => {
+    expect(sceneGuide).toContain('import { paper } from "@yumekit/scene-kit";');
+    expect(sceneGuide).toContain(
+      "The bottom 16 units of the picture are the caption area.",
+    );
+    for (const example of sceneGuideExamples) {
+      expect(example.code).toContain("paper.colors.background");
+      expect(example.code).toContain("paddingBottom: 24 * unit");
+    }
+  });
+
   it("contains the code of each example", () => {
     for (const example of sceneGuideExamples) {
       expect(sceneGuide).toContain(example.code.trimEnd());

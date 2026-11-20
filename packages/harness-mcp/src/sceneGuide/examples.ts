@@ -8,6 +8,7 @@ export const counterExample = {
   useFrame,
   useSceneContext,
 } from "@yumekit/scene";
+import { paper } from "@yumekit/scene-kit";
 
 export default defineReactScene(({ props }) => {
   const frame = useFrame();
@@ -33,19 +34,22 @@ export default defineReactScene(({ props }) => {
         inset: 0,
         boxSizing: "border-box",
         padding: 8 * unit,
+        paddingBottom: 24 * unit,
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",
         gap: 2 * unit,
-        background: "#eef1f4",
-        color: "#18203a",
-        fontFamily: "system-ui, sans-serif",
+        background: paper.colors.background,
+        color: paper.colors.text,
+        fontFamily: paper.fonts.body.family,
+        fontWeight: paper.fonts.body.weight,
       }}
     >
       <div
         style={{
           fontSize: (layout === "tall" ? 30 : 24) * unit,
-          fontWeight: 700,
+          fontFamily: paper.fonts.display.family,
+          fontWeight: paper.fonts.display.weight,
           lineHeight: 1,
           opacity,
           transform: "translateY(" + String(rise) + "px)",
@@ -75,8 +79,7 @@ export const stepsExample = {
   useFrame,
   useSceneContext,
 } from "@yumekit/scene";
-
-const dotColors = ["#e891ab", "#4db6ae", "#a294e0"];
+import { paper } from "@yumekit/scene-kit";
 
 function Step(props: { text: string; color: string }) {
   const frame = useFrame();
@@ -119,12 +122,14 @@ export default defineReactScene(({ props }) => {
         inset: 0,
         boxSizing: "border-box",
         padding: 8 * unit,
+        paddingBottom: 24 * unit,
         display: "flex",
         flexDirection: layout === "tall" ? "column" : "row",
         gap: 6 * unit,
-        background: "#eef1f4",
-        color: "#18203a",
-        fontFamily: "system-ui, sans-serif",
+        background: paper.colors.background,
+        color: paper.colors.text,
+        fontFamily: paper.fonts.body.family,
+        fontWeight: paper.fonts.body.weight,
       }}
     >
       {sparks.map((spark, index) => (
@@ -137,7 +142,7 @@ export default defineReactScene(({ props }) => {
             width: unit,
             height: unit,
             borderRadius: "50%",
-            background: "#f2b33d",
+            background: paper.colors.accent,
             opacity: 0.4,
           }}
         />
@@ -145,11 +150,11 @@ export default defineReactScene(({ props }) => {
       <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 3 * unit }}>
         {steps.map((step, index) => (
           <FrameWindow key={index} startFrame={stagger({ index, startFrame: 0, eachFrames })}>
-            <Step text={step} color={dotColors[index % dotColors.length] ?? "#4db6ae"} />
+            <Step text={step} color={paper.colors.bars[index % paper.colors.bars.length] ?? paper.colors.bullet} />
           </FrameWindow>
         ))}
       </div>
-      <div style={{ flex: 1, borderRadius: 2 * unit, overflow: "hidden", background: "#dfe4ea" }}>
+      <div style={{ flex: 1, borderRadius: 2 * unit, overflow: "hidden", background: paper.colors.placeholder }}>
         {image === undefined ? null : (
           <img src={image.url} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
         )}
