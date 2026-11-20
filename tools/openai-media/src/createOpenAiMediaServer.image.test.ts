@@ -10,13 +10,17 @@ import {
 } from "./testing/connectOpenAiMedia.ts";
 
 describe("generate_image", () => {
-  it("lists generate_image as its only tool", async () => {
+  it("lists the image, speech, and align tools of the convention", async () => {
     const media = await connectOpenAiMedia({
       environment: {},
       respond: () => imageResponse(fakePng({ width: 1, height: 1 })),
     });
 
-    expect(await media.listToolNames()).toEqual(["generate_image"]);
+    expect(await media.listToolNames()).toEqual([
+      "generate_image",
+      "generate_speech",
+      "align_words",
+    ]);
   });
 
   it("writes the PNG from the API inside output_directory and returns the convention shape", async () => {

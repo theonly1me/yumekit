@@ -26,10 +26,10 @@ async function failureMessage(response: Response): Promise<string> {
   return apiErrorMessage(text) ?? (text || response.statusText);
 }
 
-export async function sendToOpenAi(options: {
+async function sendToOpenAi(options: {
   sendRequest: SendRequest;
   request: Request;
-}): Promise<Outcome<unknown, string>> {
+}): Promise<Outcome<Response, string>> {
   let response: Response;
   try {
     response = await options.sendRequest(options.request);
@@ -46,8 +46,17 @@ export async function sendToOpenAi(options: {
       failure: `The OpenAI API answered ${String(response.status)}: ${message}`,
     };
   }
+  return { ok: true, value: response };
+}
+
+export async function requestJson(options: {
+  sendRequest: SendRequest;
+  request: Request;
+}): Promise<Outcome<unknown, string>> {
+  const sent = await sendToOpenAi(options);
+  if (!sent.ok) return sent;
   try {
-    const body: unknown = await response.json();
+    const body: unknown = await sent.value.json();
     return { ok: true, value: body };
   } catch (error) {
     return {
@@ -55,4 +64,47 @@ export async function sendToOpenAi(options: {
       failure: `The OpenAI API sent a body that is not JSON: ${errorMessage(error)}`,
     };
   }
+}
+
+export async function requestBytes(options: {
+  sendRequest: SendRequest;
+  request: Request;
+}): Promise<Outcome<Buffer, string>> {
+  const sent = await sendToOpenAi(options);
+  if (!sent.ok) return sent;
+  try {
+    return { ok: true, value: Buffer.from(await sent.value.arrayBuffer()) };
+  } catch (error) {
+    return {
+      ok: false,
+      failure: `Cannot read the audio from the OpenAI API: ${errorMessage(error)}`,
+    };
+  }
+}
+
+export function jsonRequest(options: {
+  path: string;
+  apiKey: string;
+  body: Record<string, unknown>;
+}): Request {
+  return new Request(`${openAiApiUrl}${options.path}`, {
+    method: "POST",
+    headers: {
+      authorization: `Bearer ${options.apiKey}`,
+      "content-type": "application/json",
+    },
+    body: JSON.stringify(options.body),
+  });
+}
+
+export function formRequest(options: {
+  path: string;
+  apiKey: string;
+  form: FormData;
+}): Request {
+  return new Request(`${openAiApiUrl}${options.path}`, {
+    method: "POST",
+    headers: { authorization: `Bearer ${options.apiKey}` },
+    body: options.form,
+  });
 }

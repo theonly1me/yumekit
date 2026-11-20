@@ -4,13 +4,21 @@ import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 
 export interface MediaFile {
   path: string;
-  kind: "image";
+  kind: "image" | "audio";
   width_pixels?: number;
   height_pixels?: number;
+  duration_seconds?: number;
+}
+
+export interface WordTiming {
+  text: string;
+  start_seconds: number;
+  end_seconds: number;
 }
 
 export interface MediaToolResult {
   files: MediaFile[];
+  words?: WordTiming[];
 }
 
 export type Outcome<Value, Failure> =

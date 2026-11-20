@@ -75,3 +75,39 @@ export function imageResponse(png: Buffer): Promise<Response> {
 export function temporaryFolder(): Promise<string> {
   return mkdtemp(join(tmpdir(), "yumekit-openai-media-"));
 }
+
+export function fakeWav(options: {
+  sampleRate: number;
+  sampleCount: number;
+  declaredDataBytes?: number;
+}): Buffer {
+  const bytesPerSample = 2;
+  const dataBytes = options.sampleCount * bytesPerSample;
+  const header = Buffer.alloc(44);
+  header.write("RIFF", 0, "ascii");
+  header.writeUInt32LE(36 + dataBytes, 4);
+  header.write("WAVE", 8, "ascii");
+  header.write("fmt ", 12, "ascii");
+  header.writeUInt32LE(16, 16);
+  header.writeUInt16LE(1, 20);
+  header.writeUInt16LE(1, 22);
+  header.writeUInt32LE(options.sampleRate, 24);
+  header.writeUInt32LE(options.sampleRate * bytesPerSample, 28);
+  header.writeUInt16LE(bytesPerSample, 32);
+  header.writeUInt16LE(16, 34);
+  header.write("data", 36, "ascii");
+  header.writeUInt32LE(options.declaredDataBytes ?? dataBytes, 40);
+  return Buffer.concat([header, Buffer.alloc(dataBytes)]);
+}
+
+export function errorResponse(options: {
+  status: number;
+  message: string;
+}): Promise<Response> {
+  return Promise.resolve(
+    Response.json(
+      { error: { message: options.message } },
+      { status: options.status },
+    ),
+  );
+}

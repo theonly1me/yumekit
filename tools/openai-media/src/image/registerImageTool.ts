@@ -1,12 +1,12 @@
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { missingKeyMessage, type SendRequest } from "../openAiApi.ts";
+import { missingKeyMessage } from "../openAiApi.ts";
 import {
   checkFileStem,
   errorResult,
   successResult,
   writeOutputFile,
 } from "../toolResults.ts";
+import type { ToolOptions } from "../toolOptions.ts";
 import { readPngSize, requestedSize } from "./imageSize.ts";
 import { requestImage } from "./requestImage.ts";
 
@@ -37,18 +37,11 @@ const imageInput = {
     .describe("Make a PNG with a transparent background"),
 };
 
-export interface ImageToolOptions {
-  server: McpServer;
-  apiKey: string | undefined;
-  imageModel: string;
-  sendRequest: SendRequest;
-}
-
-export function registerImageTool(options: ImageToolOptions): void {
+export function registerImageTool(options: ToolOptions): void {
   options.server.registerTool(
     "generate_image",
     {
-      description: `Make a PNG image with the OpenAI model ${options.imageModel}. Uses the OpenAI API key of the user, which costs money.`,
+      description: `Make a PNG image with the OpenAI model ${options.model}. Uses the OpenAI API key of the user, which costs money.`,
       inputSchema: imageInput,
     },
     async (input) => {
@@ -63,7 +56,7 @@ export function registerImageTool(options: ImageToolOptions): void {
       const image = await requestImage({
         sendRequest: options.sendRequest,
         apiKey: options.apiKey,
-        model: options.imageModel,
+        model: options.model,
         prompt: input.prompt,
         size: size.value,
         transparentBackground: input.transparent_background ?? false,

@@ -1,7 +1,12 @@
 import { readFile } from "node:fs/promises";
 import { basename, extname } from "node:path";
 import { z } from "zod";
-import { openAiApiUrl, sendToOpenAi, type SendRequest } from "../openAiApi.ts";
+import {
+  formRequest,
+  jsonRequest,
+  requestJson,
+  type SendRequest,
+} from "../openAiApi.ts";
 import { errorMessage, type Outcome } from "../toolResults.ts";
 
 export interface ImageRequest {
@@ -71,22 +76,19 @@ async function editRequest(
   }
   return {
     ok: true,
-    value: new Request(`${openAiApiUrl}/images/edits`, {
-      method: "POST",
-      headers: { authorization: `Bearer ${request.apiKey}` },
-      body: form,
+    value: formRequest({
+      path: "/images/edits",
+      apiKey: request.apiKey,
+      form,
     }),
   };
 }
 
 function generationRequest(request: ImageRequest): Request {
-  return new Request(`${openAiApiUrl}/images/generations`, {
-    method: "POST",
-    headers: {
-      authorization: `Bearer ${request.apiKey}`,
-      "content-type": "application/json",
-    },
-    body: JSON.stringify({ ...sharedFields(request), n: 1 }),
+  return jsonRequest({
+    path: "/images/generations",
+    apiKey: request.apiKey,
+    body: { ...sharedFields(request), n: 1 },
   });
 }
 
@@ -102,7 +104,7 @@ export async function requestImage(
 ): Promise<Outcome<Buffer, string>> {
   const httpRequest = await buildRequest(request);
   if (!httpRequest.ok) return httpRequest;
-  const sent = await sendToOpenAi({
+  const sent = await requestJson({
     sendRequest: request.sendRequest,
     request: httpRequest.value,
   });
