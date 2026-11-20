@@ -124,6 +124,7 @@ How a timeline reads:
 
 - Scene tracks draw in list order. The first track is at the back.
 - At frame `f`, a scene clip is visible when `startFrame <= f < startFrame + durationFrames`. The scene gets the frame `f - startFrame + sceneStartFrame`.
+- `sceneStartFrame` cuts the start of a scene. The stage mounts the scene with a length of `sceneStartFrame + durationFrames`, so each frame it asks for is inside the scene.
 - The length of an output is the largest clip end over all of its tracks.
 
 ## The store
