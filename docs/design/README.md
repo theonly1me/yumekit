@@ -76,3 +76,4 @@ Use these words with these meanings in code and in documents.
 - `tools/codex-images`, after a probe confirms that a `codex exec` run can make an image.
 - Smaller undo history for long projects, and recovery after a crash in the middle of a write.
 - Removal of media files and word timing files that no record references.
+- A failure with a `kind` and a hint when an input does not match the schema of a harness tool.

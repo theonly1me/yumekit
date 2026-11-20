@@ -5,6 +5,8 @@ The scene kit gives an agent ready scenes, so most content needs no custom code.
 ## Interface
 
 - `kitScenes` from the main entry: one `SceneModule` for each component name. The stage page loads it in the browser.
+- `paper` from the main entry: the tokens of the default style pack (colors and font family names), for custom scene code.
+- `loadStylePackFonts` from the main entry: loads the fonts of a style pack. The stage page calls it before the first frame, so each scene, kit or custom, can use the fonts by name.
 - `kitSceneSchemas` from the entry `@yumekit/scene-kit/schemas`: for each component name, a `purpose` text and a `zod` schema of its props. This entry has no browser code, so the harness can load it in Node.
 
 ## Rules for each kit scene
@@ -14,7 +16,8 @@ The scene kit gives an agent ready scenes, so most content needs no custom code.
 3. A scene draws in the `wide`, `tall`, and `square` layouts, with all sizes in `unit`.
 4. Text never leaves the picture. A scene lowers the text size until the text fits, and a long word can break.
 5. A scene that shows an image draws a neutral placeholder when `findAsset` returns nothing.
-6. Each schema is strict. An unknown prop is a failure in the harness, with the list of valid props.
+6. A scene keeps its text and its values out of the caption area at the bottom (see Captions). A background or a full picture can fill it.
+7. Each schema is strict. An unknown prop is a failure in the harness, with the list of valid props.
 
 ## Scenes in milestone 1
 
@@ -31,7 +34,15 @@ The scene kit gives an agent ready scenes, so most content needs no custom code.
 
 ## Captions
 
-`caption-words` is an overlay. Its background is transparent, and the words sit on a small panel at the bottom of the picture. Put it on a scene track above the scene it describes.
+`caption-words` is an overlay. Its background is transparent, and the words sit on a panel at the bottom of the picture. Put it on a scene track above the scene it describes.
+
+The panel must read on any scene, also on a paper background and on a photo:
+
+- The panel is ink (`#18203a`) at 92 percent opacity, and the words are paper (`#eef1f4`).
+- The words are 4.5 units tall in `wide` and `square`, and 5 units in `tall`.
+- The panel sits inside the caption area, which is the bottom 16 units of the picture.
+
+Each other kit scene keeps its content out of the caption area. So a caption never covers a heading, a list, or a value. A custom scene should do the same, and the scene guide says so.
 
 The scene reads the word timings of the speech asset. Frame 0 of the scene is frame 0 of the asset. So a caption clip must match its audio clip:
 
