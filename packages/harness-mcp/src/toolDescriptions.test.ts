@@ -51,4 +51,21 @@ describe("tool descriptions say what the first agent run could not learn", () =>
       expect.arrayContaining(["scene_id", "asset_id"]),
     );
   });
+
+  it("generate_asset says that video costs money, has a limit, and starts from a checked still", async () => {
+    const description = (await descriptionsByName()).get("generate_asset");
+
+    expect(description).toContain("costs money for each second");
+    expect(description).toContain("limits.generatedVideoSeconds");
+    expect(description).toContain("generated-video-limit-reached");
+    expect(description).toContain("Make a still image first");
+  });
+
+  it("place_video names the scene, the tracks, and the clip ids that it makes", async () => {
+    const description = (await descriptionsByName()).get("place_video");
+
+    expect(description).toContain('"video-<asset_id>"');
+    expect(description).toContain('audio track "video-sound"');
+    expect(description).toContain('"video-sound-<asset_id>"');
+  });
 });

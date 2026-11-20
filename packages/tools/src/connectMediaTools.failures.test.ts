@@ -84,32 +84,29 @@ describe("connectMediaTools failures", () => {
   });
 
   it("returns no-server-for-capability when no server lists the tool", async () => {
-    const { tools, outputDirectory } = await connectFixture({});
+    const { tools, outputDirectory } = await connectFixture({
+      projectFile: { mcpServers: { fake: fakeServerCommand } },
+    });
+    const alignRequest = {
+      capability: "align",
+      input: { audio_path: "/tmp/voice.wav", text: "hi" },
+      outputDirectory,
+      fileStem: "voice",
+    } as const;
 
-    const anyServer = await tools.run({
-      capability: "video",
-      input: { prompt: "waves", duration_seconds: 2 },
-      outputDirectory,
-      fileStem: "waves",
-    });
-    const namedServer = await tools.run({
-      capability: "video",
-      server: "sample",
-      input: { prompt: "waves", duration_seconds: 2 },
-      outputDirectory,
-      fileStem: "waves",
-    });
+    const anyServer = await tools.run(alignRequest);
+    const namedServer = await tools.run({ ...alignRequest, server: "fake" });
 
     expect(anyServer).toEqual({
       ok: false,
-      failure: { kind: "no-server-for-capability", capability: "video" },
+      failure: { kind: "no-server-for-capability", capability: "align" },
     });
     expect(namedServer).toEqual({
       ok: false,
       failure: {
         kind: "no-server-for-capability",
-        capability: "video",
-        server: "sample",
+        capability: "align",
+        server: "fake",
       },
     });
   });

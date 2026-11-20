@@ -36,6 +36,7 @@ describe("read tools", () => {
         "remove_clip",
         "copy_timeline",
         "place_narration",
+        "place_video",
         "undo",
         "redo",
         "generate_asset",
@@ -57,7 +58,10 @@ describe("read tools", () => {
     expect(instructions).toContain(
       "1. Call get_project, list_kit_scenes, and list_media_tools.",
     );
-    expect(instructions).toContain("8. Call render_video for each output.");
+    expect(instructions).toContain(
+      '6. For a shot that code cannot draw, make a still image first. Check it with the person or with preview_frame. Then call generate_asset with the capability "video" and first_frame_asset_id, and add the clip with place_video.',
+    );
+    expect(instructions).toContain("9. Call render_video for each output.");
   });
 
   it("get_project gives the frame rate, the outputs with their timeline length, and the scenes", async () => {

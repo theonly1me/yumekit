@@ -136,7 +136,7 @@ describe("asset and reference read tools", () => {
       servers: [
         {
           server: "sample",
-          capabilities: ["image", "speech", "align", "music"],
+          capabilities: ["image", "speech", "align", "music", "video"],
         },
       ],
       failed_servers: [],

@@ -7,12 +7,14 @@ import { errorMessage } from "./errorMessage.js";
 import type {
   Capability,
   ConnectFailure,
+  MediaLimits,
   Outcome,
   ServerCommand,
 } from "./types.js";
 
 const sampleServerName = "sample";
 const configurationFileName = "media-tools.json";
+const defaultGeneratedVideoSeconds = 30;
 
 const serverEntrySchema = z.object({
   command: z.string().min(1).optional(),
@@ -20,9 +22,14 @@ const serverEntrySchema = z.object({
   passEnvironment: z.array(z.string()).optional(),
 });
 
+const limitsSchema = z.object({
+  generatedVideoSeconds: z.number().nonnegative().optional(),
+});
+
 const configurationFileSchema = z.object({
   mcpServers: z.record(z.string(), serverEntrySchema).default({}),
   defaults: z.partialRecord(z.enum(capabilities), z.string()).default({}),
+  limits: limitsSchema.default({}),
 });
 
 type ServerEntry = z.infer<typeof serverEntrySchema>;
@@ -35,6 +42,7 @@ export type ConfiguredServer =
 export interface MediaToolsConfiguration {
   servers: ConfiguredServer[];
   defaults: Partial<Record<Capability, string>>;
+  limits: MediaLimits;
 }
 
 function isMissingFile(error: unknown): boolean {
@@ -105,6 +113,7 @@ function bundledSampleOnly(
       ? [{ name: sampleServerName, status: "ready", command: sample }]
       : [],
     defaults: {},
+    limits: { generatedVideoSeconds: defaultGeneratedVideoSeconds },
   };
 }
 
@@ -136,6 +145,12 @@ export async function readMediaToolsConfiguration(options: {
         resolveServer({ name, entry, bundledServers: options.bundledServers }),
       ),
       defaults: { ...userFile?.defaults, ...projectFile?.defaults },
+      limits: {
+        generatedVideoSeconds:
+          projectFile?.limits.generatedVideoSeconds ??
+          userFile?.limits.generatedVideoSeconds ??
+          defaultGeneratedVideoSeconds,
+      },
     },
   };
 }

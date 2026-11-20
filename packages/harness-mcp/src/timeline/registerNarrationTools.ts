@@ -11,7 +11,7 @@ function registerPlaceNarration(context: HarnessContext): void {
     "place_narration",
     {
       description:
-        'Put a speech asset on the audio track of an output for its full length. With with_captions, also add a caption-words scene on a caption track above the other scenes, timed to the same frames. The audio clip goes on the first audio track, or on a new audio track "narration". The caption clip goes on the top scene track when it holds only captions, or on a new scene track "captions" above the others. The audio clip id is "narration-<asset_id>", the caption clip id and the caption scene id are "captions-<asset_id>", and a suffix such as "-2" keeps each id unique. The result gives audio_clip_id, caption_clip_id, and caption_scene_id. One undo removes all of it.',
+        'Put a speech asset on the audio track of an output for its full length. With with_captions, also add a caption-words scene on a caption track above the other scenes, timed to the same frames. The audio clip goes on the first audio track other than "video-sound", or on a new audio track "narration". The caption clip goes on the top scene track when it holds only captions, or on a new scene track "captions" above the others. The audio clip id is "narration-<asset_id>", the caption clip id and the caption scene id are "captions-<asset_id>", and a suffix such as "-2" keeps each id unique. The result gives audio_clip_id, caption_clip_id, and caption_scene_id. One undo removes all of it.',
       inputSchema: {
         output_id: idInput("The id of the output."),
         asset_id: idInput("The id of a speech asset from generate_asset."),
