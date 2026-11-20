@@ -6,7 +6,7 @@ export default defineConfig({
       {
         test: {
           name: "node",
-          include: ["{packages,apps}/*/src/**/*.test.{ts,tsx}"],
+          include: ["{packages,apps,tools}/*/src/**/*.test.{ts,tsx}"],
           exclude: ["**/node_modules/**", "**/*.browser.test.tsx"],
         },
       },

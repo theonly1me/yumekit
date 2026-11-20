@@ -1,7 +1,9 @@
 # tools
 
-This folder holds the bundled MCP tool servers. Each server has its own folder.
+This folder holds the bundled media tool servers. Each server has its own folder and is one MCP server over stdio.
 
-Planned servers include OpenAI images and speech, word timings, and a sound library.
+| Folder         | Command                | Capabilities                        |
+| -------------- | ---------------------- | ----------------------------------- |
+| `sample-media` | `yumekit-sample-media` | `image`, `speech`, `align`, `music` |
 
-The folder has no servers yet.
+The servers import nothing from the yumekit packages.

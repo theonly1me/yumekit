@@ -1,17 +1,18 @@
 # @yumekit/project
 
-The project folder format and its schema.
+The project folder format, its schemas, and the store that changes it.
 
 ## What this package owns
 
-- The folder format and the schema.
-- Validation and undo history.
-- Change events for each edit.
+- The folder format and the schemas (document 03).
+- Validation of each edit against the store rules.
+- Undo history in `.yumekit/history/`.
+- Change events for each new revision.
 
 ## Interface
 
-The planned interface is: `openProject`, `applyEdit`, `undo`, `subscribe`.
+- `createProject` makes a new project folder and returns a `ProjectStore`.
+- `openProject` reads a project folder and returns a `ProjectStore`.
+- `ProjectStore` has `read`, `applyEdits`, `undo`, `redo`, `readAssetWords`, and `subscribe`.
 
-`applyEdit` is the only way to change a project.
-
-The package is a scaffold. It has no feature logic yet.
+`applyEdits` is the only way to change a project.
