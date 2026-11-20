@@ -1,4 +1,5 @@
 import * as sceneKit from "@yumekit/scene-kit";
+import { loadStylePackFonts, paper } from "@yumekit/scene-kit";
 import { createStage } from "@yumekit/stage";
 import stagePageData, { moduleSceneImports } from "virtual:yumekit-stage-data";
 import { guardScene } from "./guardScene.js";
@@ -89,4 +90,5 @@ function startStagePage(): StagePageApi {
   };
 }
 
+await loadStylePackFonts(paper);
 window.yumekitStage = startStagePage();
