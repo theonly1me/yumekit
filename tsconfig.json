@@ -1,0 +1,14 @@
+{
+  "files": [],
+  "references": [
+    { "path": "packages/project" },
+    { "path": "packages/render" },
+    { "path": "packages/tools" },
+    { "path": "packages/brain" },
+    { "path": "packages/harness-mcp" },
+    { "path": "packages/engine" },
+    { "path": "packages/scene-kit" },
+    { "path": "apps/editor" },
+    { "path": "apps/cli" }
+  ]
+}
