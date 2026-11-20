@@ -43,12 +43,19 @@ export interface StylePack {
   layout: {
     marginUnits: number;
     captionAreaUnits: number;
-    wideContentUnits: number;
     barUnits: number;
+    longestBarShare: number;
+    stackedLongestBarShare: number;
     bulletShareOfItem: number;
+    itemGapShareOfItem: number;
+    wideHeadingColumnUnits: number;
+    wideContentColumnStartUnits: number;
+    wideQuoteUnits: number;
+    wideTitleUnits: number;
   };
   textUnits: {
-    wideAndSquare: TextUnits;
+    wide: TextUnits;
+    square: TextUnits;
     tall: TextUnits;
   };
 }

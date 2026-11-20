@@ -1,7 +1,6 @@
 import { stagger, tween, type JsonObject } from "@yumekit/scene";
 import type { ReactNode } from "react";
-import { centeredContentBoxStyle } from "../kit/captionArea.js";
-import { FitBox } from "../kit/FitBox.js";
+import { HeadedContent } from "../kit/HeadedContent.js";
 import { riseStyle, useMotionFrame } from "../kit/motion.js";
 import { useSizes } from "../kit/sizes.js";
 import { bodyTextStyle, displayTextStyle } from "../kit/textStyles.js";
@@ -12,7 +11,7 @@ import { formatValue, fractionDigitsOf } from "./formatValue.js";
 const headingStartFrame = 2;
 const firstBarStartFrame = 20;
 const growFrames = 40;
-const barTrackPercent = 72;
+const barGapUnits = 5;
 
 export function BarChart(props: { props: JsonObject }): ReactNode {
   const { heading, bars, valuePrefix, valueSuffix } = readBarChartProps(
@@ -28,28 +27,18 @@ export function BarChart(props: { props: JsonObject }): ReactNode {
   });
   const rise = (startFrame: number) =>
     riseStyle({ motionFrame, startFrame, stylePack, unit: sizes.unit });
+  const longestBarPercent =
+    100 *
+    (sizes.layout === "wide"
+      ? stylePack.layout.longestBarShare
+      : stylePack.layout.stackedLongestBarShare);
   const largestValue = Math.max(0, ...bars.map((bar) => bar.value));
   return (
-    <FitBox
-      style={centeredContentBoxStyle({ stylePack, sizes })}
-      contentStyle={{
-        display: "flex",
-        flexDirection: "column",
-        gap: sizes.fitted(5),
-      }}
+    <HeadedContent
+      heading={heading}
+      headingStyle={rise(headingStartFrame)}
+      contentStyle={{ gap: sizes.fitted(barGapUnits) }}
     >
-      {heading === undefined || heading === "" ? null : (
-        <h2
-          style={{
-            ...displayTextStyle(stylePack),
-            fontSize: sizes.text("heading"),
-            lineHeight: 1.1,
-            ...rise(headingStartFrame),
-          }}
-        >
-          {heading}
-        </h2>
-      )}
       {[...bars.entries()].map(([index, bar]) => {
         const startFrame = startOf(index);
         const grow = (to: number) =>
@@ -88,7 +77,7 @@ export function BarChart(props: { props: JsonObject }): ReactNode {
                 style={{
                   flex: "none",
                   height: sizes.fitted(stylePack.layout.barUnits),
-                  width: `${String(grow(share * barTrackPercent))}%`,
+                  width: `${String(grow(share * longestBarPercent))}%`,
                   minWidth: sizes.fitted(0.6),
                   borderRadius: sizes.fitted(1.2),
                   background: color,
@@ -114,6 +103,6 @@ export function BarChart(props: { props: JsonObject }): ReactNode {
           </div>
         );
       })}
-    </FitBox>
+    </HeadedContent>
   );
 }

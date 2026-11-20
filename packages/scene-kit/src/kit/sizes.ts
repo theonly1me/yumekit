@@ -18,10 +18,7 @@ export interface Sizes {
 export function useSizes(): Sizes {
   const { unit, layout } = useSceneContext();
   const stylePack = useStylePack();
-  const layoutTextUnits =
-    layout === "tall"
-      ? stylePack.textUnits.tall
-      : stylePack.textUnits.wideAndSquare;
+  const layoutTextUnits = stylePack.textUnits[layout];
   const fitted = (units: number) =>
     `calc(var(${fitVariable}, 1) * ${String(units * unit)}px)`;
   const textUnits = (role: TextRole) => layoutTextUnits[role];

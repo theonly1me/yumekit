@@ -12,22 +12,25 @@ export function contentBottomUnits(stylePack: StylePack): number {
   );
 }
 
-export function centeredContentBoxStyle(options: {
+export function centeredContentBox(options: {
   stylePack: StylePack;
   sizes: Sizes;
-}): CSSProperties {
-  const { stylePack, sizes } = options;
-  const { marginUnits, wideContentUnits } = stylePack.layout;
+  wideWidthUnits?: number;
+}): { style: CSSProperties; leadingSpace: string } {
+  const { stylePack, sizes, wideWidthUnits } = options;
+  const { marginUnits, captionAreaUnits } = stylePack.layout;
   const bottomUnits = contentBottomUnits(stylePack);
-  const topUnits =
-    marginUnits + bottomUnits - stylePack.layout.captionAreaUnits;
   return {
-    left: sizes.pixels(marginUnits),
-    top: sizes.pixels(topUnits),
-    bottom: sizes.pixels(bottomUnits),
-    justifyContent: "center",
-    ...(sizes.layout === "wide"
-      ? { width: sizes.pixels(wideContentUnits) }
-      : { right: sizes.pixels(marginUnits) }),
+    style: {
+      left: sizes.pixels(marginUnits),
+      top: sizes.pixels(marginUnits),
+      bottom: sizes.pixels(bottomUnits),
+      right: sizes.pixels(marginUnits),
+      justifyContent: "center",
+      ...(sizes.layout === "wide" && wideWidthUnits !== undefined
+        ? { maxWidth: sizes.pixels(wideWidthUnits) }
+        : {}),
+    },
+    leadingSpace: sizes.pixels(bottomUnits - captionAreaUnits),
   };
 }

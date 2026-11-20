@@ -39,6 +39,7 @@ function fitContent(options: { box: HTMLElement; content: HTMLElement }) {
 export function FitBox(props: {
   style: CSSProperties;
   contentStyle?: CSSProperties;
+  leadingSpace?: string;
   children: ReactNode;
 }): ReactNode {
   const boxReference = useRef<HTMLDivElement>(null);
@@ -60,6 +61,9 @@ export function FitBox(props: {
         ...props.style,
       }}
     >
+      {props.leadingSpace === undefined ? null : (
+        <div aria-hidden="true" style={{ flex: `0 1 ${props.leadingSpace}` }} />
+      )}
       <div
         ref={contentReference}
         style={{ flexShrink: 0, maxWidth: "100%", ...props.contentStyle }}

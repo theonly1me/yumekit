@@ -1,10 +1,9 @@
 import { stagger, type JsonObject } from "@yumekit/scene";
 import type { ReactNode } from "react";
-import { centeredContentBoxStyle } from "../kit/captionArea.js";
-import { FitBox } from "../kit/FitBox.js";
+import { HeadedContent } from "../kit/HeadedContent.js";
 import { riseStyle, useMotionFrame } from "../kit/motion.js";
 import { useSizes } from "../kit/sizes.js";
-import { bodyTextStyle, displayTextStyle } from "../kit/textStyles.js";
+import { bodyTextStyle } from "../kit/textStyles.js";
 import { readBulletListProps } from "../props/readProps.js";
 import { useStylePack } from "../stylePacks/StylePackContext.js";
 
@@ -28,31 +27,17 @@ export function BulletList(props: { props: JsonObject }): ReactNode {
   const rise = (startFrame: number) =>
     riseStyle({ motionFrame, startFrame, stylePack, unit: sizes.unit });
   const itemUnits = sizes.textUnits("item");
-  const bulletUnits = itemUnits * stylePack.layout.bulletShareOfItem;
+  const { bulletShareOfItem, itemGapShareOfItem } = stylePack.layout;
+  const bulletUnits = itemUnits * bulletShareOfItem;
   const bulletOffsetUnits =
     (itemUnits * itemLineHeight - bulletUnits) / 2 +
     itemUnits * bulletDropShare;
   return (
-    <FitBox
-      style={centeredContentBoxStyle({ stylePack, sizes })}
-      contentStyle={{
-        display: "flex",
-        flexDirection: "column",
-        gap: sizes.fitted(4.5),
-      }}
+    <HeadedContent
+      heading={heading}
+      headingStyle={rise(headingStartFrame)}
+      contentStyle={{ gap: sizes.fitted(itemUnits * itemGapShareOfItem) }}
     >
-      {heading === undefined || heading === "" ? null : (
-        <h2
-          style={{
-            ...displayTextStyle(stylePack),
-            fontSize: sizes.text("heading"),
-            lineHeight: 1.1,
-            ...rise(headingStartFrame),
-          }}
-        >
-          {heading}
-        </h2>
-      )}
       {[...items.entries()].map(([index, item]) => (
         <div
           key={`${String(index)}-${item}`}
@@ -92,6 +77,6 @@ export function BulletList(props: { props: JsonObject }): ReactNode {
           </p>
         </div>
       ))}
-    </FitBox>
+    </HeadedContent>
   );
 }

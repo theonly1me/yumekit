@@ -17,79 +17,69 @@ const measuredTexts: {
   name: MeasuredScene;
   text: string;
   find: (element: HTMLElement) => Element | undefined;
-  wideAndSquareUnits: number;
-  tallUnits: number;
+  units: Record<"wide" | "square" | "tall", number>;
 }[] = [
   {
     name: "title-card",
     text: "heading",
     find: (element) => element.querySelector("h1") ?? undefined,
-    wideAndSquareUnits: 13,
-    tallUnits: 14,
+    units: { wide: 15, square: 13, tall: 14 },
   },
   {
     name: "title-card",
     text: "subheading",
     find: (element) => element.querySelector("p") ?? undefined,
-    wideAndSquareUnits: 4.5,
-    tallUnits: 5,
+    units: { wide: 5.5, square: 5, tall: 5.5 },
   },
   {
     name: "quote",
     text: "sentence",
     find: (element) => element.querySelector("p") ?? undefined,
-    wideAndSquareUnits: 11,
-    tallUnits: 12,
+    units: { wide: 13, square: 12, tall: 12.5 },
   },
   {
     name: "quote",
     text: "source line",
     find: (element) => [...element.querySelectorAll("p")].at(-1),
-    wideAndSquareUnits: 4.5,
-    tallUnits: 5,
+    units: { wide: 5.5, square: 5, tall: 5.5 },
   },
   {
     name: "bullet-list",
     text: "heading",
     find: (element) => element.querySelector("h2") ?? undefined,
-    wideAndSquareUnits: 10,
-    tallUnits: 11,
+    units: { wide: 12, square: 11, tall: 12 },
   },
   {
     name: "bullet-list",
     text: "item",
     find: (element) => element.querySelector("p") ?? undefined,
-    wideAndSquareUnits: 7,
-    tallUnits: 7.5,
+    units: { wide: 8, square: 7.5, tall: 8 },
   },
   {
     name: "bar-chart",
     text: "heading",
     find: (element) => element.querySelector("h2") ?? undefined,
-    wideAndSquareUnits: 10,
-    tallUnits: 11,
+    units: { wide: 12, square: 11, tall: 12 },
   },
   {
     name: "bar-chart",
     text: "value",
     find: (element) => element.querySelector("span") ?? undefined,
-    wideAndSquareUnits: 6.5,
-    tallUnits: 7,
+    units: { wide: 7.5, square: 7, tall: 7.5 },
   },
   {
     name: "bar-chart",
     text: "label",
     find: (element) => element.querySelector("p") ?? undefined,
-    wideAndSquareUnits: 4.5,
-    tallUnits: 5,
+    units: { wide: 5.5, square: 5, tall: 5.5 },
   },
 ];
 
-const layouts: { output: SceneOutput; isTall: boolean }[] = [
-  { output: wideOutput, isTall: false },
-  { output: squareOutput, isTall: false },
-  { output: tallOutput, isTall: true },
-];
+const layouts = [
+  { output: wideOutput, layout: "wide" },
+  { output: squareOutput, layout: "square" },
+  { output: tallOutput, layout: "tall" },
+] as const;
 
 async function fontSizeUnitsOf(options: {
   name: MeasuredScene;
@@ -110,8 +100,8 @@ async function fontSizeUnitsOf(options: {
 
 describe("kit text sizes of the paper style pack", () => {
   for (const measured of measuredTexts) {
-    for (const { output, isTall } of layouts) {
-      const units = isTall ? measured.tallUnits : measured.wideAndSquareUnits;
+    for (const { output, layout } of layouts) {
+      const units = measured.units[layout];
       it(`draws the ${measured.text} of ${measured.name} ${String(units)} units tall in ${output.id}`, async () => {
         expect(
           await fontSizeUnitsOf({

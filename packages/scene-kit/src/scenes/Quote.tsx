@@ -1,6 +1,6 @@
 import { stagger, tween, type JsonObject } from "@yumekit/scene";
 import { Fragment, type ReactNode } from "react";
-import { centeredContentBoxStyle } from "../kit/captionArea.js";
+import { centeredContentBox } from "../kit/captionArea.js";
 import { FitBox } from "../kit/FitBox.js";
 import { riseStyle, useMotionFrame } from "../kit/motion.js";
 import { useSizes } from "../kit/sizes.js";
@@ -36,7 +36,11 @@ export function Quote(props: { props: JsonObject }): ReactNode {
   });
   return (
     <FitBox
-      style={centeredContentBoxStyle({ stylePack, sizes })}
+      {...centeredContentBox({
+        stylePack,
+        sizes,
+        wideWidthUnits: stylePack.layout.wideQuoteUnits,
+      })}
       contentStyle={{
         display: "flex",
         flexDirection: "column",
