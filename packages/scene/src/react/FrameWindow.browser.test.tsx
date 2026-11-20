@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { defineReactScene, FrameWindow, useFrame } from "../index.js";
+import {
+  defineReactScene,
+  FrameWindow,
+  useFrame,
+  type SceneModule,
+} from "../index.js";
 import { mountForTest } from "./mountForTest.js";
 
 function WindowFrame() {
@@ -20,9 +25,15 @@ const nestedScene = defineReactScene(() => (
   </FrameWindow>
 ));
 
-async function textAtFrames(options: { frames: number[]; nested: boolean }) {
+const openEndedScene = defineReactScene(() => (
+  <FrameWindow startFrame={30}>
+    <WindowFrame />
+  </FrameWindow>
+));
+
+async function textAtFrames(options: { frames: number[]; scene: SceneModule }) {
   const { element, mounted } = await mountForTest({
-    scene: options.nested ? nestedScene : windowScene,
+    scene: options.scene,
     durationFrames: 40,
   });
   const texts: string[] = [];
@@ -36,21 +47,25 @@ async function textAtFrames(options: { frames: number[]; nested: boolean }) {
 describe("FrameWindow", () => {
   it("hides its children before and after the window", async () => {
     expect(
-      await textAtFrames({ frames: [0, 4, 8, 39], nested: false }),
+      await textAtFrames({ frames: [0, 4, 8, 39], scene: windowScene }),
     ).toEqual(["", "", "", ""]);
   });
 
   it("restarts useFrame at 0 on the start frame", async () => {
-    expect(await textAtFrames({ frames: [5, 6, 7], nested: false })).toEqual([
-      "inside 0",
-      "inside 1",
-      "inside 2",
-    ]);
+    expect(
+      await textAtFrames({ frames: [5, 6, 7], scene: windowScene }),
+    ).toEqual(["inside 0", "inside 1", "inside 2"]);
   });
 
   it("counts a nested window from the start of its parent window", async () => {
     expect(
-      await textAtFrames({ frames: [13, 14, 15, 16], nested: true }),
+      await textAtFrames({ frames: [13, 14, 15, 16], scene: nestedScene }),
     ).toEqual(["", "inside 0", "inside 1", ""]);
+  });
+
+  it("lasts to the end of the clip when it has no durationFrames", async () => {
+    expect(
+      await textAtFrames({ frames: [29, 30, 39], scene: openEndedScene }),
+    ).toEqual(["", "inside 0", "inside 9"]);
   });
 });

@@ -4,12 +4,13 @@ import { FrameContext } from "./sceneContexts.js";
 
 export function FrameWindow(props: {
   startFrame: number;
-  durationFrames: number;
+  durationFrames?: number;
   children: ReactNode;
 }): ReactNode {
   const frame = useFrame();
   const windowFrame = frame - props.startFrame;
-  const isInsideWindow = windowFrame >= 0 && windowFrame < props.durationFrames;
+  const windowDurationFrames = props.durationFrames ?? Number.POSITIVE_INFINITY;
+  const isInsideWindow = windowFrame >= 0 && windowFrame < windowDurationFrames;
   if (!isInsideWindow) {
     return null;
   }
