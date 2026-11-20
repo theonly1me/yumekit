@@ -16,6 +16,7 @@ These documents are the design of yumekit. Code follows them. If code and a docu
 | [08-scene-kit.md](08-scene-kit.md)                                 | Which ready scenes exist, how captions follow narration, and the default look |
 | [09-generated-video.md](09-generated-video.md)                     | How a clip from a video model gets into a scene, and the limit on its cost    |
 | [10-providers-models-and-keys.md](10-providers-models-and-keys.md) | How a server describes its models, and where an API key lives                 |
+| [11-editor-m2.md](11-editor-m2.md)                                 | How the engine serves the editor, and the screens of the first version        |
 
 ## Product in one paragraph
 
@@ -68,7 +69,7 @@ Use these words with these meanings in code and in documents.
 ## Follow-ups that have no design yet
 
 - One paid check of `tools/gemini-media` with a real key: a 3 second clip at 720p, and confirmation that background mode works for the model.
-- The web editor (milestones 2 and 3).
+- Timeline changes by drag in the editor (milestone 3), the first run screen, and a desktop shell with Tauri.
 - The brain runner that starts an agent CLI from the editor (milestone 2).
 - The cost guard and the budget cap (milestone 4).
 - The cast and style rules for long content (milestone 5).
