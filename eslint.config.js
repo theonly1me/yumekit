@@ -15,7 +15,7 @@ export default defineConfig(
       globals: globals.node,
       parserOptions: {
         projectService: {
-          allowDefaultProject: ["*.js", "*.ts"],
+          allowDefaultProject: ["*.js", "*.ts", "packages/*/vitest.config.ts"],
           defaultProject: "tsconfig.base.json",
         },
         tsconfigRootDir: import.meta.dirname,
@@ -31,7 +31,7 @@ export default defineConfig(
     },
   },
   {
-    files: ["apps/editor/**/*.{ts,tsx}"],
+    files: ["apps/editor/**/*.{ts,tsx}", "packages/scene/src/**/*.{ts,tsx}"],
     extends: [reactHooks.configs.flat.recommended],
     languageOptions: { globals: globals.browser },
   },
