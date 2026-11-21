@@ -28,6 +28,7 @@ export type {
   MediaLimits,
   MediaServerEntry,
   MediaToolFailure,
+  MediaToolProgress,
   MediaToolRequest,
   MediaToolRun,
   MediaTools,

@@ -6,35 +6,29 @@ import { durationInput, frameInput, idInput, scaleInput } from "../inputs.js";
 import { failureResult, successResult } from "../results.js";
 import { renderFailureOf } from "./renderFailures.js";
 
-function noop(): void {
-  return undefined;
-}
-
 function rendersFolder(context: HarnessContext): string {
   return join(context.store.folder, "renders");
 }
 
 function registerRenderVideo(context: HarnessContext): void {
-  context.server.registerTool(
-    "render_video",
-    {
-      description:
-        "Render an output to an MP4 file with sound in the renders folder of the project, and return its path, frame count, and length in seconds. It can take minutes; it sends progress notifications. Check frames with preview_frames first. Default scale 1; use 0.25 with frame_count for a fast test.",
-      inputSchema: {
-        output_id: idInput("The id of the output."),
-        first_frame: frameInput(
-          "The first frame to render. Default 0.",
-        ).optional(),
-        frame_count: durationInput(
-          "How many frames to render. Default: to the end of the output.",
-        ).optional(),
-        scale: scaleInput,
-      },
+  context.tools.add({
+    name: "render_video",
+    description:
+      "Render an output to an MP4 file with sound in the renders folder of the project, and return its path, frame count, and length in seconds. It can take minutes; it sends progress notifications. Check frames with preview_frames first. Default scale 1; use 0.25 with frame_count for a fast test.",
+    inputSchema: {
+      output_id: idInput("The id of the output."),
+      first_frame: frameInput(
+        "The first frame to render. Default 0.",
+      ).optional(),
+      frame_count: durationInput(
+        "How many frames to render. Default: to the end of the output.",
+      ).optional(),
+      scale: scaleInput,
     },
-    async (...parameters) => {
-      const [{ output_id, first_frame, frame_count, scale }, extra] =
-        parameters;
-      const progressToken = extra._meta?.progressToken;
+    run: async ({
+      input: { output_id, first_frame, frame_count, scale },
+      onProgress,
+    }) => {
       const rendered = await renderVideo({
         folder: context.store.folder,
         outputId: output_id,
@@ -43,17 +37,7 @@ function registerRenderVideo(context: HarnessContext): void {
         ...(frame_count === undefined ? {} : { frameCount: frame_count }),
         ...(scale === undefined ? {} : { scale }),
         onProgress: ({ framesDone, frameCount }) => {
-          if (progressToken === undefined) return;
-          extra
-            .sendNotification({
-              method: "notifications/progress",
-              params: {
-                progressToken,
-                progress: framesDone,
-                total: frameCount,
-              },
-            })
-            .catch(noop);
+          onProgress?.({ done: framesDone, total: frameCount });
         },
       });
       if (!rendered.ok) return failureResult(renderFailureOf(rendered.failure));
@@ -69,23 +53,21 @@ function registerRenderVideo(context: HarnessContext): void {
         },
       });
     },
-  );
+  });
 }
 
 function registerRenderStill(context: HarnessContext): void {
-  context.server.registerTool(
-    "render_still",
-    {
-      description:
-        "Render one frame of an output at full size to a PNG file in the renders folder, for example a thumbnail, and return its path.",
-      inputSchema: {
-        output_id: idInput("The id of the output."),
-        frame: frameInput(
-          "The frame of the output, from 0 to length_frames - 1.",
-        ),
-      },
+  context.tools.add({
+    name: "render_still",
+    description:
+      "Render one frame of an output at full size to a PNG file in the renders folder, for example a thumbnail, and return its path.",
+    inputSchema: {
+      output_id: idInput("The id of the output."),
+      frame: frameInput(
+        "The frame of the output, from 0 to length_frames - 1.",
+      ),
     },
-    async ({ output_id, frame }) => {
+    run: async ({ input: { output_id, frame } }) => {
       const rendered = await renderFrame({
         folder: context.store.folder,
         outputId: output_id,
@@ -107,7 +89,7 @@ function registerRenderStill(context: HarnessContext): void {
         },
       });
     },
-  );
+  });
 }
 
 export function registerRenderTools(context: HarnessContext): void {

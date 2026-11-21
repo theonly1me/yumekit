@@ -7,26 +7,24 @@ import { failureResult, successResult } from "../results.js";
 import { planNarration } from "./narrationPlan.js";
 
 function registerPlaceNarration(context: HarnessContext): void {
-  context.server.registerTool(
-    "place_narration",
-    {
-      description:
-        'Put a speech asset on the audio track of an output for its full length. With with_captions, also add a caption-words scene on a caption track above the other scenes, timed to the same frames. The audio clip goes on the first audio track other than "video-sound", or on a new audio track "narration". The caption clip goes on the top scene track when it holds only captions, or on a new scene track "captions" above the others. The audio clip id is "narration-<asset_id>", the caption clip id and the caption scene id are "captions-<asset_id>", and a suffix such as "-2" keeps each id unique. The result gives audio_clip_id, caption_clip_id, and caption_scene_id. One undo removes all of it.',
-      inputSchema: {
-        output_id: idInput("The id of the output."),
-        asset_id: idInput("The id of a speech asset from generate_asset."),
-        start_frame: frameInput(
-          "The frame of the output where the narration starts.",
+  context.tools.add({
+    name: "place_narration",
+    description:
+      'Put a speech asset on the audio track of an output for its full length. With with_captions, also add a caption-words scene on a caption track above the other scenes, timed to the same frames. The audio clip goes on the first audio track other than "video-sound", or on a new audio track "narration". The caption clip goes on the top scene track when it holds only captions, or on a new scene track "captions" above the others. The audio clip id is "narration-<asset_id>", the caption clip id and the caption scene id are "captions-<asset_id>", and a suffix such as "-2" keeps each id unique. The result gives audio_clip_id, caption_clip_id, and caption_scene_id. One undo removes all of it.',
+    inputSchema: {
+      output_id: idInput("The id of the output."),
+      asset_id: idInput("The id of a speech asset from generate_asset."),
+      start_frame: frameInput(
+        "The frame of the output where the narration starts.",
+      ),
+      with_captions: z
+        .boolean()
+        .optional()
+        .describe(
+          "Also show the words as captions. Needs word timings. Default false.",
         ),
-        with_captions: z
-          .boolean()
-          .optional()
-          .describe(
-            "Also show the words as captions. Needs word timings. Default false.",
-          ),
-      },
     },
-    ({ output_id, asset_id, start_frame, with_captions }) => {
+    run: ({ input: { output_id, asset_id, start_frame, with_captions } }) => {
       const snapshot = context.store.read();
       const output = findOutput({ snapshot, outputId: output_id });
       if (!output.ok) return failureResult(output.failure);
@@ -76,17 +74,16 @@ function registerPlaceNarration(context: HarnessContext): void {
         },
       });
     },
-  );
+  });
 }
 
 function registerHistoryTools(context: HarnessContext): void {
-  context.server.registerTool(
-    "undo",
-    {
-      description:
-        "Undo the last change to the project. Each tool call that changed the project is one step.",
-    },
-    async () => {
+  context.tools.add({
+    name: "undo",
+    description:
+      "Undo the last change to the project. Each tool call that changed the project is one step.",
+    inputSchema: {},
+    run: async () => {
       const undone = await context.store.undo();
       return undone.ok
         ? successResult({
@@ -99,11 +96,12 @@ function registerHistoryTools(context: HarnessContext): void {
             hint: "Call get_project to see the current state.",
           });
     },
-  );
-  context.server.registerTool(
-    "redo",
-    { description: "Redo the last change that undo reverted." },
-    async () => {
+  });
+  context.tools.add({
+    name: "redo",
+    description: "Redo the last change that undo reverted.",
+    inputSchema: {},
+    run: async () => {
       const redone = await context.store.redo();
       return redone.ok
         ? successResult({
@@ -117,7 +115,7 @@ function registerHistoryTools(context: HarnessContext): void {
             hint: "Call get_project to see the current state.",
           });
     },
-  );
+  });
 }
 
 export function registerNarrationAndHistoryTools(

@@ -99,6 +99,11 @@ type MediaTools = {
     input: JsonObject;
     outputDirectory: string;
     fileStem: string;
+    onProgress?: (progress: {
+      done: number;
+      total?: number;
+      message?: string;
+    }) => void;
   }) => Promise<
     Outcome<
       { server: string; model?: string; result: MediaToolResult },

@@ -3,6 +3,7 @@ import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
 import { applyEditsResult } from "../applyEditsResult.js";
 import type { HarnessContext } from "../context.js";
+import type { ProgressListener } from "../harness/toolTable.js";
 import { idInput } from "../inputs.js";
 import { findAsset } from "../lookups.js";
 import { failureResult } from "../results.js";
@@ -13,8 +14,9 @@ async function alignWords(options: {
   context: HarnessContext;
   assetId: string;
   text: string;
+  onProgress: ProgressListener | undefined;
 }): Promise<CallToolResult> {
-  const { context, assetId, text } = options;
+  const { context, assetId, text, onProgress } = options;
   const snapshot = context.store.read();
   const found = findAsset({ snapshot, assetId });
   if (!found.ok) return failureResult(found.failure);
@@ -38,6 +40,7 @@ async function alignWords(options: {
     input: { audio_path: join(context.store.folder, asset.file), text },
     outputDirectory: assetFilesFolder(context.store.folder),
     fileStem: assetId,
+    ...(onProgress === undefined ? {} : { onProgress }),
   });
   if (!ran.ok) return failureResult(mediaFailureOf(ran.failure));
   const { words } = ran.value.result;
@@ -66,19 +69,18 @@ async function alignWords(options: {
 }
 
 export function registerAlignWords(context: HarnessContext): void {
-  context.server.registerTool(
-    "align_words",
-    {
-      description:
-        "Make word timings for a speech asset that has none, from the text that it speaks, and store them. Captions and get_asset_words need them.",
-      inputSchema: {
-        asset_id: idInput("The id of the speech asset."),
-        text: z
-          .string()
-          .min(1)
-          .describe("The exact words that the audio speaks."),
-      },
+  context.tools.add({
+    name: "align_words",
+    description:
+      "Make word timings for a speech asset that has none, from the text that it speaks, and store them. Captions and get_asset_words need them.",
+    inputSchema: {
+      asset_id: idInput("The id of the speech asset."),
+      text: z
+        .string()
+        .min(1)
+        .describe("The exact words that the audio speaks."),
     },
-    ({ asset_id, text }) => alignWords({ context, assetId: asset_id, text }),
-  );
+    run: ({ input: { asset_id, text }, onProgress }) =>
+      alignWords({ context, assetId: asset_id, text, onProgress }),
+  });
 }

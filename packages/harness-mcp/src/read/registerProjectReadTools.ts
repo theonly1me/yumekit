@@ -8,14 +8,13 @@ import { wireSceneOf } from "../wireRecords.js";
 const readOnly = { readOnlyHint: true } as const;
 
 function registerGetProject(context: HarnessContext): void {
-  context.server.registerTool(
-    "get_project",
-    {
-      description:
-        "Read the project: name, frame rate, outputs with the length of each timeline in frames, script, bible, a list of scenes, and the revision. Call it first. All time in this harness is in whole frames at frames_per_second.",
-      annotations: readOnly,
-    },
-    () => {
+  context.tools.add({
+    name: "get_project",
+    description:
+      "Read the project: name, frame rate, outputs with the length of each timeline in frames, script, bible, a list of scenes, and the revision. Call it first. All time in this harness is in whole frames at frames_per_second.",
+    inputSchema: {},
+    annotations: readOnly,
+    run: () => {
       const snapshot = context.store.read();
       const { project } = snapshot;
       return successResult({
@@ -56,19 +55,17 @@ function registerGetProject(context: HarnessContext): void {
         },
       });
     },
-  );
+  });
 }
 
 function registerGetScene(context: HarnessContext): void {
-  context.server.registerTool(
-    "get_scene",
-    {
-      description:
-        "Read one scene: title, notes, kind, props, the kit component of a kit scene, and the code of a module scene. The result has the same fields as the input of put_scene.",
-      inputSchema: { scene_id: idInput("The id of the scene.") },
-      annotations: readOnly,
-    },
-    ({ scene_id }) => {
+  context.tools.add({
+    name: "get_scene",
+    description:
+      "Read one scene: title, notes, kind, props, the kit component of a kit scene, and the code of a module scene. The result has the same fields as the input of put_scene.",
+    inputSchema: { scene_id: idInput("The id of the scene.") },
+    annotations: readOnly,
+    run: ({ input: { scene_id } }) => {
       const snapshot = context.store.read();
       const found = findScene({ snapshot, sceneId: scene_id });
       if (!found.ok) return failureResult(found.failure);
@@ -77,19 +74,17 @@ function registerGetScene(context: HarnessContext): void {
         data: wireSceneOf({ scene: found.value, snapshot }),
       });
     },
-  );
+  });
 }
 
 function registerGetTimeline(context: HarnessContext): void {
-  context.server.registerTool(
-    "get_timeline",
-    {
-      description:
-        "Read all tracks and clips of one output, and its length in frames. Scene tracks draw in list order: the first track is at the back. The result has the same track fields as the input of set_timeline.",
-      inputSchema: { output_id: idInput("The id of the output.") },
-      annotations: readOnly,
-    },
-    ({ output_id }) => {
+  context.tools.add({
+    name: "get_timeline",
+    description:
+      "Read all tracks and clips of one output, and its length in frames. Scene tracks draw in list order: the first track is at the back. The result has the same track fields as the input of set_timeline.",
+    inputSchema: { output_id: idInput("The id of the output.") },
+    annotations: readOnly,
+    run: ({ input: { output_id } }) => {
       const found = findOutput({
         snapshot: context.store.read(),
         outputId: output_id,
@@ -101,7 +96,7 @@ function registerGetTimeline(context: HarnessContext): void {
         data,
       });
     },
-  );
+  });
 }
 
 export function registerProjectReadTools(context: HarnessContext): void {

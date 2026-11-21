@@ -84,13 +84,11 @@ async function putScene(options: {
 }
 
 export function registerPutScene(context: HarnessContext): void {
-  context.server.registerTool(
-    "put_scene",
-    {
-      description:
-        "Add or replace a scene: a kit scene (kit_component and props) or a custom scene (code and props). The harness checks the props or compiles the code first and changes nothing when the check fails. A scene is not visible until a clip on a timeline shows it.",
-      inputSchema: putSceneInput,
-    },
-    (input) => putScene({ context, input }),
-  );
+  context.tools.add({
+    name: "put_scene",
+    description:
+      "Add or replace a scene: a kit scene (kit_component and props) or a custom scene (code and props). The harness checks the props or compiles the code first and changes nothing when the check fails. A scene is not visible until a clip on a timeline shows it.",
+    inputSchema: putSceneInput,
+    run: ({ input }) => putScene({ context, input }),
+  });
 }

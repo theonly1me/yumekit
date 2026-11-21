@@ -1,9 +1,9 @@
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { ProjectStore } from "@yumekit/project";
 import type { MediaTools } from "@yumekit/tools";
+import type { ToolTable } from "./harness/toolTable.js";
 
 export interface HarnessContext {
-  server: McpServer;
+  tools: ToolTable;
   store: ProjectStore;
   mediaTools: MediaTools;
 }

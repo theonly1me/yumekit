@@ -54,6 +54,12 @@ export interface ConnectFailure {
   message: string;
 }
 
+export interface MediaToolProgress {
+  done: number;
+  total?: number;
+  message?: string;
+}
+
 export interface MediaToolRequest {
   capability: Capability;
   server?: string;
@@ -61,6 +67,7 @@ export interface MediaToolRequest {
   input: JsonObject;
   outputDirectory: string;
   fileStem: string;
+  onProgress?: (progress: MediaToolProgress) => void;
 }
 
 export interface MediaLimits {

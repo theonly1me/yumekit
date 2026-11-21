@@ -1,42 +1,75 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import type { ProjectStore } from "@yumekit/project";
-import type { MediaTools } from "@yumekit/tools";
+import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
+import type {
+  ServerNotification,
+  ServerRequest,
+} from "@modelcontextprotocol/sdk/types.js";
+import { harnessToolsOf, type HarnessOptions } from "./harness/harnessTools.js";
+import type { HarnessTool, ProgressListener } from "./harness/toolTable.js";
 import { serverInstructions } from "./instructions.js";
-import { registerAlignWords } from "./media/registerAlignWords.js";
-import { registerImportAsset } from "./media/registerAssetFileTools.js";
-import { registerGenerateAsset } from "./media/registerGenerateAsset.js";
-import { registerPreviewTools } from "./output/registerPreviewTools.js";
-import { registerRenderTools } from "./output/registerRenderTools.js";
-import { registerAssetReadTools } from "./read/registerAssetReadTools.js";
-import { registerProjectReadTools } from "./read/registerProjectReadTools.js";
-import { registerReferenceTools } from "./read/registerReferenceTools.js";
-import { registerPutScene } from "./story/registerPutScene.js";
-import { registerStoryTools } from "./story/registerStoryTools.js";
-import { registerNarrationAndHistoryTools } from "./timeline/registerNarrationTools.js";
-import { registerPlaceVideo } from "./timeline/registerPlaceVideo.js";
-import { registerTimelineTools } from "./timeline/registerTimelineTools.js";
 
-export function createHarnessServer(options: {
-  store: ProjectStore;
-  mediaTools: MediaTools;
-}): McpServer {
+type RequestExtra = RequestHandlerExtra<ServerRequest, ServerNotification>;
+
+function noop(): void {
+  return undefined;
+}
+
+function progressOptionOf(extra: RequestExtra): {
+  onProgress?: ProgressListener;
+} {
+  const progressToken = extra._meta?.progressToken;
+  if (progressToken === undefined) return {};
+  return {
+    onProgress: ({ done, total, message }) => {
+      extra
+        .sendNotification({
+          method: "notifications/progress",
+          params: {
+            progressToken,
+            progress: done,
+            ...(total === undefined ? {} : { total }),
+            ...(message === undefined ? {} : { message }),
+          },
+        })
+        .catch(noop);
+    },
+  };
+}
+
+function registerMcpTool(options: {
+  server: McpServer;
+  tool: HarnessTool;
+}): void {
+  const { server, tool } = options;
+  const config = {
+    description: tool.description,
+    ...(tool.annotations === undefined
+      ? {}
+      : { annotations: tool.annotations }),
+  };
+  if (Object.keys(tool.inputShape).length === 0) {
+    server.registerTool(tool.name, config, (extra) =>
+      tool.run({ input: {}, ...progressOptionOf(extra) }),
+    );
+    return;
+  }
+  server.registerTool(
+    tool.name,
+    { ...config, inputSchema: tool.inputShape },
+    (...parameters) => {
+      const [input, extra] = parameters;
+      return tool.run({ input, ...progressOptionOf(extra) });
+    },
+  );
+}
+
+export function createHarnessServer(options: HarnessOptions): McpServer {
   const server = new McpServer(
     { name: "yumekit", version: "0.0.0" },
     { instructions: serverInstructions },
   );
-  const context = { server, ...options };
-  registerProjectReadTools(context);
-  registerAssetReadTools(context);
-  registerReferenceTools(context);
-  registerStoryTools(context);
-  registerPutScene(context);
-  registerTimelineTools(context);
-  registerNarrationAndHistoryTools(context);
-  registerPlaceVideo(context);
-  registerGenerateAsset(context);
-  registerImportAsset(context);
-  registerAlignWords(context);
-  registerPreviewTools(context);
-  registerRenderTools(context);
+  for (const tool of harnessToolsOf(options)) {
+    registerMcpTool({ server, tool });
+  }
   return server;
 }
