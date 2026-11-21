@@ -4,7 +4,8 @@ import type { Field } from "./fields.js";
 import type { FieldProps, FormBinding } from "./formBinding.js";
 import { ObjectListField, TextListField } from "./ListFields.js";
 import { isJsonObject, withValueAt, type PropPath } from "./propPath.js";
-import { NumberField, TextField } from "./TextFields.js";
+import { NumberField } from "./NumberField.js";
+import { TextField } from "./TextFields.js";
 
 function isEmptyGroup(value: unknown): boolean {
   return (

@@ -7,7 +7,11 @@ export type AssetKind = (typeof assetKinds)[number];
 export interface PropSchema {
   type?: string | undefined;
   enum?: string[] | undefined;
+  minLength?: number | undefined;
   maxLength?: number | undefined;
+  minimum?: number | undefined;
+  maximum?: number | undefined;
+  minItems?: number | undefined;
   maxItems?: number | undefined;
   assetKind?: AssetKind | undefined;
   items?: PropSchema | undefined;
@@ -19,7 +23,11 @@ export const propSchemaSchema: z.ZodType<PropSchema> = z.lazy(() =>
   z.object({
     type: z.string().optional(),
     enum: z.array(z.string()).optional(),
+    minLength: z.number().optional(),
     maxLength: z.number().optional(),
+    minimum: z.number().optional(),
+    maximum: z.number().optional(),
+    minItems: z.number().optional(),
     maxItems: z.number().optional(),
     assetKind: z.enum(assetKinds).optional(),
     items: propSchemaSchema.optional(),

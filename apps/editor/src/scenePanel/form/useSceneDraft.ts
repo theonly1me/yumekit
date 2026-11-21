@@ -23,24 +23,30 @@ export type DraftFailure =
 
 const pauseMilliseconds = 450;
 
+export type IssueWording = (options: {
+  issues: FailureIssue[];
+  props: JsonObject;
+}) => FailureIssue[];
+
 export function useSceneDraft(options: {
   client: EngineClient;
   scene: Scene;
   component: string;
+  wordIssues: IssueWording;
 }) {
-  const { client, scene, component } = options;
+  const { client, scene, component, wordIssues } = options;
   const storedKey = JSON.stringify(scene.source.props);
   const [draft, setDraft] = useState<JsonObject>(scene.source.props);
   const [failure, setFailure] = useState<DraftFailure>({ kind: "none" });
-  const latest = useRef({ draft, scene, component });
+  const latest = useRef({ draft, scene, component, wordIssues });
   const timer = useRef<number | undefined>(undefined);
   const isUnsent = useRef(false);
   const callsInFlight = useRef(0);
   const sendNumber = useRef(0);
 
   useEffect(() => {
-    latest.current = { ...latest.current, scene, component };
-  }, [scene, component]);
+    latest.current = { ...latest.current, scene, component, wordIssues };
+  }, [scene, component, wordIssues]);
 
   const send = useCallback(() => {
     window.clearTimeout(timer.current);
@@ -64,7 +70,17 @@ export function useSceneDraft(options: {
     })
       .then((outcome) => {
         if (thisSend !== sendNumber.current) return;
-        setFailure(outcome.kind === "done" ? { kind: "none" } : outcome);
+        setFailure(
+          outcome.kind === "done"
+            ? { kind: "none" }
+            : {
+                ...outcome,
+                issues: current.wordIssues({
+                  issues: outcome.issues,
+                  props: current.draft,
+                }),
+              },
+        );
       })
       .catch((error: unknown) => {
         setFailure({
