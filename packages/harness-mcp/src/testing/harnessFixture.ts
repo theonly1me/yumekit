@@ -1,6 +1,3 @@
-import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
@@ -8,20 +5,25 @@ import {
   CallToolResultSchema,
   type CallToolResult,
 } from "@modelcontextprotocol/sdk/types.js";
-import {
-  createProject,
-  type Output,
-  type ProjectStore,
-} from "@yumekit/project";
-import { connectMediaTools, type MediaToolRequest } from "@yumekit/tools";
-import { onTestFinished, vi } from "vitest";
+import type { ProjectStore } from "@yumekit/project";
+import type { MediaToolRequest } from "@yumekit/tools";
+import { onTestFinished } from "vitest";
 import { createHarnessServer } from "../index.js";
+import {
+  startHarnessProject,
+  type HarnessProjectOptions,
+} from "./harnessProject.js";
 
-export const sampleServerCommand = {
+export { sampleServerCommand, smallOutput } from "./harnessProject.js";
+
+export const progressServerCommand = {
   command: process.execPath,
   args: [
     fileURLToPath(
-      new URL("../../../../tools/sample-media/src/main.ts", import.meta.url),
+      new URL(
+        "../../../tools/src/testing/progressMediaServer.ts",
+        import.meta.url,
+      ),
     ),
   ],
 };
@@ -37,13 +39,6 @@ export const keyedServerCommand = {
     ),
   ],
   passEnvironment: ["YUMEKIT_TEST_KEY"],
-};
-
-export const smallOutput: Output = {
-  id: "wide",
-  label: "Wide",
-  widthPixels: 320,
-  heightPixels: 180,
 };
 
 export interface ToolCall {
@@ -64,52 +59,11 @@ export interface Harness {
   }) => Promise<ToolCall>;
 }
 
-export async function startHarness(options?: {
-  outputs?: Output[];
-  mediaToolsFile?: object;
-  beforeConnect?: () => Promise<unknown>;
-}): Promise<Harness> {
-  const root = await mkdtemp(join(tmpdir(), "yumekit-harness-"));
-  const home = join(root, "home");
-  await mkdir(home);
-  vi.stubEnv("HOME", home);
-  vi.stubEnv("YUMEKIT_CONFIG_DIRECTORY", join(home, ".config", "yumekit"));
-  onTestFinished(async () => {
-    vi.unstubAllEnvs();
-    await rm(root, { recursive: true, force: true });
-  });
-  const created = await createProject({
-    folder: join(root, "project"),
-    name: "Harness test",
-    framesPerSecond: 30,
-    outputs: options?.outputs ?? [smallOutput],
-  });
-  if (!created.ok) throw new Error(created.failure.message);
-  const store = created.value;
-  if (options?.mediaToolsFile !== undefined) {
-    await writeFile(
-      join(store.folder, "media-tools.json"),
-      JSON.stringify(options.mediaToolsFile),
-    );
-  }
-  await options?.beforeConnect?.();
-  const connected = await connectMediaTools({
-    projectFolder: store.folder,
-    bundledServers: { sample: sampleServerCommand },
-  });
-  if (!connected.ok) throw new Error(connected.failure.message);
-  const mediaTools = connected.value;
-  const runRequests: MediaToolRequest[] = [];
-  const server = createHarnessServer({
-    store,
-    mediaTools: {
-      ...mediaTools,
-      run: (request) => {
-        runRequests.push(request);
-        return mediaTools.run(request);
-      },
-    },
-  });
+export async function startHarness(
+  options?: HarnessProjectOptions,
+): Promise<Harness> {
+  const { store, mediaTools, runRequests } = await startHarnessProject(options);
+  const server = createHarnessServer({ store, mediaTools });
   const client = new Client({ name: "harness-test", version: "0.0.0" });
   const [clientTransport, serverTransport] =
     InMemoryTransport.createLinkedPair();

@@ -25,6 +25,11 @@ export const fakeServerCommand: ServerCommand = {
   args: [fileURLToPath(new URL("./fakeMediaServer.ts", import.meta.url))],
 };
 
+export const progressServerCommand: ServerCommand = {
+  command: process.execPath,
+  args: [fileURLToPath(new URL("./progressMediaServer.ts", import.meta.url))],
+};
+
 export const missingServerCommand: ServerCommand = {
   command: "yumekit-command-that-does-not-exist",
   args: [],

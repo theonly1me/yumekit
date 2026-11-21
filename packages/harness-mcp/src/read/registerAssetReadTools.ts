@@ -8,20 +8,18 @@ import { wireAssetOf } from "../wireRecords.js";
 const readOnly = { readOnlyHint: true } as const;
 
 function registerListAssets(context: HarnessContext): void {
-  context.server.registerTool(
-    "list_assets",
-    {
-      description:
-        "List the asset records: id, kind, file, size, duration_frames, has_words, has_audio for a video, and the source. Word timings are not included; read them with get_asset_words.",
-      inputSchema: {
-        kind: z
-          .enum(["image", "audio", "video", "font"])
-          .optional()
-          .describe("Only list assets of this kind."),
-      },
-      annotations: readOnly,
+  context.tools.add({
+    name: "list_assets",
+    description:
+      "List the asset records: id, kind, file, size, duration_frames, has_words, has_audio for a video, and the source. Word timings are not included; read them with get_asset_words.",
+    inputSchema: {
+      kind: z
+        .enum(["image", "audio", "video", "font"])
+        .optional()
+        .describe("Only list assets of this kind."),
     },
-    ({ kind }) => {
+    annotations: readOnly,
+    run: ({ input: { kind } }) => {
       const assets = context.store
         .read()
         .assets.filter((asset) => kind === undefined || asset.kind === kind)
@@ -31,19 +29,17 @@ function registerListAssets(context: HarnessContext): void {
         data: { assets },
       });
     },
-  );
+  });
 }
 
 function registerGetAssetWords(context: HarnessContext): void {
-  context.server.registerTool(
-    "get_asset_words",
-    {
-      description:
-        "Read the word timings of a speech asset, in frames from the start of the asset. Use them to set the length of each scene.",
-      inputSchema: { asset_id: idInput("The id of the speech asset.") },
-      annotations: readOnly,
-    },
-    async ({ asset_id }) => {
+  context.tools.add({
+    name: "get_asset_words",
+    description:
+      "Read the word timings of a speech asset, in frames from the start of the asset. Use them to set the length of each scene.",
+    inputSchema: { asset_id: idInput("The id of the speech asset.") },
+    annotations: readOnly,
+    run: async ({ input: { asset_id } }) => {
       const found = findAsset({
         snapshot: context.store.read(),
         assetId: asset_id,
@@ -71,7 +67,7 @@ function registerGetAssetWords(context: HarnessContext): void {
         },
       });
     },
-  );
+  });
 }
 
 export function registerAssetReadTools(context: HarnessContext): void {

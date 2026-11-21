@@ -54,14 +54,12 @@ function changesOf(input: UpdateClipInput): ClipChanges {
 }
 
 export function registerUpdateClip(context: HarnessContext): void {
-  context.server.registerTool(
-    "update_clip",
-    {
-      description:
-        "Change the timing, the gain, or the target of one clip. Give only the fields to change. scene_id shows another scene in the same place, for example a tall version of a scene in the tall output. asset_id plays another audio asset.",
-      inputSchema: updateClipInput,
-    },
-    (input) =>
+  context.tools.add({
+    name: "update_clip",
+    description:
+      "Change the timing, the gain, or the target of one clip. Give only the fields to change. scene_id shows another scene in the same place, for example a tall version of a scene in the tall output. asset_id plays another audio asset.",
+    inputSchema: updateClipInput,
+    run: ({ input }) =>
       applyEditsResult({
         store: context.store,
         edits: [
@@ -74,5 +72,5 @@ export function registerUpdateClip(context: HarnessContext): void {
         ],
         line: `Clip "${input.clip_id}" changed.`,
       }),
-  );
+  });
 }

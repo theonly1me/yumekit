@@ -35,14 +35,12 @@ const placeVideoInput = {
 };
 
 export function registerPlaceVideo(context: HarnessContext): void {
-  context.server.registerTool(
-    "place_video",
-    {
-      description:
-        'Show a video asset in an output, with its sound. Makes a video-clip scene "video-<asset_id>" (or uses that scene when it exists, with no change to its props), adds a clip of it on the first scene track that is not a caption track (or on a new scene track "scenes" below the others), and adds the sound of the video on the audio track "video-sound". Each video asset gets its own scene, so to show several clips, call place_video once for each asset. A video without sound gets no sound clip, and the "video-sound" track appears only when a sound clip is added. The clip ids are "video-<asset_id>" and "video-sound-<asset_id>", and a suffix such as "-2" keeps each id unique. The result gives scene_id, scene_clip_id, and sound_clip_id. One undo removes all of it.',
-      inputSchema: placeVideoInput,
-    },
-    (request) => {
+  context.tools.add({
+    name: "place_video",
+    description:
+      'Show a video asset in an output, with its sound. Makes a video-clip scene "video-<asset_id>" (or uses that scene when it exists, with no change to its props), adds a clip of it on the first scene track that is not a caption track (or on a new scene track "scenes" below the others), and adds the sound of the video on the audio track "video-sound". Each video asset gets its own scene, so to show several clips, call place_video once for each asset. A video without sound gets no sound clip, and the "video-sound" track appears only when a sound clip is added. The clip ids are "video-<asset_id>" and "video-sound-<asset_id>", and a suffix such as "-2" keeps each id unique. The result gives scene_id, scene_clip_id, and sound_clip_id. One undo removes all of it.',
+    inputSchema: placeVideoInput,
+    run: ({ input: request }) => {
       const snapshot = context.store.read();
       const output = findOutput({ snapshot, outputId: request.output_id });
       if (!output.ok) return failureResult(output.failure);
@@ -94,5 +92,5 @@ export function registerPlaceVideo(context: HarnessContext): void {
         },
       });
     },
-  );
+  });
 }

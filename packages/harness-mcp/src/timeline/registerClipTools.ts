@@ -32,15 +32,13 @@ const addClipInput = {
 type AddClipInput = z.infer<z.ZodObject<typeof addClipInput>>;
 
 function registerAddClip(context: HarnessContext): void {
-  context.server.registerTool(
-    "add_clip",
-    {
-      description:
-        "Add one clip to an existing track. Give scene_id for a scene track or asset_id for an audio track. To add a track, use set_timeline.",
-      inputSchema: addClipInput,
-    },
-    (input) => addClip({ context, input }),
-  );
+  context.tools.add({
+    name: "add_clip",
+    description:
+      "Add one clip to an existing track. Give scene_id for a scene track or asset_id for an audio track. To add a track, use set_timeline.",
+    inputSchema: addClipInput,
+    run: ({ input }) => addClip({ context, input }),
+  });
 }
 
 function addClip(options: {

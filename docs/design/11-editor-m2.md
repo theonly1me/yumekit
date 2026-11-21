@@ -80,6 +80,14 @@ type HarnessResult = {
 
 `createHarnessServer` becomes a thin MCP layer over `createHarness`. The tool list and each result stay the same.
 
+- `HarnessOptions` is `{ store: ProjectStore; mediaTools: MediaTools }`, the same options as `createHarnessServer`.
+- `text` is the text blocks of the MCP result, joined with a line break. `data` is the structured content. `images` is the image blocks.
+- `text` cannot give back the blocks. So both functions build one internal tool table, and the MCP layer keeps the blocks of each result.
+- A call that the MCP SDK answers before the tool runs has a `kind` in `createHarness`: `invalid-input` for input that does not match the schema, and `tool-not-found` for a name that is not a tool.
+- `close` refuses each new call with `harness-closed`, waits for the running calls, and closes the media tools.
+- `onProgress` of a media call goes to `onProgress` of the request to `MediaTools.run` (document 06). `generate_asset` and `align_words` pass it on.
+- Over MCP, the harness sends each progress as an MCP progress notification when the client gave a progress token.
+
 ### HTTP interface
 
 Each request needs the header `Authorization: Bearer <token>`. A request without it gets status 401.

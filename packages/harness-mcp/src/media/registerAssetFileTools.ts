@@ -115,13 +115,11 @@ async function importAsset(options: {
 }
 
 export function registerImportAsset(context: HarnessContext): void {
-  context.server.registerTool(
-    "import_asset",
-    {
-      description:
-        "Copy an image, audio, video, or font file of the user into the project and add it as an asset. Use the asset id in scene props, for example assetId of image-pan. The result gives duration_frames for audio and video.",
-      inputSchema: importAssetInput,
-    },
-    (request) => importAsset({ context, request }),
-  );
+  context.tools.add({
+    name: "import_asset",
+    description:
+      "Copy an image, audio, video, or font file of the user into the project and add it as an asset. Use the asset id in scene props, for example assetId of image-pan. The result gives duration_frames for audio and video.",
+    inputSchema: importAssetInput,
+    run: ({ input: request }) => importAsset({ context, request }),
+  });
 }

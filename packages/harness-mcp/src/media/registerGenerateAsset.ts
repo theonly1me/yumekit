@@ -2,6 +2,7 @@ import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { Edit } from "@yumekit/project";
 import { applyEditsResult } from "../applyEditsResult.js";
 import type { HarnessContext } from "../context.js";
+import type { ProgressListener } from "../harness/toolTable.js";
 import { failureResult } from "../results.js";
 import {
   assetFilesFolder,
@@ -24,8 +25,9 @@ import { videoLimitFailureOf } from "./videoLimit.js";
 async function generateAsset(options: {
   context: HarnessContext;
   request: GenerateAssetInput;
+  onProgress: ProgressListener | undefined;
 }): Promise<CallToolResult> {
-  const { context, request } = options;
+  const { context, request, onProgress } = options;
   const snapshot = context.store.read();
   const projectFolder = context.store.folder;
   const ids = {
@@ -67,6 +69,7 @@ async function generateAsset(options: {
     input: { ...request.input, ...paths.value },
     outputDirectory: assetFilesFolder(projectFolder),
     fileStem: request.asset_id,
+    ...(onProgress === undefined ? {} : { onProgress }),
   });
   if (!ran.ok) return failureResult(mediaFailureOf(ran.failure));
   const { server, model, result } = ran.value;
@@ -125,12 +128,11 @@ async function generateAsset(options: {
 }
 
 export function registerGenerateAsset(context: HarnessContext): void {
-  context.server.registerTool(
-    "generate_asset",
-    {
-      description: generateAssetDescription,
-      inputSchema: generateAssetInput,
-    },
-    (request) => generateAsset({ context, request }),
-  );
+  context.tools.add({
+    name: "generate_asset",
+    description: generateAssetDescription,
+    inputSchema: generateAssetInput,
+    run: ({ input: request, onProgress }) =>
+      generateAsset({ context, request, onProgress }),
+  });
 }

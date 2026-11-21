@@ -1,5 +1,9 @@
 import type { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { ErrorCode, McpError } from "@modelcontextprotocol/sdk/types.js";
+import {
+  ErrorCode,
+  McpError,
+  type Progress,
+} from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
 import { isAbsolute, relative, resolve } from "node:path";
 import { errorMessage } from "./errorMessage.js";
@@ -70,6 +74,22 @@ function pathsOutside(options: {
     .filter((path) => !isInside({ directory: options.outputDirectory, path }));
 }
 
+function progressOptionOf(request: MediaToolRequest): {
+  onprogress?: (progress: Progress) => void;
+} {
+  const { onProgress } = request;
+  if (onProgress === undefined) return {};
+  return {
+    onprogress: ({ progress, total, message }) => {
+      onProgress({
+        done: progress,
+        ...(total === undefined ? {} : { total }),
+        ...(message === undefined ? {} : { message }),
+      });
+    },
+  };
+}
+
 export async function runTool(options: {
   server: string;
   client: Client;
@@ -86,7 +106,10 @@ export async function runTool(options: {
         arguments: toolArguments({ request, model }),
       },
       undefined,
-      { timeout: toolTimeoutSeconds * 1000 },
+      {
+        timeout: toolTimeoutSeconds * 1000,
+        ...progressOptionOf(request),
+      },
     );
   } catch (error) {
     if (isTimeout(error)) {
