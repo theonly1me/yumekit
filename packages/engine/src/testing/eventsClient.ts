@@ -6,6 +6,7 @@ export interface EventsClient {
   messages: unknown[];
   waitFor: (matches: (message: unknown) => boolean) => Promise<unknown>;
   closed: Promise<number>;
+  close: () => void;
 }
 
 const waitMilliseconds = 20_000;
@@ -38,8 +39,12 @@ export function upgradeStatusOf(options: {
 export async function openEvents(options: {
   port: number;
   token: string;
+  isAgent?: boolean;
 }): Promise<EventsClient> {
-  const socket = new WebSocket(eventsUrlOf(options));
+  const url = eventsUrlOf(options);
+  const socket = new WebSocket(
+    options.isAgent === true ? `${url}&client=agent` : url,
+  );
   const messages: unknown[] = [];
   const closed = Promise.withResolvers<number>();
   socket.on("message", (data: Buffer) => {
@@ -60,6 +65,9 @@ export async function openEvents(options: {
   return {
     messages,
     closed: closed.promise,
+    close: () => {
+      socket.close();
+    },
     waitFor: async (matches) => {
       const deadline = Date.now() + waitMilliseconds;
       while (Date.now() < deadline) {

@@ -3,6 +3,7 @@ import { realpath } from "node:fs/promises";
 import { createServer, type Server } from "node:http";
 import { resolve } from "node:path";
 import { openProject, type ProjectStore } from "@yumekit/project";
+import type { ServerCommand } from "./agents/agentTypes.js";
 import { claimEngineFile } from "./engineFile/claimEngineFile.js";
 import { removeEngineFile } from "./engineFile/engineFile.js";
 import {
@@ -74,6 +75,7 @@ export async function startEngine(options: {
   projectFolder: string;
   editorFolder?: string;
   port?: number;
+  serverCommand?: ServerCommand;
 }): Promise<Outcome<Engine, EngineFailure>> {
   const opened = await openProject({ folder: resolve(options.projectFolder) });
   if (!opened.ok) {
@@ -107,7 +109,14 @@ export async function startEngine(options: {
   server.on(
     "request",
     createRequestHandler({
-      context: { origin, projectFolder, store, events, ...parts },
+      context: {
+        origin,
+        projectFolder,
+        store,
+        events,
+        serverCommand: options.serverCommand,
+        ...parts,
+      },
       port,
       token,
       editorFolder:
