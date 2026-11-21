@@ -62,12 +62,10 @@ describe("the editor failure states", () => {
     await runningEngine().stop();
 
     await expect
-      .poll(
-        () =>
-          editor.page
-            .getByRole("heading", { name: "The engine is not reachable" })
-            .count(),
-        { timeout: 15_000 },
+      .poll(() =>
+        editor.page
+          .getByRole("heading", { name: "The engine is not reachable" })
+          .count(),
       )
       .toBe(1);
     await editor.close();

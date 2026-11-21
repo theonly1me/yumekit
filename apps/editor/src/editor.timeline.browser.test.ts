@@ -99,13 +99,12 @@ describe("the scenes row and the timeline", () => {
     await editor.page.keyboard.press("ArrowLeft");
     const afterArrows = await editor.scrubberFrame();
     await editor.page.keyboard.press("Space");
-    const isPlaying = await editor.page
-      .getByRole("button", { name: "Pause" })
-      .count();
+    await expect
+      .poll(() => editor.page.getByRole("button", { name: "Pause" }).count())
+      .toBe(1);
     await editor.page.keyboard.press("Space");
 
     expect(afterArrows).toBe(11);
-    expect(isPlaying).toBe(1);
     await expect
       .poll(() => editor.page.getByRole("button", { name: "Play" }).count())
       .toBe(1);

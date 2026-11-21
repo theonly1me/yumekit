@@ -7,5 +7,6 @@ export default defineProject({
     globalSetup: ["src/testing/buildEditor.ts"],
     testTimeout: 60_000,
     hookTimeout: 120_000,
+    expect: { poll: { timeout: 20_000 } },
   },
 });

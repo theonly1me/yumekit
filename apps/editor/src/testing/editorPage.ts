@@ -23,6 +23,7 @@ export async function openEditor(url: string): Promise<EditorPage> {
   const context = await (
     await sharedBrowser()
   ).newContext({ viewport: { width: 1440, height: 900 } });
+  context.setDefaultTimeout(15_000);
   const page = await context.newPage();
   await page.goto(url);
   const shownFrame = page

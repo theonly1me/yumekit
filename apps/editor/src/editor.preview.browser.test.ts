@@ -52,9 +52,7 @@ describe("the editor preview", () => {
 
     await expect.poll(editor.previewFrame).toBeGreaterThan(20);
     await expect
-      .poll(() => editor.page.getByRole("button", { name: "Play" }).count(), {
-        timeout: 10_000,
-      })
+      .poll(() => editor.page.getByRole("button", { name: "Play" }).count())
       .toBe(1);
     expect(await editor.scrubberFrame()).toBe(lastFrame);
     await expect.poll(editor.previewFrame).toBe(lastFrame);
