@@ -4,12 +4,14 @@ import type { SceneClip, Snapshot } from "../engine/snapshot.js";
 import { Preview } from "../preview/Preview.js";
 import { usePlayback } from "../preview/usePlayback.js";
 import { useSound } from "../preview/useSound.js";
+import { renderButtonLabel } from "../render/renderJobs.js";
+import { RenderSheet } from "../render/RenderSheet.js";
+import { useRenders } from "../render/useRenders.js";
 import { AgentPane } from "../side/AgentPane.js";
 import { ScenePane } from "../side/ScenePane.js";
 import { SidePanel, ToolsPane, type SideTab } from "../side/SidePanel.js";
 import { useEditorFacts } from "./useEditorFacts.js";
 import { LowerArea, type LowerView } from "./LowerArea.js";
-import { RenderSheet } from "./RenderSheet.js";
 import { TopBar } from "./TopBar.js";
 import { Transport } from "./Transport.js";
 import { useKeyboard } from "./useKeyboard.js";
@@ -29,6 +31,7 @@ export function Editor(props: {
   const [lowerView, setLowerView] = useState<LowerView>("scenes");
   const [isRenderOpen, setRenderOpen] = useState(false);
   const { theme, setTheme } = useTheme();
+  const renders = useRenders(client);
   const facts = useEditorFacts({
     snapshot,
     chosenOutputId,
@@ -116,6 +119,7 @@ export function Editor(props: {
           setOutputId(outputId);
         }}
         onTheme={setTheme}
+        renderLabel={renderButtonLabel(renders)}
         onRender={() => {
           pause();
           setRenderOpen(true);
@@ -152,8 +156,10 @@ export function Editor(props: {
       </SidePanel>
       {isRenderOpen ? (
         <RenderSheet
+          client={client}
+          snapshot={snapshot}
           projectFolder={props.projectFolder}
-          outputId={output.id}
+          renders={renders}
           onClose={() => {
             setRenderOpen(false);
           }}

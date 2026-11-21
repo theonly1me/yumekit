@@ -1,0 +1,119 @@
+.render-facts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  font-size: var(--step--1);
+}
+
+.render-facts div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+
+.render-facts dt {
+  color: var(--muted);
+  flex: none;
+}
+
+.render-facts dd {
+  margin: 0;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.sheet-body .primary {
+  justify-self: start;
+  font-size: var(--step-0);
+  padding: 10px 24px;
+}
+
+.sheet-body .primary:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.sheet-body fieldset:disabled label {
+  color: var(--muted);
+}
+
+.sheet-body input[type="checkbox"]:disabled + * {
+  color: var(--faint);
+}
+
+.render-jobs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  font-size: var(--step--1);
+}
+
+.render-job {
+  display: grid;
+  gap: 10px;
+  padding: 14px 0;
+  border-top: 1px solid var(--line);
+}
+
+.render-job-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.render-job-status {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.render-job[data-state="done"] .render-job-status {
+  color: var(--text);
+}
+
+.render-progress {
+  height: 1px;
+  background: var(--line-strong);
+  overflow: hidden;
+}
+
+.render-progress span {
+  display: block;
+  height: 100%;
+  background: var(--text);
+  transition: width 200ms linear;
+}
+
+.render-path {
+  color: var(--muted);
+  font-size: var(--step--2);
+  overflow-wrap: anywhere;
+}
+
+.render-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.render-failure {
+  display: grid;
+  gap: 4px;
+}
+
+.render-failure > p:first-child {
+  color: var(--accent);
+}
+
+.render-job .fact a {
+  color: var(--text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .render-progress span {
+    transition: none;
+  }
+}

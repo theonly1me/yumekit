@@ -1,6 +1,6 @@
 import { execFile, spawn } from "node:child_process";
 import { mkdir, mkdtemp, rm } from "node:fs/promises";
-import { tmpdir } from "node:os";
+import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
@@ -23,6 +23,21 @@ export interface RunningEngine {
   remove: () => Promise<void>;
 }
 
+function playwrightBrowsersPath(): string {
+  const known = process.env["PLAYWRIGHT_BROWSERS_PATH"];
+  if (known !== undefined && known !== "") return known;
+  if (process.platform === "darwin") {
+    return join(homedir(), "Library", "Caches", "ms-playwright");
+  }
+  if (process.platform === "win32") {
+    return join(process.env["LOCALAPPDATA"] ?? homedir(), "ms-playwright");
+  }
+  return join(
+    process.env["XDG_CACHE_HOME"] ?? join(homedir(), ".cache"),
+    "ms-playwright",
+  );
+}
+
 async function createProject(): Promise<{
   root: string;
   folder: string;
@@ -36,6 +51,7 @@ async function createProject(): Promise<{
     HOME: home,
     YUMEKIT_CONFIG_DIRECTORY: join(root, "config"),
     OPENAI_API_KEY: "",
+    PLAYWRIGHT_BROWSERS_PATH: playwrightBrowsersPath(),
   };
   const folder = join(root, "project");
   await runFile(

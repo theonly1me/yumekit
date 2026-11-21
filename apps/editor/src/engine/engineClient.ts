@@ -83,12 +83,14 @@ export function createEngineClient(token: string) {
         path: `/api/preview?output=${encodeURIComponent(outputId)}`,
         schema: previewSchema,
       }),
-    callTool: (call: { name: string; input: object }) =>
+    callTool: (call: { name: string; input: object; callId?: string }) =>
       readJson({
         path: `/api/tools/${encodeURIComponent(call.name)}`,
         schema: toolResultSchema,
-        body: { input: call.input },
+        body: { input: call.input, callId: call.callId },
       }),
+    renderFile: (file: string) =>
+      send({ path: `/api/renders/${encodeURIComponent(file)}` }),
     assetFile: async (assetId: string): Promise<Reply<Blob>> => {
       const sent = await send({
         path: `/api/assets/${encodeURIComponent(assetId)}/file`,

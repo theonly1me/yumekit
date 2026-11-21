@@ -246,10 +246,21 @@ These rules came from the build of WP21.
 5. A clip picked in the scenes row or the timeline stays selected while the playhead is inside it. Otherwise the selection follows the clip of the first scene track at the playhead. A pick in the scenes row also opens the Scene tab.
 6. The timeline names each track by its id, with a capital first letter and spaces for hyphens. An audio clip shows the `text` or the `prompt` of its tool input, or its asset id. An audio clip of an asset with word timings and a clip of a caption track use the narration style.
 7. The Agent tab shows `yumekit mcp --project <folder>` and a block for Claude Code (`.mcp.json`), Codex (`~/.codex/config.toml`), and Cursor (`.cursor/mcp.json` or `~/.cursor/mcp.json`). Each block runs `yumekit` from the `PATH`.
-8. Until WP24, the Render button opens a sheet with the `yumekit render` command for the current output.
+8. The Render button opens the Render sheet. See "Details of Render".
 9. The theme setting is a text button in the top bar. The key in `localStorage` is `yumekit-theme`.
 10. A reload loses the token, because the app keeps it only in memory. The page then asks for the link from `yumekit open`.
 11. The editor browser tests start `yumekit open` as a child process and use only HTTP, so `apps/editor` imports no yumekit package. The test setup builds the editor first, because CI runs `pnpm test` before `pnpm build`.
+
+#### Details of Render
+
+These rules came from the build of WP24.
+
+1. The sheet lists each output with its label, its size, and its length. An output with no clips cannot be chosen. At first each output with clips is chosen. After a render, the sheet keeps the outputs of the last render.
+2. "Render N files" runs one `render_video` call for each chosen output, one after another, at the full size of the output. Each call has a `callId`. While renders run, the editor opens its own event WebSocket and shows each `call-progress` as frames done of the total, with a thin progress line.
+3. The renders belong to the editor shell, not to the sheet. A render keeps running when the person closes the sheet, the Render button shows "Rendering N%" over all chosen files, and the sheet shows the progress again when it opens. A reload of the page loses this state, and the engine still finishes the render.
+4. A finished render shows the full path of the file with a button that copies it, and "Open the video". That button opens a new tab first, so the browser does not block it, then fetches `GET /api/renders/<file>` with the header and shows the file from a blob URL. If `Content-Length` is more than 512 MB, the editor does not load the file and asks the person to copy the path.
+5. A failed render shows the message and the hint of the tool.
+6. The editor browser tests give the engine a temporary `HOME`, so they pass `PLAYWRIGHT_BROWSERS_PATH` with the browser folder of Playwright. Without it, the renderer of the engine finds no Chromium.
 
 ## The command
 
