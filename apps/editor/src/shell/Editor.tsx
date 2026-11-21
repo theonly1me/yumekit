@@ -4,7 +4,7 @@ import type { SceneClip, Snapshot } from "../engine/snapshot.js";
 import { Preview } from "../preview/Preview.js";
 import { usePlayback } from "../preview/usePlayback.js";
 import { useSound } from "../preview/useSound.js";
-import { renderButtonLabel } from "../render/renderJobs.js";
+import { clipOfTarget, renderButtonLabel } from "../render/renderJobs.js";
 import { RenderSheet } from "../render/RenderSheet.js";
 import { useRenders } from "../render/useRenders.js";
 import { useHistory } from "../scenePanel/history/useHistory.js";
@@ -166,6 +166,14 @@ export function Editor(props: {
           snapshot={snapshot}
           projectFolder={props.projectFolder}
           renders={renders}
+          onOpenScene={(target) => {
+            const clip = clipOfTarget({ snapshot, target });
+            setRenderOpen(false);
+            setOutputId(target.outputId);
+            setPickedClipId(clip?.id);
+            setFrame(target.frame ?? clip?.startFrame ?? 0);
+            setSideTab("scene");
+          }}
           onClose={() => {
             setRenderOpen(false);
           }}

@@ -1,7 +1,8 @@
 import { useState } from "react";
 import type { EngineClient } from "../engine/engineClient.js";
 import { openRenderFile, type OpenOutcome } from "./openRenderFile.js";
-import type { RenderJob } from "./renderJobs.js";
+import { FailedRender } from "./FailedRender.js";
+import type { RenderJob, SceneTarget } from "./renderJobs.js";
 
 function statusOf(job: RenderJob): string {
   switch (job.state.kind) {
@@ -87,6 +88,8 @@ export function RenderJobRow(props: {
   client: EngineClient;
   job: RenderJob;
   label: string;
+  sceneTitleOf: (sceneId: string | undefined) => string | undefined;
+  onOpenScene: (target: SceneTarget) => void;
 }) {
   const { job } = props;
   const share =
@@ -119,12 +122,14 @@ export function RenderJobRow(props: {
         />
       ) : undefined}
       {job.state.kind === "failed" ? (
-        <div className="render-failure" role="alert">
-          <p>{job.state.message}</p>
-          {job.state.hint === undefined ? undefined : (
-            <p className="fact">{job.state.hint}</p>
-          )}
-        </div>
+        <FailedRender
+          message={job.state.message}
+          failedAt={job.state.failedAt}
+          sceneTitle={props.sceneTitleOf(job.state.failedAt?.sceneId)}
+          onOpenScene={(failedAt) => {
+            props.onOpenScene({ outputId: job.outputId, ...failedAt });
+          }}
+        />
       ) : undefined}
     </li>
   );

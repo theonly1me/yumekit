@@ -35,7 +35,7 @@ async function renderOne(options: {
       reply.failure.kind === "request-failed"
         ? reply.failure.message
         : "The engine is not reachable. Check that yumekit open still runs.";
-    return { kind: "failed", message, hint: undefined };
+    return { kind: "failed", message, failedAt: undefined };
   }
   if (reply.value.isError) {
     const failure = renderFailureSchema.safeParse(reply.value.data);
@@ -43,13 +43,16 @@ async function renderOne(options: {
       ? {
           kind: "failed",
           message: failure.data.message,
-          hint: failure.data.hint,
+          failedAt:
+            failure.data.scene_id === undefined
+              ? undefined
+              : { sceneId: failure.data.scene_id, frame: failure.data.frame },
         }
-      : { kind: "failed", message: reply.value.text, hint: undefined };
+      : { kind: "failed", message: reply.value.text, failedAt: undefined };
   }
   const result = renderResultSchema.safeParse(reply.value.data);
   if (!result.success) {
-    return { kind: "failed", message: reply.value.text, hint: undefined };
+    return { kind: "failed", message: reply.value.text, failedAt: undefined };
   }
   return {
     kind: "done",
@@ -128,7 +131,7 @@ export function useRenders(client: EngineClient) {
                     state: {
                       kind: "failed",
                       message: String(error),
-                      hint: undefined,
+                      failedAt: undefined,
                     },
                   },
             ),

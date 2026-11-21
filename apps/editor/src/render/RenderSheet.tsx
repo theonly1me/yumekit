@@ -3,7 +3,7 @@ import type { EngineClient } from "../engine/engineClient.js";
 import type { Snapshot } from "../engine/snapshot.js";
 import { outputLabel } from "../timeline/timelineFacts.js";
 import { RenderJobRow } from "./RenderJobRow.js";
-import { outputFactsOf } from "./renderJobs.js";
+import { outputFactsOf, type SceneTarget } from "./renderJobs.js";
 import type { Renders } from "./useRenders.js";
 import "./render.css";
 
@@ -22,6 +22,7 @@ export function RenderSheet(props: {
   projectFolder: string;
   renders: Renders;
   onClose: () => void;
+  onOpenScene: (target: SceneTarget) => void;
 }) {
   const { client, snapshot, renders } = props;
   const closeButton = useRef<HTMLButtonElement>(null);
@@ -121,6 +122,10 @@ export function RenderSheet(props: {
               );
               return (
                 <RenderJobRow
+                  sceneTitleOf={(sceneId) =>
+                    snapshot.scenes.find((scene) => scene.id === sceneId)?.title
+                  }
+                  onOpenScene={props.onOpenScene}
                   key={job.callId}
                   client={client}
                   job={job}

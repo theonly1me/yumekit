@@ -10,7 +10,14 @@ export type JobState =
   | { kind: "waiting" }
   | { kind: "rendering"; framesDone: number; frameCount: number | undefined }
   | { kind: "done"; file: string; fileName: string; durationSeconds: number }
-  | { kind: "failed"; message: string; hint: string | undefined };
+  | { kind: "failed"; message: string; failedAt: FailedAt | undefined };
+
+export interface FailedAt {
+  sceneId: string;
+  frame: number | undefined;
+}
+
+export type SceneTarget = FailedAt & { outputId: string };
 
 export interface RenderJob {
   callId: string;
@@ -25,7 +32,8 @@ export const renderResultSchema = z.object({
 
 export const renderFailureSchema = z.object({
   message: z.string(),
-  hint: z.string().optional(),
+  scene_id: z.string().optional(),
+  frame: z.number().optional(),
 });
 
 export const progressEventSchema = z.object({
@@ -83,4 +91,23 @@ export function renderButtonLabel(options: {
   if (!options.isRunning) return "Render";
   const percent = Math.floor(framesShareOf(options.jobs) * 100);
   return `Rendering ${String(percent)}%`;
+}
+
+export function clipOfTarget(options: {
+  snapshot: Snapshot;
+  target: SceneTarget;
+}): { id: string; startFrame: number } | undefined {
+  const { snapshot, target } = options;
+  const clips = timelineOf({ snapshot, outputId: target.outputId })
+    .tracks.flatMap((track) => (track.kind === "scene" ? track.clips : []))
+    .filter((clip) => clip.sceneId === target.sceneId);
+  const frame = target.frame;
+  return (
+    clips.find(
+      (clip) =>
+        frame !== undefined &&
+        frame >= clip.startFrame &&
+        frame < clip.startFrame + clip.durationFrames,
+    ) ?? clips[0]
+  );
 }

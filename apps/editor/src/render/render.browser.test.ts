@@ -90,18 +90,38 @@ describe("render from the editor", () => {
     await close();
   });
 
-  it("shows the message and the hint of a render that fails", async () => {
-    const { sheet, close } = await openRenderSheet("Tall");
+  it("shows a failed render in plain words and opens the scene at the failed frame", async () => {
+    const { page, sheet, scrubberFrame, close } = await openRenderSheet("Tall");
 
     await sheet.getByRole("button", { name: "Render 1 file" }).click();
 
     const failure = sheet.getByRole("alert");
     await expect.poll(() => failure.count(), { timeout: 60_000 }).toBe(1);
+    const message = (await failure.textContent()) ?? "";
+    expect(message).toContain("This scene breaks on purpose.");
     expect(await sheet.getByText("Did not render").count()).toBe(1);
-    expect(await failure.textContent()).toContain(
-      "This scene breaks on purpose.",
-    );
-    expect(await failure.textContent()).toContain('Scene "broken" failed');
+    expect(
+      await sheet
+        .getByText(
+          "Ask your agent to correct the scene Broken, or change it in the Scene panel.",
+        )
+        .count(),
+    ).toBe(1);
+    expect(await sheet.getByText(/get_scene|put_scene/).count()).toBe(0);
+    const failedFrame = Number(/at frame (\d+)/.exec(message)?.[1]);
+
+    await sheet.getByRole("button", { name: "Open this scene" }).click();
+
+    expect(await page.getByRole("dialog", { name: "Render" }).count()).toBe(0);
+    await expect
+      .poll(() => page.getByRole("heading", { level: 2 }).textContent())
+      .toBe("Broken");
+    expect(
+      await page
+        .getByRole("button", { name: "Tall", exact: true })
+        .getAttribute("aria-pressed"),
+    ).toBe("true");
+    expect(await scrubberFrame()).toBe(failedFrame);
     await close();
   });
 
