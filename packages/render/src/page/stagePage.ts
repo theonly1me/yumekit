@@ -1,17 +1,8 @@
-import * as sceneKit from "@yumekit/scene-kit";
 import { loadStylePackFonts, paper } from "@yumekit/scene-kit";
-import { createStage } from "@yumekit/stage";
 import stagePageData, { moduleSceneImports } from "virtual:yumekit-stage-data";
-import { guardScene } from "./guardScene.js";
-import { loadSceneModule } from "./loadSceneModule.js";
+import { createPageStage } from "./pageStage.js";
 import { createSceneErrorLog } from "./sceneErrorLog.js";
-import { KitSceneNotFound, messageOf, SceneFailure } from "./sceneFailure.js";
-import type { SeekResult, StagePageApi } from "./stagePageData.js";
-
-const sceneTimeoutMilliseconds = 30_000;
-
-const kitScenes: unknown =
-  "kitScenes" in sceneKit ? sceneKit.kitScenes : undefined;
+import type { StagePageApi } from "./stagePageData.js";
 
 const sceneImports = new Map(Object.entries(moduleSceneImports));
 
@@ -28,66 +19,14 @@ function startStagePage(): StagePageApi {
   if (element === null) {
     throw new Error("The stage page has no #stage element");
   }
-  const sources = new Map(Object.entries(stagePageData.sceneSources));
-  const errorLog = createSceneErrorLog();
-  let sceneIdsSeeked: string[] = [];
-  const stage = createStage({
+  const stage = createPageStage({
     element,
-    project: stagePageData.project,
+    pageData: stagePageData,
+    importModuleScene,
+    errorLog: createSceneErrorLog(),
     mode: "render",
-    loadScene: async (sceneId) =>
-      guardScene({
-        sceneId,
-        sceneModule: await loadSceneModule({
-          sceneId,
-          source: sources.get(sceneId),
-          kitScenes,
-          importModuleScene,
-        }),
-        errorLog,
-        timeoutMilliseconds: sceneTimeoutMilliseconds,
-        onSeek: (seekedSceneId) => {
-          sceneIdsSeeked.push(seekedSceneId);
-        },
-      }),
   });
-  return {
-    seek: async (frame): Promise<SeekResult> => {
-      sceneIdsSeeked = [];
-      try {
-        await stage.seek(frame);
-      } catch (error) {
-        if (error instanceof KitSceneNotFound) {
-          return {
-            ok: false,
-            kind: "kit-scene-not-found",
-            sceneId: error.sceneId,
-            component: error.component,
-            message: error.message,
-          };
-        }
-        return {
-          ok: false,
-          kind: "scene-error",
-          sceneId:
-            error instanceof SceneFailure
-              ? error.sceneId
-              : (sceneIdsSeeked[0] ?? ""),
-          message: messageOf(error),
-        };
-      }
-      const [logged] = errorLog.takeErrors();
-      if (logged !== undefined) {
-        return {
-          ok: false,
-          kind: "scene-error",
-          sceneId: logged.sceneId ?? sceneIdsSeeked[0] ?? "",
-          message: `A scene logged an error: ${logged.message}`,
-        };
-      }
-      return { ok: true };
-    },
-  };
+  return { seek: stage.seek };
 }
 
 await loadStylePackFonts(paper);

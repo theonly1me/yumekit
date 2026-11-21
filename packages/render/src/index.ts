@@ -1,5 +1,9 @@
 export { probeMedia, type ProbedMedia } from "./media/probeMedia.js";
 export type { Outcome } from "./outcome.js";
+export {
+  startPreviewServer,
+  type PreviewServer,
+} from "./preview/startPreviewServer.js";
 export type { RenderFailure, RenderScale } from "./renderFailure.js";
 export { renderFrame, type RenderedFrame } from "./renderFrame.js";
 export {

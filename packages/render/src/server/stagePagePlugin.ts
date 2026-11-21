@@ -1,28 +1,13 @@
-import { join, sep } from "node:path";
 import type { Plugin } from "vite";
-import { stageEntryFile, stagePageEntryFile } from "../packagePaths.js";
-import { isPermittedCompiledSceneImport } from "../sceneCode/permittedImports.js";
+import { stagePageEntryFile } from "../packagePaths.js";
 import type { StagePageData } from "../page/stagePageData.js";
-import {
-  assetFramesPath,
-  type VideoFrameServer,
-} from "../videoFrames/videoFrameServer.js";
+import type { VideoFrameServer } from "../videoFrames/videoFrameServer.js";
+import { pageHtmlOf, sendHtml, serveAssetFrames } from "./pageResponses.js";
 
 const stageDataModuleId = "virtual:yumekit-stage-data";
 const resolvedStageDataModuleId = `\0${stageDataModuleId}`;
 
 export const stagePagePath = "/stage.html";
-
-function stagePageHtml(): string {
-  return [
-    "<!doctype html>",
-    '<html><head><meta charset="utf-8">',
-    "<style>html, body { margin: 0; background: #000000; overflow: hidden; }</style>",
-    '</head><body><div id="stage"></div>',
-    `<script type="module" src="/@fs${encodeURI(stagePageEntryFile)}"></script>`,
-    "</body></html>",
-  ].join("");
-}
 
 function stageDataModuleCode(pageData: StagePageData): string {
   const moduleSceneImports = Object.entries(pageData.sceneSources).flatMap(
@@ -40,30 +25,14 @@ function stageDataModuleCode(pageData: StagePageData): string {
 }
 
 export function stagePagePlugin(options: {
-  projectFolder: string;
   pageData: StagePageData;
   videoFrames: VideoFrameServer;
 }): Plugin {
-  const scenesFolder = join(options.projectFolder, "scenes") + sep;
   return {
     name: "yumekit-stage-page",
     enforce: "pre",
-    async resolveId(...parameters) {
-      const [source, importer] = parameters;
-      if (source === stageDataModuleId) {
-        return resolvedStageDataModuleId;
-      }
-      if (!importer?.startsWith(scenesFolder)) {
-        return null;
-      }
-      if (!isPermittedCompiledSceneImport(source)) {
-        this.error(`A scene may not import "${source}"`);
-      }
-      return this.resolve(
-        source,
-        source === "@yumekit/scene" ? stageEntryFile : stagePageEntryFile,
-        { skipSelf: true },
-      );
+    resolveId(source) {
+      return source === stageDataModuleId ? resolvedStageDataModuleId : null;
     },
     load(id) {
       return id === resolvedStageDataModuleId
@@ -73,13 +42,9 @@ export function stagePagePlugin(options: {
     configureServer(server) {
       server.middlewares.use(stagePagePath, (...parameters) => {
         const [, response] = parameters;
-        response.setHeader("Content-Type", "text/html; charset=utf-8");
-        response.end(stagePageHtml());
+        sendHtml({ response, html: pageHtmlOf(stagePageEntryFile) });
       });
-      server.middlewares.use(assetFramesPath, (...parameters) => {
-        const [request, response, next] = parameters;
-        options.videoFrames.respond({ request, response }).catch(next);
-      });
+      serveAssetFrames({ server, videoFrames: () => options.videoFrames });
     },
   };
 }

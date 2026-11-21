@@ -156,6 +156,16 @@ type PreviewServer = {
 - The engine calls `refresh` after each `project-changed`. The page then loads the new project data and draws the current frame again.
 - A scene that fails shows the failure in the editor next to the preview, with the scene id. The other scenes still draw.
 
+#### Details of the preview page
+
+1. `pageUrlOf(outputId)` returns `http://127.0.0.1:<port>/preview.html?output=<outputId>`. The engine adds `&parentOrigin=<engine origin>` before it gives the URL to the editor.
+2. If `parentOrigin` is missing or is not an exact origin, such as `*`, the page accepts no message and sends no message.
+3. The page accepts a message only when its origin is `parentOrigin` and its source is the parent window. It sends each message with `parentOrigin` as the target origin.
+4. The page reads the project data from `GET /preview-data?output=<outputId>` of the preview server. It learns of a `refresh` from the event stream `GET /preview-events`.
+5. The page sends `ready` after the first load and again after each `refresh`. After a `refresh`, it draws the frame of the last `seek` before it sends `ready`. If that draw fails, it first sends `failed` with the `requestId` of the last `seek`.
+6. `failed` has the `kind` of a scene failure (`scene-error` or `kit-scene-not-found`), `frame-out-of-range`, or the kind of a load failure such as `output-not-found`.
+7. The stage in `preview` mode has no render guards. For a scene that obeys document 02, the preview pixels equal the pixels of `renderFrame`. A test checks this for a kit scene, a custom scene, and a `video-clip` scene.
+
 ### Play
 
 1. Play steps the frame from a clock in the editor: frame = start frame + elapsed seconds times the frame rate.
