@@ -77,6 +77,7 @@ export interface MediaLimits {
 export interface MediaServerEntry {
   server: string;
   capabilities: Capability[];
+  canCheckKey: boolean;
   description?: MediaServerDescription;
   descriptionFailure?: { kind: "media-tool-invalid-result"; message: string };
 }

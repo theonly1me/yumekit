@@ -9,7 +9,7 @@ export interface EditorPage {
 
 let browser: Browser | undefined;
 
-async function sharedBrowser(): Promise<Browser> {
+export async function sharedBrowser(): Promise<Browser> {
   browser ??= await chromium.launch();
   return browser;
 }

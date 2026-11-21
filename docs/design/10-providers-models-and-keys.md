@@ -155,7 +155,7 @@ The value is never a command argument, because a shell keeps arguments in its hi
 ### Keys and the agent
 
 - No MCP tool reads, sets, or removes a key.
-- `list_media_tools` returns the description of each server and the state of each key (`environment`, `key-file`, or `missing`), with `get_key_url` and `steps`. So an agent can tell the person what to do. It never returns a value.
+- `list_media_tools` returns the description of each server and the state of each key (`environment`, `key-file`, or `missing`), with `get_key_url` and `steps`, and `can_check_key` for each server (true when the server lists `check_key`). So an agent can tell the person what to do. It never returns a value.
 - Before a call to a server with a missing key, the harness makes no tool call. It returns the failure `media-key-missing` with the server, the variable, `get_key_url`, `steps`, and the sentence "Add the key in the editor under Tools, or run `yumekit keys set <VARIABLE>`."
 
 ## What the editor shows
