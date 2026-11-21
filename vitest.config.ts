@@ -18,6 +18,7 @@ export default defineConfig({
       "packages/scene-kit/vitest.config.ts",
       "packages/stage/vitest.config.ts",
       "packages/render/vitest.config.ts",
+      "apps/editor/vitest.config.ts",
     ],
   },
 });
