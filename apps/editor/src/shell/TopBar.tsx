@@ -9,6 +9,7 @@ export function TopBar(props: {
   theme: Theme;
   onOutput: (outputId: string) => void;
   onTheme: (theme: Theme) => void;
+  renderLabel: string;
   onRender: () => void;
 }) {
   const otherTheme = props.theme === "dark" ? "light" : "dark";
@@ -43,7 +44,7 @@ export function TopBar(props: {
           Use the {otherTheme} theme
         </button>
         <button type="button" className="primary" onClick={props.onRender}>
-          Render
+          {props.renderLabel}
         </button>
       </div>
     </header>
