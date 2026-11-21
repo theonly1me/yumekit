@@ -1,4 +1,5 @@
 import type { z } from "zod";
+import { createEventHub } from "./engineEvents.js";
 import {
   healthSchema,
   previewSchema,
@@ -31,6 +32,7 @@ async function messageOf(response: Response): Promise<string> {
 
 export function createEngineClient(token: string) {
   const headers = { authorization: `Bearer ${token}` };
+  const events = createEventHub();
 
   async function send(options: {
     path: string;
@@ -82,6 +84,7 @@ export function createEngineClient(token: string) {
 
   return {
     token,
+    events,
     health: () => readJson({ path: "/api/health", schema: healthSchema }),
     project: () => readJson({ path: "/api/project", schema: snapshotSchema }),
     preview: (outputId: string) =>

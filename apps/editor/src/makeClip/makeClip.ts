@@ -99,26 +99,16 @@ export async function makeClip(options: {
   });
   if (!generated.ok) return generated;
   const assetId = textField({ data: generated.data, name: "asset_id" });
-  const removed = await callTool({
-    client,
-    name: "remove_clip",
-    input: { output_id: output.id, clip_id: clip.id },
-  });
-  if (!removed.ok) return removed;
   const placed = await callTool({
     client,
     name: "place_video",
     input: {
       output_id: output.id,
       asset_id: assetId,
-      start_frame: clip.startFrame,
-      duration_frames: clip.durationFrames,
+      replace_clip_id: clip.id,
     },
   });
-  if (!placed.ok) {
-    await callTool({ client, name: "undo", input: {} });
-    return placed;
-  }
+  if (!placed.ok) return placed;
   return {
     ok: true,
     made: {

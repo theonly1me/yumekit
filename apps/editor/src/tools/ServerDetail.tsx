@@ -49,11 +49,13 @@ function KeyActions(props: {
   return (
     <>
       <div className="key-actions">
-        <button type="button" disabled={isBusy} onClick={run(test)}>
-          {state.kind === "busy" && state.action === "test"
-            ? "Testing the key"
-            : "Test the key"}
-        </button>
+        {server.can_check_key ? (
+          <button type="button" disabled={isBusy} onClick={run(test)}>
+            {state.kind === "busy" && state.action === "test"
+              ? "Testing the key"
+              : "Test the key"}
+          </button>
+        ) : undefined}
         {props.canRemove ? (
           <button type="button" disabled={isBusy} onClick={run(remove)}>
             Remove the key

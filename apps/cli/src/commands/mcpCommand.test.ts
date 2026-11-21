@@ -6,7 +6,7 @@ import { connectToMcp } from "../testing/connectToMcp.js";
 import { createCliWorkspace } from "../testing/runCli.js";
 
 describe("yumekit mcp", () => {
-  it("serves the harness over stdio with the bundled sample server and nothing else on stdout", async () => {
+  it("serves the harness over stdio with each bundled server and nothing else on stdout", async () => {
     const workspace = await createCliWorkspace();
     const folder = join(workspace.root, "project");
     await workspace.run(["init", folder]);
@@ -26,7 +26,12 @@ describe("yumekit mcp", () => {
     expect(tools).toHaveLength(30);
     expect(client.getInstructions()).toContain("get_scene_guide");
     expect(media.structuredContent).toMatchObject({
-      servers: [{ server: "sample" }],
+      servers: [
+        { server: "sample" },
+        { server: "openai" },
+        { server: "gemini" },
+        { server: "fal" },
+      ],
     });
     expect(project.structuredContent).toMatchObject({
       name: "project",

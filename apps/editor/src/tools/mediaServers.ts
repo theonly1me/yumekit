@@ -65,6 +65,7 @@ const keySchema = z.object({
 const serverSchema = z.object({
   server: z.string(),
   capabilities: z.array(capabilitySchema),
+  can_check_key: z.boolean(),
   label: z.string().optional(),
   runs: z.enum(["hosted", "on-this-computer"]).optional(),
   models: z.array(modelSchema).default([]),

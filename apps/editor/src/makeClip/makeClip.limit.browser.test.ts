@@ -5,6 +5,7 @@ import {
   generateStill,
   openMakeClip,
   videoAssetCount,
+  withoutOtherBundled,
 } from "../testing/mediaTestTools.js";
 import { runEngine, type RunningEngine } from "../testing/runEngine.js";
 
@@ -18,7 +19,7 @@ function runningEngine(): RunningEngine {
 beforeAll(async () => {
   engine = await runEngine({
     mediaTools: {
-      mcpServers: { sample: {} },
+      mcpServers: { sample: {}, ...withoutOtherBundled },
       limits: { generatedVideoSeconds: 3 },
     },
   });

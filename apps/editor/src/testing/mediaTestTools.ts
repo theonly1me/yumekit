@@ -11,6 +11,17 @@ export const keyTestServer = {
   passEnvironment: [testKeyVariable],
 };
 
+export const plainKeyTestServer = {
+  ...keyTestServer,
+  args: [...keyTestServer.args, "--without-check-key"],
+};
+
+export const withoutOtherBundled = {
+  openai: { disabled: true },
+  gemini: { disabled: true },
+  fal: { disabled: true },
+};
+
 export async function engineRequest(options: {
   engine: RunningEngine;
   path: string;

@@ -12,7 +12,6 @@ import type {
   ServerCommand,
 } from "./types.js";
 
-const sampleServerName = "sample";
 const configurationFileName = "media-tools.json";
 const defaultGeneratedVideoSeconds = 30;
 
@@ -20,6 +19,7 @@ const serverEntrySchema = z.object({
   command: z.string().min(1).optional(),
   args: z.array(z.string()).optional(),
   passEnvironment: z.array(z.string()).optional(),
+  disabled: z.boolean().optional(),
 });
 
 const limitsSchema = z.object({
@@ -120,17 +120,13 @@ function resolveServer(options: {
   return { name, status: "ready", command };
 }
 
-function bundledSampleOnly(
-  bundledServers: Record<string, ServerCommand>,
-): MediaToolsConfiguration {
-  const sample = bundledServers[sampleServerName];
-  return {
-    servers: sample
-      ? [{ name: sampleServerName, status: "ready", command: sample }]
-      : [],
-    defaults: {},
-    limits: { generatedVideoSeconds: defaultGeneratedVideoSeconds },
-  };
+function bundledServersNotIn(options: {
+  bundledServers: Record<string, ServerCommand>;
+  names: Set<string>;
+}): ConfiguredServer[] {
+  return Object.entries(options.bundledServers)
+    .filter(([name]) => !options.names.has(name))
+    .map(([name, command]) => ({ name, status: "ready", command }));
 }
 
 export async function readMediaToolsConfiguration(options: {
@@ -150,19 +146,25 @@ export async function readMediaToolsConfiguration(options: {
   if (!projectRead.ok) return projectRead;
   const userFile = userRead.value;
   const projectFile = projectRead.value;
-  if (!userFile && !projectFile) {
-    return { ok: true, value: bundledSampleOnly(options.bundledServers) };
-  }
   const entries = {
     ...userFile?.mcpServers,
     ...projectFile?.mcpServers,
   };
+  const fileServers = Object.entries(entries)
+    .filter(([, entry]) => entry.disabled !== true)
+    .map(([name, entry]) =>
+      resolveServer({ name, entry, bundledServers: options.bundledServers }),
+    );
   return {
     ok: true,
     value: {
-      servers: Object.entries(entries).map(([name, entry]) =>
-        resolveServer({ name, entry, bundledServers: options.bundledServers }),
-      ),
+      servers: [
+        ...fileServers,
+        ...bundledServersNotIn({
+          bundledServers: options.bundledServers,
+          names: new Set(Object.keys(entries)),
+        }),
+      ],
       defaults: { ...userFile?.defaults, ...projectFile?.defaults },
       limits: {
         generatedVideoSeconds:

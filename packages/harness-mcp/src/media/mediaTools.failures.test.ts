@@ -23,7 +23,9 @@ describe("media tool failures", () => {
   });
 
   it("says that no server makes video and what to do", async () => {
-    const harness = await startHarness({ mediaToolsFile: { mcpServers: {} } });
+    const harness = await startHarness({
+      mediaToolsFile: { mcpServers: { sample: { disabled: true } } },
+    });
 
     const result = await harness.call({
       name: "generate_asset",

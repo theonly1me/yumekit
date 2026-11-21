@@ -43,7 +43,12 @@ export function useMediaServers(client: EngineClient) {
   useEngineEvents({
     client,
     onEvent: (event) => {
-      if (event.type === "media-servers-changed") reloadInBackground();
+      if (
+        event.type === "media-servers-changed" ||
+        event.type === "connection-opened"
+      ) {
+        reloadInBackground();
+      }
     },
   });
 

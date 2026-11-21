@@ -7,6 +7,7 @@ import {
   openMakeClip,
   sceneClipsOf,
   testKeyVariable,
+  withoutOtherBundled,
 } from "../testing/mediaTestTools.js";
 import { runEngine, type RunningEngine } from "../testing/runEngine.js";
 
@@ -19,7 +20,13 @@ function runningEngine(): RunningEngine {
 
 beforeAll(async () => {
   engine = await runEngine({
-    mediaTools: { mcpServers: { sample: {}, keytest: keyTestServer } },
+    mediaTools: {
+      mcpServers: {
+        sample: {},
+        keytest: keyTestServer,
+        ...withoutOtherBundled,
+      },
+    },
   });
   await buildCounterProject(engine);
 });

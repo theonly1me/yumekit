@@ -1,6 +1,6 @@
 import { execFile, spawn } from "node:child_process";
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
+import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
@@ -23,6 +23,19 @@ export interface RunningEngine {
   remove: () => Promise<void>;
 }
 
+const browserCacheFolders: Partial<Record<NodeJS.Platform, string>> = {
+  darwin: join("Library", "Caches", "ms-playwright"),
+  linux: join(".cache", "ms-playwright"),
+  win32: join("AppData", "Local", "ms-playwright"),
+};
+
+function browsersPath(): string {
+  return (
+    process.env["PLAYWRIGHT_BROWSERS_PATH"] ??
+    join(homedir(), browserCacheFolders[process.platform] ?? "")
+  );
+}
+
 export interface EngineOptions {
   mediaTools?: object;
 }
@@ -38,6 +51,7 @@ async function createProject(options: EngineOptions): Promise<{
   const environment = {
     ...process.env,
     HOME: home,
+    PLAYWRIGHT_BROWSERS_PATH: browsersPath(),
     YUMEKIT_CONFIG_DIRECTORY: join(root, "config"),
     OPENAI_API_KEY: "",
     GEMINI_API_KEY: "",

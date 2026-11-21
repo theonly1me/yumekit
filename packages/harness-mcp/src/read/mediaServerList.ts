@@ -8,6 +8,7 @@ export async function wireMediaServerOf(entry: MediaServerEntry) {
   return {
     server: entry.server,
     capabilities: entry.capabilities,
+    can_check_key: entry.canCheckKey,
     ...(entry.description === undefined
       ? {}
       : {

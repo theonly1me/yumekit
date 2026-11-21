@@ -1,6 +1,14 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { buildCounterProject } from "../testing/counterProject.js";
 import { closeBrowser, openEditor } from "../testing/editorPage.js";
-import { keyTestServer, openTools } from "../testing/mediaTestTools.js";
+import {
+  engineRequest,
+  keyTestServer,
+  openTools,
+  plainKeyTestServer,
+  testKeyVariable,
+  withoutOtherBundled,
+} from "../testing/mediaTestTools.js";
 import { runEngine, type RunningEngine } from "../testing/runEngine.js";
 
 const madeUpKey = "made-up-editor-key-5f2e91c4";
@@ -14,7 +22,14 @@ function runningEngine(): RunningEngine {
 
 beforeAll(async () => {
   engine = await runEngine({
-    mediaTools: { mcpServers: { sample: {}, keytest: keyTestServer } },
+    mediaTools: {
+      mcpServers: {
+        sample: {},
+        keytest: keyTestServer,
+        keyplain: plainKeyTestServer,
+        ...withoutOtherBundled,
+      },
+    },
   });
 });
 
@@ -29,7 +44,7 @@ describe("the Tools tab", () => {
     await openTools(editor.page);
 
     const list = editor.page.getByRole("list", { name: "Media tools" });
-    await expect.poll(() => list.getByRole("listitem").count()).toBe(2);
+    await expect.poll(() => list.getByRole("listitem").count()).toBe(3);
     const sample = list.getByRole("button", { name: /Sample/ });
     const keyTest = list.getByRole("button", { name: /Key test server/ });
     expect(await sample.textContent()).toContain("Ready, no key needed");
@@ -115,6 +130,52 @@ describe("the Tools tab", () => {
     expect(await page.getByText("Open the key page and sign in.").count()).toBe(
       1,
     );
+    await editor.close();
+  });
+
+  it("shows no Test button for a server without the check_key tool", async () => {
+    const keyPath = `/api/keys/${testKeyVariable}`;
+    await engineRequest({
+      engine: runningEngine(),
+      path: keyPath,
+      method: "PUT",
+      body: { value: madeUpKey },
+    });
+    const editor = await openEditor(runningEngine().url);
+    const { page } = editor;
+    await openTools(page);
+
+    await page.getByRole("button", { name: /Plain key test server/ }).click();
+
+    await page.getByRole("button", { name: "Remove the key" }).waitFor();
+    expect(
+      await page.getByRole("button", { name: "Test the key" }).count(),
+    ).toBe(0);
+    await page.getByRole("button", { name: /^Key test server/ }).click();
+    await page.getByRole("button", { name: "Test the key" }).waitFor();
+    await engineRequest({
+      engine: runningEngine(),
+      path: keyPath,
+      method: "DELETE",
+    });
+    await editor.close();
+  });
+
+  it("shows the stills of the scenes row while the Tools tab is open", async () => {
+    await buildCounterProject(runningEngine());
+    const editor = await openEditor(runningEngine().url);
+    await openTools(editor.page);
+
+    const stills = editor.page.locator(".panel-frame img");
+
+    await expect.poll(() => stills.count()).toBe(2);
+    expect(
+      await stills.evaluateAll((images) =>
+        images.map((image) =>
+          image instanceof HTMLImageElement ? image.naturalWidth : 0,
+        ),
+      ),
+    ).toEqual([320, 320]);
     await editor.close();
   });
 });

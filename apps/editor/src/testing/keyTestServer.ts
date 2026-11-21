@@ -2,8 +2,10 @@ import { createInterface } from "node:readline";
 
 const keyVariable = "YUMEKIT_EDITOR_TEST_KEY";
 
+const hasCheckKey = !process.argv.includes("--without-check-key");
+
 const description = {
-  label: "Key test server",
+  label: hasCheckKey ? "Key test server" : "Plain key test server",
   runs: "hosted",
   keys: [
     {
@@ -47,9 +49,9 @@ const description = {
 
 const emptyInput = { type: "object", properties: {} };
 
-const tools = ["describe_media_server", "check_key", "generate_video"].map(
-  (name) => ({ name, inputSchema: emptyInput }),
-);
+const tools = ["describe_media_server", "check_key", "generate_video"]
+  .filter((name) => hasCheckKey || name !== "check_key")
+  .map((name) => ({ name, inputSchema: emptyInput }));
 
 function toolResult(name: unknown): object {
   if (name === "describe_media_server") {
