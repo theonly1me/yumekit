@@ -7,7 +7,8 @@ import { useSound } from "../preview/useSound.js";
 import { useHistory } from "../scenePanel/history/useHistory.js";
 import { ScenePanel } from "../scenePanel/ScenePanel.js";
 import { AgentPane } from "../side/AgentPane.js";
-import { SidePanel, ToolsPane, type SideTab } from "../side/SidePanel.js";
+import { SidePanel, type SideTab } from "../side/SidePanel.js";
+import { useClipTools } from "../makeClip/useClipTools.js";
 import { useEditorFacts } from "./useEditorFacts.js";
 import { LowerArea, type LowerView } from "./LowerArea.js";
 import { RenderSheet } from "./RenderSheet.js";
@@ -72,29 +73,46 @@ export function Editor(props: {
     pickClip(clip);
     setSideTab("scene");
   };
+  const clipTools = useClipTools({
+    client,
+    snapshot,
+    output,
+    onOpen: pause,
+    onToolsTab: () => {
+      setSideTab("tools");
+    },
+    onPlaced: pickClip,
+  });
   useKeyboard({
-    isActive: !isRenderOpen,
+    isActive: !isRenderOpen && !clipTools.isOpen,
     onToggle: playback.toggle,
     onStep: step,
   });
-  const history = useHistory({ client, isActive: !isRenderOpen });
+  const history = useHistory({
+    client,
+    isActive: !isRenderOpen && !clipTools.isOpen,
+  });
   const sidePane = useMemo(() => {
     if (sideTab === "agent") {
       return <AgentPane projectFolder={props.projectFolder} />;
     }
-    if (sideTab === "tools") return <ToolsPane />;
+    if (sideTab === "tools") return clipTools.toolsPane;
     return (
-      <ScenePanel
-        client={client}
-        snapshot={snapshot}
-        clip={facts.sceneClip}
-        scene={facts.scene}
-        history={history}
-      />
+      <>
+        <ScenePanel
+          client={client}
+          snapshot={snapshot}
+          clip={facts.sceneClip}
+          scene={facts.scene}
+          history={history}
+        />
+        {clipTools.entryFor({ scene: facts.scene, clip: facts.sceneClip })}
+      </>
     );
   }, [
     sideTab,
     props.projectFolder,
+    clipTools,
     client,
     snapshot,
     facts.sceneClip,
@@ -165,6 +183,7 @@ export function Editor(props: {
           }}
         />
       ) : undefined}
+      {clipTools.sheet}
     </div>
   );
 }

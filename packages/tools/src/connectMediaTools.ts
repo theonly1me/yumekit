@@ -1,3 +1,4 @@
+import { checkKeyToolName } from "./convention.js";
 import { callCheckKey } from "./checkKey.js";
 import { readMediaToolsConfiguration } from "./configuration.js";
 import {
@@ -26,6 +27,7 @@ function entryOf(connection: StartedServer): MediaServerEntry {
   return {
     server: connection.name,
     capabilities: [...connection.capabilities],
+    canCheckKey: connection.toolNames.includes(checkKeyToolName),
     ...(connection.description ? { description: connection.description } : {}),
     ...(connection.descriptionFailure
       ? { descriptionFailure: connection.descriptionFailure }

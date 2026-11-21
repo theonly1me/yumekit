@@ -266,6 +266,25 @@ These rules came from the build of WP22.
 9. The project data has no link between a scene and its narration, so the Scene tab has no narration group.
 10. Each column of the scenes row is as wide as its still: 152 pixels for a wide output, 112 for a square one, and 88 for a tall one. Under a square or tall still, the length is on a second line under the title.
 
+#### Details of Tools and Make a clip
+
+These rules came from the build of WP23.
+
+1. A Tools row shows the label, what the server makes, where it runs, and one state: "Ready, no key needed", "Ready, key saved here", "Ready, key from your shell", "Needs a key", or "Failed to start". A row opens its detail. The detail of a failed server shows the reason.
+2. The key field is a password field with `autocomplete="off"`. The editor reads its value only in the save handler, and clears the field right after it sends `PUT /api/keys/<VARIABLE>`. The value is never in React state.
+3. The link to `get_key_url` is an `a` element with `target="_blank"` and `rel="noopener noreferrer"`. Its text names the host, for example "Open fal.ai".
+4. Each server of `GET /api/media-servers` and `list_media_tools` has `can_check_key`: true when the server lists the tool `check_key`. The editor shows "Test the key" only for a server with `can_check_key` and a saved key or a key from the shell.
+5. With no `media-tools.json`, yumekit connects each bundled server (document 06). So a new project shows Sample, OpenAI, Google Gemini, and fal in Tools, and a person adds a key there. The "Add another tool" text tells the person to put another MCP server in `media-tools.json`.
+6. "Make a clip for this scene" is in the Scene tab for each scene clip. The sheet makes the clip for the selected scene clip of the current output.
+7. The sheet calls `place_video` with `replace_clip_id` set to the selected scene clip. The video takes the start frame and the length of that clip, in one edit batch. One undo brings back the scene clip.
+8. The length setting (`duration_seconds`) starts at the length of the scene clip in whole seconds, inside the range of the model. A video request sends `width_pixels` and `height_pixels` of the current output. A still request sends them only when the image model lists both settings.
+9. The first frame is the newest image asset of the project, or one that the person picks. With no image asset, the sheet shows the still form. The still uses the first ready image model. The person can pick another one when more than one is ready.
+10. The settings form shows `choice` as buttons, `whole-number` as a slider for a range of 120 steps or fewer and as a number field for a larger range, and `switch` as a check box. `image-files` with the name `reference_image_paths` is a list of the image assets, sent as `reference_asset_ids`. The harness has no asset id field for another `image-file` setting, such as `last_frame_path`, so the form leaves it out.
+11. The price uses the price whose `when` matches the most selected values. The editor multiplies the unit `second` by `duration_seconds`, and the unit `minute` by `duration_seconds` divided by 60. With no match, the sheet shows "Price not known". With a price that is not free, the sheet shows the `read_on` date.
+12. The sheet reads `generated_video` when it opens, after `media-servers-changed`, after each connect of the event WebSocket, and after each make. If the selected length plus the used seconds is more than the limit, the sheet shows the limit message and no button to make the clip. The failure `generated-video-limit-reached` from the engine shows the same message with the numbers of the failure.
+13. The app has one event WebSocket, in the project hook. The hook sends each event, and `connection-opened` after each connect, to the listeners on the engine client. After each connect, the project hook and the media server list read their data again. The sheet sends a `callId` with `generate_asset` and shows the message of each `call-progress` for that call.
+14. The browser tests run the engine with a temporary `HOME`, and with `PLAYWRIGHT_BROWSERS_PATH` set to an empty folder. So the engine finds no Chromium, and `preview_frames` fails with `browser-not-installed`. Stills after each change cost about 6 times the CPU time of the editor tests, and on a CI runner with 4 processors two test setups ran past 120 seconds. A test that needs the renderer, such as the test of the scenes row stills, starts the engine with `withChromium`. Then the engine gets the Chromium folder of the test process.
+
 ## The command
 
 | Command                                             | What it does                                                                                 |

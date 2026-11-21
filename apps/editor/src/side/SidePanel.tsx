@@ -36,15 +36,3 @@ export function SidePanel(props: {
     </aside>
   );
 }
-
-export function ToolsPane() {
-  return (
-    <>
-      <h2>Tools</h2>
-      <p className="fact">
-        The list of media tools and their keys arrives in the next step. Until
-        then, run <strong>yumekit keys</strong> in a terminal to add a key.
-      </p>
-    </>
-  );
-}

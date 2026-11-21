@@ -34,7 +34,10 @@ yumekit reads two files with the same shape. The project file wins for a server 
 - `defaults` names the server for each capability when a tool call gives no server. An entry is a server name, or `{ "server": "...", "model": "..." }` (document 10).
 - `limits` is optional. `generatedVideoSeconds` is the limit of document 09, a number of 0 or more, and 30 by default. The project file wins over the user file. `MediaTools.limits()` gives the merged value.
 - The `yumekit` command passes the commands of the bundled servers as `bundledServers`. A file can use a bundled server by its name with no `command`.
-- With no file, yumekit connects only the bundled sample server.
+- With no file (user or project), yumekit connects each bundled server, in the order `sample`, `openai`, `gemini`, `fal`. A bundled server with a missing key starts, and the editor shows that it needs a key.
+- With a file, yumekit connects the servers of the file first. Then it connects each bundled server that the file does not name.
+- An entry `"<name>": { "disabled": true }` turns off that server, also a bundled one.
+- The order of the servers does not change how a call selects a server: the server of the call, then `defaults`, then the first server that started with the capability. With no `defaults`, `sample` is the first server for each capability that it has.
 
 ## The convention
 
