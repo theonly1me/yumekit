@@ -134,7 +134,14 @@ describe("the project interface of the engine", () => {
       input: {},
     });
 
-    expect(bodyOf(servers)).toMatchObject({ servers: [{ server: "sample" }] });
+    expect(bodyOf(servers)).toMatchObject({
+      servers: [
+        { server: "sample" },
+        { server: "openai" },
+        { server: "gemini" },
+        { server: "fal" },
+      ],
+    });
     expect(bodyOf(listed)).toMatchObject({ data: bodyOf(servers) });
   });
 

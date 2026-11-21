@@ -4,6 +4,7 @@ import type { HarnessContext } from "../context.js";
 import { durationInput, frameInput, idInput } from "../inputs.js";
 import { findAsset, findOutput } from "../lookups.js";
 import { failureResult } from "../results.js";
+import { placementFramesOf } from "./videoPlacementFrames.js";
 import { planVideo } from "./videoPlan.js";
 
 const defaultSoundGainDecibels = -12;
@@ -13,9 +14,14 @@ const share = z.number().min(0).max(1);
 const placeVideoInput = {
   output_id: idInput("The id of the output."),
   asset_id: idInput("The id of a video asset from generate_asset."),
-  start_frame: frameInput("The frame of the output where the video starts."),
+  start_frame: frameInput(
+    "The frame of the output where the video starts. The default is the start of the clip of replace_clip_id.",
+  ).optional(),
   duration_frames: durationInput(
-    "The length of the clip. The default is the length of the video. A longer clip holds the last picture.",
+    "The length of the clip. The default is the length of the clip of replace_clip_id, or else the length of the video. A longer clip holds the last picture.",
+  ).optional(),
+  replace_clip_id: idInput(
+    "A scene clip to replace. The tool removes it, and the sound clip of its video when it shows a video-clip scene, in the same batch.",
   ).optional(),
   focus: z
     .strictObject({
@@ -38,7 +44,7 @@ export function registerPlaceVideo(context: HarnessContext): void {
   context.tools.add({
     name: "place_video",
     description:
-      'Show a video asset in an output, with its sound. Makes a video-clip scene "video-<asset_id>" (or uses that scene when it exists, with no change to its props), adds a clip of it on the first scene track that is not a caption track (or on a new scene track "scenes" below the others), and adds the sound of the video on the audio track "video-sound". Each video asset gets its own scene, so to show several clips, call place_video once for each asset. A video without sound gets no sound clip, and the "video-sound" track appears only when a sound clip is added. The clip ids are "video-<asset_id>" and "video-sound-<asset_id>", and a suffix such as "-2" keeps each id unique. The result gives scene_id, scene_clip_id, and sound_clip_id. One undo removes all of it.',
+      'Show a video asset in an output, with its sound. Makes a video-clip scene "video-<asset_id>" (or uses that scene when it exists, with no change to its props), adds a clip of it on the first scene track that is not a caption track (or on a new scene track "scenes" below the others), and adds the sound of the video on the audio track "video-sound". Each video asset gets its own scene, so to show several clips, call place_video once for each asset. A video without sound gets no sound clip, and the "video-sound" track appears only when a sound clip is added. The clip ids are "video-<asset_id>" and "video-sound-<asset_id>", and a suffix such as "-2" keeps each id unique. With replace_clip_id, the video takes the place of that scene clip: the tool removes the clip, and the sound clip of its video when it shows a video-clip scene, and places the video at its start frame with its length, unless start_frame or duration_frames are given. The result gives scene_id, scene_clip_id, and sound_clip_id. One undo removes all of it and brings back a replaced clip.',
     inputSchema: placeVideoInput,
     run: ({ input: request }) => {
       const snapshot = context.store.read();
@@ -54,11 +60,19 @@ export function registerPlaceVideo(context: HarnessContext): void {
           hint: 'Make a video with generate_asset and capability "video", or import one with import_asset and kind "video". Then call place_video with that asset_id.',
         });
       }
-      const startFrame = request.start_frame;
-      const durationFrames = request.duration_frames ?? assetLength;
-      const plan = planVideo({
+      const frames = placementFramesOf({
         snapshot,
         timeline: output.value.timeline,
+        assetLength,
+        startFrame: request.start_frame,
+        durationFrames: request.duration_frames,
+        replaceClipId: request.replace_clip_id,
+      });
+      if (!frames.ok) return failureResult(frames.failure);
+      const { startFrame, durationFrames } = frames.value;
+      const plan = planVideo({
+        snapshot,
+        timeline: frames.value.remainingTimeline,
         placement: {
           asset: { ...asset.value, durationFrames: assetLength },
           startFrame,
@@ -71,7 +85,7 @@ export function registerPlaceVideo(context: HarnessContext): void {
       const endFrame = startFrame + durationFrames;
       return applyEditsResult({
         store: context.store,
-        edits: plan.edits,
+        edits: [...frames.value.removeEdits, ...plan.edits],
         line: `Video "${request.asset_id}" placed on "${request.output_id}" from frame ${String(startFrame)} to ${String(endFrame)}${plan.soundClipId === undefined ? " with no sound clip" : " with its sound"}.`,
         data: {
           scene_id: plan.sceneId,

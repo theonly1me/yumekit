@@ -1,0 +1,146 @@
+.sheet-body.wide input[type="range"] {
+  width: 100%;
+  accent-color: var(--solid);
+  margin: 10px 0 0;
+}
+
+.sheet-body.wide input[type="number"] {
+  width: 100%;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--line-strong);
+  border-radius: 0;
+  padding: 6px 0 8px;
+  font-size: var(--step-0);
+  font-variant-numeric: tabular-nums;
+}
+
+.sheet-body.wide input[type="number"]:focus {
+  outline: 0;
+  border-bottom-color: var(--text);
+}
+
+label.toggle {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  color: var(--text);
+  font-size: var(--step-0);
+}
+
+.reference-picks legend {
+  margin-bottom: 2px;
+}
+
+.reference-picks label {
+  font-size: var(--step--1);
+}
+
+.clip-action {
+  display: grid;
+  gap: 10px;
+  justify-items: start;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+
+.clip-price {
+  font-size: var(--step-2);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.clip-action .primary {
+  margin-top: 8px;
+  font-size: var(--step-0);
+  padding: 10px 24px;
+}
+
+.made-clip .key-actions {
+  margin-top: 8px;
+}
+
+.made-clip .key-actions button {
+  font-size: var(--step-0);
+  padding: 10px 24px;
+}
+
+.clip-progress {
+  justify-self: stretch;
+  display: grid;
+  gap: 10px;
+  padding-top: 6px;
+}
+
+.clip-progress-track {
+  position: relative;
+  display: block;
+  height: 1px;
+  overflow: hidden;
+  background: var(--line-strong);
+}
+
+.clip-progress-track span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 30%;
+  background: var(--text);
+  transition: width 240ms ease;
+}
+
+.clip-progress-track[data-known="false"] span {
+  animation: clip-progress-sweep 1.6s ease-in-out infinite;
+}
+
+@keyframes clip-progress-sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(340%);
+  }
+}
+
+.made-clip {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 56px;
+  align-items: center;
+}
+
+.made-clip-picture {
+  aspect-ratio: 16 / 9;
+  border-radius: 3px;
+  overflow: hidden;
+  background: var(--well);
+  box-shadow: var(--frame-shadow);
+}
+
+.made-clip-picture video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.made-clip-facts {
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clip-progress-track[data-known="false"] span {
+    animation: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .clip-columns,
+  .made-clip {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 32px;
+  }
+}

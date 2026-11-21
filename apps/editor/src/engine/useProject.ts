@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { ClientFailure, EngineClient } from "./engineClient.js";
+import { engineEventOf } from "./engineEvents.js";
 import type { Snapshot } from "./snapshot.js";
 
 export type ProjectState =
@@ -9,22 +10,6 @@ export type ProjectState =
 
 const firstReconnectMilliseconds = 500;
 const longestReconnectMilliseconds = 5_000;
-
-function isProjectChanged(data: unknown): boolean {
-  if (typeof data !== "string") return false;
-  let message: unknown;
-  try {
-    message = JSON.parse(data);
-  } catch {
-    return false;
-  }
-  return (
-    typeof message === "object" &&
-    message !== null &&
-    "type" in message &&
-    message.type === "project-changed"
-  );
-}
 
 export function useProject(client: EngineClient): ProjectState {
   const [state, setState] = useState<ProjectState>({ kind: "loading" });
@@ -74,9 +59,13 @@ export function useProject(client: EngineClient): ProjectState {
       socket.addEventListener("open", () => {
         reconnectDelay = firstReconnectMilliseconds;
         reload();
+        client.events.send({ type: "connection-opened" });
       });
-      socket.addEventListener("message", (event) => {
-        if (isProjectChanged(event.data)) reload();
+      socket.addEventListener("message", (message) => {
+        const event = engineEventOf(message.data);
+        if (event === undefined) return;
+        if (event.type === "project-changed") reload();
+        client.events.send(event);
       });
       socket.addEventListener("close", () => {
         if (isClosed) return;

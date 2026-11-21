@@ -52,16 +52,16 @@ Before `put_scene` sends its edit, the harness checks the scene. For a kit scene
 
 ### Timeline
 
-| Tool              | Input                                                                                        | Edit                                                                                      |
-| ----------------- | -------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| `set_timeline`    | `output_id`, `tracks`                                                                        | `setTimeline`                                                                             |
-| `add_clip`        | `output_id`, `track_id`, the clip fields                                                     | `addClip`                                                                                 |
-| `update_clip`     | `output_id`, `clip_id`, the fields to change                                                 | `updateClip`                                                                              |
-| `remove_clip`     | `output_id`, `clip_id`                                                                       | `removeClip`                                                                              |
-| `copy_timeline`   | `from_output_id`, `to_output_id`                                                             | `copyTimeline`                                                                            |
-| `place_narration` | `output_id`, `asset_id`, `start_frame`, `with_captions?`                                     | `addClip` for the audio, and `addClip` for a `caption-words` scene on the top scene track |
-| `place_video`     | `output_id`, `asset_id`, `start_frame`, `duration_frames?`, `focus?`, `sound_gain_decibels?` | `putScene` for a `video-clip` scene, `addClip` for the scene, and `addClip` for the sound |
-| `undo`, `redo`    | none                                                                                         | The store operation                                                                       |
+| Tool              | Input                                                                                                             | Edit                                                                                                                        |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `set_timeline`    | `output_id`, `tracks`                                                                                             | `setTimeline`                                                                                                               |
+| `add_clip`        | `output_id`, `track_id`, the clip fields                                                                          | `addClip`                                                                                                                   |
+| `update_clip`     | `output_id`, `clip_id`, the fields to change                                                                      | `updateClip`                                                                                                                |
+| `remove_clip`     | `output_id`, `clip_id`                                                                                            | `removeClip`                                                                                                                |
+| `copy_timeline`   | `from_output_id`, `to_output_id`                                                                                  | `copyTimeline`                                                                                                              |
+| `place_narration` | `output_id`, `asset_id`, `start_frame`, `with_captions?`                                                          | `addClip` for the audio, and `addClip` for a `caption-words` scene on the top scene track                                   |
+| `place_video`     | `output_id`, `asset_id`, `start_frame?`, `duration_frames?`, `replace_clip_id?`, `focus?`, `sound_gain_decibels?` | `removeClip` for a replaced clip, `putScene` for a `video-clip` scene, `addClip` for the scene, and `addClip` for the sound |
+| `undo`, `redo`    | none                                                                                                              | The store operation                                                                                                         |
 
 `set_timeline` is the usual tool for a first build, because an agent can state the whole timeline in one call. The clip tools serve small changes. `update_clip` can also change the scene of a scene clip or the asset of an audio clip. So one output can show a different scene in the same place.
 
@@ -74,7 +74,7 @@ What the first agent run could not learn from the descriptions, and each descrip
 
 `place_narration` puts a speech asset on the first audio track other than `video-sound`, for its full length. With `with_captions`, it also adds a `caption-words` scene and a clip that matches the audio clip, as document 08 requires. It creates the audio track and the caption track when the output has none. All of it is one edit batch, so one undo removes it.
 
-`place_video` shows a video asset in an output, as document 09 says. The scene id is `video-` followed by the asset id. The scene clip goes on the first scene track that is not a caption track, or on a new scene track `scenes` below the others. The sound clip goes on the audio track `video-sound`, at -12 decibels by default, and is never longer than the video. `sound_gain_decibels` set to `off`, or an asset without `hasAudio`, adds no sound clip. All of it is one edit batch.
+`place_video` shows a video asset in an output, as document 09 says. The scene id is `video-` followed by the asset id. The scene clip goes on the first scene track that is not a caption track, or on a new scene track `scenes` below the others. The sound clip goes on the audio track `video-sound`, at -12 decibels by default, and is never longer than the video. `sound_gain_decibels` set to `off`, or an asset without `hasAudio`, adds no sound clip. With `replace_clip_id`, the tool removes that scene clip, and the sound clip of its video when the clip shows a `video-clip` scene. The video then starts at the start frame of that clip with its length, unless `start_frame` or `duration_frames` are given. A call needs `start_frame` or `replace_clip_id`. All of it is one edit batch, so one undo brings back the replaced clip.
 
 ### Media
 

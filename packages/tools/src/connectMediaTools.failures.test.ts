@@ -85,7 +85,9 @@ describe("connectMediaTools failures", () => {
 
   it("returns no-server-for-capability when no server lists the tool", async () => {
     const { tools, outputDirectory } = await connectFixture({
-      projectFile: { mcpServers: { fake: fakeServerCommand } },
+      projectFile: {
+        mcpServers: { fake: fakeServerCommand, sample: { disabled: true } },
+      },
     });
     const alignRequest = {
       capability: "align",

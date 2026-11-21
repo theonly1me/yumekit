@@ -111,6 +111,7 @@ describe("connectMediaTools descriptions", () => {
         mcpServers: {
           gemini: bundledSourceServer("gemini-media"),
           fal: bundledSourceServer("fal-media"),
+          sample: { disabled: true },
         },
       },
     });

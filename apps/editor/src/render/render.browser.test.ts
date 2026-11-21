@@ -31,7 +31,7 @@ async function openRenderSheet(outputLabel: "Wide" | "Tall") {
 }
 
 beforeAll(async () => {
-  engine = await runEngine();
+  engine = await runEngine({ withChromium: true });
   await buildRenderProject(engine);
 });
 

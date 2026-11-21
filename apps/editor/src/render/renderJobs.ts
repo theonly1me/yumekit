@@ -36,13 +36,6 @@ export const renderFailureSchema = z.object({
   frame: z.number().optional(),
 });
 
-export const progressEventSchema = z.object({
-  type: z.literal("call-progress"),
-  callId: z.string(),
-  done: z.number(),
-  total: z.number().optional(),
-});
-
 export function fileNameOf(file: string): string {
   return file.split(/[\\/]/).pop() ?? file;
 }

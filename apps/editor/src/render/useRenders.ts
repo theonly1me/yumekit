@@ -1,7 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import type { EngineClient } from "../engine/engineClient.js";
 import {
-  progressEventSchema,
   renderFailureSchema,
   renderResultSchema,
   fileNameOf,
@@ -10,16 +9,6 @@ import {
 } from "./renderJobs.js";
 
 export type Renders = ReturnType<typeof useRenders>;
-
-function progressOf(data: unknown) {
-  if (typeof data !== "string") return undefined;
-  try {
-    const parsed = progressEventSchema.safeParse(JSON.parse(data));
-    return parsed.success ? parsed.data : undefined;
-  } catch {
-    return undefined;
-  }
-}
 
 async function renderOne(options: {
   client: EngineClient;
@@ -89,19 +78,17 @@ export function useRenders(client: EngineClient) {
         state: { kind: "waiting" },
       }));
       setJobs(queued);
-      const socket = new WebSocket(client.eventsUrl());
-      socket.addEventListener("message", (event) => {
-        const progress = progressOf(event.data);
-        if (progress === undefined) return;
+      const stopListening = client.events.listen((event) => {
+        if (event.type !== "call-progress") return;
         setJobs((current) =>
           current.map((job) =>
-            job.callId === progress.callId && job.state.kind === "rendering"
+            job.callId === event.callId && job.state.kind === "rendering"
               ? {
                   ...job,
                   state: {
                     kind: "rendering",
-                    framesDone: progress.done,
-                    frameCount: progress.total,
+                    framesDone: event.done,
+                    frameCount: event.total,
                   },
                 }
               : job,
@@ -138,7 +125,7 @@ export function useRenders(client: EngineClient) {
           );
         })
         .finally(() => {
-          socket.close();
+          stopListening();
           isRunningNow.current = false;
           setRunning(false);
         });

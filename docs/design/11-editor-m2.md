@@ -266,16 +266,35 @@ These rules came from the build of WP22.
 9. The project data has no link between a scene and its narration, so the Scene tab has no narration group.
 10. Each column of the scenes row is as wide as its still: 152 pixels for a wide output, 112 for a square one, and 88 for a tall one. Under a square or tall still, the length is on a second line under the title.
 
+#### Details of Tools and Make a clip
+
+These rules came from the build of WP23.
+
+1. A Tools row shows the label, what the server makes, where it runs, and one state: "Ready, no key needed", "Ready, key saved here", "Ready, key from your shell", "Needs a key", or "Failed to start". A row opens its detail. The detail of a failed server shows the reason.
+2. The key field is a password field with `autocomplete="off"`. The editor reads its value only in the save handler, and clears the field right after it sends `PUT /api/keys/<VARIABLE>`. The value is never in React state.
+3. The link to `get_key_url` is an `a` element with `target="_blank"` and `rel="noopener noreferrer"`. Its text names the host, for example "Open fal.ai".
+4. Each server of `GET /api/media-servers` and `list_media_tools` has `can_check_key`: true when the server lists the tool `check_key`. The editor shows "Test the key" only for a server with `can_check_key` and a saved key or a key from the shell.
+5. With no `media-tools.json`, yumekit connects each bundled server (document 06). So a new project shows Sample, OpenAI, Google Gemini, and fal in Tools, and a person adds a key there. The "Add another tool" text tells the person to put another MCP server in `media-tools.json`.
+6. "Make a clip for this scene" is in the Scene tab for each scene clip. The sheet makes the clip for the selected scene clip of the current output.
+7. The sheet calls `place_video` with `replace_clip_id` set to the selected scene clip. The video takes the start frame and the length of that clip, in one edit batch. One undo brings back the scene clip.
+8. The length setting (`duration_seconds`) starts at the length of the scene clip in whole seconds, inside the range of the model. A video request sends `width_pixels` and `height_pixels` of the current output. A still request sends them only when the image model lists both settings.
+9. The first frame is the newest image asset of the project, or one that the person picks. With no image asset, the sheet shows the still form. The still uses the first ready image model. The person can pick another one when more than one is ready.
+10. The settings form shows `choice` as buttons, `whole-number` as a slider for a range of 120 steps or fewer and as a number field for a larger range, and `switch` as a check box. `image-files` with the name `reference_image_paths` is a list of the image assets, sent as `reference_asset_ids`. The harness has no asset id field for another `image-file` setting, such as `last_frame_path`, so the form leaves it out.
+11. The price uses the price whose `when` matches the most selected values. The editor multiplies the unit `second` by `duration_seconds`, and the unit `minute` by `duration_seconds` divided by 60. With no match, the sheet shows "Price not known". With a price that is not free, the sheet shows the `read_on` date.
+12. The sheet reads `generated_video` when it opens, after `media-servers-changed`, after each connect of the event WebSocket, and after each make. If the selected length plus the used seconds is more than the limit, the sheet shows the limit message and no button to make the clip. The failure `generated-video-limit-reached` from the engine shows the same message with the numbers of the failure.
+13. The app has one event WebSocket, in the project hook. The hook sends each event, and `connection-opened` after each connect, to the listeners on the engine client. After each connect, the project hook and the media server list read their data again. The sheet sends a `callId` with `generate_asset` and shows the message of each `call-progress` for that call.
+14. The browser tests run the engine with a temporary `HOME`, and with `PLAYWRIGHT_BROWSERS_PATH` set to an empty folder. So the engine finds no Chromium, and `preview_frames` fails with `browser-not-installed`. Stills after each change cost about 6 times the CPU time of the editor tests, and on a CI runner with 4 processors two test setups ran past 120 seconds. A test that needs the renderer, such as the test of the scenes row stills, starts the engine with `withChromium`. Then the engine gets the Chromium folder of the test process.
+
 #### Details of Render
 
 These rules came from the build of WP24.
 
 1. The sheet lists each output with its label, its size, and its length. An output with no clips cannot be chosen. At first each output with clips is chosen. After a render, the sheet keeps the outputs of the last render.
-2. "Render N files" runs one `render_video` call for each chosen output, one after another, at the full size of the output. Each call has a `callId`. While renders run, the editor opens its own event WebSocket and shows each `call-progress` as frames done of the total, with a thin progress line.
+2. "Render N files" runs one `render_video` call for each chosen output, one after another, at the full size of the output. Each call has a `callId`. While renders run, the sheet listens on the events of the engine client and shows each `call-progress` as frames done of the total, with a thin progress line.
 3. The renders belong to the editor shell, not to the sheet. A render keeps running when the person closes the sheet, the Render button shows "Rendering N%" over all chosen files, and the sheet shows the progress again when it opens. A reload of the page loses this state, and the engine still finishes the render.
 4. A finished render shows the full path of the file with a button that copies it, and "Open the video". That button opens a new tab first, so the browser does not block it, then fetches `GET /api/renders/<file>` with the header and shows the file from a blob URL. If `Content-Length` is more than 512 MB, the editor does not load the file and asks the person to copy the path.
 5. A failed render shows the message of the tool. The hint of the tool is for an agent, so the sheet does not show it. A render failure about a scene has `scene_id` and `frame` in its data. Then the sheet says "Ask your agent to correct the scene <title>, or change it in the Scene panel." and shows "Open this scene". That button closes the sheet, picks the clip of the scene in that output, moves the playhead to the failed frame, and opens the Scene tab.
-6. The editor browser tests give the engine a temporary `HOME`, so they pass `PLAYWRIGHT_BROWSERS_PATH` with the browser folder of Playwright. Without it, the renderer of the engine finds no Chromium. The editor browser test files run one after another, because each one starts its own engine with a renderer, and in parallel their setup passed the hook time limit on CI.
+6. The render tests start the engine with `withChromium`, because a render needs the renderer.
 
 ## The command
 

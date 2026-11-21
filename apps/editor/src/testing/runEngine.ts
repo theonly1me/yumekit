@@ -1,5 +1,5 @@
 import { execFile, spawn } from "node:child_process";
-import { mkdir, mkdtemp, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
@@ -23,22 +23,25 @@ export interface RunningEngine {
   remove: () => Promise<void>;
 }
 
-function playwrightBrowsersPath(): string {
-  const known = process.env["PLAYWRIGHT_BROWSERS_PATH"];
-  if (known !== undefined && known !== "") return known;
-  if (process.platform === "darwin") {
-    return join(homedir(), "Library", "Caches", "ms-playwright");
-  }
-  if (process.platform === "win32") {
-    return join(process.env["LOCALAPPDATA"] ?? homedir(), "ms-playwright");
-  }
-  return join(
-    process.env["XDG_CACHE_HOME"] ?? join(homedir(), ".cache"),
-    "ms-playwright",
+const browserCacheFolders: Partial<Record<NodeJS.Platform, string>> = {
+  darwin: join("Library", "Caches", "ms-playwright"),
+  linux: join(".cache", "ms-playwright"),
+  win32: join("AppData", "Local", "ms-playwright"),
+};
+
+function browsersPath(): string {
+  return (
+    process.env["PLAYWRIGHT_BROWSERS_PATH"] ??
+    join(homedir(), browserCacheFolders[process.platform] ?? "")
   );
 }
 
-async function createProject(): Promise<{
+export interface EngineOptions {
+  mediaTools?: object;
+  withChromium?: boolean;
+}
+
+async function createProject(options: EngineOptions): Promise<{
   root: string;
   folder: string;
   environment: NodeJS.ProcessEnv;
@@ -49,9 +52,15 @@ async function createProject(): Promise<{
   const environment = {
     ...process.env,
     HOME: home,
+    PLAYWRIGHT_BROWSERS_PATH:
+      options.withChromium === true
+        ? browsersPath()
+        : join(root, "no-browsers"),
     YUMEKIT_CONFIG_DIRECTORY: join(root, "config"),
     OPENAI_API_KEY: "",
-    PLAYWRIGHT_BROWSERS_PATH: playwrightBrowsersPath(),
+    GEMINI_API_KEY: "",
+    FAL_KEY: "",
+    YUMEKIT_EDITOR_TEST_KEY: "",
   };
   const folder = join(root, "project");
   await runFile(
@@ -69,11 +78,19 @@ async function createProject(): Promise<{
     ],
     { env: environment },
   );
+  if (options.mediaTools !== undefined) {
+    await writeFile(
+      join(folder, "media-tools.json"),
+      JSON.stringify(options.mediaTools),
+    );
+  }
   return { root, folder, environment };
 }
 
-export async function runEngine(): Promise<RunningEngine> {
-  const { root, folder, environment } = await createProject();
+export async function runEngine(
+  options: EngineOptions = {},
+): Promise<RunningEngine> {
+  const { root, folder, environment } = await createProject(options);
   const child = spawn(
     process.execPath,
     [cliMainFile, "open", folder, "--no-browser"],
