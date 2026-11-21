@@ -4,8 +4,9 @@ import type { SceneClip, Snapshot } from "../engine/snapshot.js";
 import { Preview } from "../preview/Preview.js";
 import { usePlayback } from "../preview/usePlayback.js";
 import { useSound } from "../preview/useSound.js";
+import { useHistory } from "../scenePanel/history/useHistory.js";
+import { ScenePanel } from "../scenePanel/ScenePanel.js";
 import { AgentPane } from "../side/AgentPane.js";
-import { ScenePane } from "../side/ScenePane.js";
 import { SidePanel, type SideTab } from "../side/SidePanel.js";
 import { useClipTools } from "../makeClip/useClipTools.js";
 import { useEditorFacts } from "./useEditorFacts.js";
@@ -87,6 +88,10 @@ export function Editor(props: {
     onToggle: playback.toggle,
     onStep: step,
   });
+  const history = useHistory({
+    client,
+    isActive: !isRenderOpen && !clipTools.isOpen,
+  });
   const sidePane = useMemo(() => {
     if (sideTab === "agent") {
       return <AgentPane projectFolder={props.projectFolder} />;
@@ -94,10 +99,12 @@ export function Editor(props: {
     if (sideTab === "tools") return clipTools.toolsPane;
     return (
       <>
-        <ScenePane
+        <ScenePanel
+          client={client}
+          snapshot={snapshot}
           clip={facts.sceneClip}
           scene={facts.scene}
-          framesPerSecond={framesPerSecond}
+          history={history}
         />
         {clipTools.entryFor({ scene: facts.scene, clip: facts.sceneClip })}
       </>
@@ -106,9 +113,11 @@ export function Editor(props: {
     sideTab,
     props.projectFolder,
     clipTools,
+    client,
+    snapshot,
     facts.sceneClip,
     facts.scene,
-    framesPerSecond,
+    history,
   ]);
 
   if (output === undefined) {

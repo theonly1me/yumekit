@@ -66,4 +66,24 @@ describe("kitSceneSchemas", () => {
       expect(z.toJSONSchema(entry.props)).toHaveProperty("properties");
     }
   });
+
+  it("names the asset kind of each asset id prop in the JSON Schema", () => {
+    const assetKinds = Object.entries(kitSceneSchemas).flatMap(
+      ([name, entry]) => {
+        const assetId: unknown = z.toJSONSchema(entry.props).properties?.[
+          "assetId"
+        ];
+        return typeof assetId === "object" &&
+          assetId !== null &&
+          "assetKind" in assetId
+          ? [[name, assetId.assetKind]]
+          : [];
+      },
+    );
+    expect(assetKinds).toEqual([
+      ["image-pan", "image"],
+      ["caption-words", "audio"],
+      ["video-clip", "video"],
+    ]);
+  });
 });
