@@ -27,17 +27,26 @@ function lengthOf(timeline: Timeline): number {
   );
 }
 
+export async function openProjectFolder(
+  folder: string,
+): Promise<Outcome<ProjectStore, RenderFailure>> {
+  const opened = await openProject({ folder });
+  return opened.ok
+    ? opened
+    : fail({
+        kind: "project-invalid",
+        openFailure: opened.failure,
+        message: `The project does not open: ${opened.failure.message}`,
+      });
+}
+
 export async function loadOutput(options: {
   folder: string;
   outputId: string;
 }): Promise<Outcome<LoadedOutput, RenderFailure>> {
-  const opened = await openProject({ folder: options.folder });
+  const opened = await openProjectFolder(options.folder);
   if (!opened.ok) {
-    return fail({
-      kind: "project-invalid",
-      openFailure: opened.failure,
-      message: `The project does not open: ${opened.failure.message}`,
-    });
+    return opened;
   }
   const store = opened.value;
   const snapshot = store.read();

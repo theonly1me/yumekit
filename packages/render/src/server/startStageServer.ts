@@ -2,15 +2,12 @@ import { mkdtemp, rm } from "node:fs/promises";
 import type { AddressInfo } from "node:net";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { createServer, searchForWorkspaceRoot } from "vite";
+import { createServer, searchForWorkspaceRoot, type Plugin } from "vite";
 import { renderPackageDirectory } from "../packagePaths.js";
-import type { StagePageData } from "../page/stagePageData.js";
-import type { VideoFrameServer } from "../videoFrames/videoFrameServer.js";
-import { stagePagePath, stagePagePlugin } from "./stagePagePlugin.js";
+import { sceneImportsPlugin } from "./sceneImportsPlugin.js";
 
 export interface StageServer {
   origin: string;
-  pageUrl: string;
   close: () => Promise<void>;
 }
 
@@ -28,8 +25,7 @@ function isAddressInfo(address: unknown): address is AddressInfo {
 
 export async function startStageServer(options: {
   projectFolder: string;
-  pageData: StagePageData;
-  videoFrames: VideoFrameServer;
+  pagePlugin: Plugin;
 }): Promise<StageServer> {
   const cacheDir = await mkdtemp(join(tmpdir(), "yumekit-render-"));
   const server = await createServer({
@@ -57,7 +53,10 @@ export async function startStageServer(options: {
     },
     optimizeDeps: { noDiscovery: true, include: browserDependencies },
     oxc: { jsx: { runtime: "automatic", development: false } },
-    plugins: [stagePagePlugin(options)],
+    plugins: [
+      sceneImportsPlugin({ projectFolder: options.projectFolder }),
+      options.pagePlugin,
+    ],
   });
   await server.listen();
   const address = server.httpServer?.address();
@@ -65,10 +64,8 @@ export async function startStageServer(options: {
     await server.close();
     throw new Error("The stage server has no port");
   }
-  const origin = `http://127.0.0.1:${String(address.port)}`;
   return {
-    origin,
-    pageUrl: `${origin}${stagePagePath}`,
+    origin: `http://127.0.0.1:${String(address.port)}`,
     close: async () => {
       await server.close();
       await rm(cacheDir, { recursive: true, force: true });

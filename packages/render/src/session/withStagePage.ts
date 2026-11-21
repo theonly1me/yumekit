@@ -9,6 +9,7 @@ import {
   startStageServer,
   type StageServer,
 } from "../server/startStageServer.js";
+import { stagePagePath, stagePagePlugin } from "../server/stagePagePlugin.js";
 import { createVideoFrameServer } from "../videoFrames/videoFrameServer.js";
 
 export async function withStagePage<Value>(options: {
@@ -36,12 +37,11 @@ export async function withStagePage<Value>(options: {
     });
     server = await startStageServer({
       projectFolder: loaded.folder,
-      pageData,
-      videoFrames,
+      pagePlugin: stagePagePlugin({ pageData, videoFrames }),
     });
     const browserPage = await openStagePage({
       browser,
-      pageUrl: server.pageUrl,
+      pageUrl: `${server.origin}${stagePagePath}`,
       origin: server.origin,
       output: loaded.output,
       scale,

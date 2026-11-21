@@ -18,3 +18,7 @@ export const sceneTypesFile = sceneEntryFile.replace(/\.js$/, ".d.ts");
 export const stagePageEntryFile = fileURLToPath(
   new URL(`page/stagePage${sourceExtension}`, import.meta.url),
 );
+
+export const previewPageEntryFile = fileURLToPath(
+  new URL(`page/previewPage${sourceExtension}`, import.meta.url),
+);
