@@ -1,0 +1,90 @@
+.tracks {
+  display: grid;
+  gap: 6px;
+  position: relative;
+}
+
+.track {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  align-items: center;
+  font-size: var(--step--2);
+  color: var(--muted);
+}
+
+.lane {
+  position: relative;
+  height: 28px;
+}
+
+.lane.ruler {
+  height: 20px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--line);
+}
+
+.tick {
+  position: absolute;
+  top: 0;
+  color: var(--faint);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+
+.clip {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  border: 0;
+  border-radius: 3px;
+  padding: 0 8px;
+  font-size: var(--step--2);
+  font-weight: 500;
+  line-height: 24px;
+  text-align: left;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--text);
+}
+
+.clip:hover {
+  border: 0;
+}
+
+.clip.scene {
+  background: var(--clip-scene);
+  color: var(--on-solid);
+}
+
+.clip.narration {
+  background: var(--clip-voice);
+}
+
+.clip.music {
+  background: var(--clip-music);
+  color: var(--muted);
+}
+
+.clip[aria-current="true"] {
+  box-shadow:
+    0 0 0 1px var(--surface),
+    0 0 0 2px var(--accent);
+}
+
+.playhead-layer {
+  position: absolute;
+  left: 76px;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+.playhead {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--accent);
+}

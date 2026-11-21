@@ -111,7 +111,7 @@ Each request needs the header `Authorization: Bearer <token>`. A request without
 - After `PUT` or `DELETE` of a key, the engine starts that media server again, as document 10 says.
 - The engine never writes a key value to a log or a response.
 - A body that does not match its schema returns status 400 with the schema error.
-- The tools `preview_frame` and `preview_frames` work over HTTP, but the editor does not use them. It uses the preview page.
+- The tools `preview_frame` and `preview_frames` work over HTTP. The preview of the editor uses the preview page. Only the stills of the scenes row use `preview_frames` (see "Details of the editor").
 
 ### Events
 
@@ -234,6 +234,22 @@ Package `apps/editor` (browser): React, TypeScript, and Vite, built to static fi
 - The price in "Make a clip" comes from `prices` of the model and the selected settings. With no matching price, the editor shows "Price not known".
 - A model of a server with a missing key stays in the list. Its button opens the key guide of that server.
 - The first run screen and the creation of a project in the editor are not in this version. `yumekit init` makes the project.
+
+#### Details of the editor
+
+These rules came from the build of WP21.
+
+1. The scenes row shows one still for each clip of the first scene track that is not a caption track, in start order. A caption track is a scene track whose clips all show `caption-words` scenes, as in `place_narration`.
+2. Each still comes from one call of `preview_frames` for up to 8 clips, so the stills of a project cost one renderer page and no extra preview page. The frame is 75% into the clip, where kit motion has settled. The scale is the smallest of 0.25, 0.5, and 1 that gives a still 380 pixels wide or more. The editor reads the stills again after each `project-changed`.
+3. A still is the full frame of the output, so it also shows the captions of that frame.
+4. The output switch shows the label of each output with a capital first letter. `yumekit init` sets the label to the id.
+5. A clip picked in the scenes row or the timeline stays selected while the playhead is inside it. Otherwise the selection follows the clip of the first scene track at the playhead. A pick in the scenes row also opens the Scene tab.
+6. The timeline names each track by its id, with a capital first letter and spaces for hyphens. An audio clip shows the `text` or the `prompt` of its tool input, or its asset id. An audio clip of an asset with word timings and a clip of a caption track use the narration style.
+7. The Agent tab shows `yumekit mcp --project <folder>` and a block for Claude Code (`.mcp.json`), Codex (`~/.codex/config.toml`), and Cursor (`.cursor/mcp.json` or `~/.cursor/mcp.json`). Each block runs `yumekit` from the `PATH`.
+8. Until WP24, the Render button opens a sheet with the `yumekit render` command for the current output.
+9. The theme setting is a text button in the top bar. The key in `localStorage` is `yumekit-theme`.
+10. A reload loses the token, because the app keeps it only in memory. The page then asks for the link from `yumekit open`.
+11. The editor browser tests start `yumekit open` as a child process and use only HTTP, so `apps/editor` imports no yumekit package. The test setup builds the editor first, because CI runs `pnpm test` before `pnpm build`.
 
 ## The command
 
