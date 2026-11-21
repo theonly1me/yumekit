@@ -1,7 +1,7 @@
 import { checkSceneCode, type RenderFailure } from "@yumekit/render";
 import { kitSceneSchemas } from "@yumekit/scene-kit/schemas";
 import { prettifyError, type z } from "zod";
-import type { HarnessFailure } from "../results.js";
+import type { FailureIssue, HarnessFailure } from "../results.js";
 
 const permittedImports = "react, @yumekit/scene, and @yumekit/scene-kit";
 
@@ -19,6 +19,15 @@ function propListOf(schema: z.ZodObject): string {
       return `${name} (${requirement}): ${field.description ?? ""}`;
     })
     .join(" ");
+}
+
+function issuesOf(error: z.ZodError): FailureIssue[] {
+  return error.issues.map((issue) => ({
+    path: issue.path.filter(
+      (key): key is string | number => typeof key !== "symbol",
+    ),
+    message: issue.message,
+  }));
 }
 
 export function checkKitProps(options: {
@@ -40,6 +49,7 @@ export function checkKitProps(options: {
     kind: "invalid-props",
     message: `The props do not match the kit scene "${component}": ${prettifyError(parsed.error)}`,
     hint: `Send only these props, with these names: ${propListOf(schema)}`,
+    issues: issuesOf(parsed.error),
   };
 }
 

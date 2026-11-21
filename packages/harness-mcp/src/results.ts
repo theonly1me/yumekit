@@ -1,9 +1,15 @@
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 
+export interface FailureIssue {
+  path: (string | number)[];
+  message: string;
+}
+
 export interface HarnessFailure {
   kind: string;
   message: string;
   hint: string;
+  issues?: FailureIssue[];
 }
 
 export type Outcome<Value, Failure> =
