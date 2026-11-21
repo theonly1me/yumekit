@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { chooseModel } from "../catalog/catalog.ts";
 import { missingKeyMessage } from "../openAiApi.ts";
 import {
   checkFileStem,
@@ -13,6 +14,11 @@ import { requestImage } from "./requestImage.ts";
 const sidePixels = z.number().int().min(16).max(3840);
 
 const imageInput = {
+  model: z
+    .string()
+    .min(1)
+    .optional()
+    .describe("The id of a model from describe_media_server"),
   prompt: z.string().min(1).describe("What the image shows"),
   output_directory: z.string().min(1).describe("Folder for the new file"),
   file_stem: z.string().min(1).describe("Start of the new file name"),
@@ -45,6 +51,13 @@ export function registerImageTool(options: ToolOptions): void {
       inputSchema: imageInput,
     },
     async (input) => {
+      const chosen = chooseModel({
+        capability: "image",
+        activeModel: options.model,
+        requested: input.model,
+      });
+      if (!chosen.ok) return errorResult(chosen.failure);
+      const model = chosen.value;
       if (!options.apiKey) return errorResult(missingKeyMessage);
       const fileStem = checkFileStem(input.file_stem);
       if (!fileStem.ok) return errorResult(fileStem.failure);
@@ -56,7 +69,7 @@ export function registerImageTool(options: ToolOptions): void {
       const image = await requestImage({
         sendRequest: options.sendRequest,
         apiKey: options.apiKey,
-        model: options.model,
+        model,
         prompt: input.prompt,
         size: size.value,
         transparentBackground: input.transparent_background ?? false,

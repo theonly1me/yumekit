@@ -1,10 +1,16 @@
 import { z } from "zod";
+import { chooseModel, estimatedCostOf } from "../catalog/catalog.ts";
 import { formRequest, missingKeyMessage, requestJson } from "../openAiApi.ts";
 import type { ToolOptions } from "../toolOptions.ts";
 import { errorResult, successResult, type WordTiming } from "../toolResults.ts";
 import { readAudioFile } from "./readAudioFile.ts";
 
 const alignInput = {
+  model: z
+    .string()
+    .min(1)
+    .optional()
+    .describe("The id of a model from describe_media_server"),
   audio_path: z.string().min(1).describe("The audio file to align"),
   text: z
     .string()
@@ -18,6 +24,7 @@ const alignInput = {
 };
 
 const verboseTranscription = z.object({
+  duration: z.number().nonnegative().optional(),
   words: z
     .array(z.object({ word: z.string(), start: z.number(), end: z.number() }))
     .optional(),
@@ -47,6 +54,13 @@ export function registerAlignTool(options: ToolOptions): void {
       inputSchema: alignInput,
     },
     async (input) => {
+      const chosen = chooseModel({
+        capability: "align",
+        activeModel: options.model,
+        requested: input.model,
+      });
+      if (!chosen.ok) return errorResult(chosen.failure);
+      const model = chosen.value;
       if (!options.apiKey) return errorResult(missingKeyMessage);
       const audio = await readAudioFile(input.audio_path);
       if (!audio.ok) return errorResult(audio.failure);
@@ -56,7 +70,7 @@ export function registerAlignTool(options: ToolOptions): void {
           path: "/audio/transcriptions",
           apiKey: options.apiKey,
           form: transcriptionForm({
-            model: options.model,
+            model,
             audio: audio.value,
             language: input.language,
           }),
@@ -66,7 +80,7 @@ export function registerAlignTool(options: ToolOptions): void {
       const body = verboseTranscription.safeParse(sent.value);
       if (!body.success || body.data.words === undefined) {
         return errorResult(
-          `The OpenAI model ${options.model} returned no word timestamps. Set YUMEKIT_OPENAI_ALIGN_MODEL to a model that gives them, such as whisper-1.`,
+          `The OpenAI model ${model} returned no word timestamps. Set YUMEKIT_OPENAI_ALIGN_MODEL to a model that gives them, such as whisper-1.`,
         );
       }
       const words: WordTiming[] = body.data.words.map((word) => ({
@@ -74,7 +88,12 @@ export function registerAlignTool(options: ToolOptions): void {
         start_seconds: word.start,
         end_seconds: word.end,
       }));
-      return successResult({ files: [], words });
+      const { duration } = body.data;
+      const cost =
+        duration === undefined
+          ? undefined
+          : estimatedCostOf({ model, minutes: duration / 60 });
+      return successResult({ files: [], words, ...cost });
     },
   );
 }

@@ -1,11 +1,20 @@
+import { callCheckKey } from "./checkKey.js";
 import { readMediaToolsConfiguration } from "./configuration.js";
-import { connectServer, type ServerConnection } from "./connectServer.js";
+import {
+  connectServer,
+  type ServerConnection,
+  type StartedServer,
+} from "./connectServer.js";
 import { runTool } from "./runTool.js";
+import {
+  describedDefaultModel,
+  isStarted,
+  selectServer,
+} from "./selectServer.js";
+import { createServerPool, missingKeyFailureOf } from "./serverPool.js";
 import type {
-  Capability,
   ConnectFailure,
-  MediaToolFailure,
-  MediaToolRequest,
+  MediaServerEntry,
   MediaTools,
   Outcome,
   ServerCommand,
@@ -13,60 +22,15 @@ import type {
 
 const defaultToolTimeoutSeconds = 600;
 
-type StartedServer = Extract<ServerConnection, { status: "started" }>;
-
-function isStarted(connection: ServerConnection): connection is StartedServer {
-  return connection.status === "started";
-}
-
-function selectServer(options: {
-  connections: ServerConnection[];
-  defaults: Partial<Record<Capability, string>>;
-  request: MediaToolRequest;
-}): Outcome<StartedServer, MediaToolFailure> {
-  const { capability } = options.request;
-  const requested = options.request.server ?? options.defaults[capability];
-  if (requested === undefined) {
-    const first = options.connections
-      .filter(isStarted)
-      .find((connection) => connection.capabilities.includes(capability));
-    return first
-      ? { ok: true, value: first }
-      : {
-          ok: false,
-          failure: { kind: "no-server-for-capability", capability },
-        };
-  }
-  const connection = options.connections.find(
-    (candidate) => candidate.name === requested,
-  );
-  if (!connection) {
-    return {
-      ok: false,
-      failure: { kind: "server-not-found", server: requested },
-    };
-  }
-  if (connection.status === "failed") {
-    return {
-      ok: false,
-      failure: {
-        kind: "server-failed-to-start",
-        server: requested,
-        message: connection.message,
-      },
-    };
-  }
-  if (!connection.capabilities.includes(capability)) {
-    return {
-      ok: false,
-      failure: {
-        kind: "no-server-for-capability",
-        capability,
-        server: requested,
-      },
-    };
-  }
-  return { ok: true, value: connection };
+function entryOf(connection: StartedServer): MediaServerEntry {
+  return {
+    server: connection.name,
+    capabilities: [...connection.capabilities],
+    ...(connection.description ? { description: connection.description } : {}),
+    ...(connection.descriptionFailure
+      ? { descriptionFailure: connection.descriptionFailure }
+      : {}),
+  };
 }
 
 export async function connectMediaTools(options: {
@@ -79,26 +43,24 @@ export async function connectMediaTools(options: {
   const configuration = configurationRead.value;
   const toolTimeoutSeconds =
     options.toolTimeoutSeconds ?? defaultToolTimeoutSeconds;
-  const connections = await Promise.all(
-    configuration.servers.map((server) =>
-      server.status === "ready"
-        ? connectServer({ name: server.name, command: server.command })
-        : Promise.resolve<ServerConnection>({
-            name: server.name,
-            status: "failed",
-            message: server.message,
-          }),
+  const pool = createServerPool(
+    await Promise.all(
+      configuration.servers.map((server) =>
+        server.status === "ready"
+          ? connectServer({ name: server.name, command: server.command })
+          : Promise.resolve<ServerConnection>({
+              name: server.name,
+              status: "failed",
+              message: server.message,
+            }),
+      ),
     ),
   );
-  const startedServers = connections.filter(isStarted);
   const tools: MediaTools = {
-    list: () =>
-      startedServers.map((connection) => ({
-        server: connection.name,
-        capabilities: [...connection.capabilities],
-      })),
+    list: () => pool.connections().filter(isStarted).map(entryOf),
     failedServers: () =>
-      connections
+      pool
+        .connections()
         .filter((connection) => connection.status === "failed")
         .map((connection) => ({
           server: connection.name,
@@ -107,25 +69,59 @@ export async function connectMediaTools(options: {
     limits: () => ({ ...configuration.limits }),
     run: async (request) => {
       const selected = selectServer({
-        connections,
+        connections: pool.connections(),
         defaults: configuration.defaults,
         request,
       });
       if (!selected.ok) return selected;
-      const server = selected.value.name;
+      const missingKey = await missingKeyFailureOf(selected.value.connection);
+      if (missingKey) return { ok: false, failure: missingKey };
+      const refreshed = await pool.refresh(selected.value.connection);
+      if (!refreshed.ok) return refreshed;
+      const connection = refreshed.value;
+      const { model } = selected.value;
       const ran = await runTool({
-        server,
-        client: selected.value.client,
+        server: connection.name,
+        client: connection.client,
         request,
+        model,
         toolTimeoutSeconds,
       });
-      return ran.ok ? { ok: true, value: { server, result: ran.value } } : ran;
+      if (!ran.ok) return ran;
+      const recordedModel =
+        model ??
+        describedDefaultModel({ connection, capability: request.capability });
+      return {
+        ok: true,
+        value: {
+          server: connection.name,
+          ...(recordedModel === undefined ? {} : { model: recordedModel }),
+          result: ran.value,
+        },
+      };
     },
-    close: async () => {
-      await Promise.all(
-        startedServers.map((connection) => connection.client.close()),
-      );
+    checkKey: async (server) => {
+      const connection = pool
+        .connections()
+        .find((candidate) => candidate.name === server);
+      if (!connection) {
+        return { ok: false, failure: { kind: "server-not-found", server } };
+      }
+      if (connection.status === "failed") {
+        return {
+          ok: false,
+          failure: {
+            kind: "server-failed-to-start",
+            server,
+            message: connection.message,
+          },
+        };
+      }
+      const refreshed = await pool.refresh(connection);
+      if (!refreshed.ok) return refreshed;
+      return callCheckKey({ connection: refreshed.value, toolTimeoutSeconds });
     },
+    close: () => pool.close(),
   };
   return { ok: true, value: tools };
 }

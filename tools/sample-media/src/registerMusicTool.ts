@@ -1,5 +1,6 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
+import { modelInput, unknownModelMessage } from "./catalog.ts";
 import { encodeToneWav } from "./audio/wav.ts";
 import { errorResult, successResult, writeOutputFile } from "./toolResults.ts";
 
@@ -8,6 +9,7 @@ const musicToneAmplitude = 0.1;
 const maximumDurationSeconds = 600;
 
 const musicInput = {
+  model: modelInput("music"),
   prompt: z.string().min(1).describe("Ignored by the sample server"),
   duration_seconds: z
     .number()
@@ -27,6 +29,11 @@ export function registerMusicTool(server: McpServer): void {
       inputSchema: musicInput,
     },
     async (input) => {
+      const modelFailure = unknownModelMessage({
+        capability: "music",
+        model: input.model,
+      });
+      if (modelFailure) return errorResult(modelFailure);
       const tone = encodeToneWav({
         durationSeconds: input.duration_seconds,
         frequencyHertz: musicToneHertz,

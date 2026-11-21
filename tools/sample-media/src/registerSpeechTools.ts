@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
+import { modelInput, unknownModelMessage } from "./catalog.ts";
 import { encodeToneWav, readWavDurationSeconds } from "./audio/wav.ts";
 import { evenWordTimings, splitWords } from "./audio/wordTimings.ts";
 import { errorResult, successResult, writeOutputFile } from "./toolResults.ts";
@@ -10,6 +11,7 @@ const speechToneHertz = 440;
 const speechToneAmplitude = 0.05;
 
 const speechInput = {
+  model: modelInput("speech"),
   text: z.string().min(1).describe("The words to speak"),
   output_directory: z.string().min(1).describe("Folder for the new file"),
   file_stem: z.string().min(1).describe("Start of the new file name"),
@@ -23,6 +25,7 @@ const speechInput = {
 };
 
 const alignInput = {
+  model: modelInput("align"),
   audio_path: z.string().min(1).describe("A WAV file to align"),
   text: z.string().min(1).describe("The words in the audio"),
   language: z.string().optional().describe("Ignored by the sample server"),
@@ -37,6 +40,11 @@ function registerSpeechTool(server: McpServer): void {
       inputSchema: speechInput,
     },
     async (input) => {
+      const modelFailure = unknownModelMessage({
+        capability: "speech",
+        model: input.model,
+      });
+      if (modelFailure) return errorResult(modelFailure);
       const words = splitWords(input.text);
       if (words.length === 0) return errorResult("text has no words");
       const tone = encodeToneWav({
@@ -85,6 +93,11 @@ function registerAlignTool(server: McpServer): void {
       inputSchema: alignInput,
     },
     async (input) => {
+      const modelFailure = unknownModelMessage({
+        capability: "align",
+        model: input.model,
+      });
+      if (modelFailure) return errorResult(modelFailure);
       const words = splitWords(input.text);
       if (words.length === 0) return errorResult("text has no words");
       const bytes = await readAudio(input.audio_path);

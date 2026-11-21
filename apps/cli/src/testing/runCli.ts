@@ -1,4 +1,4 @@
-import { execFile } from "node:child_process";
+import { execFile, spawn } from "node:child_process";
 import { mkdir, mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -35,8 +35,35 @@ function failedRunOf(error: unknown): CliRun {
 
 export interface CliWorkspace {
   root: string;
+  configurationDirectory: string;
   environment: NodeJS.ProcessEnv;
   run: (args: string[]) => Promise<CliRun>;
+  runWithInput: (run: { args: string[]; input: string }) => Promise<CliRun>;
+}
+
+function runWithInput(options: {
+  args: string[];
+  input: string;
+  environment: NodeJS.ProcessEnv;
+}): Promise<CliRun> {
+  const child = spawn(process.execPath, [builtMainFile, ...options.args], {
+    env: options.environment,
+  });
+  const stdout: string[] = [];
+  const stderr: string[] = [];
+  child.stdout.on("data", (chunk: Buffer) => stdout.push(chunk.toString()));
+  child.stderr.on("data", (chunk: Buffer) => stderr.push(chunk.toString()));
+  child.stdin.end(options.input);
+  const finished = Promise.withResolvers<CliRun>();
+  child.on("error", finished.reject);
+  child.on("close", (code) => {
+    finished.resolve({
+      exitCode: code ?? 1,
+      stdout: stdout.join(""),
+      stderr: stderr.join(""),
+    });
+  });
+  return finished.promise;
 }
 
 export async function createCliWorkspace(options?: {
@@ -46,13 +73,18 @@ export async function createCliWorkspace(options?: {
   const home = join(root, "home");
   await mkdir(home);
   onTestFinished(() => rm(root, { recursive: true, force: true }));
-  const environment =
-    options?.home === "user"
-      ? { ...process.env }
-      : { ...process.env, HOME: home };
+  const configurationDirectory = join(root, "config");
+  const environment = {
+    ...process.env,
+    ...(options?.home === "user" ? {} : { HOME: home }),
+    YUMEKIT_CONFIG_DIRECTORY: configurationDirectory,
+    OPENAI_API_KEY: "",
+  };
   return {
     root,
+    configurationDirectory,
     environment,
+    runWithInput: (run) => runWithInput({ ...run, environment }),
     run: async (args) => {
       try {
         const { stdout, stderr } = await runFile(

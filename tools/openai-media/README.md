@@ -20,26 +20,21 @@ OpenAI retires models often. Each tool has a default model, and an environment v
 
 After a shutdown date, the tool fails with the message of the API. Set the variable to a model that the OpenAI documents still list for the same endpoint. `align_words` needs a model that returns word timestamps.
 
+## Description and key check
+
+- `describe_media_server` gives the key, the models, their settings, and their prices. It makes no request. See document 10 for the facts and their date.
+- `check_key` lists the models with the key, which is a free request, and returns `{ valid, message }`.
+- Each tool accepts the optional input `model`. An unknown id is rejected with the list of ids, before any request.
+
 ## Setup
 
 1. Create a key at https://platform.openai.com/api-keys.
-2. Set `OPENAI_API_KEY` in your shell.
-3. Add the server to `media-tools.json`:
+2. Run `yumekit keys set OPENAI_API_KEY` and paste the key at the hidden prompt. An `OPENAI_API_KEY` in your shell wins over the key file.
+3. Add the bundled server to `media-tools.json`. The bundled entry already passes `OPENAI_API_KEY` and the model variables:
 
 ```json
 {
-  "mcpServers": {
-    "openai": {
-      "command": "yumekit-openai-media",
-      "args": [],
-      "passEnvironment": [
-        "OPENAI_API_KEY",
-        "YUMEKIT_OPENAI_IMAGE_MODEL",
-        "YUMEKIT_OPENAI_SPEECH_MODEL",
-        "YUMEKIT_OPENAI_ALIGN_MODEL"
-      ]
-    }
-  },
+  "mcpServers": { "openai": {} },
   "defaults": { "image": "openai", "speech": "openai", "align": "openai" }
 }
 ```

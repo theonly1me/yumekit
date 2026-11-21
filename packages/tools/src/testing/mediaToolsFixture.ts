@@ -41,6 +41,7 @@ export interface FixtureOptions {
   userFile?: object | string;
   bundledServers?: Record<string, ServerCommand>;
   toolTimeoutSeconds?: number;
+  beforeConnect?: () => Promise<unknown>;
 }
 
 function fileText(content: object | string): string {
@@ -58,6 +59,7 @@ export async function connectFixtureOutcome(options: FixtureOptions): Promise<{
   await mkdir(join(home, ".config", "yumekit"), { recursive: true });
   await mkdir(projectFolder);
   vi.stubEnv("HOME", home);
+  vi.stubEnv("YUMEKIT_CONFIG_DIRECTORY", join(home, ".config", "yumekit"));
   onTestFinished(async () => {
     vi.unstubAllEnvs();
     await rm(root, { recursive: true, force: true });
@@ -74,6 +76,7 @@ export async function connectFixtureOutcome(options: FixtureOptions): Promise<{
       fileText(options.projectFile),
     );
   }
+  await options.beforeConnect?.();
   const outcome = await connectMediaTools({
     projectFolder,
     bundledServers: options.bundledServers ?? { sample: sampleServerCommand },
@@ -96,3 +99,11 @@ export async function connectFixture(
     outputDirectory: join(projectFolder, "assets"),
   };
 }
+
+export const keyedServerCommand: ServerCommand = {
+  command: process.execPath,
+  args: [fileURLToPath(new URL("./keyedMediaServer.ts", import.meta.url))],
+  passEnvironment: ["YUMEKIT_TEST_KEY"],
+};
+
+export const testKeyValue = "yumekit-test-key-7f3a9c";

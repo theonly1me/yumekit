@@ -19,8 +19,10 @@ export const assetSourceSchema = z.discriminatedUnion("kind", [
     kind: z.literal("tool"),
     server: z.string(),
     tool: z.string(),
+    model: z.string().exactOptional(),
     input: jsonObjectSchema,
     costUsd: z.number().min(0).exactOptional(),
+    costIsEstimate: z.boolean().exactOptional(),
   }),
 ]);
 

@@ -47,21 +47,23 @@ const transcriptionResponse = (body: object) => () =>
   Promise.resolve(Response.json(body));
 
 describe("align_words", () => {
-  it("converts the word timestamps of the API to the convention shape and writes no file", async () => {
+  it("converts the word timestamps of the API to the convention shape, estimates the cost, and writes no file", async () => {
     const { result } = await callAlign({
       environment: { OPENAI_API_KEY: placeholderKey },
       respond: transcriptionResponse(verboseTranscription),
     });
 
     expect(result.isError).toBeFalsy();
-    expect(result.structuredContent).toEqual({
+    expect(result.structuredContent).toMatchObject({
       files: [],
       words: [
         { text: "Hello", start_seconds: 0, end_seconds: 0.42 },
         { text: "from", start_seconds: 0.42, end_seconds: 0.7 },
         { text: "yumekit", start_seconds: 0.7, end_seconds: 1.36 },
       ],
+      cost_is_estimate: true,
     });
+    expect(result.structuredContent?.["cost_usd"]).toBeCloseTo(0.00015, 10);
   });
 
   it("asks whisper-1 for verbose JSON with word timestamps and the language", async () => {

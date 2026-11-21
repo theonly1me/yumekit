@@ -9,7 +9,15 @@ interface BundledServer {
 
 const bundledServersByName: Record<string, BundledServer> = {
   sample: { folder: "sample-media" },
-  openai: { folder: "openai-media" },
+  openai: {
+    folder: "openai-media",
+    passEnvironment: [
+      "OPENAI_API_KEY",
+      "YUMEKIT_OPENAI_IMAGE_MODEL",
+      "YUMEKIT_OPENAI_SPEECH_MODEL",
+      "YUMEKIT_OPENAI_ALIGN_MODEL",
+    ],
+  },
   gemini: {
     folder: "gemini-media",
     passEnvironment: [

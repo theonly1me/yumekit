@@ -19,6 +19,8 @@ export interface WordTiming {
 export interface MediaToolResult {
   files: MediaFile[];
   words?: WordTiming[];
+  cost_usd?: number;
+  cost_is_estimate?: boolean;
 }
 
 export type Outcome<Value, Failure> =
