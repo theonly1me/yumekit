@@ -1,13 +1,13 @@
 import { execFile, spawn } from "node:child_process";
-import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { chmod, mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
-import { join } from "node:path";
+import { delimiter, dirname, join } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 
 const runFile = promisify(execFile);
-const cliMainFile = fileURLToPath(
+export const cliMainFile = fileURLToPath(
   new URL("../../../cli/dist/main.js", import.meta.url),
 );
 const urlPattern = /http:\/\/127\.0\.0\.1:\d+\/\?token=[0-9a-f]{64}/;
@@ -18,6 +18,7 @@ export interface RunningEngine {
   origin: string;
   token: string;
   projectFolder: string;
+  environment: NodeJS.ProcessEnv;
   callTool: (call: { name: string; input: object }) => Promise<unknown>;
   stop: () => Promise<void>;
   remove: () => Promise<void>;
@@ -39,6 +40,25 @@ function browsersPath(): string {
 export interface EngineOptions {
   mediaTools?: object;
   withChromium?: boolean;
+  agentPrograms?: string[];
+}
+
+async function pathWithAgents(options: {
+  root: string;
+  agentPrograms: string[] | undefined;
+}): Promise<{ PATH?: string }> {
+  if (options.agentPrograms === undefined) return {};
+  const folder = join(options.root, "bin");
+  await mkdir(folder);
+  for (const program of options.agentPrograms) {
+    await writeFile(join(folder, program), "#!/bin/sh\n");
+    await chmod(join(folder, program), 0o755);
+  }
+  return {
+    PATH: [folder, dirname(process.execPath), "/usr/bin", "/bin"].join(
+      delimiter,
+    ),
+  };
 }
 
 async function createProject(options: EngineOptions): Promise<{
@@ -61,6 +81,7 @@ async function createProject(options: EngineOptions): Promise<{
     GEMINI_API_KEY: "",
     FAL_KEY: "",
     YUMEKIT_EDITOR_TEST_KEY: "",
+    ...(await pathWithAgents({ root, agentPrograms: options.agentPrograms })),
   };
   const folder = join(root, "project");
   await runFile(
@@ -125,6 +146,7 @@ export async function runEngine(
     origin: parsed.origin,
     token,
     projectFolder: folder,
+    environment,
     callTool: async (call) => {
       const response = await fetch(`${parsed.origin}/api/tools/${call.name}`, {
         method: "POST",
