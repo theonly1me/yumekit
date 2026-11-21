@@ -79,6 +79,7 @@ Use these words with these meanings in code and in documents.
 - A local align server, before OpenAI shuts down `whisper-1` on 2027-02-26.
 - Servers for more hosts, such as Replicate and BytePlus, and more fal models.
 - Keys in the keychain of the operating system.
+- `tools/local-video`, a video server that runs on the computer of the user. It has a low priority. Document 10 has the facts of the LTX-2.3 probe.
 - `tools/codex-images`, after a probe confirms that a `codex exec` run can make an image.
 - Smaller undo history for long projects, and recovery after a crash in the middle of a write.
 - Removal of media files and word timing files that no record references.
