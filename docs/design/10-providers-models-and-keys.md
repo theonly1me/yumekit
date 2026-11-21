@@ -178,7 +178,7 @@ Document 09 named one video server. With decision P1, yumekit bundles three, and
 | -------------------- | ---------------- | ---------------- | --------------------------------------------- |
 | `tools/gemini-media` | Hosted           | `GEMINI_API_KEY` | `gemini-omni-1.2-flash`                       |
 | `tools/fal-media`    | Hosted           | `FAL_KEY`        | Seedance 2.5 text to video and image to video |
-| `tools/local-video`  | On this computer | None             | LTX-2, after the probe below gives its facts  |
+| `tools/local-video`  | On this computer | None             | Not built. LTX-2.3 is the first candidate     |
 
 ### `tools/fal-media`
 
@@ -224,7 +224,22 @@ The endpoints that the server uses, from `fal.ai/docs/api-reference/inference-ap
 
 ### `tools/local-video`
 
-A probe on the computer of the owner comes first. It measures LTX-2 with `mlx-video`: the size of the download, the peak memory, the time for a 5 second clip from a first frame, and the license of the weights. The design of the server follows the probe. A license that does not permit bundled use stops the work, and the owner decides.
+The probe ran on 2026-11-21, on a MacBook with an M3 Max and 64 GB of memory. It used LTX-2.3 distilled with `mlx-video`.
+
+| Measure                             | Result                                                             |
+| ----------------------------------- | ------------------------------------------------------------------ |
+| Download                            | 73.5 GB in 96 minutes: 47.1 GB for LTX-2.3 and 26.4 GB for Gemma 3 |
+| 5 second clip from text, 512 x 512  | 119 seconds                                                        |
+| 5 second clip from a first frame    | 106 seconds, after a fix for a configuration defect in `mlx-video` |
+| 5 second clip from text, 1280 x 704 | 351 seconds                                                        |
+| Peak memory                         | 53 GB to 55 GB                                                     |
+| License of the weights              | LTX-2 Community License                                            |
+
+- Each time includes the load of the model into memory.
+- The license is free below 10 million US dollars of revenue for each year. The user must disclose content that a machine made. The license does not permit a product that competes directly with the commercial products of the licensor.
+- yumekit does not bundle the weights. The user downloads them, and the user accepts the license.
+
+The owner decided on 2026-11-21: a local video server stays an option of the harness, with a low priority. LTX is one candidate, and another local model can replace it. The server follows the same convention as the hosted servers, so the choice of model stays inside the server. The design of the server has no document yet.
 
 ## Work packages
 
@@ -234,7 +249,7 @@ These add to the table in document 09. WP13 gets the catalog and `describe_media
 | ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
 | WP15 | Keys and descriptions: the key file and its interface, `yumekit keys`, `describe_media_server` in the client, the sample server, and `tools/openai-media`, `list_media_tools` with descriptions and key states, `media-key-missing`, the `model` input, and `defaults` with a model | WP12  |
 | WP16 | `tools/fal-media`                                                                                                                                                                                                                                                                   |       |
-| WP17 | `tools/local-video`, after the probe                                                                                                                                                                                                                                                | WP15  |
+| WP17 | `tools/local-video`, with a low priority                                                                                                                                                                                                                                            | WP15  |
 
 WP13 and WP16 follow WP15 for `describe_media_server` only. Each one can start before WP15 merges, with the types of this document.
 
