@@ -7,9 +7,20 @@
   },
   "include": ["src"],
   "references": [
-    { "path": "../../packages/project" },
-    { "path": "../../packages/render" },
-    { "path": "../../packages/tools" },
-    { "path": "../../packages/harness-mcp" }
+    {
+      "path": "../../packages/project"
+    },
+    {
+      "path": "../../packages/render"
+    },
+    {
+      "path": "../../packages/tools"
+    },
+    {
+      "path": "../../packages/harness-mcp"
+    },
+    {
+      "path": "../../packages/engine"
+    }
   ]
 }

@@ -2,6 +2,7 @@ import { usage, usageError, type CommandResult } from "./commandResult.js";
 import { initCommand } from "./commands/initCommand.js";
 import { keysCommand } from "./commands/keys/keysCommand.js";
 import { mcpCommand } from "./commands/mcpCommand.js";
+import { openCommand } from "./commands/open/openCommand.js";
 import { frameCommand, renderCommand } from "./commands/renderCommands.js";
 import { formatVersion, version } from "./index.js";
 
@@ -11,6 +12,7 @@ const commands: Record<string, (args: string[]) => Promise<CommandResult>> = {
   render: renderCommand,
   frame: frameCommand,
   keys: keysCommand,
+  open: openCommand,
 };
 
 export function runCommand(args: string[]): Promise<CommandResult> {

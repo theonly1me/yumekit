@@ -1,3 +1,4 @@
+import type { ToolAnnotations } from "@modelcontextprotocol/sdk/types.js";
 import type { JsonObject } from "@yumekit/tools";
 import { z } from "zod";
 import {
@@ -7,12 +8,14 @@ import {
   type HarnessResult,
 } from "./harnessResult.js";
 import { harnessToolsOf, type HarnessOptions } from "./harnessTools.js";
+import { mcpInputFailureOf } from "./mcpInputFailure.js";
 import type { HarnessTool, ProgressListener } from "./toolTable.js";
 
 export interface HarnessToolListing {
   name: string;
   description: string;
   inputSchema: JsonObject;
+  annotations?: ToolAnnotations;
 }
 
 export interface HarnessCall {
@@ -53,6 +56,24 @@ const harnessClosed = harnessFailureResult({
   hint: "Create the harness again with createHarness.",
 });
 
+async function runTool(options: {
+  tool: HarnessTool;
+  input: JsonObject;
+  onProgress: ProgressListener | undefined;
+}): Promise<HarnessResult> {
+  const { tool, input, onProgress } = options;
+  const mcpInputFailure = await mcpInputFailureOf({ tool, input });
+  const result = harnessResultOf(
+    await tool.run({
+      input,
+      ...(onProgress === undefined ? {} : { onProgress }),
+    }),
+  );
+  return mcpInputFailure === undefined
+    ? result
+    : { ...result, mcpResult: mcpInputFailure };
+}
+
 export function createHarness(options: HarnessOptions): Harness {
   const harnessTools = harnessToolsOf(options);
   const toolsByName = new Map(harnessTools.map((tool) => [tool.name, tool]));
@@ -63,14 +84,15 @@ export function createHarness(options: HarnessOptions): Harness {
       name: tool.name,
       description: tool.description,
       inputSchema: inputSchemaOf(tool),
+      ...(tool.annotations === undefined
+        ? {}
+        : { annotations: tool.annotations }),
     })),
     call: async ({ name, input, onProgress }) => {
       if (isClosed) return harnessClosed;
       const tool = toolsByName.get(name);
       if (tool === undefined) return toolNotFound(name);
-      const pending = tool
-        .run({ input, ...(onProgress === undefined ? {} : { onProgress }) })
-        .then(harnessResultOf);
+      const pending = runTool({ tool, input, onProgress });
       running.add(pending);
       try {
         return await pending;

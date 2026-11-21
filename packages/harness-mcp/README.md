@@ -26,6 +26,8 @@ function createHarness(options: HarnessOptions): {
 
 `createHarness` gives the same tools as the MCP server, as functions. The engine of document 11 uses it. `createHarnessServer` is the MCP layer over the same tool table.
 
+Each tool also has `annotations` when it has them. Each `HarnessResult` also has `mcpResult`, the result that the MCP server gives for the same call. `serverInstructions` is the instruction text of the MCP server. The `yumekit mcp` bridge uses both.
+
 Each tool that changes the project calls `applyEdits` one time. No tool reads or writes an arbitrary file. A failure is a result with `isError: true` and `{ kind, message, hint }`. The hint says what to call or change next.
 
 `yumekit mcp --project <folder>` in `apps/cli` serves this server over stdio.

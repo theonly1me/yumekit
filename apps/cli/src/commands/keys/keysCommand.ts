@@ -1,4 +1,5 @@
 import {
+  findBundledServers,
   keyFilePath,
   listServerKeys,
   readKeyStates,
@@ -7,7 +8,6 @@ import {
   type KeyFailure,
   type ServerKeys,
 } from "@yumekit/tools";
-import { findBundledServers } from "../../bundledServers.js";
 import { failed, usageError, type CommandResult } from "../../commandResult.js";
 import { parseCommandLine } from "../../options.js";
 import { readSecret } from "./readSecret.js";

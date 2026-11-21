@@ -23,6 +23,9 @@ export async function launchBrowser(): Promise<
     return succeed(
       await chromium.launch({
         headless: true,
+        handleSIGINT: false,
+        handleSIGTERM: false,
+        handleSIGHUP: false,
         args: ["--force-color-profile=srgb", "--hide-scrollbars"],
       }),
     );

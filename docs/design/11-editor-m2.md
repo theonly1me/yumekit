@@ -45,9 +45,9 @@ type EngineFailure =
 
 ### One engine for one project
 
-1. At the start, the engine writes `<project>/.yumekit/engine.json` with `{ "port": number, "token": string, "processId": number }` and mode `0600`. It removes the file when it closes.
+1. At the start, the engine creates `<project>/.yumekit/engine.json` with `{ "port": number, "token": string, "processId": number }` and mode `0600`. The create is exclusive (the `wx` flag), so two starts at the same moment give one engine. The engine removes the file when it closes.
 2. If the file exists and its engine answers `GET /api/health` with the token, `startEngine` returns `engine-already-running` with the URL.
-3. If the file exists and no engine answers, the file is stale. The engine replaces it.
+3. If the file exists and no engine answers, the file is stale. The engine removes it and tries the exclusive create once more. If that create also fails, the engine that holds the file wins.
 4. `yumekit mcp --project <folder>` reads the file first. If an engine runs, the command is a bridge: it serves MCP over stdio and sends each tool call to `POST /api/tools/<name>` of that engine. If no engine runs, the command works as in milestone 1.
 5. `.yumekit/` is already in the `.gitignore` of a project.
 
@@ -85,6 +85,7 @@ type HarnessResult = {
 - `text` cannot give back the blocks. So both functions build one internal tool table, and the MCP layer keeps the blocks of each result.
 - A call that the MCP SDK answers before the tool runs has a `kind` in `createHarness`: `invalid-input` for input that does not match the schema, and `tool-not-found` for a name that is not a tool.
 - `close` refuses each new call with `harness-closed`, waits for the running calls, and closes the media tools.
+- Each tool of `tools` also has `annotations` when the tool has them. Each `HarnessResult` also has `mcpResult`: the result that the MCP server gives for the same call, with its content blocks. For input that does not match the schema, `mcpResult` is the MCP SDK error result. The `yumekit mcp` bridge gives `mcpResult` to the agent, so an agent gets the same result with or without an engine.
 - `onProgress` of a media call goes to `onProgress` of the request to `MediaTools.run` (document 06). `generate_asset` and `align_words` pass it on.
 - Over MCP, the harness sends each progress as an MCP progress notification when the client gave a progress token.
 
@@ -96,13 +97,14 @@ Each request needs the header `Authorization: Bearer <token>`. A request without
 | -------------------------------- | --------------------------------------------------------------------------------------------------------- |
 | `GET /api/health`                | Returns `{ "name": "yumekit", "projectFolder": string, "version": string }`                               |
 | `GET /api/project`               | Returns the full snapshot: project, scenes with code, timelines, assets, and the revision                 |
+| `GET /api/tools`                 | Returns `{ "tools": [...] }`: the `tools` list of `createHarness` with annotations, for the bridge        |
 | `POST /api/tools/<name>`         | Calls one harness tool. The body is `{ "input": object, "callId"?: string }`. Returns a `HarnessResult`   |
 | `GET /api/assets/<assetId>/file` | Returns the media file of an asset, with range support for audio and video                                |
 | `GET /api/media-servers`         | Returns the same data as `list_media_tools`: descriptions, key states, and the generated video seconds    |
 | `PUT /api/keys/<VARIABLE>`       | Saves a key with `saveKey`. The body is `{ "value": string }`. Returns the new key state, never the value |
 | `DELETE /api/keys/<VARIABLE>`    | Removes a key with `removeKey`                                                                            |
 | `POST /api/keys/<server>/check`  | Calls `check_key` of that server. Returns `{ "valid": boolean, "message": string }`                       |
-| `GET /api/preview`               | Returns `{ "pageUrl": string }` for the preview page of each output                                       |
+| `GET /api/preview?output=<id>`   | Returns `{ "pageUrl": string }` for the preview page of the output. With no `output`, the first output    |
 | `GET /api/renders/<file>`        | Returns a file from `renders/`                                                                            |
 
 - A tool that fails returns status 200 with `isError: true`, as over MCP. A tool name that does not exist returns status 404.
@@ -139,6 +141,27 @@ type EngineEvent =
 2. The engine rejects a request with an `Origin` header that is not its own origin, with status 403. It sends no CORS headers.
 3. The WebSocket has the same two checks and needs the token.
 4. The preview page runs scene code that an agent wrote. It is served from a second port, so it has another origin and cannot read the token or call the interface.
+
+### Details of the engine
+
+These rules came from the build of WP20.
+
+1. Each answer with a status other than 200 or 206 has the body `{ "kind": string, "message": string }`.
+2. The statuses are 400 (a path or a body that is not valid), 401 (no token or a wrong token), 403 (`Host` or `Origin`), 404, 405 (a method that the path does not accept), 413 (a body larger than 10 MB), 426 (`/api/events` without a WebSocket), and 500 (a defect in the engine).
+3. Only the header `Authorization: Bearer <token>` counts for HTTP. A token in the query of an HTTP request gets status 401. The engine compares the token in constant time.
+4. The files of the built editor need no token, because a browser loads the first page from the URL with no header. They hold no project data. The `Host` and `Origin` checks still apply, and each editor file has `Content-Security-Policy: frame-ancestors 'none'`.
+5. If `editorFolder` has no `index.html`, `GET /` returns a page that says the editor is not built.
+6. A path segment of `.`, `..`, or a decoded segment with `/`, `\`, or a null byte gets status 400. The engine serves a file only when its real path is inside the folder.
+7. Asset and render files have `Content-Security-Policy: default-src 'none'; sandbox`.
+8. Each answer has `Cache-Control: no-store`, `X-Content-Type-Options: nosniff`, and `Referrer-Policy: no-referrer`.
+9. `PUT /api/keys/<VARIABLE>` returns `{ "variable", "source" }`. `DELETE` returns `{ "removed", "variable", "source" }`. Both send `media-servers-changed`. The media server starts again before its next call, as document 10 says.
+10. `POST /api/keys/<server>/check` returns status 404 for `server-not-found` and `no-check-key-tool`, and 502 for each other failure.
+11. An invalid `media-tools.json` and a preview server that does not start give `project-invalid` with the message.
+12. `findRunningEngine(projectFolder)` of `@yumekit/engine` reads `engine.json` and checks `GET /api/health`. `yumekit mcp` uses it.
+13. `findBundledServers` is in `@yumekit/tools`, so the engine and `apps/cli` start the same bundled servers.
+14. The bridge gets the instructions from `serverInstructions` of `@yumekit/harness-mcp`. It gives `mcpResult` of each call, and each tool with its annotations and `execution: { "taskSupport": "forbidden" }`, as the MCP SDK lists it. For a name that is not a tool, it gives the MCP SDK result `Tool <name> not found`. A test checks the full tool list and each result against `yumekit mcp` without an engine. Its frame previews, and those of the `createHarness` test, hold no downscaled video picture. Chromium on Linux drew the edge pixels of a 1280 by 720 video picture in an 80 by 45 frame in two ways from one browser launch to the next. The digits of the picture were the same. This is a render repeatability defect with no design yet: a frame picture at the render size would remove it.
+15. `@yumekit/render` adds no signal listener. Its stage server runs Vite in middleware mode on its own `node:http` server, because Vite in server mode ends the process on `SIGTERM` and at the end of standard input. Its browser starts with `handleSIGINT`, `handleSIGTERM`, and `handleSIGHUP` set to `false`, because Playwright ends the process on `SIGINT`. So `yumekit open` closes the engine on `SIGTERM` and Ctrl+C, also while a render runs.
+16. The preview page loads `/@vite/client`, because Vite imports it into each module with a dynamic `import()`. The client tries a WebSocket and logs a failure in the console. `server.ws: false` and `server.hmr: false` are set, and the Vite documents give no option that removes the client. The preview works.
 
 ## The preview
 
@@ -191,6 +214,7 @@ Package `apps/editor` (browser): React, TypeScript, and Vite, built to static fi
 - The token comes from the URL at the first load. The app keeps it in memory, removes it from the address bar, and sends it with each request.
 - The app holds one copy of the snapshot. After `project-changed`, it reads `GET /api/project` again. It keeps no second copy of project data that can go stale.
 - Each change is one call to `POST /api/tools/<name>`. A failure shows its message and its hint next to the control that caused it.
+- The app reads an asset file with `GET /api/assets/<assetId>/file` and the `Authorization` header, and plays it from a blob URL. A media element cannot send the header, and the engine accepts the token only in the header.
 - The app is usable with a keyboard: each control has a visible focus state, Space plays and pauses, the left and right arrows step one frame, and `Cmd+Z` and `Shift+Cmd+Z` call `undo` and `redo`.
 - Dark is the default theme. Light is a setting that the app keeps in `localStorage`.
 
@@ -275,5 +299,6 @@ Each editor work package has browser tests that drive the real app against a rea
 - The first run screen, and the creation or the choice of a project in the editor.
 - Change of the timeline by drag, cut, and trim (milestone 3).
 - An editor for custom scene code.
+- A way to play a large asset file without loading all of it.
 - A desktop shell with Tauri.
 - An engine that serves more than one project, or that a person reaches from another machine.

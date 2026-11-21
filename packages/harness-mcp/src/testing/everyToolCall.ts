@@ -136,7 +136,7 @@ export function everyToolCall(importSourcePath: string): ScriptedCall[] {
     { name: "undo", input: {} },
     { name: "redo", input: {} },
     { name: "preview_frame", input: { output_id: "wide", frame: 10 } },
-    { name: "preview_frames", input: { output_id: "wide", frames: [0, 40] } },
+    { name: "preview_frames", input: { output_id: "wide", frames: [0, 20] } },
     { name: "render_still", input: { output_id: "wide", frame: 0 } },
     {
       name: "render_video",

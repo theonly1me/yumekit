@@ -8,3 +8,4 @@ export type { HarnessImage, HarnessResult } from "./harness/harnessResult.js";
 export type { HarnessOptions } from "./harness/harnessTools.js";
 export type { HarnessProgress, ProgressListener } from "./harness/toolTable.js";
 export { createHarnessServer } from "./createHarnessServer.js";
+export { serverInstructions } from "./instructions.js";

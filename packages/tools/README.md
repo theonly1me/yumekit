@@ -22,3 +22,5 @@ Connections to media MCP servers. Design: [06-media-tools.md](../../docs/design/
 - `close()` stops each server.
 
 With no `media-tools.json` file, only the bundled server named `sample` starts.
+
+`findBundledServers()` gives the command of each bundled server in `tools/` that is built, by its name. `yumekit mcp`, `yumekit keys`, and the engine pass it as `bundledServers`.

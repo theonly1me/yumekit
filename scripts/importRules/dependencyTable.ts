@@ -3,11 +3,14 @@ export interface Permission {
   typesOnly?: true;
 }
 
+const engine = { importName: "@yumekit/engine" };
+const harnessMcp = { importName: "@yumekit/harness-mcp" };
 const project = { importName: "@yumekit/project" };
 const render = { importName: "@yumekit/render" };
 const scene = { importName: "@yumekit/scene" };
 const sceneKit = { importName: "@yumekit/scene-kit" };
 const stage = { importName: "@yumekit/stage" };
+const sceneKitSchemas = { importName: "@yumekit/scene-kit/schemas" };
 const tools = { importName: "@yumekit/tools" };
 
 export const permittedImports: Record<string, Permission[]> = {
@@ -17,13 +20,9 @@ export const permittedImports: Record<string, Permission[]> = {
   stage: [scene, { ...project, typesOnly: true }],
   render: [project, stage, sceneKit],
   tools: [],
-  "harness-mcp": [
-    project,
-    render,
-    tools,
-    { importName: "@yumekit/scene-kit/schemas" },
-  ],
-  "apps/cli": [project, render, tools, { importName: "@yumekit/harness-mcp" }],
+  "harness-mcp": [project, render, tools, sceneKitSchemas],
+  engine: [project, render, tools, harnessMcp, sceneKitSchemas],
+  "apps/cli": [project, render, tools, harnessMcp, engine],
   "tools/*": [],
 };
 

@@ -13,10 +13,15 @@ The `yumekit` command.
 | `yumekit keys`                                                                              | Lists each media server, each key it needs, and the state of the key         |
 | `yumekit keys set <VARIABLE>`                                                               | Reads the value from a hidden prompt or from standard input, and saves it    |
 | `yumekit keys remove <VARIABLE>`                                                            | Removes the key from the key file                                            |
+| `yumekit open <folder> [--port <n>] [--no-browser]`                                         | Starts the engine with the built editor, prints the URL, and opens it        |
 
 The value of a key is never a command argument, because a shell keeps arguments in its history. `yumekit keys set` writes `~/.config/yumekit/keys.json` with mode `0600`.
 
 `yumekit mcp` writes only MCP messages to stdout. It prints each media server that failed to start to stderr.
+
+If `yumekit open` runs for the project, `yumekit mcp` is a bridge. It reads `<project>/.yumekit/engine.json`, gets the tool list from the engine, and sends each tool call to the engine. The progress of a call comes back as MCP progress. The editor then shows each change of the agent. If no engine runs, `yumekit mcp` serves the harness itself.
+
+`yumekit open` runs until you stop it with Ctrl+C. It then closes the engine and removes `engine.json`. If the editor is not built, the engine serves a page that says so. Run `pnpm build` to build the editor.
 
 ## Connect an agent
 

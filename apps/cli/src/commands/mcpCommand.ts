@@ -1,11 +1,12 @@
 import { resolve } from "node:path";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { findRunningEngine } from "@yumekit/engine";
 import { createHarnessServer } from "@yumekit/harness-mcp";
 import { openProject } from "@yumekit/project";
-import { connectMediaTools } from "@yumekit/tools";
-import { findBundledServers } from "../bundledServers.js";
+import { connectMediaTools, findBundledServers } from "@yumekit/tools";
 import { failed, usageError, type CommandResult } from "../commandResult.js";
 import { parseCommandLine, stringOption } from "../options.js";
+import { serveBridge } from "./bridge/serveBridge.js";
 
 function keepStdoutForMessages(): void {
   console.log = console.error;
@@ -28,6 +29,8 @@ export async function mcpCommand(args: string[]): Promise<CommandResult> {
   }
   keepStdoutForMessages();
   const folder = resolve(projectArgument);
+  const runningEngine = await findRunningEngine(folder);
+  if (runningEngine !== undefined) return serveBridge(runningEngine);
   const opened = await openProject({ folder });
   if (!opened.ok) return failed(opened.failure.message);
   const connected = await connectMediaTools({
