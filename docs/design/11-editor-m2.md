@@ -251,6 +251,22 @@ These rules came from the build of WP21.
 10. A reload loses the token, because the app keeps it only in memory. The page then asks for the link from `yumekit open`.
 11. The editor browser tests start `yumekit open` as a child process and use only HTTP, so `apps/editor` imports no yumekit package. The test setup builds the editor first, because CI runs `pnpm test` before `pnpm build`.
 
+These rules came from the build of WP23.
+
+1. A Tools row shows the label, what the server makes, where it runs, and one state: "Ready, no key needed", "Ready, key saved here", "Ready, key from your shell", "Needs a key", or "Failed to start". A row opens its detail. The detail of a failed server shows the reason.
+2. The key field is a password field with `autocomplete="off"`. The editor reads its value only in the save handler, and clears the field right after it sends `PUT /api/keys/<VARIABLE>`. The value is never in React state.
+3. The link to `get_key_url` is an `a` element with `target="_blank"` and `rel="noopener noreferrer"`. Its text names the host, for example "Open fal.ai".
+4. The data of `GET /api/media-servers` does not say if a server has `check_key`. So each server with a saved key or a key from the shell shows "Test the key". A server without `check_key` answers with status 404, and the editor shows that message.
+5. A project with no `media-tools.json` connects only the sample server (document 06). So the Tools tab can show only the sample server. The tab tells the person to add a server in `media-tools.json` and to run `yumekit open` again.
+6. "Make a clip for this scene" is in the Scene tab for each scene clip. The sheet makes the clip for the selected scene clip of the current output.
+7. `place_video` adds its clip on the first scene track, so a clip at the start of the selected scene clip overlaps it (`clips-overlap`). So the editor calls `remove_clip` for the selected scene clip, then `place_video` with the start frame and the length of that clip. If `place_video` fails, the editor calls `undo` once, and the scene clip comes back. One clip from the editor is two undo steps.
+8. The length setting (`duration_seconds`) starts at the length of the scene clip in whole seconds, inside the range of the model. A video request sends `width_pixels` and `height_pixels` of the current output. A still request sends them only when the image model lists both settings.
+9. The first frame is the newest image asset of the project, or one that the person picks. With no image asset, the sheet shows the still form. The still uses the first ready image model. The person can pick another one when more than one is ready.
+10. The settings form shows `choice` as buttons, `whole-number` as a slider for a range of 120 steps or fewer and as a number field for a larger range, and `switch` as a check box. `image-files` with the name `reference_image_paths` is a list of the image assets, sent as `reference_asset_ids`. The harness has no asset id field for another `image-file` setting, such as `last_frame_path`, so the form leaves it out.
+11. The price uses the price whose `when` matches the most selected values. The editor multiplies the unit `second` by `duration_seconds`, and the unit `minute` by `duration_seconds` divided by 60. With no match, the sheet shows "Price not known". With a price that is not free, the sheet shows the `read_on` date.
+12. The sheet reads `generated_video` when it opens, after `media-servers-changed`, and after each make. If the selected length plus the used seconds is more than the limit, the sheet shows the limit message and no button to make the clip. The failure `generated-video-limit-reached` from the engine shows the same message with the numbers of the failure.
+13. The Tools tab and the sheet each open one event WebSocket for `media-servers-changed` and `call-progress`. The sheet sends a `callId` with `generate_asset` and shows the message of each `call-progress` for that call.
+
 ## The command
 
 | Command                                             | What it does                                                                                 |

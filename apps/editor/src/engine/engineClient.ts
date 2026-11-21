@@ -14,6 +14,8 @@ export type ClientFailure =
 export type Reply<Value> =
   { ok: true; value: Value } | { ok: false; failure: ClientFailure };
 
+export type RequestMethod = "GET" | "POST" | "PUT" | "DELETE";
+
 export type EngineClient = ReturnType<typeof createEngineClient>;
 
 const failedReply = (failure: ClientFailure) =>
@@ -32,13 +34,16 @@ export function createEngineClient(token: string) {
 
   async function send(options: {
     path: string;
+    method?: RequestMethod;
     body?: unknown;
   }): Promise<Reply<Response>> {
+    const method =
+      options.method ?? (options.body === undefined ? "GET" : "POST");
     const init: RequestInit =
       options.body === undefined
-        ? { headers }
+        ? { method, headers }
         : {
-            method: "POST",
+            method,
             headers: { ...headers, "content-type": "application/json" },
             body: JSON.stringify(options.body),
           };
@@ -59,6 +64,7 @@ export function createEngineClient(token: string) {
   async function readJson<Schema extends z.ZodType>(options: {
     path: string;
     schema: Schema;
+    method?: RequestMethod;
     body?: unknown;
   }): Promise<Reply<z.infer<Schema>>> {
     const sent = await send(options);
@@ -83,12 +89,13 @@ export function createEngineClient(token: string) {
         path: `/api/preview?output=${encodeURIComponent(outputId)}`,
         schema: previewSchema,
       }),
-    callTool: (call: { name: string; input: object }) =>
+    callTool: (call: { name: string; input: object; callId?: string }) =>
       readJson({
         path: `/api/tools/${encodeURIComponent(call.name)}`,
         schema: toolResultSchema,
-        body: { input: call.input },
+        body: { input: call.input, callId: call.callId },
       }),
+    readJson,
     assetFile: async (assetId: string): Promise<Reply<Blob>> => {
       const sent = await send({
         path: `/api/assets/${encodeURIComponent(assetId)}/file`,

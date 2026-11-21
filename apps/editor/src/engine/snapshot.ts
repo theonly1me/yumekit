@@ -97,6 +97,7 @@ export const previewSchema = z.object({ pageUrl: z.string() });
 export const toolResultSchema = z.object({
   isError: z.boolean(),
   text: z.string(),
+  data: z.record(z.string(), z.json()),
   images: z.array(z.object({ mimeType: z.string(), base64: z.string() })),
 });
 

@@ -1,5 +1,5 @@
 import { execFile, spawn } from "node:child_process";
-import { mkdir, mkdtemp, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
@@ -23,7 +23,11 @@ export interface RunningEngine {
   remove: () => Promise<void>;
 }
 
-async function createProject(): Promise<{
+export interface EngineOptions {
+  mediaTools?: object;
+}
+
+async function createProject(options: EngineOptions): Promise<{
   root: string;
   folder: string;
   environment: NodeJS.ProcessEnv;
@@ -36,6 +40,9 @@ async function createProject(): Promise<{
     HOME: home,
     YUMEKIT_CONFIG_DIRECTORY: join(root, "config"),
     OPENAI_API_KEY: "",
+    GEMINI_API_KEY: "",
+    FAL_KEY: "",
+    YUMEKIT_EDITOR_TEST_KEY: "",
   };
   const folder = join(root, "project");
   await runFile(
@@ -53,11 +60,19 @@ async function createProject(): Promise<{
     ],
     { env: environment },
   );
+  if (options.mediaTools !== undefined) {
+    await writeFile(
+      join(folder, "media-tools.json"),
+      JSON.stringify(options.mediaTools),
+    );
+  }
   return { root, folder, environment };
 }
 
-export async function runEngine(): Promise<RunningEngine> {
-  const { root, folder, environment } = await createProject();
+export async function runEngine(
+  options: EngineOptions = {},
+): Promise<RunningEngine> {
+  const { root, folder, environment } = await createProject(options);
   const child = spawn(
     process.execPath,
     [cliMainFile, "open", folder, "--no-browser"],

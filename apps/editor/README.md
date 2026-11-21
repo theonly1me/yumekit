@@ -6,6 +6,10 @@ The web editor. `yumekit open` serves the built files. Design: [11-editor-m2.md]
 
 - The Editor screen: the preview, play with sound, the scenes row, and the output switch.
 - The Timeline, and the side panel with the tabs Agent, Scene, and Tools.
+- Tools and keys: the state of each media server, the key guide, and save, test, and remove of a key.
+- Make a clip: the model, its settings and price, the first frame, and the clip in place of a scene.
+- Tools and keys: the state of each media server, the key guide, and save, test, and remove of a key.
+- Make a clip: the model, its settings and price, the first frame, and the clip in place of a scene.
 - The connection to the engine: the token, the snapshot, and the events.
 
 The app talks to the engine only over HTTP and the event WebSocket. It imports no yumekit package.

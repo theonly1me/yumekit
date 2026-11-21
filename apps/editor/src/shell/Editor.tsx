@@ -6,7 +6,8 @@ import { usePlayback } from "../preview/usePlayback.js";
 import { useSound } from "../preview/useSound.js";
 import { AgentPane } from "../side/AgentPane.js";
 import { ScenePane } from "../side/ScenePane.js";
-import { SidePanel, ToolsPane, type SideTab } from "../side/SidePanel.js";
+import { SidePanel, type SideTab } from "../side/SidePanel.js";
+import { useClipTools } from "../makeClip/useClipTools.js";
 import { useEditorFacts } from "./useEditorFacts.js";
 import { LowerArea, type LowerView } from "./LowerArea.js";
 import { RenderSheet } from "./RenderSheet.js";
@@ -71,8 +72,18 @@ export function Editor(props: {
     pickClip(clip);
     setSideTab("scene");
   };
+  const clipTools = useClipTools({
+    client,
+    snapshot,
+    output,
+    onOpen: pause,
+    onToolsTab: () => {
+      setSideTab("tools");
+    },
+    onPlaced: pickClip,
+  });
   useKeyboard({
-    isActive: !isRenderOpen,
+    isActive: !isRenderOpen && !clipTools.isOpen,
     onToggle: playback.toggle,
     onStep: step,
   });
@@ -80,17 +91,21 @@ export function Editor(props: {
     if (sideTab === "agent") {
       return <AgentPane projectFolder={props.projectFolder} />;
     }
-    if (sideTab === "tools") return <ToolsPane />;
+    if (sideTab === "tools") return clipTools.toolsPane;
     return (
-      <ScenePane
-        clip={facts.sceneClip}
-        scene={facts.scene}
-        framesPerSecond={framesPerSecond}
-      />
+      <>
+        <ScenePane
+          clip={facts.sceneClip}
+          scene={facts.scene}
+          framesPerSecond={framesPerSecond}
+        />
+        {clipTools.entryFor({ scene: facts.scene, clip: facts.sceneClip })}
+      </>
     );
   }, [
     sideTab,
     props.projectFolder,
+    clipTools,
     facts.sceneClip,
     facts.scene,
     framesPerSecond,
@@ -159,6 +174,7 @@ export function Editor(props: {
           }}
         />
       ) : undefined}
+      {clipTools.sheet}
     </div>
   );
 }
