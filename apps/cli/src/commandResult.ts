@@ -20,11 +20,13 @@ export const usage = `Usage:
   yumekit keys
   yumekit keys set <VARIABLE>
   yumekit keys remove <VARIABLE>
+  yumekit open <folder> [--port <n>] [--no-browser]
   yumekit --version
 
 init makes a project with one 1920x1080 output named "wide" when no --output is given.
-mcp serves the harness MCP tools over stdio for an agent.
+mcp serves the harness MCP tools over stdio for an agent. If yumekit open runs for the project, mcp sends each tool call to that engine.
 render writes renders/<id>.mp4. frame writes renders/<id>-frame-<n>.png.
 keys lists each media server, the keys it needs, and the state of each key.
 keys set reads the value from a hidden prompt or from standard input, never from an argument.
+open starts the engine and the editor for the project, prints the URL, and opens it in the browser. It runs until you stop it.
 `;

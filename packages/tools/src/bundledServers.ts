@@ -1,6 +1,6 @@
 import { stat } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
-import type { ServerCommand } from "@yumekit/tools";
+import type { ServerCommand } from "./types.js";
 
 interface BundledServer {
   folder: string;

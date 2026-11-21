@@ -12,6 +12,7 @@ async function workspaceWith(files: Record<string, string>): Promise<string> {
     "packages/stage",
     "packages/render",
     "packages/harness-mcp",
+    "packages/engine",
     "apps/cli",
     "tools/sample-media",
   ];
@@ -61,8 +62,26 @@ describe("findImportViolations", () => {
           'import { kitSceneSchemas } from "@yumekit/scene-kit/schemas";\n',
         "apps/cli/src/c.ts":
           'export { createHarnessServer } from "@yumekit/harness-mcp";\n',
+        "packages/engine/src/d.ts":
+          'import { createHarness } from "@yumekit/harness-mcp";\nimport { startPreviewServer } from "@yumekit/render";\nimport { kitSceneSchemas } from "@yumekit/scene-kit/schemas";\n',
+        "apps/cli/src/e.ts": 'import { startEngine } from "@yumekit/engine";\n',
       }),
     ).resolves.toEqual([]);
+  });
+
+  it("finds an import into the engine that its row does not permit, and an import of the engine by another package", async () => {
+    await expect(
+      messagesOf({
+        "packages/engine/src/a.ts":
+          'import { tween } from "@yumekit/scene";\nimport { kitScenes } from "@yumekit/scene-kit";\n',
+        "packages/harness-mcp/src/b.ts":
+          'import { startEngine } from "@yumekit/engine";\n',
+      }),
+    ).resolves.toEqual([
+      'packages/engine/src/a.ts:1 imports "@yumekit/scene", which the dependency table does not permit for engine',
+      'packages/engine/src/a.ts:2 imports "@yumekit/scene-kit", which the dependency table does not permit for engine',
+      'packages/harness-mcp/src/b.ts:1 imports "@yumekit/engine", which the dependency table does not permit for harness-mcp',
+    ]);
   });
 
   it("finds a value import where the table permits only types", async () => {
