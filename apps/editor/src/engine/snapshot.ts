@@ -7,14 +7,21 @@ const outputSchema = z.object({
   heightPixels: z.number(),
 });
 
+const propsSchema = z.record(z.string(), z.json());
+
 const sceneSourceSchema = z.discriminatedUnion("kind", [
-  z.object({ kind: z.literal("kit"), component: z.string() }),
-  z.object({ kind: z.literal("module") }),
+  z.object({
+    kind: z.literal("kit"),
+    component: z.string(),
+    props: propsSchema,
+  }),
+  z.object({ kind: z.literal("module"), props: propsSchema }),
 ]);
 
 const sceneSchema = z.object({
   id: z.string(),
   title: z.string(),
+  notes: z.string(),
   source: sceneSourceSchema,
 });
 
@@ -74,6 +81,7 @@ export const snapshotSchema = z.object({
     outputs: z.array(outputSchema),
   }),
   scenes: z.array(sceneSchema),
+  sceneCode: z.record(z.string(), z.string()),
   timelines: z.array(timelineSchema),
   assets: z.array(assetSchema),
 });
@@ -85,6 +93,7 @@ export type Track = z.infer<typeof trackSchema>;
 export type SceneClip = z.infer<typeof sceneClipSchema>;
 export type AudioClip = z.infer<typeof audioClipSchema>;
 export type Asset = z.infer<typeof assetSchema>;
+export type SceneProps = z.infer<typeof propsSchema>;
 export type Timeline = z.infer<typeof timelineSchema>;
 
 export const healthSchema = z.object({
@@ -97,6 +106,7 @@ export const previewSchema = z.object({ pageUrl: z.string() });
 export const toolResultSchema = z.object({
   isError: z.boolean(),
   text: z.string(),
+  data: z.record(z.string(), z.json()),
   images: z.array(z.object({ mimeType: z.string(), base64: z.string() })),
 });
 

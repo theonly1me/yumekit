@@ -251,6 +251,21 @@ These rules came from the build of WP21.
 10. A reload loses the token, because the app keeps it only in memory. The page then asks for the link from `yumekit open`.
 11. The editor browser tests start `yumekit open` as a child process and use only HTTP, so `apps/editor` imports no yumekit package. The test setup builds the editor first, because CI runs `pnpm test` before `pnpm build`.
 
+#### Details of the Scene panel
+
+These rules came from the build of WP22.
+
+1. The form of a kit scene comes from the JSON Schema of its props in `list_kit_scenes`. A string is a text field. A string that allows more than 200 characters, or has no limit, is a text area. A number is a text field, so a value that is not a number goes to `put_scene` as the person typed it. An `enum` is a choice. A `boolean` is a switch. An array of strings is a list of text, and an array of objects is a list of objects. An object is a group of fields.
+2. Each kit prop that holds an asset id has `assetKind` (`image`, `video`, or `audio`) in its schema. `@yumekit/scene-kit` sets it with `meta`, and `z.toJSONSchema` copies it. The form shows it as a choice of the project assets of that kind.
+3. The `invalid-props` failure of `put_scene` has `issues`: a list of `{ path, message }`, with the path of each prop that the schema rejected. The form shows each message under the field with the longest matching path. A message with no matching field shows under the form.
+4. The form calls `put_scene` 450 ms after the last key in a text field, at once for a choice, a switch, and a list button, and when a field loses focus. A new list item waits for its first change. An empty optional field removes its prop.
+5. After each `project-changed`, the form shows the stored props, unless a change of the person waits or runs. A rejected value stays in its field until the stored props change.
+6. The editor sends `put_scene`, `undo`, and `redo` one after another, in the order of the actions of the person.
+7. `Cmd+Z` and `Ctrl+Z` call `undo`. `Shift+Cmd+Z` and `Shift+Ctrl+Z` call `redo`. A text field that the person typed in since it got focus keeps these keys for its own undo. The undo and redo buttons of the Scene tab always call the tools, and a failure such as "nothing to undo" shows under them.
+8. A custom scene shows its code read only, with a line that says that the agent changes it.
+9. The project data has no link between a scene and its narration, so the Scene tab has no narration group.
+10. Each column of the scenes row is as wide as its still: 152 pixels for a wide output, 112 for a square one, and 88 for a tall one. Under a square or tall still, the length is on a second line under the title.
+
 ## The command
 
 | Command                                             | What it does                                                                                 |
