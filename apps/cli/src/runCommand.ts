@@ -1,4 +1,5 @@
 import { usage, usageError, type CommandResult } from "./commandResult.js";
+import { agentCommand } from "./commands/agent/agentCommand.js";
 import { initCommand } from "./commands/initCommand.js";
 import { keysCommand } from "./commands/keys/keysCommand.js";
 import { mcpCommand } from "./commands/mcpCommand.js";
@@ -13,6 +14,7 @@ const commands: Record<string, (args: string[]) => Promise<CommandResult>> = {
   frame: frameCommand,
   keys: keysCommand,
   open: openCommand,
+  agent: agentCommand,
 };
 
 export function runCommand(args: string[]): Promise<CommandResult> {

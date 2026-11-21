@@ -21,6 +21,7 @@ export const usage = `Usage:
   yumekit keys set <VARIABLE>
   yumekit keys remove <VARIABLE>
   yumekit open <folder> [--port <n>] [--no-browser]
+  yumekit agent connect --agent claude-code|codex|cursor [--project <folder>]
   yumekit --version
 
 init makes a project with one 1920x1080 output named "wide" when no --output is given.
@@ -29,4 +30,5 @@ render writes renders/<id>.mp4. frame writes renders/<id>-frame-<n>.png.
 keys lists each media server, the keys it needs, and the state of each key.
 keys set reads the value from a hidden prompt or from standard input, never from an argument.
 open starts the engine and the editor for the project, prints the URL, and opens it in the browser. It runs until you stop it.
+agent connect writes the yumekit MCP entry for an agent in the project folder. The folder is the current folder when no --project is given.
 `;
