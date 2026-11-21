@@ -98,6 +98,8 @@ export function createEngineClient(token: string) {
         schema: toolResultSchema,
         body: { input: call.input, callId: call.callId },
       }),
+    renderFile: (file: string) =>
+      send({ path: `/api/renders/${encodeURIComponent(file)}` }),
     readJson,
     assetFile: async (assetId: string): Promise<Reply<Blob>> => {
       const sent = await send({

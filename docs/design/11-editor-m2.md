@@ -246,7 +246,7 @@ These rules came from the build of WP21.
 5. A clip picked in the scenes row or the timeline stays selected while the playhead is inside it. Otherwise the selection follows the clip of the first scene track at the playhead. A pick in the scenes row also opens the Scene tab.
 6. The timeline names each track by its id, with a capital first letter and spaces for hyphens. An audio clip shows the `text` or the `prompt` of its tool input, or its asset id. An audio clip of an asset with word timings and a clip of a caption track use the narration style.
 7. The Agent tab shows `yumekit mcp --project <folder>` and a block for Claude Code (`.mcp.json`), Codex (`~/.codex/config.toml`), and Cursor (`.cursor/mcp.json` or `~/.cursor/mcp.json`). Each block runs `yumekit` from the `PATH`.
-8. Until WP24, the Render button opens a sheet with the `yumekit render` command for the current output.
+8. The Render button opens the Render sheet. See "Details of Render".
 9. The theme setting is a text button in the top bar. The key in `localStorage` is `yumekit-theme`.
 10. A reload loses the token, because the app keeps it only in memory. The page then asks for the link from `yumekit open`.
 11. The editor browser tests start `yumekit open` as a child process and use only HTTP, so `apps/editor` imports no yumekit package. The test setup builds the editor first, because CI runs `pnpm test` before `pnpm build`.
@@ -284,6 +284,17 @@ These rules came from the build of WP23.
 12. The sheet reads `generated_video` when it opens, after `media-servers-changed`, after each connect of the event WebSocket, and after each make. If the selected length plus the used seconds is more than the limit, the sheet shows the limit message and no button to make the clip. The failure `generated-video-limit-reached` from the engine shows the same message with the numbers of the failure.
 13. The app has one event WebSocket, in the project hook. The hook sends each event, and `connection-opened` after each connect, to the listeners on the engine client. After each connect, the project hook and the media server list read their data again. The sheet sends a `callId` with `generate_asset` and shows the message of each `call-progress` for that call.
 14. The browser tests run the engine with a temporary `HOME`, and with `PLAYWRIGHT_BROWSERS_PATH` set to an empty folder. So the engine finds no Chromium, and `preview_frames` fails with `browser-not-installed`. Stills after each change cost about 6 times the CPU time of the editor tests, and on a CI runner with 4 processors two test setups ran past 120 seconds. A test that needs the renderer, such as the test of the scenes row stills, starts the engine with `withChromium`. Then the engine gets the Chromium folder of the test process.
+
+#### Details of Render
+
+These rules came from the build of WP24.
+
+1. The sheet lists each output with its label, its size, and its length. An output with no clips cannot be chosen. At first each output with clips is chosen. After a render, the sheet keeps the outputs of the last render.
+2. "Render N files" runs one `render_video` call for each chosen output, one after another, at the full size of the output. Each call has a `callId`. While renders run, the sheet listens on the events of the engine client and shows each `call-progress` as frames done of the total, with a thin progress line.
+3. The renders belong to the editor shell, not to the sheet. A render keeps running when the person closes the sheet, the Render button shows "Rendering N%" over all chosen files, and the sheet shows the progress again when it opens. A reload of the page loses this state, and the engine still finishes the render.
+4. A finished render shows the full path of the file with a button that copies it, and "Open the video". That button opens a new tab first, so the browser does not block it, then fetches `GET /api/renders/<file>` with the header and shows the file from a blob URL. If `Content-Length` is more than 512 MB, the editor does not load the file and asks the person to copy the path.
+5. A failed render shows the message of the tool. The hint of the tool is for an agent, so the sheet does not show it. A render failure about a scene has `scene_id` and `frame` in its data. Then the sheet says "Ask your agent to correct the scene <title>, or change it in the Scene panel." and shows "Open this scene". That button closes the sheet, picks the clip of the scene in that output, moves the playhead to the failed frame, and opens the Scene tab.
+6. The render tests start the engine with `withChromium`, because a render needs the renderer.
 
 ## The command
 

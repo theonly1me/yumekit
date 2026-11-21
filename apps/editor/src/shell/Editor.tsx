@@ -4,6 +4,7 @@ import type { SceneClip, Snapshot } from "../engine/snapshot.js";
 import { Preview } from "../preview/Preview.js";
 import { usePlayback } from "../preview/usePlayback.js";
 import { useSound } from "../preview/useSound.js";
+import { useRenderSheet } from "../render/useRenderSheet.js";
 import { useHistory } from "../scenePanel/history/useHistory.js";
 import { ScenePanel } from "../scenePanel/ScenePanel.js";
 import { AgentPane } from "../side/AgentPane.js";
@@ -11,7 +12,6 @@ import { SidePanel, type SideTab } from "../side/SidePanel.js";
 import { useClipTools } from "../makeClip/useClipTools.js";
 import { useEditorFacts } from "./useEditorFacts.js";
 import { LowerArea, type LowerView } from "./LowerArea.js";
-import { RenderSheet } from "./RenderSheet.js";
 import { TopBar } from "./TopBar.js";
 import { Transport } from "./Transport.js";
 import { useKeyboard } from "./useKeyboard.js";
@@ -29,8 +29,18 @@ export function Editor(props: {
   const [pickedClipId, setPickedClipId] = useState<string>();
   const [sideTab, setSideTab] = useState<SideTab>("agent");
   const [lowerView, setLowerView] = useState<LowerView>("scenes");
-  const [isRenderOpen, setRenderOpen] = useState(false);
   const { theme, setTheme } = useTheme();
+  const render = useRenderSheet({
+    client,
+    snapshot,
+    projectFolder: props.projectFolder,
+    onShowScene: (scene) => {
+      setOutputId(scene.outputId);
+      setPickedClipId(scene.clipId);
+      setFrame(scene.frame);
+      setSideTab("scene");
+    },
+  });
   const facts = useEditorFacts({
     snapshot,
     chosenOutputId,
@@ -84,13 +94,13 @@ export function Editor(props: {
     onPlaced: pickClip,
   });
   useKeyboard({
-    isActive: !isRenderOpen && !clipTools.isOpen,
+    isActive: !render.isOpen && !clipTools.isOpen,
     onToggle: playback.toggle,
     onStep: step,
   });
   const history = useHistory({
     client,
-    isActive: !isRenderOpen && !clipTools.isOpen,
+    isActive: !render.isOpen && !clipTools.isOpen,
   });
   const sidePane = useMemo(() => {
     if (sideTab === "agent") {
@@ -140,9 +150,10 @@ export function Editor(props: {
           setOutputId(outputId);
         }}
         onTheme={setTheme}
+        renderLabel={render.label}
         onRender={() => {
           pause();
-          setRenderOpen(true);
+          render.open();
         }}
       />
       <main className="center">
@@ -174,15 +185,7 @@ export function Editor(props: {
       <SidePanel tab={sideTab} onTab={setSideTab}>
         {sidePane}
       </SidePanel>
-      {isRenderOpen ? (
-        <RenderSheet
-          projectFolder={props.projectFolder}
-          outputId={output.id}
-          onClose={() => {
-            setRenderOpen(false);
-          }}
-        />
-      ) : undefined}
+      {render.sheet}
       {clipTools.sheet}
     </div>
   );

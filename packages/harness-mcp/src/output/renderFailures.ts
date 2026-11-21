@@ -28,10 +28,20 @@ function hintOf(failure: RenderFailure): string {
   }
 }
 
-export function renderFailureOf(failure: RenderFailure): HarnessFailure {
+function sceneIdOf(failure: RenderFailure): string | undefined {
+  if ("sceneId" in failure) return failure.sceneId;
+  return "sceneIds" in failure ? failure.sceneIds[0] : undefined;
+}
+
+export function renderFailureOf(
+  failure: RenderFailure,
+): HarnessFailure & { scene_id?: string; frame?: number } {
+  const sceneId = sceneIdOf(failure);
   return {
     kind: failure.kind,
     message: failure.message,
     hint: hintOf(failure),
+    ...(sceneId === undefined ? {} : { scene_id: sceneId }),
+    ...("frame" in failure ? { frame: failure.frame } : {}),
   };
 }
