@@ -16,8 +16,9 @@ export function KitForm(props: {
   component: string;
   schema: PropSchema;
   assets: Asset[];
+  revision: number;
 }) {
-  const { client, scene, component, schema, assets } = props;
+  const { client, scene, component, schema, assets, revision } = props;
   const fields = useMemo(() => fieldsOf(schema), [schema]);
   const wordIssues = useCallback<IssueWording>(
     (wording) =>
@@ -26,7 +27,13 @@ export function KitForm(props: {
       ),
     [schema],
   );
-  const draft = useSceneDraft({ client, scene, component, wordIssues });
+  const draft = useSceneDraft({
+    client,
+    scene,
+    component,
+    wordIssues,
+    revision,
+  });
   const issues = useMemo(
     () =>
       routeIssues({

@@ -33,20 +33,28 @@ export function useSceneDraft(options: {
   scene: Scene;
   component: string;
   wordIssues: IssueWording;
+  revision: number;
 }) {
-  const { client, scene, component, wordIssues } = options;
+  const { client, scene, component, wordIssues, revision } = options;
   const storedKey = JSON.stringify(scene.source.props);
   const [draft, setDraft] = useState<JsonObject>(scene.source.props);
   const [failure, setFailure] = useState<DraftFailure>({ kind: "none" });
-  const latest = useRef({ draft, scene, component, wordIssues });
+  const latest = useRef({ draft, scene, component, wordIssues, revision });
+  const ownRevision = useRef(0);
   const timer = useRef<number | undefined>(undefined);
   const isUnsent = useRef(false);
   const callsInFlight = useRef(0);
   const sendNumber = useRef(0);
 
   useEffect(() => {
-    latest.current = { ...latest.current, scene, component, wordIssues };
-  }, [scene, component, wordIssues]);
+    latest.current = {
+      ...latest.current,
+      scene,
+      component,
+      wordIssues,
+      revision,
+    };
+  }, [scene, component, wordIssues, revision]);
 
   const send = useCallback(() => {
     window.clearTimeout(timer.current);
@@ -69,6 +77,12 @@ export function useSceneDraft(options: {
       },
     })
       .then((outcome) => {
+        if (outcome.kind === "done") {
+          const saved = outcome.result.data["revision"];
+          if (typeof saved === "number") {
+            ownRevision.current = Math.max(ownRevision.current, saved);
+          }
+        }
         if (thisSend !== sendNumber.current) return;
         setFailure(
           outcome.kind === "done"
@@ -125,7 +139,8 @@ export function useSceneDraft(options: {
       timer.current !== undefined ||
       callsInFlight.current > 0 ||
       isUnsent.current;
-    if (isWaiting) return;
+    const isOwnChange = latest.current.revision <= ownRevision.current;
+    if (isWaiting || isOwnChange) return;
     const stored = latest.current.scene.source.props;
     latest.current = { ...latest.current, draft: stored };
     setDraft(stored);

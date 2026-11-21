@@ -29,9 +29,7 @@ async function issueOf(options: {
   field: Awaited<ReturnType<typeof openScene>>["form"];
 }) {
   await expect
-    .poll(() => options.field.getAttribute("aria-invalid"), {
-      timeout: 10_000,
-    })
+    .poll(() => options.field.getAttribute("aria-invalid"))
     .toBe("true");
   const issueId = (await options.field.getAttribute("aria-describedby")) ?? "";
   return options.page.locator(`[id="${issueId}"]`).textContent();
@@ -91,9 +89,7 @@ describe("plain words and number fields in the scene form", () => {
     }
 
     await expect
-      .poll(() => editor.form.getByRole("alert").textContent(), {
-        timeout: 10_000,
-      })
+      .poll(() => editor.form.getByRole("alert").textContent())
       .toBe("Add at least 1 item");
     await editor.close();
   });
