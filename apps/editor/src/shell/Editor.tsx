@@ -7,8 +7,9 @@ import { useSound } from "../preview/useSound.js";
 import { renderButtonLabel } from "../render/renderJobs.js";
 import { RenderSheet } from "../render/RenderSheet.js";
 import { useRenders } from "../render/useRenders.js";
+import { useHistory } from "../scenePanel/history/useHistory.js";
+import { ScenePanel } from "../scenePanel/ScenePanel.js";
 import { AgentPane } from "../side/AgentPane.js";
-import { ScenePane } from "../side/ScenePane.js";
 import { SidePanel, ToolsPane, type SideTab } from "../side/SidePanel.js";
 import { useEditorFacts } from "./useEditorFacts.js";
 import { LowerArea, type LowerView } from "./LowerArea.js";
@@ -79,24 +80,29 @@ export function Editor(props: {
     onToggle: playback.toggle,
     onStep: step,
   });
+  const history = useHistory({ client, isActive: !isRenderOpen });
   const sidePane = useMemo(() => {
     if (sideTab === "agent") {
       return <AgentPane projectFolder={props.projectFolder} />;
     }
     if (sideTab === "tools") return <ToolsPane />;
     return (
-      <ScenePane
+      <ScenePanel
+        client={client}
+        snapshot={snapshot}
         clip={facts.sceneClip}
         scene={facts.scene}
-        framesPerSecond={framesPerSecond}
+        history={history}
       />
     );
   }, [
     sideTab,
     props.projectFolder,
+    client,
+    snapshot,
     facts.sceneClip,
     facts.scene,
-    framesPerSecond,
+    history,
   ]);
 
   if (output === undefined) {

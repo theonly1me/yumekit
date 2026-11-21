@@ -1,0 +1,168 @@
+.kit-form {
+  display: grid;
+  gap: 22px;
+}
+
+.field {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.kit-form .field > label {
+  display: block;
+  font-size: var(--step--2);
+  color: var(--muted);
+}
+
+.object-fields {
+  display: flex;
+  gap: 16px;
+}
+
+.object-fields > * {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.object-fields > :first-child {
+  flex-grow: 2.4;
+}
+
+.field-issue {
+  font-size: var(--step--2);
+  color: var(--accent);
+  padding-top: 4px;
+}
+
+.kit-form [aria-invalid="true"],
+.kit-form [aria-invalid="true"]:focus {
+  border-bottom-color: var(--accent);
+}
+
+.kit-form select {
+  appearance: none;
+  width: 100%;
+  font: inherit;
+  font-size: var(--step-0);
+  color: inherit;
+  background-color: transparent;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+    linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position:
+    calc(100% - 9px) 55%,
+    calc(100% - 4px) 55%;
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
+  border: 0;
+  border-bottom: 1px solid var(--line-strong);
+  border-radius: 0;
+  padding: 6px 20px 8px 0;
+  cursor: pointer;
+}
+
+.kit-form select:focus {
+  outline: 0;
+  border-bottom-color: var(--text);
+}
+
+.kit-form select option {
+  background: var(--raised);
+  color: var(--text);
+}
+
+.list-field,
+.group-field {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.list-field > legend,
+.group-field > legend {
+  margin-bottom: 2px;
+}
+
+.list-item {
+  display: grid;
+  min-width: 0;
+}
+
+.text-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 8px;
+}
+
+.object-item {
+  gap: 6px;
+  padding: 10px 0 12px;
+  border-top: 1px solid var(--line);
+}
+
+.object-item-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: var(--step--2);
+  color: var(--faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.item-actions {
+  display: flex;
+  gap: 2px;
+}
+
+button.quiet {
+  border: 0;
+  padding: 4px 8px;
+  color: var(--muted);
+  font-size: var(--step--2);
+}
+
+button.quiet:hover {
+  color: var(--text);
+}
+
+button.quiet:disabled {
+  color: var(--faint);
+  opacity: 0.5;
+  cursor: default;
+}
+
+.list-field > button.quiet {
+  justify-self: start;
+  padding-left: 0;
+}
+
+.group-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.kit-form .switch-field label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text);
+  font-size: var(--step-0);
+}
+
+.history-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.side-pane pre.scene-code {
+  white-space: pre;
+  overflow: auto;
+  max-height: 420px;
+  overflow-wrap: normal;
+  tab-size: 2;
+}

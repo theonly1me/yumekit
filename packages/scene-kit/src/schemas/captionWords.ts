@@ -12,7 +12,8 @@ export const captionWordsSchema = {
       .optional()
       .describe(
         "The id of the speech asset with word timings. Start the caption clip at the same frame as the audio clip of that asset.",
-      ),
+      )
+      .meta({ assetKind: "audio" }),
     text: z
       .string()
       .max(captionWordsLimits.text)
