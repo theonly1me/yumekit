@@ -4,6 +4,7 @@ import type {
   ServerResponse,
 } from "node:http";
 import { sendStaticFile } from "../files/staticFiles.js";
+import { agentRoutes } from "./agentRoutes.js";
 import { anySegment, type EngineContext, type Route } from "./exchange.js";
 import { fileRoutes } from "./fileRoutes.js";
 import { keyRoutes } from "./keyRoutes.js";
@@ -29,7 +30,7 @@ export interface RequestHandlerOptions {
   editorFolder: string | undefined;
 }
 
-const routes = [...projectRoutes, ...keyRoutes, ...fileRoutes];
+const routes = [...projectRoutes, ...keyRoutes, ...fileRoutes, ...agentRoutes];
 
 const upgradeRequired: Failure = {
   status: 426,

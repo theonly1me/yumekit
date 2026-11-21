@@ -22,4 +22,5 @@ export type EngineEvent =
       message?: string;
     }
   | { type: "media-servers-changed" }
+  | { type: "agents-changed"; connected: number }
   | { type: "engine-closing" };

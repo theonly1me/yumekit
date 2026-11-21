@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url";
 import { startEngine, type Engine } from "@yumekit/engine";
 import { failed, usageError, type CommandResult } from "../../commandResult.js";
 import { parseCommandLine, wholeNumberOption } from "../../options.js";
+import { realFolderOf, serverCommandOf } from "../../serverCommand.js";
 import { openBrowser } from "./openBrowser.js";
 
 const builtEditorFolder = fileURLToPath(
@@ -53,6 +54,7 @@ export async function openCommand(args: string[]): Promise<CommandResult> {
   const started = await startEngine({
     projectFolder: resolve(folder),
     editorFolder: builtEditorFolder,
+    serverCommand: serverCommandOf(await realFolderOf(folder)),
     ...(port.value === undefined ? {} : { port: port.value }),
   });
   if (!started.ok) {

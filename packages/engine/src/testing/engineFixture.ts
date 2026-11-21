@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createProject } from "@yumekit/project";
 import { onTestFinished, vi } from "vitest";
+import type { ServerCommand } from "../agents/agentTypes.js";
 import { startEngine } from "../startEngine.js";
 
 export interface TestProject {
@@ -53,6 +54,7 @@ export async function startTestEngine(options: {
   projectFolder: string;
   editorFolder?: string;
   port?: number;
+  serverCommand?: ServerCommand;
 }): Promise<TestEngine> {
   const started = await startEngine(options);
   if (!started.ok) {

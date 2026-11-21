@@ -7,7 +7,7 @@ import { useSound } from "../preview/useSound.js";
 import { useRenderSheet } from "../render/useRenderSheet.js";
 import { useHistory } from "../scenePanel/history/useHistory.js";
 import { ScenePanel } from "../scenePanel/ScenePanel.js";
-import { AgentPane } from "../side/AgentPane.js";
+import { AgentPane } from "../side/agent/AgentPane.js";
 import { SidePanel, type SideTab } from "../side/SidePanel.js";
 import { useClipTools } from "../makeClip/useClipTools.js";
 import { useEditorFacts } from "./useEditorFacts.js";
@@ -104,7 +104,7 @@ export function Editor(props: {
   });
   const sidePane = useMemo(() => {
     if (sideTab === "agent") {
-      return <AgentPane projectFolder={props.projectFolder} />;
+      return <AgentPane client={client} projectFolder={props.projectFolder} />;
     }
     if (sideTab === "tools") return clipTools.toolsPane;
     return (

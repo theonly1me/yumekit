@@ -20,7 +20,7 @@ my-project/
   .cache/                       frame pictures of video assets (not in git)
 ```
 
-`createProject` writes a `.gitignore` with `renders/`, `.yumekit/`, and `.cache/`.
+`createProject` writes a `.gitignore` with `renders/`, `.yumekit/`, `.cache/`, and the agent files `.mcp.json`, `.codex/config.toml`, and `.cursor/mcp.json`. The agent files hold full paths of one computer (document 11, "Agent setup").
 
 ## Schemas
 

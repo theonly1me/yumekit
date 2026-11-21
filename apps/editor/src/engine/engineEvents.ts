@@ -10,6 +10,7 @@ const engineEventSchema = z.discriminatedUnion("type", [
     message: z.string().optional(),
   }),
   z.object({ type: z.literal("media-servers-changed") }),
+  z.object({ type: z.literal("agents-changed"), connected: z.number() }),
   z.object({ type: z.literal("engine-closing") }),
 ]);
 

@@ -19,6 +19,7 @@ export interface Upgrade {
 export interface EventHub {
   handleUpgrade: (upgrade: Upgrade) => void;
   send: (event: EngineEvent) => void;
+  agentConnectionCount: () => number;
   close: () => Promise<void>;
 }
 
@@ -41,6 +42,11 @@ function upgradeRejectionOf(options: {
       token: options.token,
     })
   );
+}
+
+function isAgentConnection(request: IncomingMessage): boolean {
+  const path = requestPathOf(request.url);
+  return path.ok && path.value.query.get("client") === "agent";
 }
 
 function rejectUpgrade(options: {
@@ -74,6 +80,18 @@ export function createEventHub(options: {
     [...server.clients].filter(
       (client) => client.readyState === WebSocket.OPEN,
     );
+  const send = (event: EngineEvent) => {
+    const text = JSON.stringify(event);
+    for (const client of openClients()) {
+      client.send(text);
+    }
+  };
+  const agentClients = new Set<WebSocket>();
+  const countAgent = (options: { client: WebSocket; isOpen: boolean }) => {
+    if (options.isOpen) agentClients.add(options.client);
+    else agentClients.delete(options.client);
+    send({ type: "agents-changed", connected: agentClients.size });
+  };
   return {
     handleUpgrade: ({ request, socket, head }) => {
       socket.on("error", () => {
@@ -84,18 +102,20 @@ export function createEventHub(options: {
         rejectUpgrade({ socket, rejection });
         return;
       }
+      const isAgent = isAgentConnection(request);
       server.handleUpgrade(request, socket, head, (client) => {
         client.on("error", () => {
           client.terminate();
         });
+        if (!isAgent) return;
+        client.on("close", () => {
+          countAgent({ client, isOpen: false });
+        });
+        countAgent({ client, isOpen: true });
       });
     },
-    send: (event) => {
-      const text = JSON.stringify(event);
-      for (const client of openClients()) {
-        client.send(text);
-      }
-    },
+    send,
+    agentConnectionCount: () => agentClients.size,
     close: async () => {
       const clients = [...server.clients];
       for (const client of clients) {

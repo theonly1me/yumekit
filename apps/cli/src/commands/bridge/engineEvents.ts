@@ -39,6 +39,7 @@ export async function followEngineEvents(options: {
     engine.origin.replace(/^http/, "ws"),
   );
   eventsUrl.searchParams.set("token", engine.token);
+  eventsUrl.searchParams.set("client", "agent");
   const socket = new WebSocket(eventsUrl);
   const listeners = new Map<string, (event: ProgressEvent) => void>();
   socket.on("message", (data: Buffer) => {

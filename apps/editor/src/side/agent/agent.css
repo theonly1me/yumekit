@@ -1,0 +1,79 @@
+.agent-state {
+  font-size: var(--step-0);
+  color: var(--muted);
+}
+
+.agent-state[data-connected="true"] {
+  color: var(--text);
+}
+
+.agent-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+}
+
+.agent {
+  border-top: 1px solid var(--line);
+}
+
+.agent-head {
+  padding: 13px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.agent-name {
+  font-size: var(--step-0);
+}
+
+.agent-name em {
+  display: block;
+  font-style: normal;
+  font-size: var(--step--1);
+  color: var(--muted);
+}
+
+.agent[data-found="false"] .agent-name {
+  color: var(--muted);
+}
+
+.agent[data-found="false"] .agent-name em {
+  color: var(--faint);
+}
+
+.agent-detail {
+  display: grid;
+  gap: 10px;
+  justify-items: start;
+  padding: 0 0 18px;
+}
+
+.agent .failure {
+  padding: 0 0 14px;
+}
+
+button.agent-manual-head {
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  font-size: var(--step--1);
+  font-weight: 400;
+  color: var(--muted);
+}
+
+button.agent-manual-head:hover,
+button.agent-manual-head[aria-expanded="true"] {
+  color: var(--text);
+}
+
+button.agent-manual-head::after {
+  content: " +";
+}
+
+button.agent-manual-head[aria-expanded="true"]::after {
+  content: " \2212";
+}

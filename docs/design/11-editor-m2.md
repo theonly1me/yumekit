@@ -128,6 +128,7 @@ type EngineEvent =
       message?: string;
     }
   | { type: "media-servers-changed" }
+  | { type: "agents-changed"; connected: number }
   | { type: "engine-closing" };
 ```
 
@@ -220,15 +221,15 @@ Package `apps/editor` (browser): React, TypeScript, and Vite, built to static fi
 
 ### Screens of the first version
 
-| Screen         | What a person can do                                                                                                             | Tools it calls                  |
-| -------------- | -------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
-| Editor         | See the preview, play, scrub, switch the output, and pick a scene from the scenes row                                            | none                            |
-| Timeline       | See each track and clip, pick a clip, and move the playhead. Change of a clip by drag is milestone 3                             | none                            |
-| Scene panel    | Change the props of a kit scene in a form made from its schema, read the code of a custom scene, and undo                        | `put_scene`, `undo`, `redo`     |
-| Tools and keys | See each media server and its state, follow the key guide, save, test, and remove a key                                          | the key requests                |
-| Make a clip    | Pick a model, set its settings from `settings`, see the price and the seconds used, make the clip, and place it                  | `generate_asset`, `place_video` |
-| Render         | Pick outputs, start a render, see the progress, and open the file                                                                | `render_video`                  |
-| Agent panel    | Read how to connect an agent: the command `yumekit mcp --project <folder>` and a ready configuration block for each known client | none                            |
+| Screen         | What a person can do                                                                                                           | Tools it calls                  |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------ | ------------------------------- |
+| Editor         | See the preview, play, scrub, switch the output, and pick a scene from the scenes row                                          | none                            |
+| Timeline       | See each track and clip, pick a clip, and move the playhead. Change of a clip by drag is milestone 3                           | none                            |
+| Scene panel    | Change the props of a kit scene in a form made from its schema, read the code of a custom scene, and undo                      | `put_scene`, `undo`, `redo`     |
+| Tools and keys | See each media server and its state, follow the key guide, save, test, and remove a key                                        | the key requests                |
+| Make a clip    | Pick a model, set its settings from `settings`, see the price and the seconds used, make the clip, and place it                | `generate_asset`, `place_video` |
+| Render         | Pick outputs, start a render, see the progress, and open the file                                                              | `render_video`                  |
+| Agent panel    | Connect an agent with one button or one prompt, see that it is connected, and read the manual configuration. See "Agent setup" | the agent requests              |
 
 - "Make a clip" needs a first frame. The person picks an image asset of the project, or makes a still first with `generate_asset` and the capability `image`.
 - The price in "Make a clip" comes from `prices` of the model and the selected settings. With no matching price, the editor shows "Price not known".
@@ -245,7 +246,7 @@ These rules came from the build of WP21.
 4. The output switch shows the label of each output with a capital first letter. `yumekit init` sets the label to the id.
 5. A clip picked in the scenes row or the timeline stays selected while the playhead is inside it. Otherwise the selection follows the clip of the first scene track at the playhead. A pick in the scenes row also opens the Scene tab.
 6. The timeline names each track by its id, with a capital first letter and spaces for hyphens. An audio clip shows the `text` or the `prompt` of its tool input, or its asset id. An audio clip of an asset with word timings and a clip of a caption track use the narration style.
-7. The Agent tab shows `yumekit mcp --project <folder>` and a block for Claude Code (`.mcp.json`), Codex (`~/.codex/config.toml`), and Cursor (`.cursor/mcp.json` or `~/.cursor/mcp.json`). Each block runs `yumekit` from the `PATH`.
+7. The Agent tab follows "Agent setup". Its manual part shows the MCP command and a block for Claude Code, Codex, and Cursor.
 8. The Render button opens the Render sheet. See "Details of Render".
 9. The theme setting is a text button in the top bar. The key in `localStorage` is `yumekit-theme`.
 10. A reload loses the token, because the app keeps it only in memory. The page then asks for the link from `yumekit open`.
@@ -296,6 +297,102 @@ These rules came from the build of WP24.
 5. A failed render shows the message of the tool. The hint of the tool is for an agent, so the sheet does not show it. A render failure about a scene has `scene_id` and `frame` in its data. Then the sheet says "Ask your agent to correct the scene <title>, or change it in the Scene panel." and shows "Open this scene". That button closes the sheet, picks the clip of the scene in that output, moves the playhead to the failed frame, and opens the Scene tab.
 6. The render tests start the engine with `withChromium`, because a render needs the renderer.
 
+### Agent setup
+
+The owner asked for this on 2026-11-21. The person must not copy a configuration block by hand. yumekit connects the agent, and the manual blocks stay as a second choice.
+
+| Decision | What                                                                                       | Why                                                                         |
+| -------- | ------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------- |
+| A1       | One module connects an agent. The engine and the command both call it                      | One set of rules for the button and for the prompt                          |
+| A2       | The configuration runs the command with full paths: the Node program and the CLI script    | `yumekit` is not always on the `PATH`, and an agent in a window has another |
+| A3       | The module prefers a file in the project folder to a file in the home folder               | The person can see the change and remove it with the project                |
+| A4       | The module merges into a file that exists. It changes only the entry with the name yumekit | Other servers of the person stay as they are                                |
+| A5       | The module never starts an agent, and it calls no model                                    | The brain runner is document 12                                             |
+| A6       | The engine tells the editor when an agent is connected                                     | The person sees that the setup worked                                       |
+
+#### The module
+
+- `listAgents({ projectFolder })` gives one record for each known agent: `id`, `name`, `installed`, `configured`, `start_command`, and `configuration_file`.
+- `connectAgent({ agentId, projectFolder, serverCommand })` writes the configuration and gives the same record. It gives a failure as a value, with a sentence for a person.
+- `installed` is true when the program of the agent is on the `PATH` of the engine. `configured` is true when the configuration has a yumekit entry for this project folder.
+- The known agents are `claude-code`, `codex`, and `cursor`. The id comes from this fixed list only.
+- `serverCommand` is `{ command, args }`. The command `yumekit open` makes it from `process.execPath` and the path of its own script, then `mcp --project <folder>`.
+
+Where each agent keeps the entry:
+
+| Agent       | File                           | Start in the project folder | Source                                                                                                                         | Checked with                      |
+| ----------- | ------------------------------ | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | --------------------------------- |
+| Claude Code | `<project>/.mcp.json`          | `claude`                    | [code.claude.com/docs/en/mcp](https://code.claude.com/docs/en/mcp)                                                             | Claude Code 2.1.330               |
+| Cursor      | `<project>/.cursor/mcp.json`   | `cursor-agent`              | [cursor.com/docs/context/mcp](https://cursor.com/docs/context/mcp), [cursor.com/docs/cli/mcp](https://cursor.com/docs/cli/mcp) | `cursor-agent` 2026.09.02-c22c1a3 |
+| Codex       | `<project>/.codex/config.toml` | `codex`                     | [developers.openai.com/codex/mcp](https://developers.openai.com/codex/mcp)                                                     | `codex-cli` 0.163.0               |
+
+- The builder confirms each row with the documents of the agent and with the installed program, and records the source and the version here.
+- For Codex, a configuration file in the project folder is the first choice. If the installed Codex does not read one, the module runs the `codex mcp add` command of Codex. It does not write `~/.codex/config.toml` itself.
+- If a file exists and the module cannot read it as its format, the module changes nothing and gives a failure.
+- The files hold full paths of one computer. `yumekit init` puts them in the `.gitignore` of a new project.
+
+#### The engine and the command
+
+| Request                         | Result                                                  |
+| ------------------------------- | ------------------------------------------------------- |
+| `GET /api/agents`               | `{ agents, connected }`. `connected` is a count         |
+| `POST /api/agents/<id>/connect` | The record of the agent after the write, or the failure |
+
+- Each request needs the session token, as the other requests do.
+- `startEngine` takes `serverCommand` as an option. With no option, the two requests give a failure that says to use `yumekit open`.
+- The `yumekit mcp` bridge tells the engine that it is an agent connection. The engine counts the bridges that are open, and sends the event `agents-changed` when the count changes.
+- The command `yumekit agent connect --agent <id> [--project <folder>]` calls the same module. It prints the file that it changed and the next step for the person. It works with and without a running engine.
+
+#### The Agent tab
+
+1. The tab starts with one line of state: "No agent is connected yet." or "An agent is connected."
+2. Then it shows one row for each agent, with its name and "Found on this computer" or "Not found on this computer". An agent that is found comes first.
+3. Each row has the button "Connect". After a connect, the row says where the entry is, and shows the start line `cd <folder> && <start command>` with "Copy".
+4. For Claude Code, the row also says that Claude Code asks once to approve the server.
+5. Below the rows is "Or give this to an agent that already runs", with the prompt and "Copy the prompt".
+6. The manual command and the configuration blocks are below, closed, under "Set up by hand". They use the same full paths as the module.
+
+The prompt, with the real command and folder in it:
+
+```
+Connect yourself to my yumekit project.
+1. Run this command. Use your own name for <agent>: claude-code, codex, or cursor.
+   <command> agent connect --agent <agent> --project <folder>
+2. Tell me how to reload your MCP servers, or reload them if you can.
+3. Then call the yumekit tool get_project and tell me what the project holds.
+```
+
+#### Details of agent setup
+
+These rules came from the build of WP25.
+
+1. The module is in `@yumekit/engine` (`packages/engine/src/agents`). The import table permits `engine` for `apps/cli`, so `yumekit agent connect` and the engine call the same functions.
+2. Claude Code and Cursor read `{ "mcpServers": { "yumekit": { "type": "stdio", "command", "args" } } }`. The module keeps each other key of the file and writes the JSON with 2 spaces and a final newline.
+3. Codex 0.163.0 reads `<project>/.codex/config.toml`, but only in a trusted folder. A check with a temporary `CODEX_HOME` showed this: `codex mcp list` in the project folder listed no server, and listed yumekit after `[projects."<folder>"] trust_level = "trusted"` was in the home file. So the module writes the project file and never runs `codex mcp add`. The entry name is `yumekit` in each project file, so two projects do not collide. The row and the command say that Codex asks once to trust the folder. That Codex asks when it starts in an untrusted folder is an inference from its documents. No check started a Codex session.
+4. The TOML entry is the table `[mcp_servers.yumekit]`. The module parses the file with `smol-toml` 1.9.1 (BSD-3-Clause), removes the old `[mcp_servers.yumekit]` table and its sub-tables as text, and adds the new table at the end. It keeps the other text of the file, with its comments. It parses the result again. If the other values changed, or the entry is not the new one (for example an inline `mcp_servers.yumekit = { ... }`), it changes nothing and gives a failure.
+5. A connect writes only when the new text differs from the old text, with a temporary file and a rename. So a second connect leaves the file and its time as they were.
+6. `configured` is true when the entry has `--project` followed by this project folder in its `args`. A file that is not valid gives `configured: false` in the list, and the failure only on a connect.
+7. Cursor also asks to approve a project server: `cursor-agent mcp list` showed "not loaded (needs approval)". So each row shows one note: Claude Code and Cursor ask once to approve the server, and Codex asks once to trust the folder.
+8. `installed` looks for `claude`, `codex`, and `cursor-agent` as programs in the folders of `PATH` of the engine.
+9. The failures are `configuration-not-readable`, `configuration-not-valid`, and `configuration-not-written`, each with the file and a sentence. Over HTTP, `configuration-not-valid` has status 409 and the other two have 500. An id that is not in the list has status 404 with `agent-not-found`. With no `serverCommand`, both requests have status 409 with `no-server-command` and a message that names `yumekit open`.
+10. `GET /api/agents` returns `{ agents, connected, serverCommand }`. The editor uses `serverCommand` for the manual blocks and for the prompt, so the editor shows the full paths of the engine.
+11. The prompt needs the command that runs yumekit. The editor takes `serverCommand` without its last three words, `mcp --project <folder>`. `yumekit open` always makes `serverCommand` in this form.
+12. `yumekit open` makes `serverCommand` from `process.execPath`, the real path of its `main.js`, and the real path of the project folder, because the engine compares the entry with the real path. The store keeps the folder as the person gave it, as before.
+13. The bridge count: the `yumekit mcp` bridge opens the event WebSocket with `client=agent` in the query. The engine counts each open WebSocket with that query, and sends `{ "type": "agents-changed", "connected": number }` when one opens or closes. The editor never sends `client`, so its own connection does not count. The event holds the count, so the editor reads nothing again.
+14. The state line says "No agent is connected yet." for 0, "An agent is connected." for 1, and "N agents are connected." for more.
+15. A row that is already configured shows the entry and the start line also before a new connect. "Connect" is a primary button for a found agent with no entry.
+16. `yumekit init` puts `.mcp.json`, `.codex/config.toml`, and `.cursor/mcp.json` in the `.gitignore`. It does not ignore all of `.cursor/` or `.codex/`, because a person can keep other files there.
+17. A cheap real check ran each list command under `sandbox-exec` with a profile that permits writes only in a temporary folder, and with a temporary `HOME`, `CODEX_HOME`, `CLAUDE_CONFIG_DIR`, `XDG_CONFIG_HOME`, and `TMPDIR`. After `yumekit agent connect` for each agent: `claude mcp list` showed yumekit as "Pending approval", `codex mcp list` showed yumekit as enabled in a trusted folder, and `cursor-agent mcp list` showed "needs approval". After `cursor-agent mcp enable yumekit`, `cursor-agent mcp list-tools yumekit` listed 30 tools. No check started a model.
+
+#### WP25 checks
+
+1. A connect for each agent, in a temporary project and a temporary home folder, gives a file that the agent format accepts. A second connect changes nothing.
+2. A connect keeps another server in a file that exists. A file that is not valid stays unchanged, and the tab shows the failure.
+3. The entry runs the full paths, and a process started from that entry answers `tools/list`.
+4. The count `connected` goes up when a bridge opens and down when it closes, and the tab follows without a reload.
+5. A cheap real check: after a connect in a temporary project, the list command of each installed agent shows yumekit. No check starts a model.
+6. Screenshots of the tab in dark and in light: before a connect, after a connect, with an agent connected, and with "Set up by hand" open.
+
 ## The command
 
 | Command                                             | What it does                                                                                 |
@@ -316,6 +413,7 @@ These rules came from the build of WP24.
 | WP22 | The Scene panel, with the form from a kit scene schema, and undo                                                                                   | WP21       |
 | WP23 | Tools and keys, and Make a clip                                                                                                                    | WP21       |
 | WP24 | Render                                                                                                                                             | WP21       |
+| WP25 | Agent setup: the module, the two agent requests, the count of bridges, `yumekit agent connect`, and the Agent tab                                  | WP21       |
 
 WP18 and WP19 start together. WP22, WP23, and WP24 start together after WP21.
 
