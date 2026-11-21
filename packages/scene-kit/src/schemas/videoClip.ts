@@ -13,7 +13,8 @@ export const videoClipSchema = {
       .min(1)
       .describe(
         "The id of a video asset in the project. If the asset is missing or is not a video, the scene shows a plain placeholder.",
-      ),
+      )
+      .meta({ assetKind: "video" }),
     fit: z
       .enum(["cover", "contain"])
       .optional()

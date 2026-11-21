@@ -36,6 +36,26 @@ describe("put_scene failures", () => {
     expect(revisionChanged).toBe(false);
   });
 
+  it("gives the path of each rejected kit prop, so an editor can show it next to its field", async () => {
+    const harness = await startHarness();
+
+    const { result } = await putScene({
+      harness,
+      arguments: {
+        kit_component: "bar-chart",
+        props: { heading: "Costs", bars: [{ label: "A", value: "ten" }] },
+      },
+    });
+
+    expect(result.data["kind"]).toBe("invalid-props");
+    expect(result.data["issues"]).toEqual([
+      {
+        path: ["bars", 0, "value"],
+        message: "Invalid input: expected number, received string",
+      },
+    ]);
+  });
+
   it("rejects an unknown kit component with a hint that lists the kit scenes", async () => {
     const harness = await startHarness();
 

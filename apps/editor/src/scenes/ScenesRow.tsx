@@ -2,9 +2,9 @@ import type { Output, Scene, SceneClip } from "../engine/snapshot.js";
 import { secondsText } from "../timeline/clock.js";
 import { stillKey } from "./useSceneStills.js";
 
-function frameWidthOf(output: Output): string {
-  if (output.widthPixels > output.heightPixels) return "100%";
-  return output.widthPixels === output.heightPixels ? "62%" : "46%";
+function shapeOf(output: Output): "wide" | "square" | "tall" {
+  if (output.widthPixels > output.heightPixels) return "wide";
+  return output.widthPixels === output.heightPixels ? "square" : "tall";
 }
 
 export function ScenesRow(props: {
@@ -25,7 +25,7 @@ export function ScenesRow(props: {
     );
   }
   return (
-    <ol className="panels" aria-label="Scenes">
+    <ol className="panels" aria-label="Scenes" data-shape={shapeOf(output)}>
       {clips.map((...[clip, index]) => {
         const title =
           scenes.find((scene) => scene.id === clip.sceneId)?.title ??
@@ -47,7 +47,6 @@ export function ScenesRow(props: {
                 className="panel-frame"
                 style={{
                   aspectRatio: `${String(output.widthPixels)} / ${String(output.heightPixels)}`,
-                  width: frameWidthOf(output),
                 }}
               >
                 {still === undefined ? undefined : <img src={still} alt="" />}

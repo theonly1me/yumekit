@@ -20,7 +20,8 @@ export const imagePanSchema = {
       .min(1)
       .describe(
         "The id of an image asset in the project. The scene cuts the image to the shape of the output. If the asset is missing, the scene shows a plain placeholder.",
-      ),
+      )
+      .meta({ assetKind: "image" }),
     caption: z
       .string()
       .max(imagePanLimits.caption)
