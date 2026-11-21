@@ -164,7 +164,8 @@ type PreviewServer = {
 4. The page reads the project data from `GET /preview-data?output=<outputId>` of the preview server. It learns of a `refresh` from the event stream `GET /preview-events`.
 5. The page sends `ready` after the first load and again after each `refresh`. After a `refresh`, it draws the frame of the last `seek` before it sends `ready`. If that draw fails, it first sends `failed` with the `requestId` of the last `seek`.
 6. `failed` has the `kind` of a scene failure (`scene-error` or `kit-scene-not-found`), `frame-out-of-range`, or the kind of a load failure such as `output-not-found`.
-7. The stage in `preview` mode has no render guards. For a scene that obeys document 02, the preview pixels equal the pixels of `renderFrame`. A test checks this for a kit scene, a custom scene, and a `video-clip` scene.
+7. The stage in `preview` mode has no render guards. For a scene that obeys document 02, the preview pixels equal the pixels of `renderFrame`. A test checks this for a kit scene, a custom scene, and a `video-clip` scene with a picture at the output size.
+8. Chromium can draw a few edge pixels in another way in the preview. A 1280 by 720 video picture in a 640 by 360 output differed at its edges by up to 27 of 255. Text after earlier seeks differed by 1 of 255. The same frames in `render` mode inside the preview page differed in the same way, so the guards are not the cause. The preview is a guide, and the render is exact.
 
 ### Play
 
