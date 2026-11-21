@@ -11,7 +11,7 @@ interface FieldBase {
 export type Field = FieldBase &
   (
     | { kind: "text"; isLong: boolean }
-    | { kind: "number" }
+    | { kind: "number"; isInteger: boolean }
     | { kind: "choice"; options: string[] }
     | { kind: "switch" }
     | { kind: "asset"; assetKind: AssetKind }
@@ -61,7 +61,7 @@ function fieldOf(options: {
       };
     case "number":
     case "integer":
-      return { ...base, kind: "number" };
+      return { ...base, kind: "number", isInteger: schema.type === "integer" };
     case "boolean":
       return { ...base, kind: "switch" };
     case "object":

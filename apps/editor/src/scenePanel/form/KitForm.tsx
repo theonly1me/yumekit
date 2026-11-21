@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import type { EngineClient } from "../../engine/engineClient.js";
 import type { Asset, Scene } from "../../engine/snapshot.js";
 import { fieldsOf } from "./fields.js";
@@ -7,7 +7,8 @@ import type { FormBinding } from "./formBinding.js";
 import { routeIssues } from "./issueRoutes.js";
 import type { PropSchema } from "./propSchema.js";
 import { pathKey, valueAt } from "./propPath.js";
-import { useSceneDraft } from "./useSceneDraft.js";
+import { plainIssue } from "./plainMessages.js";
+import { useSceneDraft, type IssueWording } from "./useSceneDraft.js";
 
 export function KitForm(props: {
   client: EngineClient;
@@ -15,10 +16,24 @@ export function KitForm(props: {
   component: string;
   schema: PropSchema;
   assets: Asset[];
+  revision: number;
 }) {
-  const { client, scene, component, schema, assets } = props;
+  const { client, scene, component, schema, assets, revision } = props;
   const fields = useMemo(() => fieldsOf(schema), [schema]);
-  const draft = useSceneDraft({ client, scene, component });
+  const wordIssues = useCallback<IssueWording>(
+    (wording) =>
+      wording.issues.map((issue) =>
+        plainIssue({ issue, schema, props: wording.props }),
+      ),
+    [schema],
+  );
+  const draft = useSceneDraft({
+    client,
+    scene,
+    component,
+    wordIssues,
+    revision,
+  });
   const issues = useMemo(
     () =>
       routeIssues({

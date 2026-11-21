@@ -54,20 +54,21 @@ describe("the scene panel", () => {
     await editor.close();
   });
 
-  it("shows a rejected value next to its field and keeps what the person typed", async () => {
+  it("shows a rejected value next to its field in plain words and keeps what the person typed", async () => {
     const editor = await openScene("Chart");
-    const value = editor.form.getByLabel("Value", { exact: true });
+    const label = editor.form.getByLabel("Label", { exact: true });
+    const longLabel = "x".repeat(61);
 
-    await value.fill("ten");
+    await label.fill(longLabel);
 
     await expect
-      .poll(() => value.getAttribute("aria-invalid"), { timeout: 10_000 })
+      .poll(() => label.getAttribute("aria-invalid"), { timeout: 10_000 })
       .toBe("true");
-    const issueId = (await value.getAttribute("aria-describedby")) ?? "";
+    const issueId = (await label.getAttribute("aria-describedby")) ?? "";
     expect(await editor.page.locator(`[id="${issueId}"]`).textContent()).toBe(
-      "Value: Invalid input: expected number, received string",
+      "Label: Use at most 60 characters",
     );
-    expect(await value.inputValue()).toBe("ten");
+    expect(await label.inputValue()).toBe(longLabel);
     expect(await propsOf("chart")()).toEqual({
       heading: "Costs",
       bars: [{ label: "Rent", value: 40 }],

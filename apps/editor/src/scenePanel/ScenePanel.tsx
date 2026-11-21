@@ -37,6 +37,7 @@ function KitScene(props: {
       component={component}
       schema={kitScene.props}
       assets={props.snapshot.assets}
+      revision={props.snapshot.revision}
     />
   );
 }
