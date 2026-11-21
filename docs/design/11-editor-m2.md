@@ -128,6 +128,7 @@ type EngineEvent =
       message?: string;
     }
   | { type: "media-servers-changed" }
+  | { type: "agents-changed"; connected: number }
   | { type: "engine-closing" };
 ```
 
@@ -319,11 +320,11 @@ The owner asked for this on 2026-11-21. The person must not copy a configuration
 
 Where each agent keeps the entry:
 
-| Agent       | File                               | Start in the project folder |
-| ----------- | ---------------------------------- | --------------------------- |
-| Claude Code | `<project>/.mcp.json`              | `claude`                    |
-| Cursor      | `<project>/.cursor/mcp.json`       | `cursor-agent`              |
-| Codex       | The builder confirms it, see below | `codex`                     |
+| Agent       | File                           | Start in the project folder | Source                                                                                                                         | Checked with                      |
+| ----------- | ------------------------------ | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | --------------------------------- |
+| Claude Code | `<project>/.mcp.json`          | `claude`                    | [code.claude.com/docs/en/mcp](https://code.claude.com/docs/en/mcp)                                                             | Claude Code 2.1.330               |
+| Cursor      | `<project>/.cursor/mcp.json`   | `cursor-agent`              | [cursor.com/docs/context/mcp](https://cursor.com/docs/context/mcp), [cursor.com/docs/cli/mcp](https://cursor.com/docs/cli/mcp) | `cursor-agent` 2026.09.02-c22c1a3 |
+| Codex       | `<project>/.codex/config.toml` | `codex`                     | [developers.openai.com/codex/mcp](https://developers.openai.com/codex/mcp)                                                     | `codex-cli` 0.163.0               |
 
 - The builder confirms each row with the documents of the agent and with the installed program, and records the source and the version here.
 - For Codex, a configuration file in the project folder is the first choice. If the installed Codex does not read one, the module runs the `codex mcp add` command of Codex. It does not write `~/.codex/config.toml` itself.
@@ -360,6 +361,28 @@ Connect yourself to my yumekit project.
 2. Tell me how to reload your MCP servers, or reload them if you can.
 3. Then call the yumekit tool get_project and tell me what the project holds.
 ```
+
+#### Details of agent setup
+
+These rules came from the build of WP25.
+
+1. The module is in `@yumekit/engine` (`packages/engine/src/agents`). The import table permits `engine` for `apps/cli`, so `yumekit agent connect` and the engine call the same functions.
+2. Claude Code and Cursor read `{ "mcpServers": { "yumekit": { "type": "stdio", "command", "args" } } }`. The module keeps each other key of the file and writes the JSON with 2 spaces and a final newline.
+3. Codex 0.163.0 reads `<project>/.codex/config.toml`, but only in a trusted folder. A check with a temporary `CODEX_HOME` showed this: `codex mcp list` in the project folder listed no server, and listed yumekit after `[projects."<folder>"] trust_level = "trusted"` was in the home file. So the module writes the project file and never runs `codex mcp add`. The entry name is `yumekit` in each project file, so two projects do not collide. The row and the command say that Codex asks once to trust the folder. That Codex asks when it starts in an untrusted folder is an inference from its documents. No check started a Codex session.
+4. The TOML entry is the table `[mcp_servers.yumekit]`. The module parses the file with `smol-toml` 1.9.1 (BSD-3-Clause), removes the old `[mcp_servers.yumekit]` table and its sub-tables as text, and adds the new table at the end. It keeps the other text of the file, with its comments. It parses the result again. If the other values changed, or the entry is not the new one (for example an inline `mcp_servers.yumekit = { ... }`), it changes nothing and gives a failure.
+5. A connect writes only when the new text differs from the old text, with a temporary file and a rename. So a second connect leaves the file and its time as they were.
+6. `configured` is true when the entry has `--project` followed by this project folder in its `args`. A file that is not valid gives `configured: false` in the list, and the failure only on a connect.
+7. Cursor also asks to approve a project server: `cursor-agent mcp list` showed "not loaded (needs approval)". So each row shows one note: Claude Code and Cursor ask once to approve the server, and Codex asks once to trust the folder.
+8. `installed` looks for `claude`, `codex`, and `cursor-agent` as programs in the folders of `PATH` of the engine.
+9. The failures are `configuration-not-readable`, `configuration-not-valid`, and `configuration-not-written`, each with the file and a sentence. Over HTTP, `configuration-not-valid` has status 409 and the other two have 500. An id that is not in the list has status 404 with `agent-not-found`. With no `serverCommand`, both requests have status 409 with `no-server-command` and a message that names `yumekit open`.
+10. `GET /api/agents` returns `{ agents, connected, serverCommand }`. The editor uses `serverCommand` for the manual blocks and for the prompt, so the editor shows the full paths of the engine.
+11. The prompt needs the command that runs yumekit. The editor takes `serverCommand` without its last three words, `mcp --project <folder>`. `yumekit open` always makes `serverCommand` in this form.
+12. `yumekit open` makes `serverCommand` from `process.execPath`, the real path of its `main.js`, and the real path of the project folder, because the engine compares the entry with the real path. The store keeps the folder as the person gave it, as before.
+13. The bridge count: the `yumekit mcp` bridge opens the event WebSocket with `client=agent` in the query. The engine counts each open WebSocket with that query, and sends `{ "type": "agents-changed", "connected": number }` when one opens or closes. The editor never sends `client`, so its own connection does not count. The event holds the count, so the editor reads nothing again.
+14. The state line says "No agent is connected yet." for 0, "An agent is connected." for 1, and "N agents are connected." for more.
+15. A row that is already configured shows the entry and the start line also before a new connect. "Connect" is a primary button for a found agent with no entry.
+16. `yumekit init` puts `.mcp.json`, `.codex/config.toml`, and `.cursor/mcp.json` in the `.gitignore`. It does not ignore all of `.cursor/` or `.codex/`, because a person can keep other files there.
+17. A cheap real check ran each list command under `sandbox-exec` with a profile that permits writes only in a temporary folder, and with a temporary `HOME`, `CODEX_HOME`, `CLAUDE_CONFIG_DIR`, `XDG_CONFIG_HOME`, and `TMPDIR`. After `yumekit agent connect` for each agent: `claude mcp list` showed yumekit as "Pending approval", `codex mcp list` showed yumekit as enabled in a trusted folder, and `cursor-agent mcp list` showed "needs approval". After `cursor-agent mcp enable yumekit`, `cursor-agent mcp list-tools yumekit` listed 30 tools. No check started a model.
 
 #### WP25 checks
 
