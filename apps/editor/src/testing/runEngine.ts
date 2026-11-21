@@ -38,6 +38,7 @@ function browsersPath(): string {
 
 export interface EngineOptions {
   mediaTools?: object;
+  withChromium?: boolean;
 }
 
 async function createProject(options: EngineOptions): Promise<{
@@ -51,7 +52,10 @@ async function createProject(options: EngineOptions): Promise<{
   const environment = {
     ...process.env,
     HOME: home,
-    PLAYWRIGHT_BROWSERS_PATH: browsersPath(),
+    PLAYWRIGHT_BROWSERS_PATH:
+      options.withChromium === true
+        ? browsersPath()
+        : join(root, "no-browsers"),
     YUMEKIT_CONFIG_DIRECTORY: join(root, "config"),
     OPENAI_API_KEY: "",
     GEMINI_API_KEY: "",

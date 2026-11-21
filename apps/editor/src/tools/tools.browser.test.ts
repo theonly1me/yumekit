@@ -22,6 +22,7 @@ function runningEngine(): RunningEngine {
 
 beforeAll(async () => {
   engine = await runEngine({
+    withChromium: true,
     mediaTools: {
       mcpServers: {
         sample: {},
