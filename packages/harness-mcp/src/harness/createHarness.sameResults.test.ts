@@ -34,6 +34,7 @@ function resultOverMcp(call: ToolCall) {
         ? [{ mimeType: block.mimeType, base64: block.data }]
         : [],
     ),
+    mcpResult: call.result,
   };
 }
 
@@ -51,10 +52,11 @@ describe("createHarness and createHarnessServer", () => {
     const { tools } = await overMcp.client.listTools();
 
     expect(harness.tools).toEqual(
-      tools.map(({ name, description, inputSchema }) => ({
+      tools.map(({ name, description, inputSchema, annotations }) => ({
         name,
         description,
         inputSchema,
+        ...(annotations === undefined ? {} : { annotations }),
       })),
     );
   });

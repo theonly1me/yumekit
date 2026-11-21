@@ -13,6 +13,7 @@ export interface HarnessResult {
   text: string;
   data: JsonObject;
   images: HarnessImage[];
+  mcpResult: CallToolResult;
 }
 
 export function jsonObjectOf(value: object): JsonObject {
@@ -31,6 +32,7 @@ export function harnessResultOf(result: CallToolResult): HarnessResult {
         ? [{ mimeType: content.mimeType, base64: content.data }]
         : [],
     ),
+    mcpResult: result,
   };
 }
 

@@ -1,4 +1,5 @@
 import { mkdtemp, rm } from "node:fs/promises";
+import { createServer as createHttpServer, type Server } from "node:http";
 import type { AddressInfo } from "node:net";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -23,6 +24,24 @@ function isAddressInfo(address: unknown): address is AddressInfo {
   return typeof address === "object" && address !== null && "port" in address;
 }
 
+function listenOnLoopback(server: Server): Promise<unknown> {
+  const listened = Promise.withResolvers<unknown>();
+  server.once("error", listened.reject);
+  server.listen({ host: "127.0.0.1", port: 0 }, () => {
+    listened.resolve(server.address());
+  });
+  return listened.promise;
+}
+
+function closeHttpServer(server: Server): Promise<undefined> {
+  const closed = Promise.withResolvers<undefined>();
+  server.closeAllConnections();
+  server.close(() => {
+    closed.resolve(undefined);
+  });
+  return closed.promise;
+}
+
 export async function startStageServer(options: {
   projectFolder: string;
   pagePlugin: Plugin;
@@ -37,8 +56,7 @@ export async function startStageServer(options: {
     appType: "custom",
     clearScreen: false,
     server: {
-      host: "127.0.0.1",
-      port: 0,
+      middlewareMode: true,
       hmr: false,
       ws: false,
       watch: null,
@@ -58,15 +76,17 @@ export async function startStageServer(options: {
       options.pagePlugin,
     ],
   });
-  await server.listen();
-  const address = server.httpServer?.address();
+  const httpServer = createHttpServer(server.middlewares);
+  const address = await listenOnLoopback(httpServer);
   if (!isAddressInfo(address)) {
+    await closeHttpServer(httpServer);
     await server.close();
     throw new Error("The stage server has no port");
   }
   return {
     origin: `http://127.0.0.1:${String(address.port)}`,
     close: async () => {
+      await closeHttpServer(httpServer);
       await server.close();
       await rm(cacheDir, { recursive: true, force: true });
     },

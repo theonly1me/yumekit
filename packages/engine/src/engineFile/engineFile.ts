@@ -1,11 +1,4 @@
-import {
-  chmod,
-  mkdir,
-  readFile,
-  rename,
-  rm,
-  writeFile,
-} from "node:fs/promises";
+import { chmod, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { z } from "zod";
 import { isSameToken } from "../http/requestChecks.js";
@@ -38,21 +31,30 @@ export async function readEngineFile(
   }
 }
 
-export async function writeEngineFile(options: {
+function isFileExistsError(error: unknown): boolean {
+  return error instanceof Error && Reflect.get(error, "code") === "EEXIST";
+}
+
+export async function createEngineFileExclusively(options: {
   projectFolder: string;
   content: EngineFileContent;
-}): Promise<void> {
-  const folder = engineFolderOf(options.projectFolder);
-  await mkdir(folder, { recursive: true, mode: 0o700 });
-  const temporaryPath = join(
-    folder,
-    `engine.json.${String(process.pid)}.temporary`,
-  );
-  await writeFile(temporaryPath, JSON.stringify(options.content), {
-    mode: 0o600,
+}): Promise<boolean> {
+  await mkdir(engineFolderOf(options.projectFolder), {
+    recursive: true,
+    mode: 0o700,
   });
-  await chmod(temporaryPath, 0o600);
-  await rename(temporaryPath, engineFilePathOf(options.projectFolder));
+  const path = engineFilePathOf(options.projectFolder);
+  try {
+    await writeFile(path, JSON.stringify(options.content), {
+      flag: "wx",
+      mode: 0o600,
+    });
+  } catch (error) {
+    if (isFileExistsError(error)) return false;
+    throw error;
+  }
+  await chmod(path, 0o600);
+  return true;
 }
 
 export async function removeEngineFile(options: {

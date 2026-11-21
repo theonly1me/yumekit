@@ -10,7 +10,7 @@ export interface OpenRun {
   token: string;
   processId: number;
   output: () => string;
-  stop: () => Promise<number | null>;
+  stop: (signal?: NodeJS.Signals) => Promise<number | null>;
 }
 
 const startWaitMilliseconds = 60_000;
@@ -57,8 +57,8 @@ export async function runOpen(options: {
     token,
     processId: child.pid,
     output: () => chunks.join(""),
-    stop: () => {
-      child.kill("SIGTERM");
+    stop: (signal = "SIGTERM") => {
+      child.kill(signal);
       return exited;
     },
   };

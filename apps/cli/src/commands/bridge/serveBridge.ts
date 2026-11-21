@@ -3,8 +3,13 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import {
   CallToolRequestSchema,
+  CallToolResultSchema,
+  ErrorCode,
   ListToolsRequestSchema,
+  ListToolsResultSchema,
+  McpError,
   type CallToolResult,
+  type Tool,
 } from "@modelcontextprotocol/sdk/types.js";
 import type { RunningEngine } from "@yumekit/engine";
 import { serverInstructions } from "@yumekit/harness-mcp";
@@ -13,22 +18,7 @@ import { failed, type CommandResult } from "../../commandResult.js";
 import { followEngineEvents, type EngineEvents } from "./engineEvents.js";
 import { engineRequest } from "./engineRequest.js";
 
-const toolListSchema = z.object({
-  tools: z.array(
-    z.object({
-      name: z.string(),
-      description: z.string(),
-      inputSchema: z.looseObject({ type: z.literal("object") }),
-    }),
-  ),
-});
-
-const harnessResultSchema = z.object({
-  isError: z.boolean(),
-  text: z.string(),
-  data: z.record(z.string(), z.unknown()),
-  images: z.array(z.object({ mimeType: z.string(), base64: z.string() })),
-});
+const engineResultSchema = z.object({ mcpResult: z.unknown() });
 
 const failureSchema = z.object({ kind: z.string(), message: z.string() });
 
@@ -37,43 +27,43 @@ function noop(): void {
 }
 
 function callResultOf(body: unknown): CallToolResult {
-  const result = harnessResultSchema.safeParse(body);
-  if (!result.success) {
-    const failure = failureSchema.safeParse(body);
-    const text = failure.success
-      ? `${failure.data.kind}: ${failure.data.message}`
-      : "The engine gave an answer that is not a tool result.";
-    return { isError: true, content: [{ type: "text", text }] };
-  }
-  const { isError, text, data, images } = result.data;
-  return {
-    isError,
-    content: [
-      ...(text === "" ? [] : [{ type: "text" as const, text }]),
-      ...images.map((image) => ({
-        type: "image" as const,
-        data: image.base64,
-        mimeType: image.mimeType,
-      })),
-    ],
-    ...(Object.keys(data).length === 0 ? {} : { structuredContent: data }),
-  };
+  const engineResult = engineResultSchema.safeParse(body);
+  const result = CallToolResultSchema.safeParse(
+    engineResult.success ? engineResult.data.mcpResult : undefined,
+  );
+  if (result.success) return result.data;
+  const failure = failureSchema.safeParse(body);
+  const text = failure.success
+    ? `${failure.data.kind}: ${failure.data.message}`
+    : "The engine gave an answer that is not a tool result.";
+  return { isError: true, content: [{ type: "text", text }] };
+}
+
+function toolNotFound(name: string): CallToolResult {
+  const error = new McpError(ErrorCode.InvalidParams, `Tool ${name} not found`);
+  return { isError: true, content: [{ type: "text", text: error.message }] };
 }
 
 function registerTools(options: {
   server: McpServer;
   engine: RunningEngine;
   events: EngineEvents;
-  tools: z.infer<typeof toolListSchema>["tools"];
+  tools: Tool[];
 }): void {
   const { server, engine, events } = options;
   server.server.setRequestHandler(ListToolsRequestSchema, () => ({
-    tools: options.tools,
+    tools: options.tools.map((tool) => ({
+      ...tool,
+      execution: { taskSupport: "forbidden" as const },
+    })),
   }));
   server.server.setRequestHandler(
     CallToolRequestSchema,
     async (...parameters) => {
       const [request, extra] = parameters;
+      if (!options.tools.some((tool) => tool.name === request.params.name)) {
+        return toolNotFound(request.params.name);
+      }
       const progressToken = request.params._meta?.progressToken;
       const callId = progressToken === undefined ? undefined : randomUUID();
       const stopFollowing =
@@ -116,7 +106,7 @@ function registerTools(options: {
 export async function serveBridge(
   engine: RunningEngine,
 ): Promise<CommandResult> {
-  const listed = toolListSchema.safeParse(
+  const listed = ListToolsResultSchema.safeParse(
     (await engineRequest({ engine, method: "GET", path: "/api/tools" })).body,
   );
   if (!listed.success) {

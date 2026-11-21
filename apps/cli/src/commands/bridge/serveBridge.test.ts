@@ -79,7 +79,9 @@ describe("yumekit mcp with a running engine", () => {
 
     expect(failed.isError).toBe(true);
     expect(missing.isError).toBe(true);
-    expect(JSON.stringify(missing.content)).toContain("tool-not-found");
+    expect(JSON.stringify(missing.content)).toContain(
+      "Tool no_such_tool not found",
+    );
   });
 
   it("sends the progress of a render from the engine as MCP progress", async () => {

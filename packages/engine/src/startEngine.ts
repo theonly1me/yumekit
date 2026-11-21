@@ -3,7 +3,8 @@ import { realpath } from "node:fs/promises";
 import { createServer, type Server } from "node:http";
 import { resolve } from "node:path";
 import { openProject, type ProjectStore } from "@yumekit/project";
-import { removeEngineFile, writeEngineFile } from "./engineFile/engineFile.js";
+import { claimEngineFile } from "./engineFile/claimEngineFile.js";
+import { removeEngineFile } from "./engineFile/engineFile.js";
 import {
   engineUrlOf,
   findRunningEngine,
@@ -41,6 +42,27 @@ function closeServer(server: Server): Promise<void> {
     closed.resolve(undefined);
   });
   return closed.promise;
+}
+
+function noWait(): Promise<void> {
+  return Promise.resolve();
+}
+
+async function closeRunning(options: {
+  server: Server;
+  events: EventHub;
+  parts: EngineParts;
+  stopFollowing: () => Promise<void>;
+}): Promise<void> {
+  const { server, events, parts } = options;
+  events.send({ type: "engine-closing" });
+  const serverClosed = closeServer(server);
+  await parts.harness.close();
+  await options.stopFollowing();
+  await parts.preview.close();
+  await events.close();
+  server.closeAllConnections();
+  await serverClosed;
 }
 
 async function closeParts(parts: EngineParts): Promise<void> {
@@ -98,21 +120,18 @@ export async function startEngine(options: {
     const [request, socket, head] = parameters;
     events.handleUpgrade({ request, socket, head });
   });
-  await writeEngineFile({
+  const claimed = await claimEngineFile({
     projectFolder,
     content: { port, token, processId: process.pid },
   });
+  if (!claimed.ok) {
+    await closeRunning({ server, events, parts, stopFollowing: noWait });
+    return claimed;
+  }
   const stopFollowing = followProjectChanges({ store, events, parts });
   let closing: Promise<void> | undefined;
   const close = async () => {
-    events.send({ type: "engine-closing" });
-    const serverClosed = closeServer(server);
-    await parts.harness.close();
-    await stopFollowing();
-    await parts.preview.close();
-    await events.close();
-    server.closeAllConnections();
-    await serverClosed;
+    await closeRunning({ server, events, parts, stopFollowing });
     await removeEngineFile({ projectFolder, token });
   };
   return {

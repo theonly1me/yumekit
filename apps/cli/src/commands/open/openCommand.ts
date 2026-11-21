@@ -29,20 +29,6 @@ function closeOnSignal(engine: Engine): void {
   process.on("SIGTERM", close);
 }
 
-function withoutExitListenersAddedDuring<Value>(
-  run: () => Promise<Value>,
-): Promise<Value> {
-  const listenersBefore = new Set(process.listeners("SIGTERM"));
-  return run().then((value) => {
-    for (const listener of process.listeners("SIGTERM")) {
-      if (listenersBefore.has(listener)) continue;
-      process.off("SIGTERM", listener);
-      process.stdin.off("end", listener);
-    }
-    return value;
-  });
-}
-
 function showUrl(options: { url: string; withBrowser: boolean }): void {
   if (options.withBrowser) openBrowser(options.url);
 }
@@ -64,13 +50,11 @@ export async function openCommand(args: string[]): Promise<CommandResult> {
     return usageError("--port must be 65535 or less.");
   }
   const withBrowser = values["no-browser"] !== true;
-  const started = await withoutExitListenersAddedDuring(() =>
-    startEngine({
-      projectFolder: resolve(folder),
-      editorFolder: builtEditorFolder,
-      ...(port.value === undefined ? {} : { port: port.value }),
-    }),
-  );
+  const started = await startEngine({
+    projectFolder: resolve(folder),
+    editorFolder: builtEditorFolder,
+    ...(port.value === undefined ? {} : { port: port.value }),
+  });
   if (!started.ok) {
     const { failure } = started;
     switch (failure.kind) {
