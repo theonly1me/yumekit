@@ -1,9 +1,42 @@
 import { describe, expect, it } from "vitest";
+import { z } from "zod";
 import { startHarness } from "../testing/harnessFixture.js";
 import {
   generateVideo,
   sampleWithVideoLimit,
 } from "../testing/videoFixture.js";
+
+const listedServers = z.array(
+  z.object({
+    server: z.string(),
+    models: z.array(
+      z.object({
+        id: z.string(),
+        accepts: z.array(z.string()).optional(),
+        tested: z.boolean().optional(),
+      }),
+    ),
+  }),
+);
+
+describe("list_media_tools models", () => {
+  it("gives what each model accepts and if it was tested with yumekit", async () => {
+    const harness = await startHarness();
+
+    const listed = await harness.call({ name: "list_media_tools" });
+
+    const servers = listedServers.parse(listed.data["servers"]);
+    const sampleVideo = servers
+      .find((entry) => entry.server === "sample")
+      ?.models.find((model) => model.id === "sample-video");
+
+    expect(sampleVideo).toEqual({
+      id: "sample-video",
+      accepts: ["first_frame", "last_frame", "reference_images"],
+      tested: true,
+    });
+  });
+});
 
 describe("list_media_tools generated video", () => {
   it("gives the default limit and 0 used seconds in a new project", async () => {
