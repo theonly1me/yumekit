@@ -17,13 +17,15 @@ export interface TextUnits {
   caption: number;
 }
 
-export type Backdrop = "flat" | "glow" | "grid" | "grain";
+export const backdropKinds = ["flat", "glow", "grid", "grain"] as const;
+
+export type BackdropKind = (typeof backdropKinds)[number];
 
 export interface StylePack {
   id: LookId;
   name: string;
   label: string;
-  backdrop: Backdrop;
+  backdrop: BackdropKind;
   cornerUnits: number;
   colors: {
     background: string;

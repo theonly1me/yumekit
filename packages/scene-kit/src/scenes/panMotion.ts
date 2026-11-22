@@ -6,6 +6,7 @@ export type PanDirection = (typeof panDirections)[number];
 const panScale = 1.12;
 const panShiftPercent = 5;
 const zoomScale = 1.15;
+const panCurve = easings.cubicBezier({ x1: 0.3, y1: 0.15, x2: 0.7, y2: 0.85 });
 
 interface PanPose {
   scale: number;
@@ -53,7 +54,7 @@ export function panTransform(options: {
       endFrame: Math.max(1, options.durationFrames - 1),
       from: pick(start),
       to: pick(end),
-      easing: easings.easeInOut,
+      easing: panCurve,
     });
   const shiftX = between((pose) => pose.shiftXPercent);
   const shiftY = between((pose) => pose.shiftYPercent);

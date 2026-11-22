@@ -4,6 +4,7 @@ import {
   type SceneModule,
 } from "@yumekit/scene";
 import type { ReactNode } from "react";
+import { Backdrop } from "../backdrops/Backdrop.js";
 import { loadStylePackFonts } from "../stylePacks/loadStylePackFonts.js";
 import { StylePackContext } from "../stylePacks/StylePackContext.js";
 import { fontFamilyOf, type StylePack } from "../stylePacks/stylePack.js";
@@ -37,6 +38,9 @@ export function defineKitScene(options: {
           fontWeight: stylePack.fonts.body.weight,
         }}
       >
+        {definition.paintsBackground ? (
+          <Backdrop stylePack={stylePack} seed={JSON.stringify(props)} />
+        ) : null}
         <Component props={props} />
       </div>
     </StylePackContext>

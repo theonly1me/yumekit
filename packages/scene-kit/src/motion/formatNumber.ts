@@ -10,7 +10,7 @@ export function fractionDigitsOf(value: number): number {
   return largestFractionDigits;
 }
 
-export function formatValue(options: {
+export function formatNumber(options: {
   value: number;
   fractionDigits: number;
   prefix: string | undefined;

@@ -9,7 +9,8 @@ const headingGapUnits = 4.5;
 
 export function HeadedContent(props: {
   heading: string | undefined;
-  headingStyle: CSSProperties;
+  headingContent: ReactNode;
+  boxStyle: CSSProperties;
   contentStyle: CSSProperties;
   children: ReactNode;
 }): ReactNode {
@@ -26,15 +27,14 @@ export function HeadedContent(props: {
           ...displayTextStyle(stylePack),
           fontSize: sizes.text("heading"),
           lineHeight: 1.1,
-          ...props.headingStyle,
         }}
       >
-        {props.heading}
+        {props.headingContent}
       </h2>
     );
   return (
     <FitBox
-      {...centeredContentBox({ stylePack, sizes })}
+      {...centeredContentBox({ stylePack, sizes, boxStyle: props.boxStyle })}
       contentStyle={
         isWide
           ? {
