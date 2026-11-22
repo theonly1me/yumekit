@@ -1,0 +1,53 @@
+.sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  background: var(--ground);
+  overflow-y: auto;
+  padding: 72px var(--gutter) 96px;
+}
+
+.sheet-content {
+  display: grid;
+  justify-items: center;
+}
+
+.sheet-close {
+  position: fixed;
+  top: 14px;
+  right: 20px;
+  z-index: 6;
+  background: var(--ground);
+}
+
+.sheet-body {
+  width: min(600px, 100%);
+  display: grid;
+  gap: 30px;
+}
+
+.sheet-body.wide {
+  width: min(940px, 100%);
+}
+
+.sheet-body h2,
+.state h1 {
+  font-size: var(--step-3);
+  font-weight: 500;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+}
+
+.sheet-body h2 + .lead {
+  margin-top: -14px;
+}
+
+.start-action {
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+}
+
+body:has(.sheet) {
+  overflow: hidden;
+}

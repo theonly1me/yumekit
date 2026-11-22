@@ -87,15 +87,17 @@ export async function sceneClipsOf(options: {
 }
 
 export async function openTools(page: Page): Promise<void> {
-  await page.getByRole("button", { name: "Tools", exact: true }).click();
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  await page.getByRole("dialog", { name: "Settings" }).waitFor();
 }
 
 export async function openMakeClip(page: Page): Promise<void> {
-  await page.getByRole("button", { name: "Scene", exact: true }).click();
+  await page.locator(".card").first().click();
   await page
-    .getByRole("button", { name: "Make a clip for this scene" })
+    .getByRole("group", { name: /^Actions for scene/ })
+    .getByRole("button", { name: "Make a real video clip" })
     .click();
-  await page.getByRole("dialog", { name: "Make a clip" }).waitFor();
+  await page.getByRole("dialog", { name: "Make a real video clip" }).waitFor();
 }
 
 export async function generateStill(engine: RunningEngine): Promise<void> {

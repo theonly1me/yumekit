@@ -61,7 +61,7 @@ export function KitForm(props: {
   return (
     <form
       className="kit-form"
-      aria-label="Props of this scene"
+      aria-label="Fields of this scene"
       onSubmit={(event) => {
         event.preventDefault();
         draft.flush();

@@ -23,7 +23,10 @@ export const permittedImports: Record<string, Permission[]> = {
   "harness-mcp": [project, render, tools, sceneKitSchemas],
   engine: [project, render, tools, harnessMcp, sceneKitSchemas],
   "apps/cli": [project, render, tools, harnessMcp, engine],
-  "apps/editor": [{ importName: "@yumekit/project/scenes-row" }],
+  "apps/editor": [
+    { importName: "@yumekit/project/scenes-row" },
+    { importName: "@yumekit/project/platforms" },
+  ],
   "tools/*": [],
 };
 

@@ -3,7 +3,11 @@ import {
   buildKitSceneProject,
   storedPropsOf,
 } from "../testing/kitSceneProject.js";
-import { closeBrowser, openEditor } from "../testing/editorPage.js";
+import {
+  closeBrowser,
+  openEditor,
+  openSceneTab,
+} from "../testing/editorPage.js";
 import { runEngine, type RunningEngine } from "../testing/runEngine.js";
 
 let engine: RunningEngine | undefined;
@@ -15,8 +19,8 @@ function runningEngine(): RunningEngine {
 
 async function openScene(title: string) {
   const editor = await openEditor(runningEngine().url);
-  await editor.page.getByRole("button", { name: new RegExp(title) }).click();
-  const form = editor.page.getByRole("form", { name: "Props of this scene" });
+  await openSceneTab({ page: editor.page, title });
+  const form = editor.page.getByRole("form", { name: "Fields of this scene" });
   await form.waitFor();
   return { ...editor, form };
 }

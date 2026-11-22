@@ -5,6 +5,7 @@ const outputSchema = z.object({
   label: z.string(),
   widthPixels: z.number(),
   heightPixels: z.number(),
+  platforms: z.array(z.string()).optional(),
 });
 
 const propsSchema = z.record(z.string(), z.json());

@@ -1,5 +1,6 @@
 import { useMemo } from "react";
-import type { SceneClip, Snapshot } from "../engine/snapshot.js";
+import type { Snapshot } from "../engine/snapshot.js";
+import { platformTabsOf } from "../platforms/platformTabFacts.js";
 import {
   audibleClipsOf,
   clipAt,
@@ -10,14 +11,17 @@ import {
 
 export function useEditorFacts(options: {
   snapshot: Snapshot;
-  chosenOutputId: string | undefined;
+  tabKey: string | undefined;
   wantedFrame: number;
   pickedClipId: string | undefined;
 }) {
-  const { snapshot, chosenOutputId, wantedFrame, pickedClipId } = options;
-  const { outputs } = snapshot.project;
-  const output =
-    outputs.find((candidate) => candidate.id === chosenOutputId) ?? outputs[0];
+  const { snapshot, tabKey, wantedFrame, pickedClipId } = options;
+  const tabs = useMemo(
+    () => platformTabsOf(snapshot.project.outputs),
+    [snapshot.project.outputs],
+  );
+  const tab = tabs.find((candidate) => candidate.key === tabKey) ?? tabs[0];
+  const output = tab?.output;
   const outputId = output?.id ?? "";
 
   const timelineFacts = useMemo(() => {
@@ -30,39 +34,28 @@ export function useEditorFacts(options: {
       sceneClips: timeline.tracks.flatMap((track) =>
         track.kind === "scene" ? track.clips : [],
       ),
-      allClips: timeline.tracks.flatMap((track) =>
-        track.clips.map(({ id, startFrame, durationFrames }) => ({
-          id,
-          startFrame,
-          durationFrames,
-        })),
-      ),
     };
   }, [snapshot, outputId]);
 
-  const { lengthFrames, mainClips, sceneClips, allClips } = timelineFacts;
+  const { lengthFrames, mainClips, sceneClips } = timelineFacts;
   const frame = Math.min(wantedFrame, Math.max(0, lengthFrames - 1));
-  const picked = allClips.find((clip) => clip.id === pickedClipId);
-  const isPickedVisible =
-    picked !== undefined &&
-    frame >= picked.startFrame &&
-    frame < picked.startFrame + picked.durationFrames;
-  const mainClip = clipAt({ clips: mainClips, frame });
-  const selectedClipId = isPickedVisible ? picked.id : mainClip?.id;
-  const pickedSceneClip: SceneClip | undefined = isPickedVisible
-    ? sceneClips.find((clip) => clip.id === picked.id)
-    : undefined;
-  const sceneClip = pickedSceneClip ?? mainClip;
-  const scene = snapshot.scenes.find(
-    (candidate) => candidate.id === sceneClip?.sceneId,
+  const shownClipId = clipAt({ clips: mainClips, frame })?.id;
+  const pickedClip = sceneClips.find((clip) => clip.id === pickedClipId);
+  const pickedIndex = mainClips.findIndex((clip) => clip.id === pickedClipId);
+  const pickedScene = snapshot.scenes.find(
+    (candidate) => candidate.id === pickedClip?.sceneId,
   );
 
   return {
     ...timelineFacts,
+    tabs,
+    tab,
     output,
     frame,
-    selectedClipId,
-    sceneClip,
-    scene,
+    shownClipId,
+    selectedClipId: pickedClip?.id ?? shownClipId,
+    pickedClip,
+    pickedScene,
+    pickedNumber: pickedIndex < 0 ? undefined : pickedIndex + 1,
   };
 }

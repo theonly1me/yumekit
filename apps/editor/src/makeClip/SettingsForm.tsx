@@ -19,7 +19,7 @@ function SettingField(props: {
         <span className="field-label" id={id}>
           {setting.label}
         </span>
-        <div className="switch segments" role="group" aria-labelledby={id}>
+        <div className="segments" role="group" aria-labelledby={id}>
           {setting.choices.map((choice) => (
             <button
               key={choice}

@@ -1,6 +1,6 @@
-import type { FailedAt } from "./renderJobs.js";
+import type { FailedAt } from "./exportJobs.js";
 
-export function FailedRender(props: {
+export function FailedExport(props: {
   message: string;
   failedAt: FailedAt | undefined;
   sceneTitle: string | undefined;
@@ -8,16 +8,16 @@ export function FailedRender(props: {
 }) {
   const { failedAt } = props;
   return (
-    <div className="render-failure">
+    <div className="export-failure">
       <p role="alert">{props.message}</p>
       {failedAt === undefined ? undefined : (
         <>
           <p className="fact">
             Ask your agent to correct the scene{" "}
             {props.sceneTitle ?? failedAt.sceneId}, or change it in the Scene
-            panel.
+            tab.
           </p>
-          <div className="render-actions">
+          <div className="export-actions">
             <button
               type="button"
               onClick={() => {

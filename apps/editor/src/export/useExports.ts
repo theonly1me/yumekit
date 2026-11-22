@@ -1,18 +1,18 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import type { EngineClient } from "../engine/engineClient.js";
 import {
-  renderFailureSchema,
-  renderResultSchema,
+  exportFailureSchema,
+  exportResultSchema,
   fileNameOf,
+  type ExportJob,
   type JobState,
-  type RenderJob,
-} from "./renderJobs.js";
+} from "./exportJobs.js";
 
-export type Renders = ReturnType<typeof useRenders>;
+export type Exports = ReturnType<typeof useExports>;
 
-async function renderOne(options: {
+async function exportOne(options: {
   client: EngineClient;
-  job: RenderJob;
+  job: ExportJob;
 }): Promise<JobState> {
   const reply = await options.client.callTool({
     name: "render_video",
@@ -27,7 +27,7 @@ async function renderOne(options: {
     return { kind: "failed", message, failedAt: undefined };
   }
   if (reply.value.isError) {
-    const failure = renderFailureSchema.safeParse(reply.value.data);
+    const failure = exportFailureSchema.safeParse(reply.value.data);
     return failure.success
       ? {
           kind: "failed",
@@ -39,20 +39,23 @@ async function renderOne(options: {
         }
       : { kind: "failed", message: reply.value.text, failedAt: undefined };
   }
-  const result = renderResultSchema.safeParse(reply.value.data);
+  const result = exportResultSchema.safeParse(reply.value.data);
   if (!result.success) {
     return { kind: "failed", message: reply.value.text, failedAt: undefined };
   }
+  const files = result.data.files ?? [{ file: result.data.file }];
   return {
     kind: "done",
-    file: result.data.file,
-    fileName: fileNameOf(result.data.file),
-    durationSeconds: result.data.duration_seconds,
+    files: files.map((entry) => ({
+      file: entry.file,
+      fileName: fileNameOf(entry.file),
+      platformId: entry.platform_id,
+    })),
   };
 }
 
-export function useRenders(client: EngineClient) {
-  const [jobs, setJobs] = useState<RenderJob[]>([]);
+export function useExports(client: EngineClient) {
+  const [jobs, setJobs] = useState<ExportJob[]>([]);
   const [isRunning, setRunning] = useState(false);
   const isRunningNow = useRef(false);
 
@@ -72,7 +75,7 @@ export function useRenders(client: EngineClient) {
       if (isRunningNow.current || outputIds.length === 0) return;
       isRunningNow.current = true;
       setRunning(true);
-      const queued: RenderJob[] = outputIds.map((outputId) => ({
+      const queued: ExportJob[] = outputIds.map((outputId) => ({
         callId: crypto.randomUUID(),
         outputId,
         state: { kind: "waiting" },
@@ -82,11 +85,11 @@ export function useRenders(client: EngineClient) {
         if (event.type !== "call-progress") return;
         setJobs((current) =>
           current.map((job) =>
-            job.callId === event.callId && job.state.kind === "rendering"
+            job.callId === event.callId && job.state.kind === "exporting"
               ? {
                   ...job,
                   state: {
-                    kind: "rendering",
+                    kind: "exporting",
                     framesDone: event.done,
                     frameCount: event.total,
                   },
@@ -99,11 +102,11 @@ export function useRenders(client: EngineClient) {
         for (const job of queued) {
           setState({
             callId: job.callId,
-            state: { kind: "rendering", framesDone: 0, frameCount: undefined },
+            state: { kind: "exporting", framesDone: 0, frameCount: undefined },
           });
           setState({
             callId: job.callId,
-            state: await renderOne({ client, job }),
+            state: await exportOne({ client, job }),
           });
         }
       };

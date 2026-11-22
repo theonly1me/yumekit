@@ -158,7 +158,7 @@ export function ClipAction(props: {
       </button>
       {props.canMake ? undefined : (
         <p className="fact">
-          Write what happens in the clip, and pick a first frame.
+          Write what happens in the clip, and pick a first picture.
         </p>
       )}
       {isMaking ? (

@@ -84,7 +84,7 @@ describe("the event connection of the editor", () => {
       .poll(() => row.textContent())
       .toContain("Ready, key saved here");
     await expect
-      .poll(() => page.getByRole("button", { name: "Square" }).count())
+      .poll(() => page.locator('[role="tab"]', { hasText: "Square" }).count())
       .toBe(1);
     expect(openSockets.size).toBe(1);
     await context.close();

@@ -1,5 +1,9 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { closeBrowser, openEditor } from "../testing/editorPage.js";
+import {
+  closeBrowser,
+  openEditor,
+  openSceneTab,
+} from "../testing/editorPage.js";
 import { runEngine, type RunningEngine } from "../testing/runEngine.js";
 import {
   buildKitSceneProject,
@@ -15,8 +19,8 @@ function runningEngine(): RunningEngine {
 
 async function openScene(title: string) {
   const editor = await openEditor(runningEngine().url);
-  await editor.page.getByRole("button", { name: new RegExp(title) }).click();
-  const form = editor.page.getByRole("form", { name: "Props of this scene" });
+  await openSceneTab({ page: editor.page, title });
+  const form = editor.page.getByRole("form", { name: "Fields of this scene" });
   await form.waitFor();
   return { ...editor, form };
 }
@@ -38,7 +42,7 @@ describe("the scene panel", () => {
   it("changes the preview after a change in the form", async () => {
     const editor = await openScene("Opening title");
     const preview = editor.page.frameLocator(
-      'iframe[title="Preview of the current frame"]',
+      'iframe[title="Preview of the video"]',
     );
     await expect.poll(() => preview.getByText("First heading").count()).toBe(1);
 

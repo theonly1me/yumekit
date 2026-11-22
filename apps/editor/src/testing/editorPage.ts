@@ -27,14 +27,34 @@ export async function openEditor(url: string): Promise<EditorPage> {
   const page = await context.newPage();
   await page.goto(url);
   const shownFrame = page
-    .frameLocator('iframe[title="Preview of the current frame"]')
+    .frameLocator('iframe[title="Preview of the video"]')
     .locator("[data-output-frame]");
   return {
     page,
     previewFrame: async () =>
       Number(await shownFrame.getAttribute("data-output-frame")),
     scrubberFrame: async () =>
-      Number(await page.getByRole("slider", { name: "Frame" }).inputValue()),
+      Number(
+        await page
+          .getByRole("slider", { name: "Position in the video" })
+          .inputValue(),
+      ),
     close: () => context.close(),
   };
+}
+
+export async function openSceneTab(options: {
+  page: Page;
+  title: string;
+}): Promise<void> {
+  const { page, title } = options;
+  await page.locator(".card", { hasText: title }).first().click();
+  await page.getByRole("tab", { name: /^Scene/ }).click();
+  await page.waitForFunction(
+    (wanted) =>
+      [...document.querySelectorAll(".scene-name")].some(
+        (field) => field instanceof HTMLInputElement && field.value === wanted,
+      ),
+    title,
+  );
 }

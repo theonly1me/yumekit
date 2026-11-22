@@ -162,12 +162,11 @@ describe("the Tools tab", () => {
     await editor.close();
   });
 
-  it("shows the stills of the scenes row while the Tools tab is open", async () => {
+  it("shows a still on each scene card", async () => {
     await buildCounterProject(runningEngine());
     const editor = await openEditor(runningEngine().url);
-    await openTools(editor.page);
 
-    const stills = editor.page.locator(".panel-frame img");
+    const stills = editor.page.locator(".thumb img");
 
     await expect.poll(() => stills.count()).toBe(2);
     expect(

@@ -1,27 +1,36 @@
 import type { ReactNode } from "react";
 
-export type SideTab = "agent" | "scene" | "tools";
-
-const tabs: { id: SideTab; label: string }[] = [
-  { id: "agent", label: "Agent" },
-  { id: "scene", label: "Scene" },
-  { id: "tools", label: "Tools" },
-];
+export type SideTab = "chat" | "scene";
 
 export function SidePanel(props: {
   tab: SideTab;
+  sceneLabel: string | undefined;
   onTab: (tab: SideTab) => void;
   children: ReactNode;
 }) {
+  const shown: SideTab =
+    props.tab === "scene" && props.sceneLabel !== undefined ? "scene" : "chat";
+  const tabs: { id: SideTab; label: string; isDisabled: boolean }[] = [
+    { id: "chat", label: "Chat", isDisabled: false },
+    {
+      id: "scene",
+      label: props.sceneLabel ?? "Scene",
+      isDisabled: props.sceneLabel === undefined,
+    },
+  ];
   return (
-    <aside className="side" aria-label="Agent, scene, and tools">
-      <div className="side-tabs">
+    <aside className="side" aria-label="Chat and the picked scene">
+      <div className="side-tabs" role="tablist" aria-label="Side panel">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             type="button"
+            role="tab"
+            id={`side-tab-${tab.id}`}
             className="tab"
-            aria-pressed={tab.id === props.tab}
+            aria-selected={tab.id === shown}
+            aria-controls="side-body"
+            disabled={tab.isDisabled}
             onClick={() => {
               props.onTab(tab.id);
             }}
@@ -30,7 +39,13 @@ export function SidePanel(props: {
           </button>
         ))}
       </div>
-      <div className="side-pane" data-pane={props.tab}>
+      <div
+        className="side-body"
+        id="side-body"
+        role="tabpanel"
+        aria-labelledby={`side-tab-${shown}`}
+        data-tab={shown}
+      >
         {props.children}
       </div>
     </aside>

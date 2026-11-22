@@ -1,7 +1,6 @@
 import { useState } from "react";
 import type { EngineClient } from "../engine/engineClient.js";
 import type { Output, Scene, SceneClip, Snapshot } from "../engine/snapshot.js";
-import { ToolsPane } from "../tools/ToolsPane.js";
 import { MakeClipEntry } from "./MakeClipEntry.js";
 import { MakeClipSheet } from "./MakeClipSheet.js";
 
@@ -10,37 +9,25 @@ export function useClipTools(options: {
   snapshot: Snapshot;
   output: Output | undefined;
   onOpen: () => void;
-  onToolsTab: () => void;
+  onAddKey: (serverId: string) => void;
   onPlaced: (clip: { id: string; startFrame: number }) => void;
 }) {
   const { client, snapshot, output } = options;
   const [clipFor, setClipFor] = useState<SceneClip>();
-  const [toolsServerId, setToolsServerId] = useState<string>();
 
-  const toolsPane = (
-    <ToolsPane
-      client={client}
-      openServerId={toolsServerId}
-      onOpenServer={setToolsServerId}
+  const open = (clip: SceneClip) => {
+    options.onOpen();
+    setClipFor(clip);
+  };
+
+  const entryFor = (target: { scene: Scene; clip: SceneClip }) => (
+    <MakeClipEntry
+      scene={target.scene}
+      onOpen={() => {
+        open(target.clip);
+      }}
     />
   );
-
-  const entryFor = ({
-    scene,
-    clip,
-  }: {
-    scene: Scene | undefined;
-    clip: SceneClip | undefined;
-  }) =>
-    scene === undefined || clip === undefined ? undefined : (
-      <MakeClipEntry
-        scene={scene}
-        onOpen={() => {
-          options.onOpen();
-          setClipFor(clip);
-        }}
-      />
-    );
 
   const sheet =
     clipFor === undefined || output === undefined ? undefined : (
@@ -54,8 +41,7 @@ export function useClipTools(options: {
         }}
         onAddKey={(serverId) => {
           setClipFor(undefined);
-          setToolsServerId(serverId);
-          options.onToolsTab();
+          options.onAddKey(serverId);
         }}
         onPlaced={(made) => {
           setClipFor(undefined);
@@ -67,5 +53,5 @@ export function useClipTools(options: {
       />
     );
 
-  return { toolsPane, entryFor, sheet, isOpen: sheet !== undefined };
+  return { open, entryFor, sheet, isOpen: sheet !== undefined };
 }

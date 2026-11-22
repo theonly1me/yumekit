@@ -69,7 +69,7 @@ export function MakeStill(props: {
         />
       </div>
       {choices.length > 1 ? (
-        <div className="switch" role="group" aria-label="Image model">
+        <div className="segments" role="group" aria-label="Image model">
           {choices.map((candidate) => (
             <button
               key={candidate.key}

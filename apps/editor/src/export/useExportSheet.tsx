@@ -1,9 +1,9 @@
 import { useState } from "react";
 import type { EngineClient } from "../engine/engineClient.js";
 import type { Snapshot } from "../engine/snapshot.js";
-import { clipOfTarget, renderButtonLabel } from "./renderJobs.js";
-import { RenderSheet } from "./RenderSheet.js";
-import { useRenders } from "./useRenders.js";
+import { clipOfTarget, exportButtonLabel } from "./exportJobs.js";
+import { ExportSheet } from "./ExportSheet.js";
+import { useExports } from "./useExports.js";
 
 export interface SceneToShow {
   outputId: string;
@@ -11,7 +11,7 @@ export interface SceneToShow {
   frame: number;
 }
 
-export function useRenderSheet(options: {
+export function useExportSheet(options: {
   client: EngineClient;
   snapshot: Snapshot;
   projectFolder: string;
@@ -19,13 +19,13 @@ export function useRenderSheet(options: {
 }) {
   const { client, snapshot } = options;
   const [isOpen, setOpen] = useState(false);
-  const renders = useRenders(client);
+  const exports = useExports(client);
   const sheet = isOpen ? (
-    <RenderSheet
+    <ExportSheet
       client={client}
       snapshot={snapshot}
       projectFolder={options.projectFolder}
-      renders={renders}
+      exports={exports}
       onOpenScene={(target) => {
         const clip = clipOfTarget({ snapshot, target });
         setOpen(false);
@@ -45,7 +45,7 @@ export function useRenderSheet(options: {
     open: () => {
       setOpen(true);
     },
-    label: renderButtonLabel(renders),
+    label: exportButtonLabel(exports),
     sheet,
   };
 }

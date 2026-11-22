@@ -1,0 +1,34 @@
+.setting-group {
+  display: grid;
+  gap: 10px;
+}
+
+.setting-group h3 {
+  font-size: var(--step-1);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.setting-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px 20px;
+  padding: 13px 0;
+  border-top: 1px solid var(--line);
+  font-size: var(--step-0);
+}
+
+.setting-row em {
+  display: block;
+  font-style: normal;
+  font-size: var(--step--1);
+  color: var(--muted);
+  max-width: 52ch;
+}
+
+.limit-value {
+  font-size: var(--step--1);
+  font-variant-numeric: tabular-nums;
+}

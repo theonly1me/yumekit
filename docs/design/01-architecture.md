@@ -59,7 +59,7 @@ A package may import only the packages in its row. CI must fail on any other imp
 | `harness-mcp` | `project`, `render`, `tools`, and `scene-kit/schemas`                |
 | `engine`      | `project`, `render`, `tools`, `harness-mcp`, and `scene-kit/schemas` |
 | `apps/cli`    | `project`, `render`, `tools`, `harness-mcp`, `engine`                |
-| `apps/editor` | only `project/scenes-row` at run time                                |
+| `apps/editor` | only `project/scenes-row` and `project/platforms` at run time        |
 | `tools/*`     | nothing from yumekit                                                 |
 
 Two more rules:
