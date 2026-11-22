@@ -1,0 +1,57 @@
+.lower-rows {
+  display: grid;
+  gap: 16px;
+}
+
+.sound-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.sound-row {
+  display: grid;
+  grid-template-columns: 84px minmax(0, 1fr) auto auto;
+  gap: 8px 16px;
+  align-items: center;
+  padding: 9px 0;
+  border-top: 1px solid var(--line);
+  font-size: var(--step--1);
+}
+
+.sound-name {
+  color: var(--muted);
+}
+
+.sound-row[data-on="false"] .sound-choice {
+  color: var(--faint);
+}
+
+.sound-row > button {
+  padding: 4px 12px;
+}
+
+.row-choices {
+  grid-column: 2 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-bottom: 6px;
+}
+
+.row-choices button[aria-pressed="true"] {
+  background: var(--raised);
+  border-color: var(--text);
+}
+
+.describe {
+  display: flex;
+  gap: 8px;
+  flex: 1 1 240px;
+  align-items: end;
+}
+
+.describe input {
+  font-size: var(--step--1);
+}

@@ -1,0 +1,146 @@
+.scenes-row {
+  display: grid;
+  gap: 14px;
+}
+
+.cards {
+  list-style: none;
+  margin: 0;
+  padding: 4px 2px 6px;
+  display: flex;
+  overflow-x: auto;
+}
+
+.card-slot {
+  display: flex;
+  align-items: flex-start;
+  flex: 0 0 auto;
+}
+
+button.card {
+  width: 168px;
+  display: grid;
+  gap: 4px;
+  text-align: left;
+  border: 0;
+  border-radius: 4px;
+  padding: 0;
+  font-weight: 400;
+}
+
+.thumb {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 16 / 9;
+  border-radius: 3px;
+  padding: 10px;
+  color: #15140f;
+  box-shadow: 0 0 0 1px var(--line);
+  margin-bottom: 4px;
+}
+
+.thumb[data-dark="true"] {
+  color: #f6f3ec;
+}
+
+.thumb i {
+  font-style: normal;
+  white-space: normal;
+  font-size: 0.625rem;
+  font-weight: 500;
+  line-height: 1.15;
+  text-align: center;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.card-title {
+  font-size: var(--step--1);
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-facts {
+  font-size: var(--step--2);
+  color: var(--faint);
+}
+
+.card[data-shown="true"] .card-title {
+  color: var(--text);
+}
+
+.card[aria-pressed="true"] .thumb {
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+.card[aria-pressed="true"] .card-title {
+  color: var(--text);
+  font-weight: 500;
+}
+
+button.plus {
+  width: 22px;
+  height: 22px;
+  margin: 36px 7px 0;
+  padding: 0;
+  line-height: 1;
+  color: var(--muted);
+  border-color: var(--line);
+  flex: 0 0 auto;
+}
+
+button.plus:hover {
+  color: var(--text);
+}
+
+.inline-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 4px 10px;
+  align-items: end;
+}
+
+.inline-form label {
+  grid-column: 1 / -1;
+}
+
+.scene-hint {
+  padding: 6px 0;
+}
+
+.scene-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.scene-actions-name {
+  font-size: var(--step--1);
+  font-weight: 500;
+  margin-right: 8px;
+}
+
+.scene-actions .stepper {
+  padding: 0 6px;
+}
+
+@media (max-width: 560px) {
+  .sound-row {
+    grid-template-columns: 64px minmax(0, 1fr) auto auto;
+    gap: 8px 10px;
+  }
+
+  .track {
+    grid-template-columns: 56px minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .inline-form {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+}

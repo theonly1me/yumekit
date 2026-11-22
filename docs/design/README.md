@@ -18,6 +18,8 @@ These documents are the design of yumekit. Code follows them. If code and a docu
 | [10-providers-models-and-keys.md](10-providers-models-and-keys.md) | How a server describes its models, and where an API key lives                 |
 | [11-editor-m2.md](11-editor-m2.md)                                 | How the engine serves the editor, and the screens of the first version        |
 
+The visual reference for the editor is the prototype in [apps/prototype](../../apps/prototype).
+
 ## Product in one paragraph
 
 yumekit is an open source harness for content creation. A person gives an idea. An agent writes the script, the scenes, and the timeline. Media tools make the images and the audio. yumekit renders the result to video and still images for any platform. The person can edit each part by prompt or by hand. All of it runs on the machine of the user, with the AI tools of the user.
