@@ -26,27 +26,35 @@ function createHarnessServer(options: {
 
 ### Read
 
-| Tool               | Input       | Result                                                                                                                          |
-| ------------------ | ----------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `get_project`      | none        | Name, frame rate, outputs, script, bible, a list of scenes (id, title, kind), the length of each timeline, and the revision     |
-| `get_scene`        | `scene_id`  | The scene record, and the code of a module scene                                                                                |
-| `get_timeline`     | `output_id` | All tracks and clips of the output                                                                                              |
-| `list_assets`      | `kind?`     | Each asset record. Word timings are not included                                                                                |
-| `get_asset_words`  | `asset_id`  | The word timings of a speech asset, from `readAssetWords`                                                                       |
-| `list_kit_scenes`  | none        | Each kit scene: name, purpose, and the schema of its props                                                                      |
-| `get_scene_guide`  | none        | The reference for custom scene code: the contract, the hooks, the animation functions, the rules, and two examples              |
-| `list_media_tools` | none        | Each connected media server, its capabilities, its description, and the state of each key, and `generated_video` of document 09 |
+| Tool               | Input       | Result                                                                                                                                             |
+| ------------------ | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `get_project`      | none        | Name, frame rate, outputs with their `platforms`, script, bible, a list of scenes (id, title, kind), the length of each timeline, and the revision |
+| `get_scene`        | `scene_id`  | The scene record, and the code of a module scene                                                                                                   |
+| `get_timeline`     | `output_id` | All tracks and clips of the output                                                                                                                 |
+| `list_assets`      | `kind?`     | Each asset record. Word timings are not included                                                                                                   |
+| `get_asset_words`  | `asset_id`  | The word timings of a speech asset, from `readAssetWords`                                                                                          |
+| `list_kit_scenes`  | none        | Each kit scene: name, purpose, and the schema of its props                                                                                         |
+| `get_scene_guide`  | none        | The reference for custom scene code: the contract, the hooks, the animation functions, the rules, and two examples                                 |
+| `list_media_tools` | none        | Each connected media server, its capabilities, its description, and the state of each key, and `generated_video` of document 09                    |
 
 ### Write the story
 
-| Tool            | Input                                                                                         | Edit           |
-| --------------- | --------------------------------------------------------------------------------------------- | -------------- |
-| `set_script`    | `script`                                                                                      | `setScript`    |
-| `set_bible`     | `style`, `palette`, `cast`, `voice`                                                           | `setBible`     |
-| `add_output`    | `output_id`, `label`, `width_pixels`, `height_pixels`                                         | `addOutput`    |
-| `remove_output` | `output_id`                                                                                   | `removeOutput` |
-| `put_scene`     | `scene_id`, `title`, `notes?`, then either `kit_component` and `props`, or `code` and `props` | `putScene`     |
-| `remove_scene`  | `scene_id`                                                                                    | `removeScene`  |
+| Tool              | Input                                                                                         | Edit                                                    |
+| ----------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| `set_script`      | `script`                                                                                      | `setScript`                                             |
+| `set_bible`       | `style`, `palette`, `cast`, `voice`                                                           | `setBible`                                              |
+| `add_output`      | `output_id`, `label`, `width_pixels`, `height_pixels`                                         | `addOutput`                                             |
+| `remove_output`   | `output_id`                                                                                   | `removeOutput`                                          |
+| `add_platform`    | `platform_id`                                                                                 | `setOutputPlatforms`, or `addOutput` and `copyTimeline` |
+| `remove_platform` | `platform_id`                                                                                 | `setOutputPlatforms`, or `removeOutput`                 |
+| `put_scene`       | `scene_id`, `title`, `notes?`, then either `kit_component` and `props`, or `code` and `props` | `putScene`                                              |
+| `remove_scene`    | `scene_id`                                                                                    | `removeScene`                                           |
+
+`add_platform` and `remove_platform` follow the section "Platforms" of document 13. Each call is one `applyEdits` call, so it is one undo step. `add_output` is for a custom size. The descriptions of `add_output` and `add_platform` tell an agent this.
+
+- `add_platform` puts the platform on the output that has its size. With no such output, it adds the output of the catalog, with the id and the size of the platform, and copies the timeline of the output with the nearest ratio of width to height. The distance is the difference of the two ratios. On a tie, the first output in project order wins.
+- `add_platform` changes nothing for a platform that an output has. It returns that `output_id` and the current revision.
+- `remove_platform` returns `not-found` when no output has the platform.
 
 Before `put_scene` sends its edit, the harness checks the scene. For a kit scene, it validates the props against the schema from `@yumekit/scene-kit/schemas`. For a module scene, it calls `checkSceneCode` from `@yumekit/render`. If the check fails, the tool returns the compiler message and changes nothing.
 
@@ -105,10 +113,14 @@ The default scale is 0.25. An agent uses these tools after each scene and before
 
 ### Finish
 
-| Tool           | Input                                                 | Result                                                                        |
-| -------------- | ----------------------------------------------------- | ----------------------------------------------------------------------------- |
-| `render_video` | `output_id`, `first_frame?`, `frame_count?`, `scale?` | The path of the MP4 in `renders/`, the frame count, and the length in seconds |
-| `render_still` | `output_id`, `frame`                                  | The path of the PNG in `renders/`                                             |
+| Tool           | Input                                                 | Result                                                                                                                        |
+| -------------- | ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `render_video` | `output_id`, `first_frame?`, `frame_count?`, `scale?` | The path of the MP4 in `renders/` as `file`, `files` with one entry for each file, the frame count, and the length in seconds |
+| `render_still` | `output_id`, `frame`                                  | The path of the PNG in `renders/`                                                                                             |
+
+An output with platforms renders once to `renders/<project name>-<platform id>.mp4` for its first platform in catalog order. Each other platform gets a hard link to that file, or a copy when the link fails. Each entry of `files` has `file` and `platform_id`. `file` is the first file. An output with no platform writes `renders/<output id>.mp4`, and its one entry has no `platform_id`.
+
+The project name in a file name is in lower case. Each run of characters that are not a letter or a digit becomes one hyphen. The name has at most 64 characters, with no hyphen at the start or the end. An empty result becomes `video`.
 
 `render_video` sends MCP progress notifications while it works. In milestone 1 it returns when the file is complete.
 
