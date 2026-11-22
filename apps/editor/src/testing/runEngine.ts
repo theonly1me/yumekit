@@ -31,7 +31,7 @@ const browserCacheFolders: Partial<Record<NodeJS.Platform, string>> = {
   win32: join("AppData", "Local", "ms-playwright"),
 };
 
-function browsersPath(): string {
+export function browsersPath(): string {
   return (
     process.env["PLAYWRIGHT_BROWSERS_PATH"] ??
     join(homedir(), browserCacheFolders[process.platform] ?? "")

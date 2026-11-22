@@ -57,13 +57,17 @@
   gap: 6px;
 }
 
-.making-card .thumb,
-.making-card[data-empty="true"]::before {
-  content: "";
-  display: block;
-  aspect-ratio: 16 / 9;
-  border-radius: 3px;
-  box-shadow: 0 0 0 1px var(--line);
+.making-card .thumb {
+  display: grid;
+  place-items: center;
+  background: var(--surface);
+  margin-bottom: 0;
+}
+
+.thumb-words {
+  padding: 0 6px;
+  text-align: center;
+  color: var(--faint);
 }
 
 .making-action {
@@ -105,8 +109,4 @@
 .making-card {
   min-width: 0;
   grid-template-columns: minmax(0, 1fr);
-}
-
-.making-card[data-empty="true"]::before {
-  width: 100%;
 }
