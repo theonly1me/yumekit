@@ -144,3 +144,53 @@ The builder read each fact below on 2026-11-22, in `aistudio.google.com/docs` (w
 11. `tts-1` and `tts-1-hd` take 9 voices, `alloy` by default, and no `instructions`, as the API reference says. The server rejects another voice and `instructions` before any request. It returns `cost_usd` as an estimate from the number of characters.
 12. OpenAI has no video model in the public API. The video generation guide says that the Sora 2 models and the Videos API shut down on 2026-09-24, with no replacement. So `tools/openai-media` gets no `generate_video`. The OpenAI API has no music model.
 13. `accepts` lists `reference_images` for each picture model that takes reference pictures and for the music models, and `first_frame`, `last_frame`, and `reference_images` for `gemini-omni-1.2-flash`. A voice model has no `accepts`.
+
+## Details of WP45
+
+The builder read each fal model page, its `llms.txt` page, and its schema at `fal.ai/api/openapi/queue/openapi.json?endpoint_id=<id>` on 2026-11-22. The list of current models came from `api.fal.ai/v1/models`.
+
+1. `tools/fal-media` uses the optional fields `accepts` and `tested` of `@yumekit/tools` (WP46 added them). A description without them stays valid. `list_media_tools` passes them on, and its description tells the AI what they mean. `accepts` takes the three values of N1. An audio input of a model (for example `target_audio_url` of MiniMax H3) is not in the convention, so `accepts` does not name it and the server does not send it.
+2. Each model of `tools/fal-media` has `tested: false`, Seedance 2.5 included, because no call with a real key ran yet (the README follow-up). Each model of the sample server has `tested: true`, because the tests call it.
+3. The sample video model accepts each of the three inputs, and the sample picture model accepts reference pictures. The sample server ignores them, so the editor can show each control with the free server.
+4. A model record names its fal model pages in `sources`. The test of check 5 compares each request body with a recorded copy of the schema of its endpoint in `tools/fal-media/src/testing/recordedSchemas`.
+
+Video models (`generate_video`):
+
+| Model                  | Id                              | First, last, reference      | Sound                  | Price for one second                                  |
+| ---------------------- | ------------------------------- | --------------------------- | ---------------------- | ----------------------------------------------------- |
+| Seedance 2.5           | `bytedance/seedance-2.5/us`     | Yes, yes, no                | Switch                 | 0.2205 (480p) to 1.840 (4k)                           |
+| Kling 4                | `kling/v4`                      | Yes, yes, no                | No setting on the page | 0.157 (720p), 0.235 (1080p), 0.549 (4k)               |
+| Gemini Omni Flash 1.2  | `google/gemini-omni-flash/v1.2` | Yes, yes (up to 10 s), 10   | Always                 | 0.0273 (360p) to 0.2457 (4k), and input tokens        |
+| MiniMax H3             | `minimax/h3`                    | Yes, yes, 9                 | Always                 | 0.05 (480P), 0.06 (768P), 0.13 (2K), 0.16 (4K)        |
+| Wan 3.0                | `alibaba/wan-3.0`               | Yes, yes, no                | Switch (`audio`)       | 0.05 (480p), 0.10 (720p), 0.20 (1080p)                |
+| LTX 2.5 Pro            | `lightricks/ltx-2.5/pro`        | Yes, yes, no                | Switch                 | 0.12 (720p), 0.17 (1080p). Length 6, 8, or 10         |
+| PixVerse 6             | `fal-ai/pixverse/v6`            | Yes, no, no                 | Switch, off on fal     | 0.025 to 0.115, by resolution and sound               |
+| FLUX 3 Video           | `blackforestlabs/flux-3/video`  | Yes, yes (own endpoint), no | Switch                 | 0.17 (720p), 0.29 (1080p), 0.32 (1440p), 0.47 (2160p) |
+| Grok Imagine Video 1.5 | `xai/grok-imagine-video/v1.5`   | Yes, yes, no                | Switch                 | 0.08 (480p), 0.14 (720p), 0.25 (1080p)                |
+
+5. A model with "Always" rejects `with_audio: false`. Kling 4 has no sound field on its page, so it rejects each `with_audio`. A model with a switch sends `with_audio`, true by default, also for PixVerse 6, which is off by default on fal.
+6. A request with reference pictures goes to the reference endpoint. The server rejects reference pictures together with a first frame, because no endpoint takes both.
+7. The reference endpoints of Seedance 2.5 and Grok Imagine Video 1.5 are a follow-up. The extra fees for reference pictures and input tokens are not in the estimate.
+8. `check_key` still asks for the price of the Seedance text endpoint only.
+
+Picture models (`generate_image`):
+
+| Model               | Id                             | Reference pictures | Settings               | Price for one picture                     |
+| ------------------- | ------------------------------ | ------------------ | ---------------------- | ----------------------------------------- |
+| Seedream 5.5        | `bytedance/seedream/v5.5`      | Up to 10           | Transparent background | 0.03, and 0.012 for each reference        |
+| Nano Banana 2.1     | `google/nano-banana-2.1`       | Up to 10           | `resolution` 1K to 4K  | None. The page gives token prices only    |
+| FLUX 3              | `blackforestlabs/flux-3/image` | Up to 10           | `resolution` 1k to 4k  | 0.048 at 1k. Other sizes not given        |
+| GPT Image 2.6 Flare | `openai/gpt-image-2.6/flare`   | Up to 16           | `quality`, transparent | None. The page gives token prices only    |
+| Ideogram 4.6        | `ideogram/v4.6`                | No                 | `quality`, transparent | 0.008, 0.03, 0.06, or 0.10 by quality     |
+| Qwen Image 3        | `alibaba/qwen-image-3`         | Up to 3            | None                   | 0.04                                      |
+| MiniMax H3 Image    | `minimax/h3-image`             | Up to 16           | None                   | None. The page gives token prices only    |
+| Krea 3              | `krea/v3`                      | Up to 8            | None                   | 0.025, and up to 0.025 for each reference |
+
+9. Seedream 5.5 is the default picture model: it has a known price, reference pictures, and a transparent background.
+10. With reference pictures, the server uses the edit endpoint of the model and sends the uploaded files as `image_urls`. The edit endpoint of Ideogram 4.6 changes one picture with a mask, so Ideogram takes no reference pictures here.
+11. The Nano Banana 2.1 page gives no maximum for `image_urls`. yumekit sends at most 10.
+12. A model with `image_size` gets an exact size with the shape of the request: a fixed number of pixels for each model, a ratio from 2:5 to 5:2, and sides in multiples of 32. Seedream 5.5 gets about 2.56 million pixels, so the 0.03 price applies. Ideogram 4.6 and MiniMax H3 Image get about 2048 by 2048, GPT Image 2.6 Flare about 1.57 million, and Qwen Image 3 and Krea 3 about 1024 by 1024. A model with `aspect_ratio` gets the nearest ratio of its list. With no size, the picture is square.
+13. The server asks for PNG where the model has `output_format`, and names the file by its real type: `.png`, `.jpg`, or `.webp`.
+14. `cost_usd` is an estimate from the catalog, with the reference fees. A model with no price gives no `cost_usd`.
+
+The editor (WP32 and WP38) shows "Not tested with yumekit yet" next to a model with `tested: false`, and shows the controls for the first picture, the last picture, and reference pictures only for the values in `accepts`.
