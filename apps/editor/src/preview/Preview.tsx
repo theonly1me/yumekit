@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import type { EngineClient } from "../engine/engineClient.js";
-import type { Output } from "../engine/snapshot.js";
+import type { Output, Snapshot } from "../engine/snapshot.js";
 import { clockText } from "../timeline/clock.js";
 import type { PreviewFailure } from "./previewQueue.js";
 import { useFitScale } from "./useFitScale.js";
 import { usePreviewChannel } from "./usePreviewChannel.js";
-import type { TextInPlace } from "./useTextInPlace.js";
+import { useTextInPlace } from "./useTextInPlace.js";
 
 type PageState =
   | { outputId: string; kind: "loaded"; pageUrl: string }
@@ -64,9 +64,15 @@ export function Preview(props: {
   frame: number;
   framesPerSecond: number;
   hint: string;
-  textInPlace: TextInPlace;
+  snapshot: Snapshot;
+  onTextEditing: () => void;
 }) {
-  const { client, output, frame, textInPlace } = props;
+  const { client, output, frame } = props;
+  const textInPlace = useTextInPlace({
+    client,
+    snapshot: props.snapshot,
+    onEditing: props.onTextEditing,
+  });
   const page = usePageState({ client, outputId: output.id });
   const pageUrl = page?.kind === "loaded" ? page.pageUrl : undefined;
   const frameElement = useRef<HTMLIFrameElement>(null);
