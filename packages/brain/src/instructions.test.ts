@@ -16,4 +16,10 @@ describe("the instructions for the agent", () => {
       'Name a version of the video by its platform, for example "the YouTube version". Never name it by an output id such as wide or tall.',
     );
   });
+
+  it("go on with the rest of the video when a paid tool has no key", () => {
+    expect(brainInstructions).toContain(
+      "If a paid tool for a step has no key, say in one sentence which key is missing and that the person can add it in Settings. Then make the rest of the video.",
+    );
+  });
 });
