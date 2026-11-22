@@ -4,12 +4,7 @@ import type {
   ServerResponse,
 } from "node:http";
 import { sendStaticFile } from "../files/staticFiles.js";
-import { agentRoutes } from "./agentRoutes.js";
-import { chatRoutes } from "./chatRoutes.js";
-import { anySegment, type EngineContext, type Route } from "./exchange.js";
-import { fileRoutes } from "./fileRoutes.js";
-import { keyRoutes } from "./keyRoutes.js";
-import { projectRoutes } from "./projectRoutes.js";
+import { anySegment, type Route } from "./exchange.js";
 import {
   bearerTokenOf,
   siteRejectionOf,
@@ -24,20 +19,13 @@ import {
   type Failure,
 } from "./responses.js";
 
-export interface RequestHandlerOptions {
-  context: EngineContext;
+export interface RequestHandlerOptions<Context> {
+  context: Context;
+  routes: Route<Context>[];
   port: number;
   token: string;
   editorFolder: string | undefined;
 }
-
-const routes = [
-  ...projectRoutes,
-  ...keyRoutes,
-  ...fileRoutes,
-  ...agentRoutes,
-  ...chatRoutes,
-];
 
 const upgradeRequired: Failure = {
   status: 426,
@@ -45,8 +33,8 @@ const upgradeRequired: Failure = {
   message: "The event path needs a WebSocket.",
 };
 
-function parametersOf(options: {
-  route: Route;
+function parametersOf<Context>(options: {
+  route: Route<Context>;
   segments: string[];
 }): string[] | undefined {
   const { pattern } = options.route;
@@ -60,11 +48,11 @@ function parametersOf(options: {
   return parameters;
 }
 
-async function handleApi(options: {
+async function handleApi<Context>(options: {
   request: IncomingMessage;
   response: ServerResponse;
   path: RequestPath;
-  handler: RequestHandlerOptions;
+  handler: RequestHandlerOptions<Context>;
 }): Promise<Failure | undefined> {
   const { request, response, path, handler } = options;
   const tokenRejection = tokenRejectionOf({
@@ -74,7 +62,7 @@ async function handleApi(options: {
   if (tokenRejection !== undefined) return tokenRejection;
   if (path.segments.join("/") === "api/events") return upgradeRequired;
   const method = request.method === "HEAD" ? "GET" : request.method;
-  const matches = routes.flatMap((route) => {
+  const matches = handler.routes.flatMap((route) => {
     const parameters = parametersOf({ route, segments: path.segments });
     return parameters === undefined ? [] : [{ route, parameters }];
   });
@@ -90,10 +78,10 @@ async function handleApi(options: {
   });
 }
 
-async function handle(options: {
+async function handle<Context>(options: {
   request: IncomingMessage;
   response: ServerResponse;
-  handler: RequestHandlerOptions;
+  handler: RequestHandlerOptions<Context>;
 }): Promise<Failure | undefined> {
   const { request, response, handler } = options;
   const siteRejection = siteRejectionOf({ request, port: handler.port });
@@ -117,8 +105,8 @@ const engineDefect: Failure = {
   message: "The engine failed to answer the request.",
 };
 
-export function createRequestHandler(
-  handler: RequestHandlerOptions,
+export function createRequestHandler<Context>(
+  handler: RequestHandlerOptions<Context>,
 ): RequestListener {
   return (...parameters) => {
     const [request, response] = parameters;

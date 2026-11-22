@@ -19,3 +19,11 @@ export type {
   EngineFailure,
   Outcome,
 } from "./engineTypes.js";
+export {
+  recordRecentProject,
+  startHomeServer,
+  type HomeFailure,
+  type HomeServer,
+  type ProjectLength,
+  type RecentProject,
+} from "./home/index.js";

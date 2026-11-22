@@ -19,7 +19,7 @@ export interface EngineParts {
 
 const packageSchema = z.object({ version: z.string() });
 
-async function engineVersion(): Promise<string> {
+export async function engineVersion(): Promise<string> {
   const text = await readFile(
     new URL("../../package.json", import.meta.url),
     "utf8",

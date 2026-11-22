@@ -14,6 +14,7 @@ import {
 } from "./engineFile/findRunningEngine.js";
 import type { Engine, EngineFailure, Outcome } from "./engineTypes.js";
 import { createEventHub, type EventHub } from "./events/eventHub.js";
+import { engineRoutes } from "./http/engineRoutes.js";
 import { createRequestHandler } from "./http/handleRequest.js";
 import { listenOnLoopback } from "./startup/listenOnLoopback.js";
 import { startParts, type EngineParts } from "./startup/startParts.js";
@@ -130,6 +131,7 @@ export async function startEngine(options: {
         serverCommand: options.serverCommand,
         ...parts,
       },
+      routes: engineRoutes,
       port,
       token,
       editorFolder:
