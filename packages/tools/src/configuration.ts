@@ -12,7 +12,7 @@ import type {
   ServerCommand,
 } from "./types.js";
 
-const configurationFileName = "media-tools.json";
+export const configurationFileName = "media-tools.json";
 const defaultGeneratedVideoSeconds = 30;
 
 const serverEntrySchema = z.object({
@@ -35,7 +35,7 @@ const defaultEntrySchema = z
     typeof entry === "string" ? { server: entry } : entry,
   );
 
-const configurationFileSchema = z.object({
+export const configurationFileSchema = z.object({
   mcpServers: z.record(z.string(), serverEntrySchema).default({}),
   defaults: z
     .partialRecord(z.enum(capabilities), defaultEntrySchema)

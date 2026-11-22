@@ -58,14 +58,17 @@ describe("connectMediaTools configuration", () => {
     });
   });
 
-  it("uses the first server with the capability when no default exists", async () => {
+  it("uses another ready server before sample when no default exists", async () => {
     const { tools, outputDirectory } = await connectFixture({
       projectFile: { mcpServers: { sample: {}, fake: fakeServerCommand } },
     });
 
     const outcome = await tools.run({ ...speechRequest, outputDirectory });
 
-    expect(outcome.ok && outcome.value.server).toBe("sample");
+    expect(outcome.ok ? "sample" : outcome.failure).toMatchObject({
+      kind: "media-tool-failed",
+      server: "fake",
+    });
   });
 
   it("reports the default server that it used for a request with no server", async () => {

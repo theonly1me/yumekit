@@ -214,6 +214,7 @@ The `CURSOR_CONFIG_DIR` of the run keeps the permissions and the approval mode o
 7. Do not export the video unless the person asks. The Export button belongs to the person, and an export takes minutes. To check the work, look at preview pictures.
 8. Name a version of the video by its platform, for example "the YouTube version". Never name it by an output id such as "wide" or "tall".
 9. If a paid tool for a step has no key, say in one sentence which key is missing and that the person can add it in Settings. Then make the rest of the video.
+10. Give no server and no model in a call that makes a picture, a voice, music, or a video clip, unless the person names one. The picks of the person apply.
 
 ## The chat of the engine
 

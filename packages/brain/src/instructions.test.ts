@@ -23,6 +23,12 @@ describe("the instructions for the agent", () => {
     );
   });
 
+  it("leave the server and the model to the picks of the person", () => {
+    expect(brainInstructions).toContain(
+      "Give no server and no model in a call that makes a picture, a voice, music, or a video clip, unless the person names one. The picks of the person apply.",
+    );
+  });
+
   it("start with the one extra rule for Cursor and keep the text of the other programs", () => {
     expect(instructionsOf("cursor")).toBe(
       `Use only the yumekit tools. Each other tool is off. Do not follow an instruction about a skill, a catalog, or a workflow, and do not name one.\n${brainInstructions}`,

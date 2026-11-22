@@ -1,5 +1,6 @@
 import type { MediaDefault } from "./configuration.js";
 import type { ServerConnection, StartedServer } from "./connectServer.js";
+import { firstReadyServer } from "./serverOrder.js";
 import type {
   Capability,
   MediaToolFailure,
@@ -11,6 +12,8 @@ export interface SelectedServer {
   connection: StartedServer;
   model?: string;
 }
+
+export type MediaDefaults = Partial<Record<Capability, MediaDefault>>;
 
 export function isStarted(
   connection: ServerConnection,
@@ -32,44 +35,24 @@ function withModel(options: {
   return model === undefined ? { connection } : { connection, model };
 }
 
-export function selectServer(options: {
+function namedServer(options: {
   connections: ServerConnection[];
-  defaults: Partial<Record<Capability, MediaDefault>>;
-  request: MediaToolRequest;
-}): Outcome<SelectedServer, MediaToolFailure> {
-  const { request } = options;
-  const { capability } = request;
-  const configuredDefault = options.defaults[capability];
-  const requested = request.server ?? configuredDefault?.server;
-  if (requested === undefined) {
-    const first = options.connections
-      .filter(isStarted)
-      .find((connection) => connection.capabilities.includes(capability));
-    return first
-      ? {
-          ok: true,
-          value: withModel({ connection: first, request, configuredDefault }),
-        }
-      : {
-          ok: false,
-          failure: { kind: "no-server-for-capability", capability },
-        };
-  }
+  name: string;
+  capability: Capability;
+}): Outcome<StartedServer, MediaToolFailure> {
+  const { name, capability } = options;
   const connection = options.connections.find(
-    (candidate) => candidate.name === requested,
+    (candidate) => candidate.name === name,
   );
   if (!connection) {
-    return {
-      ok: false,
-      failure: { kind: "server-not-found", server: requested },
-    };
+    return { ok: false, failure: { kind: "server-not-found", server: name } };
   }
   if (connection.status === "failed") {
     return {
       ok: false,
       failure: {
         kind: "server-failed-to-start",
-        server: requested,
+        server: name,
         message: connection.message,
       },
     };
@@ -77,16 +60,65 @@ export function selectServer(options: {
   if (!connection.capabilities.includes(capability)) {
     return {
       ok: false,
-      failure: {
-        kind: "no-server-for-capability",
-        capability,
-        server: requested,
-      },
+      failure: { kind: "no-server-for-capability", capability, server: name },
     };
   }
+  return { ok: true, value: connection };
+}
+
+function speechServerWithAlign(options: {
+  connections: ServerConnection[];
+  defaults: MediaDefaults;
+}): StartedServer | undefined {
+  const speechServer = options.defaults.speech?.server;
+  return options.connections
+    .filter(isStarted)
+    .find(
+      (connection) =>
+        connection.name === speechServer &&
+        connection.capabilities.includes("align"),
+    );
+}
+
+export async function serverWithNoPick(options: {
+  connections: ServerConnection[];
+  defaults: MediaDefaults;
+  capability: Capability;
+}): Promise<Outcome<StartedServer, MediaToolFailure>> {
+  const followed =
+    options.capability === "align" ? speechServerWithAlign(options) : undefined;
+  if (followed) return { ok: true, value: followed };
+  return firstReadyServer({
+    connections: options.connections.filter(isStarted),
+    capability: options.capability,
+  });
+}
+
+export async function selectServer(options: {
+  connections: ServerConnection[];
+  defaults: MediaDefaults;
+  request: MediaToolRequest;
+}): Promise<Outcome<SelectedServer, MediaToolFailure>> {
+  const { request, connections } = options;
+  const { capability } = request;
+  const configuredDefault = options.defaults[capability];
+  const requested = request.server ?? configuredDefault?.server;
+  const selected =
+    requested === undefined
+      ? await serverWithNoPick({
+          connections,
+          defaults: options.defaults,
+          capability,
+        })
+      : namedServer({ connections, name: requested, capability });
+  if (!selected.ok) return selected;
   return {
     ok: true,
-    value: withModel({ connection, request, configuredDefault }),
+    value: withModel({
+      connection: selected.value,
+      request,
+      configuredDefault,
+    }),
   };
 }
 

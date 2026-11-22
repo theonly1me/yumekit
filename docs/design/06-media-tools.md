@@ -37,7 +37,7 @@ yumekit reads two files with the same shape. The project file wins for a server 
 - With no file (user or project), yumekit connects each bundled server, in the order `sample`, `openai`, `gemini`, `fal`. A bundled server with a missing key starts, and the editor shows that it needs a key.
 - With a file, yumekit connects the servers of the file first. Then it connects each bundled server that the file does not name.
 - An entry `"<name>": { "disabled": true }` turns off that server, also a bundled one.
-- The order of the servers does not change how a call selects a server: the server of the call, then `defaults`, then the first server that started with the capability. With no `defaults`, `sample` is the first server for each capability that it has.
+- The order of the servers does not change how a call selects a server: the server of the call, then `defaults`, then the order with no pick of document 15. That order puts `sample` last.
 
 ## The convention
 
@@ -118,6 +118,12 @@ type MediaTools = {
   ) => Promise<Outcome<{ valid: boolean; message: string }, CheckKeyFailure>>;
   failedServers: () => { server: string; message: string }[];
   limits: () => { generatedVideoSeconds: number };
+  choices: () => Promise<MediaChoices>;
+  pick: (pick: {
+    capability: "image" | "speech" | "music" | "video";
+    server?: string;
+    model?: string;
+  }) => Promise<Outcome<MediaChoices, MediaPickFailure>>;
   close: () => Promise<void>;
 };
 
@@ -159,7 +165,7 @@ A configuration file that is not valid is the failure `invalid-configuration-fil
 How `run` selects a server:
 
 1. It uses `server` from the request. If the request has none, it uses the server of the `defaults` entry for the capability.
-2. If neither names a server, it uses the first started server, in configuration order, that has the capability.
+2. If neither names a server, it uses the order with no pick of document 15: the first started server with the capability and each key that it needs, in the order `openai`, `gemini`, `fal`, each other server in configuration order, and `sample` last. `align` with no `defaults` entry uses the server of the `speech` entry when that server has `align`.
 3. A name that no file defines is `server-not-found`. A server that started without the tool is `no-server-for-capability`.
 
 How the files merge:

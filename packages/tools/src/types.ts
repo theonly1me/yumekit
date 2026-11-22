@@ -1,4 +1,9 @@
 import type { MediaToolResult } from "./convention.js";
+import type {
+  MediaChoices,
+  MediaPick,
+  MediaPickFailure,
+} from "./choiceTypes.js";
 import type { MediaServerDescription } from "./description.js";
 
 export type Capability = "image" | "speech" | "align" | "music" | "video";
@@ -96,5 +101,7 @@ export interface MediaTools {
   checkKey: (server: string) => Promise<Outcome<KeyCheck, CheckKeyFailure>>;
   failedServers: () => { server: string; message: string }[];
   limits: () => MediaLimits;
+  choices: () => Promise<MediaChoices>;
+  pick: (pick: MediaPick) => Promise<Outcome<MediaChoices, MediaPickFailure>>;
   close: () => Promise<void>;
 }

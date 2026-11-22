@@ -26,7 +26,10 @@ describe("connectMediaTools with the bundled servers", () => {
 
   it("starts a bundled server with a missing key, shows the key as missing, and uses sample for a call with no server", async () => {
     const { tools, outputDirectory } = await connectFixture({
-      bundledServers,
+      bundledServers: {
+        sample: sampleServerCommand,
+        keyed: keyedServerCommand,
+      },
     });
 
     const keyed = tools.list().find((entry) => entry.server === "keyed");

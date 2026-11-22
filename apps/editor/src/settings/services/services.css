@@ -1,0 +1,77 @@
+.service-row {
+  border-top: 1px solid var(--line);
+}
+
+.service-row > .setting-row {
+  border-top: 0;
+}
+
+.service-note {
+  display: block;
+}
+
+.model-picker {
+  display: grid;
+  gap: 18px;
+  padding: 4px 0 20px;
+}
+
+.model-service {
+  display: grid;
+  gap: 8px;
+}
+
+.model-service h4 {
+  margin: 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: var(--step--1);
+  font-weight: 500;
+}
+
+.model-service-state {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.model-options {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+button.model-option {
+  font-weight: 400;
+  text-align: left;
+}
+
+button.model-option[aria-pressed="true"] {
+  background: var(--solid);
+  border-color: var(--solid);
+  color: var(--on-solid);
+}
+
+.model-key {
+  display: grid;
+  gap: 8px;
+  padding-top: 6px;
+}
+
+button.service-reset {
+  justify-self: start;
+  font-size: var(--step--1);
+  color: var(--muted);
+}
+
+.made-with p {
+  font-size: var(--step--1);
+  color: var(--muted);
+}
+
+.made-with .link {
+  font-size: var(--step--1);
+}
