@@ -2,8 +2,8 @@ import { seededRandom, useSceneContext } from "@yumekit/scene";
 import type { ReactNode } from "react";
 import { PaintedCanvas } from "./PaintedCanvas.js";
 
-const grainOpacity = 0.14;
-const pixelsEach = 2;
+const grainOpacity = 0.09;
+const pixelsEach = 1;
 
 function paintGrain(options: {
   context: CanvasRenderingContext2D;
@@ -32,7 +32,6 @@ export function GrainBackdrop(props: { seed: string }): ReactNode {
     <PaintedCanvas
       widthPixels={widthPixels}
       heightPixels={heightPixels}
-      pixelated
       paintKey={props.seed}
       paint={(context) => {
         paintGrain({ context, seed: props.seed, widthPixels, heightPixels });

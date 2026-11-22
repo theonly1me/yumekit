@@ -30,6 +30,9 @@ export function defineKitScene(options: {
           width: "100%",
           height: "100%",
           overflow: "hidden",
+          background: definition.paintsBackground
+            ? stylePack.colors.background
+            : "transparent",
           color: stylePack.colors.text,
           fontFamily: fontFamilyOf(stylePack.fonts.body),
           fontWeight: stylePack.fonts.body.weight,

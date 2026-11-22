@@ -4,7 +4,6 @@ export function PaintedCanvas(props: {
   widthPixels: number;
   heightPixels: number;
   paint: (context: CanvasRenderingContext2D) => void;
-  pixelated?: boolean;
   paintKey: string;
 }): ReactNode {
   const canvasReference = useRef<HTMLCanvasElement>(null);
@@ -32,7 +31,6 @@ export function PaintedCanvas(props: {
         inset: 0,
         width: "100%",
         height: "100%",
-        ...(props.pixelated === true ? { imageRendering: "pixelated" } : {}),
       }}
     />
   );
