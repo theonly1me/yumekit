@@ -23,10 +23,12 @@ yumekit doctor
 
 ## First video
 
-1. Make a project: `yumekit init my-video`.
-2. Open the editor: `yumekit open my-video`. It prints the URL and opens it in the browser.
-3. Make the video in the editor, or ask an agent to make it (see "Use an agent").
-4. Render it: `yumekit render --project my-video --output wide`. The file is `my-video/renders/wide.mp4`.
+1. Run `yumekit`. It prints the URL of the start screen and opens it in the browser.
+2. Type what you want to make, pick where the video will go, and pick how long it is.
+3. Click "Make the video". yumekit makes the project in `~/Documents/yumekit` and asks the AI program on your computer (Claude Code or Codex) to make it.
+4. When the editor opens, change what you want, then click "Export".
+
+The start screen lists your recent projects. To open a project folder directly, run `yumekit open <folder>`.
 
 ## Use an agent
 

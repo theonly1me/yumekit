@@ -21,20 +21,20 @@ export interface EngineContext {
   serverCommand: ServerCommand | undefined;
 }
 
-export interface Exchange {
+export interface Exchange<Context = EngineContext> {
   request: IncomingMessage;
   response: ServerResponse;
-  context: EngineContext;
+  context: Context;
   parameters: string[];
   query: URLSearchParams;
 }
 
 export type RouteResult = Failure | undefined;
 
-export interface Route {
+export interface Route<Context = EngineContext> {
   method: "GET" | "POST" | "PUT" | "DELETE";
   pattern: string[];
-  handle: (exchange: Exchange) => Promise<RouteResult>;
+  handle: (exchange: Exchange<Context>) => Promise<RouteResult>;
 }
 
 export const anySegment = ":";

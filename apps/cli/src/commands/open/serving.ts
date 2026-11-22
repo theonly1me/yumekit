@@ -1,0 +1,43 @@
+import { fileURLToPath } from "node:url";
+import { usageError, type CommandResult } from "../../commandResult.js";
+import { wholeNumberOption, type ParsedOptions } from "../../options.js";
+
+export const builtEditorFolder = fileURLToPath(
+  new URL("../../../../editor/dist/", import.meta.url),
+);
+
+export function portOption(
+  values: ParsedOptions["values"],
+):
+  | { ok: true; port: number | undefined }
+  | { ok: false; result: CommandResult } {
+  const port = wholeNumberOption({ values, name: "port" });
+  if (!port.ok) return { ok: false, result: usageError(port.message) };
+  if (port.value !== undefined && port.value > 65_535) {
+    return { ok: false, result: usageError("--port must be 65535 or less.") };
+  }
+  return { ok: true, port: port.value };
+}
+
+export function closeOnSignal(options: {
+  close: () => Promise<void>;
+  stoppedLine: string;
+}): void {
+  let isClosing = false;
+  const close = () => {
+    if (isClosing) return;
+    isClosing = true;
+    options
+      .close()
+      .then(() => {
+        process.stdout.write(`${options.stoppedLine}\n`);
+        process.exit(0);
+      })
+      .catch((error: unknown) => {
+        process.stderr.write(`yumekit: ${String(error)}\n`);
+        process.exit(1);
+      });
+  };
+  process.on("SIGINT", close);
+  process.on("SIGTERM", close);
+}

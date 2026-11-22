@@ -18,12 +18,12 @@ async function fetchText(url: string): Promise<{ type: string; text: string }> {
 
 export async function checkEditorPage(options: {
   command: string;
-  projectFolder: string;
+  args: string[];
   cwd: string;
 }): Promise<string> {
   const child = startProgram({
     command: options.command,
-    args: ["open", options.projectFolder, "--no-browser"],
+    args: options.args,
     cwd: options.cwd,
   });
   const output: string[] = [];
@@ -38,7 +38,9 @@ export async function checkEditorPage(options: {
     }
     const [url] = match ?? [];
     if (url === undefined) {
-      throw new Error(`yumekit open did not start:\n${output.join("")}`);
+      throw new Error(
+        `yumekit ${options.args.join(" ")} did not start:\n${output.join("")}`,
+      );
     }
     const page = await fetchText(url);
     const [, scriptPath] = scriptPattern.exec(page.text) ?? [];

@@ -6,6 +6,7 @@ The `yumekit` command.
 
 | Command                                                                                     | What it does                                                                 |
 | ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `yumekit [--port <n>] [--no-browser]`                                                       | Starts the start screen, prints the URL, and opens it                        |
 | `yumekit init <folder> [--name] [--frame-rate] [--output id:WIDTHxHEIGHT]...`               | Makes a project. The default is one 1920 by 1080 output named `wide`, 30 fps |
 | `yumekit mcp --project <folder>`                                                            | Serves the harness MCP tools over stdio, with the bundled media servers      |
 | `yumekit render --project <folder> --output <id> [--scale] [--first-frame] [--frame-count]` | Writes `renders/<id>.mp4`                                                    |
@@ -23,6 +24,8 @@ The value of a key is never a command argument, because a shell keeps arguments 
 `yumekit mcp` writes only MCP messages to stdout. It prints each media server that failed to start to stderr.
 
 If `yumekit open` runs for the project, `yumekit mcp` is a bridge. It reads `<project>/.yumekit/engine.json`, gets the tool list from the engine, and sends each tool call to the engine. The progress of a call comes back as MCP progress. The editor then shows each change of the agent. If no engine runs, `yumekit mcp` serves the harness itself.
+
+`yumekit` with no command starts the home server. Its start screen makes a project in the projects folder (`~/Documents/yumekit`, or `projectsFolder` in `~/.config/yumekit/settings.json`), starts an engine for it, and sends the first request to the AI. It also lists the recent projects from `~/.config/yumekit/recent.json`. It runs until you stop it with Ctrl+C, and then it stops each engine that it started.
 
 `yumekit open` runs until you stop it with Ctrl+C. It then closes the engine and removes `engine.json`. If the editor is not built, the engine serves a page that says so. In the repository, run `pnpm build` to build the editor.
 
