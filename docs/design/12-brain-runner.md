@@ -258,7 +258,7 @@ These rules came from the build of WP26.
 5. A `text` event with `isPart: true` holds only the new piece. The engine adds the pieces. A whole text replaces them. The text of an answer is each whole text, then the pieces, with a blank line between them.
 6. Codex gives the failure of a turn as a JSON text in `error.message`. The adapter takes the inner `error.message` when the text is JSON.
 7. The engine finds the paths of `claude`, `codex`, and `cursor-agent` once, when it starts. It reads `settings.json` at each request and at each `GET /api/chat`. A path in `agentPrograms` comes before the path from `PATH`. A `settings.json` that is not valid gives `settings-not-valid` (409), so the engine never runs another agent than the one that the person picked.
-8. The engine calls `signInState` before each request, for both programs, and in `GET /api/chat`. Only `signed-out` refuses a request. `unknown` lets it run.
+8. The engine calls `signInState` before each request, for each program, and in `GET /api/chat`. Only `signed-out` refuses a request. `unknown` lets it run.
 9. The undo count: the engine gives the harness a wrapped store. The wrapper reports each `applyEdits`, `undo`, and `redo` that raised the revision, so a call that changed nothing counts no step. The tool route runs each harness call inside an `AsyncLocalStorage` context with the caller and the tool name, so the wrapper knows who made each step, also when calls run at the same time.
 10. The bridge sends the header `x-yumekit-client: agent` with each request. A tool call with this header is by `ai`. Each other call is by `person`.
 11. A call by `ai` while a chat request runs adds to the one `change` entry of that request. The entry starts at the first step with the summary "The AI is changing the project." and gets the first sentence of the answer at the end. A call by `ai` with no chat request, for example from an agent in a terminal, gives its own entry with "An agent changed the project.". A call by the person gives one entry, with the count of the steps of that call.
@@ -271,6 +271,20 @@ These rules came from the build of WP26.
 18. The summary of an AI change is the first sentence of the answer. A real answer ended with an offer, "I can re-fit the narration to the new timing if you'd like.", and the last sentence put that offer on the change line.
 19. Rule 7 of "The instructions" came from a real run: the AI called `render_video` twice in the first request. Rule 8 keeps the output ids away from the person, as rule 1 does for other ids.
 20. Rule 9 came from a real run with no media key: the AI wrote that the voice needs an OpenAI key and made no voice. The instructions do not name the sample server as a stand-in, because its sound is a test tone.
+
+These rules came from the build of WP35.
+
+21. `runTurn` takes `environment`, a record of variables that it adds to the environment of the engine for the program. The Cursor adapter passes only `CURSOR_CONFIG_DIR`.
+22. `endOf` of a stream parser gets `lastErrorLine`, the last line of standard error that is not empty. The Cursor adapter uses it as the message of `failed` with `program`. With no such line, the message is "Cursor stopped before it answered.". The other adapters do not use it.
+23. The Cursor adapter takes the two folders from the parent of the working folder, `<project>/.yumekit`. It writes the three files before each turn and does not remove them, because the configuration folder keeps the sessions. The engine still makes `<project>/.yumekit/agent`, and it stays empty.
+24. `@yumekit/brain` exports `instructionsOf(agentId)`. For `cursor`, the extra rule is the first line, and the text of `brainInstructions` follows it unchanged. For Claude Code and Codex, it is `brainInstructions`.
+25. The rule file is the front matter `alwaysApply: true`, a blank line, and the instructions. `mcp.json` has the form that `yumekit agent connect` writes: `type: "stdio"`, `command`, and `args`.
+26. `signInState` runs `cursor-agent status --format json` with the environment of the engine. The sign-in holds with each `CURSOR_CONFIG_DIR`, so the result is the same.
+27. The sign-in sentence for Cursor is "Open a terminal and run cursor-agent login.". The engine message of `agent-signed-out`, the AI part of Settings, and the start screen use it. The page after a first request that failed adds "For Cursor, run cursor-agent login.".
+28. A saved `agent` whose program is not found gives `no-agent`, for Cursor as for the other programs. The message names Claude Code, Codex, and Cursor.
+29. The real check ran the engine of the worktree build with `cursor-agent` 2026.11.22-e9042b2, a later version than the probe. The program updated itself. The engine found `~/.local/bin/cursor-agent`, a link to the installed version, and the `PATH` had no other match. The environment of the engine had no media key.
+30. In the real check, "Set the script to the single word ready." called `get_project` and `set_script`, set the script, and gave one change with one undo step. The answer had no repeated text, so the whole text at the end of a turn holds only the text after the last tool call. The request to run `touch made.txt` and to read `/etc/hosts` made no file and called no yumekit tool. The answer said that the AI cannot run a command or read a file. That request resumed the session of the first request: the session id stayed the same, the engine added no notice, and the configuration folder held one conversation.
+31. `cursor-agent` starts a `worker-server` process that does not end with the turn. Its parent is process 1, and it has the `CURSOR_CONFIG_DIR` of the run. It still ran after the engine stopped, and the real check stopped it by hand. The adapter does not stop it in this version. The owner decides if the engine stops it when it closes.
 
 ## Work package
 

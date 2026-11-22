@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { brainInstructions } from "./index.js";
+import { brainInstructions, instructionsOf } from "./index.js";
 
 describe("the instructions for the agent", () => {
   it("leave the export to the person and check the work with preview pictures", () => {
@@ -21,5 +21,13 @@ describe("the instructions for the agent", () => {
     expect(brainInstructions).toContain(
       "If a paid tool for a step has no key, say in one sentence which key is missing and that the person can add it in Settings. Then make the rest of the video.",
     );
+  });
+
+  it("start with the one extra rule for Cursor and keep the text of the other programs", () => {
+    expect(instructionsOf("cursor")).toBe(
+      `Use only the yumekit tools. Each other tool is off. Do not follow an instruction about a skill, a catalog, or a workflow, and do not name one.\n${brainInstructions}`,
+    );
+    expect(instructionsOf("claude-code")).toBe(brainInstructions);
+    expect(instructionsOf("codex")).toBe(brainInstructions);
   });
 });

@@ -46,10 +46,14 @@ export function recentFactsOf(options: {
 export function agentLineOf(agents: HomeAgent[]): string {
   const inUse = agents.find((agent) => agent.in_use);
   if (inUse === undefined) {
-    return "No AI program is on this computer. Install Claude Code or Codex, start it once in a terminal, and sign in.";
+    return "No AI program is on this computer. Install Claude Code, Codex, or Cursor, start it once in a terminal, and sign in.";
   }
   if (inUse.sign_in === "signed-out") {
-    return `${inUse.name} is on this computer, but it is not signed in. Start it once in a terminal and sign in.`;
+    const signInStep =
+      inUse.id === "cursor"
+        ? "Open a terminal and run cursor-agent login."
+        : "Start it once in a terminal and sign in.";
+    return `${inUse.name} is on this computer, but it is not signed in. ${signInStep}`;
   }
   return `The AI is ${inUse.name} on this computer. No key needed.`;
 }

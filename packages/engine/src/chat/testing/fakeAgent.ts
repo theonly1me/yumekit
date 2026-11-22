@@ -84,6 +84,10 @@ async function run(): Promise<number> {
     print(JSON.stringify({ loggedIn: scenario.signedIn }));
     return 0;
   }
+  if (command === "status --format") {
+    print(JSON.stringify({ isAuthenticated: scenario.signedIn }));
+    return 0;
+  }
   appendFileSync(
     `${scenarioFile}.runs.jsonl`,
     `${JSON.stringify(programArguments)}\n`,

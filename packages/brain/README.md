@@ -4,10 +4,11 @@ The adapters that run the agent program of the person for one chat request. Desi
 
 ## What this package owns
 
-- One adapter for Claude Code and one for Codex, behind `AgentAdapter`.
+- One adapter for each of Claude Code, Codex, and Cursor, behind `AgentAdapter`.
 - The argument list of each program, and the parser of its event stream.
 - The stop of a program: `SIGINT`, then `SIGKILL` after 5 seconds.
 - The instructions for the agent, and the plain sentence for a tool call by the person.
+- The three files that Cursor reads from its workspace, and its configuration folder.
 
 ## Interface
 
@@ -16,11 +17,13 @@ function createClaudeCodeAdapter(options: {
   programPath: string;
 }): AgentAdapter;
 function createCodexAdapter(options: { programPath: string }): AgentAdapter;
+function createCursorAdapter(options: { programPath: string }): AgentAdapter;
 function findProgram(options: {
   program: string;
   searchPath: string;
 }): Promise<string | undefined>;
 const brainInstructions: string;
+function instructionsOf(agentId: AgentId): string;
 function personSentenceOf(toolName: string): string;
 ```
 

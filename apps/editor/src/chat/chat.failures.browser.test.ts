@@ -53,7 +53,7 @@ describe("the failures in the chat", () => {
     await expect
       .poll(() => chat.entryTexts(1))
       .toEqual([
-        "The chat cannot use Cursor yet. Pick Claude Code or Codex in Settings.\nOpen Settings",
+        "No AI program is on this computer. Install Claude Code, Codex, or Cursor, start it once in a terminal, and sign in.\nOpen Settings",
       ]);
     expect(await chat.box.inputValue()).toBe("Make it shorter.");
     expect(
