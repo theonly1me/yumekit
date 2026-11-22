@@ -1,4 +1,6 @@
+import type { Route, WebSocketRoute } from "playwright";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { z } from "zod";
 import {
   chatOf,
   claudeLines,
@@ -7,7 +9,11 @@ import {
   requestTextsSent,
   setScenario,
 } from "../../testing/chatTesting.js";
-import { closeBrowser, openEditor } from "../../testing/editorPage.js";
+import {
+  closeBrowser,
+  openEditor,
+  sharedBrowser,
+} from "../../testing/editorPage.js";
 import { runEngine, type RunningEngine } from "../../testing/runEngine.js";
 import {
   buildSoundProject,
@@ -31,6 +37,10 @@ afterAll(async () => {
   await closeBrowser();
   await engine?.remove();
 });
+
+const lateAgentName = "The agent of a late view";
+
+const viewSchema = z.looseObject({ agent: z.looseObject({}) });
 
 const lockedText =
   "The AI still works on the video. You can look now. You can change this when the AI finishes, or after you stop it.";
@@ -85,6 +95,51 @@ describe("the voice view", () => {
     await expect.poll(() => editor.page.getByText(lockedText).count()).toBe(0);
     await expect.poll(() => removeVoice.isDisabled()).toBe(false);
     await editor.close();
+  });
+
+  it("stays locked from the ask on, also when the chat loads again before the engine gets the ask", async () => {
+    await setScenario({
+      engine: runningEngine(),
+      scenario: { steps: [{ print: claudeLines.result("completed") }] },
+    });
+    const context = await (
+      await sharedBrowser()
+    ).newContext({ viewport: { width: 1440, height: 900 } });
+    const page = await context.newPage();
+    const sockets: WebSocketRoute[] = [];
+    await page.routeWebSocket(/\/api\/events/, (socket) => {
+      socket.connectToServer();
+      sockets.push(socket);
+    });
+    const heldAsks: Route[] = [];
+    await page.route("**/api/chat/requests", (route) => {
+      heldAsks.push(route);
+    });
+    await page.route("**/api/chat", async (route) => {
+      const response = await route.fetch();
+      if (heldAsks.length === 0) return route.fulfill({ response });
+      const view = viewSchema.parse(await response.json());
+      const agent = { ...view.agent, name: lateAgentName };
+      return route.fulfill({ response, json: { ...view, agent } });
+    });
+    await page.goto(runningEngine().url);
+    await page.getByRole("button", { name: /on this computer$/ }).waitFor();
+
+    await chatOf(page).ask("Make the video calmer.");
+    await expect.poll(() => heldAsks.length).toBe(1);
+    await page.getByRole("button", { name: "Open the voice" }).click();
+    await page.getByText(lockedText).waitFor();
+    await sockets.at(-1)?.close();
+    await page
+      .getByRole("button", { name: `${lateAgentName} on this computer` })
+      .waitFor();
+
+    const removeVoice = page.getByRole("button", { name: "Remove the voice" });
+    expect(await removeVoice.isDisabled()).toBe(true);
+    for (const ask of heldAsks) await ask.continue();
+    await expect.poll(() => removeVoice.isDisabled()).toBe(false);
+    await page.unrouteAll({ behavior: "ignoreErrors" });
+    await context.close();
   });
 
   it("puts the recording of the person in place of the voice, and asks the AI to fit the captions", async () => {

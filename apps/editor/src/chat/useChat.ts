@@ -36,9 +36,11 @@ export function useChat(client: EngineClient) {
   const [announcement, setAnnouncement] = useState("");
 
   const entriesDuringLoads = useRef(new Set<ChatEntry[]>());
+  const asks = useRef({ started: 0, answered: 0 });
 
   const reload = useCallback(() => {
     const changedDuringLoad: ChatEntry[] = [];
+    const asksBeforeLoad = { ...asks.current };
     entriesDuringLoads.current.add(changedDuringLoad);
     requests
       .view()
@@ -54,7 +56,10 @@ export function useChat(client: EngineClient) {
           }
           setEntries(loaded);
           setAgent(view.value.agent);
-          setWaiting(false);
+          const mayMissAnAsk =
+            asksBeforeLoad.started !== asksBeforeLoad.answered ||
+            asks.current.started !== asksBeforeLoad.started;
+          if (!mayMissAnAsk) setWaiting(false);
         },
         () => undefined,
       );
@@ -81,9 +86,12 @@ export function useChat(client: EngineClient) {
 
   const send = useCallback(
     async (input: AskInput): Promise<boolean> => {
+      asks.current.started += 1;
       setWaiting(true);
       setStartFailure(undefined);
-      const asked = await requests.ask(input);
+      const asked = await requests.ask(input).finally(() => {
+        asks.current.answered += 1;
+      });
       if (!asked.ok) {
         setWaiting(false);
         setStartFailure(
