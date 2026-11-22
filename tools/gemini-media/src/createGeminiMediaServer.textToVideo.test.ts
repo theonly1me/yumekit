@@ -18,7 +18,7 @@ const finished = () =>
   completedInteraction({ id: "v1_lake", video: sampleVideo });
 
 describe("generate_video from text", () => {
-  it("lists generate_video, describe_media_server, and check_key", async () => {
+  it("lists a tool for each kind, describe_media_server, and check_key", async () => {
     const media = await connectGeminiMedia({
       environment: {},
       respond: inOrder([]),
@@ -27,6 +27,9 @@ describe("generate_video from text", () => {
     expect((await media.listToolNames()).toSorted()).toEqual([
       "check_key",
       "describe_media_server",
+      "generate_image",
+      "generate_music",
+      "generate_speech",
       "generate_video",
     ]);
   });

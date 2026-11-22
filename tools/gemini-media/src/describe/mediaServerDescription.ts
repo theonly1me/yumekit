@@ -21,6 +21,15 @@ export interface MediaModel {
   prices: MediaModelPrice[];
   read_on: string;
   shutdown_on?: string;
+  accepts?: MediaModelInput[];
+  tested?: boolean;
+}
+
+export type MediaModelInput = "first_frame" | "last_frame" | "reference_images";
+
+export interface CatalogEntry {
+  model: MediaModel;
+  sourceUrl: string;
 }
 
 export type MediaModelSetting =

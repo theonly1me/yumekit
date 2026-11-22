@@ -101,3 +101,46 @@ The list comes from a survey of the public pages of current AI video products on
 - A voice that copies the voice of the person.
 - A board of connected steps.
 - Shared projects.
+
+## Details of WP46
+
+The builder read each fact below on 2026-11-22, in `aistudio.google.com/docs` (where `ai.google.dev/gemini-api/docs` now redirects) and in `developers.openai.com/api/docs` (where `platform.openai.com/docs` now redirects). Each catalog entry keeps the URL of its page as `sourceUrl`, next to the model. The description of a server does not send it.
+
+1. `tools/gemini-media` lists these models. Each one has `tested: false`, `gemini-omni-1.2-flash` included, because no real call ran.
+
+   | Kind    | Model id                      | Price in the catalog                                     |
+   | ------- | ----------------------------- | -------------------------------------------------------- |
+   | Picture | `gemini-nano-banana-2.1`      | 0.0336 (1K), 0.0504 (2K), 0.113 (4K) US dollars an image |
+   | Picture | `gemini-3.1-flash-image`      | 0.067 (1K), 0.101 (2K), 0.151 (4K)                       |
+   | Picture | `gemini-3-pro-image`          | 0.134 (1K and 2K), 0.24 (4K)                             |
+   | Picture | `gemini-3.1-flash-lite-image` | 0.0336, one size (1K)                                    |
+   | Voice   | `gemini-3.8-flash-tts`        | 0.000225 US dollars a second                             |
+   | Voice   | `gemini-3.8-flash-lite-tts`   | 0.00015 a second                                         |
+   | Music   | `lyria-3.5`                   | None. The page gives 0.08 for each song                  |
+   | Music   | `lyria-3-clip-preview`        | None. The page gives 0.04 for each 30 second clip        |
+   | Video   | `gemini-omni-1.2-flash`       | As in document 09                                        |
+
+2. The defaults are `gemini-nano-banana-2.1` (stable, and the lowest price for each picture), `gemini-3.8-flash-tts`, `lyria-3.5` (stable, with a free length), and `gemini-omni-1.2-flash`.
+3. Each new tool uses `POST /v1beta/interactions` with no `background`, and reads the last part of its type in the `model_output` steps, as the video tool does. If the answer is `in_progress`, the tool waits in the same way as the video tool.
+4. `generate_image` sends `input` as the text part and then one image part for each reference picture. `response_format` is `{ "type": "image", "aspect_ratio", "image_size" }`. The server picks the nearest shape of the model from `width_pixels` and `height_pixels`, and sends no shape with no size, so the model makes a square. `resolution` is `1K`, `2K`, or `4K`, and `1K` by default. `gemini-3.1-flash-lite-image` has one size, so it gets no `image_size` and takes no `resolution`. The page gives no limit of reference pictures for it, so it takes none. The 512 pixel size of `gemini-3.1-flash-image` is left out, because the page does not show its exact value. `transparent_background` set to true is rejected, because no page offers it.
+5. `generate_speech` sends `input: [{ "type": "user_input", "content": [{ "type": "text", "text" }] }]`, `response_format: { "type": "audio" }`, and `generation_config.speech_config: [{ "voice" }]`, as the speech guide shows. The API reference names the field `structured_speech_config`. The builder follows the guide, because each of its examples uses `speech_config`. A first real call must confirm it. `instructions` becomes the annotation `{ "type": "speech_metadata", "style" }` of the text. `speed` is rejected, because the model has no such field. The voice is one of the 30 prebuilt voices, and `Kore` by default. The answer is a WAV file, and the server reads its length and returns `cost_usd` as an estimate from the price for each second.
+6. The speech prices are the prices until 2026-12-31. The pricing page doubles the price of `gemini-3.8-flash-tts` from 2027-01-01.
+7. `generate_music` sends `{ model, input }`: the prompt as text, or the text part and up to 10 image parts. The music guide has no field for the length or for singing. So the server adds "Make it N seconds long." for `lyria-3.5`, and "Instrumental only, no vocals." (the words of the guide) when `instrumental` is true, the default. `lyria-3.5` takes 10 to 180 seconds. The guide says "a couple of minutes", so the range is a choice of the builder. `lyria-3-clip-preview` always makes 30 seconds, so it takes only 30. The server reads the length of the MP3 file from its frames.
+8. A price for each song does not fit `MediaModelPrice`, so the music models have an empty `prices` list.
+9. Left out of the Gemini catalog: `gemini-2.5-flash-image` (the image guide calls it legacy), `gemini-3.1-flash-tts-preview` (the models page calls it legacy), `gemini-2.5-flash-preview-tts` and `gemini-2.5-pro-preview-tts` (the speech guide does not say that they take the request above), `lyria-3-pro-preview` (its page names `lyria-3-clip-preview` as its model code, and the music guide does not show it), `lyria-realtime-exp`, `genie-4`, and the Live models (they stream, which the convention does not cover), and `gemini-omni-1.1-flash` (it routes to `gemini-omni-1.2-flash` on 2026-12-03).
+10. `tools/openai-media` lists these models. The models of before keep their state, so they have no `tested`. Each new model has `tested: false`.
+
+    | Kind    | Model id                 | New | Note                                                            |
+    | ------- | ------------------------ | --- | --------------------------------------------------------------- |
+    | Picture | `gpt-image-2.5-flare`    | No  | The default                                                     |
+    | Picture | `gpt-image-2.5-sunburst` | Yes | Same settings. Token prices only                                |
+    | Picture | `gpt-image-2.6-flare`    | Yes | Same settings. Token prices only                                |
+    | Picture | `gpt-image-2.6-sunburst` | Yes | Same settings. Token prices only                                |
+    | Voice   | `gpt-4o-mini-tts`        | No  | The default. Shuts down on 2027-01-06                           |
+    | Voice   | `tts-1`                  | Yes | 0.015 US dollars for 1,000 characters. Shuts down on 2027-01-06 |
+    | Voice   | `tts-1-hd`               | Yes | 0.03 for 1,000 characters. Shuts down on 2027-01-06             |
+    | Align   | `whisper-1`              | No  | The only model with word timestamps. Shuts down on 2027-02-26   |
+
+11. `tts-1` and `tts-1-hd` take 9 voices, `alloy` by default, and no `instructions`, as the API reference says. The server rejects another voice and `instructions` before any request. It returns `cost_usd` as an estimate from the number of characters.
+12. OpenAI has no video model in the public API. The video generation guide says that the Sora 2 models and the Videos API shut down on 2026-09-24, with no replacement. So `tools/openai-media` gets no `generate_video`. The OpenAI API has no music model.
+13. `accepts` lists `reference_images` for each picture model that takes reference pictures and for the music models, and `first_frame`, `last_frame`, and `reference_images` for `gemini-omni-1.2-flash`. A voice model has no `accepts`.

@@ -18,6 +18,8 @@ OpenAI retires models often. Each tool has a default model, and an environment v
 | `generate_speech` | `gpt-4o-mini-tts`     | `YUMEKIT_OPENAI_SPEECH_MODEL` | 2027-01-06         |
 | `align_words`     | `whisper-1`           | `YUMEKIT_OPENAI_ALIGN_MODEL`  | 2027-02-26         |
 
+The catalog also lists `gpt-image-2.5-sunburst`, `gpt-image-2.6-flare`, and `gpt-image-2.6-sunburst` for pictures, and `tts-1` and `tts-1-hd` for voice. `tts-1` and `tts-1-hd` take 9 voices and no `instructions`. OpenAI has no video model in its API since 2026-09-24. Document 16, "Details of WP46", has the facts of 2026-11-22.
+
 After a shutdown date, the tool fails with the message of the API. Set the variable to a model that the OpenAI documents still list for the same endpoint. `align_words` needs a model that returns word timestamps.
 
 ## Description and key check

@@ -30,22 +30,24 @@ export const interactionSchema = z.object({
 
 export type Interaction = z.infer<typeof interactionSchema>;
 
-export type VideoOutput =
+export type OutputPartType = "image" | "audio" | "video";
+
+export type OutputPart =
   | { kind: "data"; bytes: Buffer; mimeType: string }
   | { kind: "uri"; uri: string; mimeType: string };
 
-const defaultMimeType = "video/mp4";
-
-export function videoOutputOf(
-  interaction: Interaction,
-): VideoOutput | undefined {
-  const parts = (interaction.steps ?? [])
+export function outputPartOf(options: {
+  interaction: Interaction;
+  type: OutputPartType;
+  defaultMimeType: string;
+}): OutputPart | undefined {
+  const parts = (options.interaction.steps ?? [])
     .filter((step) => step.type === "model_output")
     .flatMap((step) => step.content ?? [])
-    .filter((part) => part.type === "video");
+    .filter((part) => part.type === options.type);
   const part = parts.at(-1);
   if (!part) return undefined;
-  const mimeType = part.mime_type ?? defaultMimeType;
+  const mimeType = part.mime_type ?? options.defaultMimeType;
   if (part.data !== undefined && part.data !== "") {
     return { kind: "data", bytes: Buffer.from(part.data, "base64"), mimeType };
   }
@@ -55,15 +57,31 @@ export function videoOutputOf(
   return undefined;
 }
 
-export function videoTokensOf(interaction: Interaction): number | undefined {
-  return interaction.usage?.output_tokens_by_modality?.find(
-    (entry) => entry.modality === "video",
+export function outputTokensOf(options: {
+  interaction: Interaction;
+  modality: OutputPartType;
+}): number | undefined {
+  return options.interaction.usage?.output_tokens_by_modality?.find(
+    (entry) => entry.modality === options.modality,
   )?.tokens;
 }
 
-export function fileExtensionOf(mimeType: string): string {
-  const subtype = mimeType.split("/")[1]?.split(";")[0]?.trim() ?? "";
-  if (subtype === "quicktime") return "mov";
+const extensionsByMimeType: Partial<Record<string, string>> = {
+  "video/quicktime": "mov",
+  "image/jpeg": "jpg",
+  "audio/mpeg": "mp3",
+  "audio/x-wav": "wav",
+  "audio/wave": "wav",
+};
+
+export function fileExtensionOf(options: {
+  mimeType: string;
+  fallback: string;
+}): string {
+  const mimeType = options.mimeType.split(";")[0]?.trim().toLowerCase() ?? "";
+  const subtype = mimeType.split("/")[1] ?? "";
+  const known = extensionsByMimeType[mimeType];
+  if (known !== undefined) return known;
   if (/^[a-z0-9]+$/.test(subtype)) return subtype;
-  return "mp4";
+  return options.fallback;
 }

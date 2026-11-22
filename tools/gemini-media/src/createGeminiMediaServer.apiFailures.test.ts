@@ -1,6 +1,6 @@
 import { readdir } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
-import { maximumPolls } from "./video/requestVideo.ts";
+import { maximumPolls } from "./interactions/requestOutput.ts";
 import { callVideo } from "./testing/callVideo.ts";
 import {
   inOrder,

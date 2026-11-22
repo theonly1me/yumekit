@@ -1,22 +1,15 @@
-export type OpenAiCapability = "image" | "speech" | "align";
+import { alignEntries } from "./alignModels.ts";
+import type {
+  CatalogEntry,
+  CatalogModel,
+  OpenAiCapability,
+} from "./catalogModel.ts";
+import { imageEntries } from "./imageModels.ts";
+import { speechEntries } from "./speechModels.ts";
 
-const readOn = "2026-11-21";
+export type { OpenAiCapability } from "./catalogModel.ts";
 
-export const openAiVoices = [
-  "marin",
-  "cedar",
-  "alloy",
-  "ash",
-  "ballad",
-  "coral",
-  "echo",
-  "fable",
-  "nova",
-  "onyx",
-  "sage",
-  "shimmer",
-  "verse",
-] as const;
+const readOn = "2026-11-22";
 
 export const apiKeyVariable = "OPENAI_API_KEY";
 
@@ -31,73 +24,15 @@ export const openAiKey = {
   ],
 };
 
-type CatalogSetting = { name: string; label: string } & (
-  | { kind: "switch"; default: boolean }
-  | { kind: "choice"; choices: string[]; default: string }
-  | { kind: "image-files"; maximum: number }
-);
-
-interface CatalogPrice {
-  usd: number;
-  unit: "image" | "minute";
-  when: Record<string, string>;
-}
-
-export interface CatalogModel {
-  id: string;
-  label: string;
-  capability: OpenAiCapability;
-  settings: CatalogSetting[];
-  prices: CatalogPrice[];
-  shutdown_on?: string;
-}
-
-export const catalogModels: CatalogModel[] = [
-  {
-    id: "gpt-image-2.5-flare",
-    label: "GPT Image 2.5 Flare",
-    capability: "image",
-    settings: [
-      {
-        name: "transparent_background",
-        label: "Transparent background",
-        kind: "switch",
-        default: false,
-      },
-      {
-        name: "reference_image_paths",
-        label: "Reference images",
-        kind: "image-files",
-        maximum: 16,
-      },
-    ],
-    prices: [],
-  },
-  {
-    id: "gpt-4o-mini-tts",
-    label: "GPT-4o mini TTS",
-    capability: "speech",
-    settings: [
-      {
-        name: "voice",
-        label: "Voice",
-        kind: "choice",
-        choices: [...openAiVoices],
-        default: "marin",
-      },
-    ],
-    prices: [],
-    shutdown_on: "2027-01-06",
-  },
-  {
-    id: "whisper-1",
-    label: "Whisper",
-    capability: "align",
-    settings: [],
-    prices: [{ usd: 0.006, unit: "minute", when: {} }],
-    shutdown_on: "2027-02-26",
-  },
+export const catalogEntries: CatalogEntry[] = [
+  ...imageEntries,
+  ...speechEntries,
+  ...alignEntries,
 ];
+
+export const catalogModels: CatalogModel[] = catalogEntries.map(
+  (entry) => entry.model,
+);
 
 export type ActiveModels = Record<OpenAiCapability, string>;
 
