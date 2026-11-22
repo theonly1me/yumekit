@@ -1,0 +1,51 @@
+{
+  "endpoint_id": "bytedance/seedream/v5.5/edit",
+  "page": "https://fal.ai/models/bytedance/seedream/v5.5/edit",
+  "schema_url": "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=bytedance/seedream/v5.5/edit",
+  "read_on": "2026-11-22",
+  "required": ["image_urls", "prompt"],
+  "properties": {
+    "background": {
+      "types": ["string"],
+      "enum": ["auto", "opaque", "transparent"]
+    },
+    "enable_safety_checker": {
+      "types": ["boolean"]
+    },
+    "image_size": {
+      "types": ["object", "string"],
+      "enum": [
+        "square_hd",
+        "square",
+        "portrait_4_3",
+        "portrait_16_9",
+        "landscape_4_3",
+        "landscape_16_9",
+        "auto_1K",
+        "auto_1.5K",
+        "auto_2K"
+      ]
+    },
+    "image_urls": {
+      "types": ["array"]
+    },
+    "num_images": {
+      "types": ["integer"],
+      "minimum": 1,
+      "maximum": 6
+    },
+    "output_format": {
+      "types": ["string"],
+      "enum": ["jpeg", "png"]
+    },
+    "prompt": {
+      "types": ["string"]
+    },
+    "sync_mode": {
+      "types": ["boolean"]
+    },
+    "watermark": {
+      "types": ["boolean"]
+    }
+  }
+}

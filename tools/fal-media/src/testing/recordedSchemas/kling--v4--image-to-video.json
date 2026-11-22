@@ -1,0 +1,38 @@
+{
+  "endpoint_id": "kling/v4/image-to-video",
+  "page": "https://fal.ai/models/kling/v4/image-to-video",
+  "schema_url": "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=kling/v4/image-to-video",
+  "read_on": "2026-11-22",
+  "required": ["start_image_url"],
+  "properties": {
+    "duration": {
+      "types": ["integer"],
+      "minimum": 3,
+      "maximum": 30
+    },
+    "end_image_url": {
+      "types": ["null", "string"]
+    },
+    "hdr": {
+      "types": ["boolean"]
+    },
+    "middle_image_urls": {
+      "types": ["array", "null"],
+      "maxItems": 8
+    },
+    "multi_prompt": {
+      "types": ["array", "null"],
+      "minItems": 1
+    },
+    "prompt": {
+      "types": ["null", "string"]
+    },
+    "resolution": {
+      "types": ["string"],
+      "enum": ["720p", "1080p", "4k"]
+    },
+    "start_image_url": {
+      "types": ["string"]
+    }
+  }
+}

@@ -2,7 +2,7 @@
   "name": "@yumekit/fal-media",
   "version": "0.0.0",
   "private": true,
-  "description": "A media tool server that makes video clips with models that fal hosts, with the fal API key of the user.",
+  "description": "A media tool server that makes pictures and video clips with models that fal hosts, with the fal API key of the user.",
   "license": "Apache-2.0",
   "type": "module",
   "bin": {

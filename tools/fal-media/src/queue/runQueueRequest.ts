@@ -44,8 +44,6 @@ const queueStatus = z.object({
   status: z.enum(["IN_QUEUE", "IN_PROGRESS", "COMPLETED"]),
 });
 
-const videoResult = z.object({ video: z.object({ url: z.url() }) });
-
 function getRequest(options: { url: string; apiKey: string }): Request {
   return new Request(options.url, { headers: authorization(options.apiKey) });
 }
@@ -77,12 +75,13 @@ async function waitForCompletion(
   };
 }
 
-export async function runQueueRequest(
+export async function runQueueRequest<Output>(
   options: QueueOptions & {
     endpointId: string;
     fields: Record<string, unknown>;
+    output: z.ZodType<Output>;
   },
-): Promise<Outcome<string, FalFailure>> {
+): Promise<Outcome<Output, FalFailure>> {
   const submit = await requestJson({
     sendRequest: options.sendRequest,
     schema: submitted,
@@ -109,7 +108,7 @@ export async function runQueueRequest(
   }
   const result = await requestJson({
     sendRequest: options.sendRequest,
-    schema: videoResult,
+    schema: options.output,
     request: getRequest({
       url: submit.value.response_url,
       apiKey: options.apiKey,
@@ -124,5 +123,5 @@ export async function runQueueRequest(
       },
     };
   }
-  return { ok: true, value: result.value.video.url };
+  return result;
 }

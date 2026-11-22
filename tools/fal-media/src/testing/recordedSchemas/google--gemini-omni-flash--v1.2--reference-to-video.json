@@ -1,0 +1,33 @@
+{
+  "endpoint_id": "google/gemini-omni-flash/v1.2/reference-to-video",
+  "page": "https://fal.ai/models/google/gemini-omni-flash/v1.2/reference-to-video",
+  "schema_url": "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=google/gemini-omni-flash/v1.2/reference-to-video",
+  "read_on": "2026-11-22",
+  "required": ["prompt"],
+  "properties": {
+    "aspect_ratio": {
+      "types": ["string"],
+      "enum": ["16:9", "9:16"]
+    },
+    "duration": {
+      "types": ["integer"],
+      "minimum": 3,
+      "maximum": 15
+    },
+    "image_urls": {
+      "types": ["array"],
+      "maxItems": 10
+    },
+    "prompt": {
+      "types": ["string"]
+    },
+    "reference_video_urls": {
+      "types": ["array"],
+      "maxItems": 3
+    },
+    "resolution": {
+      "types": ["string"],
+      "enum": ["360p", "720p", "1080p", "4k"]
+    }
+  }
+}

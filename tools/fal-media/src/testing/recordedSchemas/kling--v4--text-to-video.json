@@ -1,0 +1,32 @@
+{
+  "endpoint_id": "kling/v4/text-to-video",
+  "page": "https://fal.ai/models/kling/v4/text-to-video",
+  "schema_url": "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=kling/v4/text-to-video",
+  "read_on": "2026-11-22",
+  "required": [],
+  "properties": {
+    "aspect_ratio": {
+      "types": ["string"],
+      "enum": ["16:9", "9:16", "1:1", "4:3", "3:4", "21:9"]
+    },
+    "duration": {
+      "types": ["integer"],
+      "minimum": 3,
+      "maximum": 30
+    },
+    "hdr": {
+      "types": ["boolean"]
+    },
+    "multi_prompt": {
+      "types": ["array", "null"],
+      "minItems": 1
+    },
+    "prompt": {
+      "types": ["null", "string"]
+    },
+    "resolution": {
+      "types": ["string"],
+      "enum": ["720p", "1080p", "4k"]
+    }
+  }
+}

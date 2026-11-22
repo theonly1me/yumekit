@@ -1,29 +1,37 @@
-import { estimatedCostUsd } from "../catalog/index.ts";
+import { z } from "zod";
 import { requestBytes } from "../falApi.ts";
+import { runQueueRequest } from "../queue/runQueueRequest.ts";
 import {
   writeOutputFile,
   type Outcome,
-  type VideoToolResult,
+  type MediaToolResult,
 } from "../toolResults.ts";
 import { endpointCall, type MakeVideoOptions } from "./endpointCall.ts";
 import { readMp4Facts } from "./mp4Facts.ts";
-import { runQueueRequest } from "./runQueueRequest.ts";
+import { videoCostFields } from "./videoCost.ts";
+
+const videoOutput = z.object({ video: z.object({ url: z.url() }) });
 
 export async function makeVideo(
   options: MakeVideoOptions,
-): Promise<Outcome<VideoToolResult, string>> {
+): Promise<Outcome<MediaToolResult, string>> {
   const call = await endpointCall(options);
   if (!call.ok) return call;
-  const videoUrl = await runQueueRequest({ ...options, ...call.value });
-  if (!videoUrl.ok) return { ok: false, failure: videoUrl.failure.message };
+  const output = await runQueueRequest({
+    ...options,
+    ...call.value,
+    output: videoOutput,
+  });
+  if (!output.ok) return { ok: false, failure: output.failure.message };
+  const videoUrl = output.value.video.url;
   const video = await requestBytes({
     sendRequest: options.sendRequest,
-    request: new Request(videoUrl.value),
+    request: new Request(videoUrl),
   });
   if (!video.ok) {
     return {
       ok: false,
-      failure: `Cannot download the video from ${videoUrl.value}: ${video.failure.message}`,
+      failure: `Cannot download the video from ${videoUrl}: ${video.failure.message}`,
     };
   }
   const written = await writeOutputFile({
@@ -51,12 +59,7 @@ export async function makeVideo(
             : { height_pixels: facts.heightPixels }),
         },
       ],
-      cost_usd: estimatedCostUsd({
-        model: options.input.model,
-        resolution: options.input.resolution,
-        durationSeconds,
-      }),
-      cost_is_estimate: true,
+      ...videoCostFields({ input: options.input, durationSeconds }),
     },
   };
 }
