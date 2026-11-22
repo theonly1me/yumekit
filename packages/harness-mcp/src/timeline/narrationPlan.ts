@@ -1,13 +1,14 @@
-import type {
-  Asset,
-  Edit,
-  ProjectSnapshot,
-  Scene,
-  Timeline,
-  Track,
+import {
+  captionComponent,
+  isCaptionTrack,
+  type Asset,
+  type Edit,
+  type ProjectSnapshot,
+  type Scene,
+  type Timeline,
+  type Track,
 } from "@yumekit/project";
 
-const captionComponent = "caption-words";
 const idLengthLimit = 64;
 export const videoSoundTrackId = "video-sound";
 
@@ -28,25 +29,6 @@ function isCaptionSceneOf(options: { scene: Scene; assetId: string }): boolean {
     source.kind === "kit" &&
     source.component === captionComponent &&
     source.props["assetId"] === options.assetId
-  );
-}
-
-export function isCaptionTrack(options: {
-  track: Track;
-  scenes: Scene[];
-}): boolean {
-  const { track, scenes } = options;
-  return (
-    track.kind === "scene" &&
-    track.clips.length > 0 &&
-    track.clips.every((clip) =>
-      scenes.some(
-        (scene) =>
-          scene.id === clip.sceneId &&
-          scene.source.kind === "kit" &&
-          scene.source.component === captionComponent,
-      ),
-    )
   );
 }
 

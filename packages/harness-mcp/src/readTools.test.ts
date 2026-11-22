@@ -39,6 +39,11 @@ describe("read tools", () => {
         "copy_timeline",
         "place_narration",
         "place_video",
+        "resize_scene_clip",
+        "move_scene_clip",
+        "remove_scene_clip",
+        "duplicate_scene_clip",
+        "set_track_off",
         "undo",
         "redo",
         "generate_asset",
@@ -169,6 +174,7 @@ describe("read tools", () => {
         {
           id: "main",
           kind: "scene",
+          off: false,
           clips: [
             {
               id: "a",
