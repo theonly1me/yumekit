@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { videoStyleIds } from "../videoStyle/videoStyles.js";
 
 const outputSchema = z.object({
   id: z.string(),
@@ -83,6 +84,7 @@ export const snapshotSchema = z.object({
     name: z.string(),
     framesPerSecond: z.number(),
     outputs: z.array(outputSchema),
+    videoStyle: z.enum(videoStyleIds).optional(),
   }),
   scenes: z.array(sceneSchema),
   sceneCode: z.record(z.string(), z.string()),

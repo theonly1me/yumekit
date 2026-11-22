@@ -1,6 +1,12 @@
 export type { Outcome } from "./outcome.js";
 export type { JsonObject } from "./format/values.js";
-export type { Output, Project } from "./format/project.js";
+export {
+  videoStyleOf,
+  videoStyles,
+  type Output,
+  type Project,
+  type VideoStyle,
+} from "./format/project.js";
 export {
   findPlatform,
   inCatalogOrder,

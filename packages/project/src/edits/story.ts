@@ -5,7 +5,12 @@ import { problem, type EditResult } from "./editFailure.js";
 
 interface StoryEdit<
   Kind extends EditOfKind<
-    "setProjectName" | "addOutput" | "removeOutput" | "setScript" | "setBible"
+    | "setProjectName"
+    | "addOutput"
+    | "removeOutput"
+    | "setScript"
+    | "setBible"
+    | "setVideoStyle"
   >["kind"],
 > {
   state: ProjectState;
@@ -65,4 +70,12 @@ export function setScript(options: StoryEdit<"setScript">): EditResult {
 
 export function setBible(options: StoryEdit<"setBible">): EditResult {
   return succeed({ ...options.state, bible: options.edit.bible });
+}
+
+export function setVideoStyle(options: StoryEdit<"setVideoStyle">): EditResult {
+  const { state, edit } = options;
+  return succeed({
+    ...state,
+    project: { ...state.project, videoStyle: edit.videoStyle },
+  });
 }

@@ -35,6 +35,7 @@ describe("the start screen", () => {
     expect(pressed).toEqual([
       "YouTube16:9, 1920 x 1080",
       "TikTok9:16, 1080 x 1920",
+      "GraphicsEach scene is drawn by code. It is exact, and it costs nothing.",
       "30 seconds",
     ]);
     expect(await button.isDisabled()).toBe(true);
@@ -99,6 +100,33 @@ describe("the start screen", () => {
       .toBe(1);
     expect(again.page.url()).toBe(page.url());
     await again.close();
+    await close();
+  });
+
+  it("makes an AI video project, and shows the limit of AI video before the project exists", async () => {
+    const home = await startHome("no-agent");
+    const { page, close } = await openEditor(home.url);
+    const limitLine =
+      "yumekit makes at most 30 seconds of AI video for this project. You can change this in Settings.";
+    await page.getByLabel("What do you want to make?").fill("Waves");
+    expect(await page.getByText(limitLine).count()).toBe(0);
+
+    await page.getByRole("button", { name: /^AI video/ }).click();
+    await expect.poll(() => page.getByText(limitLine).count()).toBe(1);
+    await page.getByRole("button", { name: "Make the video" }).click();
+
+    await expect
+      .poll(() =>
+        readFile(join(home.projectsFolder, "waves", "project.json"), "utf8")
+          .then((text) =>
+            z.object({ videoStyle: z.string() }).parse(JSON.parse(text)),
+          )
+          .then(
+            (project) => project.videoStyle,
+            () => undefined,
+          ),
+      )
+      .toBe("ai-video");
     await close();
   });
 

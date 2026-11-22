@@ -26,16 +26,16 @@ function createHarnessServer(options: {
 
 ### Read
 
-| Tool               | Input       | Result                                                                                                                                             |
-| ------------------ | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `get_project`      | none        | Name, frame rate, outputs with their `platforms`, script, bible, a list of scenes (id, title, kind), the length of each timeline, and the revision |
-| `get_scene`        | `scene_id`  | The scene record, and the code of a module scene                                                                                                   |
-| `get_timeline`     | `output_id` | All tracks and clips of the output, with `off` for each track                                                                                      |
-| `list_assets`      | `kind?`     | Each asset record. Word timings are not included                                                                                                   |
-| `get_asset_words`  | `asset_id`  | The word timings of a speech asset, from `readAssetWords`                                                                                          |
-| `list_kit_scenes`  | none        | Each kit scene: name, purpose, and the schema of its props                                                                                         |
-| `get_scene_guide`  | none        | The reference for custom scene code: the contract, the hooks, the animation functions, the rules, and two examples                                 |
-| `list_media_tools` | none        | Each connected media server, its capabilities, its description, and the state of each key, and `generated_video` of document 09                    |
+| Tool               | Input       | Result                                                                                                                                                            |
+| ------------------ | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `get_project`      | none        | Name, frame rate, `video_style`, outputs with their `platforms`, script, bible, a list of scenes (id, title, kind), the length of each timeline, and the revision |
+| `get_scene`        | `scene_id`  | The scene record, and the code of a module scene                                                                                                                  |
+| `get_timeline`     | `output_id` | All tracks and clips of the output, with `off` for each track                                                                                                     |
+| `list_assets`      | `kind?`     | Each asset record. Word timings are not included                                                                                                                  |
+| `get_asset_words`  | `asset_id`  | The word timings of a speech asset, from `readAssetWords`                                                                                                         |
+| `list_kit_scenes`  | none        | Each kit scene: name, purpose, and the schema of its props                                                                                                        |
+| `get_scene_guide`  | none        | The reference for custom scene code: the contract, the hooks, the animation functions, the rules, and two examples                                                |
+| `list_media_tools` | none        | Each connected media server, its capabilities, its description, and the state of each key, and `generated_video` of document 09                                   |
 
 ### Write the story
 
@@ -49,6 +49,9 @@ function createHarnessServer(options: {
 | `remove_platform` | `platform_id`                                                                                 | `setOutputPlatforms`, or `removeOutput`                 |
 | `put_scene`       | `scene_id`, `title`, `notes?`, then either `kit_component` and `props`, or `code` and `props` | `putScene`                                              |
 | `remove_scene`    | `scene_id`                                                                                    | `removeScene`                                           |
+| `set_video_style` | `video_style` (`graphics`, `ai-video`, `mix`)                                                 | `setVideoStyle`                                         |
+
+`set_video_style` follows the section "The video style" of document 15. `get_project` gives `graphics` for a project with no value. The descriptions of both tools say what each style means, and tell the agent to change the style only when the person asks.
 
 `add_platform` and `remove_platform` follow the section "Platforms" of document 13. Each call is one `applyEdits` call, so it is one undo step. `add_output` is for a custom size. The descriptions of `add_output` and `add_platform` tell an agent this.
 

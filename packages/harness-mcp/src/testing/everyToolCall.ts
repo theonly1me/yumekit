@@ -72,6 +72,7 @@ export function everyToolCall(importSourcePath: string): ScriptedCall[] {
     { name: "remove_scene_clip", input: { clip_id: "a-copy" } },
     { name: "set_track_off", input: { track_id: "main", off: true } },
     { name: "set_track_off", input: { track_id: "main", off: false } },
+    { name: "set_video_style", input: { video_style: "mix" } },
     { name: "get_timeline", input: { output_id: "wide" } },
     { name: "remove_clip", input: { output_id: "wide", clip_id: "b" } },
     {

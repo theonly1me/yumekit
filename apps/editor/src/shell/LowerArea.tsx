@@ -7,13 +7,14 @@ import type {
   Timeline as TimelineData,
 } from "../engine/snapshot.js";
 import { SceneActions, type PickedCard } from "../scenes/SceneActions.js";
-import { SceneCards } from "../scenes/SceneCards.js";
+import { isVideoScene, SceneCards } from "../scenes/SceneCards.js";
 import type { SceneEdits } from "../scenes/sceneEdits.js";
 import type { DirectChanges } from "../scenes/useDirectChanges.js";
 import { useSceneStills } from "../scenes/useSceneStills.js";
 import { SoundRows } from "../sound/SoundRows.js";
 import { soundRowsOf } from "../sound/soundRowFacts.js";
 import { Timeline, type PickedClip } from "../timeline/Timeline.js";
+import { backToGraphicsRequest } from "../videoStyle/videoStyles.js";
 import type { EditorChat } from "./useEditorChat.js";
 
 export function LowerArea(props: {
@@ -86,6 +87,12 @@ export function LowerArea(props: {
         {mainClips.length === 0 ? undefined : (
           <SceneActions
             picked={picked}
+            isVideo={isVideoScene(
+              snapshot.scenes.find(
+                (scene) => scene.id === picked?.clip.sceneId,
+              ),
+            )}
+            isChatRunning={editorChat.chat.isRunning}
             framesPerSecond={framesPerSecond}
             onEditText={props.onEditText}
             onLength={(durationFrames) => {
@@ -95,6 +102,13 @@ export function LowerArea(props: {
             }}
             onMakeClip={() => {
               if (picked !== undefined) props.onMakeClip(picked.clip);
+            }}
+            onBackToGraphics={() => {
+              if (picked === undefined) return;
+              editorChat.sendAboutClip({
+                text: backToGraphicsRequest,
+                clipId: picked.clip.id,
+              });
             }}
             onDuplicate={() => {
               if (picked !== undefined) edits.duplicate(picked.clip);

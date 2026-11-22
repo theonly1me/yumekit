@@ -44,6 +44,7 @@ describe("read tools", () => {
         "remove_scene_clip",
         "duplicate_scene_clip",
         "set_track_off",
+        "set_video_style",
         "undo",
         "redo",
         "generate_asset",
@@ -96,6 +97,7 @@ describe("read tools", () => {
     expect(data).toMatchObject({
       name: "Harness test",
       frames_per_second: 30,
+      video_style: "graphics",
       outputs: [
         {
           id: "wide",

@@ -57,8 +57,15 @@ button.card {
 }
 
 .card-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 8px;
   font-size: var(--step--2);
   color: var(--faint);
+}
+
+.card-style[data-video="true"] {
+  color: var(--accent);
 }
 
 .card[data-shown="true"] .card-title {

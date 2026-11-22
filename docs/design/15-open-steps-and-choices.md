@@ -168,3 +168,16 @@ WP37 and WP40 share the folder `apps/editor/src/parts/`. WP37 owns the frame (`p
     - `oneTimeModelSentence(target)` gives the sentence "Use the model `<label>` of `<service>`." for the fixed request.
     - `useMediaChoices(client)` and `currentModelOf({ state, kind })` give the model that applies now, with `server` and `model`. "Make a real video clip" can start its list on that model.
 12. The rule of the instructions is rule 10, at the end of the list, so the numbers of the other rules do not change.
+
+## Details of WP39
+
+1. `videoStyle` is optional in `project.json`. `videoStyleOf(project)` from `@yumekit/project` gives `graphics` when the field is absent. `createProject` takes an optional `videoStyle`, and the home server always gives one.
+2. `POST /api/home/projects` takes `video_style` as optional, with `graphics` as the default. A value that is not in the list gives status 400.
+3. The style reaches the AI only through `get_project`. The first request text keeps its lines. Rule 2 of the instructions makes `get_project` the first call, and rule 4 tells the AI to read the style.
+4. The descriptions of `get_project` and `set_video_style` say what each style means. The description of `set_video_style` tells the agent to change the style only when the person asks. The server instructions do not change.
+5. `GET /api/home` gives `generated_video_limit_seconds`: the limit of the user file `media-tools.json`, 30 with no value, and `null` when the file is not valid. A new project has no project file, so this is the limit that applies to it.
+6. The limit line of the start screen has two more forms. With `null`: "yumekit has a limit of AI video for each project. You can change this in Settings." With 0: "AI video is turned off in Settings, so yumekit draws each scene by code. You can change this in Settings."
+7. The lines of the three choices: "Each scene is drawn by code. It is exact, and it costs nothing.", "Each scene is a video clip from a video model. It looks real, and it costs money.", and "The AI picks for each scene: graphics for words and numbers, a video clip for a real shot."
+8. The group "This video" is the first group of Settings. A pick calls `set_video_style` at once. The group stays on while a request runs, because the AI reads the style at the start of its next request.
+9. A scene card shows "Graphics" or "Video clip" after its length. A scene is a video clip when it shows the kit scene `video-clip`.
+10. "Back to graphics" shows next to "Make a real video clip", only on a picked scene with a clip. It is off while a request runs. Its text is in `apps/editor/src/videoStyle/videoStyles.ts` until the table of fixed requests (WP40) exists.

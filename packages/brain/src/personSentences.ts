@@ -22,6 +22,7 @@ const personSentencesByToolName: Record<string, string> = {
   remove_scene_clip: "You deleted a scene.",
   duplicate_scene_clip: "You duplicated a scene.",
   set_track_off: "You turned a sound or the captions on or off.",
+  set_video_style: "You changed how the video is made.",
   delete_everything: "You cleared the project.",
 };
 

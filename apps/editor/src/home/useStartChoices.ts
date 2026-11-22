@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { ClientFailure, EngineClient } from "../engine/engineClient.js";
+import type { VideoStyleId } from "../videoStyle/videoStyles.js";
 import {
   makeProject,
   openRecent,
@@ -30,6 +31,7 @@ export function useStartChoices(client: EngineClient) {
     "tiktok",
   ]);
   const [length, setLength] = useState<ProjectLength>(30);
+  const [videoStyle, setVideoStyle] = useState<VideoStyleId>("graphics");
   const [busy, setBusy] = useState<Busy>("idle");
   const [makeFailure, setMakeFailure] = useState<string>();
   const [openFailure, setOpenFailure] = useState<string>();
@@ -51,7 +53,13 @@ export function useStartChoices(client: EngineClient) {
   const make = async () => {
     setBusy("making");
     setMakeFailure(undefined);
-    const reply = await makeProject({ client, request, platformIds, length });
+    const reply = await makeProject({
+      client,
+      request,
+      platformIds,
+      length,
+      videoStyle,
+    });
     if (reply.ok) {
       window.location.assign(reply.value.url);
       return;
@@ -87,6 +95,8 @@ export function useStartChoices(client: EngineClient) {
     },
     length,
     setLength,
+    videoStyle,
+    setVideoStyle,
     busy,
     makeFailure,
     openFailure,

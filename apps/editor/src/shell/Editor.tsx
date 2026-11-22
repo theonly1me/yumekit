@@ -33,6 +33,7 @@ export function Editor(props: {
     client,
     chat: editorChat.chat,
     projectFolder,
+    videoStyle: snapshot.project.videoStyle ?? "graphics",
   });
   const { facts, playback } = view;
   const exporting = useExportSheet({

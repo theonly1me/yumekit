@@ -9,10 +9,13 @@ export interface PickedCard {
 
 export function SceneActions(props: {
   picked: PickedCard | undefined;
+  isVideo: boolean;
+  isChatRunning: boolean;
   framesPerSecond: number;
   onEditText: () => void;
   onLength: (durationFrames: number) => void;
   onMakeClip: () => void;
+  onBackToGraphics: () => void;
   onDuplicate: () => void;
   onDelete: () => void;
 }) {
@@ -44,6 +47,15 @@ export function SceneActions(props: {
       <button type="button" onClick={props.onMakeClip}>
         Make a real video clip
       </button>
+      {props.isVideo ? (
+        <button
+          type="button"
+          disabled={props.isChatRunning}
+          onClick={props.onBackToGraphics}
+        >
+          Back to graphics
+        </button>
+      ) : undefined}
       <button type="button" onClick={props.onDuplicate}>
         Duplicate
       </button>

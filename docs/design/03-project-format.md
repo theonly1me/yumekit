@@ -32,7 +32,10 @@ type Project = {
   name: string;
   framesPerSecond: 24 | 25 | 30 | 50 | 60;
   outputs: Output[];
+  videoStyle?: VideoStyle;
 };
+
+type VideoStyle = "graphics" | "ai-video" | "mix";
 
 type Output = {
   id: string;
@@ -178,6 +181,7 @@ function createProject(options: {
   name: string;
   framesPerSecond: Project["framesPerSecond"];
   outputs: Output[];
+  videoStyle?: VideoStyle;
 }): Promise<Outcome<ProjectStore, CreateFailure>>;
 
 function openProject(options: {
@@ -198,7 +202,7 @@ function openProject(options: {
 
 ## Edits
 
-`Edit` is a closed union on the field `kind`. These 16 kinds are all the ways to change a project.
+`Edit` is a closed union on the field `kind`. These 17 kinds are all the ways to change a project.
 
 | Kind                 | Fields                          | Effect                                                                                                                            |
 | -------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
@@ -206,6 +210,7 @@ function openProject(options: {
 | `addOutput`          | `output`                        | Adds an output and an empty timeline                                                                                              |
 | `removeOutput`       | `outputId`                      | Removes an output and its timeline                                                                                                |
 | `setOutputPlatforms` | `outputId`, `platforms`         | Replaces the platforms of one output. The store keeps them in catalog order. An empty list removes the field                      |
+| `setVideoStyle`      | `videoStyle`                    | Sets the video style of the project (document 15)                                                                                 |
 | `setScript`          | `script`                        | Replaces `script.md`                                                                                                              |
 | `setBible`           | `bible`                         | Replaces `bible.json`                                                                                                             |
 | `putScene`           | `scene`, `code?`                | Adds or replaces a scene. `code` is required for a module scene                                                                   |
@@ -226,6 +231,10 @@ The props of a scene can hold an asset id that the store cannot see. Rule 7 does
 ## Platforms
 
 The platform catalog of document 13 is a fixed list in `@yumekit/project`. The package exports `platformCatalog` and `platformIds` in catalog order, `platformOf` and `findPlatform` for a lookup by id, and `platformsOfSize` for the platforms of one size. An output with no `platforms` is a custom output. A project without the field stays valid, so the format version stays 1.
+
+## Video style
+
+`videoStyle` says how the scenes of the project are made (document 15). A project with no value has `graphics`, so the format version stays 1. `videoStyleOf(project)` from `@yumekit/project` applies this default, and `videoStyles` lists the three values.
 
 ## Not in milestone 1
 

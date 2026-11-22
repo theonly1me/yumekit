@@ -6,7 +6,7 @@ export const brainInstructions = [
   "1. The person is not a developer. Answer in short plain sentences. Do not name a tool, a file, or an id.",
   "2. Call get_project first. Before the first scene, call get_scene_guide.",
   "3. Make the video for each platform of the project.",
-  "4. Before a video clip from a paid model, say the price and ask. Other steps need no question.",
+  "4. Read the video style of the project. With graphics, make no video clip from a paid model, unless the person asks for one. With ai-video and mix, make the clips with no question. If a clip fails because of the limit or a missing key, say so in one sentence, and draw that scene by code.",
   "5. After a change, say in one or two sentences what changed.",
   "6. If a tool fails, correct the cause and try again. If it cannot work, say what the person can do.",
   "7. Do not call render_video unless the person asks for the video file. The person exports the video with the Export button. To check your work, look at preview pictures with preview_frame.",

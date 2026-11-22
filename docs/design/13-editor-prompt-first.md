@@ -175,8 +175,8 @@ WP30 made these choices where this document, document 12, and the prototype give
 
 - The home server is in the same process as the engines. It listens on 127.0.0.1, with its own session token and the same request checks as an engine (document 11).
 - It serves the same editor app. The app shows the start screen when the server says that it is the home server.
-- `GET /api/home` gives `{ recent, agents, projects_folder }`. `recent` comes from `~/.config/yumekit/recent.json`: the folder, the name, the platforms, the length, and the time of the last change, for at most 20 projects that still exist.
-- `POST /api/home/projects` takes `{ request, platform_ids, length }`. `length` is 15, 30, 60, or `auto`. The server makes a folder in the projects folder, creates the project with one output for each size, starts an engine for it, sends the first request to the chat of that engine, and gives the URL of the engine with its token.
+- `GET /api/home` gives `{ recent, agents, projects_folder, generated_video_limit_seconds }`. `recent` comes from `~/.config/yumekit/recent.json`: the folder, the name, the platforms, the length, and the time of the last change, for at most 20 projects that still exist.
+- `POST /api/home/projects` takes `{ request, platform_ids, length, video_style }`. `length` is 15, 30, 60, or `auto`. The server makes a folder in the projects folder, creates the project with one output for each size, starts an engine for it, sends the first request to the chat of that engine, and gives the URL of the engine with its token.
 - `POST /api/home/open` takes `{ folder }` of a recent project. It starts an engine, or finds the one that runs, and gives its URL.
 - The projects folder is `~/Documents/yumekit`. `settings.json` can name another one as `projectsFolder`. The folder name of a project comes from the first words of the request, in lower case with hyphens, with a number when the name is taken.
 - The first request that the engine gets is the text of the person, then one line with the platforms and one line with the length.

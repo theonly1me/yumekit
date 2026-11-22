@@ -1,0 +1,35 @@
+.style-choices {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0 24px;
+}
+
+button.style-choice {
+  display: grid;
+  gap: 4px;
+  align-content: start;
+  text-align: left;
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  padding: 12px 0;
+  font-size: var(--step-0);
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.style-choice em {
+  font-style: normal;
+  font-size: var(--step--2);
+  color: var(--faint);
+}
+
+.style-choice[aria-pressed="true"] {
+  color: var(--text);
+  border-top: 2px solid var(--accent);
+  padding-top: 11px;
+}
+
+.style-choice[aria-pressed="true"] em {
+  color: var(--muted);
+}

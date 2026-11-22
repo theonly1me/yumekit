@@ -11,6 +11,13 @@ describe("the instructions for the agent", () => {
     );
   });
 
+  it("follow the video style of the project for paid video clips", () => {
+    expect(brainInstructions).toContain(
+      "4. Read the video style of the project. With graphics, make no video clip from a paid model, unless the person asks for one. With ai-video and mix, make the clips with no question.",
+    );
+    expect(brainInstructions).not.toContain("say the price and ask");
+  });
+
   it("name a version of the video by its platform, not by an output id", () => {
     expect(brainInstructions).toContain(
       'Name a version of the video by its platform, for example "the YouTube version". Never name it by an output id such as wide or tall.',
