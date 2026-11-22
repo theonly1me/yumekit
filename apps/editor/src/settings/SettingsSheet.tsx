@@ -5,6 +5,7 @@ import { AgentPane } from "../side/agent/AgentPane.js";
 import { ToolsPane } from "../tools/ToolsPane.js";
 import { AiGroup } from "./AiGroup.js";
 import { LimitsGroup } from "./LimitsGroup.js";
+import { ServicesGroup } from "./services/index.js";
 import "./settings.css";
 
 export function SettingsSheet(props: {
@@ -20,6 +21,7 @@ export function SettingsSheet(props: {
       <div className="sheet-body">
         <h2 id="settings-title">Settings</h2>
         <AiGroup client={props.client} chat={props.chat} />
+        <ServicesGroup client={props.client} />
         <section className="setting-group" aria-labelledby="tools-title">
           <h3 id="tools-title">Media tools and keys</h3>
           <ToolsPane

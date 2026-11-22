@@ -1,4 +1,16 @@
 export { findBundledServers } from "./bundledServers.js";
+export type {
+  ChoiceCapability,
+  ChoiceModel,
+  ChoiceService,
+  CurrentPick,
+  MediaChoice,
+  MediaChoices,
+  MediaPick,
+  MediaPickFailure,
+  ServiceState,
+} from "./choiceTypes.js";
+export { choiceCapabilities } from "./mediaChoices.js";
 export { connectMediaTools } from "./connectMediaTools.js";
 export {
   configurationDirectory,

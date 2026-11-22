@@ -17,6 +17,7 @@ export function KeyGuide(props: {
   serverId: string;
   mediaKey: MediaKey;
   requests: KeyRequests;
+  onSaved?: () => void;
 }) {
   const { mediaKey, requests } = props;
   const input = useRef<HTMLInputElement>(null);
@@ -40,6 +41,7 @@ export function KeyGuide(props: {
             ? { kind: "idle" }
             : { kind: "failed", message: failureTextOf(saved.failure) },
         );
+        if (saved.ok) props.onSaved?.();
       },
       (error: unknown) => {
         setState({ kind: "failed", message: String(error) });

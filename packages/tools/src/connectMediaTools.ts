@@ -6,7 +6,10 @@ import {
   type ServerConnection,
   type StartedServer,
 } from "./connectServer.js";
+import { checkPick } from "./checkPick.js";
+import { mediaChoicesOf } from "./mediaChoices.js";
 import { runTool } from "./runTool.js";
+import { saveUserDefault } from "./saveUserDefault.js";
 import {
   describedDefaultModel,
   isStarted,
@@ -43,6 +46,7 @@ export async function connectMediaTools(options: {
   const configurationRead = await readMediaToolsConfiguration(options);
   if (!configurationRead.ok) return configurationRead;
   const configuration = configurationRead.value;
+  let defaults = configuration.defaults;
   const toolTimeoutSeconds =
     options.toolTimeoutSeconds ?? defaultToolTimeoutSeconds;
   const pool = createServerPool(
@@ -69,10 +73,28 @@ export async function connectMediaTools(options: {
           message: connection.message,
         })),
     limits: () => ({ ...configuration.limits }),
+    choices: () =>
+      mediaChoicesOf({ connections: pool.connections(), defaults }),
+    pick: async (pick) => {
+      const checked = checkPick({ connections: pool.connections(), pick });
+      if (!checked.ok) return checked;
+      const saved = await saveUserDefault(pick);
+      if (!saved.ok) return saved;
+      const reread = await readMediaToolsConfiguration(options);
+      if (!reread.ok) return reread;
+      defaults = reread.value.defaults;
+      return {
+        ok: true,
+        value: await mediaChoicesOf({
+          connections: pool.connections(),
+          defaults,
+        }),
+      };
+    },
     run: async (request) => {
-      const selected = selectServer({
+      const selected = await selectServer({
         connections: pool.connections(),
-        defaults: configuration.defaults,
+        defaults,
         request,
       });
       if (!selected.ok) return selected;

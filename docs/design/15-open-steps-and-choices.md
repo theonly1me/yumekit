@@ -149,3 +149,22 @@ WP37 and WP40 share the folder `apps/editor/src/parts/`. WP37 owns the frame (`p
 - More than one music clip, and a fade that the person sets.
 - A voice that the person records in the browser.
 - A picker for the model of the AI in the chat.
+
+## Details of WP38
+
+1. `MediaTools` of document 06 gets `choices()` and `pick()`. The two media routes call them. `pick` checks the server and the model, writes the user file, and then reads both files again. So the next call uses the merged `defaults` with no restart. The project file still wins for a kind that it names.
+2. A server is ready when it started and no key of its description is missing. A server with no valid description is ready, because yumekit knows no key of it.
+3. yumekit does not know the capabilities of a server that failed to start. So `GET /api/media/choices` gives each failed server once in `failed_servers`, and the state of a service in a list is `ready` or `needs-key`.
+4. The answer of `GET /api/media/choices` is `{ choices, failed_servers }`. Each item of `choices` has `capability`, `current`, and `services`. `current` is `null` when no server makes the kind. Otherwise it has `server`, `server_label`, `model`, `model_label`, `source`, and `state` (`ready`, `needs-key`, or `not-available` for a pick of a server that is not there now). Each service has `server`, `label`, `state`, `keys` (as in `/api/media-servers`), and `models` with `id`, `label`, and `is_default`.
+5. `PUT /api/media/defaults` gives the same shape as the `GET`, and the engine sends `media-servers-changed`. Its failures: `body-not-valid` (400, also for `align`), `server-not-found` (404), `no-server-for-capability` (400), `model-not-found` (400), `invalid-configuration-file` (409, and the engine does not write over the file), and `configuration-not-written` (500).
+6. The entry is the server name alone for a pick with no model, and `{ "server", "model" }` for a pick with a model. The write keeps each other field of the file. yumekit makes a missing configuration folder with mode `0700`, as for the key file.
+7. A service that describes no model of the kind shows one choice, "The model of this service". The sentence for a one-time pick of it is "Use the service `<label>`."
+8. The list shows the services in the order with no pick. It shows each model that a service describes for the kind.
+9. A pick of a model of a service that needs a key opens the key guide under that service. The pick saves after the key saves. "Let yumekit pick the first service that is ready" removes a pick.
+10. When the free test service applies, the row says that it makes test pictures or a test tone, and that another service gives a real video.
+11. `apps/editor/src/settings/services/index.ts` exports the parts for the step views and for "Make a real video clip":
+    - `MadeWith({ client, kind })` shows "Made with `<service>`, `<model>`." with "Change". A pick there changes the pick of Settings.
+    - `MadeWith({ client, kind, once: { chosen, onChoose } })` is the one-time pick. A pick calls `onChoose` with the model and saves nothing. The line then shows the chosen model.
+    - `oneTimeModelSentence(target)` gives the sentence "Use the model `<label>` of `<service>`." for the fixed request.
+    - `useMediaChoices(client)` and `currentModelOf({ state, kind })` give the model that applies now, with `server` and `model`. "Make a real video clip" can start its list on that model.
+12. The rule of the instructions is rule 10, at the end of the list, so the numbers of the other rules do not change.
