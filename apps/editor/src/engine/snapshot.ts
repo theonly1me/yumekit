@@ -71,6 +71,7 @@ const assetSchema = z.object({
     z.object({ kind: z.literal("import"), originalName: z.string() }),
     z.object({
       kind: z.literal("tool"),
+      tool: z.string(),
       input: z.record(z.string(), z.json()),
     }),
   ]),

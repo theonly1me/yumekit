@@ -194,6 +194,34 @@ The Making screen shows five steps. The engine does not report steps. The editor
 
 A step that the request never calls shows as skipped when the request ends.
 
+### Details of the start screen
+
+WP31 made these choices where this document and the prototype give no rule.
+
+1. The home server is `startHomeServer` in `packages/engine/src/home`. It takes `editorFolder`, `port`, and `serverCommandOf`, a function that gives the `serverCommand` of a project folder. The import rules do not change.
+2. The engine and the home server share one request handler with a list of routes. So the token, the `Host` check, and the `Origin` check have one copy. The home server has no WebSocket. It closes each upgrade request.
+3. `GET /api/health` of the home server gives `{ name: "yumekit", server: "home", version }`. The app shows the start screen for `server: "home"`. The engine answer stays as it is.
+4. `agents` of `GET /api/home` lists Claude Code, Codex, and Cursor, each with `installed`, `in_use`, and `sign_in`. `in_use` follows the choice of the chat (document 12). `sign_in` is only for the agent in use.
+5. `POST /api/home/projects` takes a request of 1 to 4000 characters after trim. It keeps each platform once, in catalog order. It answers status 200 with `{ url, folder, first_request }`.
+6. The folder name is the first six words of the first line, in lower case. Each run of other characters becomes one hyphen, with at most 48 characters. An empty result becomes `video`. A taken name gets `-2`, `-3`, and so on. Only letters, digits, and hyphens remain, and the server checks that the folder is a direct child of the projects folder.
+7. The project name is the first six words of the first line, with a capital first letter and no punctuation at the end. An empty result becomes "New video". The frame rate is 30.
+8. The outputs follow `add_platform` from a project with no output: one output for each size, in catalog order, with the output id and the label of the catalog. So a project with no YouTube, X, or LinkedIn has no `wide` output.
+9. The first request is the text of the person, then `Platforms: YouTube, TikTok.`, then `Length: 15 seconds.` For `auto`, the last line is `Length: choose the length that fits the request.` The home server sends it with `POST /api/chat/requests` and the token of that engine.
+10. When the first request does not start, the project stays open. The URL gets `&first-request=<kind>`, for example `no-agent`. The editor removes the value from the address bar, as it does the token. It then shows the failure in plain words with "Open the editor".
+11. `recent.json` is `{ projects: [{ folder, length, openedAt }] }`, with the real path of the folder. `GET /api/home` reads the name and the platforms from `project.json`. The time of the last change is the latest of `openedAt` and the change times of `project.json`, `script.md`, `bible.json`, `assets/index.json`, `scenes`, and `timelines`.
+12. A failed write of `recent.json` does not stop a create or an open. `yumekit open` prints one line about it. `yumekit open` records the folder also when an engine already runs.
+13. `projectsFolder` in `settings.json` is an absolute path or starts with `~/`. Another value gives `settings-not-valid` (409).
+14. The home server stops only the engines that it started. An engine of another `yumekit open` keeps running. A second `yumekit` starts a second home server on another port.
+15. "Change" shows the line "You can pick another AI in Settings of the editor, after the project opens." The settings route of WP30 was not on `main` at the build of WP31.
+16. The prototype has "Custom size" on the start screen. The catalog has no custom platform, so the start screen leaves it out.
+17. The editor shows the Making screen when the chat has one request and its answer runs at the first load. This is also true when a scene exists, because a fast request can add a scene before the page loads.
+18. While the request runs, the first step that is not done is in progress ("Working"). "Pictures" is done after `generate_asset` with an asset from `generate_image`, or after `put_scene` for 2 scenes. "Music" is done after `generate_asset` with an asset from `generate_music`. "Put together" is done after `set_timeline`, or when the answer ends as `done`. A failed request shows it as skipped.
+19. A done step says "The script is ready", "2 pictures are ready", "The voice is ready", "The music is ready", or "The video is ready". A skipped step says "Skipped".
+20. "Open the editor" shows when the project has a scene. When the answer is `done`, the screen says "Your video is ready" for 1.2 seconds, then shows the editor. After "Stop", the editor shows at once.
+21. The line above the title is the request text before its `Platforms:` line.
+22. The editor keeps the theme in `localStorage`, which is separate for each port. So the start screen and the editor can show different themes. This is an inference from the browser rule, not a measured fault.
+23. The release check runs with a temporary `YUMEKIT_CONFIG_DIRECTORY` and also loads the page of `yumekit --no-browser`.
+
 ## Work packages
 
 | Id   | Scope                                                                                                                                       | Needs            |

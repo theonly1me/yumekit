@@ -15,15 +15,24 @@ export interface OpenRun {
 
 const startWaitMilliseconds = 60_000;
 
-export async function runOpen(options: {
+export function runOpen(options: {
   folder: string;
   environment: NodeJS.ProcessEnv;
 }): Promise<OpenRun> {
-  const child = spawn(
-    process.execPath,
-    [builtMainFile, "open", options.folder, "--no-browser"],
-    { env: options.environment, stdio: ["ignore", "pipe", "pipe"] },
-  );
+  return runServing({
+    args: ["open", options.folder, "--no-browser"],
+    environment: options.environment,
+  });
+}
+
+export async function runServing(options: {
+  args: string[];
+  environment: NodeJS.ProcessEnv;
+}): Promise<OpenRun> {
+  const child = spawn(process.execPath, [builtMainFile, ...options.args], {
+    env: options.environment,
+    stdio: ["ignore", "pipe", "pipe"],
+  });
   const chunks: string[] = [];
   child.stdout.on("data", (chunk: Buffer) => chunks.push(chunk.toString()));
   child.stderr.on("data", (chunk: Buffer) => chunks.push(chunk.toString()));
@@ -48,7 +57,9 @@ export async function runOpen(options: {
   }
   const [url = "", port = "", token = ""] = match ?? [];
   if (url === "" || child.pid === undefined) {
-    throw new Error(`yumekit open did not start: ${chunks.join("")}`);
+    throw new Error(
+      `yumekit ${options.args.join(" ")} did not start: ${chunks.join("")}`,
+    );
   }
   return {
     url,

@@ -1,8 +1,6 @@
-import { chmod, mkdir, readFile, writeFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
-import { fileURLToPath } from "node:url";
-import { vi } from "vitest";
 import { z } from "zod";
 import {
   createTestProject,
@@ -10,21 +8,12 @@ import {
 } from "../../testing/engineFixture.js";
 import { openEvents } from "../../testing/eventsClient.js";
 import { rawRequest, withToken } from "../../testing/rawRequest.js";
+import {
+  installFakeAgent,
+  type FakeAgentScenario,
+} from "./fakeAgentProgram.js";
 
-export type FakeStep =
-  | { print: string }
-  | { callTool: { name: string; input: object } }
-  | { waitForStop: { print: string[] } }
-  | { waitForFile: string };
-
-export interface FakeAgentScenario {
-  steps: FakeStep[];
-  exitCode?: number;
-  signedIn?: boolean;
-  resumeFails?: boolean;
-}
-
-const fakeAgentFile = fileURLToPath(new URL("./fakeAgent.ts", import.meta.url));
+export type { FakeAgentScenario, FakeStep } from "./fakeAgentProgram.js";
 
 const chatSchema = z.object({
   state: z.enum(["idle", "running"]),
@@ -33,28 +22,10 @@ const chatSchema = z.object({
 
 export async function startChatEngine(scenario: FakeAgentScenario) {
   const project = await createTestProject();
-  const folder = join(project.root, "fake-agent");
-  await mkdir(folder);
-  const scenarioFile = join(folder, "scenario.json");
-  const writeScenario = (next: FakeAgentScenario) =>
-    writeFile(
-      scenarioFile,
-      JSON.stringify({
-        exitCode: 0,
-        signedIn: true,
-        resumeFails: false,
-        ...next,
-      }),
-    );
-  await writeScenario(scenario);
-  vi.stubEnv("YUMEKIT_FAKE_AGENT_SCENARIO", scenarioFile);
-  vi.stubEnv("PATH", folder);
-  const programPath = join(folder, "claude");
-  await writeFile(
-    programPath,
-    `#!/bin/sh\nexec "${process.execPath}" "${fakeAgentFile}" "$@"\n`,
-  );
-  await chmod(programPath, 0o755);
+  const { programPath, scenarioFile, writeScenario } = await installFakeAgent({
+    folder: join(project.root, "fake-agent"),
+    scenario,
+  });
   await writeFile(
     join(project.configurationDirectory, "settings.json"),
     JSON.stringify({

@@ -45,6 +45,7 @@ const yumekit = values.global
   ? join(prefix, "bin", "yumekit")
   : join(folder, "node_modules", ".bin", "yumekit");
 const projectFolder = join(folder, "video");
+process.env["YUMEKIT_CONFIG_DIRECTORY"] = join(folder, "config");
 try {
   await writeFile(join(folder, "package.json"), '{ "private": true }\n');
   await step({
@@ -127,7 +128,20 @@ try {
   await step({
     name: "yumekit open --no-browser",
     work: () =>
-      checkEditorPage({ command: yumekit, projectFolder, cwd: folder }),
+      checkEditorPage({
+        command: yumekit,
+        args: ["open", projectFolder, "--no-browser"],
+        cwd: folder,
+      }),
+  });
+  await step({
+    name: "yumekit --no-browser",
+    work: () =>
+      checkEditorPage({
+        command: yumekit,
+        args: ["--no-browser"],
+        cwd: folder,
+      }),
   });
 } finally {
   await rm(folder, { recursive: true, force: true });
