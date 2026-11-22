@@ -58,7 +58,9 @@ describe("transitions in the editor", () => {
 
   it("Between scenes in Settings sets one kind for the whole video", async () => {
     const editor = await openEditor(runningEngine().url);
-    await editor.page.getByRole("button", { name: "Settings" }).click();
+    await editor.page
+      .getByRole("button", { name: "Settings", exact: true })
+      .click();
     const row = editor.page.getByRole("group", { name: "Between scenes" });
 
     await row.getByRole("button", { name: "Fade" }).click();
