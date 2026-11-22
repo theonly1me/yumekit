@@ -1,6 +1,11 @@
 import { useState } from "react";
 import type { MediaServers } from "../tools/mediaServers.js";
-import { firstChoiceOf, modelChoicesOf } from "./modelChoices.js";
+import {
+  firstChoiceOf,
+  modelChoicesOf,
+  type ModelChoice,
+} from "./modelChoices.js";
+import { priceOf, type Price } from "./price.js";
 import {
   valuesFor,
   type SettingValue,
@@ -62,5 +67,26 @@ export function useClipChoice(options: {
     });
   };
 
-  return { videoChoices, imageChoices, choice, values, choose, change };
+  const priceFor = (candidate: ModelChoice): Price =>
+    priceOf({
+      model: candidate.model,
+      values:
+        candidate.key === choice?.key
+          ? values
+          : valuesFor({
+              model: candidate.model,
+              previous: values,
+              preferredSeconds,
+            }),
+    });
+
+  return {
+    videoChoices,
+    imageChoices,
+    choice,
+    values,
+    choose,
+    change,
+    priceFor,
+  };
 }

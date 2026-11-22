@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { MediaModel } from "../tools/mediaServers.js";
-import { lowestPriceText, priceOf, priceText } from "./price.js";
+import { priceOf, priceText } from "./price.js";
 
 function modelWith(prices: MediaModel["prices"]): MediaModel {
   return {
@@ -67,11 +67,5 @@ describe("the price of a clip", () => {
     expect(priceText(priceOf({ model, values: { duration_seconds: 9 } }))).toBe(
       "Free",
     );
-    expect(lowestPriceText(model)).toBe("Free");
-  });
-
-  it("names the lowest price and its unit in the model list", () => {
-    expect(lowestPriceText(falPrices)).toBe("From $0.22 a second");
-    expect(lowestPriceText(modelWith([]))).toBe("Price not known");
   });
 });

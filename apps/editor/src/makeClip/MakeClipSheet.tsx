@@ -1,4 +1,4 @@
-import { useRef, useState, type SubmitEvent } from "react";
+import { useRef, useState } from "react";
 import type { EngineClient } from "../engine/engineClient.js";
 import type { Output, SceneClip, Snapshot } from "../engine/snapshot.js";
 import { useEngineEvents } from "../engine/useEngineEvents.js";
@@ -7,7 +7,9 @@ import { useMediaServers } from "../tools/useMediaServers.js";
 import type { Phase } from "./ClipAction.js";
 import { ClipForm, type ClipDraft } from "./ClipForm.js";
 import { MadeClipResult } from "./MadeClipResult.js";
+import { outputsHoldingClip, sceneNumberOf } from "./clipOutputs.js";
 import { makeClip, type MadeClip } from "./makeClip.js";
+import { promptOfScene } from "./scenePrompt.js";
 import { useClipChoice } from "./useClipChoice.js";
 import "./makeClip.css";
 
@@ -17,7 +19,6 @@ export function MakeClipSheet(props: {
   output: Output;
   clip: SceneClip;
   onClose: () => void;
-  onAddKey: (serverId: string) => void;
   onPlaced: (made: MadeClip) => void;
 }) {
   const { client, snapshot, output } = props;
@@ -26,11 +27,15 @@ export function MakeClipSheet(props: {
   const servers =
     media.state.kind === "ready" ? media.state.servers : undefined;
   const [target, setTarget] = useState(props.clip);
-  const [draft, setDraft] = useState<ClipDraft>({
-    prompt: "",
+  const scene = snapshot.scenes.find((each) => each.id === target.sceneId);
+  const [draft, setDraft] = useState<ClipDraft>(() => ({
+    prompt:
+      scene === undefined
+        ? ""
+        : promptOfScene({ scene, assets: snapshot.assets }),
     firstFrameId: undefined,
     referenceIds: [],
-  });
+  }));
   const [phase, setPhase] = useState<Phase>({ kind: "editing" });
   const clipSeconds = Math.ceil(
     target.durationFrames / snapshot.project.framesPerSecond,
@@ -41,9 +46,7 @@ export function MakeClipSheet(props: {
     .filter((asset) => asset.kind === "image")
     .at(-1)?.id;
   const firstFrameId = draft.firstFrameId ?? latestImageId;
-  const sceneTitle =
-    snapshot.scenes.find((scene) => scene.id === target.sceneId)?.title ??
-    target.sceneId;
+  const sceneTitle = scene?.title ?? target.sceneId;
 
   useEngineEvents({
     client,
@@ -63,8 +66,7 @@ export function MakeClipSheet(props: {
     if (phase.kind === "failed") setPhase({ kind: "editing" });
   };
 
-  const make = (event: SubmitEvent) => {
-    event.preventDefault();
+  const make = () => {
     if (choice === undefined || firstFrameId === undefined) return;
     if (phase.kind === "making") return;
     callId.current = crypto.randomUUID();
@@ -76,7 +78,11 @@ export function MakeClipSheet(props: {
       values,
       firstFrameAssetId: firstFrameId,
       referenceAssetIds: draft.referenceIds,
-      output,
+      outputs: outputsHoldingClip({
+        snapshot,
+        clipId: target.id,
+        currentOutput: output,
+      }),
       clip: target,
       assets: snapshot.assets,
       callId: callId.current,
@@ -99,7 +105,7 @@ export function MakeClipSheet(props: {
 
   return (
     <Sheet titleId="make-clip-title" onClose={props.onClose}>
-      <form className="sheet-body wide" onSubmit={make}>
+      <div className="sheet-body wide">
         <h2 id="make-clip-title">Make a real video clip</h2>
         {phase.kind === "made" ? (
           <MadeClipResult
@@ -125,7 +131,13 @@ export function MakeClipSheet(props: {
             output={output}
             target={target}
             sceneTitle={sceneTitle}
+            sceneNumber={sceneNumberOf({
+              snapshot,
+              output,
+              clipId: target.id,
+            })}
             media={media.state}
+            keyRequests={media.requests}
             clipChoice={{
               ...clipChoice,
               choose: (key) => {
@@ -143,10 +155,10 @@ export function MakeClipSheet(props: {
               setDraft({ ...draft, ...change });
             }}
             phase={phase}
-            onAddKey={props.onAddKey}
+            onMake={make}
           />
         )}
-      </form>
+      </div>
     </Sheet>
   );
 }

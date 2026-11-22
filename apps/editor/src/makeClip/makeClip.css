@@ -143,9 +143,12 @@ fieldset label.model {
   color: var(--muted);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+  text-align: right;
 }
 
-.model[data-ready="false"] .model-price {
+.model-price em {
+  display: block;
+  font-style: normal;
   color: var(--accent);
 }
 
@@ -156,4 +159,12 @@ fieldset label.model {
 
 .field .segments {
   display: inline-flex;
+}
+
+@media (max-width: 760px) {
+  .clip-columns,
+  .made-clip {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 32px;
+  }
 }

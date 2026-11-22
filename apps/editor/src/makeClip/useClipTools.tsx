@@ -9,7 +9,6 @@ export function useClipTools(options: {
   snapshot: Snapshot;
   output: Output | undefined;
   onOpen: () => void;
-  onAddKey: (serverId: string) => void;
   onPlaced: (clip: { id: string; startFrame: number }) => void;
 }) {
   const { client, snapshot, output } = options;
@@ -38,10 +37,6 @@ export function useClipTools(options: {
         clip={clipFor}
         onClose={() => {
           setClipFor(undefined);
-        }}
-        onAddKey={(serverId) => {
-          setClipFor(undefined);
-          options.onAddKey(serverId);
         }}
         onPlaced={(made) => {
           setClipFor(undefined);

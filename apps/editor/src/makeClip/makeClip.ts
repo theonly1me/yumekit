@@ -2,6 +2,7 @@ import type { EngineClient } from "../engine/engineClient.js";
 import type { Asset, Output, SceneClip } from "../engine/snapshot.js";
 import type { ModelChoice } from "./modelChoices.js";
 import type { SettingValues } from "./settingValues.js";
+import { placeInEachOutput } from "./placeInEachOutput.js";
 import {
   callTool,
   textField,
@@ -13,6 +14,7 @@ export interface MadeClip {
   assetId: string;
   sceneClipId: string;
   startFrame: number;
+  outputs: Output[];
 }
 
 export type MakeOutcome =
@@ -68,12 +70,13 @@ export async function makeClip(options: {
   values: SettingValues;
   firstFrameAssetId: string;
   referenceAssetIds: string[];
-  output: Output;
+  outputs: [Output, ...Output[]];
   clip: SceneClip;
   assets: Asset[];
   callId: string;
 }): Promise<MakeOutcome> {
-  const { client, choice, clip, output } = options;
+  const { client, choice, clip, outputs } = options;
+  const [output] = outputs;
   const generated = await callTool({
     client,
     name: "generate_asset",
@@ -99,22 +102,20 @@ export async function makeClip(options: {
   });
   if (!generated.ok) return generated;
   const assetId = textField({ data: generated.data, name: "asset_id" });
-  const placed = await callTool({
+  const placed = await placeInEachOutput({
     client,
-    name: "place_video",
-    input: {
-      output_id: output.id,
-      asset_id: assetId,
-      replace_clip_id: clip.id,
-    },
+    assetId,
+    clipId: clip.id,
+    outputs,
   });
   if (!placed.ok) return placed;
   return {
     ok: true,
     made: {
       assetId,
-      sceneClipId: textField({ data: placed.data, name: "scene_clip_id" }),
+      sceneClipId: placed.sceneClipId,
       startFrame: clip.startFrame,
+      outputs,
     },
   };
 }

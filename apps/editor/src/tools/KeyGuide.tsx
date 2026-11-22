@@ -18,6 +18,7 @@ export function KeyGuide(props: {
   mediaKey: MediaKey;
   requests: KeyRequests;
   onSaved?: () => void;
+  saveLabel?: string;
 }) {
   const { mediaKey, requests } = props;
   const input = useRef<HTMLInputElement>(null);
@@ -80,7 +81,9 @@ export function KeyGuide(props: {
           className="primary"
           disabled={state.kind === "saving"}
         >
-          {state.kind === "saving" ? "Saving the key" : "Save the key"}
+          {state.kind === "saving"
+            ? "Saving the key"
+            : (props.saveLabel ?? "Save the key")}
         </button>
       </form>
       {state.kind === "failed" ? (

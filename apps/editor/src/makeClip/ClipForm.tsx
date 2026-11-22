@@ -1,7 +1,6 @@
 import type { EngineClient } from "../engine/engineClient.js";
-import { clockText, secondsText } from "../timeline/clock.js";
 import type { Output, SceneClip, Snapshot } from "../engine/snapshot.js";
-import { outputLabel } from "../timeline/timelineFacts.js";
+import type { KeyRequests } from "../tools/requestText.js";
 import type { MediaServersState } from "../tools/useMediaServers.js";
 import { ClipAction, type Phase } from "./ClipAction.js";
 import { FirstFrame } from "./FirstFrame.js";
@@ -21,101 +20,102 @@ export function ClipForm(props: {
   output: Output;
   target: SceneClip;
   sceneTitle: string;
+  sceneNumber: number | undefined;
   media: MediaServersState;
+  keyRequests: KeyRequests;
   clipChoice: ReturnType<typeof useClipChoice>;
   draft: ClipDraft;
   onDraft: (change: Partial<ClipDraft>) => void;
   phase: Phase;
-  onAddKey: (serverId: string) => void;
+  onMake: () => void;
 }) {
   const { client, snapshot, output, target, media, clipChoice, draft } = props;
   const { choice, values } = clipChoice;
   const imageIds = snapshot.assets
     .filter((asset) => asset.kind === "image")
     .map((image) => image.id);
+  const sceneName =
+    props.sceneNumber === undefined
+      ? props.sceneTitle
+      : `scene ${String(props.sceneNumber)}`;
   return (
-    <div className="clip-columns">
-      <div className="clip-column">
-        <p className="fact">
-          For the scene <strong>{props.sceneTitle}</strong> in{" "}
-          <strong>{outputLabel(output)}</strong>, from{" "}
-          {clockText({
-            frame: target.startFrame,
-            framesPerSecond: snapshot.project.framesPerSecond,
-          })}{" "}
-          for{" "}
-          {secondsText({
-            frames: target.durationFrames,
-            framesPerSecond: snapshot.project.framesPerSecond,
-          })}
-          .
-        </p>
-        <div className="field">
-          <label htmlFor="clip-prompt">What happens in the clip</label>
-          <textarea
-            id="clip-prompt"
-            rows={3}
-            value={draft.prompt}
-            placeholder="A street basketball player jumps for a dunk. Low angle, golden hour."
-            onChange={(change) => {
-              props.onDraft({ prompt: change.target.value });
+    <>
+      <p className="fact lead">
+        For {sceneName}: {props.sceneTitle}. A video model makes moving video
+        from your words.
+      </p>
+      <div className="clip-columns">
+        <div className="clip-column">
+          <div className="field">
+            <label htmlFor="clip-prompt">What happens in the clip</label>
+            <textarea
+              id="clip-prompt"
+              rows={3}
+              value={draft.prompt}
+              placeholder="A street basketball player jumps for a dunk. Low angle, golden hour."
+              onChange={(change) => {
+                props.onDraft({ prompt: change.target.value });
+              }}
+            />
+          </div>
+          <ModelList
+            choices={clipChoice.videoChoices}
+            chosenKey={choice?.key}
+            onChoose={clipChoice.choose}
+            priceFor={clipChoice.priceFor}
+          />
+          <FirstFrame
+            client={client}
+            assets={snapshot.assets}
+            output={output}
+            sceneId={target.sceneId}
+            imageChoices={clipChoice.imageChoices}
+            assetId={draft.firstFrameId}
+            onPick={(firstFrameId) => {
+              props.onDraft({ firstFrameId });
             }}
           />
         </div>
-        <FirstFrame
-          client={client}
-          assets={snapshot.assets}
-          output={output}
-          sceneId={target.sceneId}
-          imageChoices={clipChoice.imageChoices}
-          assetId={draft.firstFrameId}
-          onPick={(firstFrameId) => {
-            props.onDraft({ firstFrameId });
-          }}
-        />
-        <ModelList
-          choices={clipChoice.videoChoices}
-          chosenKey={choice?.key}
-          onChoose={clipChoice.choose}
-        />
+        <div className="clip-column">
+          {media.kind === "failed" ? (
+            <p className="failure" role="alert">
+              {media.message}
+            </p>
+          ) : undefined}
+          {media.kind === "loading" ? (
+            <p className="fact">Reading the models.</p>
+          ) : undefined}
+          {choice === undefined || media.kind !== "ready" ? undefined : (
+            <>
+              <SettingsForm
+                settings={choice.model.settings}
+                values={values}
+                onChange={clipChoice.change}
+                imageIds={imageIds}
+                referenceIds={draft.referenceIds}
+                onReferences={(referenceIds) => {
+                  props.onDraft({ referenceIds });
+                }}
+              />
+              <ClipAction
+                choice={choice}
+                values={values}
+                limit={{
+                  usedSeconds: media.servers.generated_video.used_seconds,
+                  limitSeconds: media.servers.generated_video.limit_seconds,
+                }}
+                phase={props.phase}
+                canMake={
+                  draft.prompt.trim() !== "" && draft.firstFrameId !== undefined
+                }
+                sceneName={sceneName}
+                keyRequests={props.keyRequests}
+                onMake={props.onMake}
+              />
+            </>
+          )}
+        </div>
       </div>
-      <div className="clip-column">
-        {media.kind === "failed" ? (
-          <p className="failure" role="alert">
-            {media.message}
-          </p>
-        ) : undefined}
-        {media.kind === "loading" ? (
-          <p className="fact">Reading the models.</p>
-        ) : undefined}
-        {choice === undefined || media.kind !== "ready" ? undefined : (
-          <>
-            <SettingsForm
-              settings={choice.model.settings}
-              values={values}
-              onChange={clipChoice.change}
-              imageIds={imageIds}
-              referenceIds={draft.referenceIds}
-              onReferences={(referenceIds) => {
-                props.onDraft({ referenceIds });
-              }}
-            />
-            <ClipAction
-              choice={choice}
-              values={values}
-              limit={{
-                usedSeconds: media.servers.generated_video.used_seconds,
-                limitSeconds: media.servers.generated_video.limit_seconds,
-              }}
-              phase={props.phase}
-              canMake={
-                draft.prompt.trim() !== "" && draft.firstFrameId !== undefined
-              }
-              onAddKey={props.onAddKey}
-            />
-          </>
-        )}
-      </div>
-    </div>
+    </>
   );
 }

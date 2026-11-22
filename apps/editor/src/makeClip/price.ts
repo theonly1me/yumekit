@@ -4,13 +4,6 @@ import { secondsOf, type SettingValues } from "./settingValues.js";
 export type Price =
   { kind: "free" } | { kind: "about"; usd: number } | { kind: "not-known" };
 
-const unitWords: Record<ModelPrice["unit"], string> = {
-  second: "a second",
-  image: "an image",
-  minute: "a minute",
-  "thousand-characters": "for 1,000 characters",
-};
-
 function matches(options: { price: ModelPrice; values: SettingValues }) {
   return Object.entries(options.price.when).every(
     ([name, value]) => String(options.values[name]) === value,
@@ -56,13 +49,4 @@ export function priceText(price: Price): string {
   if (price.kind === "free") return "Free";
   if (price.kind === "about") return `About ${dollars(price.usd)}`;
   return "Price not known";
-}
-
-export function lowestPriceText(model: MediaModel): string {
-  const [lowest] = [...model.prices].sort(
-    (...[first, second]) => first.usd - second.usd,
-  );
-  if (lowest === undefined) return "Price not known";
-  if (model.prices.every((price) => price.usd === 0)) return "Free";
-  return `From ${dollars(lowest.usd)} ${unitWords[lowest.unit]}`;
 }
