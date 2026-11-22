@@ -1,3 +1,4 @@
+import { scenesRowOf } from "@yumekit/project/scenes-row";
 import type {
   Asset,
   AudioClip,
@@ -6,10 +7,7 @@ import type {
   SceneClip,
   Snapshot,
   Timeline,
-  Track,
 } from "../engine/snapshot.js";
-
-const captionComponent = "caption-words";
 
 export function timelineOf(options: {
   snapshot: Snapshot;
@@ -29,36 +27,15 @@ export function lengthFramesOf(timeline: Timeline): number {
   return Math.max(0, ...clipEnds);
 }
 
-export function isCaptionScene(scene: Scene | undefined): boolean {
-  return (
-    scene?.source.kind === "kit" && scene.source.component === captionComponent
-  );
-}
-
-export function isCaptionTrack(options: {
-  track: Track;
-  scenes: Scene[];
-}): boolean {
-  const { track, scenes } = options;
-  return (
-    track.kind === "scene" &&
-    track.clips.length > 0 &&
-    track.clips.every((clip) =>
-      isCaptionScene(scenes.find((scene) => scene.id === clip.sceneId)),
-    )
-  );
-}
-
 export function mainSceneClipsOf(options: {
   timeline: Timeline;
   scenes: Scene[];
 }): SceneClip[] {
-  const mainTrack = options.timeline.tracks.find(
-    (track) =>
-      track.kind === "scene" &&
-      !isCaptionTrack({ track, scenes: options.scenes }),
-  );
-  if (mainTrack?.kind !== "scene") return [];
+  const mainTrack = scenesRowOf({
+    tracks: options.timeline.tracks,
+    scenes: options.scenes,
+  });
+  if (mainTrack === undefined) return [];
   return [...mainTrack.clips].sort(
     (...[first, second]) => first.startFrame - second.startFrame,
   );
@@ -75,9 +52,9 @@ export function clipAt(options: {
   );
 }
 
-export function audioClipsOf(timeline: Timeline): AudioClip[] {
+export function audibleClipsOf(timeline: Timeline): AudioClip[] {
   return timeline.tracks.flatMap((track) =>
-    track.kind === "audio" ? track.clips : [],
+    track.kind === "audio" && track.off !== true ? track.clips : [],
   );
 }
 
@@ -102,3 +79,5 @@ export function trackLabel(trackId: string): string {
   const words = trackId.replaceAll("-", " ");
   return `${words.charAt(0).toUpperCase()}${words.slice(1)}`;
 }
+
+export { isCaptionTrack } from "@yumekit/project/scenes-row";

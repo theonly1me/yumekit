@@ -88,4 +88,22 @@ describe("tool descriptions say what the first agent run could not learn", () =>
     expect(videoClip).toContain("It is not the narration caption");
     expect(videoClip).not.toContain("caption line at the bottom");
   });
+
+  it.each([
+    "resize_scene_clip",
+    "move_scene_clip",
+    "remove_scene_clip",
+    "duplicate_scene_clip",
+  ])(
+    "%s says when to use it in place of another tool and that the voice may not match",
+    async (name) => {
+      const description = (await descriptionsByName()).get(name);
+
+      expect(description).toMatch(
+        /Use it in place of (update_clip|remove_clip|put_scene)/,
+      );
+      expect(description).toContain("voice_may_not_match");
+      expect(description).toContain("One undo");
+    },
+  );
 });

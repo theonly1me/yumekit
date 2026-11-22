@@ -42,6 +42,12 @@ export const wireTrack = z.discriminatedUnion("kind", [
     clips: z
       .array(wireSceneClip)
       .describe("Scene clips. They must not overlap."),
+    off: z
+      .boolean()
+      .optional()
+      .describe(
+        "true switches the track off: the preview and the render skip it. Default false.",
+      ),
   }),
   z.strictObject({
     id: idInput("The id of the track."),
@@ -49,6 +55,12 @@ export const wireTrack = z.discriminatedUnion("kind", [
     clips: z
       .array(wireAudioClip)
       .describe("Audio clips. They must not overlap."),
+    off: z
+      .boolean()
+      .optional()
+      .describe(
+        "true switches the track off: the preview and the render skip it. Default false.",
+      ),
   }),
 ]);
 
@@ -78,9 +90,20 @@ export function audioClipOf(clip: WireAudioClip) {
 }
 
 export function trackOf(track: WireTrack): Track {
+  const switched = track.off === true ? { off: true } : {};
   return track.kind === "scene"
-    ? { id: track.id, kind: "scene", clips: track.clips.map(sceneClipOf) }
-    : { id: track.id, kind: "audio", clips: track.clips.map(audioClipOf) };
+    ? {
+        id: track.id,
+        kind: "scene",
+        clips: track.clips.map(sceneClipOf),
+        ...switched,
+      }
+    : {
+        id: track.id,
+        kind: "audio",
+        clips: track.clips.map(audioClipOf),
+        ...switched,
+      };
 }
 
 export function lengthFramesOf(timeline: Timeline): number {
@@ -97,6 +120,7 @@ function wireTrackOf(track: Track) {
     ? {
         id: track.id,
         kind: track.kind,
+        off: track.off === true,
         clips: track.clips.map((clip) => ({
           id: clip.id,
           scene_id: clip.sceneId,
@@ -108,6 +132,7 @@ function wireTrackOf(track: Track) {
     : {
         id: track.id,
         kind: track.kind,
+        off: track.off === true,
         clips: track.clips.map((clip) => ({
           id: clip.id,
           asset_id: clip.assetId,

@@ -33,7 +33,7 @@ With no editor, the engine is the process that `yumekit mcp` starts, and it serv
 | ---------------------- | ------- | ----------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `@yumekit/scene`       | Browser | The scene contract, the React adapter, the animation functions                | `SceneModule`, `defineReactScene`, `useFrame`, `useSceneContext`, `useHold`, `FrameWindow`, `tween`, `spring`, `stagger`, `easings`, `seededRandom` |
 | `@yumekit/scene-kit`   | Browser | Ready scene components and style packs                                        | `kitScenes` for the browser, and `kitSceneSchemas` from the entry `@yumekit/scene-kit/schemas`, which has no browser code                           |
-| `@yumekit/project`     | Node    | The folder format, schemas, validation, edit commands, undo, change events    | `createProject`, `openProject`, and the `ProjectStore` it returns                                                                                   |
+| `@yumekit/project`     | Node    | The folder format, schemas, validation, edit commands, undo, change events    | `createProject`, `openProject`, the `ProjectStore` it returns, and `scenesRowOf`                                                                    |
 | `@yumekit/stage`       | Browser | Drawing one output at one frame from project data and scene modules           | `createStage`                                                                                                                                       |
 | `@yumekit/render`      | Node    | Frames and video files. Hides Chromium, the bundler, and FFmpeg               | `renderFrame`, `renderVideo`, `checkSceneCode`                                                                                                      |
 | `@yumekit/tools`       | Node    | Connections to media MCP servers and the media tool convention                | `connectMediaTools`                                                                                                                                 |
@@ -60,7 +60,7 @@ A package may import only the packages in its row. CI must fail on any other imp
 | `brain`       | nothing from yumekit                                                          |
 | `engine`      | `project`, `render`, `tools`, `harness-mcp`, `brain`, and `scene-kit/schemas` |
 | `apps/cli`    | `project`, `render`, `tools`, `harness-mcp`, `engine`                         |
-| `apps/editor` | nothing from yumekit at run time                                              |
+| `apps/editor` | only `project/scenes-row` at run time                                         |
 | `tools/*`     | nothing from yumekit                                                          |
 
 Two more rules:

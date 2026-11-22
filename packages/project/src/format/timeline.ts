@@ -23,11 +23,13 @@ export const trackSchema = z.discriminatedUnion("kind", [
     id: idSchema,
     kind: z.literal("scene"),
     clips: z.array(sceneClipSchema),
+    off: z.boolean().exactOptional(),
   }),
   z.strictObject({
     id: idSchema,
     kind: z.literal("audio"),
     clips: z.array(audioClipSchema),
+    off: z.boolean().exactOptional(),
   }),
 ]);
 
