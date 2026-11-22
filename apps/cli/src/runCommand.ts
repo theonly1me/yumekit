@@ -1,6 +1,7 @@
 import { usage, usageError, type CommandResult } from "./commandResult.js";
 import { agentCommand } from "./commands/agent/agentCommand.js";
 import { doctorCommand } from "./commands/doctor/doctorCommand.js";
+import { homeCommand } from "./commands/home/homeCommand.js";
 import { initCommand } from "./commands/initCommand.js";
 import { keysCommand } from "./commands/keys/keysCommand.js";
 import { mcpCommand } from "./commands/mcpCommand.js";
@@ -26,9 +27,10 @@ export function runCommand(args: string[]): Promise<CommandResult> {
   if (name === "--version") {
     return Promise.resolve({ kind: "done", output: formatVersion(version) });
   }
-  if (name === undefined || name === "--help" || name === "help") {
+  if (name === "--help" || name === "help") {
     return Promise.resolve({ kind: "done", output: usage });
   }
+  if (name === undefined || name.startsWith("-")) return homeCommand(args);
   const command = commands[name];
   return command === undefined
     ? Promise.resolve(usageError(`Unknown command "${name}".`))

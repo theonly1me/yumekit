@@ -1,37 +1,22 @@
 import { resolve } from "node:path";
-import { fileURLToPath } from "node:url";
-import { startEngine, type Engine } from "@yumekit/engine";
+import { recordRecentProject, startEngine } from "@yumekit/engine";
 import { failed, usageError, type CommandResult } from "../../commandResult.js";
-import { parseCommandLine, wholeNumberOption } from "../../options.js";
+import { parseCommandLine } from "../../options.js";
 import { realFolderOf, serverCommandOf } from "../../serverCommand.js";
 import { openBrowser } from "./openBrowser.js";
-
-const builtEditorFolder = fileURLToPath(
-  new URL("../../../../editor/dist/", import.meta.url),
-);
-
-function closeOnSignal(engine: Engine): void {
-  let isClosing = false;
-  const close = () => {
-    if (isClosing) return;
-    isClosing = true;
-    engine
-      .close()
-      .then(() => {
-        process.stdout.write("yumekit: the engine stopped.\n");
-        process.exit(0);
-      })
-      .catch((error: unknown) => {
-        process.stderr.write(`yumekit: ${String(error)}\n`);
-        process.exit(1);
-      });
-  };
-  process.on("SIGINT", close);
-  process.on("SIGTERM", close);
-}
+import { builtEditorFolder, closeOnSignal, portOption } from "./serving.js";
 
 function showUrl(options: { url: string; withBrowser: boolean }): void {
   if (options.withBrowser) openBrowser(options.url);
+}
+
+async function addToRecent(folder: string): Promise<void> {
+  const recorded = await recordRecentProject({ folder });
+  if (!recorded.ok) {
+    process.stderr.write(
+      `yumekit: the list of recent projects did not change: ${recorded.failure}\n`,
+    );
+  }
 }
 
 export async function openCommand(args: string[]): Promise<CommandResult> {
@@ -45,22 +30,21 @@ export async function openCommand(args: string[]): Promise<CommandResult> {
   if (folder === undefined || positionals.length > 1) {
     return usageError("open needs one <folder>.");
   }
-  const port = wholeNumberOption({ values, name: "port" });
-  if (!port.ok) return usageError(port.message);
-  if (port.value !== undefined && port.value > 65_535) {
-    return usageError("--port must be 65535 or less.");
-  }
+  const port = portOption(values);
+  if (!port.ok) return port.result;
   const withBrowser = values["no-browser"] !== true;
+  const realFolder = await realFolderOf(folder);
   const started = await startEngine({
     projectFolder: resolve(folder),
     editorFolder: builtEditorFolder,
-    serverCommand: serverCommandOf(await realFolderOf(folder)),
-    ...(port.value === undefined ? {} : { port: port.value }),
+    serverCommand: serverCommandOf(realFolder),
+    ...(port.port === undefined ? {} : { port: port.port }),
   });
   if (!started.ok) {
     const { failure } = started;
     switch (failure.kind) {
       case "engine-already-running":
+        await addToRecent(realFolder);
         showUrl({ url: failure.url, withBrowser });
         return {
           kind: "done",
@@ -73,7 +57,11 @@ export async function openCommand(args: string[]): Promise<CommandResult> {
     }
   }
   const engine = started.value;
-  closeOnSignal(engine);
+  closeOnSignal({
+    close: engine.close,
+    stoppedLine: "yumekit: the engine stopped.",
+  });
+  await addToRecent(realFolder);
   process.stdout.write(
     `The editor runs at:\n${engine.url}\nPress Ctrl+C to stop the engine.\n`,
   );

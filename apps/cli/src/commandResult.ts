@@ -14,6 +14,7 @@ export function usageError(message: string): CommandResult {
 }
 
 export const usage = `Usage:
+  yumekit [--port <n>] [--no-browser]
   yumekit init <folder> [--name <name>] [--frame-rate 24|25|30|50|60] [--output <id>:<width>x<height>]...
   yumekit mcp --project <folder>
   yumekit render --project <folder> --output <id> [--scale 0.25|0.5|1] [--first-frame <n>] [--frame-count <n>]
@@ -27,6 +28,7 @@ export const usage = `Usage:
   yumekit setup
   yumekit --version
 
+yumekit with no command starts the start screen, prints the URL, and opens it in the browser. There you describe a video, and yumekit makes the project in the projects folder. It runs until you stop it.
 init makes a project with one 1920x1080 output named "wide" when no --output is given.
 mcp serves the harness MCP tools over stdio for an agent. If yumekit open runs for the project, mcp sends each tool call to that engine.
 render writes renders/<id>.mp4. frame writes renders/<id>-frame-<n>.png.
