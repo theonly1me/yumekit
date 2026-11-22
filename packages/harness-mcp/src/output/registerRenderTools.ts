@@ -1,11 +1,11 @@
-import { mkdir, rm, writeFile } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { renderFrame, renderVideo } from "@yumekit/render";
+import { renderFrame } from "@yumekit/render";
 import type { HarnessContext } from "../context.js";
 import { durationInput, frameInput, idInput, scaleInput } from "../inputs.js";
 import { failureResult, successResult } from "../results.js";
-import { linkOrCopy, platformFilesOf } from "./platformFiles.js";
 import { renderFailureOf } from "./renderFailures.js";
+import { renderOutputFiles } from "./renderOutputFiles.js";
 
 function rendersFolder(context: HarnessContext): string {
   return join(context.store.folder, "renders");
@@ -30,16 +30,10 @@ function registerRenderVideo(context: HarnessContext): void {
       input: { output_id, first_frame, frame_count, scale },
       onProgress,
     }) => {
-      const [first, ...others] = platformFilesOf({
+      const rendered = await renderOutputFiles({
         snapshot: context.store.read(),
-        outputId: output_id,
-        rendersFolder: rendersFolder(context),
-      });
-      await rm(first.file, { force: true });
-      const rendered = await renderVideo({
         folder: context.store.folder,
         outputId: output_id,
-        destination: first.file,
         ...(first_frame === undefined ? {} : { firstFrame: first_frame }),
         ...(frame_count === undefined ? {} : { frameCount: frame_count }),
         ...(scale === undefined ? {} : { scale }),
@@ -48,11 +42,7 @@ function registerRenderVideo(context: HarnessContext): void {
         },
       });
       if (!rendered.ok) return failureResult(renderFailureOf(rendered.failure));
-      const video = rendered.value;
-      for (const other of others) {
-        await linkOrCopy({ from: video.file, to: other.file });
-      }
-      const files = [{ ...first, file: video.file }, ...others];
+      const { video, files } = rendered.value;
       return successResult({
         line: `Rendered ${String(video.frameCount)} frames (${video.durationSeconds.toFixed(2)} seconds) to ${files.map((entry) => entry.file).join(", ")}.`,
         data: {

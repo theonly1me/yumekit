@@ -2,7 +2,7 @@ import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { describe, expect, it, onTestFinished } from "vitest";
-import { lastSentenceOf } from "./answerTracker.js";
+import { changeSummaryOf } from "./answerTracker.js";
 import { chatFilePath, loadChat } from "./chatFile.js";
 
 async function projectWithChat(content: string): Promise<string> {
@@ -53,11 +53,19 @@ describe("the chat file", () => {
 });
 
 describe("the summary of a change by the AI", () => {
-  it("is the last sentence of the answer, cut at 140 characters", () => {
-    expect(lastSentenceOf("I set the script. It now says ready.")).toBe(
-      "It now says ready.",
-    );
-    expect(lastSentenceOf(`Done. ${"a".repeat(200)}`)).toBe("a".repeat(140));
-    expect(lastSentenceOf("")).toBe("");
+  it("is the first sentence of the answer, not an offer at the end", () => {
+    expect(
+      changeSummaryOf(
+        "I made the video shorter. I can re-fit the narration to the new timing if you'd like.",
+      ),
+    ).toBe("I made the video shorter.");
+  });
+
+  it("is cut at 140 characters", () => {
+    expect(changeSummaryOf(`${"a".repeat(200)}. Done.`)).toBe("a".repeat(140));
+  });
+
+  it("is a fixed sentence when the answer is empty", () => {
+    expect(changeSummaryOf("  ")).toBe("The AI changed the project.");
   });
 });

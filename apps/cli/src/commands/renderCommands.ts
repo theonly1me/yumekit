@@ -1,8 +1,9 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
+import { renderOutputFiles } from "@yumekit/harness-mcp";
+import { openProject } from "@yumekit/project";
 import {
   renderFrame,
-  renderVideo,
   type RenderFailure,
   type RenderScale,
 } from "@yumekit/render";
@@ -73,11 +74,13 @@ export async function renderCommand(args: string[]): Promise<CommandResult> {
   const parsed = parseRenderRequest(args);
   if (!parsed.ok) return usageError(parsed.message);
   const request = parsed.value;
+  const opened = await openProject({ folder: request.folder });
+  if (!opened.ok) return failed(opened.failure.message);
   let reportedTenth = -1;
-  const rendered = await renderVideo({
+  const rendered = await renderOutputFiles({
+    snapshot: opened.value.read(),
     folder: request.folder,
     outputId: request.outputId,
-    destination: join(request.folder, "renders", `${request.outputId}.mp4`),
     ...(request.scale === undefined ? {} : { scale: request.scale }),
     ...(request.firstFrame === undefined
       ? {}
@@ -95,7 +98,8 @@ export async function renderCommand(args: string[]): Promise<CommandResult> {
     },
   });
   if (!rendered.ok) return failed(failureText(rendered.failure));
-  return { kind: "done", output: `${rendered.value.file}\n` };
+  const lines = rendered.value.files.map((entry) => `${entry.file}\n`);
+  return { kind: "done", output: lines.join("") };
 }
 
 export async function frameCommand(args: string[]): Promise<CommandResult> {

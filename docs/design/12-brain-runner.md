@@ -127,6 +127,9 @@ With `--ignore-user-config`, Codex uses its own default model. The adapter passe
 4. Before a video clip from a paid model, say the price and ask. Other steps need no question.
 5. After a change, say in one or two sentences what changed.
 6. If a tool fails, correct the cause and try again. If it cannot work, say what the person can do.
+7. Do not export the video unless the person asks. The Export button belongs to the person, and an export takes minutes. To check the work, look at preview pictures.
+8. Name a version of the video by its platform, for example "the YouTube version". Never name it by an output id such as "wide" or "tall".
+9. If a paid tool for a step has no key, say in one sentence which key is missing and that the person can add it in Settings. Then make the rest of the video.
 
 ## The chat of the engine
 
@@ -140,7 +143,7 @@ The engine holds the chat of a project: the entries, the session id, and the req
 | `notice`   | `id`, `text`                                 | A failure or a fact for the person, in plain words                       |
 
 - `steps` of an answer is the list of tool calls of the request, each with the tool name and `running`, `done`, or `failed`. The Making screen and the chat read it.
-- A request by the AI gives one `change` entry for the whole request, when it changed the project. `undoSteps` is the count of undo steps that it made. `summary` is the last sentence that the AI wrote, cut at 140 characters.
+- A request by the AI gives one `change` entry for the whole request, when it changed the project. `undoSteps` is the count of undo steps that it made. `summary` is the first sentence of the answer, cut at 140 characters. An empty answer gives "The AI changed the project."
 - A tool call by the person through `/api/tools/<name>` gives one `change` entry with one undo step. `@yumekit/brain` has a table with a plain sentence for each tool, for example "You changed the text of a scene." for `put_scene`.
 - An `undo` call, by anyone, lowers the count of the last change that is not undone. At zero, the entry is `undone`. A `redo` call does the reverse.
 
@@ -174,13 +177,16 @@ These rules came from the build of WP26.
 8. The engine calls `signInState` before each request, for both programs, and in `GET /api/chat`. Only `signed-out` refuses a request. `unknown` lets it run.
 9. The undo count: the engine gives the harness a wrapped store. The wrapper reports each `applyEdits`, `undo`, and `redo` that raised the revision, so a call that changed nothing counts no step. The tool route runs each harness call inside an `AsyncLocalStorage` context with the caller and the tool name, so the wrapper knows who made each step, also when calls run at the same time.
 10. The bridge sends the header `x-yumekit-client: agent` with each request. A tool call with this header is by `ai`. Each other call is by `person`.
-11. A call by `ai` while a chat request runs adds to the one `change` entry of that request. The entry starts at the first step with the summary "The AI is changing the project." and gets the last sentence at the end. A call by `ai` with no chat request, for example from an agent in a terminal, gives its own entry with "An agent changed the project.". A call by the person gives one entry, with the count of the steps of that call.
+11. A call by `ai` while a chat request runs adds to the one `change` entry of that request. The entry starts at the first step with the summary "The AI is changing the project." and gets the first sentence of the answer at the end. A call by `ai` with no chat request, for example from an agent in a terminal, gives its own entry with "An agent changed the project.". A call by the person gives one entry, with the count of the steps of that call.
 12. A redo raises the change of the last undo. The list of these changes is `redoChangeIds` in `chat.json`, so a redo after a restart still finds its change. A new edit clears the list, as the store clears its redo steps.
 13. A resume failed when the turn ends as `failed` with `program` and no `session` event came. Then the engine adds the notice, clears the session id, and runs the request once more.
 14. `POST /api/chat/stop` returns `{ stopped }`, true when a request ran. `POST /api/chat/changes/<id>/undo` returns the change entry after the undo. While a request runs, it gives `chat-busy`. An unknown id gives `change-not-found` (404). An `about_clip_id` that is not a scene clip gives `clip-not-found` (404). An engine with no `serverCommand` gives `no-server-command` (409).
 15. A `chat.json` that is not valid loads as an empty chat. The next change writes a new file.
 16. The first match on the `PATH` can be a wrapper script. On the computer of the owner, the first `claude` and `codex` were shims of a terminal app, and such a shim can add its own flags. The real check removed the folder of the shims from the `PATH` of the engine. Then `claude` was a wrapper script of the owner that runs the installed Claude Code 2.1.330, and `codex` was the Homebrew link to Codex 0.163.0. The owner decides if the engine skips known shim folders.
 17. The real check ran the engine of the worktree build in temporary projects. Claude Code ran with `ANTHROPIC_MODEL=haiku` in the environment of the engine, which the product does not set. "Set the script to the single word ready." set the script with each program, with one change of one undo step. A request to run `touch` made no file, and each program answered that it cannot run a command.
+18. The summary of an AI change is the first sentence of the answer. A real answer ended with an offer, "I can re-fit the narration to the new timing if you'd like.", and the last sentence put that offer on the change line.
+19. Rule 7 of "The instructions" came from a real run: the AI called `render_video` twice in the first request. Rule 8 keeps the output ids away from the person, as rule 1 does for other ids.
+20. Rule 9 came from a real run with no media key: the AI wrote that the voice needs an OpenAI key and made no voice. The instructions do not name the sample server as a stand-in, because its sound is a test tone.
 
 ## Work package
 

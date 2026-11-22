@@ -55,7 +55,7 @@ WP27 made these choices where the section "Platforms" gives no rule.
 - When `remove_platform` removes the last platform of the only output, the output stays as a custom output.
 - `render_video` renders to the file of the first platform in catalog order. The result keeps `file` (that first file) and adds `files`, with `platform_id` and `file` for each file.
 - The project name in a file name is in lower case. Each run of characters that are not a letter or a digit becomes one hyphen. It has at most 64 characters and no hyphen at either end. An empty result becomes `video`.
-- `yumekit init` keeps its output `wide` with no platform. `yumekit render` keeps the file `renders/<output id>.mp4`.
+- `yumekit init` keeps its output `wide` with no platform. `yumekit render` writes the same files as `render_video` and prints one line for each file. Both use `renderOutputFiles` of `@yumekit/harness-mcp`, so the file rule has one copy outside the editor.
 
 ## Direct changes to scenes
 
@@ -192,7 +192,7 @@ The Making screen shows five steps. The engine does not report steps. The editor
 | Music        | `generate_asset` for music                                 |
 | Put together | `set_timeline`, or the request ended                       |
 
-A step that the request never calls shows as skipped when the request ends.
+A step that is not done shows as skipped when a later step is done, and when the request ends.
 
 ### Details of the start screen
 
@@ -215,7 +215,7 @@ WP31 made these choices where this document and the prototype give no rule.
 15. "Change" shows the line "You can pick another AI in Settings of the editor, after the project opens." The settings route of WP30 was not on `main` at the build of WP31.
 16. The prototype has "Custom size" on the start screen. The catalog has no custom platform, so the start screen leaves it out.
 17. The editor shows the Making screen when the chat has one request and its answer runs at the first load. This is also true when a scene exists, because a fast request can add a scene before the page loads.
-18. While the request runs, the first step that is not done is in progress ("Working"). "Pictures" is done after `generate_asset` with an asset from `generate_image`, or after `put_scene` for 2 scenes. "Music" is done after `generate_asset` with an asset from `generate_music`. "Put together" is done after `set_timeline`, or when the answer ends as `done`. A failed request shows it as skipped.
+18. While the request runs, only a step after the last done step can be in progress ("Working"). It is the first step after the last done step that is not done. A step that is not done and has a done step after it is skipped. When the request ends, each step that is not done is skipped. "Pictures" is done after `generate_asset` with an asset from `generate_image`, or after `put_scene` for 2 scenes. "Music" is done after `generate_asset` with an asset from `generate_music`. "Put together" is done after `set_timeline`, or when the answer ends as `done`. A failed request shows it as skipped.
 19. A done step says "The script is ready", "2 pictures are ready", "The voice is ready", "The music is ready", or "The video is ready". A skipped step says "Skipped".
 20. "Open the editor" shows when the project has a scene. When the answer is `done`, the screen says "Your video is ready" for 1.2 seconds, then shows the editor. After "Stop", the editor shows at once.
 21. The line above the title is the request text before its `Platforms:` line.

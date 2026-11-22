@@ -13,7 +13,6 @@ import type { ChatLog } from "./chatLog.js";
 import type { AnswerEntry } from "./chatTypes.js";
 
 export const newConversationNotice = "The AI started a new conversation.";
-export const aiChangedSummary = "The AI changed the project.";
 
 export function signInMessageOf(adapter: AgentAdapter): string {
   const { program } = agentCatalog[adapter.id];
@@ -97,6 +96,5 @@ export async function runRequest(run: RequestRun): Promise<void> {
       text: noticeOf({ end, adapter: run.adapter }),
     });
   }
-  const sentence = tracker.lastSentence();
-  ledger.endRequest(sentence === "" ? aiChangedSummary : sentence);
+  ledger.endRequest(tracker.changeSummary());
 }

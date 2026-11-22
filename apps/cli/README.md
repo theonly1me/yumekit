@@ -4,20 +4,20 @@ The `yumekit` command.
 
 ## Commands
 
-| Command                                                                                     | What it does                                                                 |
-| ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| `yumekit [--port <n>] [--no-browser]`                                                       | Starts the start screen, prints the URL, and opens it                        |
-| `yumekit init <folder> [--name] [--frame-rate] [--output id:WIDTHxHEIGHT]...`               | Makes a project. The default is one 1920 by 1080 output named `wide`, 30 fps |
-| `yumekit mcp --project <folder>`                                                            | Serves the harness MCP tools over stdio, with the bundled media servers      |
-| `yumekit render --project <folder> --output <id> [--scale] [--first-frame] [--frame-count]` | Writes `renders/<id>.mp4`                                                    |
-| `yumekit frame --project <folder> --output <id> --frame <n> [--scale]`                      | Writes `renders/<id>-frame-<n>.png`                                          |
-| `yumekit keys`                                                                              | Lists each media server, each key it needs, and the state of the key         |
-| `yumekit keys set <VARIABLE>`                                                               | Reads the value from a hidden prompt or from standard input, and saves it    |
-| `yumekit keys remove <VARIABLE>`                                                            | Removes the key from the key file                                            |
-| `yumekit open <folder> [--port <n>] [--no-browser]`                                         | Starts the engine with the built editor, prints the URL, and opens it        |
-| `yumekit agent connect --agent claude-code\|codex\|cursor [--project <folder>]`             | Writes the yumekit MCP entry for the agent in the project folder             |
-| `yumekit doctor`                                                                            | Checks Node.js, FFmpeg, Chromium for Playwright, and the agent programs      |
-| `yumekit setup`                                                                             | Installs Chromium with the Playwright version of yumekit                     |
+| Command                                                                                     | What it does                                                                                                                                              |
+| ------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `yumekit [--port <n>] [--no-browser]`                                                       | Starts the start screen, prints the URL, and opens it                                                                                                     |
+| `yumekit init <folder> [--name] [--frame-rate] [--output id:WIDTHxHEIGHT]...`               | Makes a project. The default is one 1920 by 1080 output named `wide`, 30 fps                                                                              |
+| `yumekit mcp --project <folder>`                                                            | Serves the harness MCP tools over stdio, with the bundled media servers                                                                                   |
+| `yumekit render --project <folder> --output <id> [--scale] [--first-frame] [--frame-count]` | Writes `renders/<project name>-<platform id>.mp4` for each platform of the output, or `renders/<id>.mp4` for an output with no platform. Prints each file |
+| `yumekit frame --project <folder> --output <id> --frame <n> [--scale]`                      | Writes `renders/<id>-frame-<n>.png`                                                                                                                       |
+| `yumekit keys`                                                                              | Lists each media server, each key it needs, and the state of the key                                                                                      |
+| `yumekit keys set <VARIABLE>`                                                               | Reads the value from a hidden prompt or from standard input, and saves it                                                                                 |
+| `yumekit keys remove <VARIABLE>`                                                            | Removes the key from the key file                                                                                                                         |
+| `yumekit open <folder> [--port <n>] [--no-browser]`                                         | Starts the engine with the built editor, prints the URL, and opens it                                                                                     |
+| `yumekit agent connect --agent claude-code\|codex\|cursor [--project <folder>]`             | Writes the yumekit MCP entry for the agent in the project folder                                                                                          |
+| `yumekit doctor`                                                                            | Checks Node.js, FFmpeg, Chromium for Playwright, and the agent programs                                                                                   |
+| `yumekit setup`                                                                             | Installs Chromium with the Playwright version of yumekit                                                                                                  |
 
 The value of a key is never a command argument, because a shell keeps arguments in its history. `yumekit keys set` writes `~/.config/yumekit/keys.json` with mode `0600`.
 

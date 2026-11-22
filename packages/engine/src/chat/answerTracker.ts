@@ -5,20 +5,22 @@ import type { AnswerEntry } from "./chatTypes.js";
 export const textIntervalMilliseconds = 100;
 
 const summaryLimit = 140;
+export const aiChangedSummary = "The AI changed the project.";
 
 export interface AnswerTracker {
   onEvent: (event: BrainEvent) => void;
   finish: (state: AnswerEntry["state"]) => void;
-  lastSentence: () => string;
+  changeSummary: () => string;
 }
 
-export function lastSentenceOf(text: string): string {
-  const sentences = text
+export function changeSummaryOf(text: string): string {
+  const [firstSentence] = text
     .trim()
     .split(/(?<=[.!?])\s+/)
     .map((sentence) => sentence.trim())
     .filter((sentence) => sentence !== "");
-  return (sentences.at(-1) ?? "").slice(0, summaryLimit);
+  if (firstSentence === undefined) return aiChangedSummary;
+  return firstSentence.slice(0, summaryLimit);
 }
 
 export function createAnswerTracker(options: {
@@ -89,6 +91,6 @@ export function createAnswerTracker(options: {
       trailingSend = undefined;
       put({ ...answer, text: fullText(), state });
     },
-    lastSentence: () => lastSentenceOf(fullText()),
+    changeSummary: () => changeSummaryOf(fullText()),
   };
 }
