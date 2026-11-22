@@ -5,7 +5,7 @@ const toneIds = Object.keys(tones);
 const view = { sceneId: undefined, platformId: undefined, note: "" };
 
 function pictureMarkup({ scene, platform }) {
-  const own = state.ownPictures[scene.id];
+  const own = state.ownPictures.get(scene.id);
   const fill =
     own === undefined
       ? `background:${tones[scene.tone]}`
@@ -29,7 +29,7 @@ function cardMarkup({ scene, platform }) {
 
 function detailMarkup({ scene, platform, locked }) {
   const off = locked ? "disabled" : "";
-  const own = state.ownPictures[scene.id];
+  const own = state.ownPictures.get(scene.id);
   return `
     <div class="picture-detail">
       <div class="picture-large">${pictureMarkup({ scene, platform })}</div>
@@ -111,7 +111,7 @@ export function renderPictures({ element, locked }) {
       apply: () => {
         const next = (toneIds.indexOf(scene.tone) + 1) % toneIds.length;
         scene.tone = toneIds[next];
-        delete state.ownPictures[scene.id];
+        state.ownPictures.delete(scene.id);
       },
     });
     redraw("The AI made a new picture. Undo is in the chat of the editor.");
@@ -121,14 +121,14 @@ export function renderPictures({ element, locked }) {
     if (file === undefined) {
       return;
     }
-    state.ownPictures[scene.id] = {
+    state.ownPictures.set(scene.id, {
       name: file.name,
       url: URL.createObjectURL(file),
-    };
+    });
     redraw(`Scene ${numberOf(scene.id)} now uses your file ${file.name}.`);
   });
   element.querySelector("[data-remove-own]")?.addEventListener("click", () => {
-    delete state.ownPictures[scene.id];
+    state.ownPictures.delete(scene.id);
     redraw("The scene uses the picture of the AI again.");
   });
   element

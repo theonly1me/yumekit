@@ -5,7 +5,10 @@ const barCount = 64;
 export const view = { playing: undefined, note: "" };
 
 function waveMarkup(name) {
-  let seed = [...name].reduce((sum, letter) => sum + letter.charCodeAt(0), 7);
+  let seed = 7;
+  for (const letter of name) {
+    seed += letter.charCodeAt(0);
+  }
   const bars = Array.from({ length: barCount }, () => {
     seed = (seed * 9301 + 49297) % 233280;
     return `<i style="height:${18 + Math.round((seed / 233280) * 82)}%"></i>`;
