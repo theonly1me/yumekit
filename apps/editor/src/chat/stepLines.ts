@@ -16,6 +16,8 @@ const sentencesByTool: Record<string, string> = {
   list_media_tools: reading,
   set_script: "Writing the script",
   set_bible: "Writing the style notes",
+  put_cast_member: "Changing the cast",
+  remove_cast_member: "Changing the cast",
   put_scene: "Writing a scene",
   remove_scene: "Removing a scene",
   generate_asset: "Making a picture or a sound",

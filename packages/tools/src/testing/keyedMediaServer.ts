@@ -7,16 +7,24 @@ import { z } from "zod";
 const keyVariable = "YUMEKIT_TEST_KEY";
 const readOn = "2026-11-21";
 
+const referenceImagesSetting = {
+  name: "reference_image_paths",
+  label: "Reference images",
+  kind: "image-files",
+  maximum: 3,
+};
+
 const model = (options: {
   id: string;
   capability: string;
   isDefault: boolean;
+  settings?: object[];
 }) => ({
   id: options.id,
   label: options.id,
   capability: options.capability,
   is_default: options.isDefault,
-  settings: [],
+  settings: options.settings ?? [],
   prices: [{ usd: 0.5, unit: "image", when: {} }],
   read_on: readOn,
 });
@@ -34,7 +42,12 @@ const description = {
   ],
   models: [
     model({ id: "keyed-image", capability: "image", isDefault: true }),
-    model({ id: "keyed-image-large", capability: "image", isDefault: false }),
+    model({
+      id: "keyed-image-large",
+      capability: "image",
+      isDefault: false,
+      settings: [referenceImagesSetting],
+    }),
     model({ id: "keyed-speech", capability: "speech", isDefault: true }),
   ],
 };
@@ -54,6 +67,7 @@ server.registerTool(
     inputSchema: {
       prompt: z.string(),
       model: z.string().optional(),
+      reference_image_paths: z.array(z.string()).optional(),
       output_directory: z.string(),
       file_stem: z.string(),
     },

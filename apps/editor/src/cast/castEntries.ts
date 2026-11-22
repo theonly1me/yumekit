@@ -1,0 +1,43 @@
+import { z } from "zod";
+
+export const castKinds = ["person", "place", "product"] as const;
+
+export type CastKind = (typeof castKinds)[number];
+
+export const castKindLabels: Record<CastKind, string> = {
+  person: "Person",
+  place: "Place",
+  product: "Product",
+};
+
+export const castEntrySchema = z.object({
+  id: z.string(),
+  kind: z.enum(castKinds),
+  name: z.string(),
+  description: z.string(),
+  referenceAssetIds: z.array(z.string()),
+});
+
+export type CastEntry = z.infer<typeof castEntrySchema>;
+
+export const maximumPictures = 4;
+
+const idLimit = 60;
+
+export function newCastIdOf(options: {
+  name: string;
+  entries: CastEntry[];
+}): string {
+  const cleaned = options.name
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, idLimit);
+  const base = cleaned === "" ? "entry" : cleaned;
+  const taken = new Set(options.entries.map((entry) => entry.id));
+  let candidate = base;
+  for (let suffix = 2; taken.has(candidate); suffix += 1) {
+    candidate = `${base}-${String(suffix)}`;
+  }
+  return candidate;
+}

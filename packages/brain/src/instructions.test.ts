@@ -42,6 +42,12 @@ describe("the instructions for the agent", () => {
     );
   });
 
+  it("add each recurring person, place, and product to the cast before the first picture", () => {
+    expect(brainInstructions).toContain(
+      "15. Before the first picture, add each person, place, and product that shows in two or more scenes to the cast. Give the cast ids in each call that shows them.",
+    );
+  });
+
   it("prefer a kit scene, check each scene during its entry and settled, and set the transitions once", () => {
     expect(brainInstructions).toContain(
       "2. Call get_project first. Before the first scene, call get_scene_guide.",

@@ -1,5 +1,6 @@
 import type { ProjectStore } from "@yumekit/project";
 import type { MediaTools } from "@yumekit/tools";
+import { registerCastTools } from "../cast/registerCastTools.js";
 import { registerAlignWords } from "../media/registerAlignWords.js";
 import { registerImportAsset } from "../media/registerAssetFileTools.js";
 import { registerGenerateAsset } from "../media/registerGenerateAsset.js";
@@ -33,6 +34,7 @@ export function harnessToolsOf(options: HarnessOptions): HarnessTool[] {
   registerAssetReadTools(context);
   registerReferenceTools(context);
   registerStoryTools(context);
+  registerCastTools(context);
   registerPlatformTools(context);
   registerSetVideoStyle(context);
   registerSetLook(context);

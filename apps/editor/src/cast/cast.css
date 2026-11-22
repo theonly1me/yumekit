@@ -1,0 +1,133 @@
+.cast-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.cast-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px 20px;
+  align-items: start;
+  padding: 18px 0;
+  border-top: 1px solid var(--line);
+}
+
+.cast-row.editing {
+  display: block;
+}
+
+.cast-row-pictures {
+  display: grid;
+  grid-template-columns: repeat(2, 44px);
+  gap: 4px;
+  min-height: 44px;
+}
+
+.cast-row-pictures:empty {
+  width: 92px;
+  border-radius: 2px;
+  background: var(--well);
+  box-shadow: 0 0 0 1px var(--line);
+}
+
+.cast-picture {
+  display: block;
+  aspect-ratio: 1;
+  border-radius: 2px;
+  overflow: hidden;
+  background: var(--well);
+  box-shadow: 0 0 0 1px var(--line);
+}
+
+.cast-picture img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cast-row-text {
+  display: grid;
+  gap: 2px;
+}
+
+.cast-row-text h3 {
+  font-size: var(--step-1);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.cast-kind {
+  font-size: var(--step--2);
+  color: var(--muted);
+}
+
+.cast-description {
+  font-size: var(--step--1);
+  color: var(--muted);
+  max-width: 52ch;
+}
+
+.cast-row-actions {
+  grid-column: 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cast-form {
+  display: grid;
+  gap: 22px;
+  padding: 18px 0;
+  border-top: 1px solid var(--line);
+}
+
+.cast-picture-field {
+  display: grid;
+  gap: 10px;
+  justify-items: start;
+}
+
+.cast-picture-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.cast-picture-list li {
+  display: grid;
+  gap: 6px;
+  width: 96px;
+}
+
+.cast-picture-list button.quiet {
+  border: 0;
+  padding: 0;
+  text-align: left;
+  color: var(--muted);
+  font-size: var(--step--2);
+}
+
+.cast-form-actions {
+  display: flex;
+  gap: 8px;
+}
+
+@media (max-width: 520px) {
+  .cast-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cast-row-actions {
+    grid-column: 1;
+  }
+}
+
+.cast-row.editing .cast-form {
+  border-top: 0;
+  padding-top: 0;
+}

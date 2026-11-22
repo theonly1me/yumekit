@@ -1,3 +1,4 @@
+import { castKinds } from "@yumekit/project";
 import { z } from "zod";
 import { applyEditsResult } from "../applyEditsResult.js";
 import type { HarnessContext } from "../context.js";
@@ -22,14 +23,19 @@ function registerSetScript(context: HarnessContext): void {
 
 const castMemberInput = z.strictObject({
   id: idInput("The id of the cast member."),
+  kind: z
+    .enum(castKinds)
+    .optional()
+    .describe("A person, a place, or a product. Default person."),
   name: z.string().describe("The name of the cast member."),
   description: z
     .string()
     .describe("How the cast member looks. Put it in each image prompt."),
   reference_asset_ids: z
     .array(idInput("An image asset that shows the cast member."))
+    .max(4)
     .optional()
-    .describe("Image assets that show the cast member. Default none."),
+    .describe("Up to 4 image assets that show the cast member. Default none."),
 });
 
 function registerSetBible(context: HarnessContext): void {
@@ -49,7 +55,9 @@ function registerSetBible(context: HarnessContext): void {
       cast: z
         .array(castMemberInput)
         .optional()
-        .describe("The recurring characters. Default none."),
+        .describe(
+          "The people, places, and products that show in two or more scenes. It replaces the whole cast. To change one entry, call put_cast_member. Default none.",
+        ),
       voice: z
         .string()
         .describe(
@@ -68,6 +76,7 @@ function registerSetBible(context: HarnessContext): void {
               voice,
               cast: (cast ?? []).map((member) => ({
                 id: member.id,
+                kind: member.kind ?? "person",
                 name: member.name,
                 description: member.description,
                 referenceAssetIds: member.reference_asset_ids ?? [],
