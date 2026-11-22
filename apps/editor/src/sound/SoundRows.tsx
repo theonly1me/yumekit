@@ -1,4 +1,4 @@
-import type { SoundRow } from "./soundRowFacts.js";
+import type { SoundPartName, SoundRow } from "./soundRowFacts.js";
 import "./sound.css";
 
 export function SoundRows(props: {
@@ -6,6 +6,7 @@ export function SoundRows(props: {
   failure: string | undefined;
   onSwitch: (change: { trackId: string; off: boolean }) => void;
   onChange: (rowName: string) => void;
+  onOpen: (part: SoundPartName) => void;
 }) {
   if (props.rows.length === 0) return undefined;
   return (
@@ -32,15 +33,27 @@ export function SoundRows(props: {
               />{" "}
               On
             </label>
-            <button
-              type="button"
-              aria-label={`Change the ${row.name.toLowerCase()}`}
-              onClick={() => {
-                props.onChange(row.name);
-              }}
-            >
-              Change
-            </button>
+            {row.part === undefined ? (
+              <button
+                type="button"
+                aria-label={`Change the ${row.name.toLowerCase()}`}
+                onClick={() => {
+                  props.onChange(row.name);
+                }}
+              >
+                Change
+              </button>
+            ) : (
+              <button
+                type="button"
+                aria-label={`Open the ${row.name.toLowerCase()}`}
+                onClick={() => {
+                  if (row.part !== undefined) props.onOpen(row.part);
+                }}
+              >
+                Open
+              </button>
+            )}
           </li>
         ))}
       </ul>

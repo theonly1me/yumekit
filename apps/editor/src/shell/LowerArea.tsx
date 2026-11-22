@@ -1,5 +1,6 @@
 import { changeStartOf, fitTheVoiceRequest } from "../chat/requestTexts.js";
 import type { EngineClient } from "../engine/engineClient.js";
+import { fixedRequestTextOf } from "../parts/fixedRequests.js";
 import type {
   Output,
   SceneClip,
@@ -12,9 +13,8 @@ import type { SceneEdits } from "../scenes/sceneEdits.js";
 import type { DirectChanges } from "../scenes/useDirectChanges.js";
 import { useSceneStills } from "../scenes/useSceneStills.js";
 import { SoundRows } from "../sound/SoundRows.js";
-import { soundRowsOf } from "../sound/soundRowFacts.js";
+import { soundRowsOf, type SoundPartName } from "../sound/soundRowFacts.js";
 import { Timeline, type PickedClip } from "../timeline/Timeline.js";
-import { backToGraphicsRequest } from "../videoStyle/videoStyles.js";
 import type { EditorChat } from "./useEditorChat.js";
 
 export function LowerArea(props: {
@@ -38,6 +38,7 @@ export function LowerArea(props: {
   onSeek: (frame: number) => void;
   onEditText: () => void;
   onMakeClip: (clip: SceneClip) => void;
+  onOpenSound: (part: SoundPartName) => void;
 }) {
   const { client, snapshot, output, mainClips, picked, changes, edits } = props;
   const { editorChat } = props;
@@ -106,7 +107,10 @@ export function LowerArea(props: {
             onBackToGraphics={() => {
               if (picked === undefined) return;
               editorChat.sendAboutClip({
-                text: backToGraphicsRequest,
+                text: fixedRequestTextOf({
+                  kind: "back-to-graphics",
+                  aboutClipId: picked.clip.id,
+                }),
                 clipId: picked.clip.id,
               });
             }}
@@ -135,6 +139,7 @@ export function LowerArea(props: {
           onChange={(rowName) => {
             editorChat.fillBox(changeStartOf(rowName));
           }}
+          onOpen={props.onOpenSound}
           onSwitch={({ trackId, off }) => {
             changes
               .run({

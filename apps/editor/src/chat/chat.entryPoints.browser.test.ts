@@ -82,24 +82,21 @@ describe("the other places that talk to the chat", () => {
     await editor.close();
   });
 
-  it("puts the start of a request in the box from Change on a sound row", async () => {
+  it("puts the start of a request in the box from Change on the captions row", async () => {
     const editor = await openEditor(runningEngine().url);
     const chat = chatOf(editor.page);
 
     const sound = editor.page.getByRole("list", { name: "Sound" });
-    await sound.getByRole("button", { name: "Change the voice" }).click();
+    await sound.getByRole("button", { name: "Change the captions" }).click();
 
-    expect(await chat.box.inputValue()).toBe("Change the voice to ");
+    expect(await chat.box.inputValue()).toBe("Change the captions to ");
     expect(
       await chat.box.evaluate((element) => element === document.activeElement),
     ).toBe(true);
-    await chat.box.pressSequentially("a calm voice");
+    await chat.box.pressSequentially("large words");
     expect(await chat.box.inputValue()).toBe(
-      "Change the voice to a calm voice",
+      "Change the captions to large words",
     );
-
-    await sound.getByRole("button", { name: "Change the captions" }).click();
-    expect(await chat.box.inputValue()).toBe("Change the captions to ");
     await editor.close();
   });
 

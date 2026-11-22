@@ -5,6 +5,7 @@ import {
   previewSchema,
   snapshotSchema,
   toolResultSchema,
+  uploadSchema,
 } from "./snapshot.js";
 
 export type ClientFailure =
@@ -44,17 +45,20 @@ export function createEngineClient(token: string) {
     path: string;
     method?: RequestMethod;
     body?: unknown;
+    file?: Blob;
   }): Promise<Reply<Response>> {
-    const method =
-      options.method ?? (options.body === undefined ? "GET" : "POST");
+    const hasBody = options.body !== undefined || options.file !== undefined;
+    const method = options.method ?? (hasBody ? "POST" : "GET");
     const init: RequestInit =
-      options.body === undefined
-        ? { method, headers }
-        : {
-            method,
-            headers: { ...headers, "content-type": "application/json" },
-            body: JSON.stringify(options.body),
-          };
+      options.file !== undefined
+        ? { method, headers, body: options.file }
+        : options.body === undefined
+          ? { method, headers }
+          : {
+              method,
+              headers: { ...headers, "content-type": "application/json" },
+              body: JSON.stringify(options.body),
+            };
     try {
       const response = await fetch(options.path, init);
       if (response.status === 401)
@@ -71,6 +75,7 @@ export function createEngineClient(token: string) {
     schema: Schema;
     method?: RequestMethod;
     body?: unknown;
+    file?: Blob;
   }): Promise<Reply<z.infer<Schema>>> {
     const sent = await send(options);
     if (!sent.ok) return sent;
@@ -110,6 +115,16 @@ export function createEngineClient(token: string) {
       });
       return sent.ok ? { ok: true, value: await sent.value.blob() } : sent;
     },
+    upload: (file: File) =>
+      readJson({
+        path: `/api/uploads?name=${encodeURIComponent(file.name)}`,
+        schema: uploadSchema,
+        file,
+      }),
+    assetDownload: (assetId: string) =>
+      send({
+        path: `/api/assets/${encodeURIComponent(assetId)}/file?download=1`,
+      }),
     eventsUrl: () => {
       const url = new URL("/api/events", window.location.href);
       url.protocol = url.protocol === "https:" ? "wss:" : "ws:";

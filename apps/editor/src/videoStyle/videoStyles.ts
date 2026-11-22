@@ -39,6 +39,3 @@ export function aiVideoLimitLineOf(limitSeconds: number | null): string {
   }
   return `yumekit makes at most ${String(limitSeconds)} seconds of AI video for this project. You can change this in Settings.`;
 }
-
-export const backToGraphicsRequest =
-  "Draw this scene by code, with no video clip.";
