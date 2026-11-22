@@ -64,7 +64,9 @@ describe("the looks", () => {
       .locator("h1");
     await expect.poll(() => heading.count()).toBe(1);
 
-    await editor.page.getByRole("button", { name: "Settings" }).click();
+    await editor.page
+      .getByRole("button", { name: "Settings", exact: true })
+      .click();
     const settings = editor.page.getByRole("dialog", { name: "Settings" });
     await settings.getByRole("button", { name: /^Neon/ }).click();
 
