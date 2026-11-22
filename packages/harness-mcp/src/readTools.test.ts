@@ -51,6 +51,7 @@ describe("read tools", () => {
         "redo",
         "generate_asset",
         "import_asset",
+        "remove_asset",
         "align_words",
         "preview_frame",
         "preview_frames",

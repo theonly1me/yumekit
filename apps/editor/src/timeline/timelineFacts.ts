@@ -65,7 +65,8 @@ export function audioClipLabel(options: {
   const asset = options.assets.find(
     (candidate) => candidate.id === options.clip.assetId,
   );
-  if (asset?.source.kind !== "tool") return options.clip.assetId;
+  if (asset?.source.kind === "import") return asset.source.originalName;
+  if (asset === undefined) return options.clip.assetId;
   const { text, prompt } = asset.source.input;
   if (typeof text === "string") return text;
   return typeof prompt === "string" ? prompt : options.clip.assetId;

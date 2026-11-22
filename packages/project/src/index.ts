@@ -49,3 +49,9 @@ export {
   type RowScene,
   type RowTrack,
 } from "./scenesRow/index.js";
+export {
+  assetUsesOf,
+  propsUseAsset,
+  type AssetUse,
+  type UsesProject,
+} from "./assetUses/index.js";
