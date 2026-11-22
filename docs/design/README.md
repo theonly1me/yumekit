@@ -19,6 +19,7 @@ These documents are the design of yumekit. Code follows them. If code and a docu
 | [11-editor-m2.md](11-editor-m2.md)                                 | How the engine serves the editor, and the screens of the first version                     |
 | [12-brain-runner.md](12-brain-runner.md)                           | How the editor starts the agent program of the person, and how the chat works              |
 | [13-editor-prompt-first.md](13-editor-prompt-first.md)             | The second version of the editor: the prompt, platforms, scene cards, and the start screen |
+| [14-install-and-release.md](14-install-and-release.md)             | How a person installs yumekit from npm, and how the owner makes a release                  |
 
 The visual reference for the editor is the prototype in [apps/prototype](../../apps/prototype).
 
