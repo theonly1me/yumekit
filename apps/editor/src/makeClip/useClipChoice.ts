@@ -1,6 +1,13 @@
 import { useState } from "react";
+import type { ModelTarget } from "../settings/services/index.js";
 import type { MediaServers } from "../tools/mediaServers.js";
-import { firstChoiceOf, modelChoicesOf } from "./modelChoices.js";
+import {
+  firstChoiceOf,
+  modelChoicesOf,
+  pickedChoiceOf,
+  type ModelChoice,
+} from "./modelChoices.js";
+import { priceOf, type Price } from "./price.js";
 import {
   valuesFor,
   type SettingValue,
@@ -10,6 +17,7 @@ import {
 export function useClipChoice(options: {
   servers: MediaServers | undefined;
   preferredSeconds: number;
+  pickedModel: ModelTarget | undefined;
 }) {
   const { servers, preferredSeconds } = options;
   const [chosenKey, setChosenKey] = useState<string>();
@@ -29,6 +37,7 @@ export function useClipChoice(options: {
         );
   const choice =
     videoChoices.find((candidate) => candidate.key === chosenKey) ??
+    pickedChoiceOf({ choices: videoChoices, picked: options.pickedModel }) ??
     firstChoiceOf(videoChoices);
   const values =
     choice === undefined
@@ -62,5 +71,26 @@ export function useClipChoice(options: {
     });
   };
 
-  return { videoChoices, imageChoices, choice, values, choose, change };
+  const priceFor = (candidate: ModelChoice): Price =>
+    priceOf({
+      model: candidate.model,
+      values:
+        candidate.key === choice?.key
+          ? values
+          : valuesFor({
+              model: candidate.model,
+              previous: values,
+              preferredSeconds,
+            }),
+    });
+
+  return {
+    videoChoices,
+    imageChoices,
+    choice,
+    values,
+    choose,
+    change,
+    priceFor,
+  };
 }

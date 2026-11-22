@@ -35,7 +35,7 @@ export function FirstFrame(props: {
       <div className="first-frame">
         <Picture client={client} assetId={props.assetId} />
         <p className="fact">
-          <strong>First picture</strong>
+          <strong>Start on this picture</strong>
           {props.assetId === undefined
             ? "The clip starts from a still image. Make one from a prompt."
             : `The clip starts from the image ${props.assetId}.`}

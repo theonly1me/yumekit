@@ -4,6 +4,8 @@ const keyVariable = "YUMEKIT_EDITOR_TEST_KEY";
 
 const hasCheckKey = !process.argv.includes("--without-check-key");
 
+const acceptsNoPicture = process.argv.includes("--accepts-no-picture");
+
 const description = {
   label: hasCheckKey ? "Key test server" : "Plain key test server",
   runs: "hosted",
@@ -43,6 +45,8 @@ const description = {
         { usd: 0.25, unit: "second", when: { resolution: "720p" } },
       ],
       read_on: "2026-11-21",
+      tested: false,
+      ...(acceptsNoPicture ? { accepts: ["reference_images"] } : {}),
     },
   ],
 };

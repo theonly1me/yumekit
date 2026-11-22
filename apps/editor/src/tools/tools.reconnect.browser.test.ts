@@ -1,4 +1,4 @@
-import type { WebSocketRoute } from "playwright";
+import type { Request, WebSocketRoute } from "playwright";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { closeBrowser, sharedBrowser } from "../testing/editorPage.js";
 import {
@@ -54,10 +54,22 @@ describe("the event connection of the editor", () => {
       });
       route.connectToServer();
     });
+    let pendingServerLists = 0;
+    const isServerList = (url: string) => url.endsWith("/api/media-servers");
+    page.on("request", (request) => {
+      if (isServerList(request.url())) pendingServerLists += 1;
+    });
+    const finishServerList = (request: Request) => {
+      if (isServerList(request.url())) pendingServerLists -= 1;
+    };
+    page.on("requestfinished", finishServerList);
+    page.on("requestfailed", finishServerList);
     await page.goto(runningEngine().url);
     await openTools(page);
     const row = page.getByRole("button", { name: /Key test server/ });
     await expect.poll(() => row.textContent()).toContain("Needs a key");
+    await expect.poll(() => pendingServerLists).toBe(0);
+    expect(await row.textContent()).toContain("Needs a key");
     expect(openSockets.size).toBe(1);
 
     isBlocked = true;
