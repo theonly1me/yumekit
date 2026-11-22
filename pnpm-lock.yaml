@@ -274,6 +274,8 @@ importers:
         specifier: 8.3.8
         version: 8.3.8(@types/node@22.20.5)
 
+  apps/prototype: {}
+
   packages/brain: {}
 
   packages/engine:
@@ -454,6 +456,18 @@ importers:
       '@modelcontextprotocol/sdk':
         specifier: 1.32.2
         version: 1.32.2(zod@4.6.7)
+      '@yumekit/fal-media':
+        specifier: workspace:*
+        version: link:../../tools/fal-media
+      '@yumekit/gemini-media':
+        specifier: workspace:*
+        version: link:../../tools/gemini-media
+      '@yumekit/openai-media':
+        specifier: workspace:*
+        version: link:../../tools/openai-media
+      '@yumekit/sample-media':
+        specifier: workspace:*
+        version: link:../../tools/sample-media
       zod:
         specifier: 4.6.7
         version: 4.6.7
