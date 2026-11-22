@@ -90,17 +90,20 @@ What the first agent run could not learn from the descriptions, and each descrip
 
 ### Direct changes to scenes
 
-| Tool                   | Input                                       | Edit                                                                |
-| ---------------------- | ------------------------------------------- | ------------------------------------------------------------------- |
-| `resize_scene_clip`    | `output_ids?`, `clip_id`, `duration_frames` | `setTimeline` for each changed output                               |
-| `move_scene_clip`      | `output_ids?`, `clip_id`, `to_index`        | `setTimeline` for each changed output                               |
-| `remove_scene_clip`    | `output_ids?`, `clip_id`                    | `setTimeline` for each changed output                               |
-| `duplicate_scene_clip` | `output_ids?`, `clip_id`                    | `putScene` for each copy, and `setTimeline` for each changed output |
-| `set_track_off`        | `output_ids?`, `track_id`, `off`            | `setTimeline` for each changed output                               |
+| Tool                   | Input                                                  | Edit                                                                |
+| ---------------------- | ------------------------------------------------------ | ------------------------------------------------------------------- |
+| `resize_scene_clip`    | `output_ids?`, `clip_id`, `duration_frames`            | `setTimeline` for each changed output                               |
+| `move_scene_clip`      | `output_ids?`, `clip_id`, `to_index`                   | `setTimeline` for each changed output                               |
+| `remove_scene_clip`    | `output_ids?`, `clip_id`                               | `setTimeline` for each changed output                               |
+| `duplicate_scene_clip` | `output_ids?`, `clip_id`                               | `putScene` for each copy, and `setTimeline` for each changed output |
+| `set_track_off`        | `output_ids?`, `track_id`, `off`                       | `setTimeline` for each changed output                               |
+| `set_transitions`      | `output_ids?`, `clip_ids?`, `kind`, `duration_frames?` | `setTimeline` for each changed output                               |
 
 The four scene clip tools change the scenes row of document 03, as document 13 says in "Direct changes to scenes". With no `output_ids`, a tool changes each output that has a clip with `clip_id` on its scenes row. Only the clips of the row move. Each tool is one edit batch, so one undo reverts the change in each output. The result has `output_ids`, `scenes_rows`, and `voice_may_not_match`. It is `true` when a changed output has an audio clip of an asset with word timings. The descriptions tell the agent to use these tools in place of `update_clip` and `remove_clip` to change the length, the order, or the set of scenes.
 
 `set_track_off` switches a track off or on in each output that has it. `get_timeline` shows `off` for each track, and `set_timeline` accepts it.
+
+`set_transitions` sets the transition of document 17 on the clips of the scenes row. The section "Details of WP51" of document 17 gives its rules.
 
 ### Media
 

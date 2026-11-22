@@ -87,6 +87,12 @@ type SceneClip = {
   startFrame: number;
   durationFrames: number;
   sceneStartFrame: number;
+  transition?: SceneTransition;
+};
+
+type SceneTransition = {
+  kind: "fade" | "slide" | "wipe" | "zoom";
+  durationFrames: number;
 };
 
 type AudioClip = {

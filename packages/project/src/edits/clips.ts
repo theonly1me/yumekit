@@ -1,9 +1,24 @@
 import type { ProjectState } from "../format/state.js";
-import type { Track } from "../format/timeline.js";
+import type { SceneClip, Track } from "../format/timeline.js";
 import { succeed } from "../outcome.js";
 import type { ClipChanges, EditOfKind } from "./edit.js";
 import { problem, type EditProblem, type EditResult } from "./editFailure.js";
 import { findTimeline, timelineNotFound, withTimeline } from "./timelines.js";
+
+function changedSceneClip(options: {
+  clip: SceneClip;
+  changes: Omit<ClipChanges, "assetStartFrame" | "gainDecibels" | "assetId">;
+}): SceneClip {
+  const { transition, ...timing } = options.changes;
+  const { transition: current, ...clip } = { ...options.clip, ...timing };
+  const kept =
+    transition === undefined
+      ? current
+      : transition.kind === "cut"
+        ? undefined
+        : transition;
+  return kept === undefined ? clip : { ...clip, transition: kept };
+}
 
 type TrackChange =
   { ok: true; track: Track } | { ok: false; failure: EditProblem };
@@ -32,16 +47,23 @@ function changeClipOnTrack(options: {
       track: {
         ...track,
         clips: track.clips.map((clip) =>
-          clip.id === clipId ? { ...clip, ...sceneChanges } : clip,
+          clip.id === clipId
+            ? changedSceneClip({ clip, changes: sceneChanges })
+            : clip,
         ),
       },
     };
   }
-  const { sceneStartFrame, sceneId, ...audioChanges } = options.changes;
-  if (sceneStartFrame !== undefined || sceneId !== undefined) {
+  const { sceneStartFrame, sceneId, transition, ...audioChanges } =
+    options.changes;
+  if (
+    sceneStartFrame !== undefined ||
+    sceneId !== undefined ||
+    transition !== undefined
+  ) {
     return problem({
       kind: "invalid-value",
-      message: `The audio clip "${clipId}" has no sceneStartFrame and no sceneId.`,
+      message: `The audio clip "${clipId}" has no sceneStartFrame, no sceneId, and no transition.`,
     });
   }
   return {

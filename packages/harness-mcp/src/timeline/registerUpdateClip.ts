@@ -3,6 +3,7 @@ import { z } from "zod";
 import { applyEditsResult } from "../applyEditsResult.js";
 import type { HarnessContext } from "../context.js";
 import { durationInput, frameInput, idInput } from "../inputs.js";
+import { transitionOf, wireTransition } from "../transitions/wireTransition.js";
 
 type ClipChanges = Extract<Edit, { kind: "updateClip" }>["changes"];
 
@@ -27,11 +28,16 @@ const updateClipInput = {
     .number()
     .optional()
     .describe("Audio clip only: the new volume change in decibels."),
+  transition: wireTransition.optional(),
 };
 
 type UpdateClipInput = z.infer<z.ZodObject<typeof updateClipInput>>;
 
-function changesOf(input: UpdateClipInput): ClipChanges {
+function changesOf(options: {
+  input: UpdateClipInput;
+  framesPerSecond: number;
+}): ClipChanges {
+  const { input, framesPerSecond } = options;
   return {
     ...(input.start_frame === undefined
       ? {}
@@ -50,6 +56,14 @@ function changesOf(input: UpdateClipInput): ClipChanges {
     ...(input.gain_decibels === undefined
       ? {}
       : { gainDecibels: input.gain_decibels }),
+    ...(input.transition === undefined
+      ? {}
+      : {
+          transition: transitionOf({
+            wire: input.transition,
+            framesPerSecond,
+          }),
+        }),
   };
 }
 
@@ -57,7 +71,7 @@ export function registerUpdateClip(context: HarnessContext): void {
   context.tools.add({
     name: "update_clip",
     description:
-      "Change the timing, the gain, or the target of one clip. Give only the fields to change. scene_id shows another scene in the same place, for example a tall version of a scene in the tall output. asset_id plays another audio asset.",
+      "Change the timing, the gain, or the target of one clip. Give only the fields to change. scene_id shows another scene in the same place, for example a tall version of a scene in the tall output. asset_id plays another audio asset. transition with kind cut removes the transition of a scene clip.",
     inputSchema: updateClipInput,
     run: ({ input }) =>
       applyEditsResult({
@@ -67,7 +81,10 @@ export function registerUpdateClip(context: HarnessContext): void {
             kind: "updateClip",
             outputId: input.output_id,
             clipId: input.clip_id,
-            changes: changesOf(input),
+            changes: changesOf({
+              input,
+              framesPerSecond: context.store.read().project.framesPerSecond,
+            }),
           },
         ],
         line: `Clip "${input.clip_id}" changed.`,

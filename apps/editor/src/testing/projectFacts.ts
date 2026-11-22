@@ -17,6 +17,7 @@ const projectSchema = z.object({
               sceneId: z.string().optional(),
               startFrame: z.number(),
               durationFrames: z.number(),
+              transition: z.object({ kind: z.string() }).optional(),
             }),
           ),
         }),

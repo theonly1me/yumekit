@@ -9,7 +9,7 @@ function registerSetTimeline(context: HarnessContext): void {
   context.tools.add({
     name: "set_timeline",
     description:
-      "Replace all tracks and clips of one output in one call. Use it for a first build. Scene tracks draw in list order: the first is at the back, so put captions on the last scene track. A scene clip shows a scene; an audio clip plays an audio asset. Clips on one track must not overlap. The video ends at the last clip end.",
+      "Replace all tracks and clips of one output in one call. Use it for a first build. Scene tracks draw in list order: the first is at the back, so put captions on the last scene track. A scene clip shows a scene; an audio clip plays an audio asset. Clips on one track must not overlap. The video ends at the last clip end. A scene clip can have a transition from the clip before it; set_transitions sets one kind for each scene in one call.",
     inputSchema: {
       output_id: idInput("The id of the output."),
       tracks: z.array(wireTrack).describe("All tracks, back to front."),
@@ -20,7 +20,15 @@ function registerSetTimeline(context: HarnessContext): void {
         edits: [
           {
             kind: "setTimeline",
-            timeline: { outputId: output_id, tracks: tracks.map(trackOf) },
+            timeline: {
+              outputId: output_id,
+              tracks: tracks.map((track) =>
+                trackOf({
+                  track,
+                  framesPerSecond: context.store.read().project.framesPerSecond,
+                }),
+              ),
+            },
           },
         ],
         line: `Timeline of "${output_id}" set with ${String(tracks.length)} tracks.`,

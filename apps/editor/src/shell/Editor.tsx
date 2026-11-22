@@ -33,6 +33,7 @@ export function Editor(props: {
   const settings = useSettingsSheet({
     client,
     chat: editorChat.chat,
+    snapshot,
     projectFolder,
     videoStyle: snapshot.project.videoStyle ?? "graphics",
     look: snapshot.project.look ?? "paper",
