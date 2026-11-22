@@ -45,7 +45,7 @@ function registerGetSceneGuide(context: HarnessContext): void {
   context.tools.add({
     name: "get_scene_guide",
     description:
-      "Read the full reference for custom scene code: the contract, each hook, each animation function, the rules, the tokens of the look, and two complete examples. Call it before you send code to put_scene.",
+      "Read the full reference for custom scene code: the contract, each hook, each animation function, the rules, the tokens of the look, the rules and functions of motion design, and three complete examples. Call it before you send code to put_scene.",
     inputSchema: {},
     annotations: readOnly,
     run: () => ({

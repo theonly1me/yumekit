@@ -26,7 +26,8 @@ describe("scene guide", () => {
       "The bottom 16 units of the picture are the caption area.",
     );
     for (const example of sceneGuideExamples) {
-      expect(example.code).toContain("stylePack.colors.background");
+      expect(example.code).toContain("<Backdrop seed=");
+      expect(example.code).toContain("stylePack.fonts.body.family");
       expect(example.code).toContain("paddingBottom: 24 * unit");
     }
   });
@@ -51,7 +52,11 @@ describe("scene guide", () => {
 
   it("tells agents to mark each text prop, so a person can change it in the preview", () => {
     expect(sceneGuide).toContain('<h1 data-text-prop="title">{title}</h1>');
-    expect(sceneGuideExamples[0].code).toContain('data-text-prop="label"');
+    expect(sceneGuideExamples[0].code).toContain('data-text-prop="heading"');
+    expect(sceneGuideExamples[0].code).toContain(
+      'data-text-prop={"points." + String(index)}',
+    );
+    expect(sceneGuideExamples[1].code).toContain('data-text-prop="label"');
   });
 
   it("contains the code of each example", () => {

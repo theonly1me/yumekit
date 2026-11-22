@@ -122,6 +122,9 @@ describe("asset and reference read tools", () => {
       "stylePack.fonts.display.family",
       "## Example 1",
       "## Example 2",
+      "## Example 3",
+      "## Motion design",
+      "@yumekit/scene-kit/motion",
     ]) {
       expect(text).toContain(name);
     }
