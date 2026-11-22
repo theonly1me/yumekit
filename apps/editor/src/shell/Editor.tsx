@@ -5,7 +5,7 @@ import { useExportSheet } from "../export/useExportSheet.js";
 import { useClipTools } from "../makeClip/useClipTools.js";
 import type { StepViewId } from "../parts/frame/stepViewProps.js";
 import { useStepSheet } from "../parts/frame/useStepSheet.js";
-import { PlatformTabs } from "../platforms/PlatformTabs.js";
+import { ProjectPlatformTabs } from "../platforms/ProjectPlatformTabs.js";
 import { Preview } from "../preview/Preview.js";
 import { sceneEditsOf } from "../scenes/sceneEdits.js";
 import { useDirectChanges } from "../scenes/useDirectChanges.js";
@@ -104,31 +104,12 @@ export function Editor(props: {
         />
         <main className="stage">
           <div className="preview">
-            <PlatformTabs
+            <ProjectPlatformTabs
               tabs={facts.tabs}
               activeKey={tab.key}
               outputs={snapshot.project.outputs}
-              failure={changes.failureOf("platforms")}
+              changes={changes}
               onTab={view.chooseTab}
-              onAdd={(platformId) => {
-                view.chooseTab(`platform:${platformId}`);
-                changes
-                  .run({
-                    area: "platforms",
-                    name: "add_platform",
-                    input: { platform_id: platformId },
-                  })
-                  .catch(() => undefined);
-              }}
-              onRemove={(platformId) => {
-                changes
-                  .run({
-                    area: "platforms",
-                    name: "remove_platform",
-                    input: { platform_id: platformId },
-                  })
-                  .catch(() => undefined);
-              }}
             />
             <Preview
               client={client}
