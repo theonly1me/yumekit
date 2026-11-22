@@ -34,6 +34,8 @@ export const state = {
   usedSeconds: 4,
   playing: false,
   playheadSeconds: 0,
+  script: undefined,
+  ownPictures: {},
 };
 
 export function onChange(listener) {

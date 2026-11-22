@@ -3,13 +3,45 @@
 }
 
 .making-steps li {
-  display: grid;
-  grid-template-columns: 18px minmax(0, 1fr) auto;
-  gap: 12px;
-  align-items: center;
-  padding: 13px 0;
   border-top: 1px solid var(--line);
   color: var(--faint);
+}
+
+.step-row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) auto;
+  gap: 2px 12px;
+  align-items: center;
+  padding: 13px 0;
+  border: 0;
+  border-radius: 0;
+  text-align: left;
+  font-size: var(--step-0);
+  font-weight: 400;
+  white-space: normal;
+}
+
+.step-see {
+  grid-column: 2 / -1;
+  font-size: var(--step--2);
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--line-strong);
+}
+
+button.step-row:hover .step-see {
+  color: var(--text);
+}
+
+.making-steps li[data-open="true"] {
+  border-top-color: var(--text);
+}
+
+.making-steps li[data-open="true"] .step-see {
+  color: var(--text);
+  text-decoration: none;
 }
 
 .making-steps em {
@@ -44,28 +76,6 @@
   animation: pulse 1s ease-in-out infinite alternate;
 }
 
-.making-cards {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 12px;
-  font-size: var(--step--2);
-  color: var(--muted);
-}
-
-.making-card {
-  display: grid;
-  gap: 6px;
-}
-
-.making-card .thumb,
-.making-card[data-empty="true"]::before {
-  content: "";
-  display: block;
-  aspect-ratio: 16 / 9;
-  border-radius: 3px;
-  box-shadow: 0 0 0 1px var(--line);
-}
-
 .making-action {
   display: flex;
   flex-wrap: wrap;
@@ -85,11 +95,5 @@
 @media (prefers-reduced-motion: reduce) {
   .making-steps li[data-status="now"] .step-mark {
     animation: none;
-  }
-}
-
-@media (max-width: 560px) {
-  .making-cards {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }

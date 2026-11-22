@@ -1,41 +1,33 @@
 const changes = [
   [
-    "The prompt comes first",
-    "Pass 3 had no place to type a request. Now the start screen is one prompt, and the editor keeps a chat with the AI on the right at all times.",
+    "Each step opens",
+    "On the Making screen, a step that is done is a button. It opens the script, the pictures, the voice, or the music next to the steps.",
   ],
   [
-    "You can change things yourself",
-    "Pass 3 showed a timeline that you could not change. Now you click the text in the video to change it, drag a scene to move it, and use the buttons of a scene to change its length, duplicate it, or delete it.",
+    "You can change the script",
+    "The script is a page that you type in, with Bold, Italic, Heading, and List. After a change, yumekit asks if the AI must update the video to match.",
   ],
   [
-    "Scenes are cards, not tracks",
-    "The lower area starts as a row of large scene cards with three plain rows: Voice, Music, and Captions. The track view is behind the switch Detailed timeline.",
+    "You see the real pictures",
+    "Each scene shows its picture in the shape of the platform. Click a picture to see it large, change its text, ask the AI for a change, or use your own picture.",
   ],
   [
-    "Platforms replace Wide and Tall",
-    "You pick where the video goes: YouTube, YouTube Shorts, TikTok, Instagram Reel, Instagram post, X, LinkedIn, Square, or a custom size. Each place is a tab above the video and a file in Export.",
+    "You can listen, change, and bring your own sound",
+    "The music and the voice have Play. You can try another music, describe the music, use your own sound file, download it, or remove it.",
   ],
   [
-    "A real video clip is one click from a scene",
-    "Make a real video clip is a button on each picked scene and in the Scene tab. The chat can open it too. The price shows before the button.",
+    "The video does not open the editor by itself",
+    "When the video is ready, the screen stays. You check what you want, then you click Open the editor.",
   ],
   [
-    "A key shows only when it is needed",
-    "Tools and keys moved to Settings. If a model needs a key, the steps show inside Make a real video clip, and the clip continues after you save the key.",
-  ],
-  [
-    "Each change has Undo",
-    "The chat lists each change in plain words, from you or from the AI, with Undo next to it.",
-  ],
-  [
-    "Plain words",
-    "Export replaces Render. The interface does not say track, frame, asset, or MCP.",
+    "The same views are in the editor",
+    "The editor has the buttons Script and Pictures at the top. The rows Voice and Music have Open.",
   ],
 ];
 
 const screens = [
   ["Start", "One prompt, where the video goes, and how long. One button."],
-  ["Making", "Plain steps that fill in, scenes that appear, and Stop."],
+  ["Making", "Steps that fill in. Each done step opens to see and change."],
   [
     "Editor",
     "The video in the centre, platform tabs above, the chat on the right, scene cards below.",
@@ -49,48 +41,40 @@ const screens = [
 ];
 
 const limits = [
-  "This is a mock. The AI answers are fixed. Try the four suggestions, or type a request with the word shorter, voice, add, music, or video.",
-  "The pictures are color fills. The real editor shows the real video.",
-  "Play moves through the scenes with no sound.",
+  "This is a mock. The AI answers are fixed, and the pictures are color fills.",
+  "Play shows a moving line with no sound. A sound file of your own does play.",
+  "Download the script saves a real file. The other downloads only show a note.",
 ];
 
 const questions = [
   {
-    text: "Where is the chat?",
+    text: "When can you change a step?",
     words: [
-      ["visible", "The chat is always on the right, as in this mock."],
       [
-        "tab",
-        "The chat is one tab of the side panel, so the Scene tab can replace it.",
+        "wait",
+        "You can look at any time. You can change it when the AI finishes, or after Stop, as in this mock.",
+      ],
+      [
+        "live",
+        "You can change it while the AI still works. The AI then reads your change before its next step.",
       ],
     ],
   },
   {
-    text: "What is below the video?",
+    text: "What happens when the video is ready?",
     words: [
       [
-        "cards",
-        "Scene cards, with the detailed timeline behind a switch, as in this mock.",
+        "stay",
+        "The screen stays until you click Open the editor, as in this mock.",
       ],
-      ["timeline", "The detailed timeline is always visible."],
+      ["jump", "The editor opens by itself, as before."],
     ],
   },
   {
-    text: "Does the AI stop for approval before it makes pictures?",
+    text: "What happens after you change the script?",
     words: [
-      [
-        "approve",
-        "The AI shows the script and rough scenes first, and waits for your approval.",
-      ],
-      ["nostop", "The AI makes the full video with no stop, as in this mock."],
-    ],
-  },
-  {
-    text: "Which places are on at the start?",
-    words: [
-      ["both", "YouTube and TikTok are on, as in this mock."],
-      ["youtube", "Only YouTube is on."],
-      ["none", "Nothing is on. The person must pick."],
+      ["ask", "yumekit asks, and you click Update the video, as in this mock."],
+      ["auto", "The AI updates the video at once."],
     ],
   },
 ];
@@ -117,10 +101,10 @@ function questionMarkup(question) {
 export function renderNotes({ element }) {
   element.innerHTML = `
     <div class="notes-intro">
-      <h2>Fourth pass: the prompt comes first</h2>
-      <p>You said the editor was hard to use, that you could not see where to talk to the AI, that nothing looked editable, and that Wide and Tall were not enough. This pass starts again from one rule: you type what you want, and you can also change each simple thing yourself.</p>
+      <h2>Fifth pass: you can open each step</h2>
+      <p>You said that the Making screen needs more control. You want to read and change the script, to see the pictures in place of black boxes, to open the music and change it, and to use and download your own music. This pass makes each step a place that you can open.</p>
     </div>
-    <div><h2>What changed since the third pass, and why</h2>${rowsMarkup(changes)}</div>
+    <div><h2>What changed since the fourth pass, and why</h2>${rowsMarkup(changes)}</div>
     <div>
       <h2>The screens</h2>${rowsMarkup(screens)}
       <h2 class="notes-gap">Limits of this mock</h2>
