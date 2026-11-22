@@ -1,4 +1,4 @@
-import type { KeyboardEvent } from "react";
+import type { KeyboardEvent, ReactNode } from "react";
 import type { SceneClip } from "../engine/snapshot.js";
 
 export interface CardFacts {
@@ -19,6 +19,7 @@ export function SceneCard(props: {
   onDragStart: () => void;
   onDrop: () => void;
   onAdd: () => void;
+  mark?: ReactNode;
 }) {
   const { card } = props;
   const onKeyDown = (event: KeyboardEvent) => {
@@ -66,15 +67,18 @@ export function SceneCard(props: {
           </span>
         </span>
       </button>
-      <button
-        type="button"
-        className="plus"
-        aria-label={`Add a scene after scene ${String(card.index + 1)}`}
-        title="Add a scene here"
-        onClick={props.onAdd}
-      >
-        +
-      </button>
+      <span className="between">
+        <button
+          type="button"
+          className="plus"
+          aria-label={`Add a scene after scene ${String(card.index + 1)}`}
+          title="Add a scene here"
+          onClick={props.onAdd}
+        >
+          +
+        </button>
+        {props.mark}
+      </span>
     </li>
   );
 }

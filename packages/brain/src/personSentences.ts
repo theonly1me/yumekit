@@ -24,6 +24,7 @@ const personSentencesByToolName: Record<string, string> = {
   set_track_off: "You turned a sound or the captions on or off.",
   set_video_style: "You changed how the video is made.",
   set_look: "You changed the look of the video.",
+  set_transitions: "You changed how the scenes change from one to the next.",
   delete_everything: "You cleared the project.",
 };
 

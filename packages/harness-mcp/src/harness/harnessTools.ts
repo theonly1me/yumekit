@@ -18,6 +18,7 @@ import { registerStoryTools } from "../story/registerStoryTools.js";
 import { registerNarrationAndHistoryTools } from "../timeline/registerNarrationTools.js";
 import { registerPlaceVideo } from "../timeline/registerPlaceVideo.js";
 import { registerTimelineTools } from "../timeline/registerTimelineTools.js";
+import { registerSetTransitions } from "../transitions/registerSetTransitions.js";
 import { createToolTable, type HarnessTool } from "./toolTable.js";
 
 export interface HarnessOptions {
@@ -39,6 +40,7 @@ export function harnessToolsOf(options: HarnessOptions): HarnessTool[] {
   registerNarrationAndHistoryTools(context);
   registerPlaceVideo(context);
   registerSceneClipTools(context);
+  registerSetTransitions(context);
   registerGenerateAsset(context);
   registerImportAsset(context);
   registerAlignWords(context);

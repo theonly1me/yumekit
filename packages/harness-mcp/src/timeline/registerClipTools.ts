@@ -5,6 +5,7 @@ import type { HarnessContext } from "../context.js";
 import { durationInput, frameInput, idInput } from "../inputs.js";
 import { failureResult } from "../results.js";
 import { registerUpdateClip } from "./registerUpdateClip.js";
+import { wireTransition } from "../transitions/wireTransition.js";
 import { audioClipOf, sceneClipOf } from "./wireTimeline.js";
 
 const addClipInput = {
@@ -27,6 +28,7 @@ const addClipInput = {
     .number()
     .optional()
     .describe("Audio clip only: volume change in decibels. Default 0."),
+  transition: wireTransition.optional(),
 };
 
 type AddClipInput = z.infer<z.ZodObject<typeof addClipInput>>;
@@ -55,9 +57,13 @@ function addClip(options: {
   const clip =
     sceneId !== undefined && assetId === undefined
       ? sceneClipOf({
-          ...timing,
-          scene_id: sceneId,
-          scene_start_frame: input.scene_start_frame,
+          clip: {
+            ...timing,
+            scene_id: sceneId,
+            scene_start_frame: input.scene_start_frame,
+            transition: input.transition,
+          },
+          framesPerSecond: context.store.read().project.framesPerSecond,
         })
       : assetId !== undefined && sceneId === undefined
         ? audioClipOf({

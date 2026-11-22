@@ -1,3 +1,4 @@
+import type { SceneTransition } from "@yumekit/project";
 import type { MountOptions, SceneModule } from "@yumekit/scene";
 import { onTestFinished } from "vitest";
 import { createStage } from "../index.js";
@@ -62,6 +63,7 @@ export function clip(options: {
   startFrame: number;
   durationFrames: number;
   sceneStartFrame?: number;
+  transition?: SceneTransition;
 }) {
   return { sceneStartFrame: 0, ...options };
 }
@@ -81,6 +83,18 @@ export function shownScenes(element: HTMLElement): (string | null)[] {
   return [...element.querySelectorAll("p")].map(
     (paragraph) => paragraph.textContent,
   );
+}
+
+export function shownLayers(element: HTMLElement) {
+  return [...element.querySelectorAll("p")].map((paragraph) => {
+    const style = paragraph.parentElement?.style;
+    return {
+      text: paragraph.textContent,
+      opacity: style?.opacity ?? "",
+      transform: style?.transform ?? "",
+      clipPath: style?.clipPath ?? "",
+    };
+  });
 }
 
 export function loaderOf(scenes: Record<string, SceneModule>) {
