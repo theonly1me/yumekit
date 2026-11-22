@@ -50,3 +50,5 @@ jobs:
         timeout-minutes: 12
       - run: pnpm test
       - run: pnpm build
+      - run: pnpm run pack-release
+      - run: pnpm run check-release
