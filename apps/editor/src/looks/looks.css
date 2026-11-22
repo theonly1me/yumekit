@@ -1,15 +1,19 @@
 .look-group {
   display: grid;
   gap: 10px;
+  min-width: 0;
 }
 
 .look-choices {
+  min-width: 0;
+  contain: inline-size;
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 12px;
 }
 
 button.look-choice {
+  position: relative;
   display: grid;
   gap: 8px;
   justify-items: start;

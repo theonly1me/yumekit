@@ -3,10 +3,12 @@ import { usePictureScale } from "./usePictureScale.js";
 import { pictureOutput, useLookPicture } from "./useLookPicture.js";
 import "./looks.css";
 
-function LookPicture(props: { look: LookId; label: string }) {
+const pictureHeading = "Your idea, as a video.";
+
+function LookPicture(props: { look: LookId }) {
   const { hostRef, state } = useLookPicture({
     look: props.look,
-    heading: props.label,
+    heading: pictureHeading,
   });
   const { frameRef, scale } = usePictureScale(pictureOutput.widthPixels);
   return (
@@ -54,7 +56,7 @@ export function LookChoices(props: {
               props.onChoose(look.id);
             }}
           >
-            <LookPicture look={look.id} label={look.label} />
+            <LookPicture look={look.id} />
             <span className="look-name">{look.label}</span>
             <span id={`look-line-${look.id}`} className="visually-hidden">
               {look.line}

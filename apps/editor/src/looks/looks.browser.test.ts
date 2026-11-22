@@ -32,6 +32,9 @@ describe("the looks", () => {
       .poll(() => looks.locator('.look-picture[data-state="ready"]').count())
       .toBe(5);
     expect(await looks.locator(".look-stage h1").allTextContents()).toEqual(
+      lookLabels.map(() => "Your idea, as a video."),
+    );
+    expect(await looks.locator(".look-name").allTextContents()).toEqual(
       lookLabels,
     );
     expect(
