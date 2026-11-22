@@ -82,11 +82,16 @@ export function makingStepsOf(options: {
       fact: "The video is ready",
     },
   ] as const;
-  const nowIndex = hasEnded ? -1 : made.findIndex((step) => !step.isDone);
+  const lastDoneIndex = made.findLastIndex((step) => step.isDone);
+  const nowIndex = hasEnded
+    ? -1
+    : made.findIndex(
+        (...[step, index]) => !step.isDone && index > lastDoneIndex,
+      );
   return made.map((...[step, index]): MakingStep => {
     if (step.isDone)
       return { id: step.id, label: step.label, state: "done", fact: step.fact };
-    if (hasEnded)
+    if (hasEnded || index < lastDoneIndex)
       return {
         id: step.id,
         label: step.label,

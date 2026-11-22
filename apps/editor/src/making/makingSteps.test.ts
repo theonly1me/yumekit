@@ -37,7 +37,7 @@ function answerOf(options: {
 }
 
 describe("the steps of the Making screen", () => {
-  it("marks pictures and music done from the made assets, and the first open step as in progress", () => {
+  it("marks pictures and music done from the made assets, and skips each open step before the last done step", () => {
     const steps = makingStepsOf({
       answer: answerOf({
         state: "running",
@@ -53,10 +53,43 @@ describe("the steps of the Making screen", () => {
     });
 
     expect(steps.map((step) => step.state)).toEqual([
+      "skipped",
+      "done",
+      "skipped",
+      "done",
       "now",
+    ]);
+  });
+
+  it("never shows a step as in progress when a later step is done", () => {
+    const steps = makingStepsOf({
+      answer: answerOf({
+        state: "running",
+        tools: ["set_script", "put_scene", "put_scene", "set_timeline"],
+      }),
+      snapshot: emptySnapshot,
+    });
+
+    expect(steps.map((step) => `${step.state} ${step.fact}`)).toEqual([
+      "done The script is ready",
+      "done 2 pictures are ready",
+      "skipped Skipped",
+      "skipped Skipped",
+      "done The video is ready",
+    ]);
+  });
+
+  it("shows the first open step after the last done step as in progress", () => {
+    const steps = makingStepsOf({
+      answer: answerOf({ state: "running", tools: ["set_script"] }),
+      snapshot: emptySnapshot,
+    });
+
+    expect(steps.map((step) => step.state)).toEqual([
       "done",
+      "now",
       "waiting",
-      "done",
+      "waiting",
       "waiting",
     ]);
   });
