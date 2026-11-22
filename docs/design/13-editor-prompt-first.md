@@ -161,6 +161,8 @@ WP29 made these choices where this document and the prototype give no rule.
 33. The result names the platforms of the changed outputs, for example "on YouTube and TikTok". An output with no platform shows its label.
 34. While the clip is made, the sheet says "You can close this. The clip goes into scene 2 when it is ready." The call continues after the sheet closes.
 35. The sheet says "seconds of real video", as the prototype does. The limit message keeps the advice of item 14 about `media-tools.json`.
+36. The sheet starts on the video model of the pick in Settings (document 15). A pick with a server and no model starts on the first video model of that server. With no pick, the sheet starts on the first default model of a ready server. A model that the person picks in the sheet applies to this clip only, and does not change the pick of Settings.
+37. A model with `tested: false` shows "Not tested with yumekit yet" under its name (document 16).
 
 ### Details of the chat panel
 

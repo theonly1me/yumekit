@@ -64,3 +64,17 @@ export function firstChoiceOf(choices: ModelChoice[]): ModelChoice | undefined {
     choices[0]
   );
 }
+
+export function pickedChoiceOf(options: {
+  choices: ModelChoice[];
+  picked: { server: string; model: string | undefined } | undefined;
+}): ModelChoice | undefined {
+  const { picked } = options;
+  if (picked === undefined) return undefined;
+  const ofServer = options.choices.filter(
+    (choice) => choice.server.server === picked.server,
+  );
+  return (
+    ofServer.find((choice) => choice.model.id === picked.model) ?? ofServer[0]
+  );
+}

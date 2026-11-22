@@ -138,6 +138,13 @@ fieldset label.model {
   margin: 4px 0 0;
 }
 
+.model-name em {
+  display: block;
+  font-style: normal;
+  font-size: var(--step--1);
+  color: var(--muted);
+}
+
 .model-price {
   font-size: var(--step--1);
   color: var(--muted);

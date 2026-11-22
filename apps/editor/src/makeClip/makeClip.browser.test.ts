@@ -59,7 +59,9 @@ describe("Make a clip", () => {
       },
       {
         server: "Key test server",
-        models: ["Test video modelAbout $0.20Needs a key"],
+        models: [
+          "Test video modelNot tested with yumekit yetAbout $0.20Needs a key",
+        ],
       },
     ]);
     await editor.close();
@@ -93,6 +95,23 @@ describe("Make a clip", () => {
     await expect.poll(() => price.textContent()).toBe("About $0.60");
     await page.getByLabel("Plain color with a frame counter").check();
     await expect.poll(() => price.textContent()).toBe("Free");
+    await editor.close();
+  });
+
+  it("starts on the video model that the person picked in Settings", async () => {
+    await engineRequest({
+      engine: runningEngine(),
+      path: "/api/media/defaults",
+      method: "PUT",
+      body: { capability: "video", server: "keytest", model: "test-video" },
+    });
+    const editor = await openEditor(runningEngine().url);
+    const { page } = editor;
+    await openMakeClip(page);
+
+    await expect
+      .poll(() => page.getByLabel("Test video model").isChecked())
+      .toBe(true);
     await editor.close();
   });
 

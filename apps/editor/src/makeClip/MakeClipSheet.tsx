@@ -3,6 +3,7 @@ import type { EngineClient } from "../engine/engineClient.js";
 import type { Output, SceneClip, Snapshot } from "../engine/snapshot.js";
 import { useEngineEvents } from "../engine/useEngineEvents.js";
 import { Sheet } from "../sheets/Sheet.js";
+import { currentModelOf, useMediaChoices } from "../settings/services/index.js";
 import { useMediaServers } from "../tools/useMediaServers.js";
 import type { Phase } from "./ClipAction.js";
 import { ClipForm, type ClipDraft } from "./ClipForm.js";
@@ -40,7 +41,12 @@ export function MakeClipSheet(props: {
   const clipSeconds = Math.ceil(
     target.durationFrames / snapshot.project.framesPerSecond,
   );
-  const clipChoice = useClipChoice({ servers, preferredSeconds: clipSeconds });
+  const mediaChoices = useMediaChoices(client);
+  const clipChoice = useClipChoice({
+    servers,
+    preferredSeconds: clipSeconds,
+    pickedModel: currentModelOf({ state: mediaChoices.state, kind: "video" }),
+  });
   const { choice, values } = clipChoice;
   const latestImageId = snapshot.assets
     .filter((asset) => asset.kind === "image")

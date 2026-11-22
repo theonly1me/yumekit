@@ -1,8 +1,10 @@
 import { useState } from "react";
+import type { ModelTarget } from "../settings/services/index.js";
 import type { MediaServers } from "../tools/mediaServers.js";
 import {
   firstChoiceOf,
   modelChoicesOf,
+  pickedChoiceOf,
   type ModelChoice,
 } from "./modelChoices.js";
 import { priceOf, type Price } from "./price.js";
@@ -15,6 +17,7 @@ import {
 export function useClipChoice(options: {
   servers: MediaServers | undefined;
   preferredSeconds: number;
+  pickedModel: ModelTarget | undefined;
 }) {
   const { servers, preferredSeconds } = options;
   const [chosenKey, setChosenKey] = useState<string>();
@@ -34,6 +37,7 @@ export function useClipChoice(options: {
         );
   const choice =
     videoChoices.find((candidate) => candidate.key === chosenKey) ??
+    pickedChoiceOf({ choices: videoChoices, picked: options.pickedModel }) ??
     firstChoiceOf(videoChoices);
   const values =
     choice === undefined

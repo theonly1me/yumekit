@@ -43,6 +43,7 @@ const description = {
         { usd: 0.25, unit: "second", when: { resolution: "720p" } },
       ],
       read_on: "2026-11-21",
+      tested: false,
     },
   ],
 };
