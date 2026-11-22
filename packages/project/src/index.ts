@@ -29,7 +29,6 @@ export {
   type StartFormat,
   type StartFormatId,
 } from "./startFormats/catalog.js";
-export type { Bible, CastMember } from "./format/bible.js";
 export {
   castKinds,
   type Bible,

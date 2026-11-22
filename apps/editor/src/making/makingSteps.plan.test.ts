@@ -7,6 +7,7 @@ const emptySnapshot: Snapshot = {
   revision: 1,
   project: { name: "Tea", framesPerSecond: 30, outputs: [] },
   script: "",
+  bible: { cast: [] },
   scenes: [],
   sceneCode: {},
   timelines: [],
