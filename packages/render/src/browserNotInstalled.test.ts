@@ -33,6 +33,6 @@ describe("render without Chromium", () => {
       await renderFrame({ folder, outputId: "wide", frame: 0 }),
     );
     expect(failure.kind).toBe("browser-not-installed");
-    expect(failure.hint).toContain("playwright@1.65.1 install chromium");
+    expect(failure.hint).toBe("Run: yumekit setup");
   });
 });

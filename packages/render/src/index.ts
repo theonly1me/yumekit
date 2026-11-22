@@ -1,3 +1,8 @@
+export {
+  browserInstallCommand,
+  findBrowser,
+  type ProgramCommand,
+} from "./browser/browserSetup.js";
 export { probeMedia, type ProbedMedia } from "./media/probeMedia.js";
 export type { Outcome } from "./outcome.js";
 export {
@@ -12,3 +17,4 @@ export {
   type RenderVideoOptions,
 } from "./renderVideo.js";
 export { checkSceneCode } from "./sceneCode/checkSceneCode.js";
+export { findFfmpeg } from "./video/findFfmpeg.js";

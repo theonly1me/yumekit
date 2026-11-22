@@ -14,6 +14,9 @@ The `yumekit` command.
 | `yumekit keys set <VARIABLE>`                                                               | Reads the value from a hidden prompt or from standard input, and saves it    |
 | `yumekit keys remove <VARIABLE>`                                                            | Removes the key from the key file                                            |
 | `yumekit open <folder> [--port <n>] [--no-browser]`                                         | Starts the engine with the built editor, prints the URL, and opens it        |
+| `yumekit agent connect --agent claude-code\|codex\|cursor [--project <folder>]`             | Writes the yumekit MCP entry for the agent in the project folder             |
+| `yumekit doctor`                                                                            | Checks Node.js, FFmpeg, Chromium for Playwright, and the agent programs      |
+| `yumekit setup`                                                                             | Installs Chromium with the Playwright version of yumekit                     |
 
 The value of a key is never a command argument, because a shell keeps arguments in its history. `yumekit keys set` writes `~/.config/yumekit/keys.json` with mode `0600`.
 
@@ -21,24 +24,32 @@ The value of a key is never a command argument, because a shell keeps arguments 
 
 If `yumekit open` runs for the project, `yumekit mcp` is a bridge. It reads `<project>/.yumekit/engine.json`, gets the tool list from the engine, and sends each tool call to the engine. The progress of a call comes back as MCP progress. The editor then shows each change of the agent. If no engine runs, `yumekit mcp` serves the harness itself.
 
-`yumekit open` runs until you stop it with Ctrl+C. It then closes the engine and removes `engine.json`. If the editor is not built, the engine serves a page that says so. Run `pnpm build` to build the editor.
+`yumekit open` runs until you stop it with Ctrl+C. It then closes the engine and removes `engine.json`. If the editor is not built, the engine serves a page that says so. In the repository, run `pnpm build` to build the editor.
+
+`yumekit doctor` prints one line for each need. Each line starts with `ok`, `missing`, or `none`, and a `missing` line says what to do. The command exits with 1 when Node.js, FFmpeg, or Chromium is missing. No agent program is not a failure.
+
+`yumekit setup` runs the browser install of the Playwright package in yumekit, for Chromium only, and prints its progress. A render that cannot start the browser says to run `yumekit setup`.
+
+Each command stops with one sentence on Node.js older than 22.
 
 ## Connect an agent
 
-Build the repository first with `pnpm build`. Then add the server to the agent.
+`yumekit agent connect` writes the entry for Claude Code, Codex, or Cursor. The entry names the Node.js program and the full path of the installed `main.js`. If you start yumekit with `npx`, that path is in the npx cache, and the entry stops working when the cache is cleared. Install yumekit with `npm install -g yumekit` for an entry that stays.
+
+To add the server by hand, use the `npx` form.
 
 Claude Code:
 
 ```sh
-claude mcp add yumekit -- node /path/to/yumekit/apps/cli/dist/main.js mcp --project /path/to/my-video
+claude mcp add yumekit -- npx -y yumekit mcp --project /path/to/my-video
 ```
 
 Codex, in `~/.codex/config.toml`:
 
 ```toml
 [mcp_servers.yumekit]
-command = "node"
-args = ["/path/to/yumekit/apps/cli/dist/main.js", "mcp", "--project", "/path/to/my-video"]
+command = "npx"
+args = ["-y", "yumekit", "mcp", "--project", "/path/to/my-video"]
 startup_timeout_sec = 30
 tool_timeout_sec = 900
 ```

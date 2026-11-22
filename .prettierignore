@@ -2,3 +2,4 @@ dist/
 .tsbuild/
 coverage/
 pnpm-lock.yaml
+/release/

@@ -1,6 +1,6 @@
 {
   "name": "yumekit",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
   "description": "Open source harness for content creation. Turn an idea into editable content for YouTube, TikTok, Instagram, and more, with your own AI tools.",
   "license": "Apache-2.0",
@@ -11,11 +11,13 @@
   },
   "scripts": {
     "build": "tsc --build && pnpm --filter @yumekit/editor run build",
-    "typecheck": "tsc --build && tsc -p scripts/importRules",
+    "typecheck": "tsc --build && tsc -p scripts/importRules && tsc -p scripts/release",
     "lint": "eslint . && prettier --check . && pnpm run check-imports",
     "check-imports": "node --experimental-strip-types scripts/importRules/checkImports.ts",
     "test": "vitest run",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "pack-release": "tsc --build --clean && pnpm build && node --experimental-strip-types scripts/release/packRelease.ts",
+    "check-release": "node --experimental-strip-types scripts/release/installCheck/main.ts"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

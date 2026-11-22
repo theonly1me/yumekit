@@ -1,6 +1,9 @@
 import { stat } from "node:fs/promises";
-import { fileURLToPath } from "node:url";
+import { createRequire } from "node:module";
+import { dirname, join } from "node:path";
 import type { ServerCommand } from "./types.js";
+
+const resolveFromTools = createRequire(import.meta.url);
 
 interface BundledServer {
   folder: string;
@@ -42,8 +45,12 @@ export async function findBundledServers(): Promise<
 > {
   const servers: Record<string, ServerCommand> = {};
   for (const [name, bundled] of Object.entries(bundledServersByName)) {
-    const mainFile = fileURLToPath(
-      new URL(`../../../tools/${bundled.folder}/dist/main.js`, import.meta.url),
+    const mainFile = join(
+      dirname(
+        resolveFromTools.resolve(`@yumekit/${bundled.folder}/package.json`),
+      ),
+      "dist",
+      "main.js",
     );
     if (await isFile(mainFile)) {
       servers[name] = {
