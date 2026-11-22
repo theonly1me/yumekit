@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ClientFailure, EngineClient } from "../engine/engineClient.js";
 import { useEngineEvents } from "../engine/useEngineEvents.js";
 import { failureTextOf } from "../tools/requestText.js";
@@ -35,16 +35,29 @@ export function useChat(client: EngineClient) {
   const [startFailure, setStartFailure] = useState<StartFailure>();
   const [announcement, setAnnouncement] = useState("");
 
+  const entriesDuringLoads = useRef(new Set<ChatEntry[]>());
+
   const reload = useCallback(() => {
-    requests.view().then(
-      (view) => {
-        if (!view.ok) return;
-        setEntries(view.value.entries);
-        setAgent(view.value.agent);
-        setWaiting(false);
-      },
-      () => undefined,
-    );
+    const changedDuringLoad: ChatEntry[] = [];
+    entriesDuringLoads.current.add(changedDuringLoad);
+    requests
+      .view()
+      .finally(() => {
+        entriesDuringLoads.current.delete(changedDuringLoad);
+      })
+      .then(
+        (view) => {
+          if (!view.ok) return;
+          let loaded = view.value.entries;
+          for (const entry of changedDuringLoad) {
+            loaded = withEntry({ entries: loaded, entry });
+          }
+          setEntries(loaded);
+          setAgent(view.value.agent);
+          setWaiting(false);
+        },
+        () => undefined,
+      );
   }, [requests]);
 
   useEffect(reload, [reload]);
@@ -58,6 +71,7 @@ export function useChat(client: EngineClient) {
       }
       if (event.type !== "chat-changed") return;
       const { entry } = event;
+      for (const changed of entriesDuringLoads.current) changed.push(entry);
       setEntries((current) => withEntry({ entries: current, entry }));
       if (entry.kind !== "answer") return;
       setWaiting(false);

@@ -137,4 +137,49 @@ describe("the changes in the chat", () => {
       .toEqual(["You\nMake it red.", "AI\nDone."]);
     await editor.close();
   });
+
+  it("keeps a change that comes while the history still loads", async () => {
+    await setScenario({
+      engine: runningEngine(),
+      scenario: {
+        steps: [
+          { print: claudeLines.init },
+          {
+            callTool: {
+              name: "resize_scene_clip",
+              input: { clip_id: "second", duration_frames: 45 },
+            },
+          },
+          { print: claudeLines.whole("Scene 2 is longer.") },
+          { print: claudeLines.result("completed") },
+        ],
+      },
+    });
+    const editor = await openEditor(runningEngine().url);
+    const chat = chatOf(editor.page);
+    const loads = { started: 0, answered: 0 };
+    await editor.page.route(/\/api\/chat$/, async (route) => {
+      loads.started += 1;
+      const response = await route.fetch();
+      await new Promise((resolve) => setTimeout(resolve, 4_000));
+      await route.fulfill({ response });
+      loads.answered += 1;
+    });
+    await editor.page.goto(runningEngine().url);
+
+    await chat.ask("Make scene 2 longer.");
+    await expect.poll(() => chat.sendButton.count()).toBe(1);
+    await expect
+      .poll(() => loads.started > 0 && loads.answered === loads.started)
+      .toBe(true);
+
+    await expect
+      .poll(() => chat.entryTexts(3))
+      .toEqual([
+        "You\nMake scene 2 longer.",
+        "AI\nScene 2 is longer.",
+        "Scene 2 is longer.\nUndo",
+      ]);
+    await editor.close();
+  });
 });
