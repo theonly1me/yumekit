@@ -87,6 +87,8 @@ describe("the start screen", () => {
       "portrait",
     ]);
     await home.finishRequest();
+    await page.getByRole("heading", { name: "Your video is ready" }).waitFor();
+    await page.getByRole("button", { name: "Open the editor" }).first().click();
     await expect
       .poll(() => page.getByRole("button", { name: "Export" }).count())
       .toBe(1);

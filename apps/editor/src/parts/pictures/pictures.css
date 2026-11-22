@@ -1,0 +1,133 @@
+.picture-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 14px;
+}
+
+.picture-grid[data-tall="true"] {
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+}
+
+.picture-card {
+  width: 100%;
+  display: grid;
+  gap: 7px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  text-align: left;
+  white-space: normal;
+  font-size: var(--step--2);
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.picture-card:hover {
+  background: none;
+  color: var(--text);
+}
+
+.picture-card[aria-pressed="true"] {
+  color: var(--text);
+}
+
+.picture {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  border-radius: 3px;
+  box-shadow: 0 0 0 1px var(--line);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.picture img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.picture-words {
+  padding: 0 6px;
+  text-align: center;
+  font-size: var(--step--2);
+  color: var(--faint);
+}
+
+.picture-card[aria-pressed="true"] .picture {
+  box-shadow: 0 0 0 2px var(--text);
+}
+
+.picture-detail {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+
+.picture-large {
+  display: grid;
+  place-items: center;
+  background: var(--well);
+  border-radius: 4px;
+  padding: 16px;
+}
+
+.picture-large .picture {
+  box-shadow: var(--frame-shadow);
+}
+
+.picture-controls {
+  display: grid;
+  gap: 20px;
+  min-width: 0;
+}
+
+.part-body .picture-controls h3 {
+  color: var(--text);
+  font-size: var(--step-0);
+}
+
+.scene-fields {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.scene-fields:disabled {
+  opacity: 0.6;
+}
+
+.part .describe {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: end;
+}
+
+.part .describe label {
+  flex: 1 1 220px;
+  display: grid;
+  gap: 4px;
+  font-size: var(--step--1);
+  color: var(--muted);
+}
+
+.part .describe input {
+  font-size: var(--step--1);
+}
+
+@media (max-width: 760px) {
+  .picture-detail {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

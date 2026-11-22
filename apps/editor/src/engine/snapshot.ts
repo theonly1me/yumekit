@@ -89,6 +89,7 @@ export const snapshotSchema = z.object({
     outputs: z.array(outputSchema),
     videoStyle: z.enum(videoStyleIds).optional(),
   }),
+  script: z.string(),
   scenes: z.array(sceneSchema),
   sceneCode: z.record(z.string(), z.string()),
   timelines: z.array(timelineSchema),

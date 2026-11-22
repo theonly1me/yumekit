@@ -143,20 +143,3 @@
     grid-row: 2;
   }
 }
-
-.sound-part-head {
-  display: grid;
-  gap: 10px;
-}
-
-.sound-part-head .part-note {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items: center;
-}
-
-.sound-part-head .part-note p {
-  flex: 1 1 260px;
-  margin: 0;
-}

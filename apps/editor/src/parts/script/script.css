@@ -1,0 +1,91 @@
+.script-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+  align-items: center;
+}
+
+.script-tools button:not(.link) {
+  border-radius: 6px;
+  padding: 4px 11px;
+}
+
+.script-tools .link {
+  margin-left: auto;
+  font-size: var(--step--1);
+  color: var(--muted);
+}
+
+.script-page {
+  background: var(--raised);
+  box-shadow: 0 0 0 1px var(--line);
+  border-radius: 4px;
+  padding: clamp(22px, 4vw, 44px) clamp(20px, 5vw, 56px);
+  min-height: 320px;
+  max-height: 62vh;
+  overflow-y: auto;
+  line-height: 1.6;
+  cursor: text;
+  color: var(--text);
+}
+
+.script-page[contenteditable="false"] {
+  cursor: default;
+  color: var(--muted);
+}
+
+.script-page:focus {
+  outline: 0;
+  box-shadow: 0 0 0 1px var(--line-strong);
+}
+
+.script-page > * {
+  max-width: 62ch;
+  margin: 0 0 0.6em;
+}
+
+.part .script-page h1 {
+  font-size: var(--step-2);
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+
+.part .script-page h2,
+.part .script-page h3 {
+  font-size: var(--step-0);
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0;
+  margin-top: 1.6em;
+}
+
+.script-page ul,
+.script-page ol {
+  padding-left: 1.2em;
+}
+
+.script-page li > p {
+  margin: 0;
+}
+
+.script-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  align-items: center;
+  min-height: 36px;
+  font-size: var(--step--1);
+  color: var(--muted);
+}
+
+.script-status[data-status="changed"] p,
+.script-status[data-status="asked"] p,
+.script-status[data-status="failed"] p,
+.script-status[data-status="refused"] p {
+  color: var(--accent);
+}
+
+.script-status p {
+  margin-right: auto;
+}

@@ -1,5 +1,8 @@
 export const scriptAndTwoScenes = [
-  { name: "set_script", input: { script: "Tea is calm. Tea is warm." } },
+  {
+    name: "set_script",
+    input: { script: "# Tea\n\nTea is **calm**. Tea is warm." },
+  },
   {
     name: "put_scene",
     input: {

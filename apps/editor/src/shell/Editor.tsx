@@ -3,7 +3,8 @@ import type { EngineClient } from "../engine/engineClient.js";
 import type { Snapshot } from "../engine/snapshot.js";
 import { useExportSheet } from "../export/useExportSheet.js";
 import { useClipTools } from "../makeClip/useClipTools.js";
-import { useSoundPartSheet } from "../parts/sound/useSoundPartSheet.js";
+import type { StepViewId } from "../parts/frame/stepViewProps.js";
+import { useStepSheet } from "../parts/frame/useStepSheet.js";
 import { PlatformTabs } from "../platforms/PlatformTabs.js";
 import { Preview } from "../preview/Preview.js";
 import { sceneEditsOf } from "../scenes/sceneEdits.js";
@@ -51,13 +52,19 @@ export function Editor(props: {
     onAddKey: settings.open,
     onPlaced: view.pickClip,
   });
-  const soundPart = useSoundPartSheet({
+  const stepSheet = useStepSheet({
     client,
     snapshot,
     chat: editorChat.chat,
+    onSideTab: view.setSideTab,
   });
-  const isSheetOpen =
-    exporting.isOpen || clipTools.isOpen || settings.isOpen || soundPart.isOpen;
+  const openStepView = (stepId: StepViewId) => {
+    playback.pause();
+    stepSheet.open(stepId);
+  };
+  const isSheetOpen = [exporting, clipTools, settings, stepSheet].some(
+    (sheet) => sheet.isOpen,
+  );
   const openAiSettings = () => {
     playback.pause();
     settings.open(undefined);
@@ -71,7 +78,6 @@ export function Editor(props: {
   const changes = useDirectChanges(client);
   const edits = sceneEditsOf({ changes, onPicked: view.setPicked });
   const { output, tab } = facts;
-
   if (output === undefined || tab === undefined) {
     return (
       <main className="state">
@@ -88,6 +94,7 @@ export function Editor(props: {
           theme={theme}
           onTheme={setTheme}
           exportLabel={exporting.label}
+          onStepView={openStepView}
           onSettings={openAiSettings}
           onExport={() => {
             playback.pause();
@@ -162,10 +169,7 @@ export function Editor(props: {
             onSeek={view.moveTo}
             onEditText={view.editText}
             onMakeClip={clipTools.open}
-            onOpenSound={(part) => {
-              playback.pause();
-              soundPart.open(part);
-            }}
+            onOpenSound={openStepView}
           />
         </main>
         <EditorSide
@@ -189,7 +193,7 @@ export function Editor(props: {
       {exporting.sheet}
       {clipTools.sheet}
       {settings.sheet}
-      {soundPart.sheet}
+      {stepSheet.sheet}
     </div>
   );
 }

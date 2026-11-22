@@ -119,8 +119,7 @@ button.choice {
 }
 
 .recent-list,
-.making-steps,
-.making-cards {
+.making-steps {
   list-style: none;
   margin: 0;
   padding: 0;
