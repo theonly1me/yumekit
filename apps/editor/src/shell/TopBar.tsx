@@ -6,7 +6,8 @@ export function TopBar(props: {
   theme: Theme;
   onTheme: (theme: Theme) => void;
   exportLabel: string;
-  onStepView: (stepId: BarViewId) => void;
+  onStepView: (stepId: Exclude<BarViewId, "cast">) => void;
+  onCast: () => void;
   onSettings: () => void;
   onExport: () => void;
 }) {
@@ -27,7 +28,12 @@ export function TopBar(props: {
         >
           Use the {otherTheme} theme
         </button>
-        <ViewButtons onView={props.onStepView} />
+        <ViewButtons
+          onView={(viewId) => {
+            if (viewId === "cast") props.onCast();
+            else props.onStepView(viewId);
+          }}
+        />
         <button type="button" onClick={props.onSettings}>
           Settings
         </button>

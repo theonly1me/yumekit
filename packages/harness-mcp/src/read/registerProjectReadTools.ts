@@ -1,4 +1,5 @@
 import { lookOf, videoStyleOf } from "@yumekit/project";
+import { wireCastMemberOf } from "../cast/castMembers.js";
 import type { HarnessContext } from "../context.js";
 import { idInput } from "../inputs.js";
 import { findOutput, findScene } from "../lookups.js";
@@ -12,7 +13,7 @@ const readOnly = { readOnlyHint: true } as const;
 function registerGetProject(context: HarnessContext): void {
   context.tools.add({
     name: "get_project",
-    description: `Read the project: name, frame rate, the look, outputs with the platforms of each output and the length of each timeline in frames, script, bible, a list of scenes, the video style, and the revision. Call it first. All time in this harness is in whole frames at frames_per_second. video_style is the choice of the person for how the video is made: ${videoStyleMeanings}`,
+    description: `Read the project: name, frame rate, the look, outputs with the platforms of each output and the length of each timeline in frames, script, bible with the cast, a list of scenes, the video style, and the revision. Call it first. All time in this harness is in whole frames at frames_per_second. video_style is the choice of the person for how the video is made: ${videoStyleMeanings}`,
     inputSchema: {},
     annotations: readOnly,
     run: () => {
@@ -42,12 +43,7 @@ function registerGetProject(context: HarnessContext): void {
           bible: {
             style: snapshot.bible.style,
             palette: snapshot.bible.palette,
-            cast: snapshot.bible.cast.map((member) => ({
-              id: member.id,
-              name: member.name,
-              description: member.description,
-              reference_asset_ids: member.referenceAssetIds,
-            })),
+            cast: snapshot.bible.cast.map(wireCastMemberOf),
             voice: snapshot.bible.voice,
           },
           scenes: snapshot.scenes.map((scene) => ({

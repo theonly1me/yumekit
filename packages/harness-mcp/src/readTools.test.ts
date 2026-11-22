@@ -26,6 +26,8 @@ describe("read tools", () => {
         "list_media_tools",
         "set_script",
         "set_bible",
+        "put_cast_member",
+        "remove_cast_member",
         "add_output",
         "remove_output",
         "add_platform",

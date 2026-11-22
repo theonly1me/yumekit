@@ -4,7 +4,7 @@ import type {
   MediaPick,
   MediaPickFailure,
 } from "./choiceTypes.js";
-import type { MediaServerDescription } from "./description.js";
+import type { MediaModel, MediaServerDescription } from "./description.js";
 
 export type Capability = "image" | "speech" | "align" | "music" | "video";
 
@@ -75,6 +75,11 @@ export interface MediaToolRequest {
   onProgress?: (progress: MediaToolProgress) => void;
 }
 
+export type MediaModelChoice = Pick<
+  MediaToolRequest,
+  "capability" | "server" | "model"
+>;
+
 export interface MediaLimits {
   generatedVideoSeconds: number;
 }
@@ -98,6 +103,7 @@ export interface MediaTools {
   run: (
     request: MediaToolRequest,
   ) => Promise<Outcome<MediaToolRun, MediaToolFailure>>;
+  chosenModel: (choice: MediaModelChoice) => Promise<MediaModel | undefined>;
   checkKey: (server: string) => Promise<Outcome<KeyCheck, CheckKeyFailure>>;
   failedServers: () => { server: string; message: string }[];
   limits: () => MediaLimits;

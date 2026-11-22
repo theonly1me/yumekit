@@ -39,18 +39,20 @@ function createHarnessServer(options: {
 
 ### Write the story
 
-| Tool              | Input                                                                                         | Edit                                                    |
-| ----------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
-| `set_script`      | `script`                                                                                      | `setScript`                                             |
-| `set_bible`       | `style`, `palette`, `cast`, `voice`                                                           | `setBible`                                              |
-| `set_look`        | `look`                                                                                        | `setLook`                                               |
-| `add_output`      | `output_id`, `label`, `width_pixels`, `height_pixels`                                         | `addOutput`                                             |
-| `remove_output`   | `output_id`                                                                                   | `removeOutput`                                          |
-| `add_platform`    | `platform_id`                                                                                 | `setOutputPlatforms`, or `addOutput` and `copyTimeline` |
-| `remove_platform` | `platform_id`                                                                                 | `setOutputPlatforms`, or `removeOutput`                 |
-| `put_scene`       | `scene_id`, `title`, `notes?`, then either `kit_component` and `props`, or `code` and `props` | `putScene`                                              |
-| `remove_scene`    | `scene_id`                                                                                    | `removeScene`                                           |
-| `set_video_style` | `video_style` (`graphics`, `ai-video`, `mix`)                                                 | `setVideoStyle`                                         |
+| Tool                 | Input                                                                                         | Edit                                                    |
+| -------------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| `set_script`         | `script`                                                                                      | `setScript`                                             |
+| `set_bible`          | `style`, `palette`, `cast`, `voice`                                                           | `setBible`                                              |
+| `set_look`           | `look`                                                                                        | `setLook`                                               |
+| `put_cast_member`    | `cast_id`, `kind`, `name`, `description`, `reference_asset_ids?` (document 16, N3)            | `setBible`                                              |
+| `remove_cast_member` | `cast_id`                                                                                     | `setBible`                                              |
+| `add_output`         | `output_id`, `label`, `width_pixels`, `height_pixels`                                         | `addOutput`                                             |
+| `remove_output`      | `output_id`                                                                                   | `removeOutput`                                          |
+| `add_platform`       | `platform_id`                                                                                 | `setOutputPlatforms`, or `addOutput` and `copyTimeline` |
+| `remove_platform`    | `platform_id`                                                                                 | `setOutputPlatforms`, or `removeOutput`                 |
+| `put_scene`          | `scene_id`, `title`, `notes?`, then either `kit_component` and `props`, or `code` and `props` | `putScene`                                              |
+| `remove_scene`       | `scene_id`                                                                                    | `removeScene`                                           |
+| `set_video_style`    | `video_style` (`graphics`, `ai-video`, `mix`)                                                 | `setVideoStyle`                                         |
 
 `set_video_style` follows the section "The video style" of document 15. `get_project` gives `graphics` for a project with no value. The descriptions of both tools say what each style means, and tell the agent to change the style only when the person asks.
 
@@ -107,12 +109,12 @@ The four scene clip tools change the scenes row of document 03, as document 13 s
 
 ### Media
 
-| Tool             | Input                                                                                                                                         | What it does                                                                                       |
-| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `generate_asset` | `asset_id`, `capability` (`image`, `speech`, `music`, `video`), `server?`, `model?`, `input`, `reference_asset_ids?`, `first_frame_asset_id?` | Calls the media tool, then adds the asset with its source record                                   |
-| `import_asset`   | `asset_id`, `kind`, `source_path`, `original_name?`                                                                                           | Copies a file of the user into the project and adds the asset                                      |
-| `remove_asset`   | `asset_id`                                                                                                                                    | Removes the record of an asset that nothing uses, with the edit `removeAsset`. The file stays      |
-| `align_words`    | `asset_id`, `text`                                                                                                                            | Makes word timings for a speech asset that has none, and stores them with the edit `setAssetWords` |
+| Tool             | Input                                                                                                                                                      | What it does                                                                                       |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `generate_asset` | `asset_id`, `capability` (`image`, `speech`, `music`, `video`), `server?`, `model?`, `input`, `reference_asset_ids?`, `cast_ids?`, `first_frame_asset_id?` | Calls the media tool, then adds the asset with its source record                                   |
+| `import_asset`   | `asset_id`, `kind`, `source_path`, `original_name?`                                                                                                        | Copies a file of the user into the project and adds the asset                                      |
+| `remove_asset`   | `asset_id`                                                                                                                                                 | Removes the record of an asset that nothing uses, with the edit `removeAsset`. The file stays      |
+| `align_words`    | `asset_id`, `text`                                                                                                                                         | Makes word timings for a speech asset that has none, and stores them with the edit `setAssetWords` |
 
 `generate_asset` saves the tool name, the server and the model that `run` reports, the input, `costUsd`, and `costIsEstimate` in the asset record. With no `server`, the defaults of the media tools configuration apply. A repeated call reuses a file only when the model also matches, if the call names one.
 

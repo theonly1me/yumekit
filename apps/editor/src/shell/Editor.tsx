@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useCastSheet } from "../cast/useCastSheet.js";
 import type { EngineClient } from "../engine/engineClient.js";
 import type { Snapshot } from "../engine/snapshot.js";
 import { useExportSheet } from "../export/useExportSheet.js";
@@ -40,6 +41,7 @@ export function Editor(props: {
     look: snapshot.project.look ?? "paper",
   });
   const { facts, playback } = view;
+  const cast = useCastSheet({ client, snapshot, editorChat, playback });
   const exporting = useExportSheet({
     client,
     snapshot,
@@ -63,9 +65,8 @@ export function Editor(props: {
     playback.pause();
     stepSheet.open(stepId);
   };
-  const isSheetOpen = [exporting, clipTools, settings, stepSheet].some(
-    (sheet) => sheet.isOpen,
-  );
+  const sheets = [exporting, clipTools, settings, stepSheet, cast];
+  const isSheetOpen = sheets.some((sheet) => sheet.isOpen);
   const openAiSettings = () => {
     playback.pause();
     settings.open(undefined);
@@ -96,6 +97,7 @@ export function Editor(props: {
           onTheme={setTheme}
           exportLabel={exporting.label}
           onStepView={openStepView}
+          onCast={cast.open}
           onSettings={openAiSettings}
           onExport={() => {
             playback.pause();
@@ -174,10 +176,7 @@ export function Editor(props: {
           Ask for a change
         </button>
       </div>
-      {exporting.sheet}
-      {clipTools.sheet}
-      {settings.sheet}
-      {stepSheet.sheet}
+      {sheets.find((sheet) => sheet.isOpen)?.sheet}
     </div>
   );
 }
