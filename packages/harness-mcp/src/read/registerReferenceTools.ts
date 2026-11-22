@@ -1,4 +1,4 @@
-import { kitSceneSchemas } from "@yumekit/scene-kit/schemas";
+import { kitSceneSchemas, looks } from "@yumekit/scene-kit/schemas";
 import { z } from "zod";
 import type { HarnessContext } from "../context.js";
 import {
@@ -15,7 +15,7 @@ function registerListKitScenes(context: HarnessContext): void {
   context.tools.add({
     name: "list_kit_scenes",
     description:
-      "List the ready kit scenes: name, purpose, and the JSON schema of the props. Use a name as kit_component in put_scene. Prefer a kit scene to custom code.",
+      "List the ready kit scenes: name, purpose, and the JSON schema of the props, and the looks with one line for each. Use a name as kit_component in put_scene. Prefer a kit scene to custom code. Each kit scene draws in the look of the project; set_look changes it.",
     inputSchema: {},
     annotations: readOnly,
     run: () => {
@@ -27,8 +27,15 @@ function registerListKitScenes(context: HarnessContext): void {
         }),
       );
       return successResult({
-        line: `${String(kitScenes.length)} kit scenes: ${kitScenes.map((kitScene) => kitScene.name).join(", ")}.`,
-        data: { kit_scenes: kitScenes },
+        line: `${String(kitScenes.length)} kit scenes: ${kitScenes.map((kitScene) => kitScene.name).join(", ")}. ${String(looks.length)} looks: ${looks.map((look) => look.id).join(", ")}.`,
+        data: {
+          kit_scenes: kitScenes,
+          looks: looks.map((look) => ({
+            id: look.id,
+            label: look.label,
+            line: look.line,
+          })),
+        },
       });
     },
   });
@@ -38,7 +45,7 @@ function registerGetSceneGuide(context: HarnessContext): void {
   context.tools.add({
     name: "get_scene_guide",
     description:
-      "Read the full reference for custom scene code: the contract, each hook, each animation function, the rules, the paper style values, and two complete examples. Call it before you send code to put_scene.",
+      "Read the full reference for custom scene code: the contract, each hook, each animation function, the rules, the tokens of the look, and two complete examples. Call it before you send code to put_scene.",
     inputSchema: {},
     annotations: readOnly,
     run: () => ({

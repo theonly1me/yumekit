@@ -215,6 +215,7 @@ The `CURSOR_CONFIG_DIR` of the run keeps the permissions and the approval mode o
 8. Name a version of the video by its platform, for example "the YouTube version". Never name it by an output id such as "wide" or "tall".
 9. If a paid tool for a step has no key, say in one sentence which key is missing and that the person can add it in Settings. Then make the rest of the video.
 10. Give no server and no model in a call that makes a picture, a voice, music, or a video clip, unless the person names one. The picks of the person apply.
+11. Use the look of the project. Do not set colors or fonts that the look does not have, unless the person asks.
 
 ## The chat of the engine
 

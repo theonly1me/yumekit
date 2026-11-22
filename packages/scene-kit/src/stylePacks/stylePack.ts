@@ -1,3 +1,5 @@
+import type { LookId } from "../looks/looks.js";
+
 export interface StyleFont {
   family: string;
   weight: number;
@@ -15,10 +17,19 @@ export interface TextUnits {
   caption: number;
 }
 
+export type Backdrop = "flat" | "glow" | "grid" | "grain";
+
 export interface StylePack {
+  id: LookId;
   name: string;
+  label: string;
+  backdrop: Backdrop;
+  cornerUnits: number;
   colors: {
     background: string;
+    surface: string;
+    accents: readonly [string, string, string, string];
+    glow: readonly [string, string];
     text: string;
     mutedText: string;
     accent: string;

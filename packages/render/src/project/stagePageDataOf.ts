@@ -1,5 +1,5 @@
 import { join } from "node:path";
-import type { Asset, Scene } from "@yumekit/project";
+import { lookOf, type Asset, type Scene } from "@yumekit/project";
 import type { StageProject } from "@yumekit/stage";
 import type { PageSceneSource, StagePageData } from "../page/stagePageData.js";
 import { assetFramesUrlPrefixOf } from "../videoFrames/videoFrameServer.js";
@@ -67,6 +67,7 @@ export async function stagePageDataOf(
     ),
   );
   return {
+    look: lookOf(snapshot.project),
     project: {
       framesPerSecond: snapshot.project.framesPerSecond,
       output: {

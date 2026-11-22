@@ -1,9 +1,11 @@
+import type { LookId } from "@yumekit/scene-kit";
 import type { StageProject } from "@yumekit/stage";
 
 export type PageSceneSource =
   { kind: "kit"; component: string } | { kind: "module"; file: string };
 
 export interface StagePageData {
+  look: LookId;
   project: StageProject;
   sceneSources: Record<string, PageSceneSource>;
 }

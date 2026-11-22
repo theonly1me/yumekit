@@ -51,6 +51,7 @@ export function makeProject(options: {
   platformIds: string[];
   length: ProjectLength;
   videoStyle: VideoStyleId;
+  look: string;
 }) {
   return options.client.readJson({
     path: "/api/home/projects",
@@ -60,6 +61,7 @@ export function makeProject(options: {
       platform_ids: options.platformIds,
       length: options.length,
       video_style: options.videoStyle,
+      look: options.look,
     },
   });
 }

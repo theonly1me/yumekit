@@ -6,6 +6,7 @@ import {
   platformIdSchema,
   videoStyleSchema,
 } from "../format/project.js";
+import { lookSchema } from "../format/look.js";
 import { sceneSchema } from "../format/scene.js";
 import {
   audioClipSchema,
@@ -46,6 +47,7 @@ export const editSchema = z.discriminatedUnion("kind", [
     kind: z.literal("setVideoStyle"),
     videoStyle: videoStyleSchema,
   }),
+  z.strictObject({ kind: z.literal("setLook"), look: lookSchema }),
   z.strictObject({ kind: z.literal("setScript"), script: z.string() }),
   z.strictObject({ kind: z.literal("setBible"), bible: bibleSchema }),
   z.strictObject({

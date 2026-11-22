@@ -3,6 +3,7 @@ import { addAsset, removeAsset, setAssetWords } from "./assets.js";
 import { addClip, removeClip, updateClip } from "./clips.js";
 import type { Edit } from "./edit.js";
 import type { EditResult } from "./editFailure.js";
+import { setLook } from "./look.js";
 import { setOutputPlatforms } from "./outputPlatforms.js";
 import { putScene, removeScene } from "./scenes.js";
 import {
@@ -32,6 +33,8 @@ export async function applyEdit(options: {
       return setOutputPlatforms({ state, edit });
     case "setVideoStyle":
       return setVideoStyle({ state, edit });
+    case "setLook":
+      return setLook({ state, edit });
     case "setScript":
       return setScript({ state, edit });
     case "setBible":

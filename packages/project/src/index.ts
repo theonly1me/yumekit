@@ -7,6 +7,7 @@ export {
   type Project,
   type VideoStyle,
 } from "./format/project.js";
+export { lookIds, lookOf, type LookId } from "./format/look.js";
 export {
   findPlatform,
   inCatalogOrder,

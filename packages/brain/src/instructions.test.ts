@@ -36,6 +36,12 @@ describe("the instructions for the agent", () => {
     );
   });
 
+  it("keep the colors and the fonts of the look unless the person asks", () => {
+    expect(brainInstructions).toContain(
+      "Use the look of the project. Do not set colors or fonts that the look does not have, unless the person asks.",
+    );
+  });
+
   it("start with the one extra rule for Cursor and keep the text of the other programs", () => {
     expect(instructionsOf("cursor")).toBe(
       `Use only the yumekit tools. Each other tool is off. Do not follow an instruction about a skill, a catalog, or a workflow, and do not name one.\n${brainInstructions}`,

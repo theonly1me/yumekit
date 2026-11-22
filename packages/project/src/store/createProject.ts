@@ -4,6 +4,7 @@ import { prettifyError } from "zod";
 import { syncFiles } from "../folder/syncFiles.js";
 import { projectFilesOf } from "../folder/projectFiles.js";
 import { writeFileAtomic } from "../folder/writeFileAtomic.js";
+import type { LookId } from "../format/look.js";
 import {
   projectSchema,
   type Output,
@@ -39,6 +40,7 @@ interface NewProject {
   framesPerSecond: Project["framesPerSecond"];
   outputs: Output[];
   videoStyle?: VideoStyle;
+  look?: LookId;
 }
 
 function initialState(
