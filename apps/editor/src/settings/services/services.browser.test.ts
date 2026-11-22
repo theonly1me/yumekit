@@ -88,7 +88,7 @@ describe("the Services group of Settings", () => {
     await expect
       .poll(() => row.textContent())
       .toContain("Key test server, Test video model");
-    expect(await userDefaults()).toEqual({
+    await expect.poll(userDefaults).toEqual({
       video: { server: "keytest", model: "test-video" },
     });
     await engineRequest({

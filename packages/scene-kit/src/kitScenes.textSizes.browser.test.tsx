@@ -65,7 +65,10 @@ const measuredTexts: {
   {
     name: "bar-chart",
     text: "value",
-    find: (element) => element.querySelector("span") ?? undefined,
+    find: (element) =>
+      [...element.querySelectorAll("span")].find((span) =>
+        span.textContent.startsWith("$"),
+      ),
     units: { wide: 7.5, square: 7, tall: 7.5 },
   },
   {

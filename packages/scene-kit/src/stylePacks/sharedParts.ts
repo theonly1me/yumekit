@@ -2,10 +2,10 @@ import type { StyleFont, StylePack } from "./stylePack.js";
 
 export const sharedMotion: StylePack["motion"] = {
   referenceFramesPerSecond: 30,
-  riseFrames: 14,
+  riseFrames: 18,
   riseDistanceUnits: 6,
-  staggerFrames: 20,
-  wordStaggerFrames: 12,
+  staggerFrames: 8,
+  wordStaggerFrames: 3,
   settleShareOfClip: 0.7,
 };
 

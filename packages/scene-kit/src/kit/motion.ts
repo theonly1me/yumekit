@@ -1,36 +1,65 @@
-import { tween, useFrame, useSceneContext } from "@yumekit/scene";
-import type { CSSProperties } from "react";
+import { useFrame, useSceneContext } from "@yumekit/scene";
+import {
+  drift,
+  enter,
+  paceFrame,
+  type DriftKind,
+  type DriftPose,
+  type EnterKind,
+  type MotionStyle,
+} from "../motion/index.js";
 import { useStylePack } from "../stylePacks/StylePackContext.js";
-import type { StylePack } from "../stylePacks/stylePack.js";
 
-export function useMotionFrame(options: { settleFrame: number }): number {
-  const frame = useFrame();
-  const { durationFrames, framesPerSecond } = useSceneContext();
-  const { motion } = useStylePack();
-  const referenceFramesEach = motion.referenceFramesPerSecond / framesPerSecond;
-  const lastFrame = (durationFrames - 1) * referenceFramesEach;
-  if (lastFrame <= 0) {
-    return options.settleFrame;
-  }
-  const settleLimit = lastFrame * motion.settleShareOfClip;
-  const speed = Math.max(1, options.settleFrame / settleLimit);
-  return frame * referenceFramesEach * speed;
+export interface KitMotion {
+  framesPerSecond: number;
+  unit: number;
+  itemSeconds: number;
+  staggerFrames: number;
+  wordStaggerSeconds: number;
+  framesOf: (referenceFrames: number) => number;
+  paced: (settleFrame: number) => number;
+  enterAt: (options: {
+    frame: number;
+    startFrame: number;
+    kind?: EnterKind;
+    distanceUnits?: number;
+  }) => MotionStyle;
+  drift: (kind: DriftKind) => DriftPose;
 }
 
-export function riseStyle(options: {
-  motionFrame: number;
-  startFrame: number;
-  stylePack: StylePack;
-  unit: number;
-}): CSSProperties {
-  const { motion } = options.stylePack;
-  const progress = tween({
-    frame: options.motionFrame,
-    startFrame: options.startFrame,
-    endFrame: options.startFrame + motion.riseFrames,
-    from: 0,
-    to: 1,
-  });
-  const offset = (1 - progress) * motion.riseDistanceUnits * options.unit;
-  return { opacity: progress, transform: `translateY(${String(offset)}px)` };
+export function useKitMotion(): KitMotion {
+  const frame = useFrame();
+  const { durationFrames, framesPerSecond, unit } = useSceneContext();
+  const { motion } = useStylePack();
+  const secondsOf = (referenceFrames: number) =>
+    referenceFrames / motion.referenceFramesPerSecond;
+  const framesOf = (referenceFrames: number) =>
+    secondsOf(referenceFrames) * framesPerSecond;
+  const itemSeconds = secondsOf(motion.riseFrames);
+  return {
+    framesPerSecond,
+    unit,
+    itemSeconds,
+    staggerFrames: framesOf(motion.staggerFrames),
+    wordStaggerSeconds: secondsOf(motion.wordStaggerFrames),
+    framesOf,
+    paced: (settleFrame) => paceFrame({ frame, durationFrames, settleFrame }),
+    enterAt: (options) =>
+      enter({
+        kind: "rise",
+        distanceUnits: motion.riseDistanceUnits,
+        ...options,
+        framesPerSecond,
+        unit,
+        durationSeconds: itemSeconds,
+      }),
+    drift: (kind) =>
+      drift({
+        frame,
+        framesPerSecond,
+        durationFrames,
+        kind,
+        unit,
+      }),
+  };
 }

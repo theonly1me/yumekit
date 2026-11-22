@@ -16,6 +16,7 @@ export function centeredContentBox(options: {
   stylePack: StylePack;
   sizes: Sizes;
   wideWidthUnits?: number;
+  boxStyle?: CSSProperties;
 }): { style: CSSProperties; leadingSpace: string } {
   const { stylePack, sizes, wideWidthUnits } = options;
   const { marginUnits, captionAreaUnits } = stylePack.layout;
@@ -30,6 +31,7 @@ export function centeredContentBox(options: {
       ...(sizes.layout === "wide" && wideWidthUnits !== undefined
         ? { maxWidth: sizes.pixels(wideWidthUnits) }
         : {}),
+      ...options.boxStyle,
     },
     leadingSpace: sizes.pixels(bottomUnits - captionAreaUnits),
   };

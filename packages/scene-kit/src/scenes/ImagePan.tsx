@@ -1,22 +1,23 @@
 import { useFrame, useSceneContext, type JsonObject } from "@yumekit/scene";
 import type { ReactNode } from "react";
 import { CaptionPanel } from "../kit/CaptionPanel.js";
-import { riseStyle, useMotionFrame } from "../kit/motion.js";
-import { useSizes } from "../kit/sizes.js";
+import { useKitMotion } from "../kit/motion.js";
 import { readImagePanProps } from "../props/readProps.js";
 import { useStylePack } from "../stylePacks/StylePackContext.js";
 import { panTransform } from "./panMotion.js";
 
-const captionStartFrame = 10;
-const settleFrame = 24;
+const captionStartFrame = 6;
 
 export function ImagePan(props: { props: JsonObject }): ReactNode {
   const { assetId, caption, direction } = readImagePanProps(props.props);
   const stylePack = useStylePack();
   const frame = useFrame();
   const { durationFrames, findAsset } = useSceneContext();
-  const sizes = useSizes();
-  const motionFrame = useMotionFrame({ settleFrame });
+  const motion = useKitMotion();
+  const captionStart = motion.framesOf(captionStartFrame);
+  const motionFrame = motion.paced(
+    captionStart + motion.framesOf(stylePack.motion.riseFrames),
+  );
   const asset = assetId === "" ? undefined : findAsset(assetId);
   const imageUrl = asset?.kind === "image" ? asset.url : undefined;
   return (
@@ -53,11 +54,10 @@ export function ImagePan(props: { props: JsonObject }): ReactNode {
         <CaptionPanel
           placement="top"
           textProp="caption"
-          style={riseStyle({
-            motionFrame,
-            startFrame: captionStartFrame,
-            stylePack,
-            unit: sizes.unit,
+          style={motion.enterAt({
+            frame: motionFrame,
+            startFrame: captionStart,
+            kind: "wipe",
           })}
         >
           {caption}

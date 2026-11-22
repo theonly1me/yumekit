@@ -2,6 +2,7 @@ export const permittedSceneImports = [
   "react",
   "@yumekit/scene",
   "@yumekit/scene-kit",
+  "@yumekit/scene-kit/motion",
 ] as const;
 
 const importsAddedByTheJsxTransform = [

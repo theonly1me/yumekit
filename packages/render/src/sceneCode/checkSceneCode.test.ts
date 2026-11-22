@@ -13,6 +13,28 @@ describe("checkSceneCode", () => {
     ).resolves.toEqual({ ok: true, value: { checked: true } });
   });
 
+  it("accepts a scene that uses the motion functions and the backdrop of the kit", async () => {
+    const code = [
+      'import { defineReactScene, useFrame, useSceneContext } from "@yumekit/scene";',
+      'import { Backdrop } from "@yumekit/scene-kit";',
+      'import { enter } from "@yumekit/scene-kit/motion";',
+      "export default defineReactScene(() => {",
+      "  const frame = useFrame();",
+      "  const { framesPerSecond } = useSceneContext();",
+      "  return (",
+      "    <>",
+      '      <Backdrop kind="glow" seed="intro" />',
+      "      <h1 style={enter({ frame, framesPerSecond })}>Hello</h1>",
+      "    </>",
+      "  );",
+      "});",
+    ].join("\n");
+    await expect(checkSceneCode({ sceneId: "intro", code })).resolves.toEqual({
+      ok: true,
+      value: { checked: true },
+    });
+  });
+
   it("rejects an import that document 02 does not permit", async () => {
     await expect(
       checkSceneCode({ sceneId: "files", code: notPermittedImportCode }),
