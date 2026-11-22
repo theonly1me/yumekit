@@ -1,0 +1,64 @@
+.between {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  padding-top: 36px;
+}
+
+.between button.plus {
+  margin: 0 7px;
+}
+
+button.transition-mark {
+  width: 26px;
+  height: 22px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  color: var(--faint);
+  border-color: transparent;
+  background: transparent;
+}
+
+button.transition-mark:hover,
+button.transition-mark[aria-expanded="true"] {
+  color: var(--text);
+  border-color: var(--line);
+}
+
+button.transition-mark:not([data-kind="cut"]) {
+  color: var(--accent);
+}
+
+.transition-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+button.transition-choice {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+}
+
+button.transition-choice[aria-pressed="true"] {
+  color: var(--text);
+  box-shadow: 0 0 0 1px var(--accent);
+  border-color: var(--accent);
+}
+
+.transition-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+}
+
+.transition-form-title {
+  font-size: var(--step--1);
+  color: var(--muted);
+  flex-basis: 100%;
+}

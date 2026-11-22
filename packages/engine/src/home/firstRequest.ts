@@ -12,6 +12,8 @@ const failureSchema = z.object({ kind: z.string(), message: z.string() });
 
 const requestWaitMilliseconds = 30_000;
 
+const betweenScenesLine = "Between scenes: a fade from each scene to the next.";
+
 function lengthLineOf(length: ProjectLength): string {
   return length === "auto"
     ? "Length: choose the length that fits the request."
@@ -28,6 +30,7 @@ export function firstRequestTextOf(options: {
     options.request.trim(),
     `Platforms: ${names.join(", ")}.`,
     lengthLineOf(options.length),
+    betweenScenesLine,
   ].join("\n");
 }
 

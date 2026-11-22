@@ -2,6 +2,12 @@ import { useEffect, useRef, useState } from "react";
 import { newSceneRequest } from "../chat/requestTexts.js";
 import type { Output, Scene, SceneClip } from "../engine/snapshot.js";
 import { secondsText } from "../timeline/clock.js";
+import {
+  choiceOf,
+  type TransitionChoice,
+} from "../transitions/transitionChoices.js";
+import { TransitionForm } from "../transitions/TransitionForm.js";
+import { TransitionMark } from "../transitions/TransitionMark.js";
 import { AddSceneForm } from "./AddSceneForm.js";
 import { SceneCard, type CardFacts } from "./SceneCard.js";
 import { stillKey } from "./useSceneStills.js";
@@ -26,12 +32,16 @@ export function SceneCards(props: {
   onPick: (clip: SceneClip) => void;
   onMove: (move: { clip: SceneClip; toIndex: number }) => void;
   onAddScene: (request: string) => void;
+  onTransition: (change: { clip: SceneClip; kind: TransitionChoice }) => void;
 }) {
   const { output, clips, scenes, stills, framesPerSecond } = props;
   const dragged = useRef<SceneClip | undefined>(undefined);
   const list = useRef<HTMLOListElement>(null);
   const keyMovedClipId = useRef<string | undefined>(undefined);
   const [addingAfter, setAddingAfter] = useState<number>();
+  const [choosingInto, setChoosingInto] = useState<number>();
+  const choosingClip =
+    choosingInto === undefined ? undefined : clips[choosingInto];
   const order = clips.map((clip) => clip.id).join(" ");
   const { pickedClipId } = props;
 
@@ -70,6 +80,25 @@ export function SceneCards(props: {
       ? undefined
       : { number: index + 1, title: card.title };
   };
+  const markAfter = (index: number) => {
+    const next = clips[index + 1];
+    const clip = clips[index];
+    if (next === undefined || clip === undefined) return undefined;
+    if (clip.startFrame + clip.durationFrames !== next.startFrame) {
+      return undefined;
+    }
+    return (
+      <TransitionMark
+        kind={choiceOf(next)}
+        nextNumber={index + 2}
+        isOpen={choosingInto === index + 1}
+        onOpen={() => {
+          setAddingAfter(undefined);
+          setChoosingInto(choosingInto === index + 1 ? undefined : index + 1);
+        }}
+      />
+    );
+  };
   return (
     <>
       <ol className="cards" aria-label="Scenes" ref={list}>
@@ -96,11 +125,25 @@ export function SceneCards(props: {
               props.onMove({ clip, toIndex: card.index });
             }}
             onAdd={() => {
+              setChoosingInto(undefined);
               setAddingAfter(card.index);
             }}
+            mark={markAfter(card.index)}
           />
         ))}
       </ol>
+      {choosingClip === undefined || choosingInto === undefined ? undefined : (
+        <TransitionForm
+          nextNumber={choosingInto + 1}
+          current={choiceOf(choosingClip)}
+          onPick={(kind) => {
+            props.onTransition({ clip: choosingClip, kind });
+          }}
+          onClose={() => {
+            setChoosingInto(undefined);
+          }}
+        />
+      )}
       {addingAfter === undefined ? undefined : (
         <AddSceneForm
           afterNumber={addingAfter + 1}

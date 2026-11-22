@@ -69,6 +69,7 @@ export function LowerArea(props: {
             onPick={props.onPickCard}
             onMove={edits.move}
             onAddScene={editorChat.sendText}
+            onTransition={edits.transition}
           />
         )}
         {changes.voiceMayNotMatch ? (

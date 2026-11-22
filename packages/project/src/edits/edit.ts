@@ -11,6 +11,7 @@ import { sceneSchema } from "../format/scene.js";
 import {
   audioClipSchema,
   sceneClipSchema,
+  sceneTransitionSchema,
   timelineSchema,
 } from "../format/timeline.js";
 import {
@@ -32,6 +33,9 @@ export const clipChangesSchema = z.strictObject({
   gainDecibels: z.number().exactOptional(),
   sceneId: idSchema.exactOptional(),
   assetId: idSchema.exactOptional(),
+  transition: z
+    .union([sceneTransitionSchema, z.strictObject({ kind: z.literal("cut") })])
+    .exactOptional(),
 });
 
 export const editSchema = z.discriminatedUnion("kind", [
