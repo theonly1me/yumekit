@@ -42,6 +42,21 @@ A platform is a place where the person publishes. The catalog is a fixed list in
 - `render_video` writes one file for each platform of the output: `renders/<project name>-<platform id>.mp4`. It renders once. Each later file is a hard link to the first, or a copy when a link fails. An output with no platform keeps its file name of today.
 - The editor shows one tab for each platform, in catalog order, then one tab for each custom output. Two tabs of one output show the same preview.
 
+### Details of platforms
+
+WP27 made these choices where the section "Platforms" gives no rule.
+
+- The store has the edit `setOutputPlatforms` (`outputId`, `platforms`). `add_platform` and `remove_platform` each send one batch of edits to `applyEdits`, so each call is one undo step.
+- The store checks that a platform is on one output only, and that the output has the size of the platform.
+- "The output of that size" is the first output, in project order, with the same width and height. It can be a custom output, such as `wide` of `yumekit init`.
+- A new output takes the output id of the catalog and a label for its shape, for example `square` and "Square 1:1".
+- The nearest output has the smallest difference between its ratio of width to height and the ratio of the platform. On a tie, the first output in project order wins. With no output, the new output has an empty timeline.
+- `add_platform` for a platform that an output has changes nothing and succeeds.
+- When `remove_platform` removes the last platform of the only output, the output stays as a custom output.
+- `render_video` renders to the file of the first platform in catalog order. The result keeps `file` (that first file) and adds `files`, with `platform_id` and `file` for each file.
+- The project name in a file name is in lower case. Each run of characters that are not a letter or a digit becomes one hyphen. It has at most 64 characters and no hyphen at either end. An empty result becomes `video`.
+- `yumekit init` keeps its output `wide` with no platform. `yumekit render` keeps the file `renders/<output id>.mp4`.
+
 ## Direct changes to scenes
 
 The scenes row is the first scene track that is not a caption track, as in document 11. These tools change it. Each one is one undo step, and each one is also for the AI.

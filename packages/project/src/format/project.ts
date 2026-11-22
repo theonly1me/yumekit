@@ -1,5 +1,8 @@
 import { z } from "zod";
+import { platformIds } from "../platforms/catalog.js";
 import { idSchema } from "./values.js";
+
+export const platformIdSchema = z.enum(platformIds);
 
 const pixelSizeSchema = z
   .int()
@@ -12,6 +15,7 @@ export const outputSchema = z.strictObject({
   label: z.string(),
   widthPixels: pixelSizeSchema,
   heightPixels: pixelSizeSchema,
+  platforms: z.array(platformIdSchema).exactOptional(),
 });
 
 export const projectSchema = z.strictObject({

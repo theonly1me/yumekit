@@ -11,7 +11,7 @@ function registerGetProject(context: HarnessContext): void {
   context.tools.add({
     name: "get_project",
     description:
-      "Read the project: name, frame rate, outputs with the length of each timeline in frames, script, bible, a list of scenes, and the revision. Call it first. All time in this harness is in whole frames at frames_per_second.",
+      "Read the project: name, frame rate, outputs with the platforms of each output and the length of each timeline in frames, script, bible, a list of scenes, and the revision. Call it first. All time in this harness is in whole frames at frames_per_second.",
     inputSchema: {},
     annotations: readOnly,
     run: () => {
@@ -31,6 +31,7 @@ function registerGetProject(context: HarnessContext): void {
               label: output.label,
               width_pixels: output.widthPixels,
               height_pixels: output.heightPixels,
+              platforms: output.platforms ?? [],
               length_frames: timeline ? lengthFramesOf(timeline) : 0,
             };
           }),
