@@ -1,0 +1,112 @@
+.making-body {
+  gap: 28px;
+}
+
+.making-steps li {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 13px 0;
+  border-top: 1px solid var(--line);
+  color: var(--faint);
+}
+
+.making-steps em {
+  font-style: normal;
+  font-size: var(--step--1);
+  color: var(--muted);
+}
+
+.step-mark {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 1.5px solid var(--faint);
+}
+
+.making-steps li[data-status="done"] {
+  color: var(--text);
+}
+
+.making-steps li[data-status="done"] .step-mark {
+  background: var(--text);
+  border-color: var(--text);
+}
+
+.making-steps li[data-status="now"] {
+  color: var(--text);
+}
+
+.making-steps li[data-status="now"] .step-mark {
+  border-color: var(--accent);
+  background: var(--accent);
+  animation: pulse 1s ease-in-out infinite alternate;
+}
+
+.making-cards {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+  font-size: var(--step--2);
+  color: var(--muted);
+}
+
+.making-card {
+  display: grid;
+  gap: 6px;
+}
+
+.making-card .thumb,
+.making-card[data-empty="true"]::before {
+  content: "";
+  display: block;
+  aspect-ratio: 16 / 9;
+  border-radius: 3px;
+  box-shadow: 0 0 0 1px var(--line);
+}
+
+.making-action {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+}
+
+@keyframes pulse {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.35;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .making-steps li[data-status="now"] .step-mark {
+    animation: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .making-cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.making-steps li[data-status="skipped"] em {
+  color: var(--faint);
+}
+
+.making-failure {
+  color: var(--accent);
+}
+
+.making-card {
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.making-card[data-empty="true"]::before {
+  width: 100%;
+}
