@@ -236,7 +236,7 @@ The probe ran on 2026-11-21, on a MacBook with an M3 Max and 64 GB of memory. It
 | License of the weights              | LTX-2 Community License                                            |
 
 - Each time includes the load of the model into memory.
-- The license is free below 10 million US dollars of revenue for each year. The user must disclose content that a machine made. The license does not permit a product that competes directly with the commercial products of the licensor.
+- The license has conditions for use. The user must disclose content that a machine made. Read the license before use.
 - yumekit does not bundle the weights. The user downloads them, and the user accepts the license.
 
 The owner decided on 2026-11-21: a local video server stays an option of the harness, with a low priority. LTX is one candidate, and another local model can replace it. The server follows the same convention as the hosted servers, so the choice of model stays inside the server. The design of the server has no document yet.
