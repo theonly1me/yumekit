@@ -1,3 +1,5 @@
+import type { ChatEntry } from "./chat/chatTypes.js";
+
 export type Outcome<Value, Failure> =
   { ok: true; value: Value } | { ok: false; failure: Failure };
 
@@ -23,4 +25,6 @@ export type EngineEvent =
     }
   | { type: "media-servers-changed" }
   | { type: "agents-changed"; connected: number }
+  | { type: "chat-changed"; entry: ChatEntry }
+  | { type: "chat-text"; id: string; text: string }
   | { type: "engine-closing" };

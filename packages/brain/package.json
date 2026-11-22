@@ -2,7 +2,7 @@
   "name": "@yumekit/brain",
   "version": "0.0.0",
   "private": true,
-  "description": "The agent CLI sessions.",
+  "description": "The adapters that run the agent program of the person.",
   "license": "Apache-2.0",
   "type": "module",
   "exports": {
@@ -13,5 +13,11 @@
   },
   "files": [
     "dist"
-  ]
+  ],
+  "dependencies": {
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5"
+  }
 }

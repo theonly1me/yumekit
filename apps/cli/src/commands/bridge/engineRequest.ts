@@ -28,6 +28,7 @@ export function engineRequest(options: {
       method: options.method,
       headers: {
         authorization: `Bearer ${options.engine.token}`,
+        "x-yumekit-client": "agent",
         "content-type": "application/json",
       },
     },
