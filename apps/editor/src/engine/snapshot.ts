@@ -68,10 +68,13 @@ const assetSchema = z.object({
   id: z.string(),
   kind: z.enum(["image", "audio", "video", "font"]),
   hasWords: z.boolean(),
+  durationFrames: z.number().optional(),
   source: z.discriminatedUnion("kind", [
     z.object({ kind: z.literal("import"), originalName: z.string() }),
     z.object({
       kind: z.literal("tool"),
+      server: z.string().optional(),
+      model: z.string().optional(),
       tool: z.string(),
       input: z.record(z.string(), z.json()),
     }),
@@ -115,5 +118,7 @@ export const toolResultSchema = z.object({
   data: z.record(z.string(), z.json()),
   images: z.array(z.object({ mimeType: z.string(), base64: z.string() })),
 });
+
+export const uploadSchema = z.object({ asset: assetSchema });
 
 export type ToolResult = z.infer<typeof toolResultSchema>;

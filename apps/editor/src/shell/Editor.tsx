@@ -3,6 +3,7 @@ import type { EngineClient } from "../engine/engineClient.js";
 import type { Snapshot } from "../engine/snapshot.js";
 import { useExportSheet } from "../export/useExportSheet.js";
 import { useClipTools } from "../makeClip/useClipTools.js";
+import { useSoundPartSheet } from "../parts/sound/useSoundPartSheet.js";
 import { PlatformTabs } from "../platforms/PlatformTabs.js";
 import { Preview } from "../preview/Preview.js";
 import { sceneEditsOf } from "../scenes/sceneEdits.js";
@@ -50,7 +51,13 @@ export function Editor(props: {
     onAddKey: settings.open,
     onPlaced: view.pickClip,
   });
-  const isSheetOpen = exporting.isOpen || clipTools.isOpen || settings.isOpen;
+  const soundPart = useSoundPartSheet({
+    client,
+    snapshot,
+    chat: editorChat.chat,
+  });
+  const isSheetOpen =
+    exporting.isOpen || clipTools.isOpen || settings.isOpen || soundPart.isOpen;
   const openAiSettings = () => {
     playback.pause();
     settings.open(undefined);
@@ -155,6 +162,10 @@ export function Editor(props: {
             onSeek={view.moveTo}
             onEditText={view.editText}
             onMakeClip={clipTools.open}
+            onOpenSound={(part) => {
+              playback.pause();
+              soundPart.open(part);
+            }}
           />
         </main>
         <EditorSide
@@ -178,6 +189,7 @@ export function Editor(props: {
       {exporting.sheet}
       {clipTools.sheet}
       {settings.sheet}
+      {soundPart.sheet}
     </div>
   );
 }

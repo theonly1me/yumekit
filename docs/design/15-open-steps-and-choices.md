@@ -181,3 +181,25 @@ WP37 and WP40 share the folder `apps/editor/src/parts/`. WP37 owns the frame (`p
 8. The group "This video" is the first group of Settings. A pick calls `set_video_style` at once. The group stays on while a request runs, because the AI reads the style at the start of its next request.
 9. A scene card shows "Graphics" or "Video clip" after its length. A scene is a video clip when it shows the kit scene `video-clip`.
 10. "Back to graphics" shows next to "Make a real video clip", only on a picked scene with a clip. It is off while a request runs. Its text is in `apps/editor/src/videoStyle/videoStyles.ts` until the table of fixed requests (WP40) exists.
+
+## Details of WP40
+
+These rules came from the build of WP40.
+
+1. The upload keeps the part of the name after the last `/` or `\`. It keeps letters, digits, dots, dashes, and underscores, removes the dots at the start, and keeps at most 200 characters. An empty result gives `upload-name-not-valid` (400). So `../../song.mp3` and `/tmp/song.mp3` both become `song.mp3` in a new temporary folder.
+2. The asset id is the name without its extension, in lower case, with each other run of characters as one hyphen. An id in use gets `-2`, `-3`, and so on.
+3. The engine reads the kind of the file with `probeMedia`. An SVG file is a picture. A file that it cannot read gives `file-type-not-supported` (400) and calls no tool. Each failure of `import_asset` gives status 400 with its `kind` and `message`. A success returns `{ "asset": <the asset record> }`.
+4. A `Content-Length` past 500 MB gives 413 before the engine reads the body, with `Connection: close`. A body that grows past the limit is read to its end and not kept, then gives 413. The engine removes the temporary folder in each case.
+5. With `download=1`, the header is `Content-Disposition: attachment`. The name is `originalName` for an imported asset, and the asset id with the extension of its file for each other asset. `filename` holds only letters, digits, dots, dashes, and underscores. `filename*` holds the full name.
+6. A view takes `ask`, the `send` of the chat, next to the client, the snapshot, and `locked`, because a fixed request goes through the chat. `parts/fixedRequests.ts` gives `fixedRequestTextOf(request)` and `sendFixedRequest({ ask, request })`.
+7. "Use my own music" and "Use my own recording" call `set_timeline`, one time for each output. No clip tool adds an audio track, and a repeat needs more than one clip. So the change is one undo step for each output. The tracks keep their ids. A new music track is `music`, and a new voice track is `narration`.
+8. The music clips play the whole file from frame 0, one after another, until the length of the video without the music. The last clip is cut. The new clips keep the gain of the old music clip, or -12 decibels.
+9. The own recording is one clip from frame 0, cut to the length of the video without the voice. The captions stay as they are. The view says "Your recording has no word times, so the captions do not follow it yet." with "Make the captions match my recording".
+10. The voice row is the track with a voice clip, or else an audio track with the id `narration` or `voice`, also with `-<number>`. So the row stays Voice after an own recording.
+11. "How loud the music is under the voice" goes from -30 to 0 decibels. It saves 0.4 seconds after the last move, with `update_clip` for each music clip of each output.
+12. Each change of a view applies to each output. The Voice view lists the voice clips of the first output that has a voice track.
+13. The names of the voices come from the `voice` setting of the model in the asset record of the first voice clip. The pressed name is the `voice` of its input, or the default. With no such setting, the view hides "Who speaks". The picks of WP38 can replace this source.
+14. A second music row keeps "Change", because this version has one music clip.
+15. The Voice view and the Music view show the line `MadeWith` of WP38 for the pick of Settings, under "What the voice says" and "In your video now". A second line in one-time mode sits under "Who speaks" and under "Or describe the music". Its pick adds the sentence of the model to the fixed request.
+16. The text of "Back to graphics" of WP39 moves into the table of fixed requests, as the kind `back-to-graphics`.
+17. Until the frame of WP37 is on `main`, the editor opens a view in a sheet with its title, the locked line, and "Stop".

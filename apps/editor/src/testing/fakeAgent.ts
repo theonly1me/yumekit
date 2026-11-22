@@ -1,4 +1,5 @@
-import { chmod, mkdir, writeFile } from "node:fs/promises";
+import { existsSync } from "node:fs";
+import { chmod, mkdir, symlink, writeFile } from "node:fs/promises";
 import { delimiter, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -21,6 +22,16 @@ const fakeAgentFile = fileURLToPath(
   ),
 );
 
+async function linkMediaPrograms(folder: string): Promise<void> {
+  const searched = (process.env["PATH"] ?? "").split(delimiter);
+  for (const program of ["ffmpeg", "ffprobe"]) {
+    const found = searched
+      .map((searchedFolder) => join(searchedFolder, program))
+      .find((candidate) => existsSync(candidate));
+    if (found !== undefined) await symlink(found, join(folder, program));
+  }
+}
+
 export async function installFakeAgent(options: {
   root: string;
   configurationFolder: string;
@@ -37,6 +48,7 @@ export async function installFakeAgent(options: {
   const codexPath = join(folder, "codex");
   await writeFile(codexPath, "#!/bin/sh\nexit 0\n");
   await chmod(codexPath, 0o755);
+  await linkMediaPrograms(folder);
   await mkdir(options.configurationFolder, { recursive: true });
   await writeFile(
     join(options.configurationFolder, "settings.json"),
