@@ -182,7 +182,7 @@ export default defineReactScene(({ props }) => {
 });
 ```
 
-A custom scene may import only `react`, `@yumekit/scene`, and `@yumekit/scene-kit`. The bundler rejects any other import with the failure `scene-import-not-permitted`. Custom scene code compiles with strict TypeScript, but it may read a prop as `props.title`. A later design adds a list of extra packages for a project, for example a 3D library.
+A custom scene may import only `react`, `@yumekit/scene`, `@yumekit/scene-kit`, and `@yumekit/scene-kit/motion` (document 17). The bundler rejects any other import with the failure `scene-import-not-permitted`. Custom scene code compiles with strict TypeScript, but it may read a prop as `props.title`. A later design adds a list of extra packages for a project, for example a 3D library.
 
 ## Not in milestone 1
 

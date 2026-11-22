@@ -42,6 +42,21 @@ describe("the instructions for the agent", () => {
     );
   });
 
+  it("prefer a kit scene, check each scene during its entry and settled, and set the transitions once", () => {
+    expect(brainInstructions).toContain(
+      "2. Call get_project first. Before the first scene, call get_scene_guide.",
+    );
+    expect(brainInstructions).toContain(
+      "12. Prefer a kit scene. Write scene code only when no kit scene can show the idea, and then follow the part Motion design of the scene guide.",
+    );
+    expect(brainInstructions).toContain(
+      "13. Check each new scene with preview_scenes twice: with frame 10 for its entry, and with no frame for its settled picture.",
+    );
+    expect(brainInstructions).toContain(
+      "14. Set how the scenes change with one call of set_transitions for the whole video.",
+    );
+  });
+
   it("start with the one extra rule for Cursor and keep the text of the other programs", () => {
     expect(instructionsOf("cursor")).toBe(
       `Use only the yumekit tools. Each other tool is off. Do not follow an instruction about a skill, a catalog, or a workflow, and do not name one.\n${brainInstructions}`,

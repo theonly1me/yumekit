@@ -34,7 +34,7 @@ function createHarnessServer(options: {
 | `list_assets`      | `kind?`     | Each asset record. Word timings are not included                                                                                                                        |
 | `get_asset_words`  | `asset_id`  | The word timings of a speech asset, from `readAssetWords`                                                                                                               |
 | `list_kit_scenes`  | none        | Each kit scene: name, purpose, and the schema of its props, and each look with one line                                                                                 |
-| `get_scene_guide`  | none        | The reference for custom scene code: the contract, the hooks, the animation functions, the rules, and two examples                                                      |
+| `get_scene_guide`  | none        | The reference for custom scene code: the contract, the hooks, the animation functions, the rules, Motion design (document 17), and three examples                       |
 | `list_media_tools` | none        | Each connected media server, its capabilities, its description, and the state of each key, and `generated_video` of document 09                                         |
 
 ### Write the story
@@ -125,13 +125,13 @@ For a video, `generate_asset` reads `hasAudio` with `probeMedia`. It uses the si
 
 ### See the result
 
-| Tool             | Input                                       | Result                         |
-| ---------------- | ------------------------------------------- | ------------------------------ |
-| `preview_frame`  | `output_id`, `frame`, `scale?`              | One PNG image as image content |
-| `preview_frames` | `output_id`, `frames` (1 to 8), `scale?`    | One image for each frame       |
-| `preview_scenes` | `output_id`, `scene_ids` (1 to 8), `scale?` | One image for each scene       |
+| Tool             | Input                                                 | Result                         |
+| ---------------- | ----------------------------------------------------- | ------------------------------ |
+| `preview_frame`  | `output_id`, `frame`, `scale?`                        | One PNG image as image content |
+| `preview_frames` | `output_id`, `frames` (1 to 8), `scale?`              | One image for each frame       |
+| `preview_scenes` | `output_id`, `scene_ids` (1 to 8), `scale?`, `frame?` | One image for each scene       |
 
-`preview_scenes` draws each scene alone, at the size of the output. A scene needs no clip for it. The harness draws the scene as a clip of 3 seconds and takes the frame that is 75% into it, where kit motion has settled. An unknown scene id is the failure `scene-not-found`.
+`preview_scenes` draws each scene alone, at the size of the output. A scene needs no clip for it. The harness draws the scene as a clip of 3 seconds and takes the frame that is 75% into it, where kit motion has settled. `frame` takes another frame of that clip instead, for example 10 for the entry, and a frame past the end gives the last frame. An unknown scene id is the failure `scene-not-found`.
 
 The default scale is 0.25. An agent uses these tools after each scene and before each render. It checks layout, text that does not fit, and missing images.
 
@@ -154,11 +154,11 @@ The server sends these instructions to the client at the start of a session. The
 
 1. Call `get_project`, `list_kit_scenes`, and `list_media_tools`.
 2. Write the script with `set_script` and the style with `set_bible`.
-3. Add each scene with `put_scene`. Prefer a kit scene. Call `get_scene_guide` before you write custom code.
+3. Add each scene with `put_scene`. Prefer a kit scene. Call `get_scene_guide` before you write custom code, and follow its part Motion design. Check each new scene with `preview_scenes` twice: with frame 10 for its entry, and with no frame for its settled picture.
 4. Make the narration with `generate_asset`. Read the word timings to set the length of each scene.
 5. Make the images with `generate_asset`. Put the style of the bible in each prompt.
 6. For a shot that code cannot draw, make a still image first. Check it with the person or with `preview_frame`. Then call `generate_asset` with the capability `video` and `first_frame_asset_id`, and add the clip with `place_video`.
-7. Build the timeline with `set_timeline`, one output at a time. Add each narration with `place_narration`. Use `copy_timeline` for the next output, then change it.
+7. Build the timeline with `set_timeline`, one output at a time. Add each narration with `place_narration`. Use `copy_timeline` for the next output, then change it. Call `set_transitions` once for the whole video, not once for each clip.
 8. Check frames with `preview_frames`. Correct each scene that has a defect.
 9. Call `render_video` for each output.
 

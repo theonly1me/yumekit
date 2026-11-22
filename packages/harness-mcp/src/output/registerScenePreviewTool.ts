@@ -30,6 +30,7 @@ async function sceneStillsResult(options: {
   outputId: string;
   sceneIds: string[];
   scale: RenderScale;
+  frame: number | undefined;
 }): Promise<CallToolResult> {
   const { context, outputId, sceneIds, scale } = options;
   const snapshot = context.store.read();
@@ -37,9 +38,9 @@ async function sceneStillsResult(options: {
     const found = findScene({ snapshot, sceneId });
     if (!found.ok) return failureResult(found.failure);
   }
-  const { durationFrames, frame } = sceneAloneFrames(
-    snapshot.project.framesPerSecond,
-  );
+  const sceneAlone = sceneAloneFrames(snapshot.project.framesPerSecond);
+  const { durationFrames } = sceneAlone;
+  const frame = Math.min(durationFrames - 1, options.frame ?? sceneAlone.frame);
   const images: { type: "image"; data: string; mimeType: string }[] = [];
   const pictures: {
     scene_id: string;
@@ -85,7 +86,7 @@ export function registerScenePreviewTool(context: HarnessContext): void {
   context.tools.add({
     name: "preview_scenes",
     description:
-      "Draw 1 to 8 scenes alone at the size of an output and return one PNG image for each, in the order given. A scene needs no clip. Each scene is drawn as a clip of 3 seconds, at the frame 75% into it. Default scale 0.25.",
+      "Draw 1 to 8 scenes alone at the size of an output and return one PNG image for each, in the order given. A scene needs no clip. Each scene is drawn as a clip of 3 seconds, at the frame 75% into it, where the motion has settled. Give frame to see a frame of the entry instead, for example 10. Default scale 0.25.",
     inputSchema: {
       output_id: idInput("The id of the output that gives the size."),
       scene_ids: z
@@ -94,14 +95,23 @@ export function registerScenePreviewTool(context: HarnessContext): void {
         .max(8)
         .describe("1 to 8 scene ids (see get_project)."),
       scale: scaleInput,
+      frame: z
+        .number()
+        .int()
+        .min(0)
+        .optional()
+        .describe(
+          "A frame of the clip of 3 seconds, for example 10 for the entry. Default: the frame 75% into it. A frame past the end gives the last frame.",
+        ),
     },
     annotations: { readOnlyHint: true },
-    run: ({ input: { output_id, scene_ids, scale } }) =>
+    run: ({ input: { output_id, scene_ids, scale, frame } }) =>
       sceneStillsResult({
         context,
         outputId: output_id,
         sceneIds: scene_ids,
         scale: scale ?? defaultPreviewScale,
+        frame,
       }),
   });
 }
