@@ -21,6 +21,7 @@ export function HeadedContent(props: {
   const heading =
     props.heading === undefined || props.heading === "" ? null : (
       <h2
+        data-text-prop="heading"
         style={{
           ...displayTextStyle(stylePack),
           fontSize: sizes.text("heading"),

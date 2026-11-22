@@ -57,6 +57,7 @@ export function BarChart(props: { props: JsonObject }): ReactNode {
         return (
           <div key={`${String(index)}-${bar.label}`} style={rise(startFrame)}>
             <p
+              data-text-prop={`bars.${String(index)}.label`}
               style={{
                 ...bodyTextStyle(stylePack),
                 fontSize: sizes.text("label"),

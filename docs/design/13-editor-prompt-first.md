@@ -143,6 +143,15 @@ WP29 made these choices where this document and the prototype give no rule.
 15. The Chat tab and Settings both show the agent setup of document 11. WP30 moved it out of the Chat tab, so only Settings shows it now. Line 2 of the prompt says "tool servers", because the interface does not show the word MCP. The command and the configuration blocks keep their text, because the person copies them as they are.
 16. The Make a clip sheet has the title "Make a real video clip" and the layout of the sheets of the prototype. Its texts say "first picture" and give times in seconds. "Add the key" in the sheet opens Settings with that tool open. The full rework is WP32.
 17. While a sheet is open, the editor below it is `inert`.
+18. WP33 changes a text in the preview page, inside the preview. The editor cannot reach the elements of the page, because the page has another origin. The page tells the editor the scene id, the path of the prop, and the new text (document 11, "Details of the preview page").
+19. A text can change when its element has the mark of document 02 and the stored prop at that path is a string or has no value. So a kit text that draws its default, such as "Title", can change too. Each other text of the picture does not take a click.
+20. A click on a text selects the whole text, as "Edit text" does in the Scene tab. Enter or a click outside saves. Escape cancels. Line breaks and runs of spaces become one space. An empty text and an unchanged text call no tool.
+21. The click sends `text-editing` at once, and the editor pauses the play. So the play stops before the edit starts.
+22. The editor calls `put_scene` with the stored scene and the new text at the path. The title, the notes, and the kit component or the code stay. So one change is one undo step. The chat shows the line of `put_scene` for a change by the person, "You changed the text of a scene.", with "Undo", as for a change in the Scene tab. The line has no scene number, as the line of item 9 has, because the engine words the line from the tool name only.
+23. A change that the tool rejects shows "The text did not change." and the plain words of the Scene tab under the preview, for example "Use at most 60 characters." The preview then shows the stored text again.
+24. The preview is not in the tab order. So the Scene tab stays the way to change a text with the keyboard.
+25. A custom scene uses the same mark. The scene guide of `get_scene_guide` tells the AI to put `data-text-prop` on each element that shows a text prop.
+26. The editor saves the text changes one after another. When a change comes before the snapshot of the last saved change, the editor starts from the props of that saved change. So a quick second change keeps the first one.
 
 ### Details of the chat panel
 

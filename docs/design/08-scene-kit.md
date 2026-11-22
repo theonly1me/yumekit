@@ -18,6 +18,7 @@ The scene kit gives an agent ready scenes, so most content needs no custom code.
 5. A scene that shows an image draws a neutral placeholder when `findAsset` returns nothing.
 6. A scene keeps its text and its values out of the caption area at the bottom (see Captions). A background or a full picture can fill it.
 7. Each schema is strict. An unknown prop is a failure in the harness, with the list of valid props.
+8. A scene marks each text prop that it draws with `data-text-prop` (document 02): `heading` and `subheading` of `title-card`, `heading` and `items.<index>` of `bullet-list`, `heading` and `bars.<index>.label` of `bar-chart`, `quote` and `source` of `quote`, and `caption` of `image-pan` and `video-clip`. `caption-words` has no mark, because it shows the narration one page at a time. The value of a bar has no mark, because it is a number.
 
 ## Scenes in milestone 1
 

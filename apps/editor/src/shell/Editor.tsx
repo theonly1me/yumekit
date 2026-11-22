@@ -127,7 +127,9 @@ export function Editor(props: {
               output={output}
               frame={facts.frame}
               framesPerSecond={framesPerSecond}
-              hint={`${tab.name}, ${String(output.widthPixels)} x ${String(output.heightPixels)}.`}
+              hint={`Click the text in the video to change it. ${tab.name}, ${String(output.widthPixels)} x ${String(output.heightPixels)}.`}
+              snapshot={snapshot}
+              onTextEditing={playback.pause}
             />
             <Transport
               frame={facts.frame}

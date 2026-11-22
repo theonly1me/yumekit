@@ -52,6 +52,7 @@ export function createStage(options: StageOptions): Stage {
       throw new Error(`The stage has no scene "${clip.sceneId}"`);
     }
     const box = createOutputBox({ parent: layer, output: project.output });
+    box.dataset["sceneId"] = clip.sceneId;
     try {
       const sceneModule = await loadScene(clip.sceneId);
       guards.seedRandom(randomSeedOf(visible));

@@ -200,6 +200,12 @@ type PreviewServer = {
 6. `failed` has the `kind` of a scene failure (`scene-error` or `kit-scene-not-found`), `frame-out-of-range`, or the kind of a load failure such as `output-not-found`.
 7. The stage in `preview` mode has no render guards. For a scene that obeys document 02, the preview pixels equal the pixels of `renderFrame`. A test checks this for a kit scene, a custom scene, and a `video-clip` scene with a picture at the output size.
 8. Chromium can draw a few edge pixels in another way in the preview. A 1280 by 720 video picture in a 640 by 360 output differed at its edges by up to 27 of 255. Text after earlier seeks differed by 1 of 255. The same frames in `render` mode inside the preview page differed in the same way, so the guards are not the cause. The preview is a guide, and the render is exact.
+9. The stage sets `data-scene-id` on the box of each scene that it mounts, in each mode (WP33). It is an attribute only, so a render does not change.
+10. WP33 adds three messages. From the page: `{ type: "text-editing" }` when a person clicks a text that can change, and `{ type: "text-changed", sceneId, path, text }` when the person saves it. To the page: `{ type: "reload" }`. The page then loads the project data again, draws the frame of the last `seek`, and sends `ready`, as after a `refresh`.
+11. Only the preview page adds a style for the text in place. Each element of a scene gets no pointer events, except a text that can change. Such a text shows a dashed outline in its own color on hover and focus. The outline is 0.3 `vmin` wide, so it shows as about one screen pixel at the scale of the editor. The render page has no such style.
+12. After each draw, the page sets `data-text-editable` on each element with `data-text-prop` whose scene has a string, or no value, at that path. Only such an element takes a click. A number, a list, or an object at the path keeps the text as it is.
+13. The edit is one step of the queue of the page, so a `seek` that comes during the edit waits until the edit ends. If a draw replaced the clicked element before the edit started, the page edits the new element with the same scene and path.
+14. A text that the person cancels, empties, or does not change makes the page load the scene again, because the browser changed the elements that React drew. After a save, the typed text stays until the `refresh` of the change. If the change fails, the editor sends `reload`.
 
 ### Play
 

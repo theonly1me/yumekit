@@ -13,6 +13,7 @@ Prefer a kit scene (list_kit_scenes). Write custom code only when no kit scene c
 7. The picture of a frame depends only on the frame number. The same frame always gives the same pixels, and frames can be drawn in any order.
 8. The scene must draw correctly for any clip length of 1 frame or more. Fit the motion into \`durationFrames\`, for example settle by 70 percent of it.
 9. Size all text and spacing in \`unit\`, so the scene reads the same at each output size. Keep text short: a custom scene does not shrink text to fit.
+10. Put \`data-text-prop\` with the name of the prop on the element that shows a text prop, for example \`<h1 data-text-prop="title">{title}</h1>\`. A person can then click the text in the preview and change it. For a text in a list, use the path, such as \`items.0\` or \`steps.1.label\`.
 
 ## Hooks and components from @yumekit/scene
 
