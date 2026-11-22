@@ -114,7 +114,7 @@ describe("the project interface of the engine", () => {
 
     const { tools } = toolListSchema.parse(bodyOf(answer));
 
-    expect(tools).toHaveLength(39);
+    expect(tools).toHaveLength(40);
     expect(tools.find((tool) => tool.name === "put_scene")).toMatchObject({
       inputSchema: { type: "object" },
     });

@@ -23,6 +23,7 @@ const personSentencesByToolName: Record<string, string> = {
   duplicate_scene_clip: "You duplicated a scene.",
   set_track_off: "You turned a sound or the captions on or off.",
   set_video_style: "You changed how the video is made.",
+  set_look: "You changed the look of the video.",
   delete_everything: "You cleared the project.",
 };
 
