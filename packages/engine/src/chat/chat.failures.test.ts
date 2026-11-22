@@ -108,7 +108,7 @@ describe("the failures and the stop of a chat request", () => {
     expect(failureOf(asked.body)).toEqual({
       kind: "no-agent",
       message:
-        "No AI program is on this computer. Install Claude Code or Codex, start it once in a terminal, and sign in.",
+        "No AI program is on this computer. Install Claude Code, Codex, or Cursor, start it once in a terminal, and sign in.",
     });
     const view = await rawRequest({
       port: engine.port,

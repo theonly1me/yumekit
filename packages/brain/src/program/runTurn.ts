@@ -8,6 +8,7 @@ export interface ProgramRun {
   programPath: string;
   arguments: string[];
   workingFolder: string;
+  environment?: Record<string, string>;
   parser: StreamParser;
   onEvent: (event: BrainEvent) => void;
 }
@@ -39,12 +40,17 @@ export function runTurn(run: ProgramRun): Turn {
   const ended = Promise.withResolvers<TurnEnd>();
   const child = spawn(run.programPath, run.arguments, {
     cwd: run.workingFolder,
+    env: { ...process.env, ...run.environment },
     stdio: ["ignore", "pipe", "pipe"],
     shell: false,
   });
   let stopRequested = false;
   let streamEnd: TurnEnd | undefined;
-  child.stderr.resume();
+  let lastErrorLine: string | undefined;
+  const errorLines = createInterface({ input: child.stderr });
+  errorLines.on("line", (line) => {
+    if (line.trim() !== "") lastErrorLine = line.trim();
+  });
   const lines = createInterface({ input: child.stdout });
   lines.on("line", (line) => {
     const step = run.parser.readLine(line);
@@ -54,11 +60,15 @@ export function runTurn(run: ProgramRun): Turn {
   });
   child.once("error", () => {
     lines.close();
+    errorLines.close();
     ended.resolve(notStarted(run.programPath));
   });
   child.once("close", () => {
     lines.close();
-    ended.resolve(streamEnd ?? run.parser.endOf({ stopRequested }));
+    errorLines.close();
+    ended.resolve(
+      streamEnd ?? run.parser.endOf({ stopRequested, lastErrorLine }),
+    );
   });
   return {
     ended: ended.promise,

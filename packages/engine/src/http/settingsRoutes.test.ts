@@ -74,25 +74,32 @@ describe("the request that saves the agent of the chat", () => {
     });
   });
 
-  it("refuses Cursor and an unknown agent, and leaves the file as it was", async () => {
+  it("saves Cursor, refuses an unknown agent, and leaves the file as it was", async () => {
     const { engine, configurationDirectory } = await startedTestEngine();
     await writeFile(
       join(configurationDirectory, "settings.json"),
       '{"agent":"codex"}',
     );
 
-    for (const agent of ["cursor", "gemini"]) {
-      const answer = await putAgent({
-        engine,
-        body: JSON.stringify({ agent }),
-      });
-      expect([answer.status, JSON.parse(answer.body)]).toEqual([
-        400,
-        expect.objectContaining({ kind: "body-not-valid" }),
-      ]);
-    }
+    const unknown = await putAgent({
+      engine,
+      body: JSON.stringify({ agent: "gemini" }),
+    });
+    expect([unknown.status, JSON.parse(unknown.body)]).toEqual([
+      400,
+      expect.objectContaining({ kind: "body-not-valid" }),
+    ]);
     expect(await settingsOf(configurationDirectory)).toEqual({
       agent: "codex",
+    });
+
+    const cursor = await putAgent({
+      engine,
+      body: JSON.stringify({ agent: "cursor" }),
+    });
+    expect(cursor.status).toBe(200);
+    expect(await settingsOf(configurationDirectory)).toEqual({
+      agent: "cursor",
     });
   });
 

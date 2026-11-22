@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import {
-  brainInstructions,
+  instructionsOf,
   type AgentAdapter,
   type ServerCommand,
   type Turn,
@@ -16,7 +16,11 @@ export const newConversationNotice = "The AI started a new conversation.";
 
 export function signInMessageOf(adapter: AgentAdapter): string {
   const { program } = agentCatalog[adapter.id];
-  return `${adapter.name} is not signed in. Open a terminal, run ${program} once, and sign in. Then try again.`;
+  const signInStep =
+    adapter.id === "cursor"
+      ? `Open a terminal and run ${program} login.`
+      : `Open a terminal, run ${program} once, and sign in.`;
+  return `${adapter.name} is not signed in. ${signInStep} Then try again.`;
 }
 
 function noticeOf(options: {
@@ -58,7 +62,7 @@ async function runAttempt(options: {
   const turn = run.adapter.startTurn({
     request: run.requestText,
     sessionId: run.log.sessionId(),
-    instructions: brainInstructions,
+    instructions: instructionsOf(run.adapter.id),
     serverCommand: run.serverCommand,
     workingFolder: run.workingFolder,
     onEvent: (event) => {

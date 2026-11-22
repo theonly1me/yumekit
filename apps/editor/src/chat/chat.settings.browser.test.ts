@@ -35,7 +35,7 @@ describe("the AI part of Settings and the empty chat", () => {
       .toEqual([
         "Claude Code\nFound on this computer. Signed in. Uses the plan you already pay for.\nIn use",
         "Codex\nFound on this computer. Uses the plan you already pay for.\nUse this",
-        "Cursor\nInstall it, then open Settings again.\nNot supported in the chat yet.",
+        "Cursor\nInstall it, then open Settings again.\nNot found on this computer",
       ]);
 
     await rows.getByRole("button", { name: "Use Codex" }).click();
