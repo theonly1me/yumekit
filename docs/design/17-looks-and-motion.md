@@ -207,3 +207,4 @@ WP48 made these choices where this document gives no rule.
 10. A heading that is fully in shows as plain text, and a quote shows its word spans, as before WP49. So the last frame of each `paper` scene draws the same pixels as before.
 11. `image-pan` moves its picture on the curve `cubicBezier(0.3, 0.15, 0.7, 0.85)`, so the picture moves at the first and at the last frame.
 12. `@yumekit/scene-kit/motion` is a permitted import of a custom scene.
+13. A text with `data-text-prop` keeps the mark on the one element that holds the whole text of the prop, and the word spans of `words` sit inside it. While a person edits such a text in the preview, the page shows the element, its word spans, and its parents at full opacity, with no filter and no clip, and the element and its word spans with no transform. So a heading that still comes in shows each word, and the saved text is the whole new text.

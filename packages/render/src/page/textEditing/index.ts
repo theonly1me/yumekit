@@ -11,6 +11,17 @@ const textEditingStyle = `
 #stage [${editableTextAttribute}]:focus {
   outline: 0.3vmin dashed currentColor;
   outline-offset: 0.8vmin;
+}
+#stage [contenteditable],
+#stage [contenteditable] *,
+#stage :has([contenteditable]) {
+  opacity: 1 !important;
+  filter: none !important;
+  clip-path: none !important;
+}
+#stage [contenteditable],
+#stage [contenteditable] * {
+  transform: none !important;
 }`;
 
 export function listenForTextEdits(options: {
