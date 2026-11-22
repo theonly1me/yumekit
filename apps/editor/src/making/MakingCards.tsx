@@ -1,15 +1,31 @@
-import { useMemo } from "react";
+import { useMemo, type CSSProperties } from "react";
 import type { EngineClient } from "../engine/engineClient.js";
 import type { Output, Snapshot } from "../engine/snapshot.js";
-import { stillKey, useSceneStills } from "../scenes/useSceneStills.js";
 import { mainSceneClipsOf, timelineOf } from "../timeline/timelineFacts.js";
+import {
+  clipPictureKey,
+  scenePictureKey,
+  useMakingPictures,
+  type MakingPicture,
+} from "./useMakingPictures.js";
 
 const slotsInRow = 5;
 
 interface MakingCard {
   key: string;
   title: string;
-  still: string | undefined;
+  picture: MakingPicture | undefined;
+}
+
+function CardPicture(props: { picture: MakingPicture | undefined }) {
+  const { picture } = props;
+  if (picture === undefined) {
+    return <span className="thumb-words">Making the picture</span>;
+  }
+  if (picture.kind === "failed") {
+    return <span className="thumb-words">No picture</span>;
+  }
+  return <img src={picture.source} alt="" />;
 }
 
 function Stills(props: {
@@ -26,34 +42,45 @@ function Stills(props: {
       }),
     [snapshot, output.id],
   );
-  const stills = useSceneStills({
+  const unplacedScenes = useMemo(() => {
+    const placedSceneIds = new Set(clips.map((clip) => clip.sceneId));
+    return snapshot.scenes.filter((scene) => !placedSceneIds.has(scene.id));
+  }, [snapshot.scenes, clips]);
+  const unplacedSceneIds = useMemo(
+    () => unplacedScenes.map((scene) => scene.id),
+    [unplacedScenes],
+  );
+  const pictures = useMakingPictures({
     client: props.client,
     output,
     clips,
+    unplacedSceneIds,
     revision: snapshot.revision,
   });
   const placed: MakingCard[] = clips.map((clip) => ({
-    key: clip.id,
+    key: clipPictureKey(clip.id),
     title:
       snapshot.scenes.find((scene) => scene.id === clip.sceneId)?.title ?? "",
-    still: stills.get(stillKey({ outputId: output.id, clipId: clip.id })),
+    picture: pictures.get(clipPictureKey(clip.id)),
   }));
-  const placedSceneIds = new Set(clips.map((clip) => clip.sceneId));
-  const unplaced: MakingCard[] = snapshot.scenes
-    .filter((scene) => !placedSceneIds.has(scene.id))
-    .map((scene) => ({ key: scene.id, title: scene.title, still: undefined }));
+  const unplaced: MakingCard[] = unplacedScenes.map((scene) => ({
+    key: scenePictureKey(scene.id),
+    title: scene.title,
+    picture: pictures.get(scenePictureKey(scene.id)),
+  }));
   const cards = [...placed, ...unplaced];
   const emptyCount =
     Math.max(slotsInRow, Math.ceil(cards.length / slotsInRow) * slotsInRow) -
     cards.length;
+  const shape: CSSProperties = {
+    aspectRatio: `${String(output.widthPixels)} / ${String(output.heightPixels)}`,
+  };
   return (
     <ul className="making-cards" aria-label="Scenes">
       {cards.map((card) => (
         <li className="making-card" key={card.key}>
-          <span className="thumb">
-            {card.still === undefined ? undefined : (
-              <img src={card.still} alt="" />
-            )}
+          <span className="thumb" style={shape}>
+            <CardPicture picture={card.picture} />
           </span>
           <span>{card.title}</span>
         </li>
@@ -63,7 +90,9 @@ function Stills(props: {
           className="making-card"
           data-empty="true"
           key={`empty-${String(index)}`}
-        />
+        >
+          <span className="thumb" style={shape} />
+        </li>
       ))}
     </ul>
   );

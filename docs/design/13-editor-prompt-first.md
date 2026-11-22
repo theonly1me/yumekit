@@ -224,6 +224,10 @@ WP31 made these choices where this document and the prototype give no rule.
 24. An AI makes each scene first and places the clips last. So during the Making screen, a scene often has no clip, and `preview_frames` has no frame for it. A real project of the owner showed three black cards for this reason. The Making cards take the picture of a scene with a clip from `preview_frames`, and the picture of a scene with no clip from `preview_scenes` (document 05).
 25. A Making card has the shape of the first output: its box has the width and the height of that output as its aspect ratio. Item 7 of "Details of the editor layout" stays the rule for the scene cards of the editor.
 26. A Making card with no picture yet shows the words "Making the picture" on the surface color. It never shows an empty dark box. If the picture cannot be made, the card shows "No picture".
+27. `preview_scenes` draws a scene with its stored props and at the frame rate of the project. So a scene alone is 90 frames at 30 frames per second, and its picture is frame 68. The frame is the smaller of `round(0.75 * length)` and the last frame, as for the stills of document 11. Only the scene draws: no other track, no captions, and no sound.
+28. `@yumekit/render` draws the scene with `renderSceneFrame` (document 04). It uses the stage page of `renderFrame`, so the renderer has one drawing path. The harness checks each scene id before it draws, and the result gives `scene_id`, `frame`, `width_pixels`, and `height_pixels` for each picture.
+29. A Making card uses the scale of the scenes row stills of document 11: the smallest of 0.25, 0.5, and 1 that gives a picture 380 pixels wide or more. A 1080 by 1920 output gives a 540 by 960 picture.
+30. A Making card keeps its last picture while the editor reads the pictures again after a change. A card of a new scene shows "Making the picture" until its first picture comes. The empty places after the cards also have the shape of the first output.
 
 ## Work packages
 

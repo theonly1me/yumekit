@@ -148,6 +148,10 @@ export function everyToolCall(importSourcePath: string): ScriptedCall[] {
     { name: "redo", input: {} },
     { name: "preview_frame", input: { output_id: "wide", frame: 10 } },
     { name: "preview_frames", input: { output_id: "wide", frames: [0, 20] } },
+    {
+      name: "preview_scenes",
+      input: { output_id: "wide", scene_ids: ["intro"] },
+    },
     { name: "render_still", input: { output_id: "wide", frame: 0 } },
     {
       name: "render_video",

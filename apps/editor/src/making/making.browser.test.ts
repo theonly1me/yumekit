@@ -55,7 +55,9 @@ describe("the Making screen", () => {
         "waiting Put it together",
       ]);
     expect(
-      await page.locator(".making-card:not([data-empty])").allTextContents(),
+      await page
+        .locator(".making-card:not([data-empty]) > span:not(.thumb)")
+        .allTextContents(),
     ).toEqual(["Calm tea", "Warm tea"]);
     await home.finishRequest();
     await expect

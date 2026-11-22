@@ -39,6 +39,7 @@ const sentencesByTool: Record<string, string> = {
   set_track_off: "Turning a sound on or off",
   preview_frame: lookingAtTheVideo,
   preview_frames: lookingAtTheVideo,
+  preview_scenes: lookingAtTheVideo,
   render_still: lookingAtTheVideo,
   render_video: "Exporting the video",
   undo: "Undoing a change",

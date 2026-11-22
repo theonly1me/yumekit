@@ -15,7 +15,7 @@ export function stillKey(options: { outputId: string; clipId: string }) {
   return `${options.outputId}/${options.clipId}`;
 }
 
-function stillScaleOf(output: Output): number {
+export function stillScaleOf(output: Output): number {
   return (
     stillScales.find(
       (scale) => output.widthPixels * scale >= smallestStillWidthPixels,

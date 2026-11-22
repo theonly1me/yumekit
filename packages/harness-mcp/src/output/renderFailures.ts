@@ -12,6 +12,8 @@ function hintOf(failure: RenderFailure): string {
       return `Fix the code of scene "${failure.sceneId}" with put_scene. Call get_scene to read it and get_scene_guide for the rules.`;
     case "kit-scene-not-found":
       return `Replace scene "${failure.sceneId}" with put_scene and a kit_component from list_kit_scenes.`;
+    case "scene-not-found":
+      return "Call get_project and use one of its scene ids. Or add the scene with put_scene.";
     case "scene-error":
       return `Scene "${failure.sceneId}" failed at output frame ${String(failure.frame)}. Read it with get_scene, fix it with put_scene, and preview that frame again. For a custom scene, check each prop before use.`;
     case "scene-not-repeatable":

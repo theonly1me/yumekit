@@ -4,6 +4,7 @@ import { registerAlignWords } from "../media/registerAlignWords.js";
 import { registerImportAsset } from "../media/registerAssetFileTools.js";
 import { registerGenerateAsset } from "../media/registerGenerateAsset.js";
 import { registerPreviewTools } from "../output/registerPreviewTools.js";
+import { registerScenePreviewTool } from "../output/registerScenePreviewTool.js";
 import { registerRenderTools } from "../output/registerRenderTools.js";
 import { registerAssetReadTools } from "../read/registerAssetReadTools.js";
 import { registerProjectReadTools } from "../read/registerProjectReadTools.js";
@@ -38,6 +39,7 @@ export function harnessToolsOf(options: HarnessOptions): HarnessTool[] {
   registerImportAsset(context);
   registerAlignWords(context);
   registerPreviewTools(context);
+  registerScenePreviewTool(context);
   registerRenderTools(context);
   return context.tools.tools();
 }

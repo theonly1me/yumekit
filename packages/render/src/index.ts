@@ -11,6 +11,7 @@ export {
 } from "./preview/startPreviewServer.js";
 export type { RenderFailure, RenderScale } from "./renderFailure.js";
 export { renderFrame, type RenderedFrame } from "./renderFrame.js";
+export { renderSceneFrame } from "./renderSceneFrame.js";
 export {
   renderVideo,
   type RenderedVideo,

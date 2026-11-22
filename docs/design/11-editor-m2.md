@@ -113,7 +113,7 @@ Each request needs the header `Authorization: Bearer <token>`. A request without
 - After `PUT` or `DELETE` of a key, the engine starts that media server again, as document 10 says.
 - The engine never writes a key value to a log or a response.
 - A body that does not match its schema returns status 400 with the schema error.
-- The tools `preview_frame` and `preview_frames` work over HTTP. The preview of the editor uses the preview page. Only the stills of the scenes row use `preview_frames` (see "Details of the editor").
+- The tools `preview_frame`, `preview_frames`, and `preview_scenes` work over HTTP. The preview of the editor uses the preview page. Only the stills of the scenes row and of the Making cards use `preview_frames` and `preview_scenes` (see "Details of the editor" and document 13).
 
 ### Events
 
