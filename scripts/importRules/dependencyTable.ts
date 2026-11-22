@@ -28,6 +28,7 @@ export const permittedImports: Record<string, Permission[]> = {
   "apps/editor": [
     { importName: "@yumekit/project/scenes-row" },
     { importName: "@yumekit/project/platforms" },
+    { importName: "@yumekit/project/asset-uses" },
     sceneKit,
   ],
   "tools/*": [],

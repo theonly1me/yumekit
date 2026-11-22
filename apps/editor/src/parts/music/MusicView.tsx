@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { MadeWith, type ModelTarget } from "../../settings/services/index.js";
 import { FileDrop } from "../files/FileDrop.js";
+import { YourFile } from "../files/YourFile.js";
 import { sendFixedRequest } from "../fixedRequests.js";
 import { PlayButton } from "../sound/PlayButton.js";
 import { soundFileTypes, type SoundViewProps } from "../sound/soundView.js";
@@ -24,7 +25,11 @@ export function MusicView(props: SoundViewProps) {
     <div className="sound-part">
       <section className="part-group">
         <h4>In your video now</h4>
-        <MadeWith client={client} kind="music" />
+        {asset?.source.kind === "import" ? (
+          <YourFile />
+        ) : (
+          <MadeWith client={client} kind="music" />
+        )}
         {piece === undefined ? (
           <p className="fact lead">The video has no music yet.</p>
         ) : (

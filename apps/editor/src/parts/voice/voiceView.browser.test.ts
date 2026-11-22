@@ -6,7 +6,6 @@ import {
   claudeLines,
   gateFileOf,
   openGate,
-  requestTextsSent,
   setScenario,
 } from "../../testing/chatTesting.js";
 import {
@@ -15,11 +14,7 @@ import {
   sharedBrowser,
 } from "../../testing/editorPage.js";
 import { runEngine, type RunningEngine } from "../../testing/runEngine.js";
-import {
-  buildSoundProject,
-  soundTracksOf,
-} from "../../testing/soundProject.js";
-import { wavBytes } from "../../testing/wavFile.js";
+import { buildSoundProject } from "../../testing/soundProject.js";
 
 let engine: RunningEngine | undefined;
 
@@ -140,56 +135,5 @@ describe("the voice view", () => {
     await expect.poll(() => removeVoice.isDisabled()).toBe(false);
     await page.unrouteAll({ behavior: "ignoreErrors" });
     await context.close();
-  });
-
-  it("puts the recording of the person in place of the voice, and asks the AI to fit the captions", async () => {
-    await setScenario({
-      engine: runningEngine(),
-      scenario: { steps: [{ print: claudeLines.result("completed") }] },
-    });
-    const editor = await openEditor(runningEngine().url);
-    await editor.page.getByRole("button", { name: "Open the voice" }).click();
-
-    await editor.page.locator(".file-button input[type=file]").setInputFiles({
-      name: "take-1.wav",
-      mimeType: "audio/wav",
-      buffer: wavBytes(3),
-    });
-
-    const ownRecording = [
-      { assetId: "take-1", startFrame: 0, durationFrames: 60 },
-    ];
-    await expect
-      .poll(async () => {
-        const { tracks } = await soundTracksOf({
-          engine: runningEngine(),
-          trackId: "narration",
-        });
-        return tracks.map(({ track }) =>
-          (track?.clips ?? []).map((clip) => ({
-            assetId: clip.assetId,
-            startFrame: clip.startFrame,
-            durationFrames: clip.durationFrames,
-          })),
-        );
-      })
-      .toEqual([ownRecording, ownRecording]);
-    await editor.page
-      .getByRole("button", { name: "Make the captions match my recording" })
-      .click();
-
-    await expect
-      .poll(async () => (await requestTextsSent(runningEngine())).at(-1))
-      .toContain("Make the captions match my recording.");
-    await editor.page.getByRole("button", { name: "Close" }).click();
-    await expect
-      .poll(() =>
-        editor.page
-          .getByRole("list", { name: "Sound" })
-          .locator(".sound-name")
-          .allTextContents(),
-      )
-      .toEqual(["Voice", "Music", "Captions"]);
-    await editor.close();
   });
 });

@@ -43,6 +43,7 @@ export async function importUpload(options: {
   context: EngineContext;
   file: string;
   fileName: string;
+  shownName: string;
 }): Promise<Outcome<Asset, Failure>> {
   const { context, file } = options;
   const kind = await kindOf(file);
@@ -56,7 +57,12 @@ export async function importUpload(options: {
     call: () =>
       context.harness.call({
         name: "import_asset",
-        input: { asset_id: assetId, kind: kind.value, source_path: file },
+        input: {
+          asset_id: assetId,
+          kind: kind.value,
+          source_path: file,
+          original_name: options.shownName,
+        },
       }),
   });
   const asset = context.store

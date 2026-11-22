@@ -110,7 +110,8 @@ The four scene clip tools change the scenes row of document 03, as document 13 s
 | Tool             | Input                                                                                                                                         | What it does                                                                                       |
 | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
 | `generate_asset` | `asset_id`, `capability` (`image`, `speech`, `music`, `video`), `server?`, `model?`, `input`, `reference_asset_ids?`, `first_frame_asset_id?` | Calls the media tool, then adds the asset with its source record                                   |
-| `import_asset`   | `asset_id`, `kind`, `source_path`                                                                                                             | Copies a file of the user into the project and adds the asset                                      |
+| `import_asset`   | `asset_id`, `kind`, `source_path`, `original_name?`                                                                                           | Copies a file of the user into the project and adds the asset                                      |
+| `remove_asset`   | `asset_id`                                                                                                                                    | Removes the record of an asset that nothing uses, with the edit `removeAsset`. The file stays      |
 | `align_words`    | `asset_id`, `text`                                                                                                                            | Makes word timings for a speech asset that has none, and stores them with the edit `setAssetWords` |
 
 `generate_asset` saves the tool name, the server and the model that `run` reports, the input, `costUsd`, and `costIsEstimate` in the asset record. With no `server`, the defaults of the media tools configuration apply. A repeated call reuses a file only when the model also matches, if the call names one.
@@ -120,6 +121,10 @@ For each server with a description, `list_media_tools` gives `label`, `runs`, `m
 A media tool needs absolute file paths, and an agent knows only asset ids. So `reference_asset_ids` becomes `reference_image_paths` in the tool input, and `first_frame_asset_id` becomes `first_frame_path`. An id that is not an image asset is the failure `asset-not-found`, the same kind as each other asset lookup.
 
 For a video, `generate_asset` reads `hasAudio` with `probeMedia`. It uses the size and the length of the probe only when the server reports none. Before a video call, it checks the limit `limits.generatedVideoSeconds` of document 09. A call past the limit is the failure `generated-video-limit-reached` with `used_seconds`, `requested_seconds`, and `limit_seconds`, and the harness calls no tool. `list_assets` shows `has_audio` for a video asset.
+
+`remove_asset` checks the uses of the asset with `assetUsesOf` from `@yumekit/project`: each scene whose props name the asset, each audio clip, and each cast member. If one exists, the failure is `asset-in-use`, and its message names each use. The tool changes nothing then. Otherwise it is one edit, so one undo brings the asset back. The file stays in `assets/files/`, because undo never restores a media file (document 03).
+
+`import_asset` keeps `original_name` as `originalName` of the record. With no value, it keeps the last part of `source_path`.
 
 `import_asset` reads the kind, the size, and the length of the file with `probeMedia` from `@yumekit/render`. So it accepts image, audio, video, and font files. If a speech tool returns word timings, the harness stores them in the same edit. If two calls have the same capability, server, and input, the second call reuses the file of the first and does not call the tool.
 
