@@ -79,6 +79,8 @@ export function everyToolCall(importSourcePath: string): ScriptedCall[] {
       input: { from_output_id: "wide", to_output_id: "tall" },
     },
     { name: "remove_output", input: { output_id: "tall" } },
+    { name: "add_platform", input: { platform_id: "square" } },
+    { name: "remove_platform", input: { platform_id: "square" } },
     {
       name: "put_scene",
       input: {

@@ -1,6 +1,17 @@
 export type { Outcome } from "./outcome.js";
 export type { JsonObject } from "./format/values.js";
 export type { Output, Project } from "./format/project.js";
+export {
+  findPlatform,
+  inCatalogOrder,
+  isPlatformId,
+  platformCatalog,
+  platformIds,
+  platformOf,
+  platformsOfSize,
+  type Platform,
+  type PlatformId,
+} from "./platforms/catalog.js";
 export type { Bible, CastMember } from "./format/bible.js";
 export type { Scene, SceneSource } from "./format/scene.js";
 export type {

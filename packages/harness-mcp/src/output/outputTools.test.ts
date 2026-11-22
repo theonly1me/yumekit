@@ -149,6 +149,7 @@ describe("preview and render tools", () => {
       const file = join(harness.folder, "renders", "wide.mp4");
       expect(result.structuredContent).toEqual({
         file,
+        files: [{ file }],
         frame_count: 20,
         duration_seconds: 20 / 30,
         width_pixels: 160,

@@ -28,6 +28,8 @@ describe("read tools", () => {
         "set_bible",
         "add_output",
         "remove_output",
+        "add_platform",
+        "remove_platform",
         "put_scene",
         "remove_scene",
         "set_timeline",

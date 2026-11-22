@@ -9,6 +9,7 @@ import { registerAssetReadTools } from "../read/registerAssetReadTools.js";
 import { registerProjectReadTools } from "../read/registerProjectReadTools.js";
 import { registerReferenceTools } from "../read/registerReferenceTools.js";
 import { registerSceneClipTools } from "../sceneClips/registerSceneClipTools.js";
+import { registerPlatformTools } from "../story/registerPlatformTools.js";
 import { registerPutScene } from "../story/registerPutScene.js";
 import { registerStoryTools } from "../story/registerStoryTools.js";
 import { registerNarrationAndHistoryTools } from "../timeline/registerNarrationTools.js";
@@ -27,6 +28,7 @@ export function harnessToolsOf(options: HarnessOptions): HarnessTool[] {
   registerAssetReadTools(context);
   registerReferenceTools(context);
   registerStoryTools(context);
+  registerPlatformTools(context);
   registerPutScene(context);
   registerTimelineTools(context);
   registerNarrationAndHistoryTools(context);

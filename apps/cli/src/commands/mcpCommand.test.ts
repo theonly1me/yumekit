@@ -23,7 +23,7 @@ describe("yumekit mcp", () => {
       await client.callTool({ name: "get_project" }),
     );
 
-    expect(tools).toHaveLength(35);
+    expect(tools).toHaveLength(37);
     expect(client.getInstructions()).toContain("get_scene_guide");
     expect(media.structuredContent).toMatchObject({
       servers: [

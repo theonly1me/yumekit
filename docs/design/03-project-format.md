@@ -39,7 +39,18 @@ type Output = {
   label: string;
   widthPixels: number;
   heightPixels: number;
+  platforms?: PlatformId[];
 };
+
+type PlatformId =
+  | "youtube"
+  | "youtube-shorts"
+  | "tiktok"
+  | "instagram-reel"
+  | "instagram-post"
+  | "x"
+  | "linkedin"
+  | "square";
 
 type Bible = {
   style: string;
@@ -123,6 +134,7 @@ type WordTimings = {
 8. `file` in an asset record is a path inside `assets/files/`.
 9. An asset of kind `audio` or `video` has `durationFrames`.
 10. A clip id is unique within its timeline, across all tracks.
+11. A platform is on one output only. The size of the output is the size of the platform in the catalog.
 
 How a timeline reads:
 
@@ -186,29 +198,34 @@ function openProject(options: {
 
 ## Edits
 
-`Edit` is a closed union on the field `kind`. These 15 kinds are all the ways to change a project.
+`Edit` is a closed union on the field `kind`. These 16 kinds are all the ways to change a project.
 
-| Kind             | Fields                          | Effect                                                                                                                            |
-| ---------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `setProjectName` | `name`                          | Changes the name                                                                                                                  |
-| `addOutput`      | `output`                        | Adds an output and an empty timeline                                                                                              |
-| `removeOutput`   | `outputId`                      | Removes an output and its timeline                                                                                                |
-| `setScript`      | `script`                        | Replaces `script.md`                                                                                                              |
-| `setBible`       | `bible`                         | Replaces `bible.json`                                                                                                             |
-| `putScene`       | `scene`, `code?`                | Adds or replaces a scene. `code` is required for a module scene                                                                   |
-| `removeScene`    | `sceneId`                       | Removes a scene and its folder                                                                                                    |
-| `addAsset`       | `asset`, `words?`               | Adds a record for a file that is already in `assets/files/`. The caller gives no `contentHash` and no `hasWords`                  |
-| `setAssetWords`  | `assetId`, `words`              | Adds or replaces the word timings of an audio asset                                                                               |
-| `removeAsset`    | `assetId`                       | Removes the record                                                                                                                |
-| `setTimeline`    | `timeline`                      | Replaces the timeline of one output                                                                                               |
-| `addClip`        | `outputId`, `trackId`, `clip`   | Adds one clip                                                                                                                     |
-| `updateClip`     | `outputId`, `clipId`, `changes` | Changes the timing, the gain, or the target of one clip. The target is `sceneId` for a scene clip and `assetId` for an audio clip |
-| `removeClip`     | `outputId`, `clipId`            | Removes one clip                                                                                                                  |
-| `copyTimeline`   | `fromOutputId`, `toOutputId`    | Replaces one timeline with a copy of another                                                                                      |
+| Kind                 | Fields                          | Effect                                                                                                                            |
+| -------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `setProjectName`     | `name`                          | Changes the name                                                                                                                  |
+| `addOutput`          | `output`                        | Adds an output and an empty timeline                                                                                              |
+| `removeOutput`       | `outputId`                      | Removes an output and its timeline                                                                                                |
+| `setOutputPlatforms` | `outputId`, `platforms`         | Replaces the platforms of one output. The store keeps them in catalog order. An empty list removes the field                      |
+| `setScript`          | `script`                        | Replaces `script.md`                                                                                                              |
+| `setBible`           | `bible`                         | Replaces `bible.json`                                                                                                             |
+| `putScene`           | `scene`, `code?`                | Adds or replaces a scene. `code` is required for a module scene                                                                   |
+| `removeScene`        | `sceneId`                       | Removes a scene and its folder                                                                                                    |
+| `addAsset`           | `asset`, `words?`               | Adds a record for a file that is already in `assets/files/`. The caller gives no `contentHash` and no `hasWords`                  |
+| `setAssetWords`      | `assetId`, `words`              | Adds or replaces the word timings of an audio asset                                                                               |
+| `removeAsset`        | `assetId`                       | Removes the record                                                                                                                |
+| `setTimeline`        | `timeline`                      | Replaces the timeline of one output                                                                                               |
+| `addClip`            | `outputId`, `trackId`, `clip`   | Adds one clip                                                                                                                     |
+| `updateClip`         | `outputId`, `clipId`, `changes` | Changes the timing, the gain, or the target of one clip. The target is `sceneId` for a scene clip and `assetId` for an audio clip |
+| `removeClip`         | `outputId`, `clipId`            | Removes one clip                                                                                                                  |
+| `copyTimeline`       | `fromOutputId`, `toOutputId`    | Replaces one timeline with a copy of another                                                                                      |
 
 The store computes `contentHash` as `sha256:` plus the hex digest, and checks that the file exists, when it applies `addAsset`. It sets `hasWords` from the word timings.
 
 The props of a scene can hold an asset id that the store cannot see. Rule 7 does not protect that reference, so a scene must draw correctly when `findAsset` returns nothing. It does not check that scene code compiles. The harness does that before it sends a `putScene` edit (document 05).
+
+## Platforms
+
+The platform catalog of document 13 is a fixed list in `@yumekit/project`. The package exports `platformCatalog` and `platformIds` in catalog order, `platformOf` and `findPlatform` for a lookup by id, and `platformsOfSize` for the platforms of one size. An output with no `platforms` is a custom output. A project without the field stays valid, so the format version stays 1.
 
 ## Not in milestone 1
 

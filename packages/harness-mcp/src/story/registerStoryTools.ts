@@ -84,7 +84,7 @@ function registerAddOutput(context: HarnessContext): void {
   context.tools.add({
     name: "add_output",
     description:
-      "Add an output: one deliverable with a fixed size, for example 1920 by 1080 for a wide video or 1080 by 1920 for a tall short. It starts with an empty timeline; copy_timeline fills it from another output.",
+      "Add an output of a custom size, for example 1280 by 720. For a platform such as YouTube, TikTok, or Instagram, call add_platform instead. An output is one deliverable with a fixed size. It starts with an empty timeline; copy_timeline fills it from another output.",
     inputSchema: {
       output_id: idInput("The id of the new output, for example 'tall'."),
       label: z
