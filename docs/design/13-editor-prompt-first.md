@@ -55,7 +55,7 @@ WP27 made these choices where the section "Platforms" gives no rule.
 - When `remove_platform` removes the last platform of the only output, the output stays as a custom output.
 - `render_video` renders to the file of the first platform in catalog order. The result keeps `file` (that first file) and adds `files`, with `platform_id` and `file` for each file.
 - The project name in a file name is in lower case. Each run of characters that are not a letter or a digit becomes one hyphen. It has at most 64 characters and no hyphen at either end. An empty result becomes `video`.
-- `yumekit init` keeps its output `wide` with no platform. `yumekit render` keeps the file `renders/<output id>.mp4`.
+- `yumekit init` keeps its output `wide` with no platform. `yumekit render` writes the same files as `render_video` and prints one line for each file. Both use `renderOutputFiles` of `@yumekit/harness-mcp`, so the file rule has one copy outside the editor.
 
 ## Direct changes to scenes
 
