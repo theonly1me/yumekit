@@ -100,3 +100,33 @@ export function loudness(options: {
   }
   return Math.sqrt(sumOfSquares / Math.max(1, window.length));
 }
+
+export async function meanColorOfFirstPicture(file: string): Promise<number[]> {
+  const { stdout } = await runFile(
+    "ffmpeg",
+    [
+      "-v",
+      "error",
+      "-i",
+      file,
+      "-frames:v",
+      "1",
+      "-f",
+      "rawvideo",
+      "-pix_fmt",
+      "rgb24",
+      "pipe:1",
+    ],
+    { encoding: "buffer", maxBuffer: 64 * 1024 * 1024 },
+  );
+  let red = 0;
+  let green = 0;
+  let blue = 0;
+  for (let pixelStart = 0; pixelStart < stdout.byteLength; pixelStart += 3) {
+    red += stdout[pixelStart] ?? 0;
+    green += stdout[pixelStart + 1] ?? 0;
+    blue += stdout[pixelStart + 2] ?? 0;
+  }
+  const pixelCount = stdout.byteLength / 3;
+  return [red, green, blue].map((sum) => Math.round(sum / pixelCount));
+}

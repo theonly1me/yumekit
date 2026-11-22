@@ -68,7 +68,10 @@ export async function loadOutput(options: {
     store,
     snapshot,
     output,
-    timeline,
+    timeline: {
+      ...timeline,
+      tracks: timeline.tracks.filter((track) => track.off !== true),
+    },
     frameCount: lengthOf(timeline),
   });
 }
