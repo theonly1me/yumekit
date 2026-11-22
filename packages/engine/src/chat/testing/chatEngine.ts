@@ -1,0 +1,113 @@
+import { chmod, mkdir, readFile, writeFile } from "node:fs/promises";
+import { join } from "node:path";
+import { setTimeout as delay } from "node:timers/promises";
+import { fileURLToPath } from "node:url";
+import { vi } from "vitest";
+import { z } from "zod";
+import {
+  createTestProject,
+  startTestEngine,
+} from "../../testing/engineFixture.js";
+import { openEvents } from "../../testing/eventsClient.js";
+import { rawRequest, withToken } from "../../testing/rawRequest.js";
+
+export type FakeStep =
+  | { print: string }
+  | { callTool: { name: string; input: object } }
+  | { waitForStop: { print: string[] } };
+
+export interface FakeAgentScenario {
+  steps: FakeStep[];
+  exitCode?: number;
+  signedIn?: boolean;
+  resumeFails?: boolean;
+}
+
+const fakeAgentFile = fileURLToPath(new URL("./fakeAgent.ts", import.meta.url));
+
+const chatSchema = z.object({
+  state: z.enum(["idle", "running"]),
+  entries: z.array(z.looseObject({ kind: z.string(), id: z.string() })),
+});
+
+export async function startChatEngine(scenario: FakeAgentScenario) {
+  const project = await createTestProject();
+  const folder = join(project.root, "fake-agent");
+  await mkdir(folder);
+  const scenarioFile = join(folder, "scenario.json");
+  const writeScenario = (next: FakeAgentScenario) =>
+    writeFile(
+      scenarioFile,
+      JSON.stringify({
+        exitCode: 0,
+        signedIn: true,
+        resumeFails: false,
+        ...next,
+      }),
+    );
+  await writeScenario(scenario);
+  vi.stubEnv("YUMEKIT_FAKE_AGENT_SCENARIO", scenarioFile);
+  vi.stubEnv("PATH", folder);
+  const programPath = join(folder, "claude");
+  await writeFile(
+    programPath,
+    `#!/bin/sh\nexec "${process.execPath}" "${fakeAgentFile}" "$@"\n`,
+  );
+  await chmod(programPath, 0o755);
+  await writeFile(
+    join(project.configurationDirectory, "settings.json"),
+    JSON.stringify({
+      agent: "claude-code",
+      agentPrograms: { "claude-code": programPath },
+    }),
+  );
+  const engine = await startTestEngine({
+    projectFolder: project.projectFolder,
+    serverCommand: { command: "/bin/false", args: [] },
+  });
+  const events = await openEvents(engine);
+  const post = (options: { path: string; body?: object }) =>
+    rawRequest({
+      port: engine.port,
+      path: options.path,
+      method: "POST",
+      headers: withToken({
+        token: engine.token,
+        headers: { "content-type": "application/json" },
+      }),
+      body: JSON.stringify(options.body ?? {}),
+    });
+  const readChat = async () => {
+    const answer = await rawRequest({
+      port: engine.port,
+      path: "/api/chat",
+      headers: withToken(engine),
+    });
+    return chatSchema.parse(JSON.parse(answer.body));
+  };
+  const waitUntilIdle = async () => {
+    for (let attempt = 0; attempt < 400; attempt += 1) {
+      const chat = await readChat();
+      if (chat.state === "idle") return chat;
+      await delay(50);
+    }
+    throw new Error("The chat request did not end.");
+  };
+  const runs = async () =>
+    (await readFile(`${scenarioFile}.runs.jsonl`, "utf8"))
+      .trim()
+      .split("\n")
+      .map((runLine) => z.array(z.string()).parse(JSON.parse(runLine)));
+  return {
+    project,
+    engine,
+    events,
+    post,
+    readChat,
+    waitUntilIdle,
+    runs,
+    writeScenario,
+    ask: (body: { text: string; about_clip_id?: string }) =>
+      post({ path: "/api/chat/requests", body }),
+  };
+}

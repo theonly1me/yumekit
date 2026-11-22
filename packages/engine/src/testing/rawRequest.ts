@@ -56,6 +56,7 @@ export async function callTool(options: {
   name: string;
   input: object;
   callId?: string;
+  headers?: Record<string, string>;
 }): Promise<RawResponse> {
   return rawRequest({
     port: options.port,
@@ -63,7 +64,7 @@ export async function callTool(options: {
     method: "POST",
     headers: withToken({
       token: options.token,
-      headers: { "content-type": "application/json" },
+      headers: { "content-type": "application/json", ...options.headers },
     }),
     body: JSON.stringify({
       input: options.input,

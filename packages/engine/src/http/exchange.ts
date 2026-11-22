@@ -4,6 +4,7 @@ import type { ProjectStore } from "@yumekit/project";
 import type { PreviewServer } from "@yumekit/render";
 import type { MediaTools } from "@yumekit/tools";
 import type { ServerCommand } from "../agents/agentTypes.js";
+import type { Chat } from "../chat/chat.js";
 import type { EventHub } from "../events/eventHub.js";
 import type { Failure } from "./responses.js";
 
@@ -16,6 +17,7 @@ export interface EngineContext {
   mediaTools: MediaTools;
   preview: PreviewServer;
   events: EventHub;
+  chat: Chat;
   serverCommand: ServerCommand | undefined;
 }
 

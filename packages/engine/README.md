@@ -9,6 +9,7 @@ The engine process: one engine for one project, with the HTTP and WebSocket inte
 - `<project>/.yumekit/engine.json`, so that a second process finds the running engine.
 - The preview server on a second port, and its refresh after each project change.
 - The static files of the built editor.
+- The chat of the project: the requests, the agent program that runs one request, the change entries with their undo steps, and `.yumekit/chat/chat.json` (document 12).
 
 ## Interface
 
