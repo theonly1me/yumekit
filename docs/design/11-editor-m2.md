@@ -4,6 +4,8 @@ The editor is the screen of yumekit. A person sees the video, changes scenes, pi
 
 The look comes from the approved prototype: dark by default, one typeface (Geist), thin lines, one accent, and the video as the only picture.
 
+Document 13 replaces the screens of this document. The engine, the preview, and the agent setup stay.
+
 ## Decisions
 
 | Id  | Decision                                                                                  | Why                                                                                      |
