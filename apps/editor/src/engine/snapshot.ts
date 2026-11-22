@@ -27,12 +27,17 @@ const sceneSchema = z.object({
   source: sceneSourceSchema,
 });
 
+export const transitionKinds = ["fade", "slide", "wipe", "zoom"] as const;
+
 const sceneClipSchema = z.object({
   id: z.string(),
   sceneId: z.string(),
   startFrame: z.number(),
   durationFrames: z.number(),
   sceneStartFrame: z.number(),
+  transition: z
+    .object({ kind: z.enum(transitionKinds), durationFrames: z.number() })
+    .optional(),
 });
 
 const audioClipSchema = z.object({

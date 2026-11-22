@@ -27,9 +27,14 @@ export function prepareStageElement(options: {
 export function createOutputBox(options: {
   parent: HTMLElement;
   output: SceneOutput;
+  atBack?: boolean;
 }): HTMLElement {
   const box = document.createElement("div");
   fillOutput({ element: box, output: options.output });
-  options.parent.append(box);
+  if (options.atBack === true) {
+    options.parent.prepend(box);
+  } else {
+    options.parent.append(box);
+  }
   return box;
 }

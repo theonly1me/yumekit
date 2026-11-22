@@ -1,5 +1,6 @@
 import type { Chat } from "../chat/useChat.js";
 import type { EngineClient } from "../engine/engineClient.js";
+import type { Snapshot } from "../engine/snapshot.js";
 import { Sheet } from "../sheets/Sheet.js";
 import { AgentPane } from "../side/agent/AgentPane.js";
 import { ToolsPane } from "../tools/ToolsPane.js";
@@ -9,11 +10,13 @@ import { LimitsGroup } from "./LimitsGroup.js";
 import { LookRow } from "./LookRow.js";
 import { ServicesGroup } from "./services/index.js";
 import { VideoStyleGroup } from "./VideoStyleGroup.js";
+import { BetweenScenesRow } from "./BetweenScenesRow.js";
 import "./settings.css";
 
 export function SettingsSheet(props: {
   client: EngineClient;
   chat: Chat;
+  snapshot: Snapshot;
   projectFolder: string;
   videoStyle: VideoStyleId;
   look: string;
@@ -27,6 +30,7 @@ export function SettingsSheet(props: {
         <h2 id="settings-title">Settings</h2>
         <VideoStyleGroup client={props.client} videoStyle={props.videoStyle}>
           <LookRow client={props.client} look={props.look} />
+          <BetweenScenesRow client={props.client} snapshot={props.snapshot} />
         </VideoStyleGroup>
         <AiGroup client={props.client} chat={props.chat} />
         <ServicesGroup client={props.client} />

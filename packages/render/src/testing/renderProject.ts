@@ -8,6 +8,7 @@ import {
   type JsonObject,
   type Output,
   type ProjectStore,
+  type SceneTransition,
 } from "@yumekit/project";
 
 export const smallOutput: Output = {
@@ -23,6 +24,7 @@ export interface TestClip {
   startFrame: number;
   durationFrames: number;
   sceneStartFrame?: number;
+  transition?: SceneTransition;
 }
 
 export function temporaryFolder(): Promise<string> {

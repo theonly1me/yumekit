@@ -1,12 +1,20 @@
 import { z } from "zod";
 import { durationFramesSchema, frameCountSchema, idSchema } from "./values.js";
 
+export const transitionKinds = ["fade", "slide", "wipe", "zoom"] as const;
+
+export const sceneTransitionSchema = z.strictObject({
+  kind: z.enum(transitionKinds),
+  durationFrames: durationFramesSchema,
+});
+
 export const sceneClipSchema = z.strictObject({
   id: idSchema,
   sceneId: idSchema,
   startFrame: frameCountSchema,
   durationFrames: durationFramesSchema,
   sceneStartFrame: frameCountSchema,
+  transition: sceneTransitionSchema.exactOptional(),
 });
 
 export const audioClipSchema = z.strictObject({
@@ -38,6 +46,8 @@ export const timelineSchema = z.strictObject({
   tracks: z.array(trackSchema),
 });
 
+export type SceneTransition = z.infer<typeof sceneTransitionSchema>;
+export type TransitionKind = SceneTransition["kind"];
 export type SceneClip = z.infer<typeof sceneClipSchema>;
 export type AudioClip = z.infer<typeof audioClipSchema>;
 export type Track = z.infer<typeof trackSchema>;

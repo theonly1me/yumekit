@@ -2,6 +2,11 @@ import { randomUUID } from "node:crypto";
 import type { Timeline, Track } from "@yumekit/project";
 import { z } from "zod";
 import { durationInput, frameInput, idInput } from "../inputs.js";
+import {
+  storedTransitionOf,
+  wireTransition,
+  wireTransitionOf,
+} from "../transitions/wireTransition.js";
 
 const clipIdInput = idInput(
   "The id of the clip, unique in the timeline. Optional: a random id is made when it is missing.",
@@ -15,6 +20,7 @@ export const wireSceneClip = z.strictObject({
   scene_start_frame: frameInput(
     "The frame of the scene that the clip shows first. Default 0. Use it to cut the start of a scene.",
   ).optional(),
+  transition: wireTransition.optional(),
 });
 
 export const wireAudioClip = z.strictObject({
@@ -68,13 +74,21 @@ export type WireSceneClip = z.infer<typeof wireSceneClip>;
 export type WireAudioClip = z.infer<typeof wireAudioClip>;
 export type WireTrack = z.infer<typeof wireTrack>;
 
-export function sceneClipOf(clip: WireSceneClip) {
+export function sceneClipOf(options: {
+  clip: WireSceneClip;
+  framesPerSecond: number;
+}) {
+  const { clip } = options;
   return {
     id: clip.id ?? randomUUID(),
     sceneId: clip.scene_id,
     startFrame: clip.start_frame,
     durationFrames: clip.duration_frames,
     sceneStartFrame: clip.scene_start_frame ?? 0,
+    ...storedTransitionOf({
+      wire: clip.transition,
+      framesPerSecond: options.framesPerSecond,
+    }),
   };
 }
 
@@ -89,13 +103,19 @@ export function audioClipOf(clip: WireAudioClip) {
   };
 }
 
-export function trackOf(track: WireTrack): Track {
+export function trackOf(options: {
+  track: WireTrack;
+  framesPerSecond: number;
+}): Track {
+  const { track, framesPerSecond } = options;
   const switched = track.off === true ? { off: true } : {};
   return track.kind === "scene"
     ? {
         id: track.id,
         kind: "scene",
-        clips: track.clips.map(sceneClipOf),
+        clips: track.clips.map((clip) =>
+          sceneClipOf({ clip, framesPerSecond }),
+        ),
         ...switched,
       }
     : {
@@ -127,6 +147,7 @@ function wireTrackOf(track: Track) {
           start_frame: clip.startFrame,
           duration_frames: clip.durationFrames,
           scene_start_frame: clip.sceneStartFrame,
+          ...wireTransitionOf(clip.transition),
         })),
       }
     : {

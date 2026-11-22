@@ -4,12 +4,12 @@ import {
   noGuards,
   type RenderGuards,
 } from "./renderGuards/index.js";
+import { applyClipLook, clipLookOf } from "./clipLook.js";
 import { createOutputBox, prepareStageElement } from "./stageElements.js";
 import type { Stage, StageOptions } from "./stageProject.js";
 import { visibleClipsAt, type VisibleClip } from "./visibleClips.js";
 
 interface MountedClip {
-  clipId: string;
   box: HTMLElement;
   scene: MountedScene;
 }
@@ -30,16 +30,16 @@ export function createStage(options: StageOptions): Stage {
   const propsOfScene = new Map(
     project.scenes.map((scene) => [scene.id, scene.props]),
   );
-  const mountedClips = new Map<number, MountedClip>();
+  const mountedClips = new Map<string, MountedClip>();
   let pendingSeek = Promise.resolve();
   let isDisposed = false;
 
-  function unmount(trackIndex: number): void {
-    const mounted = mountedClips.get(trackIndex);
+  function unmount(clipId: string): void {
+    const mounted = mountedClips.get(clipId);
     if (mounted === undefined) {
       return;
     }
-    mountedClips.delete(trackIndex);
+    mountedClips.delete(clipId);
     mounted.scene.dispose();
     mounted.box.remove();
   }
@@ -51,7 +51,11 @@ export function createStage(options: StageOptions): Stage {
     if (props === undefined || layer === undefined) {
       throw new Error(`The stage has no scene "${clip.sceneId}"`);
     }
-    const box = createOutputBox({ parent: layer, output: project.output });
+    const box = createOutputBox({
+      parent: layer,
+      output: project.output,
+      atBack: visible.part.kind === "leaving",
+    });
     box.dataset["sceneId"] = clip.sceneId;
     try {
       const sceneModule = await loadScene(clip.sceneId);
@@ -64,7 +68,7 @@ export function createStage(options: StageOptions): Stage {
         props,
         findAsset: (assetId) => assets.get(assetId),
       });
-      return { clipId: clip.id, box, scene };
+      return { box, scene };
     } catch (error) {
       box.remove();
       throw error;
@@ -79,19 +83,26 @@ export function createStage(options: StageOptions): Stage {
       sceneTracks: project.sceneTracks,
       frame,
     });
-    for (const trackIndex of [...mountedClips.keys()]) {
-      const visible = visibleClips.find(
-        (candidate) => candidate.trackIndex === trackIndex,
-      );
-      if (visible?.clip.id !== mountedClips.get(trackIndex)?.clipId) {
-        unmount(trackIndex);
+    const visibleClipIds = new Set(
+      visibleClips.map((visible) => visible.clip.id),
+    );
+    for (const clipId of [...mountedClips.keys()]) {
+      if (!visibleClipIds.has(clipId)) {
+        unmount(clipId);
       }
     }
     const scenesToSeek: { visible: VisibleClip; scene: MountedScene }[] = [];
     for (const visible of visibleClips) {
       const mounted =
-        mountedClips.get(visible.trackIndex) ?? (await mount(visible));
-      mountedClips.set(visible.trackIndex, mounted);
+        mountedClips.get(visible.clip.id) ?? (await mount(visible));
+      mountedClips.set(visible.clip.id, mounted);
+      applyClipLook({
+        box: mounted.box,
+        look: clipLookOf({
+          part: visible.part,
+          widthPixels: project.output.widthPixels,
+        }),
+      });
       scenesToSeek.push({ visible, scene: mounted.scene });
     }
     await Promise.all(
@@ -110,8 +121,8 @@ export function createStage(options: StageOptions): Stage {
     },
     dispose: () => {
       isDisposed = true;
-      for (const trackIndex of [...mountedClips.keys()]) {
-        unmount(trackIndex);
+      for (const clipId of [...mountedClips.keys()]) {
+        unmount(clipId);
       }
       guards.remove();
       element.replaceChildren();

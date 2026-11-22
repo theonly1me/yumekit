@@ -46,6 +46,7 @@ describe("read tools", () => {
         "duplicate_scene_clip",
         "set_track_off",
         "set_video_style",
+        "set_transitions",
         "undo",
         "redo",
         "generate_asset",

@@ -1,4 +1,5 @@
 import type { SceneClip } from "../engine/snapshot.js";
+import type { TransitionChoice } from "../transitions/transitionChoices.js";
 import type { DirectChanges } from "./useDirectChanges.js";
 
 export interface SceneEdits {
@@ -6,6 +7,7 @@ export interface SceneEdits {
   move: (change: { clip: SceneClip; toIndex: number }) => void;
   duplicate: (clip: SceneClip) => void;
   remove: (clip: SceneClip) => void;
+  transition: (change: { clip: SceneClip; kind: TransitionChoice }) => void;
 }
 
 function runScenesChange(options: {
@@ -57,6 +59,15 @@ export function sceneEditsOf(options: {
           const copyId =
             outcome.kind === "done" ? outcome.data["clip_id"] : undefined;
           if (typeof copyId === "string") onPicked(copyId);
+        }),
+      );
+    },
+    transition: ({ clip, kind }) => {
+      keep(
+        runScenesChange({
+          changes,
+          name: "set_transitions",
+          input: { clip_ids: [clip.id], kind },
         }),
       );
     },

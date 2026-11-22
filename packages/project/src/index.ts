@@ -24,9 +24,12 @@ export type { Scene, SceneSource } from "./format/scene.js";
 export type {
   AudioClip,
   SceneClip,
+  SceneTransition,
   Timeline,
   Track,
+  TransitionKind,
 } from "./format/timeline.js";
+export { transitionKinds } from "./format/timeline.js";
 export type {
   Asset,
   AssetIndex,
