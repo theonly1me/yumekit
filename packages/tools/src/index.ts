@@ -1,6 +1,9 @@
 export { findBundledServers } from "./bundledServers.js";
 export { connectMediaTools } from "./connectMediaTools.js";
-export { configurationDirectoryVariable } from "./configurationDirectory.js";
+export {
+  configurationDirectory,
+  configurationDirectoryVariable,
+} from "./configurationDirectory.js";
 export type { MediaToolResult } from "./convention.js";
 export {
   mediaServerDescriptionSchema,

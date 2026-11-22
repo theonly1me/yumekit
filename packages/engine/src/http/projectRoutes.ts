@@ -8,6 +8,9 @@ const toolCallSchema = z.strictObject({
   callId: z.string().min(1).max(200).optional(),
 });
 
+export const clientHeader = "x-yumekit-client";
+export const agentClient = "agent";
+
 function sendBody(options: { exchange: Exchange; body: unknown }): void {
   sendJson({
     response: options.exchange.response,
@@ -32,16 +35,25 @@ async function callTool(exchange: Exchange) {
   });
   if (!body.ok) return body.failure;
   const { input, callId } = body.value;
-  const result = await context.harness.call({
-    name,
-    input,
-    ...(callId === undefined
-      ? {}
-      : {
-          onProgress: (progress) => {
-            context.events.send({ type: "call-progress", callId, ...progress });
-          },
-        }),
+  const isAgent = exchange.request.headers[clientHeader] === agentClient;
+  const result = await context.chat.runToolCall({
+    caller: { by: isAgent ? "ai" : "person", tool: name },
+    call: () =>
+      context.harness.call({
+        name,
+        input,
+        ...(callId === undefined
+          ? {}
+          : {
+              onProgress: (progress) => {
+                context.events.send({
+                  type: "call-progress",
+                  callId,
+                  ...progress,
+                });
+              },
+            }),
+      }),
   });
   sendBody({ exchange, body: result });
   return undefined;

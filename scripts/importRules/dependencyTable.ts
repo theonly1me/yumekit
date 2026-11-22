@@ -3,6 +3,7 @@ export interface Permission {
   typesOnly?: true;
 }
 
+const brain = { importName: "@yumekit/brain" };
 const engine = { importName: "@yumekit/engine" };
 const harnessMcp = { importName: "@yumekit/harness-mcp" };
 const project = { importName: "@yumekit/project" };
@@ -20,8 +21,9 @@ export const permittedImports: Record<string, Permission[]> = {
   stage: [scene, { ...project, typesOnly: true }],
   render: [project, stage, sceneKit],
   tools: [],
+  brain: [],
   "harness-mcp": [project, render, tools, sceneKitSchemas],
-  engine: [project, render, tools, harnessMcp, sceneKitSchemas],
+  engine: [project, render, tools, harnessMcp, sceneKitSchemas, brain],
   "apps/cli": [project, render, tools, harnessMcp, engine],
   "apps/editor": [
     { importName: "@yumekit/project/scenes-row" },
