@@ -1,0 +1,37 @@
+{
+  "endpoint_id": "xai/grok-imagine-video/v1.5/image-to-video",
+  "page": "https://fal.ai/models/xai/grok-imagine-video/v1.5/image-to-video",
+  "schema_url": "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=xai/grok-imagine-video/v1.5/image-to-video",
+  "read_on": "2026-11-22",
+  "required": ["image_url", "prompt"],
+  "properties": {
+    "duration": {
+      "types": ["integer"],
+      "minimum": 1,
+      "maximum": 15
+    },
+    "enable_safety_checker": {
+      "types": ["boolean"]
+    },
+    "end_image_url": {
+      "types": ["null", "string"]
+    },
+    "generate_audio": {
+      "types": ["boolean", "null"]
+    },
+    "image_url": {
+      "types": ["string"]
+    },
+    "keyframes": {
+      "types": ["array", "null"],
+      "maxItems": 4
+    },
+    "prompt": {
+      "types": ["string"]
+    },
+    "resolution": {
+      "types": ["string"],
+      "enum": ["480p", "720p", "1080p"]
+    }
+  }
+}

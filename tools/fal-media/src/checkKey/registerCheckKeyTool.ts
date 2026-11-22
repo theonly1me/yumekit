@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { videoModels } from "../catalog/index.ts";
+import { seedance25 } from "../catalog/video/seedance.ts";
 import {
   authorization,
   falUrls,
@@ -15,9 +15,7 @@ const pricingBody = z.object({ prices: z.array(z.unknown()) });
 
 function pricingUrl(): string {
   const url = new URL(`${falUrls.platform}/models/pricing`);
-  for (const model of videoModels) {
-    url.searchParams.append("endpoint_id", model.textToVideo.endpointId);
-  }
+  url.searchParams.append("endpoint_id", seedance25.textEndpointId);
   return url.toString();
 }
 

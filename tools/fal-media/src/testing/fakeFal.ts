@@ -5,6 +5,7 @@ export const fakeUrls = {
     "https://queue.fal.run/bytedance/seedance-2.5/requests/req-1/status",
   responseUrl: "https://queue.fal.run/bytedance/seedance-2.5/requests/req-1",
   videoUrl: "https://v3b.fal.media/files/b/test/output.mp4",
+  imageUrl: "https://v3b.fal.media/files/b/test/output.png",
   uploadUrlPrefix: "https://v3b.fal.media/upload/",
   fileUrlPrefix: "https://v3b.fal.media/files/b/test/",
 } as const;
@@ -44,6 +45,20 @@ export function fakeMp4(options: {
   ]);
 }
 
+export function fakePng(options: {
+  widthPixels: number;
+  heightPixels: number;
+}): Buffer {
+  const header = Buffer.alloc(16);
+  header.write("IHDR", 4, "latin1");
+  header.writeUInt32BE(options.widthPixels, 8);
+  header.writeUInt32BE(options.heightPixels, 12);
+  return Buffer.concat([
+    Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]),
+    header,
+  ]);
+}
+
 export function fakeFal(options: {
   statuses?: string[];
   video?: Buffer;
@@ -72,13 +87,22 @@ export function fakeFal(options: {
       );
     }
     if (request.url === fakeUrls.responseUrl) {
-      return Response.json({ video: { url: fakeUrls.videoUrl }, seed: 42 });
+      return Response.json({
+        video: { url: fakeUrls.videoUrl },
+        images: [{ url: fakeUrls.imageUrl }],
+        seed: 42,
+      });
     }
     if (request.url === fakeUrls.videoUrl) {
       const video =
         options.video ??
         fakeMp4({ widthPixels: 1280, heightPixels: 720, durationSeconds: 5 });
       return new Response(new Uint8Array(video));
+    }
+    if (request.url === fakeUrls.imageUrl) {
+      return new Response(
+        new Uint8Array(fakePng({ widthPixels: 1344, heightPixels: 768 })),
+      );
     }
     if (url.hostname === "queue.fal.run" && request.method === "POST") {
       return Response.json({

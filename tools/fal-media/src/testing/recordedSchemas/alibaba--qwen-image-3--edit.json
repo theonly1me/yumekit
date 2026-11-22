@@ -1,0 +1,50 @@
+{
+  "endpoint_id": "alibaba/qwen-image-3/edit",
+  "page": "https://fal.ai/models/alibaba/qwen-image-3/edit",
+  "schema_url": "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=alibaba/qwen-image-3/edit",
+  "read_on": "2026-11-22",
+  "required": ["image_urls", "prompt"],
+  "properties": {
+    "enable_prompt_expansion": {
+      "types": ["boolean"]
+    },
+    "enable_safety_checker": {
+      "types": ["boolean"]
+    },
+    "image_size": {
+      "types": ["null", "object", "string"],
+      "enum": [
+        "square_hd",
+        "square",
+        "portrait_4_3",
+        "portrait_16_9",
+        "landscape_4_3",
+        "landscape_16_9"
+      ]
+    },
+    "image_urls": {
+      "types": ["array"]
+    },
+    "negative_prompt": {
+      "types": ["null", "string"]
+    },
+    "num_images": {
+      "types": ["integer"],
+      "minimum": 1,
+      "maximum": 6
+    },
+    "output_format": {
+      "types": ["string"],
+      "enum": ["jpeg", "png", "webp"]
+    },
+    "prompt": {
+      "types": ["string"]
+    },
+    "seed": {
+      "types": ["integer", "null"]
+    },
+    "sync_mode": {
+      "types": ["boolean"]
+    }
+  }
+}

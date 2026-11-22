@@ -1,0 +1,48 @@
+{
+  "endpoint_id": "alibaba/wan-3.0/image-to-video",
+  "page": "https://fal.ai/models/alibaba/wan-3.0/image-to-video",
+  "schema_url": "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=alibaba/wan-3.0/image-to-video",
+  "read_on": "2026-11-22",
+  "required": ["start_image_url"],
+  "properties": {
+    "aspect_ratio": {
+      "types": ["string"],
+      "enum": ["adaptive", "16:9", "4:3", "1:1", "3:4", "9:16"]
+    },
+    "audio": {
+      "types": ["boolean"]
+    },
+    "duration": {
+      "types": ["integer", "null"],
+      "minimum": 2,
+      "maximum": 30
+    },
+    "enable_prompt_expansion": {
+      "types": ["boolean"]
+    },
+    "enable_safety_checker": {
+      "types": ["boolean"]
+    },
+    "enable_thinking": {
+      "types": ["boolean"]
+    },
+    "end_image_url": {
+      "types": ["null", "string"]
+    },
+    "prompt": {
+      "types": ["null", "string"]
+    },
+    "resolution": {
+      "types": ["string"],
+      "enum": ["480p", "720p", "1080p"]
+    },
+    "seed": {
+      "types": ["integer", "null"],
+      "minimum": 0,
+      "maximum": 2147483647
+    },
+    "start_image_url": {
+      "types": ["string"]
+    }
+  }
+}

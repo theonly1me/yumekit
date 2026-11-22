@@ -39,6 +39,8 @@ export const sampleDescription = {
       ],
       prices: free("image"),
       read_on: readOn,
+      accepts: ["reference_images"],
+      tested: true,
     },
     {
       id: "sample-speech",
@@ -48,6 +50,7 @@ export const sampleDescription = {
       settings: [],
       prices: free("minute"),
       read_on: readOn,
+      tested: true,
     },
     {
       id: "sample-align",
@@ -57,6 +60,7 @@ export const sampleDescription = {
       settings: [],
       prices: free("minute"),
       read_on: readOn,
+      tested: true,
     },
     {
       id: "sample-music",
@@ -75,6 +79,7 @@ export const sampleDescription = {
       ],
       prices: free("second"),
       read_on: readOn,
+      tested: true,
     },
     {
       id: "sample-video",
@@ -99,6 +104,8 @@ export const sampleDescription = {
       ],
       prices: free("second"),
       read_on: readOn,
+      accepts: ["first_frame", "last_frame", "reference_images"],
+      tested: true,
     },
   ],
 } as const;

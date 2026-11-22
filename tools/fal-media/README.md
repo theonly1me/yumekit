@@ -1,25 +1,23 @@
 # @yumekit/fal-media
 
-A media tool server that makes video clips with models that fal hosts. It uses the fal API key of the user, so each second of video costs money.
+A media tool server that makes pictures and video clips with models that fal hosts. It uses the fal API key of the user, so each picture and each second of video costs money.
 
-Not tested with a real key yet. Tests use recorded shapes from the documents of 2026-11-21.
+Not tested with a real key yet. Tests check each request against the schemas of the fal model pages of 2026-11-22.
 
-| Tool                    | Result                                                                                         |
-| ----------------------- | ---------------------------------------------------------------------------------------------- |
-| `generate_video`        | An MP4 clip from a prompt, with an optional first frame and last frame. Sound is on by default |
-| `describe_media_server` | The key, the models, their settings, and their prices. Needs no key and makes no request       |
-| `check_key`             | `{ valid, message }` from one request to the fal price list, which runs no model               |
+| Tool                    | Result                                                                                                  |
+| ----------------------- | ------------------------------------------------------------------------------------------------------- |
+| `generate_image`        | A picture from a prompt, with optional reference pictures                                               |
+| `generate_video`        | An MP4 clip from a prompt, with an optional first frame and last frame, or reference pictures           |
+| `describe_media_server` | The key, the models, their settings, their prices, and what each model accepts. Needs no key or request |
+| `check_key`             | `{ valid, message }` from one request to the fal price list, which runs no model                        |
 
 ## Models
 
-| Model        | Id                          | fal endpoints                                                                          |
-| ------------ | --------------------------- | -------------------------------------------------------------------------------------- |
-| Seedance 2.5 | `bytedance/seedance-2.5/us` | `bytedance/seedance-2.5/us/text-to-video`, and `.../image-to-video` with a first frame |
-
-- `duration_seconds` is a whole number from 4 to 30.
-- `resolution` is `480p`, `720p`, `1080p`, or `4k`. The default is `720p`.
-- Without a first frame, the server picks the nearest shape to `width_pixels` and `height_pixels`. With a first frame, the clip takes the shape of that image.
-- `cost_usd` is an estimate from the price for one second on 2026-11-21: 0.2205 US dollars at 480p, 0.4730 at 720p, 1.164 at 1080p, and 1.840 at 4K.
+- Pictures: Seedream 5.5 (the default), Nano Banana 2.1, FLUX 3, GPT Image 2.6 Flare, Ideogram 4.6, Qwen Image 3, MiniMax H3 Image, and Krea 3.
+- Video clips: Seedance 2.5 (the default), Kling 4, Gemini Omni Flash 1.2, MiniMax H3, Wan 3.0, LTX 2.5 Pro, PixVerse 6, FLUX 3 Video, and Grok Imagine Video 1.5.
+- `describe_media_server` gives the settings of each model. Document 16 of the design has the facts of each model page.
+- The server picks the nearest shape to `width_pixels` and `height_pixels`. With a first frame, most video models take the shape of that image.
+- `cost_usd` is an estimate from the price on the model page. A model whose page gives only token prices gives no `cost_usd`.
 
 ## Setup
 
@@ -36,7 +34,7 @@ Not tested with a real key yet. Tests use recorded shapes from the documents of 
       "passEnvironment": ["FAL_KEY"]
     }
   },
-  "defaults": { "video": "fal" }
+  "defaults": { "image": "fal", "video": "fal" }
 }
 ```
 
