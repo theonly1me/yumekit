@@ -18,6 +18,7 @@ export function SceneCard(props: {
   onKeyMove: (step: number) => void;
   onDragStart: () => void;
   onDrop: () => void;
+  onAdd: () => void;
 }) {
   const { card } = props;
   const onKeyDown = (event: KeyboardEvent) => {
@@ -62,6 +63,15 @@ export function SceneCard(props: {
           {card.lengthText}
           {card.isVideo ? ", video clip" : ""}
         </span>
+      </button>
+      <button
+        type="button"
+        className="plus"
+        aria-label={`Add a scene after scene ${String(card.index + 1)}`}
+        title="Add a scene here"
+        onClick={props.onAdd}
+      >
+        +
       </button>
     </li>
   );

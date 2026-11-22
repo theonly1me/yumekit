@@ -10,7 +10,7 @@ import {
 export type ClientFailure =
   | { kind: "token-rejected" }
   | { kind: "engine-unreachable" }
-  | { kind: "request-failed"; message: string };
+  | { kind: "request-failed"; message: string; engineKind?: string };
 
 export type Reply<Value> =
   { ok: true; value: Value } | { ok: false; failure: ClientFailure };
@@ -22,12 +22,18 @@ export type EngineClient = ReturnType<typeof createEngineClient>;
 const failedReply = (failure: ClientFailure) =>
   ({ ok: false, failure }) as const;
 
-async function messageOf(response: Response): Promise<string> {
+async function requestFailureOf(response: Response): Promise<ClientFailure> {
   const body: unknown = await response.json().catch(() => undefined);
   if (typeof body === "object" && body !== null && "message" in body) {
-    return String(body.message);
+    const message = String(body.message);
+    return "kind" in body && typeof body.kind === "string"
+      ? { kind: "request-failed", message, engineKind: body.kind }
+      : { kind: "request-failed", message };
   }
-  return `The engine answered with status ${String(response.status)}.`;
+  return {
+    kind: "request-failed",
+    message: `The engine answered with status ${String(response.status)}.`,
+  };
 }
 
 export function createEngineClient(token: string) {
@@ -53,10 +59,7 @@ export function createEngineClient(token: string) {
       const response = await fetch(options.path, init);
       if (response.status === 401)
         return failedReply({ kind: "token-rejected" });
-      if (!response.ok) {
-        const message = await messageOf(response);
-        return failedReply({ kind: "request-failed", message });
-      }
+      if (!response.ok) return failedReply(await requestFailureOf(response));
       return { ok: true, value: response };
     } catch {
       return failedReply({ kind: "engine-unreachable" });

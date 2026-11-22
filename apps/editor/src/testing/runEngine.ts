@@ -5,6 +5,7 @@ import { delimiter, dirname, join } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
+import { installFakeAgent } from "./fakeAgent.js";
 
 const runFile = promisify(execFile);
 export const cliMainFile = fileURLToPath(
@@ -41,6 +42,7 @@ export interface EngineOptions {
   mediaTools?: object;
   withChromium?: boolean;
   agentPrograms?: string[];
+  fakeAgent?: boolean;
 }
 
 async function pathWithAgents(options: {
@@ -82,6 +84,12 @@ async function createProject(options: EngineOptions): Promise<{
     FAL_KEY: "",
     YUMEKIT_EDITOR_TEST_KEY: "",
     ...(await pathWithAgents({ root, agentPrograms: options.agentPrograms })),
+    ...(options.fakeAgent === true
+      ? await installFakeAgent({
+          root,
+          configurationFolder: join(root, "config"),
+        })
+      : {}),
   };
   const folder = join(root, "project");
   await runFile(

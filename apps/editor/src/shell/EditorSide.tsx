@@ -1,23 +1,25 @@
 import type { ReactNode } from "react";
+import { ChatPanel } from "../chat/ChatPanel.js";
 import type { EngineClient } from "../engine/engineClient.js";
 import type { Scene, SceneClip, Snapshot } from "../engine/snapshot.js";
 import type { History } from "../scenePanel/history/useHistory.js";
 import { ScenePanel } from "../scenePanel/ScenePanel.js";
 import type { SceneEdits } from "../scenes/sceneEdits.js";
-import { ChatPane } from "../side/ChatPane.js";
 import { SidePanel } from "../side/SidePanel.js";
+import type { EditorChat } from "./useEditorChat.js";
 import type { EditorView } from "./useEditorView.js";
 
 export function EditorSide(props: {
   client: EngineClient;
   snapshot: Snapshot;
-  projectFolder: string;
   view: EditorView;
+  editorChat: EditorChat;
   history: History;
   pictureGroupFor: (target: { scene: Scene; clip: SceneClip }) => ReactNode;
   onLength: SceneEdits["resize"];
+  onOpenAiSettings: () => void;
 }) {
-  const { client, snapshot, view } = props;
+  const { client, snapshot, view, editorChat } = props;
   const { pickedClip, pickedScene } = view.facts;
   const isScene =
     view.sideTab === "scene" &&
@@ -45,9 +47,16 @@ export function EditorSide(props: {
             props.onLength({ clip: pickedClip, durationFrames });
           }}
         />
-      ) : (
-        <ChatPane client={client} projectFolder={props.projectFolder} />
-      )}
+      ) : undefined}
+      <ChatPanel
+        chat={editorChat.chat}
+        box={editorChat.box}
+        chip={editorChat.chip}
+        hasScenes={view.facts.mainClips.length > 0}
+        isHidden={isScene}
+        sceneNumberOf={editorChat.sceneNumberOf}
+        onOpenAiSettings={props.onOpenAiSettings}
+      />
     </SidePanel>
   );
 }

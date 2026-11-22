@@ -1,12 +1,15 @@
+import type { Chat } from "../chat/useChat.js";
 import type { EngineClient } from "../engine/engineClient.js";
 import { Sheet } from "../sheets/Sheet.js";
 import { AgentPane } from "../side/agent/AgentPane.js";
 import { ToolsPane } from "../tools/ToolsPane.js";
+import { AiGroup } from "./AiGroup.js";
 import { LimitsGroup } from "./LimitsGroup.js";
 import "./settings.css";
 
 export function SettingsSheet(props: {
   client: EngineClient;
+  chat: Chat;
   projectFolder: string;
   openServerId: string | undefined;
   onOpenServer: (serverId: string | undefined) => void;
@@ -16,6 +19,7 @@ export function SettingsSheet(props: {
     <Sheet titleId="settings-title" onClose={props.onClose}>
       <div className="sheet-body">
         <h2 id="settings-title">Settings</h2>
+        <AiGroup client={props.client} chat={props.chat} />
         <section className="setting-group" aria-labelledby="tools-title">
           <h3 id="tools-title">Media tools and keys</h3>
           <ToolsPane

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { chatEntrySchema } from "../chat/chatSchemas.js";
 
 const engineEventSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("project-changed"), revision: z.number() }),
@@ -11,9 +12,13 @@ const engineEventSchema = z.discriminatedUnion("type", [
   }),
   z.object({ type: z.literal("media-servers-changed") }),
   z.object({ type: z.literal("agents-changed"), connected: z.number() }),
-  z.object({ type: z.literal("chat-changed"), entry: z.looseObject({}) }),
-  z.object({ type: z.literal("chat-text"), id: z.string(), text: z.string() }),
   z.object({ type: z.literal("engine-closing") }),
+  z.object({ type: z.literal("chat-changed"), entry: chatEntrySchema }),
+  z.object({
+    type: z.literal("chat-text"),
+    id: z.string(),
+    text: z.string(),
+  }),
 ]);
 
 export type EngineEvent =

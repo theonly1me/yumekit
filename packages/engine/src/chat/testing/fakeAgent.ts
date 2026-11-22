@@ -1,4 +1,4 @@
-import { appendFileSync, readFileSync } from "node:fs";
+import { appendFileSync, existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { z } from "zod";
 
@@ -11,6 +11,7 @@ const stepSchema = z.union([
     }),
   }),
   z.object({ waitForStop: z.object({ print: z.array(z.string()) }) }),
+  z.object({ waitForFile: z.string() }),
 ]);
 
 const scenarioSchema = z.object({
@@ -65,9 +66,16 @@ async function waitForStop(lines: string[]): Promise<void> {
   for (const line of lines) print(line);
 }
 
+async function waitForFile(file: string): Promise<void> {
+  while (!existsSync(file)) {
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  }
+}
+
 async function runStep(step: Step): Promise<void> {
   if ("print" in step) print(step.print);
   else if ("callTool" in step) await callTool(step.callTool);
+  else if ("waitForFile" in step) await waitForFile(step.waitForFile);
   else await waitForStop(step.waitForStop.print);
 }
 
