@@ -17,13 +17,14 @@ export interface FakeScenario {
   exitCode?: number;
   untilInterrupt?: { lines: string[]; exitCode: number };
   ignoresInterrupt?: boolean;
+  errorLines?: string[];
   signedIn?: boolean;
 }
 
 export interface FakeProgram {
   programPath: string;
   workingFolder: string;
-  readRun: () => Promise<{ arguments: string[]; folder: string }>;
+  readRun: () => Promise<z.infer<typeof runSchema>>;
 }
 
 const fakeAgentFile = fileURLToPath(new URL("./fakeAgent.ts", import.meta.url));
@@ -31,6 +32,7 @@ const fakeAgentFile = fileURLToPath(new URL("./fakeAgent.ts", import.meta.url));
 const runSchema = z.object({
   arguments: z.array(z.string()),
   folder: z.string(),
+  cursorConfigurationFolder: z.string().nullable(),
 });
 
 export async function createFakeProgram(

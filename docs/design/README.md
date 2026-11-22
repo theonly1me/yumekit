@@ -75,7 +75,6 @@ Use these words with these meanings in code and in documents.
 
 - One paid check of `tools/gemini-media` with a real key: a 3 second clip at 720p, and confirmation that background mode works for the model.
 - Timeline changes by drag in the editor (milestone 3), the first run screen, and a desktop shell with Tauri.
-- An adapter for Cursor in the brain runner, after a probe with a signed-in `cursor-agent`.
 - The cost guard and the budget cap (milestone 4).
 - The cast and style rules for long content (milestone 5).
 - Publishing to a platform (milestone 6).

@@ -25,7 +25,7 @@ export function startFailureOf(kind: string): StartFailure {
       return {
         title: "No AI is on this computer",
         lines: [
-          "yumekit uses the AI program that you have on this computer. Install Claude Code or Codex, start it once in a terminal, and sign in.",
+          "yumekit uses the AI program that you have on this computer. Install Claude Code, Codex, or Cursor, start it once in a terminal, and sign in.",
           askAgain,
         ],
       };
@@ -33,7 +33,7 @@ export function startFailureOf(kind: string): StartFailure {
       return {
         title: "The AI is not signed in",
         lines: [
-          "Open a terminal, start Claude Code or Codex once, and sign in.",
+          "Open a terminal, start Claude Code or Codex once, and sign in. For Cursor, run cursor-agent login.",
           askAgain,
         ],
       };

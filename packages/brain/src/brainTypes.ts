@@ -1,4 +1,4 @@
-export const brainAgentIds = ["claude-code", "codex"] as const;
+export const brainAgentIds = ["claude-code", "codex", "cursor"] as const;
 
 export type AgentId = (typeof brainAgentIds)[number];
 
@@ -51,7 +51,10 @@ export interface StreamStep {
 
 export interface StreamParser {
   readLine: (line: string) => StreamStep;
-  endOf: (exit: { stopRequested: boolean }) => TurnEnd;
+  endOf: (exit: {
+    stopRequested: boolean;
+    lastErrorLine: string | undefined;
+  }) => TurnEnd;
 }
 
 export const serverName = "yumekit";

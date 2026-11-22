@@ -8,6 +8,7 @@ const scenarioSchema = z.object({
     .object({ lines: z.array(z.string()), exitCode: z.number() })
     .optional(),
   ignoresInterrupt: z.boolean().optional(),
+  errorLines: z.array(z.string()).optional(),
   signedIn: z.boolean(),
 });
 
@@ -26,12 +27,20 @@ if (command === "auth status") {
   printLines([JSON.stringify({ loggedIn: scenario.signedIn })]);
   process.exit(0);
 }
+if (command === "status --format") {
+  printLines([JSON.stringify({ isAuthenticated: scenario.signedIn })]);
+  process.exit(0);
+}
 if (command === "login status") {
   process.exit(scenario.signedIn ? 0 : 1);
 }
 writeFileSync(
   `${scenarioFile}.arguments.json`,
-  JSON.stringify({ arguments: programArguments, folder: process.cwd() }),
+  JSON.stringify({
+    arguments: programArguments,
+    folder: process.cwd(),
+    cursorConfigurationFolder: process.env["CURSOR_CONFIG_DIR"] ?? null,
+  }),
 );
 const { untilInterrupt } = scenario;
 if (untilInterrupt === undefined) {
@@ -46,3 +55,4 @@ if (untilInterrupt === undefined) {
   });
 }
 printLines(scenario.lines);
+for (const line of scenario.errorLines ?? []) process.stderr.write(`${line}\n`);

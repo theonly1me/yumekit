@@ -25,7 +25,7 @@ yumekit doctor
 
 1. Run `yumekit`. It prints the URL of the start screen and opens it in the browser.
 2. Type what you want to make, pick where the video will go, and pick how long it is.
-3. Click "Make the video". yumekit makes the project in `~/Documents/yumekit` and asks the AI program on your computer (Claude Code or Codex) to make it.
+3. Click "Make the video". yumekit makes the project in `~/Documents/yumekit` and asks the AI program on your computer (Claude Code, Codex, or Cursor) to make it.
 4. When the editor opens, change what you want, then click "Export".
 
 The start screen lists your recent projects. To open a project folder directly, run `yumekit open <folder>`.

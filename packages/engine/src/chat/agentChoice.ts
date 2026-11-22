@@ -2,6 +2,7 @@ import {
   brainAgentIds,
   createClaudeCodeAdapter,
   createCodexAdapter,
+  createCursorAdapter,
   findProgram,
   type AgentAdapter,
   type AgentId as BrainAgentId,
@@ -26,23 +27,25 @@ export async function findAgentPrograms(): Promise<AgentPrograms> {
   return programs;
 }
 
-function isBrainAgentId(agentId: AgentId): agentId is BrainAgentId {
-  return brainAgentIds.some((brainAgentId) => brainAgentId === agentId);
-}
-
 function adapterOf(options: {
-  agentId: BrainAgentId;
+  agentId: AgentId;
   programPath: string;
 }): AgentAdapter {
-  return options.agentId === "claude-code"
-    ? createClaudeCodeAdapter({ programPath: options.programPath })
-    : createCodexAdapter({ programPath: options.programPath });
+  const { programPath } = options;
+  switch (options.agentId) {
+    case "claude-code":
+      return createClaudeCodeAdapter({ programPath });
+    case "codex":
+      return createCodexAdapter({ programPath });
+    case "cursor":
+      return createCursorAdapter({ programPath });
+  }
 }
 
 const noAgentInstalled: ChatFailure = {
   kind: "no-agent",
   message:
-    "No AI program is on this computer. Install Claude Code or Codex, start it once in a terminal, and sign in.",
+    "No AI program is on this computer. Install Claude Code, Codex, or Cursor, start it once in a terminal, and sign in.",
 };
 
 export async function chooseAgent(
@@ -59,15 +62,6 @@ export async function chooseAgent(
     };
   }
   const { agent, agentPrograms } = settings.value;
-  if (agent !== undefined && !isBrainAgentId(agent)) {
-    return {
-      ok: false,
-      failure: {
-        kind: "no-agent",
-        message: `The chat cannot use ${agentCatalog[agent].name} yet. Pick Claude Code or Codex in Settings.`,
-      },
-    };
-  }
   const candidates = agent === undefined ? brainAgentIds : [agent];
   for (const agentId of candidates) {
     const programPath = agentPrograms?.[agentId] ?? programs[agentId];

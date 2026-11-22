@@ -4,7 +4,6 @@ import type { EngineClient } from "../engine/engineClient.js";
 import type { Agent } from "../side/agent/agentRequests.js";
 import { useAgents } from "../side/agent/useAgents.js";
 
-const chatAgentIds = new Set(["claude-code", "codex"]);
 const planText = "Uses the plan you already pay for.";
 
 function noteOf(options: { agent: Agent; chat: Chat }): string {
@@ -12,7 +11,11 @@ function noteOf(options: { agent: Agent; chat: Chat }): string {
   if (!agent.installed) return "Install it, then open Settings again.";
   const signIn = chat.agent?.id === agent.id ? chat.agent.signIn : "unknown";
   if (signIn === "signed-out") {
-    return `Found on this computer. Not signed in. Open a terminal, run ${agent.start_command} once, and sign in.`;
+    const signInStep =
+      agent.id === "cursor"
+        ? `Open a terminal and run ${agent.start_command} login.`
+        : `Open a terminal, run ${agent.start_command} once, and sign in.`;
+    return `Found on this computer. Not signed in. ${signInStep}`;
   }
   return signIn === "signed-in"
     ? `Found on this computer. Signed in. ${planText}`
@@ -21,9 +24,6 @@ function noteOf(options: { agent: Agent; chat: Chat }): string {
 
 function AgentChoice(props: { agent: Agent; chat: Chat; onUse: () => void }) {
   const { agent } = props;
-  if (!chatAgentIds.has(agent.id)) {
-    return <span className="fact">Not supported in the chat yet.</span>;
-  }
   if (!agent.installed) {
     return <span className="fact">Not found on this computer</span>;
   }
