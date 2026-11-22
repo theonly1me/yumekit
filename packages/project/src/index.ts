@@ -19,6 +19,16 @@ export {
   type Platform,
   type PlatformId,
 } from "./platforms/catalog.js";
+export {
+  firstStartFormatId,
+  isStartFormatId,
+  planFirstSentence,
+  startFormatCatalog,
+  startFormatIds,
+  startFormatOf,
+  type StartFormat,
+  type StartFormatId,
+} from "./startFormats/catalog.js";
 export type { Bible, CastMember } from "./format/bible.js";
 export type { Scene, SceneSource } from "./format/scene.js";
 export type {

@@ -3,11 +3,15 @@ import { join } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import { z } from "zod";
 
+const callsSchema = z.array(
+  z.object({ name: z.string(), input: z.record(z.string(), z.unknown()) }),
+);
+
 const scenarioSchema = z.object({
-  calls: z.array(
-    z.object({ name: z.string(), input: z.record(z.string(), z.unknown()) }),
-  ),
+  calls: callsSchema,
+  restCalls: callsSchema.default([]),
   waitFile: z.string(),
+  restWaitFile: z.string(),
   ending: z.enum(["done", "failed"]),
 });
 
@@ -17,6 +21,11 @@ const scenario = scenarioSchema.parse(
   JSON.parse(readFileSync(process.env["YUMEKIT_FAKE_MAKING"] ?? "", "utf8")),
 );
 const programArguments = process.argv.slice(2);
+const isContinue =
+  programArguments.at(-1) === "The plan is good. Make the rest of the video.";
+const turn = isContinue
+  ? { calls: scenario.restCalls, waitFile: scenario.restWaitFile }
+  : { calls: scenario.calls, waitFile: scenario.waitFile };
 
 function print(value: object): void {
   process.stdout.write(`${JSON.stringify(value)}\n`);
@@ -88,10 +97,10 @@ async function run(): Promise<void> {
     session_id: "made-up-making-session",
     mcp_servers: [{ name: "yumekit", status: "connected" }],
   });
-  for (const [index, call] of scenario.calls.entries()) {
+  for (const [index, call] of turn.calls.entries()) {
     await callTool({ callId: `call-${String(index)}`, ...call });
   }
-  while (!isStopped && !existsSync(scenario.waitFile)) await delay(100);
+  while (!isStopped && !existsSync(turn.waitFile)) await delay(100);
   if (isStopped) {
     print({
       type: "result",

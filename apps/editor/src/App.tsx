@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { z } from "zod";
 import { chatRequestsOf } from "./chat/chatRequests.js";
+import { sendFixedRequest } from "./parts/fixedRequests.js";
 import {
   createEngineClient,
   type EngineClient,
@@ -53,6 +54,13 @@ function ProjectScreens(props: {
               .catch(() => undefined);
           }}
           onOpenEditor={gate.onOpenEditor}
+          onContinue={() =>
+            sendFixedRequest({
+              ask: async (request) =>
+                (await chatRequestsOf(client).ask(request)).ok,
+              request: { kind: "continue-after-the-plan" },
+            })
+          }
           ask={async (request) => {
             const asked = await chatRequestsOf(client).ask(request);
             if (asked.ok) gate.onOpenEditor();

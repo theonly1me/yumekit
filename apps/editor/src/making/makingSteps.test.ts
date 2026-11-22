@@ -51,6 +51,7 @@ describe("the steps of the Making screen", () => {
           madeAsset({ id: "song", tool: "generate_music" }),
         ],
       },
+      phase: "whole",
     });
 
     expect(steps.map((step) => step.state)).toEqual([
@@ -69,6 +70,7 @@ describe("the steps of the Making screen", () => {
         tools: ["set_script", "put_scene", "put_scene", "set_timeline"],
       }),
       snapshot: emptySnapshot,
+      phase: "whole",
     });
 
     expect(steps.map((step) => `${step.state} ${step.fact}`)).toEqual([
@@ -84,6 +86,7 @@ describe("the steps of the Making screen", () => {
     const steps = makingStepsOf({
       answer: answerOf({ state: "running", tools: ["set_script"] }),
       snapshot: emptySnapshot,
+      phase: "whole",
     });
 
     expect(steps.map((step) => step.state)).toEqual([
@@ -99,6 +102,7 @@ describe("the steps of the Making screen", () => {
     const steps = makingStepsOf({
       answer: answerOf({ state: "failed", tools: ["set_script"] }),
       snapshot: emptySnapshot,
+      phase: "whole",
     });
 
     expect(steps.map((step) => step.state)).toEqual([
@@ -114,6 +118,7 @@ describe("the steps of the Making screen", () => {
     const steps = makingStepsOf({
       answer: answerOf({ state: "done", tools: ["put_scene", "put_scene"] }),
       snapshot: emptySnapshot,
+      phase: "whole",
     });
 
     expect(steps.map((step) => `${step.state} ${step.fact}`)).toEqual([

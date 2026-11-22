@@ -17,6 +17,10 @@
     "./platforms": {
       "types": "./dist/platforms/catalog.d.ts",
       "default": "./dist/platforms/catalog.js"
+    },
+    "./start-formats": {
+      "types": "./dist/startFormats/catalog.d.ts",
+      "default": "./dist/startFormats/catalog.js"
     }
   },
   "files": [

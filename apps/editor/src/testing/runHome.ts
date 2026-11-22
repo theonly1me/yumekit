@@ -13,6 +13,7 @@ const urlPattern = /http:\/\/127\.0\.0\.1:\d+\/\?token=[0-9a-f]{64}/;
 
 export interface FakeMaking {
   calls: { name: string; input: object }[];
+  restCalls?: { name: string; input: object }[];
   ending: "done" | "failed";
 }
 
@@ -21,6 +22,7 @@ export interface RunningHome {
   root: string;
   projectsFolder: string;
   finishRequest: () => Promise<void>;
+  finishRest: () => Promise<void>;
   remove: () => Promise<void>;
 }
 
@@ -34,12 +36,13 @@ async function writeAgent(options: { root: string; making: FakeMaking }) {
   );
   await chmod(programPath, 0o755);
   const waitFile = join(options.root, "finish-request");
+  const restWaitFile = join(options.root, "finish-rest");
   const scenarioFile = join(options.root, "making.json");
   await writeFile(
     scenarioFile,
-    JSON.stringify({ ...options.making, waitFile }),
+    JSON.stringify({ ...options.making, waitFile, restWaitFile }),
   );
-  return { folder, programPath, waitFile, scenarioFile };
+  return { folder, programPath, waitFile, restWaitFile, scenarioFile };
 }
 
 export async function runHome(options: {
@@ -102,6 +105,9 @@ export async function runHome(options: {
     projectsFolder,
     finishRequest: async () => {
       if (agent !== undefined) await writeFile(agent.waitFile, "");
+    },
+    finishRest: async () => {
+      if (agent !== undefined) await writeFile(agent.restWaitFile, "");
     },
     remove: async () => {
       if (child.exitCode === null) child.kill("SIGTERM");

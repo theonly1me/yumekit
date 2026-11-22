@@ -1,5 +1,5 @@
 import type { Snapshot } from "../engine/snapshot.js";
-import type { AnswerEntry } from "./firstChat.js";
+import type { AnswerEntry, MakingPhase } from "./firstChat.js";
 
 export type StepState = "waiting" | "now" | "done" | "skipped";
 
@@ -38,13 +38,24 @@ function picturesFact(options: {
     : `${String(count)} pictures are ready`;
 }
 
+const restStepIds = new Set<MakingStep["id"]>(["voice", "music", "together"]);
+
+export function isPlanReady(options: {
+  answer: AnswerEntry;
+  phase: MakingPhase;
+}): boolean {
+  return options.phase === "plan" && options.answer.state === "done";
+}
+
 export function makingStepsOf(options: {
   answer: AnswerEntry;
   snapshot: Snapshot;
+  phase: MakingPhase;
 }): MakingStep[] {
-  const { answer, snapshot } = options;
+  const { answer, snapshot, phase } = options;
   const called = (tool: string) => doneCount({ answer, tool }) > 0;
   const hasEnded = answer.state !== "running";
+  const isWaitingForContinue = isPlanReady({ answer, phase });
   const made = [
     {
       id: "script",
@@ -78,7 +89,11 @@ export function makingStepsOf(options: {
     {
       id: "together",
       label: "Put it together",
-      isDone: called("set_timeline") || answer.state === "done",
+      isDone:
+        phase === "plan"
+          ? false
+          : answer.state === "done" ||
+            (phase === "whole" && called("set_timeline")),
       fact: "The video is ready",
     },
   ] as const;
@@ -91,6 +106,13 @@ export function makingStepsOf(options: {
   return made.map((...[step, index]): MakingStep => {
     if (step.isDone)
       return { id: step.id, label: step.label, state: "done", fact: step.fact };
+    if (isWaitingForContinue && restStepIds.has(step.id))
+      return {
+        id: step.id,
+        label: step.label,
+        state: "waiting",
+        fact: "Waits for Continue",
+      };
     if (hasEnded || index < lastDoneIndex)
       return {
         id: step.id,
