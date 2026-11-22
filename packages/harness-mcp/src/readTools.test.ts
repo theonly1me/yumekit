@@ -51,6 +51,7 @@ describe("read tools", () => {
         "align_words",
         "preview_frame",
         "preview_frames",
+        "preview_scenes",
         "render_video",
         "render_still",
       ].sort(),

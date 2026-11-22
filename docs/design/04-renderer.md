@@ -50,6 +50,20 @@ function renderFrame(options: {
   >
 >;
 
+function renderSceneFrame(options: {
+  folder: string;
+  outputId: string;
+  sceneId: string;
+  durationFrames: number;
+  frame: number;
+  scale?: RenderScale;
+}): Promise<
+  Outcome<
+    { png: Uint8Array; widthPixels: number; heightPixels: number },
+    RenderFailure
+  >
+>;
+
 function renderVideo(options: {
   folder: string;
   outputId: string;
@@ -95,6 +109,8 @@ function checkSceneCode(options: {
 }): Promise<Outcome<{ checked: true }, RenderFailure>>;
 ```
 
+`renderSceneFrame` draws one scene alone at the size of the output. It replaces the timeline with one scene track that holds one clip of the scene, from frame 0, with the length `durationFrames`. It uses the same stage page as `renderFrame`. An unknown scene id is the failure `scene-not-found`. The harness tool `preview_scenes` calls it.
+
 `checkSceneCode` compiles the code of a custom scene and checks its imports. It starts no browser. The harness calls it before it stores a module scene.
 
 - `scale` changes only the pixel density. The layout is the same at each scale. At 0.25, a 1920 by 1080 output gives a 480 by 270 picture. Use it for fast checks.
@@ -139,6 +155,7 @@ Before a video render, the renderer draws the first frame and the middle frame t
 | `scene-import-not-permitted` | `sceneId`, `importName`     | Scene code imports a package that is not permitted                                                            |
 | `scene-compile-failed`       | `sceneId`, `line`, `column` | Scene code has an error that stops the bundler                                                                |
 | `kit-scene-not-found`        | `sceneId`, `component`      | A kit scene names a component that the kit does not have                                                      |
+| `scene-not-found`            | `sceneId`                   | `renderSceneFrame` names a scene that the project does not have                                               |
 | `scene-error`                | `sceneId`, `frame`          | Scene code threw, or logged an error, or `seek` took more than 30 seconds. `frame` is the frame of the output |
 | `scene-not-repeatable`       | `sceneIds`, `frame`         | The repeat check failed                                                                                       |
 | `media-not-readable`         | `file`                      | `probeMedia` cannot read the file                                                                             |
