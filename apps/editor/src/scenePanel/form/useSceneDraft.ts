@@ -45,6 +45,7 @@ export function useSceneDraft(options: {
   const isUnsent = useRef(false);
   const callsInFlight = useRef(0);
   const sendNumber = useRef(0);
+  const lastKnownStoredKey = useRef(storedKey);
 
   useEffect(() => {
     latest.current = {
@@ -82,6 +83,7 @@ export function useSceneDraft(options: {
           if (typeof saved === "number") {
             ownRevision.current = Math.max(ownRevision.current, saved);
           }
+          lastKnownStoredKey.current = JSON.stringify(current.draft);
         }
         if (thisSend !== sendNumber.current) return;
         setFailure(
@@ -139,13 +141,15 @@ export function useSceneDraft(options: {
       timer.current !== undefined ||
       callsInFlight.current > 0 ||
       isUnsent.current;
-    const isOwnChange = latest.current.revision <= ownRevision.current;
-    if (isWaiting || isOwnChange) return;
+    const isOwnChange = revision <= ownRevision.current;
+    const isKnown = storedKey === lastKnownStoredKey.current;
+    if (isWaiting || isOwnChange || isKnown) return;
+    lastKnownStoredKey.current = storedKey;
     const stored = latest.current.scene.source.props;
     latest.current = { ...latest.current, draft: stored };
     setDraft(stored);
     setFailure({ kind: "none" });
-  }, [storedKey]);
+  }, [storedKey, revision]);
 
   useEffect(() => send, [send]);
 
