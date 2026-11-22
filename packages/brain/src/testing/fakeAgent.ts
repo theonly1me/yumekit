@@ -33,7 +33,6 @@ writeFileSync(
   `${scenarioFile}.arguments.json`,
   JSON.stringify({ arguments: programArguments, folder: process.cwd() }),
 );
-printLines(scenario.lines);
 const { untilInterrupt } = scenario;
 if (untilInterrupt === undefined) {
   process.exitCode = scenario.exitCode;
@@ -46,3 +45,4 @@ if (untilInterrupt === undefined) {
     process.exitCode = untilInterrupt.exitCode;
   });
 }
+printLines(scenario.lines);

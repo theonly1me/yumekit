@@ -53,15 +53,16 @@ async function callTool(options: { name: string; input: object }) {
   );
 }
 
-function waitForStop(lines: string[]): Promise<void> {
-  const stopped = Promise.withResolvers<undefined>();
+const stopSignal = Promise.withResolvers<undefined>();
+process.once("SIGINT", () => {
+  stopSignal.resolve(undefined);
+});
+
+async function waitForStop(lines: string[]): Promise<void> {
   const keepAlive = setInterval(() => undefined, 1_000);
-  process.once("SIGINT", () => {
-    clearInterval(keepAlive);
-    for (const line of lines) print(line);
-    stopped.resolve(undefined);
-  });
-  return stopped.promise;
+  await stopSignal.promise;
+  clearInterval(keepAlive);
+  for (const line of lines) print(line);
 }
 
 async function runStep(step: Step): Promise<void> {
