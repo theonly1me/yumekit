@@ -1,12 +1,17 @@
 import { createContext, useContext } from "react";
+import { paperStylePack } from "./paper.js";
 import type { StylePack } from "./stylePack.js";
+import { stylePackOf } from "./stylePacks.js";
 
 export const StylePackContext = createContext<StylePack | undefined>(undefined);
 
+let stylePackOfPage: StylePack = paperStylePack;
+
+export function activateLook(look: string): StylePack {
+  stylePackOfPage = stylePackOf(look);
+  return stylePackOfPage;
+}
+
 export function useStylePack(): StylePack {
-  const stylePack = useContext(StylePackContext);
-  if (stylePack === undefined) {
-    throw new Error("A kit scene needs a style pack from defineKitScene");
-  }
-  return stylePack;
+  return useContext(StylePackContext) ?? stylePackOfPage;
 }

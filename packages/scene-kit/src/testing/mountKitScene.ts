@@ -1,6 +1,6 @@
 import type { JsonObject, SceneAsset, SceneOutput } from "@yumekit/scene";
 import { onTestFinished } from "vitest";
-import { kitScenes } from "../index.js";
+import { kitScenesOf } from "../index.js";
 
 export const wideOutput: SceneOutput = {
   id: "wide",
@@ -26,8 +26,9 @@ export async function mountKitScene(options: {
   props: JsonObject;
   output?: SceneOutput;
   assets?: Record<string, SceneAsset>;
+  look?: string;
 }) {
-  const scene = kitScenes[options.name];
+  const scene = kitScenesOf(options.look ?? "paper")[options.name];
   if (scene === undefined) {
     throw new Error(`The kit has no scene "${options.name}"`);
   }
