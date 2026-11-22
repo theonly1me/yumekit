@@ -78,3 +78,7 @@ export function pickedChoiceOf(options: {
     ofServer.find((choice) => choice.model.id === picked.model) ?? ofServer[0]
   );
 }
+
+export function takesFirstPicture(model: MediaModel): boolean {
+  return model.accepts === undefined || model.accepts.includes("first_frame");
+}

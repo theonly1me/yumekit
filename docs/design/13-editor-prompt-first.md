@@ -163,6 +163,7 @@ WP29 made these choices where this document and the prototype give no rule.
 35. The sheet says "seconds of real video", as the prototype does. The limit message keeps the advice of item 14 about `media-tools.json`.
 36. The sheet starts on the video model of the pick in Settings (document 15). A pick with a server and no model starts on the first video model of that server. With no pick, the sheet starts on the first default model of a ready server. A model that the person picks in the sheet applies to this clip only, and does not change the pick of Settings.
 37. A model with `tested: false` shows "Not tested with yumekit yet" under its name (document 16).
+38. The control of the first picture says "Start on this picture". It shows only when the picked model has `first_frame` in `accepts` (document 16). A model with no `accepts` keeps the control, as before. For a model without it, the sheet sends no `first_frame_asset_id` and needs no picture to make the clip.
 
 ### Details of the chat panel
 

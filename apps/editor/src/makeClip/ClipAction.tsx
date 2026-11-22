@@ -102,7 +102,7 @@ export function ClipAction(props: {
   values: SettingValues;
   limit: VideoLimit;
   phase: Phase;
-  canMake: boolean;
+  missing: string | undefined;
   sceneName: string;
   keyRequests: KeyRequests;
   onMake: () => void;
@@ -157,16 +157,14 @@ export function ClipAction(props: {
       <button
         type="button"
         className="primary"
-        disabled={!props.canMake || isMaking}
+        disabled={props.missing !== undefined || isMaking}
         onClick={props.onMake}
       >
         {isMaking ? "Making the clip" : "Make the clip"}
       </button>
-      {props.canMake ? undefined : (
-        <p className="fact">
-          Write what happens in the clip, and pick a first picture.
-        </p>
-      )}
+      {props.missing === undefined ? undefined : (
+        <p className="fact">{props.missing}</p>
+      )}{" "}
       {isMaking ? (
         <Progress
           progress={phase.progress}

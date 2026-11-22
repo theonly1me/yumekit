@@ -68,7 +68,7 @@ export async function makeClip(options: {
   choice: ModelChoice;
   prompt: string;
   values: SettingValues;
-  firstFrameAssetId: string;
+  firstFrameAssetId: string | undefined;
   referenceAssetIds: string[];
   outputs: [Output, ...Output[]];
   clip: SceneClip;
@@ -94,7 +94,9 @@ export async function makeClip(options: {
         ...options.values,
         ...sizeInput({ choice, output }),
       },
-      first_frame_asset_id: options.firstFrameAssetId,
+      ...(options.firstFrameAssetId === undefined
+        ? {}
+        : { first_frame_asset_id: options.firstFrameAssetId }),
       ...(options.referenceAssetIds.length === 0
         ? {}
         : { reference_asset_ids: options.referenceAssetIds }),

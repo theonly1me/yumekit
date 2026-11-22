@@ -10,6 +10,7 @@ import { ClipForm, type ClipDraft } from "./ClipForm.js";
 import { MadeClipResult } from "./MadeClipResult.js";
 import { outputsHoldingClip, sceneNumberOf } from "./clipOutputs.js";
 import { makeClip, type MadeClip } from "./makeClip.js";
+import { takesFirstPicture } from "./modelChoices.js";
 import { promptOfScene } from "./scenePrompt.js";
 import { useClipChoice } from "./useClipChoice.js";
 import "./makeClip.css";
@@ -73,7 +74,9 @@ export function MakeClipSheet(props: {
   };
 
   const make = () => {
-    if (choice === undefined || firstFrameId === undefined) return;
+    if (choice === undefined) return;
+    const takesPicture = takesFirstPicture(choice.model);
+    if (takesPicture && firstFrameId === undefined) return;
     if (phase.kind === "making") return;
     callId.current = crypto.randomUUID();
     setPhase({ kind: "making", progress: undefined });
@@ -82,7 +85,7 @@ export function MakeClipSheet(props: {
       choice,
       prompt: draft.prompt.trim(),
       values,
-      firstFrameAssetId: firstFrameId,
+      firstFrameAssetId: takesPicture ? firstFrameId : undefined,
       referenceAssetIds: draft.referenceIds,
       outputs: outputsHoldingClip({
         snapshot,
