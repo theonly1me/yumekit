@@ -6,6 +6,7 @@ import { useClipTools } from "../makeClip/useClipTools.js";
 import { useSoundPartSheet } from "../parts/sound/useSoundPartSheet.js";
 import { PlatformTabs } from "../platforms/PlatformTabs.js";
 import { Preview } from "../preview/Preview.js";
+import { useTextInPlace } from "../preview/useTextInPlace.js";
 import { sceneEditsOf } from "../scenes/sceneEdits.js";
 import { useDirectChanges } from "../scenes/useDirectChanges.js";
 import { useHistory } from "../scenePanel/history/useHistory.js";
@@ -68,6 +69,11 @@ export function Editor(props: {
     onStep: view.step,
   });
   const history = useHistory({ client, isActive: !isSheetOpen });
+  const textInPlace = useTextInPlace({
+    client,
+    snapshot,
+    onEditing: playback.pause,
+  });
   const changes = useDirectChanges(client);
   const edits = sceneEditsOf({ changes, onPicked: view.setPicked });
   const { output, tab } = facts;
@@ -127,7 +133,8 @@ export function Editor(props: {
               output={output}
               frame={facts.frame}
               framesPerSecond={framesPerSecond}
-              hint={`${tab.name}, ${String(output.widthPixels)} x ${String(output.heightPixels)}.`}
+              hint={`Click the text in the video to change it. ${tab.name}, ${String(output.widthPixels)} x ${String(output.heightPixels)}.`}
+              textInPlace={textInPlace}
             />
             <Transport
               frame={facts.frame}

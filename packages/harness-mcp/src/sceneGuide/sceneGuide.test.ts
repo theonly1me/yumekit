@@ -44,6 +44,11 @@ describe("scene guide", () => {
     expect(checked.ok ? "" : checked.failure.kind).toBe("scene-compile-failed");
   });
 
+  it("tells agents to mark each text prop, so a person can change it in the preview", () => {
+    expect(sceneGuide).toContain('<h1 data-text-prop="title">{title}</h1>');
+    expect(sceneGuideExamples[0].code).toContain('data-text-prop="label"');
+  });
+
   it("contains the code of each example", () => {
     for (const example of sceneGuideExamples) {
       expect(sceneGuide).toContain(example.code.trimEnd());

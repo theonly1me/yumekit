@@ -63,6 +63,7 @@ export function TitleCard(props: { props: JsonObject }): ReactNode {
         }}
       >
         <h1
+          data-text-prop="heading"
           style={{
             ...displayTextStyle(stylePack),
             fontSize: sizes.text("title"),
@@ -74,6 +75,7 @@ export function TitleCard(props: { props: JsonObject }): ReactNode {
         </h1>
         {subheading === undefined || subheading === "" ? null : (
           <p
+            data-text-prop="subheading"
             style={{
               ...bodyTextStyle(stylePack),
               color: stylePack.colors.mutedText,

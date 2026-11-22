@@ -57,7 +57,7 @@ export default defineReactScene(({ props }) => {
       >
         {String(Math.round(shown))}
       </div>
-      <div style={{ fontSize: 6 * unit, opacity, overflowWrap: "anywhere" }}>{label}</div>
+      <div data-text-prop="label" style={{ fontSize: 6 * unit, opacity, overflowWrap: "anywhere" }}>{label}</div>
     </div>
   );
 });

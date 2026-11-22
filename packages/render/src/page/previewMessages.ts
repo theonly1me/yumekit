@@ -4,8 +4,17 @@ export interface SeekRequest {
   requestId: number;
 }
 
+export type ParentRequest = SeekRequest | { type: "reload" };
+
 export type PreviewReply =
   | { type: "ready"; frameCount: number }
+  | { type: "text-editing" }
+  | {
+      type: "text-changed";
+      sceneId: string;
+      path: (string | number)[];
+      text: string;
+    }
   | { type: "sought"; requestId: number }
   | {
       type: "failed";
@@ -15,15 +24,12 @@ export type PreviewReply =
       sceneId?: string;
     };
 
-export function seekRequestOf(data: unknown): SeekRequest | undefined {
-  if (
-    typeof data !== "object" ||
-    data === null ||
-    !("type" in data) ||
-    data.type !== "seek" ||
-    !("frame" in data) ||
-    !("requestId" in data)
-  ) {
+export function parentRequestOf(data: unknown): ParentRequest | undefined {
+  if (typeof data !== "object" || data === null || !("type" in data)) {
+    return undefined;
+  }
+  if (data.type === "reload") return { type: "reload" };
+  if (data.type !== "seek" || !("frame" in data) || !("requestId" in data)) {
     return undefined;
   }
   const { frame, requestId } = data;
