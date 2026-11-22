@@ -10,8 +10,8 @@ import { ImagePan } from "./scenes/ImagePan.js";
 import { Quote } from "./scenes/Quote.js";
 import { TitleCard } from "./scenes/TitleCard.js";
 import { VideoClip } from "./scenes/VideoClip.js";
-import { paperStylePack } from "./stylePacks/paper.js";
 import type { StylePack } from "./stylePacks/stylePack.js";
+import { stylePackOf } from "./stylePacks/stylePacks.js";
 
 const kitSceneDefinitions: Record<string, KitSceneDefinition> = {
   "title-card": { component: TitleCard, paintsBackground: true },
@@ -32,5 +32,15 @@ function kitScenesFor(stylePack: StylePack): Record<string, SceneModule> {
   );
 }
 
-export const kitScenes: Record<string, SceneModule> =
-  kitScenesFor(paperStylePack);
+const kitScenesByLook = new Map<string, Record<string, SceneModule>>();
+
+export function kitScenesOf(look: string): Record<string, SceneModule> {
+  const stylePack = stylePackOf(look);
+  const known = kitScenesByLook.get(stylePack.id);
+  if (known !== undefined) return known;
+  const made = kitScenesFor(stylePack);
+  kitScenesByLook.set(stylePack.id, made);
+  return made;
+}
+
+export const kitScenes: Record<string, SceneModule> = kitScenesOf("paper");

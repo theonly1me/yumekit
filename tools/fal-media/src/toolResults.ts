@@ -2,18 +2,18 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 
-export interface VideoFile {
+export interface MediaFile {
   path: string;
-  kind: "video";
+  kind: "video" | "image";
   width_pixels?: number;
   height_pixels?: number;
-  duration_seconds: number;
+  duration_seconds?: number;
 }
 
-export interface VideoToolResult {
-  files: VideoFile[];
-  cost_usd: number;
-  cost_is_estimate: true;
+export interface MediaToolResult {
+  files: MediaFile[];
+  cost_usd?: number;
+  cost_is_estimate?: true;
 }
 
 export type Outcome<Value, Failure> =
@@ -22,7 +22,7 @@ export type Outcome<Value, Failure> =
 const plainFileStem = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
 
 export function structuredResult(
-  result: VideoToolResult | Record<string, unknown>,
+  result: MediaToolResult | Record<string, unknown>,
 ): CallToolResult {
   return {
     content: [{ type: "text", text: JSON.stringify(result) }],

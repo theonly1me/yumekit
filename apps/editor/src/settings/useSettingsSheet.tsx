@@ -9,6 +9,7 @@ export function useSettingsSheet(options: {
   chat: Chat;
   projectFolder: string;
   videoStyle: VideoStyleId;
+  look: string;
 }) {
   const [isOpen, setOpen] = useState(false);
   const [serverId, setServerId] = useState<string>();
@@ -18,6 +19,7 @@ export function useSettingsSheet(options: {
       chat={options.chat}
       projectFolder={options.projectFolder}
       videoStyle={options.videoStyle}
+      look={options.look}
       openServerId={serverId}
       onOpenServer={setServerId}
       onClose={() => {

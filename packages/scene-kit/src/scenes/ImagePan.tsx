@@ -52,6 +52,7 @@ export function ImagePan(props: { props: JsonObject }): ReactNode {
       {caption === undefined || caption === "" ? null : (
         <CaptionPanel
           placement="top"
+          textProp="caption"
           style={riseStyle({
             motionFrame,
             startFrame: captionStartFrame,

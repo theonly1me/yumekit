@@ -66,6 +66,7 @@ export function BulletList(props: { props: JsonObject }): ReactNode {
             }}
           />
           <p
+            data-text-prop={`items.${String(index)}`}
             style={{
               ...bodyTextStyle(stylePack),
               minWidth: 0,

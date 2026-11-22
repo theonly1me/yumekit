@@ -48,6 +48,7 @@ type SceneModule = {
 2. `durationFrames` is the length of the scene. It is `sceneStartFrame` plus the length of the clip that shows the scene. A scene must draw correctly for any length of 1 frame or more.
 3. `props` come from `scene.json`. The scene treats them as untrusted input and gives a default for each missing value.
 4. `words` on a speech asset are relative to the start of that asset, in frames.
+5. An element that shows a text prop may carry the attribute `data-text-prop` with the path of the prop (WP33). The path joins the prop names with dots, and a list index is a whole number: `heading`, `items.0`, `bars.1.label`. The mark is an attribute only, so it adds no pixel to a frame. The editor preview uses it to change the text in place (document 13).
 
 ## Rules for `seek`
 

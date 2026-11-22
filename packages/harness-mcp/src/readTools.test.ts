@@ -30,6 +30,7 @@ describe("read tools", () => {
         "remove_output",
         "add_platform",
         "remove_platform",
+        "set_look",
         "put_scene",
         "remove_scene",
         "set_timeline",

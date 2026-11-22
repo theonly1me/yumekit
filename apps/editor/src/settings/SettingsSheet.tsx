@@ -6,6 +6,7 @@ import { ToolsPane } from "../tools/ToolsPane.js";
 import { AiGroup } from "./AiGroup.js";
 import type { VideoStyleId } from "../videoStyle/videoStyles.js";
 import { LimitsGroup } from "./LimitsGroup.js";
+import { LookRow } from "./LookRow.js";
 import { ServicesGroup } from "./services/index.js";
 import { VideoStyleGroup } from "./VideoStyleGroup.js";
 import "./settings.css";
@@ -15,6 +16,7 @@ export function SettingsSheet(props: {
   chat: Chat;
   projectFolder: string;
   videoStyle: VideoStyleId;
+  look: string;
   openServerId: string | undefined;
   onOpenServer: (serverId: string | undefined) => void;
   onClose: () => void;
@@ -23,7 +25,9 @@ export function SettingsSheet(props: {
     <Sheet titleId="settings-title" onClose={props.onClose}>
       <div className="sheet-body">
         <h2 id="settings-title">Settings</h2>
-        <VideoStyleGroup client={props.client} videoStyle={props.videoStyle} />
+        <VideoStyleGroup client={props.client} videoStyle={props.videoStyle}>
+          <LookRow client={props.client} look={props.look} />
+        </VideoStyleGroup>
         <AiGroup client={props.client} chat={props.chat} />
         <ServicesGroup client={props.client} />
         <section className="setting-group" aria-labelledby="tools-title">

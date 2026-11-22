@@ -1,0 +1,44 @@
+{
+  "endpoint_id": "krea/v3/text-to-image",
+  "page": "https://fal.ai/models/krea/v3/text-to-image",
+  "schema_url": "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=krea/v3/text-to-image",
+  "read_on": "2026-11-22",
+  "required": ["prompt"],
+  "properties": {
+    "enable_safety_checker": {
+      "types": ["boolean"]
+    },
+    "image_size": {
+      "types": ["object", "string"],
+      "enum": [
+        "square_hd",
+        "square",
+        "portrait_4_3",
+        "portrait_16_9",
+        "landscape_4_3",
+        "landscape_16_9",
+        "auto"
+      ]
+    },
+    "negative_prompt": {
+      "types": ["string"]
+    },
+    "output_format": {
+      "types": ["string"],
+      "enum": ["png", "jpeg"]
+    },
+    "prompt": {
+      "types": ["string"]
+    },
+    "reasoning_level": {
+      "types": ["string"],
+      "enum": ["medium", "high"]
+    },
+    "seed": {
+      "types": ["integer", "null"]
+    },
+    "sync_mode": {
+      "types": ["boolean"]
+    }
+  }
+}

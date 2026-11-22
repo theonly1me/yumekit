@@ -3,8 +3,10 @@ import { dirname } from "node:path";
 import {
   createProject,
   inCatalogOrder,
+  lookIds,
   platformIds,
   videoStyles,
+  type LookId,
   type PlatformId,
   type VideoStyle,
 } from "@yumekit/project";
@@ -32,6 +34,7 @@ const createBodySchema = z.strictObject({
   platform_ids: z.array(z.enum(platformIds)).min(1).max(platformIds.length),
   length: projectLengthSchema,
   video_style: z.enum(videoStyles).default("graphics"),
+  look: z.enum(lookIds).default("midnight"),
 });
 
 function notCreated(message: string): Failure {
@@ -42,6 +45,7 @@ async function makeProjectFolder(options: {
   request: string;
   platformIds: PlatformId[];
   videoStyle: VideoStyle;
+  look: LookId;
 }): Promise<Outcome<string, Failure>> {
   const projectsFolder = await readProjectsFolder();
   if (!projectsFolder.ok) {
@@ -62,6 +66,7 @@ async function makeProjectFolder(options: {
     framesPerSecond: 30,
     outputs: outputsForPlatforms(options.platformIds),
     videoStyle: options.videoStyle,
+    look: options.look,
   });
   return created.ok
     ? { ok: true, value: folder }
@@ -83,11 +88,11 @@ export async function createProjectRoute(exchange: Exchange<HomeContext>) {
     schema: createBodySchema,
   });
   if (!body.ok) return body.failure;
-  const { request, length, video_style: videoStyle } = body.value;
+  const { request, length, video_style: videoStyle, look } = body.value;
   const platformIds = inCatalogOrder(body.value.platform_ids);
   const made = await queued({
     context: exchange.context,
-    work: () => makeProjectFolder({ request, platformIds, videoStyle }),
+    work: () => makeProjectFolder({ request, platformIds, videoStyle, look }),
   });
   if (!made.ok) return made.failure;
   const folder = made.value;

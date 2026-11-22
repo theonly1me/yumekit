@@ -1,0 +1,68 @@
+{
+  "endpoint_id": "google/nano-banana-2.1",
+  "page": "https://fal.ai/models/google/nano-banana-2.1",
+  "schema_url": "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=google/nano-banana-2.1",
+  "read_on": "2026-11-22",
+  "required": ["prompt"],
+  "properties": {
+    "aspect_ratio": {
+      "types": ["null", "string"],
+      "enum": [
+        "auto",
+        "21:9",
+        "16:9",
+        "3:2",
+        "4:3",
+        "5:4",
+        "1:1",
+        "4:5",
+        "3:4",
+        "2:3",
+        "9:16",
+        "4:1",
+        "1:4",
+        "8:1",
+        "1:8"
+      ]
+    },
+    "enable_web_search": {
+      "types": ["boolean"]
+    },
+    "limit_generations": {
+      "types": ["boolean"]
+    },
+    "num_images": {
+      "types": ["integer"],
+      "minimum": 1,
+      "maximum": 4
+    },
+    "output_format": {
+      "types": ["string"],
+      "enum": ["jpeg", "png", "webp"]
+    },
+    "prompt": {
+      "types": ["string"]
+    },
+    "resolution": {
+      "types": ["string"],
+      "enum": ["1K", "2K", "4K"]
+    },
+    "safety_tolerance": {
+      "types": ["string"],
+      "enum": ["1", "2", "3", "4", "5", "6"]
+    },
+    "seed": {
+      "types": ["integer", "null"]
+    },
+    "sync_mode": {
+      "types": ["boolean"]
+    },
+    "system_prompt": {
+      "types": ["string"]
+    },
+    "thinking_level": {
+      "types": ["null", "string"],
+      "enum": ["minimal", "medium", "high"]
+    }
+  }
+}

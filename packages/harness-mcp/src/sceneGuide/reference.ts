@@ -7,12 +7,13 @@ Prefer a kit scene (list_kit_scenes). Write custom code only when no kit scene c
 1. A custom scene is one TSX file. Send it as \`code\` to put_scene, with \`props\`. The harness checks it before it stores it.
 2. The default export is a SceneModule. Make it with \`defineReactScene(component)\`. The component gets \`{ props }\`: the JSON object that you gave to put_scene.
 3. Treat each prop as untrusted. Check its type with \`typeof\` or \`Array.isArray\`, and give a default for a missing or wrong value. You may read a prop as \`props.title\`.
-4. A scene may import only \`react\`, \`@yumekit/scene\`, and \`@yumekit/scene-kit\`. Any other import fails with scene-import-not-permitted. Most scenes import \`@yumekit/scene\`, and \`paper\` from \`@yumekit/scene-kit\` for colors and fonts.
+4. A scene may import only \`react\`, \`@yumekit/scene\`, and \`@yumekit/scene-kit\`. Any other import fails with scene-import-not-permitted. Most scenes import \`@yumekit/scene\`, and \`useStylePack\` from \`@yumekit/scene-kit\` for the colors and the fonts of the look.
 5. The code compiles with strict TypeScript. A type error fails with scene-compile-failed and gives the line and the column.
 6. The scene draws inside an element with the exact size of the output in CSS pixels. Use \`position: "absolute", inset: 0\` on the root element to fill it.
 7. The picture of a frame depends only on the frame number. The same frame always gives the same pixels, and frames can be drawn in any order.
 8. The scene must draw correctly for any clip length of 1 frame or more. Fit the motion into \`durationFrames\`, for example settle by 70 percent of it.
 9. Size all text and spacing in \`unit\`, so the scene reads the same at each output size. Keep text short: a custom scene does not shrink text to fit.
+10. Put \`data-text-prop\` with the name of the prop on the element that shows a text prop, for example \`<h1 data-text-prop="title">{title}</h1>\`. A person can then click the text in the preview and change it. For a text in a list, use the path, such as \`items.0\` or \`steps.1.label\`.
 
 ## Hooks and components from @yumekit/scene
 
@@ -53,29 +54,34 @@ export const rulesSection = `## What a scene must not do
 | A network request, or a URL from the internet | An asset from \`findAsset\` |
 | Audio playback | An audio clip on the timeline |
 | A \`<video>\` element (put_scene rejects it with scene-compile-failed) | \`VideoFrame\` with the id of a video asset |
-| A font from the internet, or a font file in the code | The paper fonts from \`paper.fonts\` |
+| A font from the internet, or a font file in the code | The fonts of the look from \`useStylePack().fonts\` |
 
-## The paper style
+## The look
 
-Import \`paper\` from \`@yumekit/scene-kit\` and read colors and fonts from it, so that a custom scene matches the kit scenes:
+The project has a look: its colors, its fonts, and its backdrop. The person picks the look, and each kit scene follows it. A custom scene must take each color and each font from the look, so a change of the look changes the custom scene too. Call \`useStylePack()\` inside the component:
 
 \`\`\`tsx
-import { paper } from "@yumekit/scene-kit";
+import { useStylePack } from "@yumekit/scene-kit";
+
+const stylePack = useStylePack();
 \`\`\`
 
-| Token | Value | Use |
-| --- | --- | --- |
-| \`paper.colors.background\` | #eef1f4 | Background |
-| \`paper.colors.text\` | #18203a | Text |
-| \`paper.colors.mutedText\` | Ink at 75 percent | A smaller second line |
-| \`paper.colors.accent\` | #f2b33d | Accent shape, and the rule under a quote |
-| \`paper.colors.bars\` | #e891ab, #4db6ae, #a294e0 | The items of a series, in this order |
-| \`paper.colors.bullet\` | #4db6ae | Bullets |
-| \`paper.colors.placeholder\` | #dfe4ea | An empty image area |
-| \`paper.fonts.display.family\` | Zen Maru Gothic, weight \`paper.fonts.display.weight\` (700) | Headings and large text |
-| \`paper.fonts.body.family\` | Zen Kaku Gothic New, weight \`paper.fonts.body.weight\` (500) | Items, labels, and small lines |
+| Token | Use |
+| --- | --- |
+| \`stylePack.colors.background\` | Background |
+| \`stylePack.colors.surface\` | A card or a panel on the background |
+| \`stylePack.colors.text\` | Text |
+| \`stylePack.colors.mutedText\` | A smaller second line |
+| \`stylePack.colors.accent\` | The one accent shape of a scene |
+| \`stylePack.colors.accents\` | Four accent colors, for the items of a series |
+| \`stylePack.colors.bars\` | The items of a series, in this order |
+| \`stylePack.colors.bullet\` | Bullets |
+| \`stylePack.colors.placeholder\` | An empty image area |
+| \`stylePack.fonts.display.family\` | Headings and large text, at weight \`stylePack.fonts.display.weight\` |
+| \`stylePack.fonts.body.family\` | Items, labels, and small lines, at weight \`stylePack.fonts.body.weight\` |
+| \`stylePack.cornerUnits\` | The corner radius of a bar or a card, in units |
 
-The stage loads both fonts before the first frame, so a custom scene can name them in \`fontFamily\`.
+The stage loads the fonts of the look before the first frame, so a custom scene can name them in \`fontFamily\`. Do not set a color or a font that the look does not have, unless the person asks.
 
 ## The caption area
 

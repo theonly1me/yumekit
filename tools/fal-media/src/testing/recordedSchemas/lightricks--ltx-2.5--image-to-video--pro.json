@@ -1,0 +1,50 @@
+{
+  "endpoint_id": "lightricks/ltx-2.5/image-to-video/pro",
+  "page": "https://fal.ai/models/lightricks/ltx-2.5/image-to-video/pro",
+  "schema_url": "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=lightricks/ltx-2.5/image-to-video/pro",
+  "read_on": "2026-11-22",
+  "required": ["image_url", "prompt"],
+  "properties": {
+    "aspect_ratio": {
+      "types": ["string"],
+      "enum": ["auto", "16:9", "9:16"]
+    },
+    "camera_motion": {
+      "types": ["null", "string"],
+      "enum": [
+        "dolly_in",
+        "dolly_out",
+        "dolly_left",
+        "dolly_right",
+        "jib_up",
+        "jib_down",
+        "static",
+        "focus_shift"
+      ]
+    },
+    "duration": {
+      "types": ["integer"],
+      "enum": [6, 8, 10, "auto"]
+    },
+    "end_image_url": {
+      "types": ["null", "string"]
+    },
+    "fps": {
+      "types": ["integer"],
+      "enum": [24, 25, 50]
+    },
+    "generate_audio": {
+      "types": ["boolean"]
+    },
+    "image_url": {
+      "types": ["string"]
+    },
+    "prompt": {
+      "types": ["string"]
+    },
+    "resolution": {
+      "types": ["string"],
+      "enum": ["720p", "1080p"]
+    }
+  }
+}

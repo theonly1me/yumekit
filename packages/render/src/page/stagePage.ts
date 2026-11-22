@@ -1,4 +1,4 @@
-import { loadStylePackFonts, paper } from "@yumekit/scene-kit";
+import { loadStylePackFonts, stylePackOf } from "@yumekit/scene-kit";
 import stagePageData, { moduleSceneImports } from "virtual:yumekit-stage-data";
 import { createPageStage } from "./pageStage.js";
 import { createSceneErrorLog } from "./sceneErrorLog.js";
@@ -29,5 +29,5 @@ function startStagePage(): StagePageApi {
   return { seek: stage.seek };
 }
 
-await loadStylePackFonts(paper);
+await loadStylePackFonts(stylePackOf(stagePageData.look));
 window.yumekitStage = startStagePage();

@@ -1,26 +1,13 @@
+import type { EndpointCall } from "../catalog/video/index.ts";
 import type { SendRequest } from "../falApi.ts";
+import type { Wait } from "../queue/runQueueRequest.ts";
 import type { Outcome } from "../toolResults.ts";
-import type { CheckedVideoInput } from "./checkVideoInput.ts";
 import {
-  readFrameImage,
-  uploadFrameImage,
-  type FrameImage,
-} from "./frameImages.ts";
-import type { Wait } from "./runQueueRequest.ts";
-
-export interface EndpointCall {
-  endpointId: string;
-  fields: Record<string, unknown>;
-}
-
-function sharedRequest(input: CheckedVideoInput) {
-  return {
-    prompt: input.prompt,
-    durationSeconds: input.durationSeconds,
-    resolution: input.resolution,
-    withAudio: input.withAudio,
-  };
-}
+  pathEntries,
+  readImages,
+  uploadImages,
+} from "../upload/uploadImages.ts";
+import type { CheckedVideoInput } from "./checkVideoInput.ts";
 
 export interface MakeVideoOptions {
   input: CheckedVideoInput;
@@ -31,95 +18,63 @@ export interface MakeVideoOptions {
   onPoll: (status: string) => Promise<void>;
 }
 
-async function readOptionalFrame(options: {
-  path: string | undefined;
-  field: string;
-}): Promise<Outcome<FrameImage | undefined, string>> {
-  if (options.path === undefined) return { ok: true, value: undefined };
-  return readFrameImage({ path: options.path, field: options.field });
-}
-
-async function uploadedUrl(options: {
-  image: FrameImage;
-  field: string;
-  sendRequest: SendRequest;
-  apiKey: string;
-}): Promise<Outcome<string, string>> {
-  const uploaded = await uploadFrameImage(options);
-  if (uploaded.ok) return uploaded;
+function sharedRequest(input: CheckedVideoInput) {
   return {
-    ok: false,
-    failure: `Cannot upload ${options.field}: ${uploaded.failure.message}`,
+    prompt: input.prompt,
+    durationSeconds: input.durationSeconds,
+    resolution: input.resolution,
+    withAudio: input.withAudio,
+    aspectRatio: input.aspectRatio,
   };
 }
 
-async function imageCall(
-  options: MakeVideoOptions & {
-    firstImage: FrameImage;
-    lastImage?: FrameImage;
-  },
-): Promise<Outcome<EndpointCall, string>> {
-  const { input } = options;
-  const firstFrameUrl = await uploadedUrl({
-    ...options,
-    image: options.firstImage,
-    field: "first_frame_path",
-  });
-  if (!firstFrameUrl.ok) return firstFrameUrl;
-  let lastFrameUrl: string | undefined;
-  if (options.lastImage !== undefined) {
-    const uploaded = await uploadedUrl({
-      ...options,
-      image: options.lastImage,
+function framePaths(input: CheckedVideoInput) {
+  return [
+    ...pathEntries({
+      field: "first_frame_path",
+      paths: input.firstFramePath === undefined ? [] : [input.firstFramePath],
+    }),
+    ...pathEntries({
       field: "last_frame_path",
+      paths: input.lastFramePath === undefined ? [] : [input.lastFramePath],
+    }),
+    ...pathEntries({
+      field: "reference_image_paths",
+      paths: input.referenceImagePaths,
+    }),
+  ];
+}
+
+function callWithUrls(options: {
+  input: CheckedVideoInput;
+  urls: string[];
+}): EndpointCall {
+  const { input, urls } = options;
+  const { model } = input;
+  const request = sharedRequest(input);
+  const [firstFrameUrl, lastFrameUrl] = urls;
+  if (input.firstFramePath !== undefined && firstFrameUrl !== undefined) {
+    return model.firstFrame.call({
+      ...request,
+      firstFrameUrl,
+      ...(lastFrameUrl === undefined ? {} : { lastFrameUrl }),
     });
-    if (!uploaded.ok) return uploaded;
-    lastFrameUrl = uploaded.value;
   }
-  const endpoint = input.model.imageToVideo;
-  return {
-    ok: true,
-    value: {
-      endpointId: endpoint.endpointId,
-      fields: endpoint.fieldsOf({
-        ...sharedRequest(input),
-        firstFrameUrl: firstFrameUrl.value,
-        ...(lastFrameUrl === undefined ? {} : { lastFrameUrl }),
-      }),
-    },
-  };
+  if (model.references !== undefined && urls.length > 0) {
+    return model.references.call({ ...request, referenceImageUrls: urls });
+  }
+  return model.textToVideo(request);
 }
 
 export async function endpointCall(
   options: MakeVideoOptions,
 ): Promise<Outcome<EndpointCall, string>> {
-  const { input } = options;
-  const firstImage = await readOptionalFrame({
-    path: input.firstFramePath,
-    field: "first_frame_path",
-  });
-  if (!firstImage.ok) return firstImage;
-  const lastImage = await readOptionalFrame({
-    path: input.lastFramePath,
-    field: "last_frame_path",
-  });
-  if (!lastImage.ok) return lastImage;
-  if (firstImage.value !== undefined) {
-    return imageCall({
-      ...options,
-      firstImage: firstImage.value,
-      ...(lastImage.value === undefined ? {} : { lastImage: lastImage.value }),
-    });
-  }
-  const endpoint = input.model.textToVideo;
+  const images = await readImages(framePaths(options.input));
+  if (!images.ok) return images;
+  const urls = await uploadImages({ ...options, images: images.value });
+  if (!urls.ok) return urls;
   return {
     ok: true,
-    value: {
-      endpointId: endpoint.endpointId,
-      fields: endpoint.fieldsOf({
-        ...sharedRequest(input),
-        aspectRatio: input.aspectRatio,
-      }),
-    },
+    value: callWithUrls({ input: options.input, urls: urls.value }),
   };
 }

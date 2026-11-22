@@ -99,7 +99,7 @@ describe("asset and reference read tools", () => {
     });
   });
 
-  it("get_scene_guide names each hook and animation function, the forbidden calls, and the paper colors", async () => {
+  it("get_scene_guide names each hook and animation function, the forbidden calls, and the tokens of the look", async () => {
     const harness = await startHarness();
 
     const { text } = await harness.call({ name: "get_scene_guide" });
@@ -117,9 +117,9 @@ describe("asset and reference read tools", () => {
       "easings.cubicBezier",
       "Math.random",
       "requestAnimationFrame",
-      "#eef1f4",
-      "#18203a",
-      "#f2b33d",
+      "useStylePack()",
+      "stylePack.colors.background",
+      "stylePack.fonts.display.family",
       "## Example 1",
       "## Example 2",
     ]) {

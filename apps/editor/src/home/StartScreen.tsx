@@ -7,6 +7,7 @@ import { agentLineOf, lengthLabelOf } from "./startTexts.js";
 import { useStartChoices } from "./useStartChoices.js";
 import { VideoStyleChoices } from "../videoStyle/VideoStyleChoices.js";
 import { aiVideoLimitLineOf, usesAiVideo } from "../videoStyle/videoStyles.js";
+import { LookChoices } from "../looks/LookChoices.js";
 
 const examplePrompt =
   "A 30 second video that explains my app to new users. Friendly, with a voice and music.";
@@ -92,6 +93,10 @@ export function StartScreen(props: { client: EngineClient }) {
                 </button>
               ))}
             </div>
+          </div>
+          <div className="start-group">
+            <h2>Look</h2>
+            <LookChoices chosen={start.look} onChoose={start.setLook} />
           </div>
           <div className="start-action">
             <button

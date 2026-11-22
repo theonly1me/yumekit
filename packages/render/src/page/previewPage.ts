@@ -1,4 +1,5 @@
-import { loadStylePackFonts, paper } from "@yumekit/scene-kit";
+import { loadStylePackFonts, stylePackOf } from "@yumekit/scene-kit";
+import { listenForTextEdits, markEditableTexts } from "./textEditing/index.js";
 import { createPageStage, type PageStage } from "./pageStage.js";
 import {
   isPreviewData,
@@ -7,8 +8,8 @@ import {
   type PreviewData,
 } from "./previewData.js";
 import {
+  parentRequestOf,
   permittedOriginOf,
-  seekRequestOf,
   type PreviewReply,
   type SeekRequest,
 } from "./previewMessages.js";
@@ -16,12 +17,18 @@ import { createSceneErrorLog } from "./sceneErrorLog.js";
 import { messageOf } from "./sceneFailure.js";
 
 type LoadedPreview =
-  | { ok: true; stage: PageStage; frameCount: number }
+  | {
+      ok: true;
+      stage: PageStage;
+      frameCount: number;
+      propsOfScene: Map<string, unknown>;
+    }
   | { ok: false; kind: string; message: string };
 
 const parameters = new URLSearchParams(window.location.search);
 const outputId = parameters.get("output") ?? "";
 const parentOrigin = permittedOriginOf(parameters.get("parentOrigin"));
+const stageElement = document.querySelector<HTMLElement>("#stage");
 const errorLog = createSceneErrorLog();
 let loaded: LoadedPreview = {
   ok: false,
@@ -53,13 +60,14 @@ async function load(): Promise<void> {
   if (loaded.ok) {
     loaded.stage.dispose();
   }
-  const element = document.querySelector<HTMLElement>("#stage");
+  const element = stageElement;
   if (!data.ok || element === null) {
     loaded = data.ok
       ? { ok: false, kind: "preview-not-ready", message: "No #stage element" }
       : data;
     return;
   }
+  await loadStylePackFonts(stylePackOf(data.pageData.look));
   const moduleSceneUrls = new Map(Object.entries(data.moduleSceneUrls));
   const stage = createPageStage({
     element,
@@ -75,7 +83,10 @@ async function load(): Promise<void> {
     errorLog,
     mode: "preview",
   });
-  loaded = { ok: true, stage, frameCount: data.frameCount };
+  const propsOfScene = new Map<string, unknown>(
+    data.pageData.project.scenes.map((scene) => [scene.id, scene.props]),
+  );
+  loaded = { ok: true, stage, frameCount: data.frameCount, propsOfScene };
 }
 
 function isFrameInRange(options: { frame: number; frameCount: number }) {
@@ -106,6 +117,13 @@ async function draw(request: SeekRequest): Promise<PreviewReply> {
   }
   errorLog.takeErrors();
   const result = await loaded.stage.seek(frame);
+  const { propsOfScene } = loaded;
+  if (stageElement !== null) {
+    markEditableTexts({
+      root: stageElement,
+      propsOf: (sceneId) => propsOfScene.get(sceneId),
+    });
+  }
   return result.ok
     ? { type: "sought", requestId }
     : {
@@ -138,7 +156,7 @@ function enqueue(work: () => Promise<void>): void {
 }
 
 window.addEventListener("message", (event) => {
-  const request = seekRequestOf(event.data);
+  const request = parentRequestOf(event.data);
   if (
     parentOrigin === undefined ||
     event.origin !== parentOrigin ||
@@ -147,13 +165,19 @@ window.addEventListener("message", (event) => {
   ) {
     return;
   }
+  if (request.type === "reload") {
+    enqueue(refresh);
+    return;
+  }
   enqueue(async () => {
     lastSeek = request;
     reply(await draw(request));
   });
 });
 
-await loadStylePackFonts(paper);
+if (stageElement !== null) {
+  listenForTextEdits({ root: stageElement, enqueue, reply, redraw: refresh });
+}
 const events = new EventSource(previewEventsPath);
 events.addEventListener("open", () => {
   enqueue(refresh);

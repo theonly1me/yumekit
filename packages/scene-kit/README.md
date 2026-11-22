@@ -4,10 +4,12 @@ Ready scene components and style packs. Documents 01 and 02 in `docs/design` are
 
 ## Interface
 
-- `kitScenes` from `@yumekit/scene-kit`: a `SceneModule` for each kit scene, keyed by its component name. It runs in the browser.
-- `paper` from `@yumekit/scene-kit`: the tokens of the default style pack. Custom scene code reads its colors, such as `paper.colors.text`, and its font family names, such as `paper.fonts.display.family`.
-- `loadStylePackFonts(paper)` from `@yumekit/scene-kit`: loads the fonts of a style pack. The stage page calls it before the first frame.
-- `kitSceneSchemas` from `@yumekit/scene-kit/schemas`: the purpose and the `zod` props schema of each kit scene. It has no browser code, so Node code can load it.
+- `kitScenesOf(look)` from `@yumekit/scene-kit`: a `SceneModule` for each kit scene in a look, keyed by its component name. It runs in the browser. `kitScenes` gives the `paper` scenes.
+- `stylePacks` and `stylePackOf(look)`: the style pack of each look.
+- `useStylePack()`: the style pack in a scene. In a custom scene, it is the pack of the look that the stage page activates with `activateLook(look)`.
+- `paper`: the tokens of the `paper` style pack, for old custom scenes.
+- `loadStylePackFonts(stylePack)`: loads the fonts of a style pack. The stage page calls it before the first frame.
+- `kitSceneSchemas`, `lookIds`, and `looks` from `@yumekit/scene-kit/schemas`: the purpose and the `zod` props schema of each kit scene, and the id, the label, and one line for each look. This entry has no browser code, so Node code can load it.
 
 | Component       | What it shows                                                    |
 | --------------- | ---------------------------------------------------------------- |
@@ -21,15 +23,15 @@ Ready scene components and style packs. Documents 01 and 02 in `docs/design` are
 
 A scene treats its props as untrusted input. It draws a default for a missing or wrong value and never throws.
 
-## Style pack
+## Looks
 
-The `paper` style pack sets the colors, the fonts, the motion, and the sizes. Each scene reads its tokens, so a second pack needs no change to the scenes.
+A look is a style pack: the colors, the fonts, the backdrop, the motion, and the sizes. Each scene reads its tokens, so a new pack needs no change to the scenes. The looks are `midnight`, `studio`, `editorial`, `neon`, and `paper` (document 17 in `docs/design`).
 
-The bottom 16 units of the picture are the caption area. `caption-words` draws paper words on an ink panel inside it, and each other scene keeps its text above it.
+The bottom 16 units of the picture are the caption area. `caption-words` draws the words on the caption panel of the look inside it, and each other scene keeps its text above it.
 
 ## Fonts
 
-The `fonts` folder holds the Latin subsets of Zen Maru Gothic (700) and Zen Kaku Gothic New (500) as WOFF2 files from Google Fonts. Both use the SIL Open Font License 1.1. The license files are next to the fonts.
+The `fonts` folder holds the Latin subsets of the fonts of each look as WOFF2 files from Google Fonts: Zen Maru Gothic (700), Zen Kaku Gothic New (500), Bricolage Grotesque (700), Inter (500), Inter Tight (800), Fraunces (600), DM Sans (500), and Space Grotesk (700 and 500). Each uses the SIL Open Font License 1.1. The license files are next to the fonts.
 
 ## Tests
 

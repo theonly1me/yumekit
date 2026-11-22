@@ -61,7 +61,7 @@ describe("generate_video rejects a setting before any request", () => {
       name: "an unknown model",
       input: { model: "fal-ai/unknown" },
       message:
-        'model "fal-ai/unknown" is not a model of this server. Use one of: bytedance/seedance-2.5/us.',
+        'model "fal-ai/unknown" is not a model of this server. Use one of: bytedance/seedance-2.5/us, kling/v4, google/gemini-omni-flash/v1.2, minimax/h3, alibaba/wan-3.0, lightricks/ltx-2.5/pro, fal-ai/pixverse/v6, blackforestlabs/flux-3/video, xai/grok-imagine-video/v1.5.',
     },
     {
       name: "reference images",

@@ -263,6 +263,9 @@ importers:
       '@yumekit/project':
         specifier: workspace:*
         version: link:../../packages/project
+      '@yumekit/scene-kit':
+        specifier: workspace:*
+        version: link:../../packages/scene-kit
       react:
         specifier: 19.3.1
         version: 19.3.1

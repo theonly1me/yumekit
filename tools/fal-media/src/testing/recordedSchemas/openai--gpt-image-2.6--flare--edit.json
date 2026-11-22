@@ -1,0 +1,76 @@
+{
+  "endpoint_id": "openai/gpt-image-2.6/flare/edit",
+  "page": "https://fal.ai/models/openai/gpt-image-2.6/flare/edit",
+  "schema_url": "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=openai/gpt-image-2.6/flare/edit",
+  "read_on": "2026-11-22",
+  "required": ["image_urls", "prompt"],
+  "properties": {
+    "background": {
+      "types": ["string"],
+      "enum": ["auto", "transparent", "opaque"]
+    },
+    "enable_safety_checker": {
+      "types": ["boolean"]
+    },
+    "frame_count": {
+      "types": ["integer"],
+      "minimum": 2,
+      "maximum": 16
+    },
+    "frame_duration_ms": {
+      "types": ["integer"],
+      "minimum": 20,
+      "maximum": 2000
+    },
+    "image_size": {
+      "types": ["object", "string"],
+      "enum": [
+        "square_hd",
+        "square",
+        "portrait_4_3",
+        "portrait_16_9",
+        "landscape_4_3",
+        "landscape_16_9",
+        "auto"
+      ]
+    },
+    "image_urls": {
+      "types": ["array"],
+      "maxItems": 16
+    },
+    "markup_image_url": {
+      "types": ["null", "string"]
+    },
+    "mask_url": {
+      "types": ["null", "string"]
+    },
+    "num_images": {
+      "types": ["integer"],
+      "minimum": 1,
+      "maximum": 10
+    },
+    "output_compression": {
+      "types": ["integer", "null"],
+      "minimum": 0,
+      "maximum": 100
+    },
+    "output_format": {
+      "types": ["string"],
+      "enum": ["jpeg", "png", "webp", "gif"]
+    },
+    "prompt": {
+      "types": ["string"]
+    },
+    "quality": {
+      "types": ["string"],
+      "enum": ["auto", "low", "medium", "high", "xhigh", "max"]
+    },
+    "reasoning_effort": {
+      "types": ["string"],
+      "enum": ["low", "medium", "high"]
+    },
+    "sync_mode": {
+      "types": ["boolean"]
+    }
+  }
+}

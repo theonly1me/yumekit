@@ -10,6 +10,7 @@ const bottomInsetUnits = 2.5;
 export function CaptionPanel(props: {
   placement: "top" | "bottom";
   style?: CSSProperties;
+  textProp?: string;
   children: ReactNode;
 }): ReactNode {
   const stylePack = useStylePack();
@@ -31,6 +32,7 @@ export function CaptionPanel(props: {
       }}
     >
       <p
+        data-text-prop={props.textProp}
         style={{
           ...bodyTextStyle(stylePack),
           fontSize: sizes.text("caption"),

@@ -36,6 +36,7 @@ export function Editor(props: {
     chat: editorChat.chat,
     projectFolder,
     videoStyle: snapshot.project.videoStyle ?? "graphics",
+    look: snapshot.project.look ?? "paper",
   });
   const { facts, playback } = view;
   const exporting = useExportSheet({
@@ -134,7 +135,9 @@ export function Editor(props: {
               output={output}
               frame={facts.frame}
               framesPerSecond={framesPerSecond}
-              hint={`${tab.name}, ${String(output.widthPixels)} x ${String(output.heightPixels)}.`}
+              hint={`Click the text in the video to change it. ${tab.name}, ${String(output.widthPixels)} x ${String(output.heightPixels)}.`}
+              snapshot={snapshot}
+              onTextEditing={playback.pause}
             />
             <Transport
               frame={facts.frame}

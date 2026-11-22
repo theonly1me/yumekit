@@ -1,0 +1,42 @@
+{
+  "endpoint_id": "minimax/h3/image-to-video",
+  "page": "https://fal.ai/models/minimax/h3/image-to-video",
+  "schema_url": "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=minimax/h3/image-to-video",
+  "read_on": "2026-11-22",
+  "required": ["prompt"],
+  "properties": {
+    "duration": {
+      "types": ["integer"],
+      "minimum": 5,
+      "maximum": 15
+    },
+    "enable_safety_checker": {
+      "types": ["boolean"]
+    },
+    "end_image_url": {
+      "types": ["null", "string"]
+    },
+    "image_url": {
+      "types": ["null", "string"]
+    },
+    "prompt": {
+      "types": ["string"]
+    },
+    "prompt_expansion_mode": {
+      "types": ["null", "string"]
+    },
+    "resolution": {
+      "types": ["string"],
+      "enum": ["480P", "768P", "2K", "4K"]
+    },
+    "seed": {
+      "types": ["integer", "null"]
+    },
+    "sync_mode": {
+      "types": ["boolean"]
+    },
+    "target_audio_url": {
+      "types": ["null", "string"]
+    }
+  }
+}

@@ -26,16 +26,16 @@ function createHarnessServer(options: {
 
 ### Read
 
-| Tool               | Input       | Result                                                                                                                                                            |
-| ------------------ | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `get_project`      | none        | Name, frame rate, `video_style`, outputs with their `platforms`, script, bible, a list of scenes (id, title, kind), the length of each timeline, and the revision |
-| `get_scene`        | `scene_id`  | The scene record, and the code of a module scene                                                                                                                  |
-| `get_timeline`     | `output_id` | All tracks and clips of the output, with `off` for each track                                                                                                     |
-| `list_assets`      | `kind?`     | Each asset record. Word timings are not included                                                                                                                  |
-| `get_asset_words`  | `asset_id`  | The word timings of a speech asset, from `readAssetWords`                                                                                                         |
-| `list_kit_scenes`  | none        | Each kit scene: name, purpose, and the schema of its props                                                                                                        |
-| `get_scene_guide`  | none        | The reference for custom scene code: the contract, the hooks, the animation functions, the rules, and two examples                                                |
-| `list_media_tools` | none        | Each connected media server, its capabilities, its description, and the state of each key, and `generated_video` of document 09                                   |
+| Tool               | Input       | Result                                                                                                                                                                  |
+| ------------------ | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `get_project`      | none        | Name, frame rate, `video_style`, look, outputs with their `platforms`, script, bible, a list of scenes (id, title, kind), the length of each timeline, and the revision |
+| `get_scene`        | `scene_id`  | The scene record, and the code of a module scene                                                                                                                        |
+| `get_timeline`     | `output_id` | All tracks and clips of the output, with `off` for each track                                                                                                           |
+| `list_assets`      | `kind?`     | Each asset record. Word timings are not included                                                                                                                        |
+| `get_asset_words`  | `asset_id`  | The word timings of a speech asset, from `readAssetWords`                                                                                                               |
+| `list_kit_scenes`  | none        | Each kit scene: name, purpose, and the schema of its props, and each look with one line                                                                                 |
+| `get_scene_guide`  | none        | The reference for custom scene code: the contract, the hooks, the animation functions, the rules, and two examples                                                      |
+| `list_media_tools` | none        | Each connected media server, its capabilities, its description, and the state of each key, and `generated_video` of document 09                                         |
 
 ### Write the story
 
@@ -43,6 +43,7 @@ function createHarnessServer(options: {
 | ----------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
 | `set_script`      | `script`                                                                                      | `setScript`                                             |
 | `set_bible`       | `style`, `palette`, `cast`, `voice`                                                           | `setBible`                                              |
+| `set_look`        | `look`                                                                                        | `setLook`                                               |
 | `add_output`      | `output_id`, `label`, `width_pixels`, `height_pixels`                                         | `addOutput`                                             |
 | `remove_output`   | `output_id`                                                                                   | `removeOutput`                                          |
 | `add_platform`    | `platform_id`                                                                                 | `setOutputPlatforms`, or `addOutput` and `copyTimeline` |

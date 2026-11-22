@@ -4,12 +4,14 @@ import {
   type PreviewFailure,
   type PreviewQueue,
 } from "./previewQueue.js";
-import { previewReplyOf } from "./previewReply.js";
+import { previewMessageOf } from "./previewReply.js";
+import type { TextInPlace } from "./useTextInPlace.js";
 
 export function usePreviewChannel(options: {
   pageUrl: string | undefined;
   frame: number;
   frameElement: RefObject<HTMLIFrameElement | null>;
+  textInPlace: TextInPlace;
 }): PreviewFailure | undefined {
   const { pageUrl, frame, frameElement } = options;
   const [failure, setFailure] = useState<{
@@ -18,6 +20,11 @@ export function usePreviewChannel(options: {
   }>();
   const queue = useRef<PreviewQueue>(undefined);
   const latestFrame = useRef(frame);
+  const textInPlace = useRef(options.textInPlace);
+
+  useEffect(() => {
+    textInPlace.current = options.textInPlace;
+  }, [options.textInPlace]);
 
   useEffect(() => {
     latestFrame.current = frame;
@@ -27,10 +34,11 @@ export function usePreviewChannel(options: {
   useEffect(() => {
     if (pageUrl === undefined) return;
     const pageOrigin = new URL(pageUrl).origin;
+    const send = (message: object) => {
+      frameElement.current?.contentWindow?.postMessage(message, pageOrigin);
+    };
     const created = createPreviewQueue({
-      send: (message) => {
-        frameElement.current?.contentWindow?.postMessage(message, pageOrigin);
-      },
+      send,
       onFailure: (found) => {
         setFailure(
           found === undefined ? undefined : { pageUrl, failure: found },
@@ -46,8 +54,19 @@ export function usePreviewChannel(options: {
       ) {
         return;
       }
-      const reply = previewReplyOf(event.data);
-      if (reply !== undefined) created.receive(reply);
+      const message = previewMessageOf(event.data);
+      if (message?.kind === "reply") created.receive(message.reply);
+      if (message?.kind === "text-editing") textInPlace.current.onEditing();
+      if (message?.kind === "text-changed") {
+        textInPlace.current
+          .save(message.change)
+          .then((saved) => {
+            if (saved.kind === "failed") send({ type: "reload" });
+          })
+          .catch(() => {
+            send({ type: "reload" });
+          });
+      }
     };
     window.addEventListener("message", listen);
     return () => {

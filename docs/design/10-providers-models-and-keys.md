@@ -40,6 +40,8 @@ type MediaModel = {
   prices: MediaModelPrice[];
   read_on: string;
   shutdown_on?: string;
+  accepts?: ("first_frame" | "last_frame" | "reference_images")[];
+  tested?: boolean;
 };
 
 type MediaModelSetting =
@@ -79,6 +81,7 @@ Rules:
 6. `steps` are short sentences that a person follows to get the key. `get_key_url` is the page where the person makes it.
 7. `describe_media_server` works with no key, and makes no network request.
 8. The harness validates the result against the schema. A result that does not match is `media-tool-invalid-result`, and the server stays usable without a description.
+9. `accepts` and `tested` are optional, so an older description stays valid. Document 16 gives their meaning.
 
 A model catalog is a constant in the server package. The price rule of document 06 changes: a server can return `cost_usd` as an estimate from its catalog when the response of the provider gives no amount. The result then has `cost_is_estimate: true`.
 
@@ -175,11 +178,11 @@ The editor is milestone 2. These rules are its input. The engine gives the edito
 
 Document 09 named one video server. With decision P1, yumekit bundles three, and each one has its own work package.
 
-| Folder               | Runs             | Key              | Models at the start                           |
-| -------------------- | ---------------- | ---------------- | --------------------------------------------- |
-| `tools/gemini-media` | Hosted           | `GEMINI_API_KEY` | `gemini-omni-1.2-flash`                       |
-| `tools/fal-media`    | Hosted           | `FAL_KEY`        | Seedance 2.5 text to video and image to video |
-| `tools/local-video`  | On this computer | None             | Not built. LTX-2.3 is the first candidate     |
+| Folder               | Runs             | Key              | Models at the start                        |
+| -------------------- | ---------------- | ---------------- | ------------------------------------------ |
+| `tools/gemini-media` | Hosted           | `GEMINI_API_KEY` | `gemini-omni-1.2-flash`                    |
+| `tools/fal-media`    | Hosted           | `FAL_KEY`        | 9 video and 8 picture models (document 16) |
+| `tools/local-video`  | On this computer | None             | Not built. LTX-2.3 is the first candidate  |
 
 ### `tools/fal-media`
 
@@ -221,7 +224,7 @@ The endpoints that the server uses, from `fal.ai/docs/api-reference/inference-ap
 - The server uses `status_url` and `response_url` from the answer, as the fal documents tell. It sends the key only to `queue.fal.run` and `queue.falrun.com`, and rejects another host.
 - The server polls every 5 seconds, for at most 550 seconds in total (110 polls), so it stops before the default `toolTimeoutSeconds` of 600. The failure then gives the fal request id and says that fal can still finish and bill the request. It sends an MCP progress notification after each poll that is not complete, when the client asks for progress. A failure message names the fal request id.
 - A failure message never holds the key. The server replaces the key value with `[FAL_KEY]` in each failure text.
-- A later change adds a catalog entry for each other fal video model. Each entry needs the model page as its source and a test.
+- Document 16 (WP45) adds the other video models and the picture models. Each entry names its model pages as its sources, and a test checks each request body against the recorded schema of its page.
 
 ### `tools/local-video`
 

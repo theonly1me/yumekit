@@ -48,6 +48,27 @@ describe("connectMediaTools descriptions", () => {
     });
   });
 
+  it("keeps accepts and tested of each model, and reads an older description without them", async () => {
+    const { tools } = await connectFixture({
+      projectFile: {
+        mcpServers: { sample: sampleServerCommand, keyed: keyedServerCommand },
+      },
+    });
+
+    const [sample, keyed] = tools.list();
+    const sampleVideo = sample?.description?.models.find(
+      (model) => model.capability === "video",
+    );
+
+    expect(sampleVideo).toMatchObject({
+      accepts: ["first_frame", "last_frame", "reference_images"],
+      tested: true,
+    });
+    expect(keyed?.descriptionFailure).toBeUndefined();
+    expect(keyed?.description?.models[0]).not.toHaveProperty("accepts");
+    expect(keyed?.description?.models[0]).not.toHaveProperty("tested");
+  });
+
   it("keeps a server with a description that does not match the schema usable", async () => {
     const { tools, outputDirectory } = await connectFixture({
       projectFile: {

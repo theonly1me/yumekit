@@ -13,6 +13,7 @@ import { registerSceneClipTools } from "../sceneClips/registerSceneClipTools.js"
 import { registerPlatformTools } from "../story/registerPlatformTools.js";
 import { registerPutScene } from "../story/registerPutScene.js";
 import { registerSetVideoStyle } from "../story/registerSetVideoStyle.js";
+import { registerSetLook } from "../story/registerSetLook.js";
 import { registerStoryTools } from "../story/registerStoryTools.js";
 import { registerNarrationAndHistoryTools } from "../timeline/registerNarrationTools.js";
 import { registerPlaceVideo } from "../timeline/registerPlaceVideo.js";
@@ -32,6 +33,7 @@ export function harnessToolsOf(options: HarnessOptions): HarnessTool[] {
   registerStoryTools(context);
   registerPlatformTools(context);
   registerSetVideoStyle(context);
+  registerSetLook(context);
   registerPutScene(context);
   registerTimelineTools(context);
   registerNarrationAndHistoryTools(context);

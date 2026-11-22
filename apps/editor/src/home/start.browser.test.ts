@@ -29,7 +29,7 @@ describe("the start screen", () => {
       .poll(() => page.getByText("What do you want to make?").count())
       .toBe(1);
     const pressed = await page
-      .locator('[aria-pressed="true"]')
+      .locator('[aria-pressed="true"]:not(.look-choice)')
       .allTextContents();
 
     expect(pressed).toEqual([

@@ -1,84 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { z } from "zod";
-import {
-  connectFalMedia,
-  placeholderKey,
-  resultText,
-  temporaryFolder,
-  writeImage,
-} from "./testing/connectFalMedia.ts";
-import { fakeFal } from "./testing/fakeFal.ts";
+import { describeWithNoKey } from "./testing/describedModels.ts";
 
-const setting = z.discriminatedUnion("kind", [
-  z.object({
-    name: z.string(),
-    label: z.string(),
-    kind: z.literal("choice"),
-    choices: z.array(z.string()),
-    default: z.string(),
-  }),
-  z.object({
-    name: z.string(),
-    label: z.string(),
-    kind: z.literal("whole-number"),
-    minimum: z.number(),
-    maximum: z.number(),
-    default: z.number(),
-  }),
-  z.object({
-    name: z.string(),
-    label: z.string(),
-    kind: z.literal("switch"),
-    default: z.boolean(),
-  }),
-  z.object({
-    name: z.string(),
-    label: z.string(),
-    kind: z.literal("image-file"),
-  }),
-]);
-
-const description = z.strictObject({
-  label: z.string(),
-  runs: z.enum(["hosted", "on-this-computer"]),
-  keys: z.array(
-    z.strictObject({
-      variable: z.string(),
-      label: z.string(),
-      get_key_url: z.url(),
-      steps: z.array(z.string()).min(1),
-    }),
-  ),
-  models: z.array(
-    z.strictObject({
-      id: z.string(),
-      label: z.string(),
-      capability: z.literal("video"),
-      is_default: z.boolean(),
-      settings: z.array(setting),
-      prices: z.array(
-        z.strictObject({
-          usd: z.number(),
-          unit: z.literal("second"),
-          when: z.record(z.string(), z.string()),
-        }),
-      ),
-      read_on: z.iso.date(),
-    }),
-  ),
-});
-
-async function describeWithNoKey() {
-  const media = await connectFalMedia({
-    environment: {},
-    respond: fakeFal({}),
-  });
-  const result = await media.callTool({
-    name: "describe_media_server",
-    arguments: {},
-  });
-  return { media, parsed: description.parse(result.structuredContent) };
-}
+const makersOf = (ids: string[]) =>
+  new Set(ids.map((id) => id.split("/")[0] ?? id));
 
 describe("describe_media_server", () => {
   it("works with no key and sends no request", async () => {
@@ -86,16 +10,36 @@ describe("describe_media_server", () => {
 
     expect(media.requests).toHaveLength(0);
     expect(parsed.keys.map((key) => key.variable)).toEqual(["FAL_KEY"]);
-    expect(parsed.models.filter((model) => model.is_default)).toHaveLength(1);
+    for (const capability of ["image", "video"]) {
+      expect(
+        parsed.models.filter(
+          (model) => model.capability === capability && model.is_default,
+        ),
+        capability,
+      ).toHaveLength(1);
+    }
   });
 
-  it("shows Seedance 2.5 as one model with the per second prices of the fal model page", async () => {
+  it("lists at least 6 picture models and 6 video models from different makers", async () => {
     const { parsed } = await describeWithNoKey();
+    const idsOf = (capability: string) =>
+      parsed.models
+        .filter((model) => model.capability === capability)
+        .map((model) => model.id);
 
-    expect(parsed.models.map((model) => model.id)).toEqual([
-      "bytedance/seedance-2.5/us",
-    ]);
-    expect(parsed.models[0]?.prices).toEqual([
+    expect(makersOf(idsOf("image")).size).toBeGreaterThanOrEqual(6);
+    expect(makersOf(idsOf("video")).size).toBeGreaterThanOrEqual(6);
+  });
+
+  it("keeps Seedance 2.5 as the default video model with the per second prices of its fal page", async () => {
+    const { parsed } = await describeWithNoKey();
+    const seedance = parsed.models.find(
+      (model) => model.id === "bytedance/seedance-2.5/us",
+    );
+
+    expect(seedance?.is_default).toBe(true);
+    expect(seedance?.accepts).toEqual(["first_frame", "last_frame"]);
+    expect(seedance?.prices).toEqual([
       { usd: 0.2205, unit: "second", when: { resolution: "480p" } },
       { usd: 0.473, unit: "second", when: { resolution: "720p" } },
       { usd: 1.164, unit: "second", when: { resolution: "1080p" } },
@@ -103,52 +47,36 @@ describe("describe_media_server", () => {
     ]);
   });
 
-  it("names only settings that are input fields of generate_video", async () => {
-    const { media, parsed } = await describeWithNoKey();
-    const fields = await media.inputFieldsOf("generate_video");
+  it("marks each model as not tested with yumekit, because no real call ran yet", async () => {
+    const { parsed } = await describeWithNoKey();
+
+    expect(parsed.models.filter((model) => model.tested)).toEqual([]);
+  });
+
+  it("offers a reference pictures setting exactly when a model accepts reference pictures", async () => {
+    const { parsed } = await describeWithNoKey();
 
     for (const model of parsed.models) {
-      for (const entry of model.settings) expect(fields).toContain(entry.name);
+      const names = model.settings.map((entry) => entry.name);
+      expect(names.includes("reference_image_paths"), model.id).toBe(
+        model.accepts.includes("reference_images"),
+      );
+      expect(names.includes("last_frame_path"), model.id).toBe(
+        model.accepts.includes("last_frame"),
+      );
     }
   });
 
-  it("accepts the default value of each setting with no input failure", async () => {
-    const { parsed } = await describeWithNoKey();
-    const folder = await temporaryFolder();
-    const firstFrame = await writeImage({ folder, name: "first.png" });
-    const lastFrame = await writeImage({ folder, name: "last.png" });
-    const imageInputs: Partial<Record<string, Record<string, string>>> = {
-      first_frame_path: { first_frame_path: firstFrame },
-      last_frame_path: {
-        first_frame_path: firstFrame,
-        last_frame_path: lastFrame,
-      },
+  it("names only settings that are input fields of the tool of the model", async () => {
+    const { media, parsed } = await describeWithNoKey();
+    const fieldsOf = {
+      image: await media.inputFieldsOf("generate_image"),
+      video: await media.inputFieldsOf("generate_video"),
     };
-    const media = await connectFalMedia({
-      environment: { FAL_KEY: placeholderKey },
-      respond: fakeFal({}),
-    });
+
     for (const model of parsed.models) {
       for (const entry of model.settings) {
-        const value =
-          entry.kind === "image-file"
-            ? imageInputs[entry.name]
-            : { [entry.name]: entry.default };
-        const result = await media.callTool({
-          name: "generate_video",
-          arguments: {
-            prompt: "A lake",
-            duration_seconds: 4,
-            output_directory: folder,
-            file_stem: `setting-${entry.name}`,
-            model: model.id,
-            ...value,
-          },
-        });
-        expect(resultText(result), entry.name).not.toMatch(
-          /must be|does not accept|needs/,
-        );
-        expect(result.isError, entry.name).toBeFalsy();
+        expect(fieldsOf[model.capability], model.id).toContain(entry.name);
       }
     }
   });

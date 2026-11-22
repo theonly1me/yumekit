@@ -1,0 +1,56 @@
+{
+  "endpoint_id": "krea/v3/edit",
+  "page": "https://fal.ai/models/krea/v3/edit",
+  "schema_url": "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=krea/v3/edit",
+  "read_on": "2026-11-22",
+  "required": ["image_urls"],
+  "properties": {
+    "enable_safety_checker": {
+      "types": ["boolean"]
+    },
+    "image_size": {
+      "types": ["object", "string"],
+      "enum": [
+        "square_hd",
+        "square",
+        "portrait_4_3",
+        "portrait_16_9",
+        "landscape_4_3",
+        "landscape_16_9",
+        "auto"
+      ]
+    },
+    "image_urls": {
+      "types": ["array"],
+      "minItems": 1,
+      "maxItems": 8
+    },
+    "negative_prompt": {
+      "types": ["string"]
+    },
+    "output_format": {
+      "types": ["string"],
+      "enum": ["png", "jpeg"]
+    },
+    "prompt": {
+      "types": ["string"]
+    },
+    "reasoning_level": {
+      "types": ["string"],
+      "enum": ["medium", "high", "ultra"]
+    },
+    "regional_edit": {
+      "types": ["boolean", "null"]
+    },
+    "regions": {
+      "types": ["array"],
+      "maxItems": 24
+    },
+    "seed": {
+      "types": ["integer", "null"]
+    },
+    "sync_mode": {
+      "types": ["boolean"]
+    }
+  }
+}

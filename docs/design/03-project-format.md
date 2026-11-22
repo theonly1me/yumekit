@@ -33,9 +33,12 @@ type Project = {
   framesPerSecond: 24 | 25 | 30 | 50 | 60;
   outputs: Output[];
   videoStyle?: VideoStyle;
+  look?: LookId;
 };
 
 type VideoStyle = "graphics" | "ai-video" | "mix";
+
+type LookId = "midnight" | "studio" | "editorial" | "neon" | "paper";
 
 type Output = {
   id: string;
@@ -202,7 +205,7 @@ function openProject(options: {
 
 ## Edits
 
-`Edit` is a closed union on the field `kind`. These 17 kinds are all the ways to change a project.
+`Edit` is a closed union on the field `kind`. These 18 kinds are all the ways to change a project.
 
 | Kind                 | Fields                          | Effect                                                                                                                            |
 | -------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
@@ -211,6 +214,7 @@ function openProject(options: {
 | `removeOutput`       | `outputId`                      | Removes an output and its timeline                                                                                                |
 | `setOutputPlatforms` | `outputId`, `platforms`         | Replaces the platforms of one output. The store keeps them in catalog order. An empty list removes the field                      |
 | `setVideoStyle`      | `videoStyle`                    | Sets the video style of the project (document 15)                                                                                 |
+| `setLook`            | `look`                          | Changes the look of the project (document 17)                                                                                     |
 | `setScript`          | `script`                        | Replaces `script.md`                                                                                                              |
 | `setBible`           | `bible`                         | Replaces `bible.json`                                                                                                             |
 | `putScene`           | `scene`, `code?`                | Adds or replaces a scene. `code` is required for a module scene                                                                   |

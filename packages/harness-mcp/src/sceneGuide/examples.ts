@@ -8,11 +8,12 @@ export const counterExample = {
   useFrame,
   useSceneContext,
 } from "@yumekit/scene";
-import { paper } from "@yumekit/scene-kit";
+import { useStylePack } from "@yumekit/scene-kit";
 
 export default defineReactScene(({ props }) => {
   const frame = useFrame();
   const { unit, layout, durationFrames } = useSceneContext();
+  const stylePack = useStylePack();
   const value = typeof props.value === "number" ? props.value : 0;
   const label = typeof props.label === "string" ? props.label : "";
   const settleFrame = Math.max(1, Math.min(45, Math.floor(durationFrames * 0.7)));
@@ -39,17 +40,17 @@ export default defineReactScene(({ props }) => {
         flexDirection: "column",
         justifyContent: "center",
         gap: 2 * unit,
-        background: paper.colors.background,
-        color: paper.colors.text,
-        fontFamily: paper.fonts.body.family,
-        fontWeight: paper.fonts.body.weight,
+        background: stylePack.colors.background,
+        color: stylePack.colors.text,
+        fontFamily: stylePack.fonts.body.family,
+        fontWeight: stylePack.fonts.body.weight,
       }}
     >
       <div
         style={{
           fontSize: (layout === "tall" ? 30 : 24) * unit,
-          fontFamily: paper.fonts.display.family,
-          fontWeight: paper.fonts.display.weight,
+          fontFamily: stylePack.fonts.display.family,
+          fontWeight: stylePack.fonts.display.weight,
           lineHeight: 1,
           opacity,
           transform: "translateY(" + String(rise) + "px)",
@@ -57,7 +58,7 @@ export default defineReactScene(({ props }) => {
       >
         {String(Math.round(shown))}
       </div>
-      <div style={{ fontSize: 6 * unit, opacity, overflowWrap: "anywhere" }}>{label}</div>
+      <div data-text-prop="label" style={{ fontSize: 6 * unit, opacity, overflowWrap: "anywhere" }}>{label}</div>
     </div>
   );
 });
@@ -79,7 +80,7 @@ export const stepsExample = {
   useFrame,
   useSceneContext,
 } from "@yumekit/scene";
-import { paper } from "@yumekit/scene-kit";
+import { useStylePack } from "@yumekit/scene-kit";
 
 function Step(props: { text: string; color: string }) {
   const frame = useFrame();
@@ -104,6 +105,7 @@ function Step(props: { text: string; color: string }) {
 
 export default defineReactScene(({ props }) => {
   const { unit, layout, durationFrames, findAsset } = useSceneContext();
+  const stylePack = useStylePack();
   const steps = Array.isArray(props.steps)
     ? props.steps.filter((step): step is string => typeof step === "string").slice(0, 5)
     : [];
@@ -126,10 +128,10 @@ export default defineReactScene(({ props }) => {
         display: "flex",
         flexDirection: layout === "tall" ? "column" : "row",
         gap: 6 * unit,
-        background: paper.colors.background,
-        color: paper.colors.text,
-        fontFamily: paper.fonts.body.family,
-        fontWeight: paper.fonts.body.weight,
+        background: stylePack.colors.background,
+        color: stylePack.colors.text,
+        fontFamily: stylePack.fonts.body.family,
+        fontWeight: stylePack.fonts.body.weight,
       }}
     >
       {sparks.map((spark, index) => (
@@ -142,7 +144,7 @@ export default defineReactScene(({ props }) => {
             width: unit,
             height: unit,
             borderRadius: "50%",
-            background: paper.colors.accent,
+            background: stylePack.colors.accent,
             opacity: 0.4,
           }}
         />
@@ -150,11 +152,11 @@ export default defineReactScene(({ props }) => {
       <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 3 * unit }}>
         {steps.map((step, index) => (
           <FrameWindow key={index} startFrame={stagger({ index, startFrame: 0, eachFrames })}>
-            <Step text={step} color={paper.colors.bars[index % paper.colors.bars.length] ?? paper.colors.bullet} />
+            <Step text={step} color={stylePack.colors.bars[index % stylePack.colors.bars.length] ?? stylePack.colors.bullet} />
           </FrameWindow>
         ))}
       </div>
-      <div style={{ flex: 1, borderRadius: 2 * unit, overflow: "hidden", background: paper.colors.placeholder }}>
+      <div style={{ flex: 1, borderRadius: 2 * unit, overflow: "hidden", background: stylePack.colors.placeholder }}>
         {image === undefined ? null : (
           <img src={image.url} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
         )}

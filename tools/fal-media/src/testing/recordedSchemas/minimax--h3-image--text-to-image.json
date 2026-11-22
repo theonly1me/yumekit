@@ -1,0 +1,42 @@
+{
+  "endpoint_id": "minimax/h3-image/text-to-image",
+  "page": "https://fal.ai/models/minimax/h3-image/text-to-image",
+  "schema_url": "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=minimax/h3-image/text-to-image",
+  "read_on": "2026-11-22",
+  "required": ["prompt"],
+  "properties": {
+    "enable_prompt_expansion": {
+      "types": ["boolean"]
+    },
+    "image_size": {
+      "types": ["object", "string"],
+      "enum": [
+        "square_hd",
+        "square",
+        "portrait_4_3",
+        "portrait_16_9",
+        "landscape_4_3",
+        "landscape_16_9"
+      ]
+    },
+    "loras": {
+      "types": ["array"],
+      "maxItems": 4
+    },
+    "num_images": {
+      "types": ["integer"],
+      "minimum": 1,
+      "maximum": 10
+    },
+    "output_format": {
+      "types": ["string"],
+      "enum": ["jpeg", "png", "webp", "jpg"]
+    },
+    "prompt": {
+      "types": ["string"]
+    },
+    "sync_mode": {
+      "types": ["boolean"]
+    }
+  }
+}

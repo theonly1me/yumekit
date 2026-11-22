@@ -48,6 +48,7 @@ export function Quote(props: { props: JsonObject }): ReactNode {
       }}
     >
       <p
+        data-text-prop="quote"
         style={{
           ...displayTextStyle(stylePack),
           fontSize: sizes.text("quote"),
@@ -84,6 +85,7 @@ export function Quote(props: { props: JsonObject }): ReactNode {
       />
       {source === undefined || source === "" ? null : (
         <p
+          data-text-prop="source"
           style={{
             ...bodyTextStyle(stylePack),
             color: stylePack.colors.mutedText,

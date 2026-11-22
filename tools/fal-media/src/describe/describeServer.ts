@@ -1,61 +1,33 @@
-import { videoModels, type VideoModel } from "../catalog/index.ts";
+import { imageModels } from "../catalog/image/index.ts";
+import { videoAccepts, videoModels } from "../catalog/video/index.ts";
 import { getKeyUrl } from "../falApi.ts";
+import { imageAccepts, imageSettings, videoSettings } from "./settings.ts";
 
-type MediaModelSetting =
-  | {
-      name: string;
-      label: string;
-      kind: "choice";
-      choices: string[];
-      default: string;
-    }
-  | {
-      name: string;
-      label: string;
-      kind: "whole-number";
-      minimum: number;
-      maximum: number;
-      default: number;
-    }
-  | { name: string; label: string; kind: "switch"; default: boolean }
-  | { name: string; label: string; kind: "image-file" };
-
-function settingsOf(model: VideoModel): MediaModelSetting[] {
-  return [
-    {
-      name: "duration_seconds",
-      label: "Length in seconds",
-      kind: "whole-number",
-      ...model.durationSeconds,
-    },
-    {
-      name: "resolution",
-      label: "Resolution",
-      kind: "choice",
-      choices: [...model.resolutions],
-      default: model.defaultResolution,
-    },
-    { name: "with_audio", label: "Sound", kind: "switch", default: true },
-    { name: "first_frame_path", label: "First frame", kind: "image-file" },
-    ...(model.imageToVideo.acceptsLastFrame
-      ? [
-          {
-            name: "last_frame_path",
-            label: "Last frame",
-            kind: "image-file" as const,
-          },
-        ]
-      : []),
-  ];
+interface CatalogEntry {
+  id: string;
+  label: string;
+  isDefault: boolean;
+  readOn: string;
+  tested: boolean;
+  prices: readonly {
+    usd: number;
+    unit: string;
+    when: Readonly<Record<string, string>>;
+  }[];
 }
 
-function pricesOf(model: VideoModel) {
-  return Object.entries(model.usdPerSecondByResolution).flatMap(
-    ([resolution, usd]) =>
-      usd === undefined
-        ? []
-        : [{ usd, unit: "second" as const, when: { resolution } }],
-  );
+function sharedFields(model: CatalogEntry) {
+  return {
+    id: model.id,
+    label: model.label,
+    is_default: model.isDefault,
+    prices: model.prices.map((price) => ({
+      ...price,
+      when: { ...price.when },
+    })),
+    read_on: model.readOn,
+    tested: model.tested,
+  };
 }
 
 export function describeServer() {
@@ -75,14 +47,19 @@ export function describeServer() {
         ],
       },
     ],
-    models: videoModels.map((model) => ({
-      id: model.id,
-      label: model.label,
-      capability: "video" as const,
-      is_default: model.isDefault,
-      settings: settingsOf(model),
-      prices: pricesOf(model),
-      read_on: model.readOn,
-    })),
+    models: [
+      ...imageModels.map((model) => ({
+        ...sharedFields(model),
+        capability: "image" as const,
+        settings: imageSettings(model),
+        accepts: imageAccepts(model),
+      })),
+      ...videoModels.map((model) => ({
+        ...sharedFields(model),
+        capability: "video" as const,
+        settings: videoSettings(model),
+        accepts: videoAccepts(model),
+      })),
+    ],
   };
 }

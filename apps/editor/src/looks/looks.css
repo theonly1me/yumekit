@@ -1,0 +1,112 @@
+.look-group {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.look-choices {
+  min-width: 0;
+  contain: inline-size;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+}
+
+button.look-choice {
+  position: relative;
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  text-align: left;
+  font-size: var(--step--1);
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.look-picture {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 6px;
+  background: var(--well);
+  outline: 1px solid var(--line);
+  outline-offset: 0;
+  transition: outline-color 120ms ease;
+}
+
+.look-stage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+}
+
+.look-picture[data-state="drawing"] .look-stage {
+  visibility: hidden;
+}
+
+.look-missing {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: var(--step--2);
+  color: var(--muted);
+}
+
+button.look-choice:hover .look-picture {
+  outline-color: var(--line-strong);
+}
+
+button.look-choice[aria-pressed="true"] {
+  color: var(--text);
+}
+
+button.look-choice[aria-pressed="true"] .look-picture {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+
+button.look-choice:focus-visible {
+  outline: none;
+}
+
+button.look-choice:focus-visible .look-picture {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.look-line {
+  margin: 0;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .look-choices {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: 132px;
+    overflow-x: auto;
+    padding: 4px 4px 8px;
+    margin: -4px -4px 0;
+    scroll-snap-type: x mandatory;
+  }
+
+  button.look-choice {
+    scroll-snap-align: start;
+  }
+}
