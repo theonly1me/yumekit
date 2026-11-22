@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { platformIds } from "../platforms/catalog.js";
+import { lookSchema } from "./look.js";
 import { idSchema } from "./values.js";
 
 export const platformIdSchema = z.enum(platformIds);
@@ -28,6 +29,7 @@ export const projectSchema = z.strictObject({
   framesPerSecond: z.literal([24, 25, 30, 50, 60]),
   outputs: z.array(outputSchema),
   videoStyle: videoStyleSchema.exactOptional(),
+  look: lookSchema.exactOptional(),
 });
 
 export type Output = z.infer<typeof outputSchema>;

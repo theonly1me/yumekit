@@ -1,4 +1,4 @@
-import * as sceneKit from "@yumekit/scene-kit";
+import { activateLook, kitScenesOf } from "@yumekit/scene-kit";
 import { createStage, type StageOptions } from "@yumekit/stage";
 import { guardScene } from "./guardScene.js";
 import { loadSceneModule } from "./loadSceneModule.js";
@@ -8,8 +8,10 @@ import type { SeekResult, StagePageData } from "./stagePageData.js";
 
 const sceneTimeoutMilliseconds = 30_000;
 
-const kitScenes: unknown =
-  "kitScenes" in sceneKit ? sceneKit.kitScenes : undefined;
+function kitScenesOfPage(look: string): unknown {
+  activateLook(look);
+  return kitScenesOf(look);
+}
 
 export interface PageStage {
   seek: (frame: number) => Promise<SeekResult>;
@@ -48,6 +50,7 @@ export function createPageStage(options: {
 }): PageStage {
   const { pageData, errorLog } = options;
   const sources = new Map(Object.entries(pageData.sceneSources));
+  const kitScenes = kitScenesOfPage(pageData.look);
   let sceneIdsSeeked: string[] = [];
   const stage = createStage({
     element: options.element,

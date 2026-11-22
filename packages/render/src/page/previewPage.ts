@@ -1,4 +1,4 @@
-import { loadStylePackFonts, paper } from "@yumekit/scene-kit";
+import { loadStylePackFonts, stylePackOf } from "@yumekit/scene-kit";
 import { listenForTextEdits, markEditableTexts } from "./textEditing/index.js";
 import { createPageStage, type PageStage } from "./pageStage.js";
 import {
@@ -67,6 +67,7 @@ async function load(): Promise<void> {
       : data;
     return;
   }
+  await loadStylePackFonts(stylePackOf(data.pageData.look));
   const moduleSceneUrls = new Map(Object.entries(data.moduleSceneUrls));
   const stage = createPageStage({
     element,
@@ -177,8 +178,6 @@ window.addEventListener("message", (event) => {
 if (stageElement !== null) {
   listenForTextEdits({ root: stageElement, enqueue, reply, redraw: refresh });
 }
-
-await loadStylePackFonts(paper);
 const events = new EventSource(previewEventsPath);
 events.addEventListener("open", () => {
   enqueue(refresh);
