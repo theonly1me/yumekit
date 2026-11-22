@@ -23,6 +23,7 @@ import {
   setSafeHeaders,
   type Failure,
 } from "./responses.js";
+import { settingsRoutes } from "./settingsRoutes.js";
 
 export interface RequestHandlerOptions {
   context: EngineContext;
@@ -37,6 +38,7 @@ const routes = [
   ...fileRoutes,
   ...agentRoutes,
   ...chatRoutes,
+  ...settingsRoutes,
 ];
 
 const upgradeRequired: Failure = {
