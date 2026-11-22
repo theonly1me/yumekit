@@ -58,6 +58,22 @@ The scenes row is the first scene track that is not a caption track, as in docum
 - So a change can leave the voice out of step with the scenes. When an output has a voice clip, the result of the tool has `voice_may_not_match: true`. The editor then shows "The voice may not match the scenes now." with the button "Ask the AI to fit the voice", which sends that request to the chat.
 - A track gets the optional field `off`. The preview and the renderer skip a track that is off. The tool `set_track_off` takes `output_ids` (optional, as above), `track_id`, and `off`.
 
+### Details of direct changes
+
+These rules came from the build of WP28.
+
+1. Each tool sends one `setTimeline` edit for each changed output, and `duplicate_scene_clip` also sends one `putScene` edit for each copy. All edits go in one `applyEdits` call, so one call is one undo step. The 15 edit kinds of document 03 stay.
+2. The rule for the scenes row has one copy: `scenesRowOf` and `isCaptionTrack` in `@yumekit/project`. The entry `@yumekit/project/scenes-row` gives the same functions with no Node code. The editor imports only that entry, so the dependency table of document 01 permits it. The editor build then needs the `dist` folder of `@yumekit/project`. CI makes it with `tsc --build` in `pnpm typecheck`, before `pnpm test`.
+3. The order of the row is the start order of its clips. A later clip is a clip after the changed clip in that order.
+4. `resize_scene_clip` keeps each gap of the row, because each later clip moves by the same difference.
+5. `move_scene_clip` places the clips end to end from the start frame of the first clip before the move. So each gap of the row closes. A `to_index` equal to the current index changes nothing and records no undo step.
+6. `remove_scene_clip` moves each later clip earlier by the length of the removed clip. Other gaps stay. The scene stays in the project, also when no clip shows it. The sound clip of a removed `video-clip` scene stays on `video-sound`, as each sound clip keeps its place.
+7. `duplicate_scene_clip` names the copy `<scene id>-copy`, with a suffix such as `-2` when that id is taken. Its title is `<title> (copy)`. It keeps the notes and the props, and the code of a module scene. The new clip is `<clip id>-copy`, with the same rule for a suffix, and has the same id in each changed output. When two outputs show different scenes for the clip id, each scene gets its own copy.
+8. The tools check `duration_frames` and `to_index` themselves, so a wrong value gets a failure with a `kind`: `invalid-duration` or `index-out-of-range`. Other failures are `clip-not-found`, `clip-not-on-scenes-row`, `output-not-found`, and `track-not-found`. With `output_ids`, each named output must hold the clip on its scenes row. If one does not, the tool changes nothing.
+9. A result has `output_ids`, `scenes_rows` (the clips of the row of each changed output), `voice_may_not_match`, and `revision`. `voice_may_not_match` is always present, as `true` or `false`. A voice clip is an audio clip of an asset with word timings, also on a track that is off. `duplicate_scene_clip` also gives `clip_id` and `scene_ids`.
+10. The store keeps `off` only as `off: true`. `set_track_off` with `off: false` removes the field, so a project that never switches a track off keeps its files. `get_timeline` shows `off` on each track, as `false` when the field is absent. `set_timeline` accepts `off`.
+11. The renderer drops each track that is off when it loads an output. So `render_video`, `render_still`, `preview_frame`, and the preview page skip its pictures and its sound. The length of the output still counts each track. The sound of the editor preview skips each audio track that is off.
+
 ## The screens
 
 The prototype is the reference for each screen. This list gives the behavior behind it.

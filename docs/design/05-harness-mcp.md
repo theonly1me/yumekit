@@ -30,7 +30,7 @@ function createHarnessServer(options: {
 | ------------------ | ----------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | `get_project`      | none        | Name, frame rate, outputs, script, bible, a list of scenes (id, title, kind), the length of each timeline, and the revision     |
 | `get_scene`        | `scene_id`  | The scene record, and the code of a module scene                                                                                |
-| `get_timeline`     | `output_id` | All tracks and clips of the output                                                                                              |
+| `get_timeline`     | `output_id` | All tracks and clips of the output, with `off` for each track                                                                   |
 | `list_assets`      | `kind?`     | Each asset record. Word timings are not included                                                                                |
 | `get_asset_words`  | `asset_id`  | The word timings of a speech asset, from `readAssetWords`                                                                       |
 | `list_kit_scenes`  | none        | Each kit scene: name, purpose, and the schema of its props                                                                      |
@@ -75,6 +75,20 @@ What the first agent run could not learn from the descriptions, and each descrip
 `place_narration` puts a speech asset on the first audio track other than `video-sound`, for its full length. With `with_captions`, it also adds a `caption-words` scene and a clip that matches the audio clip, as document 08 requires. It creates the audio track and the caption track when the output has none. All of it is one edit batch, so one undo removes it.
 
 `place_video` shows a video asset in an output, as document 09 says. The scene id is `video-` followed by the asset id. The scene clip goes on the first scene track that is not a caption track, or on a new scene track `scenes` below the others. The sound clip goes on the audio track `video-sound`, at -12 decibels by default, and is never longer than the video. `sound_gain_decibels` set to `off`, or an asset without `hasAudio`, adds no sound clip. With `replace_clip_id`, the tool removes that scene clip, and the sound clip of its video when the clip shows a `video-clip` scene. The video then starts at the start frame of that clip with its length, unless `start_frame` or `duration_frames` are given. A call needs `start_frame` or `replace_clip_id`. All of it is one edit batch, so one undo brings back the replaced clip.
+
+### Direct changes to scenes
+
+| Tool                   | Input                                       | Edit                                                                |
+| ---------------------- | ------------------------------------------- | ------------------------------------------------------------------- |
+| `resize_scene_clip`    | `output_ids?`, `clip_id`, `duration_frames` | `setTimeline` for each changed output                               |
+| `move_scene_clip`      | `output_ids?`, `clip_id`, `to_index`        | `setTimeline` for each changed output                               |
+| `remove_scene_clip`    | `output_ids?`, `clip_id`                    | `setTimeline` for each changed output                               |
+| `duplicate_scene_clip` | `output_ids?`, `clip_id`                    | `putScene` for each copy, and `setTimeline` for each changed output |
+| `set_track_off`        | `output_ids?`, `track_id`, `off`            | `setTimeline` for each changed output                               |
+
+The four scene clip tools change the scenes row of document 03, as document 13 says in "Direct changes to scenes". With no `output_ids`, a tool changes each output that has a clip with `clip_id` on its scenes row. Only the clips of the row move. Each tool is one edit batch, so one undo reverts the change in each output. The result has `output_ids`, `scenes_rows`, and `voice_may_not_match`. It is `true` when a changed output has an audio clip of an asset with word timings. The descriptions tell the agent to use these tools in place of `update_clip` and `remove_clip` to change the length, the order, or the set of scenes.
+
+`set_track_off` switches a track off or on in each output that has it. `get_timeline` shows `off` for each track, and `set_timeline` accepts it.
 
 ### Media
 

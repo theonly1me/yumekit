@@ -252,7 +252,7 @@ These rules came from the build of WP21.
 8. The Render button opens the Render sheet. See "Details of Render".
 9. The theme setting is a text button in the top bar. The key in `localStorage` is `yumekit-theme`.
 10. A reload loses the token, because the app keeps it only in memory. The page then asks for the link from `yumekit open`.
-11. The editor browser tests start `yumekit open` as a child process and use only HTTP, so `apps/editor` imports no yumekit package. The test setup builds the editor first, because CI runs `pnpm test` before `pnpm build`.
+11. The editor browser tests start `yumekit open` as a child process and use only HTTP, so `apps/editor` imports no yumekit package except `@yumekit/project/scenes-row` (document 13, "Details of direct changes"). The test setup builds the editor first, because CI runs `pnpm test` before `pnpm build`.
 
 #### Details of the Scene panel
 
