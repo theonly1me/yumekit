@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>yumekit editor design, fourth pass</title>
+    <link rel="stylesheet" href="fonts.css" />
+    <link rel="stylesheet" href="tokens.css" />
+    <link rel="stylesheet" href="shell.css" />
+    <link rel="stylesheet" href="start.css" />
+    <link rel="stylesheet" href="making.css" />
+    <link rel="stylesheet" href="frame.css" />
+    <link rel="stylesheet" href="editor.css" />
+    <link rel="stylesheet" href="soundRows.css" />
+    <link rel="stylesheet" href="timeline.css" />
+    <link rel="stylesheet" href="scenes.css" />
+    <link rel="stylesheet" href="side.css" />
+    <link rel="stylesheet" href="scenePanel.css" />
+    <link rel="stylesheet" href="sheets.css" />
+    <link rel="stylesheet" href="settings.css" />
+    <link rel="stylesheet" href="notes.css" />
+  </head>
+  <body>
+    <header class="review-bar">
+      <p>Editor design, fourth pass</p>
+      <nav class="review-nav" aria-label="Screens to review">
+        <button type="button" class="tab" data-go="start">Start</button>
+        <button type="button" class="tab" data-go="making">Making</button>
+        <button type="button" class="tab" data-go="editor">Editor</button>
+        <button type="button" class="tab" data-go="editor:clip">
+          Make a real video clip
+        </button>
+        <button type="button" class="tab" data-go="editor:export">
+          Export
+        </button>
+        <button type="button" class="tab" data-go="editor:settings">
+          Settings
+        </button>
+        <a class="tab-link" href="#notes">Notes and questions</a>
+      </nav>
+      <button type="button" class="tab" id="theme">
+        Show the light version
+      </button>
+    </header>
+
+    <main id="app" data-screen="start">
+      <section class="screen" id="start" aria-label="Start"></section>
+      <section
+        class="screen"
+        id="making"
+        aria-label="Making the video"
+      ></section>
+      <section class="screen editor" id="editor" aria-label="Editor">
+        <div class="editor-bar">
+          <div class="identity">
+            <button
+              type="button"
+              class="wordmark-button"
+              id="home"
+              title="Back to the start"
+            >
+              yumekit
+            </button>
+            <p class="project-name" id="project-name"></p>
+          </div>
+          <div class="bar-actions">
+            <button type="button" data-open-sheet="settings">Settings</button>
+            <button type="button" class="primary" data-open-sheet="export">
+              Export
+            </button>
+          </div>
+        </div>
+        <div class="stage">
+          <div id="preview" class="preview"></div>
+          <div id="scenes-row" class="scenes-row"></div>
+          <div id="lower-rows" class="lower-rows"></div>
+        </div>
+        <button type="button" class="primary ask-jump" id="ask-jump">
+          Ask for a change
+        </button>
+        <aside
+          id="side"
+          class="side"
+          aria-label="Chat with the AI, and the picked scene"
+        ></aside>
+      </section>
+      <div class="sheet" id="sheet" hidden>
+        <button type="button" class="sheet-close" id="sheet-close">
+          Close
+        </button>
+        <div id="sheet-content"></div>
+      </div>
+    </main>
+
+    <section
+      class="notes"
+      id="notes"
+      aria-label="Notes and questions"
+    ></section>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

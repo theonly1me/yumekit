@@ -1,0 +1,11 @@
+{
+  "name": "@yumekit/prototype",
+  "version": "0.0.0",
+  "private": true,
+  "description": "The approved design prototype of the editor. A mock with fake data.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "start": "node scripts/serve.js"
+  }
+}

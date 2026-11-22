@@ -43,5 +43,10 @@ export default defineConfig(
     files: ["**/*.js"],
     extends: [tseslint.configs.disableTypeChecked],
   },
+  {
+    files: ["apps/prototype/**/*.js"],
+    ignores: ["apps/prototype/middleware.js", "apps/prototype/scripts/**"],
+    languageOptions: { globals: globals.browser },
+  },
   prettier,
 );
