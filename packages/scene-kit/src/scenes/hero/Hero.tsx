@@ -24,7 +24,7 @@ const underlineLeadFrames = 6;
 const underlineFrames = 16;
 const pulseFrames = 12;
 const wideHeadingUnits = 140;
-const tallKickerSpaceUnits = 14;
+const tallKickerSpaceUnits = 20;
 
 export function Hero(props: { props: JsonObject }): ReactNode {
   const { heading, accentWord, kicker } = readHeroProps(props.props);

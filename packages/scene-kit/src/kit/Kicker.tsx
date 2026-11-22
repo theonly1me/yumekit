@@ -66,7 +66,7 @@ export function Kicker(props: {
           minWidth: 0,
           fontSize: sizes.text("label"),
           lineHeight: 1.25,
-          letterSpacing: "0.14em",
+          letterSpacing: "0.12em",
           textTransform: "uppercase",
           color: stylePack.colors.mutedText,
           ...motion.enterAt({
