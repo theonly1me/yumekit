@@ -1,3 +1,4 @@
+import type { Route } from "playwright";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
   closeBrowser,
@@ -97,6 +98,29 @@ describe("the scene panel", () => {
       .toBe("Every frame stays editable.");
     await editor.page.keyboard.press("ControlOrMeta+Shift+z");
     await expect.poll(() => quote.inputValue()).toBe("A changed quote");
+    await editor.close();
+  });
+
+  it("shows the undone value when the editor gets the undo before it got the change", async () => {
+    const editor = await openScene("Closing line");
+    const quote = editor.form.getByLabel("Quote", { exact: true });
+    const before = await quote.inputValue();
+    const heldLoads: Route[] = [];
+    let isHolding = true;
+    await editor.page.route("**/api/project", (route) =>
+      isHolding ? heldLoads.push(route) : route.continue(),
+    );
+    await quote.fill("A late quote");
+    await quote.blur();
+    await expect.poll(propsOf("closing")).toEqual({ quote: "A late quote" });
+    await editor.page.keyboard.press("ControlOrMeta+z");
+    await expect.poll(propsOf("closing")).toEqual({ quote: before });
+    await expect.poll(() => heldLoads.length).toBe(2);
+
+    isHolding = false;
+    for (const load of heldLoads) await load.continue();
+
+    await expect.poll(() => quote.inputValue()).toBe(before);
     await editor.close();
   });
 
