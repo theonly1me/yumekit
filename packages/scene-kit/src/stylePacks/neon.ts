@@ -26,7 +26,7 @@ export const neonStylePack: StylePack = {
     mutedText: "rgb(245 245 245 / 0.7)",
     ...accentRolesOf(accents),
     placeholder: "#151515",
-    captionPanel: "rgb(5 5 5 / 0.9)",
+    captionPanel: "rgb(21 21 21 / 0.92)",
     captionText: white,
   },
   fonts: {

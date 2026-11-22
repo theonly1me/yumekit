@@ -26,7 +26,7 @@ export const midnightStylePack: StylePack = {
     mutedText: "rgb(244 242 255 / 0.72)",
     ...accentRolesOf(accents),
     placeholder: "#1a1d33",
-    captionPanel: "rgb(11 13 26 / 0.9)",
+    captionPanel: "rgb(26 29 51 / 0.92)",
     captionText: starlight,
   },
   fonts: {

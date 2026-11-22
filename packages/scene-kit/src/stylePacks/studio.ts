@@ -9,7 +9,7 @@ import type { StylePack } from "./stylePack.js";
 
 const white = "#ffffff";
 const black = "#0a0a0a";
-const accents = ["#2f5bff", "#ff3b30", "#00b37a", "#ffc400"] as const;
+const accents = ["#2f5bff", "#ff3b30", "#00b37a", "#f5a000"] as const;
 
 export const studioStylePack: StylePack = {
   id: "studio",
