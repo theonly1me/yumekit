@@ -88,6 +88,7 @@ export const snapshotSchema = z.object({
     framesPerSecond: z.number(),
     outputs: z.array(outputSchema),
     videoStyle: z.enum(videoStyleIds).optional(),
+    look: z.string().optional(),
   }),
   scenes: z.array(sceneSchema),
   sceneCode: z.record(z.string(), z.string()),

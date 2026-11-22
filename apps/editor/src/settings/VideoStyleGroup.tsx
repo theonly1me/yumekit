@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import type { EngineClient } from "../engine/engineClient.js";
 import { changeProject } from "../scenes/directChange.js";
 import { VideoStyleChoices } from "../videoStyle/VideoStyleChoices.js";
@@ -7,6 +7,7 @@ import { usesAiVideo, type VideoStyleId } from "../videoStyle/videoStyles.js";
 export function VideoStyleGroup(props: {
   client: EngineClient;
   videoStyle: VideoStyleId;
+  children?: ReactNode;
 }) {
   const [isSaving, setSaving] = useState(false);
   const [failure, setFailure] = useState<string>();
@@ -49,6 +50,7 @@ export function VideoStyleGroup(props: {
           {failure}
         </p>
       )}
+      {props.children}
     </section>
   );
 }
