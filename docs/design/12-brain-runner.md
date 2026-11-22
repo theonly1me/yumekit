@@ -1,0 +1,183 @@
+# 12. The brain runner: the chat of the editor
+
+The person types a request in the editor. The engine starts the agent program of the person on this computer, gives it the yumekit tools, and shows the answer and each change while they happen. The person needs no API key and no terminal.
+
+A probe on 2026-11-22 measured Claude Code 2.1.330 and Codex CLI 0.163.0 on the computer of the owner. `cursor-agent` was not signed in, so its facts are from its documents only. The first version has adapters for Claude Code and Codex. Cursor follows after a measured probe.
+
+## Decisions
+
+| Id  | Decision                                                                                    | Why                                                                              |
+| --- | ------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| B1  | The engine starts the installed agent program as a child process, one process for a request | The person already has the program and its sign-in. yumekit holds no sign-in     |
+| B2  | yumekit does not use an agent SDK                                                           | The command gives the same events, and an SDK pins its own program version       |
+| B3  | One adapter for each program, behind one interface, in `@yumekit/brain`                     | The programs differ in flags, events, and how a request ends                     |
+| B4  | The agent gets the yumekit MCP server and nothing more: no shell, no file tool, no web      | A request from a chat box must not run a command on the computer                 |
+| B5  | The agent uses the `yumekit mcp` bridge to the engine that runs                             | The same tools, events, and undo history as a change by the person               |
+| B6  | One request runs at a time for a project                                                    | Two agents that change one project at once give a result that nobody can explain |
+| B7  | The settings, hooks, plugins, and other MCP servers of the person do not load               | They cost tokens, and they can reach mail and files                              |
+| B8  | The chat history is a file in the project, in `.yumekit/chat/`                              | A reload and a restart keep the conversation                                     |
+
+### The sign-in of the person
+
+yumekit never asks for, reads, or stores a sign-in. It runs the program that the person installed, as the person does in a terminal.
+
+The documents of the Claude Agent SDK say that a third party may not offer claude.ai login for its product without approval from Anthropic. yumekit does not use that SDK and does not offer a login. The owner decides if this use of the installed program is acceptable for a public release. The editor also works with an agent in the terminal of the person (document 11, "Agent setup"), and that path has no such question.
+
+## The adapter
+
+```ts
+interface AgentAdapter {
+  id: AgentId;
+  signInState: () => Promise<"signed-in" | "signed-out" | "unknown">;
+  startTurn: (options: {
+    request: string;
+    sessionId: string | undefined;
+    instructions: string;
+    serverCommand: ServerCommand;
+    workingFolder: string;
+    onEvent: (event: BrainEvent) => void;
+  }) => { ended: Promise<TurnEnd>; stop: () => void };
+}
+
+type BrainEvent =
+  | { type: "session"; sessionId: string }
+  | { type: "text"; text: string; isPart: boolean }
+  | { type: "tool-started"; callId: string; tool: string; input: unknown }
+  | { type: "tool-finished"; callId: string; ok: boolean };
+
+type TurnEnd =
+  | { kind: "done"; costUsd?: number }
+  | { kind: "stopped" }
+  | {
+      kind: "failed";
+      reason: "signed-out" | "program" | "tools";
+      message: string;
+    };
+```
+
+- `tool` is the yumekit tool name, with no prefix of a program.
+- `isPart` is true for a part of a text that is still in progress. A text with `isPart: false` is whole, and it replaces the parts before it.
+- The adapter starts the program with `spawn`, with a list of arguments and no shell. Standard input is `ignore`, because Codex waits for the end of standard input.
+- The program path is the full path of the first match on the `PATH` of the engine, found once at the start. `settings.json` can give another path in `agentPrograms`.
+- The working folder is `<project>/.yumekit/agent`, an empty folder that the engine makes. The agent has no file tool, and a configuration file of the project folder must not load.
+- `stop` sends `SIGINT`. If the program still runs after 5 seconds, it sends `SIGKILL`.
+
+### Claude Code
+
+```
+claude -p <request>
+  --output-format stream-json --verbose --include-partial-messages
+  --mcp-config <inline JSON with the server yumekit> --strict-mcp-config
+  --tools "" --allowedTools <the yumekit server>
+  --permission-mode dontAsk --setting-sources ""
+  --append-system-prompt-file <file>
+  [--resume <session id>]
+```
+
+| Fact (measured)                                                                                       | Adapter rule                                                  |
+| ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| `system/init` has `session_id` and the state of each MCP server                                       | A server state that is not connected ends the turn as `tools` |
+| Text comes as `stream_event` with `text_delta`, then as a whole `assistant` message                   | Parts, then the whole text                                    |
+| A tool call is a `tool_use` block. Its result is a `tool_result` block with `is_error`                | `tool-started` and `tool-finished`                            |
+| The last event is `result` with `is_error`, `total_cost_usd`, and `terminal_reason`                   | `done`, or `failed`                                           |
+| `SIGINT` gives exit code 0 and a `result` with `terminal_reason: "aborted_streaming"`                 | `stopped`                                                     |
+| With no sign-in, the run exits with 1, and the `assistant` event has `error: "authentication_failed"` | `failed` with `signed-out`                                    |
+| `claude auth status` prints JSON with `loggedIn`                                                      | `signInState`                                                 |
+| `--tools ""` removes each built-in tool. Without it, `dontAsk` still runs read-only shell commands    | Always pass it                                                |
+| The full path of `node` is needed in the MCP command                                                  | `serverCommand` already has full paths (document 11)          |
+
+The builder confirms the form of `--allowedTools` that permits each tool of one server, and records it here.
+
+### Codex
+
+```
+codex exec --json --skip-git-repo-check
+  --ignore-user-config --disable apps --disable plugins --disable shell_tool
+  --sandbox read-only -c approval_policy="never" -c web_search="disabled"
+  -c mcp_servers.yumekit.command=<path> -c mcp_servers.yumekit.args=<list>
+  -c mcp_servers.yumekit.default_tools_approval_mode="approve"
+  -c mcp_servers.yumekit.required=true
+  -c developer_instructions=<text>
+  <request>
+```
+
+A later request is `codex exec resume <thread id>` with the same `-c` values. `resume` has no `--sandbox` flag, so it takes `-c sandbox_mode="read-only"`.
+
+| Fact (measured)                                                                                   | Adapter rule                                |
+| ------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| `thread.started` has `thread_id`                                                                  | The session id                              |
+| `agent_message` items hold a whole text. There are no parts                                       | A whole text                                |
+| `mcp_tool_call` items come as `item.started` and `item.completed`, with `server`, `tool`, `error` | `tool-started` and `tool-finished`          |
+| `turn.completed` ends a turn. `turn.failed` has `error.message` and exit code 1                   | `done`, or `failed`                         |
+| `SIGINT` gives exit code 1 and no end event                                                       | `stopped`, when the adapter sent the signal |
+| With no sign-in, the run tries again for about 25 seconds before it fails                         | Call `signInState` before each turn         |
+| `codex login status` exits with 0 when signed in                                                  | `signInState`                               |
+| `--ignore-user-config` alone still loads the MCP servers of apps and plugins                      | Pass the two `--disable` flags              |
+| There is no flag that removes the file edit tool. The read-only sandbox refuses each write        | Always pass the sandbox                     |
+
+The builder measures which model Codex uses with `--ignore-user-config`, and records it. If the result is not the model of the person, the adapter reads `model` from the Codex configuration of the person and passes it with `-m`.
+
+### The instructions
+
+`@yumekit/brain` exports one text for each adapter to pass. Its rules for the agent:
+
+1. The person is not a developer. Answer in short plain sentences. Do not name a tool, a file, or an id.
+2. Call `get_project` first. Before the first scene, call `get_scene_guide`.
+3. Make the video for each platform of the project.
+4. Before a video clip from a paid model, say the price and ask. Other steps need no question.
+5. After a change, say in one or two sentences what changed.
+6. If a tool fails, correct the cause and try again. If it cannot work, say what the person can do.
+
+## The chat of the engine
+
+The engine holds the chat of a project: the entries, the session id, and the request that runs.
+
+| Entry kind | Fields                                       | Meaning                                                                  |
+| ---------- | -------------------------------------------- | ------------------------------------------------------------------------ |
+| `request`  | `id`, `text`, `about`                        | What the person asked. `about` names the picked scene                    |
+| `answer`   | `id`, `text`, `state`, `steps`               | The text of the AI. `state` is `running`, `done`, `stopped`, or `failed` |
+| `change`   | `id`, `by`, `summary`, `undoSteps`, `undone` | One change to the project, by `ai` or by `person`                        |
+| `notice`   | `id`, `text`                                 | A failure or a fact for the person, in plain words                       |
+
+- `steps` of an answer is the list of tool calls of the request, each with the tool name and `running`, `done`, or `failed`. The Making screen and the chat read it.
+- A request by the AI gives one `change` entry for the whole request, when it changed the project. `undoSteps` is the count of undo steps that it made. `summary` is the last sentence that the AI wrote, cut at 140 characters.
+- A tool call by the person through `/api/tools/<name>` gives one `change` entry with one undo step. `@yumekit/brain` has a table with a plain sentence for each tool, for example "You changed the text of a scene." for `put_scene`.
+- An `undo` call, by anyone, lowers the count of the last change that is not undone. At zero, the entry is `undone`. A `redo` call does the reverse.
+
+| Request                            | Result                                                                                              |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `GET /api/chat`                    | `{ agent, state, entries }`. `agent` has `id`, `name`, and `signIn`. `state` is `idle` or `running` |
+| `POST /api/chat/requests`          | Takes `{ text, about_clip_id }`. Status 202 with the `request` entry                                |
+| `POST /api/chat/stop`              | Stops the request that runs                                                                         |
+| `POST /api/chat/changes/<id>/undo` | Undoes that change and each later change that is not undone                                         |
+
+- Failure kinds of a new request: `chat-busy` (409), `no-agent` (409, no agent program is installed), and `agent-signed-out` (409). The message of `agent-signed-out` tells the person to open a terminal, start the program once, and sign in.
+- With `about_clip_id`, the text for the agent starts with one line that names the scene, its id, and its clip id.
+- The event `chat-changed` carries one entry, new or changed. The event `chat-text` carries `{ id, text }` for an answer in progress, at most 10 times in a second.
+- The first request has no session id. The engine saves the session id of the `session` event, and each later request resumes it. If a resume fails, the engine starts a new session and adds the notice "The AI started a new conversation."
+- The agent program is the `agent` of `settings.json` (document 13).
+- The file `.yumekit/chat/chat.json` holds the entries and the session id. The engine writes it with a temporary file and a rename. An answer that was `running` when the engine stopped loads as `stopped`.
+- When the engine closes, it stops the request that runs.
+- The request text goes to the program as one argument. It never goes through a shell.
+
+## Work package
+
+| Id   | Scope                                                                                                                                   | Needs |
+| ---- | --------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| WP26 | `@yumekit/brain` with the interface, the two adapters, and the instructions. The chat of the engine with its requests, events, and file | WP25  |
+
+### WP26 checks
+
+1. Each adapter reads a recorded event stream and gives the same `BrainEvent` list and `TurnEnd`. The streams are made for the tests. They hold no data of a person.
+2. The tests start a fake program that prints such a stream. No test starts a real agent or a model.
+3. A request changes the project through the bridge, and the chat has the `request`, the `answer` with its steps, and one `change` with the right count of undo steps.
+4. The undo of a change restores the project. `chat-busy`, `no-agent`, and `agent-signed-out` each give their message.
+5. Stop ends a request that runs, and the answer is `stopped`.
+6. A cheap real check, at most three short requests for each program: in a temporary project, "Set the script to the single word ready." changes the script with Claude Code and with Codex. A request to run a shell command runs no command.
+
+## Not in this version
+
+- Cursor, until a probe measures a signed-in `cursor-agent`. It has no flag for an MCP configuration, so its adapter needs a folder with `.cursor/mcp.json`.
+- An API key in place of the sign-in of the program.
+- A limit on the cost of one request (the cost guard, milestone 4).
+- More than one conversation for a project.

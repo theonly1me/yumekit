@@ -4,19 +4,21 @@ These documents are the design of yumekit. Code follows them. If code and a docu
 
 ## Read in this order
 
-| Document                                                           | Answers                                                                       |
-| ------------------------------------------------------------------ | ----------------------------------------------------------------------------- |
-| [01-architecture.md](01-architecture.md)                           | Which processes and packages exist, and which package may use which           |
-| [02-scene-contract.md](02-scene-contract.md)                       | How a scene draws one frame, and the rules that keep a render repeatable      |
-| [03-project-format.md](03-project-format.md)                       | Which files a project has, and the edit commands that change them             |
-| [04-renderer.md](04-renderer.md)                                   | How frames become a video file with sound                                     |
-| [05-harness-mcp.md](05-harness-mcp.md)                             | Which MCP tools an agent uses to build content                                |
-| [06-media-tools.md](06-media-tools.md)                             | How an image, voice, music, or video tool connects                            |
-| [07-build-plan-m1.md](07-build-plan-m1.md)                         | The work packages of milestone 1, with the checks that accept each one        |
-| [08-scene-kit.md](08-scene-kit.md)                                 | Which ready scenes exist, how captions follow narration, and the default look |
-| [09-generated-video.md](09-generated-video.md)                     | How a clip from a video model gets into a scene, and the limit on its cost    |
-| [10-providers-models-and-keys.md](10-providers-models-and-keys.md) | How a server describes its models, and where an API key lives                 |
-| [11-editor-m2.md](11-editor-m2.md)                                 | How the engine serves the editor, and the screens of the first version        |
+| Document                                                           | Answers                                                                                    |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
+| [01-architecture.md](01-architecture.md)                           | Which processes and packages exist, and which package may use which                        |
+| [02-scene-contract.md](02-scene-contract.md)                       | How a scene draws one frame, and the rules that keep a render repeatable                   |
+| [03-project-format.md](03-project-format.md)                       | Which files a project has, and the edit commands that change them                          |
+| [04-renderer.md](04-renderer.md)                                   | How frames become a video file with sound                                                  |
+| [05-harness-mcp.md](05-harness-mcp.md)                             | Which MCP tools an agent uses to build content                                             |
+| [06-media-tools.md](06-media-tools.md)                             | How an image, voice, music, or video tool connects                                         |
+| [07-build-plan-m1.md](07-build-plan-m1.md)                         | The work packages of milestone 1, with the checks that accept each one                     |
+| [08-scene-kit.md](08-scene-kit.md)                                 | Which ready scenes exist, how captions follow narration, and the default look              |
+| [09-generated-video.md](09-generated-video.md)                     | How a clip from a video model gets into a scene, and the limit on its cost                 |
+| [10-providers-models-and-keys.md](10-providers-models-and-keys.md) | How a server describes its models, and where an API key lives                              |
+| [11-editor-m2.md](11-editor-m2.md)                                 | How the engine serves the editor, and the screens of the first version                     |
+| [12-brain-runner.md](12-brain-runner.md)                           | How the editor starts the agent program of the person, and how the chat works              |
+| [13-editor-prompt-first.md](13-editor-prompt-first.md)             | The second version of the editor: the prompt, platforms, scene cards, and the start screen |
 
 The visual reference for the editor is the prototype in [apps/prototype](../../apps/prototype).
 
@@ -72,7 +74,7 @@ Use these words with these meanings in code and in documents.
 
 - One paid check of `tools/gemini-media` with a real key: a 3 second clip at 720p, and confirmation that background mode works for the model.
 - Timeline changes by drag in the editor (milestone 3), the first run screen, and a desktop shell with Tauri.
-- The brain runner that starts an agent CLI from the editor (milestone 2).
+- An adapter for Cursor in the brain runner, after a probe with a signed-in `cursor-agent`.
 - The cost guard and the budget cap (milestone 4).
 - The cast and style rules for long content (milestone 5).
 - Publishing to a platform (milestone 6).
