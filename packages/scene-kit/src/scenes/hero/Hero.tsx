@@ -24,7 +24,7 @@ const underlineLeadFrames = 6;
 const underlineFrames = 16;
 const pulseFrames = 12;
 const wideHeadingUnits = 140;
-const tallKickerSpaceUnits = 20;
+const kickerSpaceUnits = { tall: 20, square: 14 } as const;
 
 export function Hero(props: { props: JsonObject }): ReactNode {
   const { heading, accentWord, kicker } = readHeroProps(props.props);
@@ -123,6 +123,8 @@ export function Hero(props: { props: JsonObject }): ReactNode {
     );
   }
   const margin = stylePack.layout.marginUnits;
+  const kickerSpace =
+    kickerSpaceUnits[sizes.layout === "tall" ? "tall" : "square"];
   return (
     <>
       {kickerView === null ? null : (
@@ -131,7 +133,7 @@ export function Hero(props: { props: JsonObject }): ReactNode {
             left: sizes.pixels(margin),
             right: sizes.pixels(margin),
             top: sizes.pixels(margin + 2),
-            height: sizes.pixels(tallKickerSpaceUnits - 4),
+            height: sizes.pixels(kickerSpace - 4),
           }}
         >
           {kickerView}
@@ -140,7 +142,7 @@ export function Hero(props: { props: JsonObject }): ReactNode {
       <FitBox
         style={{
           ...box.style,
-          top: sizes.pixels(margin + tallKickerSpaceUnits),
+          top: sizes.pixels(margin + kickerSpace),
           bottom: sizes.pixels(contentBottomUnits(stylePack)),
           justifyContent: "center",
         }}
