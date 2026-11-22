@@ -1,15 +1,12 @@
-import type {
-  Asset,
-  Edit,
-  ProjectSnapshot,
-  Timeline,
-  Track,
-} from "@yumekit/project";
 import {
-  isCaptionTrack,
-  uniqueId,
-  videoSoundTrackId,
-} from "./narrationPlan.js";
+  scenesRowOf,
+  type Asset,
+  type Edit,
+  type ProjectSnapshot,
+  type Timeline,
+  type Track,
+} from "@yumekit/project";
+import { uniqueId, videoSoundTrackId } from "./narrationPlan.js";
 
 const videoComponent = "video-clip";
 const newSceneTrackId = "scenes";
@@ -95,11 +92,7 @@ export function planVideo(options: {
   const sceneId = `video-${asset.id}`.slice(0, idLengthLimit);
   const newTracks: Track[] = [];
   const sceneTrack =
-    timeline.tracks.find(
-      (track) =>
-        track.kind === "scene" &&
-        !isCaptionTrack({ track, scenes: snapshot.scenes }),
-    ) ??
+    scenesRowOf({ tracks: timeline.tracks, scenes: snapshot.scenes }) ??
     ({
       id: uniqueId({ base: newSceneTrackId, taken: trackIds }),
       kind: "scene",

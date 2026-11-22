@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import type { SceneClip, Snapshot } from "../engine/snapshot.js";
 import {
-  audioClipsOf,
+  audibleClipsOf,
   clipAt,
   lengthFramesOf,
   mainSceneClipsOf,
@@ -26,7 +26,7 @@ export function useEditorFacts(options: {
       timeline,
       lengthFrames: lengthFramesOf(timeline),
       mainClips: mainSceneClipsOf({ timeline, scenes: snapshot.scenes }),
-      audioClips: audioClipsOf(timeline),
+      audioClips: audibleClipsOf(timeline),
       sceneClips: timeline.tracks.flatMap((track) =>
         track.kind === "scene" ? track.clips : [],
       ),

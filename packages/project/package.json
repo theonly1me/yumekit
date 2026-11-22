@@ -9,6 +9,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./scenes-row": {
+      "types": "./dist/scenesRow/index.d.ts",
+      "default": "./dist/scenesRow/index.js"
     }
   },
   "files": [

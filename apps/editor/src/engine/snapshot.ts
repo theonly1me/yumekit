@@ -47,11 +47,13 @@ const trackSchema = z.discriminatedUnion("kind", [
     id: z.string(),
     kind: z.literal("scene"),
     clips: z.array(sceneClipSchema),
+    off: z.boolean().optional(),
   }),
   z.object({
     id: z.string(),
     kind: z.literal("audio"),
     clips: z.array(audioClipSchema),
+    off: z.boolean().optional(),
   }),
 ]);
 

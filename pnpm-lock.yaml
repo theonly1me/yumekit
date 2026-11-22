@@ -245,6 +245,9 @@ importers:
 
   apps/editor:
     dependencies:
+      '@yumekit/project':
+        specifier: workspace:*
+        version: link:../../packages/project
       react:
         specifier: 19.3.1
         version: 19.3.1
@@ -273,6 +276,8 @@ importers:
       vite:
         specifier: 8.3.8
         version: 8.3.8(@types/node@22.20.5)
+
+  apps/prototype: {}
 
   packages/brain: {}
 
