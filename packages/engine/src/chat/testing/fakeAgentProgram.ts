@@ -5,7 +5,7 @@ import { vi } from "vitest";
 
 export type FakeStep =
   | { print: string }
-  | { callTool: { name: string; input: object } }
+  | { callTool: { name: string; input: object; saveResultTo?: string } }
   | { waitForStop: { print: string[] } }
   | { waitForFile: string };
 

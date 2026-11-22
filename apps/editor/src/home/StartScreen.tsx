@@ -5,6 +5,8 @@ import { PlatformChoices } from "./PlatformChoices.js";
 import { RecentProjects } from "./RecentProjects.js";
 import { agentLineOf, lengthLabelOf } from "./startTexts.js";
 import { useStartChoices } from "./useStartChoices.js";
+import { VideoStyleChoices } from "../videoStyle/VideoStyleChoices.js";
+import { aiVideoLimitLineOf, usesAiVideo } from "../videoStyle/videoStyles.js";
 
 const examplePrompt =
   "A 30 second video that explains my app to new users. Friendly, with a voice and music.";
@@ -59,6 +61,20 @@ export function StartScreen(props: { client: EngineClient }) {
               chosen={start.platformIds}
               onToggle={start.togglePlatform}
             />
+          </div>
+          <div className="start-group">
+            <h2>How the video is made</h2>
+            <VideoStyleChoices
+              chosen={start.videoStyle}
+              onChoose={start.setVideoStyle}
+            />
+            {usesAiVideo(start.videoStyle) ? (
+              <p className="fact">
+                {aiVideoLimitLineOf(
+                  start.home?.generated_video_limit_seconds ?? null,
+                )}
+              </p>
+            ) : undefined}
           </div>
           <div className="start-group">
             <h2>How long?</h2>

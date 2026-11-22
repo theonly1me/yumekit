@@ -11,6 +11,7 @@ import {
   setBible,
   setProjectName,
   setScript,
+  setVideoStyle,
 } from "./story.js";
 import { copyTimeline, setTimeline } from "./timelines.js";
 
@@ -29,6 +30,8 @@ export async function applyEdit(options: {
       return removeOutput({ state, edit });
     case "setOutputPlatforms":
       return setOutputPlatforms({ state, edit });
+    case "setVideoStyle":
+      return setVideoStyle({ state, edit });
     case "setScript":
       return setScript({ state, edit });
     case "setBible":

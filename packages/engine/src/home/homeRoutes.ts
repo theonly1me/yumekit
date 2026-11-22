@@ -1,3 +1,4 @@
+import { readUserLimits } from "@yumekit/tools";
 import { z } from "zod";
 import type { Exchange, Route } from "../http/exchange.js";
 import { readJsonBody } from "../http/readJsonBody.js";
@@ -41,6 +42,7 @@ function readHealth(exchange: HomeExchange) {
 async function readHome(exchange: HomeExchange) {
   const projectsFolder = await readProjectsFolder();
   if (!projectsFolder.ok) return { status: 409, ...projectsFolder.failure };
+  const limits = await readUserLimits();
   sendJson({
     response: exchange.response,
     status: 200,
@@ -48,6 +50,9 @@ async function readHome(exchange: HomeExchange) {
       recent: await listRecentProjects(),
       agents: await listHomeAgents(exchange.context.programs),
       projects_folder: projectsFolder.value,
+      generated_video_limit_seconds: limits.ok
+        ? limits.value.generatedVideoSeconds
+        : null,
     },
   });
   return undefined;

@@ -37,6 +37,7 @@ const sentencesByTool: Record<string, string> = {
   remove_scene_clip: "Deleting a scene",
   duplicate_scene_clip: "Duplicating a scene",
   set_track_off: "Turning a sound on or off",
+  set_video_style: "Changing how the video is made",
   preview_frame: lookingAtTheVideo,
   preview_frames: lookingAtTheVideo,
   preview_scenes: lookingAtTheVideo,

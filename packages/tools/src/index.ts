@@ -34,6 +34,7 @@ export {
 } from "./keys/index.js";
 export { keyFilePath } from "./keys/keyFile.js";
 export { listServerKeys, type ServerKeys } from "./listServerKeys.js";
+export { readUserLimits } from "./userLimits.js";
 export type {
   Capability,
   CheckKeyFailure,

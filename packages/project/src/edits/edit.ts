@@ -1,7 +1,11 @@
 import { z } from "zod";
 import { assetSchema, wordTimingsSchema } from "../format/asset.js";
 import { bibleSchema } from "../format/bible.js";
-import { outputSchema, platformIdSchema } from "../format/project.js";
+import {
+  outputSchema,
+  platformIdSchema,
+  videoStyleSchema,
+} from "../format/project.js";
 import { sceneSchema } from "../format/scene.js";
 import {
   audioClipSchema,
@@ -37,6 +41,10 @@ export const editSchema = z.discriminatedUnion("kind", [
     kind: z.literal("setOutputPlatforms"),
     outputId: idSchema,
     platforms: z.array(platformIdSchema),
+  }),
+  z.strictObject({
+    kind: z.literal("setVideoStyle"),
+    videoStyle: videoStyleSchema,
   }),
   z.strictObject({ kind: z.literal("setScript"), script: z.string() }),
   z.strictObject({ kind: z.literal("setBible"), bible: bibleSchema }),

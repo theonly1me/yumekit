@@ -4,7 +4,12 @@ import { prettifyError } from "zod";
 import { syncFiles } from "../folder/syncFiles.js";
 import { projectFilesOf } from "../folder/projectFiles.js";
 import { writeFileAtomic } from "../folder/writeFileAtomic.js";
-import { projectSchema, type Output, type Project } from "../format/project.js";
+import {
+  projectSchema,
+  type Output,
+  type Project,
+  type VideoStyle,
+} from "../format/project.js";
 import type { ProjectState } from "../format/state.js";
 import { emptyHistory } from "../history/history.js";
 import { fail, succeed, type Outcome } from "../outcome.js";
@@ -29,11 +34,16 @@ async function isEmptyOrMissing(folder: string): Promise<boolean> {
   }
 }
 
-function initialState(options: {
+interface NewProject {
   name: string;
   framesPerSecond: Project["framesPerSecond"];
   outputs: Output[];
-}): Outcome<ProjectState, CreateFailure> {
+  videoStyle?: VideoStyle;
+}
+
+function initialState(
+  options: NewProject,
+): Outcome<ProjectState, CreateFailure> {
   const project = projectSchema.safeParse({ formatVersion: 1, ...options });
   if (!project.success) {
     return fail({
@@ -61,14 +71,11 @@ function initialState(options: {
   return succeed(state);
 }
 
-export async function createProject(options: {
-  folder: string;
-  name: string;
-  framesPerSecond: Project["framesPerSecond"];
-  outputs: Output[];
-}): Promise<Outcome<ProjectStore, CreateFailure>> {
-  const { folder, name, framesPerSecond, outputs } = options;
-  const state = initialState({ name, framesPerSecond, outputs });
+export async function createProject(
+  options: NewProject & { folder: string },
+): Promise<Outcome<ProjectStore, CreateFailure>> {
+  const { folder, ...newProject } = options;
+  const state = initialState(newProject);
   if (!state.ok) {
     return state;
   }

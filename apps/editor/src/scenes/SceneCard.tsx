@@ -61,7 +61,9 @@ export function SceneCard(props: {
         </span>
         <span className="card-facts">
           {card.lengthText}
-          {card.isVideo ? ", video clip" : ""}
+          <span className="card-style" data-video={card.isVideo}>
+            {card.isVideo ? "Video clip" : "Graphics"}
+          </span>
         </span>
       </button>
       <button

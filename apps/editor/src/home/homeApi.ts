@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { EngineClient } from "../engine/engineClient.js";
+import type { VideoStyleId } from "../videoStyle/videoStyles.js";
 
 const lengthSchema = z.union([
   z.literal(15),
@@ -28,6 +29,7 @@ const homeSchema = z.object({
   recent: z.array(recentSchema),
   agents: z.array(agentSchema),
   projects_folder: z.string(),
+  generated_video_limit_seconds: z.number().nullable(),
 });
 
 const openedSchema = z.object({ url: z.string() });
@@ -48,6 +50,7 @@ export function makeProject(options: {
   request: string;
   platformIds: string[];
   length: ProjectLength;
+  videoStyle: VideoStyleId;
 }) {
   return options.client.readJson({
     path: "/api/home/projects",
@@ -56,6 +59,7 @@ export function makeProject(options: {
       request: options.request,
       platform_ids: options.platformIds,
       length: options.length,
+      video_style: options.videoStyle,
     },
   });
 }

@@ -42,5 +42,11 @@ export function useEditorChat(options: {
       view.setSideTab("chat");
       chat.send({ text, aboutClipId: undefined }).catch(() => undefined);
     },
+    sendAboutClip: (request: { text: string; clipId: string }) => {
+      view.setSideTab("chat");
+      chat
+        .send({ text: request.text, aboutClipId: request.clipId })
+        .catch(() => undefined);
+    },
   };
 }

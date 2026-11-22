@@ -1,4 +1,9 @@
-import { appendFileSync, existsSync, readFileSync } from "node:fs";
+import {
+  appendFileSync,
+  existsSync,
+  readFileSync,
+  writeFileSync,
+} from "node:fs";
 import { join } from "node:path";
 import { z } from "zod";
 
@@ -8,6 +13,7 @@ const stepSchema = z.union([
     callTool: z.object({
       name: z.string(),
       input: z.record(z.string(), z.unknown()),
+      saveResultTo: z.string().optional(),
     }),
   }),
   z.object({ waitForStop: z.object({ print: z.array(z.string()) }) }),
@@ -36,11 +42,15 @@ function print(line: string): void {
   process.stdout.write(`${line}\n`);
 }
 
-async function callTool(options: { name: string; input: object }) {
+async function callTool(options: {
+  name: string;
+  input: object;
+  saveResultTo?: string | undefined;
+}) {
   const engine = engineFileSchema.parse(
     JSON.parse(readFileSync(join(process.cwd(), "..", "engine.json"), "utf8")),
   );
-  await fetch(
+  const response = await fetch(
     `http://127.0.0.1:${String(engine.port)}/api/tools/${options.name}`,
     {
       method: "POST",
@@ -52,6 +62,10 @@ async function callTool(options: { name: string; input: object }) {
       body: JSON.stringify({ input: options.input }),
     },
   );
+  const body = await response.text();
+  if (options.saveResultTo !== undefined) {
+    writeFileSync(options.saveResultTo, body);
+  }
 }
 
 const stopSignal = Promise.withResolvers<undefined>();
