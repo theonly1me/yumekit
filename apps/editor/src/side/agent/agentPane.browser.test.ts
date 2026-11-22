@@ -45,9 +45,15 @@ function startBridge() {
   };
 }
 
-describe("the Agent tab", () => {
+async function openSettings() {
+  const editor = await openEditor(runningEngine().url);
+  await editor.page.getByRole("button", { name: "Settings" }).click();
+  return editor;
+}
+
+describe("the agent setup in Settings", () => {
   it("puts the agent that it finds first, and a connect shows where the entry is and how to start the agent", async () => {
-    const editor = await openEditor(runningEngine().url);
+    const editor = await openSettings();
     const folder = await realpath(runningEngine().projectFolder);
     const rows = editor.page.getByRole("list", { name: "Agents" });
     await expect
@@ -91,7 +97,7 @@ describe("the Agent tab", () => {
   });
 
   it("shows the failure for a file that is not valid, and keeps the file", async () => {
-    const editor = await openEditor(runningEngine().url);
+    const editor = await openSettings();
     const folder = await realpath(runningEngine().projectFolder);
     await mkdir(join(folder, ".cursor"), { recursive: true });
     await writeFile(join(folder, ".cursor", "mcp.json"), "{ not json");
@@ -112,7 +118,7 @@ describe("the Agent tab", () => {
   });
 
   it("follows the count of agent connections with no reload", async () => {
-    const editor = await openEditor(runningEngine().url);
+    const editor = await openSettings();
     const state = editor.page
       .getByRole("status")
       .filter({ hasText: /connected/ });
@@ -129,7 +135,7 @@ describe("the Agent tab", () => {
   });
 
   it("gives the prompt and the manual setup with the full paths of this computer", async () => {
-    const editor = await openEditor(runningEngine().url);
+    const editor = await openSettings();
     const folder = await realpath(runningEngine().projectFolder);
     const main = await realpath(cliMainFile);
     const prompt = editor.page

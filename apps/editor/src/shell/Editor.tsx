@@ -8,11 +8,12 @@ import { Preview } from "../preview/Preview.js";
 import { sceneEditsOf } from "../scenes/sceneEdits.js";
 import { useDirectChanges } from "../scenes/useDirectChanges.js";
 import { useHistory } from "../scenePanel/history/useHistory.js";
-import { SettingsSheet } from "../settings/SettingsSheet.js";
+import { useSettingsSheet } from "../settings/useSettingsSheet.js";
 import { EditorSide } from "./EditorSide.js";
 import { LowerArea } from "./LowerArea.js";
 import { TopBar } from "./TopBar.js";
 import { Transport } from "./Transport.js";
+import { useEditorChat } from "./useEditorChat.js";
 import { useEditorView } from "./useEditorView.js";
 import { useKeyboard } from "./useKeyboard.js";
 import { useTheme } from "./useTheme.js";
@@ -26,9 +27,13 @@ export function Editor(props: {
   const framesPerSecond = snapshot.project.framesPerSecond;
   const { theme, setTheme } = useTheme();
   const [isTimelineOpen, setTimelineOpen] = useState(false);
-  const [settingsServerId, setSettingsServerId] = useState<string>();
-  const [isSettingsOpen, setSettingsOpen] = useState(false);
   const view = useEditorView({ client, snapshot });
+  const editorChat = useEditorChat({ client, view });
+  const settings = useSettingsSheet({
+    client,
+    chat: editorChat.chat,
+    projectFolder,
+  });
   const { facts, playback } = view;
   const exporting = useExportSheet({
     client,
@@ -41,13 +46,14 @@ export function Editor(props: {
     snapshot,
     output: facts.output,
     onOpen: playback.pause,
-    onAddKey: (serverId) => {
-      setSettingsServerId(serverId);
-      setSettingsOpen(true);
-    },
+    onAddKey: settings.open,
     onPlaced: view.pickClip,
   });
-  const isSheetOpen = exporting.isOpen || clipTools.isOpen || isSettingsOpen;
+  const isSheetOpen = exporting.isOpen || clipTools.isOpen || settings.isOpen;
+  const openAiSettings = () => {
+    playback.pause();
+    settings.open(undefined);
+  };
   useKeyboard({
     isActive: !isSheetOpen,
     onToggle: playback.toggle,
@@ -74,10 +80,7 @@ export function Editor(props: {
           theme={theme}
           onTheme={setTheme}
           exportLabel={exporting.label}
-          onSettings={() => {
-            playback.pause();
-            setSettingsOpen(true);
-          }}
+          onSettings={openAiSettings}
           onExport={() => {
             playback.pause();
             exporting.open();
@@ -142,7 +145,11 @@ export function Editor(props: {
             edits={edits}
             isTimelineOpen={isTimelineOpen}
             onTimelineOpen={setTimelineOpen}
-            onPickCard={view.toggleCard}
+            editorChat={editorChat}
+            onPickCard={(clip) => {
+              editorChat.box.removeChip(undefined);
+              view.toggleCard(clip);
+            }}
             onPick={view.pickClip}
             onSeek={view.moveTo}
             onEditText={view.editText}
@@ -152,26 +159,24 @@ export function Editor(props: {
         <EditorSide
           client={client}
           snapshot={snapshot}
-          projectFolder={projectFolder}
           view={view}
+          editorChat={editorChat}
           history={history}
           pictureGroupFor={clipTools.entryFor}
           onLength={edits.resize}
+          onOpenAiSettings={openAiSettings}
         />
+        <button
+          type="button"
+          className="primary ask-jump"
+          onClick={editorChat.focusBox}
+        >
+          Ask for a change
+        </button>
       </div>
       {exporting.sheet}
       {clipTools.sheet}
-      {isSettingsOpen ? (
-        <SettingsSheet
-          client={client}
-          projectFolder={projectFolder}
-          openServerId={settingsServerId}
-          onOpenServer={setSettingsServerId}
-          onClose={() => {
-            setSettingsOpen(false);
-          }}
-        />
-      ) : undefined}
+      {settings.sheet}
     </div>
   );
 }

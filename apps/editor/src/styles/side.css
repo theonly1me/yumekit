@@ -19,19 +19,6 @@
   overflow-y: auto;
 }
 
-.chat-pane {
-  padding: 18px 22px 24px;
-  display: grid;
-  gap: 22px;
-  align-content: start;
-}
-
-.chat-later {
-  font-size: var(--step-0);
-  line-height: 1.45;
-  color: var(--muted);
-}
-
 .agent-pane {
   display: grid;
   gap: 22px;
@@ -65,11 +52,10 @@
   .side {
     border-left: 0;
     border-top: 1px solid var(--line);
-    min-height: 60vh;
+    height: 78vh;
   }
 
   .side-tabs,
-  .chat-pane,
   .scene-panel {
     padding-left: var(--gutter);
     padding-right: var(--gutter);

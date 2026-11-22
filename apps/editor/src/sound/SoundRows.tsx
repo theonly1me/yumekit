@@ -5,6 +5,7 @@ export function SoundRows(props: {
   rows: SoundRow[];
   failure: string | undefined;
   onSwitch: (change: { trackId: string; off: boolean }) => void;
+  onChange: (rowName: string) => void;
 }) {
   if (props.rows.length === 0) return undefined;
   return (
@@ -31,6 +32,15 @@ export function SoundRows(props: {
               />{" "}
               On
             </label>
+            <button
+              type="button"
+              aria-label={`Change the ${row.name.toLowerCase()}`}
+              onClick={() => {
+                props.onChange(row.name);
+              }}
+            >
+              Change
+            </button>
           </li>
         ))}
       </ul>

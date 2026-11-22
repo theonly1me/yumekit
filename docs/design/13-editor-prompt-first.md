@@ -140,9 +140,34 @@ WP29 made these choices where this document and the prototype give no rule.
 12. Export shows one row for each platform tab, then one row for each output with no platform. Before an export, a row shows the file name from the rule of "Details of platforms", copied in the editor. After an export, each row takes its file from `files` of the result. "Show the file" opens the video in a new tab, as "Open the video" did in document 11. The progress is one line for each row, with no count of frames. A failure shows under the first row of its output. The other rows of that output say "Did not export".
 13. The line under the Export button names the real folder, which ends in `renders`. The editor shows the message of a failed export as the tool gives it, as "Details of Render" in document 11 says. Such a message can name a frame.
 14. Settings shows "Limits" read only, with the seconds used and the limit. No harness tool and no engine request changes `limits.generatedVideoSeconds`, so the row tells the person to set it in `media-tools.json`.
-15. The Chat tab and Settings both show the agent setup of document 11. Line 2 of the prompt says "tool servers", because the interface does not show the word MCP. The command and the configuration blocks keep their text, because the person copies them as they are.
+15. The Chat tab and Settings both show the agent setup of document 11. WP30 moved it out of the Chat tab, so only Settings shows it now. Line 2 of the prompt says "tool servers", because the interface does not show the word MCP. The command and the configuration blocks keep their text, because the person copies them as they are.
 16. The Make a clip sheet has the title "Make a real video clip" and the layout of the sheets of the prototype. Its texts say "first picture" and give times in seconds. "Add the key" in the sheet opens Settings with that tool open. The full rework is WP32.
 17. While a sheet is open, the editor below it is `inert`.
+
+### Details of the chat panel
+
+WP30 made these choices where this document, document 12, and the prototype give no rule.
+
+1. The chat stays in the page when the Scene tab shows. So the draft, the scroll place, and the history stay when the person comes back to Chat.
+2. The answer shows as plain text, with its line breaks. The editor has no markdown library, and a text of the AI never goes into the page as HTML.
+3. The steps show only while the answer runs. Each step is a plain sentence from a table in the editor, for example "Writing the script" for `set_script`. A tool that is not in the table shows "Working on the project". `generate_asset` shows "Making a picture or a sound", because a step has the tool name only. Steps of the same kind in a row show as one line.
+4. An answer with no text and no step yet shows "Working on it", as in the prototype. A stopped answer shows "Stopped".
+5. A request that the engine refuses (`no-agent`, `agent-signed-out`, `settings-not-valid`, `chat-busy`, or another failure) shows its message at the end of the chat. It is not in `chat.json`, and the text stays in the box. `no-agent` has "Open Settings". `settings-not-valid` and `chat-busy` have no button. Each other failure has "Try again".
+6. A failed request shows the notice of the engine. "Try again" shows only on the last entry and only when no request runs. It sends the text and the scene of the failed request again.
+7. "Undo" is off while a request runs, because the engine refuses an undo then. The confirmation counts each later change that is not undone and has undo steps. A change with no undo step shows no "Undo".
+8. The "About" line of a request uses the current number of the scene: "About scene 2: <title>". When the clip is not in the row now, it shows "About <title>". The prototype writes "Scene" with a capital letter in this line. The editor uses sentence case in both places.
+9. The control "x" on the scene chip removes the chip until the person picks a card again.
+10. "Change" on a sound row writes "Change the voice to ", "Change the music to ", or "Change the captions to ". A second music row writes "Change the music 2 to ".
+11. The "+" form follows the prototype: "Describe the new scene after scene N", "Add the scene", and "Cancel". The request is `Add a new scene between scene 1 "<title>" and scene 2 "<title>". The new scene: <text>`. After the last card, it says "after scene N "<title>", at the end of the video".
+12. "Ask the AI to fit the voice" sends "The voice may not match the scenes now. Fit the voice to the scenes."
+13. A project with no scenes shows three starters: "Make a 30 second video about", "Make a short video that explains", and "Make a 15 second teaser for". The chat with no entries shows one quiet line that tells the person what to do.
+14. The line under the box names the AI in use. It says "<name> on this computer is not signed in" when the engine knows that. With no AI that can run, it says "No AI is set up yet. Open Settings." A click opens Settings, where AI is the first section.
+15. The AI section of Settings reads the list of agent programs and the AI in use from `GET /api/chat` each time it opens. The sign-in state shows only for the AI in use, because the engine reports it for that one only. Cursor always shows "Not supported in the chat yet."
+16. `PUT /api/settings/agent` takes `{ agent }` with `claude-code` or `codex`. Another value gives `body-not-valid` (400). A settings file that is not a JSON object gives `settings-not-valid` (409), and the engine does not write over it. A failed write gives `settings-not-written` (500). The engine writes the file with a temporary file and a rename, and keeps each other field.
+17. A hidden polite live region reads the text of each answer that ends as `done`. The growing text is not in a live region, because a screen reader would read each part.
+18. The chat scrolls to the newest entry when the person is within 48 pixels of the end. If the person scrolled up, the place stays.
+19. At the width of a phone, "Ask for a change" is a fixed button, as in the prototype. It opens the Chat tab and puts the cursor in the box.
+20. The editor takes the token out of the address. So "after a reload" means a new open of the editor link. The history then loads from the engine.
 
 ## The start screen
 
