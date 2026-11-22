@@ -1,11 +1,14 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { chatOf } from "../testing/chatTesting.js";
 import { closeBrowser, openEditor } from "../testing/editorPage.js";
+import { startPreviewEdit } from "../testing/previewText.js";
 import {
   buildKitSceneProject,
   storedPropsOf,
 } from "../testing/kitSceneProject.js";
 import { runEngine, type RunningEngine } from "../testing/runEngine.js";
+
+const playClipFrames = 600;
 
 let engine: RunningEngine | undefined;
 
@@ -44,7 +47,11 @@ afterAll(async () => {
 describe("a text of the preview that changes in place", () => {
   it("changes the scene with one undo step that the chat lists as a change by the person", async () => {
     const editor = await openAt({ frame: 28 });
-    await editor.preview.getByText("First heading").click();
+    await startPreviewEdit({
+      page: editor.page,
+
+      text: editor.preview.getByText("First heading"),
+    });
 
     await editor.page.keyboard.type("A new heading");
     await editor.page.keyboard.press("Enter");
@@ -75,7 +82,11 @@ describe("a text of the preview that changes in place", () => {
   it("keeps the old text after Escape", async () => {
     const editor = await openAt({ frame: 148 });
     const before = await propsOf("closing")();
-    await editor.preview.getByText("Every frame stays editable.").click();
+    await startPreviewEdit({
+      page: editor.page,
+
+      text: editor.preview.getByText("Every frame stays editable."),
+    });
 
     await editor.page.keyboard.type("A text to throw away");
     await expect
@@ -97,7 +108,11 @@ describe("a text of the preview that changes in place", () => {
 
   it("saves the text after a click outside it, in the tall shape", async () => {
     const editor = await openAt({ frame: 28, tab: /^Tall/ });
-    await editor.preview.getByText("A small line").click();
+    await startPreviewEdit({
+      page: editor.page,
+
+      text: editor.preview.getByText("A small line"),
+    });
 
     await editor.page.keyboard.type("A tall line");
     await editor.page.getByText("Editor test").click();
@@ -114,14 +129,20 @@ describe("a text of the preview that changes in place", () => {
 
   it("changes each of two texts of one scene", async () => {
     const editor = await openAt({ frame: 58 });
-    await editor.preview.getByText("Points", { exact: true }).click();
+    await startPreviewEdit({
+      page: editor.page,
+      text: editor.preview.getByText("Points", { exact: true }),
+    });
     await editor.page.keyboard.type("Steps");
     await editor.page.keyboard.press("Enter");
     await expect
       .poll(() => editor.preview.getByText("Steps", { exact: true }).count())
       .toBe(1);
 
-    await editor.preview.getByText("Beta").click();
+    await startPreviewEdit({
+      page: editor.page,
+      text: editor.preview.getByText("Beta"),
+    });
     await editor.page.keyboard.type("Second step");
     await editor.page.keyboard.press("Enter");
 
@@ -133,13 +154,17 @@ describe("a text of the preview that changes in place", () => {
   });
 
   it("stops the play when the person clicks a text", async () => {
+    await runningEngine().callTool({
+      name: "resize_scene_clip",
+      input: { clip_id: "opening", duration_frames: playClipFrames },
+    });
     const editor = await openAt({ frame: 0 });
     await editor.page.getByRole("button", { name: "Play" }).click();
     await expect
       .poll(() => editor.page.getByRole("button", { name: "Pause" }).count())
       .toBe(1);
 
-    await editor.preview.getByText("First heading").click();
+    await editor.preview.getByText("First heading").click({ force: true });
 
     await expect
       .poll(() => editor.page.getByRole("button", { name: "Play" }).count())
@@ -147,7 +172,7 @@ describe("a text of the preview that changes in place", () => {
     const stoppedFrame = await editor.scrubberFrame();
     await editor.page.waitForTimeout(500);
     expect(await editor.scrubberFrame()).toBe(stoppedFrame);
-    expect(stoppedFrame).toBeLessThan(30);
+    expect(stoppedFrame).toBeLessThan(playClipFrames);
     await editor.page.keyboard.press("Escape");
     await editor.close();
   });

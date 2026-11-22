@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { closeBrowser, openEditor } from "../testing/editorPage.js";
+import { startPreviewEdit } from "../testing/previewText.js";
 import { storedPropsOf } from "../testing/kitSceneProject.js";
 import { runEngine, type RunningEngine } from "../testing/runEngine.js";
 
@@ -72,7 +73,10 @@ describe("a text in a custom scene", () => {
     const preview = editor.page.frameLocator(
       'iframe[title="Preview of the video"]',
     );
-    await preview.getByText("Own title").click();
+    await startPreviewEdit({
+      page: editor.page,
+      text: preview.getByText("Own title"),
+    });
     await editor.page.keyboard.type("Changed title");
     await editor.page.keyboard.press("Enter");
     await expect

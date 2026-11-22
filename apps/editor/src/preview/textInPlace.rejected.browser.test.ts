@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { closeBrowser, openEditor } from "../testing/editorPage.js";
+import { startPreviewEdit } from "../testing/previewText.js";
 import {
   buildKitSceneProject,
   storedPropsOf,
@@ -32,7 +33,11 @@ describe("a text of the preview that the scene does not accept", () => {
     const preview = editor.page.frameLocator(
       'iframe[title="Preview of the video"]',
     );
-    await preview.getByText("Rent").click();
+    await startPreviewEdit({
+      page: editor.page,
+
+      text: preview.getByText("Rent"),
+    });
 
     await editor.page.keyboard.type("x".repeat(61));
     await editor.page.keyboard.press("Enter");
