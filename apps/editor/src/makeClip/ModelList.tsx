@@ -1,10 +1,11 @@
 import { groupsOf, type ModelChoice } from "./modelChoices.js";
-import { lowestPriceText } from "./price.js";
+import { priceText, type Price } from "./price.js";
 
 export function ModelList(props: {
   choices: ModelChoice[];
   chosenKey: string | undefined;
   onChoose: (key: string) => void;
+  priceFor: (choice: ModelChoice) => Price;
 }) {
   if (props.choices.length === 0) {
     return (
@@ -35,9 +36,15 @@ export function ModelList(props: {
                   props.onChoose(choice.key);
                 }}
               />
-              <span className="model-name">{choice.model.label}</span>
+              <span className="model-name">
+                {choice.model.label}
+                {choice.model.tested === false ? (
+                  <em>Not tested with yumekit yet</em>
+                ) : undefined}
+              </span>
               <span className="model-price">
-                {choice.isReady ? lowestPriceText(choice.model) : "Needs a key"}
+                {priceText(props.priceFor(choice))}
+                {choice.isReady ? undefined : <em>Needs a key</em>}
               </span>
             </label>
           ))}

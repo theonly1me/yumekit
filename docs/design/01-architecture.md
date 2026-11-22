@@ -48,20 +48,20 @@ With no editor, the engine is the process that `yumekit mcp` starts, and it serv
 
 A package may import only the packages in its row. CI must fail on any other import between packages.
 
-| Package       | May import                                                                                           |
-| ------------- | ---------------------------------------------------------------------------------------------------- |
-| `scene`       | nothing from yumekit                                                                                 |
-| `scene-kit`   | `scene`                                                                                              |
-| `project`     | nothing from yumekit                                                                                 |
-| `stage`       | `scene`, and types only from `project`                                                               |
-| `render`      | `project`, `stage`, `scene-kit`                                                                      |
-| `tools`       | nothing from yumekit                                                                                 |
-| `harness-mcp` | `project`, `render`, `tools`, and `scene-kit/schemas`                                                |
-| `brain`       | nothing from yumekit                                                                                 |
-| `engine`      | `project`, `render`, `tools`, `harness-mcp`, `brain`, and `scene-kit/schemas`                        |
-| `apps/cli`    | `project`, `render`, `tools`, `harness-mcp`, `engine`                                                |
-| `apps/editor` | only `project/scenes-row`, `project/platforms`, `project/start-formats`, and `scene-kit` at run time |
-| `tools/*`     | nothing from yumekit                                                                                 |
+| Package       | May import                                                                                                                 |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `scene`       | nothing from yumekit                                                                                                       |
+| `scene-kit`   | `scene`                                                                                                                    |
+| `project`     | nothing from yumekit                                                                                                       |
+| `stage`       | `scene`, and types only from `project`                                                                                     |
+| `render`      | `project`, `stage`, `scene-kit`                                                                                            |
+| `tools`       | nothing from yumekit                                                                                                       |
+| `harness-mcp` | `project`, `render`, `tools`, and `scene-kit/schemas`                                                                      |
+| `brain`       | nothing from yumekit                                                                                                       |
+| `engine`      | `project`, `render`, `tools`, `harness-mcp`, `brain`, and `scene-kit/schemas`                                              |
+| `apps/cli`    | `project`, `render`, `tools`, `harness-mcp`, `engine`                                                                      |
+| `apps/editor` | only `project/scenes-row`, `project/platforms`, `project/asset-uses`, `project/start-formats`, and `scene-kit` at run time |
+| `tools/*`     | nothing from yumekit                                                                                                       |
 
 Two more rules:
 

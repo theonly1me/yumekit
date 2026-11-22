@@ -14,6 +14,7 @@ const plainFailures: Record<string, string> = {
   "clip-not-on-scenes-row": "This scene is no longer in the row of scenes.",
   "output-not-found": "This shape of the video is no longer in the project.",
   "track-not-found": "This sound is no longer in the video.",
+  "asset-in-use": "The video uses this file now, so it stays.",
   "invalid-duration": "A scene must be at least one second long.",
   "index-out-of-range": "The scene cannot move further in this direction.",
   "not-found": "This platform is not in the project now.",

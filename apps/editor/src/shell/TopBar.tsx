@@ -1,11 +1,12 @@
 import type { Theme } from "./useTheme.js";
+import { ViewButtons, type BarViewId } from "./ViewButtons.js";
 
 export function TopBar(props: {
   projectName: string;
   theme: Theme;
   onTheme: (theme: Theme) => void;
   exportLabel: string;
-  onStepView: (stepId: "script" | "pictures") => void;
+  onStepView: (stepId: BarViewId) => void;
   onSettings: () => void;
   onExport: () => void;
 }) {
@@ -26,22 +27,7 @@ export function TopBar(props: {
         >
           Use the {otherTheme} theme
         </button>
-        <button
-          type="button"
-          onClick={() => {
-            props.onStepView("script");
-          }}
-        >
-          Script
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            props.onStepView("pictures");
-          }}
-        >
-          Pictures
-        </button>
+        <ViewButtons onView={props.onStepView} />
         <button type="button" onClick={props.onSettings}>
           Settings
         </button>

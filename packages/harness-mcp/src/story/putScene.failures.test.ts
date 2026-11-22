@@ -99,7 +99,7 @@ describe("put_scene failures", () => {
     expect(result.data["kind"]).toBe("scene-import-not-permitted");
     expect(result.data["hint"]).toContain("canvas-confetti");
     expect(result.data["hint"]).toContain(
-      "react, @yumekit/scene, and @yumekit/scene-kit",
+      "react, @yumekit/scene, @yumekit/scene-kit, and @yumekit/scene-kit/motion",
     );
   });
 

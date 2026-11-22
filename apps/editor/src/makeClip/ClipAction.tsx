@@ -1,3 +1,5 @@
+import type { KeyRequests } from "../tools/requestText.js";
+import { KeyNeeded } from "./KeyNeeded.js";
 import type { MadeClip } from "./makeClip.js";
 import type { ModelChoice } from "./modelChoices.js";
 import { priceOf, priceText } from "./price.js";
@@ -36,12 +38,16 @@ function readOnText(readOn: string): string {
   return Number.isNaN(date.getTime()) ? readOn : dateFormat.format(date);
 }
 
-function summaryOf(values: SettingValues): string {
-  const seconds = secondsOf(values);
-  const resolution = values["resolution"];
+function summaryOf(options: {
+  values: SettingValues;
+  modelLabel: string;
+}): string {
+  const seconds = secondsOf(options.values);
+  const resolution = options.values["resolution"];
   const parts = [
     seconds === undefined ? "" : `${String(seconds)} seconds`,
     typeof resolution === "string" ? `at ${resolution}` : "",
+    `with ${options.modelLabel}`,
   ];
   return parts.filter((part) => part !== "").join(" ");
 }
@@ -52,8 +58,8 @@ function LimitReached(props: { limit: VideoLimit }) {
     <>
       <p className="clip-price">Over the limit of this project</p>
       <p className="fact">
-        This project has used {usedSeconds} of {limitSeconds} seconds of
-        generated video. Use a shorter clip, or raise{" "}
+        This project has used {usedSeconds} of {limitSeconds} seconds of real
+        video. Use a shorter clip, or raise{" "}
         <strong>limits.generatedVideoSeconds</strong> in{" "}
         <strong>media-tools.json</strong>.
       </p>
@@ -64,6 +70,7 @@ function LimitReached(props: { limit: VideoLimit }) {
 function Progress(props: {
   progress: CallProgress | undefined;
   server: string;
+  sceneName: string;
 }) {
   const { progress } = props;
   const share =
@@ -82,6 +89,10 @@ function Progress(props: {
       <p className="fact">
         {progress?.message ?? `Waiting for ${props.server}.`}
       </p>
+      <p className="fact">
+        You can close this. The clip goes into {props.sceneName} when it is
+        ready.
+      </p>
     </div>
   );
 }
@@ -91,25 +102,19 @@ export function ClipAction(props: {
   values: SettingValues;
   limit: VideoLimit;
   phase: Phase;
-  canMake: boolean;
-  onAddKey: (serverId: string) => void;
+  missing: string | undefined;
+  sceneName: string;
+  keyRequests: KeyRequests;
+  onMake: () => void;
 }) {
   const { choice, values, limit, phase } = props;
   if (!choice.isReady) {
     return (
-      <div className="clip-action">
-        <p className="clip-price">{choice.serverLabel} needs a key</p>
-        <p className="fact">Add the key once. It takes about two minutes.</p>
-        <button
-          type="button"
-          className="primary"
-          onClick={() => {
-            props.onAddKey(choice.server.server);
-          }}
-        >
-          Add the {choice.missingKey?.label ?? "key"}
-        </button>
-      </div>
+      <KeyNeeded
+        choice={choice}
+        price={priceOf({ model: choice.model, values })}
+        requests={props.keyRequests}
+      />
     );
   }
   const failure = phase.kind === "failed" ? phase.failure : undefined;
@@ -137,32 +142,35 @@ export function ClipAction(props: {
     );
   }
   const isMaking = phase.kind === "making";
-  const summary = summaryOf(values);
+  const summary = summaryOf({ values, modelLabel: choice.model.label });
   const price = priceOf({ model: choice.model, values });
   return (
     <div className="clip-action">
       <p className="clip-price">{priceText(price)}</p>
       <p className="fact">
-        {summary === "" ? "" : `${summary}. `}This project has used{" "}
-        {limit.usedSeconds} of {limit.limitSeconds} seconds.
+        {summary}. This project has used {limit.usedSeconds} of{" "}
+        {limit.limitSeconds} seconds of real video.
         {price.kind === "about"
           ? ` The price is from ${readOnText(choice.model.read_on)}.`
           : ""}
       </p>
       <button
-        type="submit"
+        type="button"
         className="primary"
-        disabled={!props.canMake || isMaking}
+        disabled={props.missing !== undefined || isMaking}
+        onClick={props.onMake}
       >
         {isMaking ? "Making the clip" : "Make the clip"}
       </button>
-      {props.canMake ? undefined : (
-        <p className="fact">
-          Write what happens in the clip, and pick a first picture.
-        </p>
-      )}
+      {props.missing === undefined ? undefined : (
+        <p className="fact">{props.missing}</p>
+      )}{" "}
       {isMaking ? (
-        <Progress progress={phase.progress} server={choice.serverLabel} />
+        <Progress
+          progress={phase.progress}
+          server={choice.serverLabel}
+          sceneName={props.sceneName}
+        />
       ) : undefined}
       {failure === undefined ? undefined : (
         <p className="failure" role="alert">

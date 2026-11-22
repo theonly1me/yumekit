@@ -47,6 +47,31 @@ describe("preview_scenes", () => {
     renderTimeout,
   );
 
+  it(
+    "draws a given frame of the entry, and the last frame for a frame past the end",
+    async () => {
+      const harness = await tallHarnessWithUnplacedScene();
+
+      const entry = await harness.call({
+        name: "preview_scenes",
+        arguments: { output_id: "tall", scene_ids: ["intro"], frame: 10 },
+      });
+      const settled = await harness.call({
+        name: "preview_scenes",
+        arguments: { output_id: "tall", scene_ids: ["intro"] },
+      });
+      const pastTheEnd = await harness.call({
+        name: "preview_scenes",
+        arguments: { output_id: "tall", scene_ids: ["intro"], frame: 500 },
+      });
+
+      expect(entry.data).toMatchObject({ pictures: [{ frame: 10 }] });
+      expect(pastTheEnd.data).toMatchObject({ pictures: [{ frame: 89 }] });
+      expect(imagesOf(entry)[0]?.data).not.toBe(imagesOf(settled)[0]?.data);
+    },
+    renderTimeout,
+  );
+
   it("gives scene-not-found for an unknown scene id", async () => {
     const harness = await tallHarnessWithUnplacedScene();
 

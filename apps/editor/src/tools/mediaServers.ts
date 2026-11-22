@@ -52,6 +52,10 @@ const modelSchema = z.object({
   settings: z.array(settingSchema),
   prices: z.array(priceSchema),
   read_on: z.string(),
+  tested: z.boolean().optional(),
+  accepts: z
+    .array(z.enum(["first_frame", "last_frame", "reference_images"]))
+    .optional(),
 });
 
 const keySchema = z.object({

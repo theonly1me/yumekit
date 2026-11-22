@@ -14,6 +14,10 @@
       "types": "./dist/scenesRow/index.d.ts",
       "default": "./dist/scenesRow/index.js"
     },
+    "./asset-uses": {
+      "types": "./dist/assetUses/index.d.ts",
+      "default": "./dist/assetUses/index.js"
+    },
     "./platforms": {
       "types": "./dist/platforms/catalog.d.ts",
       "default": "./dist/platforms/catalog.js"

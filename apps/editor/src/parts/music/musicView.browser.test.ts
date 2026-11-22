@@ -50,7 +50,7 @@ async function openMusic(url: string) {
 }
 
 describe("the music view", () => {
-  it("makes a sound file of the person the music of each output, cut or repeated, and Download the music gives the same bytes", async () => {
+  it("makes a sound file of the person the music of each output, cut or repeated, shows its original name and Your file, and Download the music gives the same bytes", async () => {
     const editor = await openMusic(runningEngine().url);
     const bytes = wavBytes(1.5);
 
@@ -82,13 +82,16 @@ describe("the music view", () => {
       ]);
     await expect
       .poll(() => editor.page.locator(".track-name").textContent())
-      .toBe("Mytune.wav");
+      .toBe("My tune.wav");
+    expect(await editor.page.locator(".made-with").first().textContent()).toBe(
+      "Your file.",
+    );
     const downloading = editor.page.waitForEvent("download");
     await editor.page
       .getByRole("button", { name: "Download the music" })
       .click();
     const download = await downloading;
-    expect(download.suggestedFilename()).toBe("Mytune.wav");
+    expect(download.suggestedFilename()).toBe("My tune.wav");
     const saved = await readFile(await download.path());
     expect(saved.equals(bytes)).toBe(true);
     await editor.close();

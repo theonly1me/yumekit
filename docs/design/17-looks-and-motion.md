@@ -134,13 +134,13 @@ A scene clip gets the optional `transition`: `{ kind, durationFrames }`. It desc
 1. One idea in each scene. A scene of 2 to 4 seconds holds one headline or one number.
 2. A scene has three parts: it comes in during the first 20 to 30 percent, it holds, and its last 10 percent is quiet for the transition. Use `holdSplit`.
 3. The eye goes to the largest thing first. One thing is the largest. One accent color in a scene.
-4. Things come in one after another, never all at once. Use `sequence`. A stagger is 3 to 6 frames at 30 frames each second for small things, and 8 to 12 for lines of text.
+4. Things come in one after another, never all at once. Use `sequence` for the start frames, not numbers that you write by hand. A stagger is 3 to 6 frames at 30 frames each second for small things, and 8 to 12 for lines of text.
 5. Nothing is still. The backdrop drifts, and the main thing moves a little for the whole scene. Use `drift`.
 6. Text is large. A headline uses 60 to 80 percent of the width. A viewer reads on a phone.
 7. A number counts up. A list builds. A comparison shows the old side first.
 8. Take each color and each font from the look. Keep the caption area free.
-9. Each platform shape gets its own layout: stack in tall, side by side in wide.
-10. Check each scene with `preview_scenes` at the frame after it settles, and at one frame during its entry.
+9. Each platform shape gets its own layout: stack in tall, side by side in wide. Text stays left aligned in each layout.
+10. Check each scene with `preview_scenes` in each output: at the frame after it settles, and at one frame during its entry.
 
 The guide has one full example scene that uses `Backdrop`, `words`, `draw`, `sequence`, and `drift`.
 
@@ -224,3 +224,14 @@ WP48 made these choices where this document gives no rule.
 11. The mark is under the "+" between two cards that touch. It shows a small picture of the kind, in the accent color for each kind other than `cut`. A click opens the line "How scene N comes in" under the cards, with the five kinds and "Close". A pick calls `set_transitions` with the `clip_ids` of the next card, so it changes each output.
 12. "Between scenes" is a row of the group "This video" in Settings, after the row "Look". It shows the kind of the whole video. When the scenes change in different ways, no kind is picked and the row says so. With fewer than two scenes, the row is off and says "Add a second scene first."
 13. The first request of a new project of the home server ends with the line `Between scenes: a fade from each scene to the next.`
+
+## Details of WP52
+
+1. `get_scene_guide` has the part "Motion design" after "The caption area". It holds the ten rules, the steps that fit a motion to the clip with `paceFrame`, the signature of each function of `@yumekit/scene-kit/motion` with one line on its use, and `Backdrop`. A test compiles a scene that calls each function with each option that the guide names, so a signature of the guide cannot drift from the code.
+2. `preview_scenes` takes `frame?`: a frame of the clip of 3 seconds that it draws. The default stays the frame 75% into it. A frame past the end gives the last frame. Rule 10 needs a frame during the entry, and the tool gave only the settled frame. `frame` 10 is during the entry at each frame rate of the project.
+3. The guide has three examples. Example 1 is the full example of this document: a headline that comes in word by word, a line drawn under one word, and points that build, with `Backdrop`, `words`, `draw`, `sequence`, `drift`, and `paceFrame`. The two older examples now follow the rules too: the number uses `countUp`, `enter`, `pulse`, `drift`, and `Backdrop`, and the steps use `sequence`, `enter`, `drift`, and `Backdrop`. Their props do not change.
+4. A custom scene gives `Backdrop` a fixed seed, for example its scene id, because the scene contract gives a scene no id. The content sits in a second element with `position: absolute`, because `Backdrop` is absolute and covers an element that is not positioned.
+5. A settled `MotionStyle` has `transform: "none"`, so the guide says to put each motion on its own element and never to join two transform strings.
+6. The scene guide names `@yumekit/scene-kit/motion` as a permitted import, and the hint of `scene-import-not-permitted` names it too. Document 02 has the same list.
+7. The AI in the chat gets three rules, after rule 11: 12 (prefer a kit scene, and follow Motion design for scene code), 13 (check each new scene with `preview_scenes` at frame 10 and settled), and 14 (one call of `set_transitions` for the whole video). Rule 2 (read the guide before the first scene) stays. Step 3 and step 7 of the server instructions say the same.
+8. Rules 4, 9, and 10 got one sentence each from a real run with a small model. With the guide of `main`, the AI wrote a scene that compiled at the first try and used the look, but used no motion function, no backdrop, four accent colors, and no `data-text-prop`, and its settled preview showed a clock that had not settled. With Motion design, the same request gave a scene that compiled at the first try with `Backdrop`, `paceFrame`, `enter`, `drift`, one accent, `data-text-prop`, and a stacked tall layout, and the AI checked it with `preview_scenes` at frame 10 and settled. It still wrote its start frames by hand, centered the text in tall, checked the entry only in wide, and its drawn arc showed a dot at the start. The rules now say so, and `draw` says to draw a line only when its share is above 0.02.

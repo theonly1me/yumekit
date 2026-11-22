@@ -1,6 +1,7 @@
+import { lazy, Suspense } from "react";
+import { FilesView } from "../files/FilesView.js";
 import { MusicView } from "../music/MusicView.js";
 import { PicturesView } from "../pictures/PicturesView.js";
-import { ScriptView } from "../script/ScriptView.js";
 import { VoiceView } from "../voice/VoiceView.js";
 import { StepFrame } from "./StepFrame.js";
 import {
@@ -9,17 +10,37 @@ import {
   type StepViewProps,
 } from "./stepViewProps.js";
 
+const ScriptView = lazy(() =>
+  import("../script/ScriptView.js").then((module) => ({
+    default: module.ScriptView,
+  })),
+);
+
+export const loadingScriptText = "Loading the script.";
+
 function StepBody(props: StepViewProps & { stepId: StepViewId }) {
   const { stepId, ...view } = props;
   switch (stepId) {
     case "script":
-      return <ScriptView {...view} />;
+      return (
+        <Suspense
+          fallback={
+            <p className="fact lead" role="status">
+              {loadingScriptText}
+            </p>
+          }
+        >
+          <ScriptView {...view} />
+        </Suspense>
+      );
     case "pictures":
       return <PicturesView {...view} />;
     case "voice":
       return <VoiceView {...view} />;
     case "music":
       return <MusicView {...view} />;
+    case "files":
+      return <FilesView {...view} />;
   }
 }
 

@@ -152,6 +152,18 @@ WP29 made these choices where this document and the prototype give no rule.
 24. The preview is not in the tab order. So the Scene tab stays the way to change a text with the keyboard.
 25. A custom scene uses the same mark. The scene guide of `get_scene_guide` tells the AI to put `data-text-prop` on each element that shows a text prop.
 26. The editor saves the text changes one after another. When a change comes before the snapshot of the last saved change, the editor starts from the props of that saved change. So a quick second change keeps the first one.
+27. WP32 made the next choices for the Make a clip sheet. The sheet opens from "Make a real video clip" on a picked card and from the Scene tab. The line under the title says "For scene 2: <title>.", with the number of the clip in the scenes row of the current output.
+28. The prompt starts from the scene. For a `video-clip` scene of a generated video, it is the prompt of that video. For another scene, it is each text prop as a sentence, then "Slow camera move, natural light." as in the prototype. A prop whose name ends in `Id` or `Ids` is not a text. A scene with no text prop uses its title.
+29. Each model row shows the price for the picked settings. For a model that is not picked, the editor carries the picked values over to that model, as it does when the person picks the model. A model whose server needs a key shows its price and "Needs a key".
+30. A picked model whose server needs a key shows "<server> needs a key", the price of the clip after the key, and the key guide of its first missing key. This replaces "Add the key" of item 16. The button says "Save the key and continue". After the save, `media-servers-changed` reads the servers again, and the sheet shows the price and "Make the clip" with the same prompt, model, and settings. The sheet does not start the clip by itself, because a clip can cost money (decision P8).
+31. The length stays the slider of item 10 of "Details of Tools and Make a clip" in document 11. The prototype shows four length buttons, but each model has its own range.
+32. The clip goes into each output that has the clip on its scenes row (decision P6), the current output first. The editor calls `place_video` once for each output, so each output is one undo step and one line in the chat. The video has the size of the current output. If a call fails, the outputs before it keep the clip, and the sheet shows the failure.
+33. The result names the platforms of the changed outputs, for example "on YouTube and TikTok". An output with no platform shows its label.
+34. While the clip is made, the sheet says "You can close this. The clip goes into scene 2 when it is ready." The call continues after the sheet closes.
+35. The sheet says "seconds of real video", as the prototype does. The limit message keeps the advice of item 14 about `media-tools.json`.
+36. The sheet starts on the video model of the pick in Settings (document 15). A pick with a server and no model starts on the first video model of that server. With no pick, the sheet starts on the first default model of a ready server. A model that the person picks in the sheet applies to this clip only, and does not change the pick of Settings.
+37. A model with `tested: false` shows "Not tested with yumekit yet" under its name (document 16).
+38. The control of the first picture says "Start on this picture". It shows only when the picked model has `first_frame` in `accepts` (document 16). A model with no `accepts` keeps the control, as before. For a model without it, the sheet sends no `first_frame_asset_id` and needs no picture to make the clip.
 
 ### Details of the chat panel
 

@@ -3,7 +3,8 @@ import { kitSceneSchemas } from "@yumekit/scene-kit/schemas";
 import { prettifyError, type z } from "zod";
 import type { FailureIssue, HarnessFailure } from "../results.js";
 
-const permittedImports = "react, @yumekit/scene, and @yumekit/scene-kit";
+const permittedImports =
+  "react, @yumekit/scene, @yumekit/scene-kit, and @yumekit/scene-kit/motion";
 
 function isKitComponent(name: string): name is keyof typeof kitSceneSchemas {
   return Object.keys(kitSceneSchemas).includes(name);
@@ -58,7 +59,7 @@ function codeHint(failure: RenderFailure): string {
     case "scene-import-not-permitted":
       return `Remove the import of "${failure.importName}". A scene may import only ${permittedImports}. Call get_scene_guide for what each one gives.`;
     case "scene-compile-failed":
-      return `Fix the code at line ${String(failure.line)}, column ${String(failure.column)}, then call put_scene again. The default export must come from defineReactScene. Call get_scene_guide for the contract and two complete examples.`;
+      return `Fix the code at line ${String(failure.line)}, column ${String(failure.column)}, then call put_scene again. The default export must come from defineReactScene. Call get_scene_guide for the contract and three complete examples.`;
     default:
       return (
         failure.hint ??

@@ -7,7 +7,7 @@ Prefer a kit scene (list_kit_scenes). Write custom code only when no kit scene c
 1. A custom scene is one TSX file. Send it as \`code\` to put_scene, with \`props\`. The harness checks it before it stores it.
 2. The default export is a SceneModule. Make it with \`defineReactScene(component)\`. The component gets \`{ props }\`: the JSON object that you gave to put_scene.
 3. Treat each prop as untrusted. Check its type with \`typeof\` or \`Array.isArray\`, and give a default for a missing or wrong value. You may read a prop as \`props.title\`.
-4. A scene may import only \`react\`, \`@yumekit/scene\`, and \`@yumekit/scene-kit\`. Any other import fails with scene-import-not-permitted. Most scenes import \`@yumekit/scene\`, and \`useStylePack\` from \`@yumekit/scene-kit\` for the colors and the fonts of the look.
+4. A scene may import only \`react\`, \`@yumekit/scene\`, \`@yumekit/scene-kit\`, and \`@yumekit/scene-kit/motion\`. Any other import fails with scene-import-not-permitted. Most scenes import \`@yumekit/scene\`, \`useStylePack\` and \`Backdrop\` from \`@yumekit/scene-kit\` for the look, and the motion functions from \`@yumekit/scene-kit/motion\` (see Motion design).
 5. The code compiles with strict TypeScript. A type error fails with scene-compile-failed and gives the line and the column.
 6. The scene draws inside an element with the exact size of the output in CSS pixels. Use \`position: "absolute", inset: 0\` on the root element to fill it.
 7. The picture of a frame depends only on the frame number. The same frame always gives the same pixels, and frames can be drawn in any order.
@@ -89,5 +89,5 @@ The bottom 16 units of the picture are the caption area. Narration captions (\`c
 
 - Margin: 8 units. Content is left aligned. Never center a block of body text.
 - Text sizes: a title 13 units, a heading 11 units, a list item 7.5 units, a label 5 units. In the tall layout, make text about 1.25 times larger.
-- Motion: text rises 6 units while it fades in over 14 frames at 30 frames per second. Items start about 20 frames apart. Scale these by framesPerSecond / 30.
+- Motion: use the functions of Motion design. They take seconds, so a motion has the same length at each frame rate.
 `;
