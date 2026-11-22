@@ -14,7 +14,8 @@ import { rawRequest, withToken } from "../../testing/rawRequest.js";
 export type FakeStep =
   | { print: string }
   | { callTool: { name: string; input: object } }
-  | { waitForStop: { print: string[] } };
+  | { waitForStop: { print: string[] } }
+  | { waitForFile: string };
 
 export interface FakeAgentScenario {
   steps: FakeStep[];
