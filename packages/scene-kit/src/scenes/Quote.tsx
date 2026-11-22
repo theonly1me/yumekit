@@ -1,45 +1,65 @@
-import { stagger, tween, type JsonObject } from "@yumekit/scene";
-import { Fragment, type ReactNode } from "react";
+import type { JsonObject } from "@yumekit/scene";
+import type { ReactNode } from "react";
 import { centeredContentBox } from "../kit/captionArea.js";
 import { FitBox } from "../kit/FitBox.js";
-import { riseStyle, useMotionFrame } from "../kit/motion.js";
+import { useKitMotion } from "../kit/motion.js";
+import { MotionWords } from "../kit/MotionWords.js";
 import { useSizes } from "../kit/sizes.js";
 import { bodyTextStyle, displayTextStyle } from "../kit/textStyles.js";
 import { readQuoteProps } from "../props/readProps.js";
+import { draw, words } from "../motion/index.js";
 import { useStylePack } from "../stylePacks/StylePackContext.js";
 
-const firstWordStartFrame = 6;
-const wordFadeFrames = 10;
-const ghostOpacity = 0.12;
-const ruleGrowFrames = 30;
+const firstWordStartFrame = 4;
+const wordStaggerShare = 1.6;
+const ruleDelayFrames = 4;
+const ruleGrowFrames = 22;
+const quoteRiseUnits = 3;
 const ruleUnits = 34;
 
 export function Quote(props: { props: JsonObject }): ReactNode {
   const { quote, source } = readQuoteProps(props.props);
   const stylePack = useStylePack();
   const sizes = useSizes();
-  const words = quote.split(/\s+/).filter((word) => word !== "");
-  const eachFrames = stylePack.motion.wordStaggerFrames;
-  const wordStart = (index: number) =>
-    stagger({ index, startFrame: firstWordStartFrame, eachFrames });
-  const ruleStartFrame = wordStart(words.length) + wordFadeFrames;
-  const sourceStartFrame = ruleStartFrame + ruleGrowFrames / 2;
-  const motionFrame = useMotionFrame({
-    settleFrame: sourceStartFrame + stylePack.motion.riseFrames,
-  });
-  const ruleWidth = tween({
+  const motion = useKitMotion();
+  const quoteWordsAt = (frame: number) =>
+    words({
+      text: quote,
+      frame,
+      framesPerSecond: motion.framesPerSecond,
+      startFrame: motion.framesOf(firstWordStartFrame),
+      eachSeconds: motion.wordStaggerSeconds * wordStaggerShare,
+      wordSeconds: motion.itemSeconds,
+      unit: motion.unit,
+      distanceUnits: quoteRiseUnits,
+    });
+  const ruleStartFrame =
+    quoteWordsAt(0).settleFrame -
+    motion.framesOf(stylePack.motion.riseFrames - ruleDelayFrames);
+  const sourceStartFrame = ruleStartFrame + motion.framesOf(ruleGrowFrames / 2);
+  const motionFrame = motion.paced(
+    Math.max(
+      ruleStartFrame + motion.framesOf(ruleGrowFrames),
+      sourceStartFrame + motion.framesOf(stylePack.motion.riseFrames),
+    ),
+  );
+  const ruleShare = draw({
     frame: motionFrame,
+    framesPerSecond: motion.framesPerSecond,
     startFrame: ruleStartFrame,
-    endFrame: ruleStartFrame + ruleGrowFrames,
-    from: 0,
-    to: ruleUnits,
+    durationSeconds: motion.framesOf(ruleGrowFrames) / motion.framesPerSecond,
   });
+  const contentDrift = motion.drift("scale");
   return (
     <FitBox
       {...centeredContentBox({
         stylePack,
         sizes,
         wideWidthUnits: stylePack.layout.wideQuoteUnits,
+        boxStyle: {
+          transform: contentDrift.transform,
+          transformOrigin: "center bottom",
+        },
       })}
       contentStyle={{
         display: "flex",
@@ -55,30 +75,16 @@ export function Quote(props: { props: JsonObject }): ReactNode {
           lineHeight: 1.08,
         }}
       >
-        {[...words.entries()].map(([index, word]) => (
-          <Fragment key={`${String(index)}-${word}`}>
-            {index === 0 ? null : " "}
-            <span
-              style={{
-                opacity: tween({
-                  frame: motionFrame,
-                  startFrame: wordStart(index),
-                  endFrame: wordStart(index) + wordFadeFrames,
-                  from: ghostOpacity,
-                  to: 1,
-                }),
-              }}
-            >
-              {word}
-            </span>
-          </Fragment>
-        ))}
+        <MotionWords
+          words={quoteWordsAt(motionFrame).words}
+          settledAs="word-spans"
+        />
       </p>
       <div
         aria-hidden="true"
         style={{
           height: sizes.fitted(1.4),
-          width: sizes.fitted(ruleWidth),
+          width: sizes.fitted(ruleShare * ruleUnits),
           borderRadius: sizes.fitted(1),
           background: stylePack.colors.accent,
         }}
@@ -91,11 +97,9 @@ export function Quote(props: { props: JsonObject }): ReactNode {
             color: stylePack.colors.mutedText,
             fontSize: sizes.text("label"),
             lineHeight: 1.3,
-            ...riseStyle({
-              motionFrame,
+            ...motion.enterAt({
+              frame: motionFrame,
               startFrame: sourceStartFrame,
-              stylePack,
-              unit: sizes.unit,
             }),
           }}
         >

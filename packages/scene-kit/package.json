@@ -13,6 +13,10 @@
     "./schemas": {
       "types": "./dist/schemas.d.ts",
       "default": "./dist/schemas.js"
+    },
+    "./motion": {
+      "types": "./dist/motion.d.ts",
+      "default": "./dist/motion.js"
     }
   },
   "files": [

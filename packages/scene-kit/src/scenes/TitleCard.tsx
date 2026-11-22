@@ -2,16 +2,17 @@ import { spring, type JsonObject } from "@yumekit/scene";
 import type { ReactNode } from "react";
 import { contentBottomUnits } from "../kit/captionArea.js";
 import { FitBox } from "../kit/FitBox.js";
-import { riseStyle, useMotionFrame } from "../kit/motion.js";
+import { useKitMotion } from "../kit/motion.js";
+import { MotionWords } from "../kit/MotionWords.js";
 import { useSizes } from "../kit/sizes.js";
 import { bodyTextStyle, displayTextStyle } from "../kit/textStyles.js";
 import { readTitleCardProps } from "../props/readProps.js";
+import { words } from "../motion/index.js";
 import { useStylePack } from "../stylePacks/StylePackContext.js";
 
 const accentGrowStartFrame = 0;
-const headingStartFrame = 8;
-const subheadingStartFrame = 22;
-const settleFrame = 40;
+const headingStartFrame = 5;
+const subheadingGapFrames = 3;
 const accentSizeUnits = 46;
 const accentTopUnits = -10;
 const gapBelowAccentUnits = 2.5;
@@ -20,18 +21,37 @@ export function TitleCard(props: { props: JsonObject }): ReactNode {
   const { heading, subheading } = readTitleCardProps(props.props);
   const stylePack = useStylePack();
   const sizes = useSizes();
-  const motionFrame = useMotionFrame({ settleFrame });
+  const motion = useKitMotion();
+  const headingWordsAt = (frame: number) =>
+    words({
+      text: heading,
+      frame,
+      framesPerSecond: motion.framesPerSecond,
+      startFrame: motion.framesOf(headingStartFrame),
+      eachSeconds: motion.wordStaggerSeconds,
+      wordSeconds: motion.itemSeconds,
+      unit: motion.unit,
+      distanceUnits: stylePack.motion.riseDistanceUnits,
+    });
+  const subheadingStart =
+    headingWordsAt(0).settleFrame -
+    motion.framesOf(stylePack.motion.riseFrames - subheadingGapFrames);
+  const motionFrame = motion.paced(
+    subheadingStart + motion.framesOf(stylePack.motion.riseFrames),
+  );
+  const headingWords = headingWordsAt(motionFrame);
   const margin = stylePack.layout.marginUnits;
   const accentSize = spring({
     frame: motionFrame,
-    startFrame: accentGrowStartFrame,
-    framesPerSecond: stylePack.motion.referenceFramesPerSecond,
+    startFrame: motion.framesOf(accentGrowStartFrame),
+    framesPerSecond: motion.framesPerSecond,
     from: 0,
     to: accentSizeUnits,
-    damping: 14,
+    stiffness: 120,
+    damping: 13,
   });
-  const rise = (startFrame: number) =>
-    riseStyle({ motionFrame, startFrame, stylePack, unit: sizes.unit });
+  const accentDrift = motion.drift("scale");
+  const textDrift = motion.drift("scale");
   return (
     <>
       <div
@@ -44,6 +64,7 @@ export function TitleCard(props: { props: JsonObject }): ReactNode {
           height: sizes.pixels(accentSize),
           borderRadius: "50%",
           background: stylePack.colors.accent,
+          transform: accentDrift.transform,
         }}
       />
       <FitBox
@@ -60,6 +81,8 @@ export function TitleCard(props: { props: JsonObject }): ReactNode {
           ),
           bottom: sizes.pixels(contentBottomUnits(stylePack)),
           justifyContent: "flex-end",
+          transform: textDrift.transform,
+          transformOrigin: "left bottom",
         }}
       >
         <h1
@@ -68,10 +91,9 @@ export function TitleCard(props: { props: JsonObject }): ReactNode {
             ...displayTextStyle(stylePack),
             fontSize: sizes.text("title"),
             lineHeight: 1.05,
-            ...rise(headingStartFrame),
           }}
         >
-          {heading}
+          <MotionWords words={headingWords.words} settledAs="text" />
         </h1>
         {subheading === undefined || subheading === "" ? null : (
           <p
@@ -82,7 +104,10 @@ export function TitleCard(props: { props: JsonObject }): ReactNode {
               fontSize: sizes.text("label"),
               lineHeight: 1.3,
               marginTop: sizes.fitted(2.5),
-              ...rise(subheadingStartFrame),
+              ...motion.enterAt({
+                frame: motionFrame,
+                startFrame: subheadingStart,
+              }),
             }}
           >
             {subheading}
