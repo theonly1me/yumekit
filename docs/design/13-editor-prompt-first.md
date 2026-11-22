@@ -221,6 +221,9 @@ WP31 made these choices where this document and the prototype give no rule.
 21. The line above the title is the request text before its `Platforms:` line.
 22. The editor keeps the theme in `localStorage`, which is separate for each port. So the start screen and the editor can show different themes. This is an inference from the browser rule, not a measured fault.
 23. The release check runs with a temporary `YUMEKIT_CONFIG_DIRECTORY` and also loads the page of `yumekit --no-browser`.
+24. An AI makes each scene first and places the clips last. So during the Making screen, a scene often has no clip, and `preview_frames` has no frame for it. A real project of the owner showed three black cards for this reason. The Making cards take the picture of a scene with a clip from `preview_frames`, and the picture of a scene with no clip from `preview_scenes` (document 05).
+25. A Making card has the shape of the first output: its box has the width and the height of that output as its aspect ratio. Item 7 of "Details of the editor layout" stays the rule for the scene cards of the editor.
+26. A Making card with no picture yet shows the words "Making the picture" on the surface color. It never shows an empty dark box. If the picture cannot be made, the card shows "No picture".
 
 ## Work packages
 
@@ -234,6 +237,7 @@ WP31 made these choices where this document and the prototype give no rule.
 | WP31 | The home server, `yumekit` with no arguments, the start screen, and the Making screen                                                       | WP26, WP27, WP29 |
 | WP32 | "Make a real video clip" from a scene, with the key guide in place                                                                          | WP29             |
 | WP33 | A text of the preview changes in place                                                                                                      | WP29             |
+| WP36 | `preview_scenes`, and Making cards that show each scene in the shape of the output                                                          | WP31             |
 
 WP26, WP27, and WP28 start together.
 
