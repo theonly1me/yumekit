@@ -19,7 +19,12 @@ export {
   type Platform,
   type PlatformId,
 } from "./platforms/catalog.js";
-export type { Bible, CastMember } from "./format/bible.js";
+export {
+  castKinds,
+  type Bible,
+  type CastKind,
+  type CastMember,
+} from "./format/bible.js";
 export type { Scene, SceneSource } from "./format/scene.js";
 export type {
   AudioClip,

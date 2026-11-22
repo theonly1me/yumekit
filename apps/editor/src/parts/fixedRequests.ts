@@ -17,9 +17,21 @@ export type FixedRequest =
   | { kind: "another-voice"; voiceName: string; model?: ModelTarget }
   | { kind: "make-this-music"; words: string; model?: ModelTarget }
   | { kind: "match-the-captions" }
-  | { kind: "back-to-graphics"; aboutClipId: string };
+  | { kind: "back-to-graphics"; aboutClipId: string }
+  | { kind: "make-a-cast-picture"; name: string; description: string };
 
 export type AskTheAi = (input: AskInput) => Promise<boolean>;
+
+function castPictureSentenceOf(options: {
+  name: string;
+  description: string;
+}): string {
+  const description = options.description.trim();
+  const looks = /[.!?]$/.test(description) ? description : `${description}.`;
+  const looksSentence =
+    description === "" ? "" : ` It looks like this: ${looks}`;
+  return `Make a picture of "${options.name}" from the cast.${looksSentence} Add the picture to the pictures of that cast entry.`;
+}
 
 function requestSentenceOf(request: FixedRequest): string {
   switch (request.kind) {
@@ -39,6 +51,8 @@ function requestSentenceOf(request: FixedRequest): string {
       return "Make the captions match my recording.";
     case "back-to-graphics":
       return "Draw this scene by code, with no video clip.";
+    case "make-a-cast-picture":
+      return castPictureSentenceOf(request);
   }
 }
 

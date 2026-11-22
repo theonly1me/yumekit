@@ -1,6 +1,8 @@
 const personSentencesByToolName: Record<string, string> = {
   set_script: "You changed the script.",
   set_bible: "You changed the style notes.",
+  put_cast_member: "You changed the cast.",
+  remove_cast_member: "You removed an entry from the cast.",
   put_scene: "You changed the text of a scene.",
   remove_scene: "You removed a scene.",
   add_clip: "You added a part to the video.",

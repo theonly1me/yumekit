@@ -91,6 +91,23 @@ export async function connectMediaTools(options: {
         }),
       };
     },
+    chosenModel: async (choice) => {
+      const selected = await selectServer({
+        connections: pool.connections(),
+        defaults,
+        request: choice,
+      });
+      if (!selected.ok) return undefined;
+      const { connection, model } = selected.value;
+      const modelId =
+        model ??
+        describedDefaultModel({ connection, capability: choice.capability });
+      return connection.description?.models.find(
+        (candidate) =>
+          candidate.id === modelId &&
+          candidate.capability === choice.capability,
+      );
+    },
     run: async (request) => {
       const selected = await selectServer({
         connections: pool.connections(),

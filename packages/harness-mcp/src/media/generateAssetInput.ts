@@ -39,6 +39,12 @@ export const generateAssetInput = {
     .describe(
       "Image asset ids for the image or video tool to follow, for example a character sheet. The harness gives the tool their file paths as reference_image_paths.",
     ),
+  cast_ids: z
+    .array(z.string())
+    .optional()
+    .describe(
+      "The ids of the cast entries that the picture or the video clip shows. The harness adds the name and the description of each entry to the prompt, and its reference pictures to reference_asset_ids when the model accepts reference pictures.",
+    ),
   first_frame_asset_id: z
     .string()
     .optional()

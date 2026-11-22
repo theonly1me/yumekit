@@ -96,6 +96,20 @@
     padding: 12px var(--gutter) 28px;
   }
 
+  .editor-bar {
+    padding: 0 var(--gutter);
+  }
+
+  .bar-actions {
+    min-width: 0;
+    overflow-x: auto;
+    padding: 4px;
+  }
+
+  .bar-actions button {
+    flex: none;
+  }
+
   .project-name,
   .bar-actions .theme-switch {
     display: none;

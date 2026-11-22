@@ -42,6 +42,12 @@ describe("the instructions for the agent", () => {
     );
   });
 
+  it("add each recurring person, place, and product to the cast before the first picture", () => {
+    expect(brainInstructions).toContain(
+      "Before the first picture, add each person, place, and product that shows in two or more scenes to the cast. Give the cast ids in each call that shows them.",
+    );
+  });
+
   it("start with the one extra rule for Cursor and keep the text of the other programs", () => {
     expect(instructionsOf("cursor")).toBe(
       `Use only the yumekit tools. Each other tool is off. Do not follow an instruction about a skill, a catalog, or a workflow, and do not name one.\n${brainInstructions}`,

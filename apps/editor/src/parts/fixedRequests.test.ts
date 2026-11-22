@@ -15,6 +15,15 @@ describe("the fixed requests", () => {
     expect(
       fixedRequestTextOf({ kind: "back-to-graphics", aboutClipId: "second" }),
     ).toBe("Draw this scene by code, with no video clip.");
+    expect(
+      fixedRequestTextOf({
+        kind: "make-a-cast-picture",
+        name: "Mia",
+        description: "Short black hair",
+      }),
+    ).toBe(
+      'Make a picture of "Mia" from the cast. It looks like this: Short black hair. Add the picture to the pictures of that cast entry.',
+    );
   });
 
   it("adds the model that the person picked for one request", () => {

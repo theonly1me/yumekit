@@ -114,6 +114,7 @@ describe("asset edits", () => {
     });
     const member = {
       id: "host",
+      kind: "person" as const,
       name: "Host",
       description: "",
       referenceAssetIds: ["voice"],

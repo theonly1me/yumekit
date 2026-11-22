@@ -6,6 +6,7 @@ export function TopBar(props: {
   onTheme: (theme: Theme) => void;
   exportLabel: string;
   onStepView: (stepId: "script" | "pictures") => void;
+  onCast: () => void;
   onSettings: () => void;
   onExport: () => void;
 }) {
@@ -41,6 +42,9 @@ export function TopBar(props: {
           }}
         >
           Pictures
+        </button>
+        <button type="button" onClick={props.onCast}>
+          Cast
         </button>
         <button type="button" onClick={props.onSettings}>
           Settings

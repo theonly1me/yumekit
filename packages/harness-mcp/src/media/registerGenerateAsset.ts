@@ -1,6 +1,7 @@
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { Edit } from "@yumekit/project";
 import { applyEditsResult } from "../applyEditsResult.js";
+import { withCast } from "../cast/castRequest.js";
 import type { HarnessContext } from "../context.js";
 import type { ProgressListener } from "../harness/toolTable.js";
 import { failureResult } from "../results.js";
@@ -27,8 +28,15 @@ async function generateAsset(options: {
   request: GenerateAssetInput;
   onProgress: ProgressListener | undefined;
 }): Promise<CallToolResult> {
-  const { context, request, onProgress } = options;
+  const { context, onProgress } = options;
   const snapshot = context.store.read();
+  const castApplied = await withCast({
+    snapshot,
+    request: options.request,
+    mediaTools: context.mediaTools,
+  });
+  if (!castApplied.ok) return failureResult(castApplied.failure);
+  const request = castApplied.value;
   const projectFolder = context.store.folder;
   const ids = {
     referenceAssetIds: request.reference_asset_ids,

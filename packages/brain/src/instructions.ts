@@ -14,6 +14,7 @@ export const brainInstructions = [
   "9. If a paid tool for a step has no key, say in one sentence which key is missing and that the person can add it in Settings. Then make the rest of the video.",
   "10. Give no server and no model in a call that makes a picture, a voice, music, or a video clip, unless the person names one. The picks of the person apply.",
   "11. Use the look of the project. Do not set colors or fonts that the look does not have, unless the person asks.",
+  "12. Before the first picture, add each person, place, and product that shows in two or more scenes to the cast. Give the cast ids in each call that shows them.",
   "You have only the yumekit tools. You cannot run a command, read a file, or open a web page.",
 ].join("\n");
 

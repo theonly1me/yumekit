@@ -109,6 +109,7 @@ describe("story edits", () => {
     const store = await createTestProject();
     const member = {
       id: "host",
+      kind: "person" as const,
       name: "Host",
       description: "",
       referenceAssetIds: ["host-photo"],
@@ -126,6 +127,7 @@ describe("story edits", () => {
     const store = await createTestProject();
     const member = {
       id: "host",
+      kind: "person" as const,
       name: "Host",
       description: "",
       referenceAssetIds: [],
