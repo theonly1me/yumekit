@@ -49,8 +49,16 @@ export default defineReactScene(() => {
 
 export const unguardedRandomCode = `import { defineReactScene } from "@yumekit/scene";
 
-export default defineReactScene(() => {
+const drawnValues = new Set<number>();
+
+function unseenRandomByte(): number {
   const [value = 0] = crypto.getRandomValues(new Uint8Array(1));
+  return drawnValues.has(value) ? unseenRandomByte() : value;
+}
+
+export default defineReactScene(() => {
+  const value = unseenRandomByte();
+  drawnValues.add(value);
   return <div style={{ position: "absolute", inset: 0, background: \`rgb(\${String(value)}, 0, 0)\` }} />;
 });
 `;
