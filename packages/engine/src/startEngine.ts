@@ -4,6 +4,8 @@ import { createServer, type Server } from "node:http";
 import { resolve } from "node:path";
 import { openProject, type ProjectStore } from "@yumekit/project";
 import type { ServerCommand } from "./agents/agentTypes.js";
+import { createChat, type Chat } from "./chat/chat.js";
+import { trackStore } from "./chat/trackedStore.js";
 import { claimEngineFile } from "./engineFile/claimEngineFile.js";
 import { removeEngineFile } from "./engineFile/engineFile.js";
 import {
@@ -53,10 +55,12 @@ async function closeRunning(options: {
   server: Server;
   events: EventHub;
   parts: EngineParts;
+  chat: Chat;
   stopFollowing: () => Promise<void>;
 }): Promise<void> {
   const { server, events, parts } = options;
   events.send({ type: "engine-closing" });
+  await options.chat.close();
   const serverClosed = closeServer(server);
   await parts.harness.close();
   await options.stopFollowing();
@@ -93,7 +97,8 @@ export async function startEngine(options: {
       failure: { kind: "engine-already-running", url: running.url },
     };
   }
-  const started = await startParts({ projectFolder, store });
+  const tracked = trackStore(store);
+  const started = await startParts({ projectFolder, store: tracked.store });
   if (!started.ok) return started;
   const parts = started.value;
   const server = createServer();
@@ -106,6 +111,13 @@ export async function startEngine(options: {
   const token = randomBytes(32).toString("hex");
   const { origin, url } = engineUrlOf({ port, token });
   const events = createEventHub({ port, token });
+  const chat = await createChat({
+    projectFolder,
+    store,
+    tracked,
+    events,
+    serverCommand: options.serverCommand,
+  });
   server.on(
     "request",
     createRequestHandler({
@@ -114,6 +126,7 @@ export async function startEngine(options: {
         projectFolder,
         store,
         events,
+        chat,
         serverCommand: options.serverCommand,
         ...parts,
       },
@@ -134,13 +147,19 @@ export async function startEngine(options: {
     content: { port, token, processId: process.pid },
   });
   if (!claimed.ok) {
-    await closeRunning({ server, events, parts, stopFollowing: noWait });
+    await closeRunning({
+      server,
+      events,
+      parts,
+      chat,
+      stopFollowing: noWait,
+    });
     return claimed;
   }
   const stopFollowing = followProjectChanges({ store, events, parts });
   let closing: Promise<void> | undefined;
   const close = async () => {
-    await closeRunning({ server, events, parts, stopFollowing });
+    await closeRunning({ server, events, parts, chat, stopFollowing });
     await removeEngineFile({ projectFolder, token });
   };
   return {

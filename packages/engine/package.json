@@ -15,6 +15,7 @@
     "dist"
   ],
   "dependencies": {
+    "@yumekit/brain": "workspace:*",
     "@yumekit/harness-mcp": "workspace:*",
     "@yumekit/project": "workspace:*",
     "@yumekit/render": "workspace:*",

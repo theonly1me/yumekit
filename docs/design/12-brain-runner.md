@@ -86,7 +86,7 @@ claude -p <request>
 | `--tools ""` removes each built-in tool. Without it, `dontAsk` still runs read-only shell commands    | Always pass it                                                |
 | The full path of `node` is needed in the MCP command                                                  | `serverCommand` already has full paths (document 11)          |
 
-The builder confirms the form of `--allowedTools` that permits each tool of one server, and records it here.
+`--allowedTools mcp__yumekit__*` permits each tool of the server. See "Details of the brain runner", item 1.
 
 ### Codex
 
@@ -115,7 +115,7 @@ A later request is `codex exec resume <thread id>` with the same `-c` values. `r
 | `--ignore-user-config` alone still loads the MCP servers of apps and plugins                      | Pass the two `--disable` flags              |
 | There is no flag that removes the file edit tool. The read-only sandbox refuses each write        | Always pass the sandbox                     |
 
-The builder measures which model Codex uses with `--ignore-user-config`, and records it. If the result is not the model of the person, the adapter reads `model` from the Codex configuration of the person and passes it with `-m`.
+With `--ignore-user-config`, Codex uses its own default model. The adapter passes no `-m`. See "Details of the brain runner", item 2.
 
 ### The instructions
 
@@ -159,6 +159,28 @@ The engine holds the chat of a project: the entries, the session id, and the req
 - The file `.yumekit/chat/chat.json` holds the entries and the session id. The engine writes it with a temporary file and a rename. An answer that was `running` when the engine stopped loads as `stopped`.
 - When the engine closes, it stops the request that runs.
 - The request text goes to the program as one argument. It never goes through a shell.
+
+## Details of the brain runner
+
+These rules came from the build of WP26.
+
+1. `--allowedTools mcp__yumekit__*` permits each tool of the server. The Claude Code permission documents (code.claude.com/docs/en/permissions) say that `mcp__<server>__*` matches every tool of one server. A real run of Claude Code 2.1.330 with `dontAsk` called `get_project` and `set_script` with no question.
+2. With `--ignore-user-config`, Codex 0.163.0 used `gpt-6.1-terra`, from the session log of the run. That is not the model in the configuration of the owner. A run with `-m` and the model of that configuration failed: "The model is not supported when using Codex with a ChatGPT account". So the adapter passes no `-m`, because a request that fails is worse than another model. The terminal reaches that model with a setting that `--ignore-user-config` drops. This is an inference.
+3. Both adapters put `--` before the request, and Codex also before the thread id of a resume. A request that starts with `-` stays text. The real runs accepted this form.
+4. Claude Code reads the instructions from a file. The adapter writes it in a new temporary folder for each turn and removes the folder when the turn ends. The working folder `<project>/.yumekit/agent` stays empty.
+5. A `text` event with `isPart: true` holds only the new piece. The engine adds the pieces. A whole text replaces them. The text of an answer is each whole text, then the pieces, with a blank line between them.
+6. Codex gives the failure of a turn as a JSON text in `error.message`. The adapter takes the inner `error.message` when the text is JSON.
+7. The engine finds the paths of `claude` and `codex` once, when it starts. It reads `settings.json` at each request and at each `GET /api/chat`. A path in `agentPrograms` comes before the path from `PATH`. With `agent` set to `cursor`, a request gives `no-agent` with a sentence that the chat cannot use Cursor yet. A `settings.json` that is not valid gives `settings-not-valid` (409), so the engine never runs another agent than the one that the person picked.
+8. The engine calls `signInState` before each request, for both programs, and in `GET /api/chat`. Only `signed-out` refuses a request. `unknown` lets it run.
+9. The undo count: the engine gives the harness a wrapped store. The wrapper reports each `applyEdits`, `undo`, and `redo` that raised the revision, so a call that changed nothing counts no step. The tool route runs each harness call inside an `AsyncLocalStorage` context with the caller and the tool name, so the wrapper knows who made each step, also when calls run at the same time.
+10. The bridge sends the header `x-yumekit-client: agent` with each request. A tool call with this header is by `ai`. Each other call is by `person`.
+11. A call by `ai` while a chat request runs adds to the one `change` entry of that request. The entry starts at the first step with the summary "The AI is changing the project." and gets the last sentence at the end. A call by `ai` with no chat request, for example from an agent in a terminal, gives its own entry with "An agent changed the project.". A call by the person gives one entry, with the count of the steps of that call.
+12. A redo raises the change of the last undo. The list of these changes is `redoChangeIds` in `chat.json`, so a redo after a restart still finds its change. A new edit clears the list, as the store clears its redo steps.
+13. A resume failed when the turn ends as `failed` with `program` and no `session` event came. Then the engine adds the notice, clears the session id, and runs the request once more.
+14. `POST /api/chat/stop` returns `{ stopped }`, true when a request ran. `POST /api/chat/changes/<id>/undo` returns the change entry after the undo. While a request runs, it gives `chat-busy`. An unknown id gives `change-not-found` (404). An `about_clip_id` that is not a scene clip gives `clip-not-found` (404). An engine with no `serverCommand` gives `no-server-command` (409).
+15. A `chat.json` that is not valid loads as an empty chat. The next change writes a new file.
+16. The first match on the `PATH` can be a wrapper script. On the computer of the owner, the first `claude` and `codex` were shims of a terminal app, and such a shim can add its own flags. The real check removed the folder of the shims from the `PATH` of the engine. Then `claude` was a wrapper script of the owner that runs the installed Claude Code 2.1.330, and `codex` was the Homebrew link to Codex 0.163.0. The owner decides if the engine skips known shim folders.
+17. The real check ran the engine of the worktree build in temporary projects. Claude Code ran with `ANTHROPIC_MODEL=haiku` in the environment of the engine, which the product does not set. "Set the script to the single word ready." set the script with each program, with one change of one undo step. A request to run `touch` made no file, and each program answered that it cannot run a command.
 
 ## Work package
 
