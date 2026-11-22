@@ -127,6 +127,8 @@ With `--ignore-user-config`, Codex uses its own default model. The adapter passe
 4. Before a video clip from a paid model, say the price and ask. Other steps need no question.
 5. After a change, say in one or two sentences what changed.
 6. If a tool fails, correct the cause and try again. If it cannot work, say what the person can do.
+7. Do not export the video unless the person asks. The Export button belongs to the person, and an export takes minutes. To check the work, look at preview pictures.
+8. Name a version of the video by its platform, for example "the YouTube version". Never name it by an output id such as "wide" or "tall".
 
 ## The chat of the engine
 
@@ -182,6 +184,7 @@ These rules came from the build of WP26.
 16. The first match on the `PATH` can be a wrapper script. On the computer of the owner, the first `claude` and `codex` were shims of a terminal app, and such a shim can add its own flags. The real check removed the folder of the shims from the `PATH` of the engine. Then `claude` was a wrapper script of the owner that runs the installed Claude Code 2.1.330, and `codex` was the Homebrew link to Codex 0.163.0. The owner decides if the engine skips known shim folders.
 17. The real check ran the engine of the worktree build in temporary projects. Claude Code ran with `ANTHROPIC_MODEL=haiku` in the environment of the engine, which the product does not set. "Set the script to the single word ready." set the script with each program, with one change of one undo step. A request to run `touch` made no file, and each program answered that it cannot run a command.
 18. The summary of an AI change is the first sentence of the answer. A real answer ended with an offer, "I can re-fit the narration to the new timing if you'd like.", and the last sentence put that offer on the change line.
+19. Rules 7 and 8 of "The instructions" came from a real run. The AI called `render_video` twice in the first request, and it named a version of the video by its output id.
 
 ## Work package
 
