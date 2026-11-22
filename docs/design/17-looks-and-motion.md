@@ -206,5 +206,5 @@ WP48 made these choices where this document gives no rule.
 9. The default length is the frames of 0.4 seconds, rounded, and at least 1: 12 frames at 30 frames each second.
 10. `get_timeline` shows `transition` with `kind` and `duration_frames` on a scene clip that has one.
 11. The mark is under the "+" between two cards that touch. It shows a small picture of the kind, in the accent color for each kind other than `cut`. A click opens the line "How scene N comes in" under the cards, with the five kinds and "Close". A pick calls `set_transitions` with the `clip_ids` of the next card, so it changes each output.
-12. "Between scenes" in Settings shows the kind of the whole video. When the scenes change in different ways, no kind is picked and the row says so. With fewer than two scenes, the row is off and says "Add a second scene first."
+12. "Between scenes" is a row of the group "This video" in Settings, under the video style. It shows the kind of the whole video. When the scenes change in different ways, no kind is picked and the row says so. With fewer than two scenes, the row is off and says "Add a second scene first."
 13. The first request of a new project of the home server ends with the line `Between scenes: a fade from each scene to the next.`
