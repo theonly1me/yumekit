@@ -63,6 +63,15 @@ export function everyToolCall(importSourcePath: string): ScriptedCall[] {
       name: "update_clip",
       input: { output_id: "wide", clip_id: "b", start_frame: 40 },
     },
+    {
+      name: "resize_scene_clip",
+      input: { clip_id: "a", duration_frames: 20 },
+    },
+    { name: "move_scene_clip", input: { clip_id: "b", to_index: 0 } },
+    { name: "duplicate_scene_clip", input: { clip_id: "a" } },
+    { name: "remove_scene_clip", input: { clip_id: "a-copy" } },
+    { name: "set_track_off", input: { track_id: "main", off: true } },
+    { name: "set_track_off", input: { track_id: "main", off: false } },
     { name: "get_timeline", input: { output_id: "wide" } },
     { name: "remove_clip", input: { output_id: "wide", clip_id: "b" } },
     {
