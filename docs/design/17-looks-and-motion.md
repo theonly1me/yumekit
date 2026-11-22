@@ -169,3 +169,26 @@ The guide has one full example scene that uses `Backdrop`, `words`, `draw`, `seq
 - Motion along a drawn path, and 3D.
 - A transition with a picture or a video as its mask.
 - Sound that follows a transition.
+
+## Details of WP48
+
+WP48 made these choices where this document gives no rule.
+
+1. The list of looks is in two places: `lookIds` and `looks` of `@yumekit/scene-kit` (also in the entry `schemas`, which has no browser code), and `lookIds` of `@yumekit/project`, because `project` imports nothing from yumekit. `set_look` takes the list of the kit, and the edit `setLook` takes the list of the project. TypeScript fails the build when the two lists differ.
+2. A look has a `label` and one `line`. `list_kit_scenes` gives `looks` with `id`, `label`, and `line`. The order is `midnight`, `studio`, `editorial`, `neon`, `paper`.
+3. Each pack sets `accent` to the first accent, `bullet` to the third, and `bars` to the second, third, and fourth. So `paper` keeps its old colors: lamp, then sakura, asagi, and fuji.
+4. `cornerUnits` is the corner radius of a bar. `paper` has 1.2, the old value. `midnight` has 1.2, `studio` 0.6, `editorial` 0.2, and `neon` 0. Only `bar-chart` reads it in WP48.
+5. `surface` is the color of a card or an empty image area. Each new pack sets `placeholder` to it. `paper` keeps `#dfe4ea`.
+6. Each pack has its own `mutedText`, `captionPanel`, and `captionText`. A test checks text and muted text on the background, and caption words on the panel over a white and over a black picture, for a contrast of 4.5 to 1 or more.
+7. Corrected values, after a look at each kit scene in each look and layout. `studio`: the fourth accent is `#f5a000`, not `#ffc400`, because a bar of `#ffc400` was faint on white (1.6 to 1). `midnight` and `neon`: the caption panel is the surface color at 92 percent, so a caption reads as a panel on the dark background. All the other values of the table are the start values.
+8. The fonts are static instances of the variable fonts of the `google/fonts` repository, cut to the Latin range of Google Fonts with `fontTools`: Bricolage Grotesque at weight 700, optical size 72, and width 100; Inter at 500 and optical size 14; Inter Tight at 800; Fraunces at 600, optical size 72, `SOFT` 0, and `WONK` 0; DM Sans at 500 and optical size 14; Space Grotesk at 700 and at 500. Each file keeps the features `tnum`, `lnum`, and `case`. The license file of each family is `fonts/OFL-<family>.txt`. The license files in the source repositories say SIL Open Font License 1.1. The seven new files are 128 KB.
+9. `kitScenesOf(look)` gives the kit scenes of a look. `kitScenes` stays the `paper` scenes. An unknown look gives `paper`.
+10. `useStylePack()` is in the main entry of `@yumekit/scene-kit`. In a kit scene it gives the pack of the scene. In a custom scene it gives the pack of the look that the stage page activates with `activateLook`. The stage page and the preview page call it from the `look` of the page data, and load the fonts of the look before the first frame.
+11. `StagePageData` of `@yumekit/render` gets `look`. A project with no `look` gives `paper`, and its frames are the same bytes as before WP48 (30 frames of six scenes in three layouts, compared with `main`).
+12. The scene guide replaces the part "The paper style" with "The look". It names the tokens of `useStylePack()`, and its two examples use it. `paper` stays in the main entry, so an old custom scene still compiles.
+13. `POST /api/home/projects` takes `look`. With no value, the project gets `midnight`. Another value gives `body-not-valid` (400).
+14. `apps/editor` may import `@yumekit/scene-kit`, so the look pictures are frames that the kit draws in the browser. Document 01 has the new row.
+15. A look picture is the `title-card` of the look with the heading "Your idea, as a video.", drawn at 320 by 180 and scaled to its box. The name of the look is under the picture. A heading of one short word was too small to show the fonts. It plays frames 0 to 89 at 30 frames each second, holds the last frame for 2 seconds, and plays again. With "reduce motion" in the system, it shows the settled frame and does not move. When a backdrop of WP49 comes, the picture shows it with no change.
+16. The start screen shows the row "Look" after "How long?". Under the row, one line describes the picked look. At the width of a phone, the row scrolls to the side.
+17. Settings shows the group "This video" after "AI", with the row "Look". A pick calls `set_look` at once. The editor shows the pick while the call runs, and a failure as one line.
+18. `calm` of `set_look` belongs to the motion functions (WP49), because a calm look changes only motion. WP48 does not add it.
