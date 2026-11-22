@@ -118,10 +118,13 @@ For a video, `generate_asset` reads `hasAudio` with `probeMedia`. It uses the si
 
 ### See the result
 
-| Tool             | Input                                    | Result                         |
-| ---------------- | ---------------------------------------- | ------------------------------ |
-| `preview_frame`  | `output_id`, `frame`, `scale?`           | One PNG image as image content |
-| `preview_frames` | `output_id`, `frames` (1 to 8), `scale?` | One image for each frame       |
+| Tool             | Input                                       | Result                         |
+| ---------------- | ------------------------------------------- | ------------------------------ |
+| `preview_frame`  | `output_id`, `frame`, `scale?`              | One PNG image as image content |
+| `preview_frames` | `output_id`, `frames` (1 to 8), `scale?`    | One image for each frame       |
+| `preview_scenes` | `output_id`, `scene_ids` (1 to 8), `scale?` | One image for each scene       |
+
+`preview_scenes` draws each scene alone, at the size of the output. A scene needs no clip for it. The harness draws the scene as a clip of 3 seconds and takes the frame that is 75% into it, where kit motion has settled. An unknown scene id is the failure `scene-not-found`.
 
 The default scale is 0.25. An agent uses these tools after each scene and before each render. It checks layout, text that does not fit, and missing images.
 
