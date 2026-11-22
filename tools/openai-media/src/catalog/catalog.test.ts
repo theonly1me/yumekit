@@ -109,14 +109,14 @@ describe("the openai-media catalog", () => {
 
     expect(result.isError).toBe(true);
     expect(resultText(result)).toBe(
-      'Unknown model "dall-e-2". The image models of this server are: gpt-image-2.5-flare.',
+      'Unknown model "dall-e-2". The image models of this server are: gpt-image-2.5-flare, gpt-image-2.5-sunburst, gpt-image-2.6-flare, gpt-image-2.6-sunburst.',
     );
     expect(media.requests).toHaveLength(0);
   });
 
   it("makes the model from the environment variable the default and accepts it", async () => {
     const { media, required } = await connectWithKey({
-      YUMEKIT_OPENAI_IMAGE_MODEL: "gpt-image-2.6-sunburst",
+      YUMEKIT_OPENAI_IMAGE_MODEL: "gpt-image-2-2026-04-21",
     });
 
     const description = await media.callTool({
@@ -125,14 +125,19 @@ describe("the openai-media catalog", () => {
     });
     const result = await media.callTool({
       name: "generate_image",
-      arguments: { ...required.image, model: "gpt-image-2.6-sunburst" },
+      arguments: { ...required.image, model: "gpt-image-2-2026-04-21" },
     });
 
     expect(description.structuredContent).toMatchObject({
       models: [
         { id: "gpt-image-2.5-flare", is_default: false },
-        { id: "gpt-image-2.6-sunburst", is_default: true },
+        { id: "gpt-image-2.5-sunburst", is_default: false },
+        { id: "gpt-image-2.6-flare", is_default: false },
+        { id: "gpt-image-2.6-sunburst", is_default: false },
+        { id: "gpt-image-2-2026-04-21", is_default: true },
         { id: "gpt-4o-mini-tts", is_default: true },
+        { id: "tts-1", is_default: false },
+        { id: "tts-1-hd", is_default: false },
         { id: "whisper-1", is_default: true },
       ],
     });

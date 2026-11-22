@@ -27,7 +27,9 @@ const settingSchema = z.object({
 });
 
 const descriptionSchema = z.object({
-  models: z.array(z.object({ settings: z.array(settingSchema) })),
+  models: z.array(
+    z.object({ capability: z.string(), settings: z.array(settingSchema) }),
+  ),
 });
 
 async function describeServer() {
@@ -53,10 +55,27 @@ async function settingValue(
 }
 
 describe("describe_media_server", () => {
-  it("describes the Gemini video model, its prices per second, and the key, with no key and no request", async () => {
+  it("describes the Gemini video model among the models, its prices per second, and the key, with no key and no request", async () => {
     const { result, requests } = await describeServer();
 
     expect(requests).toHaveLength(0);
+    const description = z
+      .object({ models: z.array(z.looseObject({ id: z.string() })) })
+      .parse(result.structuredContent);
+    const video = description.models.find(
+      (model) => model.id === "gemini-omni-1.2-flash",
+    );
+    expect(video).toMatchObject({
+      capability: "video",
+      is_default: true,
+      read_on: "2026-11-21",
+      prices: [
+        { usd: 0.07, unit: "second", when: { resolution: "720p" } },
+        { usd: 0.104, unit: "second", when: { resolution: "1080p" } },
+      ],
+      accepts: ["first_frame", "last_frame", "reference_images"],
+      tested: false,
+    });
     expect(result.structuredContent).toMatchObject({
       label: "Google Gemini",
       runs: "hosted",
@@ -66,25 +85,15 @@ describe("describe_media_server", () => {
           get_key_url: "https://aistudio.google.com/apikey",
         },
       ],
-      models: [
-        {
-          id: "gemini-omni-1.2-flash",
-          capability: "video",
-          is_default: true,
-          read_on: "2026-11-21",
-          prices: [
-            { usd: 0.07, unit: "second", when: { resolution: "720p" } },
-            { usd: 0.104, unit: "second", when: { resolution: "1080p" } },
-          ],
-        },
-      ],
     });
   });
 
   it("lists settings that generate_video accepts: each default value gives no input failure", async () => {
     const { result } = await describeServer();
     const description = descriptionSchema.parse(result.structuredContent);
-    const settings = description.models.flatMap((model) => model.settings);
+    const settings = description.models
+      .filter((model) => model.capability === "video")
+      .flatMap((model) => model.settings);
 
     expect(settings.map((setting) => setting.name)).toEqual([
       "duration_seconds",

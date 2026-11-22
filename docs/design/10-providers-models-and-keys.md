@@ -92,6 +92,7 @@ Facts of 2026-11-21 from the OpenAI pricing page and the speech guide:
 | `gpt-4o-mini-tts`     | `voice`, one of the 13 built-in voices, `marin` by default | None. The page gives token prices only |
 | `whisper-1`           | None                                                       | 0.006 US dollars for each minute       |
 
+- Document 16 ("Details of WP46") adds more picture and voice models to this catalog, and the catalog of `tools/gemini-media`.
 - A price in tokens does not fit `MediaModelPrice`, so the image and speech models have an empty `prices` list.
 - `align_words` returns `cost_usd` from the `duration` of the response and the catalog price, with `cost_is_estimate: true`.
 - When a `YUMEKIT_OPENAI_*_MODEL` variable names a model, that model is the default of its capability. A model that is not in the catalog gets an entry with no settings and no prices.

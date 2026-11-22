@@ -6,9 +6,13 @@ import {
   writeOutputFile,
   type VideoFile,
 } from "../toolResults.ts";
-import { fileExtensionOf } from "./interaction.ts";
+import {
+  fileExtensionOf,
+  outputTokensOf,
+} from "../interactions/interaction.ts";
+import { progressReporter } from "../interactions/progressReporter.ts";
+import { requestOutput, type Wait } from "../interactions/requestOutput.ts";
 import { readMp4Facts } from "./mp4Facts.ts";
-import { requestVideo, type Wait } from "./requestVideo.ts";
 import { usdPerMillionVideoTokens, videoCostUsd } from "./videoCost.ts";
 import { checkVideoInput, videoInput } from "./videoInput.ts";
 import { videoModel } from "./videoModel.ts";
@@ -53,35 +57,31 @@ export function registerVideoTool(options: {
       if (!plan.ok) return errorResult(plan.failure);
       const body = await videoRequestBody(plan.value);
       if (!body.ok) return errorResult(body.failure);
-      const progressToken = extra._meta?.progressToken;
-      const video = await requestVideo({
+      const video = await requestOutput({
         body: body.value,
+        output: { type: "video", defaultMimeType: "video/mp4" },
         connection: {
           sendRequest: options.sendRequest,
           apiKey: options.apiKey,
           wait: options.wait,
-          reportProgress: async (poll) => {
-            if (progressToken === undefined) return;
-            await extra.sendNotification({
-              method: "notifications/progress",
-              params: {
-                progressToken,
-                progress: poll,
-                message: `Waiting for the Gemini API, check ${String(poll)}`,
-              },
-            });
-          },
+          reportProgress: progressReporter(extra),
         },
       });
       if (!video.ok) return errorResult(video.failure);
       const written = await writeOutputFile({
         outputDirectory: input.output_directory,
         fileStem: plan.value.fileStem,
-        extension: fileExtensionOf(video.value.mimeType),
+        extension: fileExtensionOf({
+          mimeType: video.value.mimeType,
+          fallback: "mp4",
+        }),
         bytes: video.value.bytes,
       });
       if (!written.ok) return errorResult(written.failure);
-      const { videoTokens } = video.value;
+      const videoTokens = outputTokensOf({
+        interaction: video.value.interaction,
+        modality: "video",
+      });
       return successResult({
         files: [videoFile({ path: written.value, bytes: video.value.bytes })],
         ...(videoTokens === undefined

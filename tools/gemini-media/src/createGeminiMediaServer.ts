@@ -1,9 +1,12 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { registerDescribeTool } from "./describe/registerDescribeTool.ts";
 import type { SendRequest } from "./geminiApi.ts";
+import { registerImageTool } from "./image/registerImageTool.ts";
 import { registerCheckKeyTool } from "./key/registerCheckKeyTool.ts";
+import { registerMusicTool } from "./music/registerMusicTool.ts";
+import { registerSpeechTool } from "./speech/registerSpeechTool.ts";
 import { registerVideoTool } from "./video/registerVideoTool.ts";
-import type { Wait } from "./video/requestVideo.ts";
+import type { Wait } from "./interactions/requestOutput.ts";
 import { videoModel } from "./video/videoModel.ts";
 
 function configuredVideoModel(environment: NodeJS.ProcessEnv): string {
@@ -32,6 +35,10 @@ export function createGeminiMediaServer(options: {
     sendRequest,
     wait: options.wait,
   });
+  const tools = { server, apiKey, sendRequest, wait: options.wait };
+  registerImageTool(tools);
+  registerSpeechTool(tools);
+  registerMusicTool(tools);
   registerDescribeTool(server);
   registerCheckKeyTool({ server, apiKey, model, sendRequest });
   return server;

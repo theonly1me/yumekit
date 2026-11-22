@@ -8,10 +8,10 @@ import {
 import type { Outcome } from "../toolResults.ts";
 import {
   interactionSchema,
-  videoOutputOf,
-  videoTokensOf,
+  outputPartOf,
   type Interaction,
-  type VideoOutput,
+  type OutputPart,
+  type OutputPartType,
 } from "./interaction.ts";
 
 export const pollIntervalSeconds = 10;
@@ -20,21 +20,21 @@ export const maximumPolls = 55;
 
 export type Wait = (seconds: number) => Promise<void>;
 
-export interface VideoConnection {
+export interface InteractionConnection {
   sendRequest: SendRequest;
   apiKey: string;
   wait: Wait;
   reportProgress: (poll: number) => Promise<void>;
 }
 
-export interface FinishedVideo {
+export interface FinishedOutput {
   bytes: Buffer;
   mimeType: string;
-  videoTokens: number | undefined;
+  interaction: Interaction;
 }
 
 async function readInteraction(options: {
-  connection: VideoConnection;
+  connection: InteractionConnection;
   request: Request;
 }): Promise<Outcome<Interaction, string>> {
   const sent = await requestJson({
@@ -53,7 +53,7 @@ async function readInteraction(options: {
 }
 
 async function waitUntilDone(options: {
-  connection: VideoConnection;
+  connection: InteractionConnection;
   created: Interaction;
 }): Promise<Outcome<Interaction, string>> {
   const { connection } = options;
@@ -92,9 +92,9 @@ function isGeminiUrl(uri: string): boolean {
   );
 }
 
-async function videoBytes(options: {
-  connection: VideoConnection;
-  output: VideoOutput;
+async function outputBytes(options: {
+  connection: InteractionConnection;
+  output: OutputPart;
 }): Promise<Outcome<Buffer, string>> {
   const { output, connection } = options;
   if (output.kind === "data") return { ok: true, value: output.bytes };
@@ -104,10 +104,11 @@ async function videoBytes(options: {
   return requestBytes({ sendRequest: connection.sendRequest, request });
 }
 
-export async function requestVideo(options: {
-  connection: VideoConnection;
+export async function requestOutput(options: {
+  connection: InteractionConnection;
   body: Record<string, unknown>;
-}): Promise<Outcome<FinishedVideo, string>> {
+  output: { type: OutputPartType; defaultMimeType: string };
+}): Promise<Outcome<FinishedOutput, string>> {
   const { connection } = options;
   const created = await readInteraction({
     connection,
@@ -120,21 +121,21 @@ export async function requestVideo(options: {
   if (!created.ok) return created;
   const done = await waitUntilDone({ connection, created: created.value });
   if (!done.ok) return done;
-  const output = videoOutputOf(done.value);
+  const output = outputPartOf({ interaction: done.value, ...options.output });
   if (!output) {
     return {
       ok: false,
-      failure: `The Gemini API finished the interaction ${done.value.id} with no video.`,
+      failure: `The Gemini API finished the interaction ${done.value.id} with no ${options.output.type}.`,
     };
   }
-  const bytes = await videoBytes({ connection, output });
+  const bytes = await outputBytes({ connection, output });
   if (!bytes.ok) return bytes;
   return {
     ok: true,
     value: {
       bytes: bytes.value,
       mimeType: output.mimeType,
-      videoTokens: videoTokensOf(done.value),
+      interaction: done.value,
     },
   };
 }

@@ -34,6 +34,12 @@ const mediaModelPriceSchema = z.object({
 
 const dateText = z.iso.date();
 
+const mediaModelInputs = [
+  "first_frame",
+  "last_frame",
+  "reference_images",
+] as const;
+
 const mediaModelSchema = z.object({
   id: z.string().min(1),
   label: z.string().min(1),
@@ -43,6 +49,8 @@ const mediaModelSchema = z.object({
   prices: z.array(mediaModelPriceSchema),
   read_on: dateText,
   shutdown_on: dateText.optional(),
+  accepts: z.array(z.enum(mediaModelInputs)).optional(),
+  tested: z.boolean().optional(),
 });
 
 const mediaServerKeySchema = z.object({
