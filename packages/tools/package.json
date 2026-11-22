@@ -16,6 +16,10 @@
   ],
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.32.2",
+    "@yumekit/fal-media": "workspace:*",
+    "@yumekit/gemini-media": "workspace:*",
+    "@yumekit/openai-media": "workspace:*",
+    "@yumekit/sample-media": "workspace:*",
     "zod": "4.6.7"
   }
 }

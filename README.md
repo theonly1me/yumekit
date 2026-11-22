@@ -6,7 +6,41 @@ yumekit turns an idea into editable content for YouTube, TikTok, Instagram, and 
 
 ## Status
 
-Early development. The design is in `docs/design`. Milestone 1 is in progress, and no feature works yet.
+Early development. The command, the agent tools, the renderer, and the first editor work. The design is in `docs/design`.
+
+The npm package `yumekit` is not published yet. Until the first release, build the repository (see "Work on yumekit").
+
+## Install
+
+yumekit needs Node.js 22 or later.
+
+```sh
+npm install -g yumekit
+yumekit doctor
+```
+
+`yumekit doctor` checks FFmpeg, the browser of the renderer, and the agent programs. Each line that is not "ok" says what to do. To get the browser, run `yumekit setup`.
+
+## First video
+
+1. Make a project: `yumekit init my-video`.
+2. Open the editor: `yumekit open my-video`. It prints the URL and opens it in the browser.
+3. Make the video in the editor, or ask an agent to make it (see "Use an agent").
+4. Render it: `yumekit render --project my-video --output wide`. The file is `my-video/renders/wide.mp4`.
+
+## Use an agent
+
+Connect Claude Code, Codex, or Cursor to the project:
+
+```sh
+yumekit agent connect --agent claude-code --project my-video
+```
+
+Any other MCP client can start the yumekit MCP server with `npx`:
+
+```sh
+npx -y yumekit mcp --project /path/to/my-video
+```
 
 ## How it works
 
@@ -35,12 +69,9 @@ Early development. The design is in `docs/design`. Milestone 1 is in progress, a
 
 Read `docs/design/README.md` first. Agents also read `AGENTS.md`.
 
-## Requirements
+## Work on yumekit
 
-- Node.js 22 or later.
-- pnpm. The version is pinned in `package.json`.
-
-## Install and run the checks
+You need Node.js 22 or later and pnpm. The version of pnpm is pinned in `package.json`.
 
 1. Enable pnpm: `corepack enable pnpm`.
 2. Install the dependencies: `pnpm install`.
@@ -50,6 +81,8 @@ Read `docs/design/README.md` first. Agents also read `AGENTS.md`.
 6. Build each package: `pnpm build`.
 
 To format the files, run `pnpm format`.
+
+To make the npm package file, run `pnpm run pack-release`. Then run `pnpm run check-release`, which installs that file in a temporary folder and makes a short video with it. Document 14 in `docs/design` has the release steps.
 
 ## License
 
