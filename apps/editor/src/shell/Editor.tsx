@@ -53,7 +53,6 @@ export function Editor(props: {
     snapshot,
     output: facts.output,
     onOpen: playback.pause,
-    onAddKey: settings.open,
     onPlaced: view.pickClip,
   });
   const stepSheet = useStepSheet({

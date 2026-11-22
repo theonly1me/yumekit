@@ -37,28 +37,33 @@ afterAll(async () => {
 });
 
 describe("Make a clip", () => {
-  it("opens the key guide in Settings for a model whose server needs a key", async () => {
+  it("lists each video model under its server, with the price of each model for the picked settings", async () => {
     const editor = await openEditor(runningEngine().url);
     const { page } = editor;
     await openMakeClip(page);
 
-    await page.getByLabel("Test video model").check();
-    expect(await page.getByText("Key test server needs a key").count()).toBe(1);
-    await page.getByRole("button", { name: "Add the Test key" }).click();
-
-    expect(
-      await page
-        .getByRole("dialog", { name: "Make a real video clip" })
-        .count(),
-    ).toBe(0);
-    expect(await page.getByRole("dialog", { name: "Settings" }).count()).toBe(
-      1,
+    const groups = page.locator(".model-group");
+    await expect.poll(() => groups.count()).toBe(2);
+    const listed = await groups.evaluateAll((elements) =>
+      elements.map((group) => ({
+        server: group.querySelector(".model-server")?.textContent,
+        models: [...group.querySelectorAll(".model")].map(
+          (model) => model.textContent,
+        ),
+      })),
     );
-    const row = page.getByRole("button", { name: /Key test server/ });
-    expect(await row.getAttribute("aria-expanded")).toBe("true");
-    expect(await page.getByText("Open the key page and sign in.").count()).toBe(
-      1,
-    );
+    expect(listed).toEqual([
+      {
+        server: "Sample (free test server)",
+        models: ["Plain color with a frame counterFree"],
+      },
+      {
+        server: "Key test server",
+        models: [
+          "Test video modelNot tested with yumekit yetAbout $0.20Needs a key",
+        ],
+      },
+    ]);
     await editor.close();
   });
 
@@ -75,11 +80,17 @@ describe("Make a clip", () => {
     await page.getByLabel("Test video model").check();
     const price = page.locator(".clip-price");
 
+    const listedPrice = page
+      .locator(".model", { hasText: "Test video model" })
+      .locator(".model-price");
+
     await expect.poll(() => price.textContent()).toBe("About $0.20");
     await page.getByRole("button", { name: "720p" }).click();
     await expect.poll(() => price.textContent()).toBe("About $0.50");
+    expect(await listedPrice.textContent()).toBe("About $0.50");
     await page.getByLabel(/Length in seconds/).fill("6");
     await expect.poll(() => price.textContent()).toBe("About $1.50");
+    expect(await listedPrice.textContent()).toBe("About $1.50");
     await page.getByRole("button", { name: "480p" }).click();
     await expect.poll(() => price.textContent()).toBe("About $0.60");
     await page.getByLabel("Plain color with a frame counter").check();
@@ -87,13 +98,32 @@ describe("Make a clip", () => {
     await editor.close();
   });
 
-  it("makes a still and a clip with the sample server, places the clip at the scene, and the preview shows it", async () => {
+  it("starts on the video model that the person picked in Settings", async () => {
+    await engineRequest({
+      engine: runningEngine(),
+      path: "/api/media/defaults",
+      method: "PUT",
+      body: { capability: "video", server: "keytest", model: "test-video" },
+    });
+    const editor = await openEditor(runningEngine().url);
+    const { page } = editor;
+    await openMakeClip(page);
+
+    await expect
+      .poll(() => page.getByLabel("Test video model").isChecked())
+      .toBe(true);
+    await editor.close();
+  });
+
+  it("makes a clip from the prompt of the scene, puts it in place of the scene on each platform, and the preview shows it", async () => {
     const editor = await openEditor(runningEngine().url);
     const { page } = editor;
     await openMakeClip(page);
     await page.getByLabel("Plain color with a frame counter").check();
 
-    await page.getByLabel("What happens in the clip").fill("A slow pan");
+    expect(await page.getByLabel("What happens in the clip").inputValue()).toBe(
+      "First counter. Slow camera move, natural light.",
+    );
     await page.getByLabel("What the still shows").fill("A red ball");
     await page.getByRole("button", { name: "Make the still" }).click();
     await expect
@@ -106,16 +136,19 @@ describe("Make a clip", () => {
     await expect
       .poll(() => page.getByText("The clip is in the scene").count())
       .toBe(1);
-    const clips = await sceneClipsOf({
-      engine: runningEngine(),
-      outputId: "wide",
-    });
-    expect(
-      clips.map(({ id, sceneId, startFrame }) => ({ id, sceneId, startFrame })),
-    ).toEqual([
-      { id: "second", sceneId: "second", startFrame: 30 },
-      { id: "video-clip-first", sceneId: "video-clip-first", startFrame: 0 },
-    ]);
+    for (const outputId of ["wide", "tall"]) {
+      const clips = await sceneClipsOf({ engine: runningEngine(), outputId });
+      expect(
+        clips.map(({ id, sceneId, startFrame }) => ({
+          id,
+          sceneId,
+          startFrame,
+        })),
+      ).toEqual([
+        { id: "second", sceneId: "second", startFrame: 30 },
+        { id: "video-clip-first", sceneId: "video-clip-first", startFrame: 0 },
+      ]);
+    }
     await page.getByRole("button", { name: "Back to the editor" }).click();
     const picture = page
       .frameLocator('iframe[title="Preview of the video"]')

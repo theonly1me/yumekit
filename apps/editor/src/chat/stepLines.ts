@@ -22,6 +22,7 @@ const sentencesByTool: Record<string, string> = {
   remove_scene: "Removing a scene",
   generate_asset: "Making a picture or a sound",
   import_asset: "Adding a file",
+  remove_asset: "Removing a file",
   place_narration: "Placing the voice",
   place_video: "Placing a video clip",
   align_words: "Matching the captions to the voice",

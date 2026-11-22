@@ -1,4 +1,5 @@
 import { sceneGuideExamples } from "./examples.js";
+import { motionDesignSection } from "./motionDesign.js";
 import { contractSection, rulesSection } from "./reference.js";
 
 function exampleSection(options: {
@@ -27,6 +28,7 @@ function exampleSection(options: {
 export const sceneGuide = [
   contractSection,
   rulesSection,
+  motionDesignSection,
   ...[...sceneGuideExamples.entries()].map(([index, example]) =>
     exampleSection({ number: index + 1, example }),
   ),

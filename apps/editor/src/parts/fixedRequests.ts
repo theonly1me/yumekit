@@ -18,7 +18,8 @@ export type FixedRequest =
   | { kind: "make-this-music"; words: string; model?: ModelTarget }
   | { kind: "match-the-captions" }
   | { kind: "back-to-graphics"; aboutClipId: string }
-  | { kind: "make-a-cast-picture"; name: string; description: string };
+  | { kind: "make-a-cast-picture"; name: string; description: string }
+  | { kind: "use-my-file"; fileName: string };
 
 export type AskTheAi = (input: AskInput) => Promise<boolean>;
 
@@ -53,11 +54,18 @@ function requestSentenceOf(request: FixedRequest): string {
       return "Draw this scene by code, with no video clip.";
     case "make-a-cast-picture":
       return castPictureSentenceOf(request);
+    case "use-my-file":
+      return `Use my file ${request.fileName} in the video where it fits best.`;
   }
 }
 
+function endedSentence(sentence: string): string {
+  const trimmed = sentence.trimEnd();
+  return /[.!?]$/.test(trimmed) ? trimmed : `${trimmed}.`;
+}
+
 export function fixedRequestTextOf(request: FixedRequest): string {
-  const sentence = requestSentenceOf(request);
+  const sentence = endedSentence(requestSentenceOf(request));
   const model =
     request.kind === "another-voice" ||
     request.kind === "make-this-music" ||

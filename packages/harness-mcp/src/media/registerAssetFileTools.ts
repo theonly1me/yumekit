@@ -21,6 +21,14 @@ const importAssetInput = {
     .describe(
       "The absolute path of a file on this machine that the user gave you.",
     ),
+  original_name: z
+    .string()
+    .min(1)
+    .max(200)
+    .optional()
+    .describe(
+      "The name of the file that the person knows, to show and to download under. By default the last part of source_path.",
+    ),
 };
 
 type ImportAssetInput = z.infer<z.ZodObject<typeof importAssetInput>>;
@@ -73,6 +81,7 @@ async function importAsset(options: {
       hint: "Check the path with the user, then call import_asset again.",
     });
   }
+  const originalName = request.original_name ?? basename(request.source_path);
   const imported = await importedMediaOf({
     file: destination,
     extension,
@@ -98,12 +107,12 @@ async function importAsset(options: {
           ...imported.value,
           source: {
             kind: "import",
-            originalName: basename(request.source_path),
+            originalName,
           },
         },
       },
     ],
-    line: `File "${basename(request.source_path)}" imported as asset "${request.asset_id}".`,
+    line: `File "${originalName}" imported as asset "${request.asset_id}".`,
     data: {
       asset_id: request.asset_id,
       kind: request.kind,

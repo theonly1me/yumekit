@@ -5,7 +5,13 @@ describe("the fixed requests", () => {
   it("gives the texts of document 15", () => {
     expect(
       fixedRequestTextOf({ kind: "make-this-music", words: "slow strings" }),
-    ).toBe("Change the music to: slow strings");
+    ).toBe("Change the music to: slow strings.");
+    expect(
+      fixedRequestTextOf({
+        kind: "use-my-file",
+        fileName: "Morning guitar.wav",
+      }),
+    ).toBe("Use my file Morning guitar.wav in the video where it fits best.");
     expect(
       fixedRequestTextOf({ kind: "another-voice", voiceName: "cedar" }),
     ).toBe("Record the voice again with the voice cedar.");
@@ -43,7 +49,7 @@ describe("the fixed requests", () => {
     );
   });
 
-  it("adds the model that the person picked for one new picture", () => {
+  it("ends the words of the person with a period before the model sentence", () => {
     expect(
       fixedRequestTextOf({
         kind: "change-the-picture",
@@ -57,8 +63,14 @@ describe("the fixed requests", () => {
         },
       }),
     ).toBe(
-      "Change the picture of this scene: a night sky Use the model gpt-image-1 of OpenAI.",
+      "Change the picture of this scene: a night sky. Use the model gpt-image-1 of OpenAI.",
     );
+  });
+
+  it("keeps the end mark that the person typed", () => {
+    expect(
+      fixedRequestTextOf({ kind: "make-this-music", words: "bright drums!" }),
+    ).toBe("Change the music to: bright drums!");
   });
 
   it("sends a request about a scene with its clip", async () => {
@@ -78,7 +90,7 @@ describe("the fixed requests", () => {
 
     expect(asked).toEqual([
       {
-        text: "Change the picture of this scene: a red boat",
+        text: "Change the picture of this scene: a red boat.",
         aboutClipId: "second",
       },
     ]);

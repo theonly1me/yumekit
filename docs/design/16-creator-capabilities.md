@@ -195,6 +195,24 @@ Picture models (`generate_image`):
 
 The editor (WP32 and WP38) shows "Not tested with yumekit yet" next to a model with `tested: false`, and shows the controls for the first picture, the last picture, and reference pictures only for the values in `accepts`.
 
+## Details of WP44
+
+These rules came from the build of WP44.
+
+1. No harness tool removed an asset. The new tool `remove_asset` (document 05) removes the record with the edit `removeAsset`, as one undo step. It fails with `asset-in-use` and names each use. The media file stays in `assets/files/`, because undo restores no media file. The removal of files that no record references stays a follow-up of the README.
+2. The store checks the clips and the cast before `removeAsset`, but not the props of a scene. So the uses have one rule, `assetUsesOf` in the new browser entry `@yumekit/project/asset-uses`: a scene whose props hold the asset id under a key with the word "asset" (at any depth, also in a list), an audio clip, and a cast member. The harness and the editor both use it. Document 01 permits the entry for the editor.
+3. The groups: a picture is in Pictures, a video in Video clips, and a font in Fonts (a sixth group, shown only when a font exists). A sound is in Voice when it is on the voice track, or has word timings, or came from a speech tool. It is in Music when it is on a music track or came from a music tool. Each other sound is in Sounds, also a track with the id `sounds`.
+4. The name of a row is `originalName` for a file of the person, and the prompt or the text of the call for a made file, or else the asset id. The size is the length for a sound and a video, and the width and the height in pixels for a picture.
+5. "How it was made" is "Your file" for a file of the person, and "Made with `<service>`, `<model>`" from the labels of the media servers for a made file.
+6. The places: "Scene N" on the scenes row of the first output that shows the scene, "Captions" for a caption scene, "Voice", "Music", "Sounds", and "The cast". The sound of a video clip on the track `video-sound` counts under the scene of the clip. A scene that is on no row is "The scene `<title>`, not in the video". It still keeps the file, because it can come back.
+7. "Use in the video" shows on each row that nothing uses. For a made file, the request names the asset id in place of the file name, because the AI finds a file by its id.
+8. A video row loads the file only after "Play", because a video file can be large. A picture row shows the picture, and a sound row has "Play".
+9. The upload keeps the original name of the file. The engine passes the last part of the name, without control characters, as the new input `original_name` of `import_asset`. The temporary file and the asset id still come from the safe name of item 1 of "Details of WP40". So "Morning guitar.wav" shows as "Morning guitar.wav" in each view, and the download keeps that name.
+10. The Voice and Music views show "Your file." in place of the line `MadeWith` under "What the voice says" and "In your video now" when the voice or the music is a file of the person. A sound row shows the original name of a file of the person.
+11. A fixed request ends each sentence with a period, also after the words of the person. A question mark or an exclamation mark that the person typed stays.
+12. The Script view loads only when a person opens it, with the line "Loading the script." React has its own file in the build. So the editor build has no file larger than 500 kB, and the main file is about a third of its old size.
+13. Below 640 pixels, the buttons of the views in the top bar ("Script", "Pictures", "Files") are in one menu "Open". The bar then fits at the width of a phone. Each new view of the bar goes into the same list.
+
 ## Details of WP42
 
 1. An entry of the old form has no `kind`. The store reads it as `person`, because the old cast held "the recurring characters". The format version stays 1. The next write of `bible.json` adds the field.
@@ -209,3 +227,4 @@ The editor (WP32 and WP38) shows "Not tested with yumekit yet" next to a model w
 10. The editor makes the id of a new entry from its name, for example `blue-mug`, with a number after it when the id is in use.
 11. "Make a picture of this" is the fixed request `make-a-cast-picture` of the editor: `Make a picture of "<name>" from the cast. It looks like this: <description>. Add the picture to the pictures of that cast entry.` The view closes, and the chat shows the request. The row has it while the entry has fewer than 4 pictures.
 12. "Add a picture" uploads the file with `POST /api/uploads?name=<file name>` of document 15, then the person saves the entry. A file that is not a picture shows "This file is not a picture." and the entry does not get it.
+13. "Cast" is in the list of views of the top bar, after "Pictures". So below 640 pixels it is in the menu "Open" too. At that width the bar does not cut off the menu, so each item of the menu can take a click.

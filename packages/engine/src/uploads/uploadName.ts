@@ -1,8 +1,19 @@
 const idLengthLimit = 64;
 const nameLengthLimit = 200;
 
+function lastPartOf(name: string | null): string {
+  return (name ?? "").split(/[/\\]/).at(-1) ?? "";
+}
+
+export function shownUploadNameOf(name: string | null): string {
+  return lastPartOf(name)
+    .replace(/\p{Cc}/gu, "")
+    .trim()
+    .slice(-nameLengthLimit);
+}
+
 export function safeUploadNameOf(name: string | null): string | undefined {
-  const lastPart = (name ?? "").split(/[/\\]/).at(-1) ?? "";
+  const lastPart = lastPartOf(name);
   const kept = lastPart
     .replace(/[^A-Za-z0-9._-]/g, "")
     .replace(/^\.+/, "")

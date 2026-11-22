@@ -10,7 +10,7 @@ export function readScript(engine: RunningEngine): Promise<string> {
 
 export async function openStepSheet(options: {
   page: Page;
-  name: "Script" | "Pictures";
+  name: "Script" | "Pictures" | "Files";
 }): Promise<void> {
   await options.page
     .getByRole("button", { name: options.name, exact: true })

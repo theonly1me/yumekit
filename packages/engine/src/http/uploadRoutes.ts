@@ -7,7 +7,7 @@ import {
   receiveUpload,
   uploadLimitBytes,
 } from "../uploads/receiveUpload.js";
-import { safeUploadNameOf } from "../uploads/uploadName.js";
+import { safeUploadNameOf, shownUploadNameOf } from "../uploads/uploadName.js";
 import type { Exchange, Route } from "./exchange.js";
 import { sendJson, type Failure } from "./responses.js";
 
@@ -34,8 +34,9 @@ async function receiveAndImport(options: {
   exchange: Exchange;
   folder: string;
   fileName: string;
+  shownName: string;
 }): Promise<Failure | undefined> {
-  const { exchange, fileName } = options;
+  const { exchange, fileName, shownName } = options;
   const file = join(options.folder, fileName);
   const received = await receiveUpload({ request: exchange.request, file });
   if (received.kind === "too-large") return uploadTooLarge;
@@ -44,6 +45,7 @@ async function receiveAndImport(options: {
     context: exchange.context,
     file,
     fileName,
+    shownName,
   });
   if (!imported.ok) return imported.failure;
   sendJson({
@@ -62,7 +64,8 @@ async function upload(exchange: Exchange): Promise<Failure | undefined> {
   }
   const folder = await mkdtemp(join(tmpdir(), "yumekit-upload-"));
   try {
-    return await receiveAndImport({ exchange, folder, fileName });
+    const shownName = shownUploadNameOf(exchange.query.get("name"));
+    return await receiveAndImport({ exchange, folder, fileName, shownName });
   } finally {
     await rm(folder, { recursive: true, force: true });
   }

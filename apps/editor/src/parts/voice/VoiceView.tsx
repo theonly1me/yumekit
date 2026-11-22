@@ -2,6 +2,7 @@ import { useState } from "react";
 import { MadeWith, type ModelTarget } from "../../settings/services/index.js";
 import { useMediaServers } from "../../tools/useMediaServers.js";
 import { FileButton } from "../files/FileDrop.js";
+import { YourFile } from "../files/YourFile.js";
 import { sendFixedRequest, type FixedRequest } from "../fixedRequests.js";
 import { PlayButton } from "../sound/PlayButton.js";
 import { soundFileTypes, type SoundViewProps } from "../sound/soundView.js";
@@ -62,7 +63,11 @@ export function VoiceView(props: SoundViewProps) {
       )}
       <section className="part-group">
         <h4>What the voice says</h4>
-        <MadeWith client={client} kind="speech" />
+        {facts.isOwnRecording ? (
+          <YourFile />
+        ) : (
+          <MadeWith client={client} kind="speech" />
+        )}
         {facts.lines.length === 0 ? (
           <p className="fact lead">
             The video has no voice yet. Ask the AI in the chat to record one, or

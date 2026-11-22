@@ -50,6 +50,35 @@
   margin-right: 12px;
 }
 
+.bar-views {
+  display: contents;
+}
+
+.bar-menu {
+  display: none;
+  position: relative;
+}
+
+.bar-menu-list {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 5;
+  display: grid;
+  gap: 6px;
+  min-width: 150px;
+  padding: 8px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--raised);
+  box-shadow: 0 12px 32px -12px rgb(0 0 0 / 0.5);
+}
+
+.bar-menu-list button {
+  justify-content: flex-start;
+  text-align: left;
+}
+
 .stage {
   grid-area: stage;
   overflow-y: auto;
@@ -115,7 +144,25 @@
     display: none;
   }
 
+  .bar-actions {
+    gap: 6px;
+  }
+
   .ask-jump {
+    display: block;
+  }
+}
+
+@media (max-width: 640px) {
+  .bar-views {
+    display: none;
+  }
+
+  .bar-actions {
+    overflow: visible;
+  }
+
+  .bar-menu {
     display: block;
   }
 }

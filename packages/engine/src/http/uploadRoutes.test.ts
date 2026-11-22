@@ -34,7 +34,7 @@ function strayFilesAbove(folder: string): string[] {
 }
 
 describe("the upload request", () => {
-  it("adds the file as an asset, and a download gives the same bytes under its name", async () => {
+  it("adds the file as an asset under its original name, and a download gives the same bytes under that name", async () => {
     const { engine, projectFolder } = await startedTestEngine();
     const bytes = wavBytes(1);
 
@@ -55,12 +55,12 @@ describe("the upload request", () => {
         id: "mysong",
         kind: "audio",
         durationFrames: 30,
-        source: { kind: "import", originalName: "MySong.wav" },
+        source: { kind: "import", originalName: "My Song.wav" },
       },
     });
     expect(downloaded.bytes.equals(bytes)).toBe(true);
     expect(downloaded.headers["content-disposition"]).toBe(
-      `attachment; filename="MySong.wav"; filename*=UTF-8''MySong.wav`,
+      `attachment; filename="My_Song.wav"; filename*=UTF-8''My%20Song.wav`,
     );
     const stored = await readFile(
       join(projectFolder, "assets", "files", "mysong.wav"),

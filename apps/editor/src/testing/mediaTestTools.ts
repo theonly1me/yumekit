@@ -16,6 +16,11 @@ export const plainKeyTestServer = {
   args: [...keyTestServer.args, "--without-check-key"],
 };
 
+export const noPictureKeyTestServer = {
+  ...keyTestServer,
+  args: [...keyTestServer.args, "--accepts-no-picture"],
+};
+
 export const withoutOtherBundled = {
   openai: { disabled: true },
   gemini: { disabled: true },

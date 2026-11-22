@@ -74,6 +74,8 @@ const assetSchema = z.object({
   id: z.string(),
   kind: z.enum(["image", "audio", "video", "font"]),
   hasWords: z.boolean(),
+  widthPixels: z.number().optional(),
+  heightPixels: z.number().optional(),
   durationFrames: z.number().optional(),
   source: z.discriminatedUnion("kind", [
     z.object({ kind: z.literal("import"), originalName: z.string() }),
