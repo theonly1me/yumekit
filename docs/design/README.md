@@ -21,6 +21,7 @@ These documents are the design of yumekit. Code follows them. If code and a docu
 | [13-editor-prompt-first.md](13-editor-prompt-first.md)             | The second version of the editor: the prompt, platforms, scene cards, and the start screen  |
 | [14-install-and-release.md](14-install-and-release.md)             | How a person installs yumekit from npm, and how the owner makes a release                   |
 | [15-open-steps-and-choices.md](15-open-steps-and-choices.md)       | The step views, files of the person, the choice of services and models, and the video style |
+| [16-creator-capabilities.md](16-creator-capabilities.md)           | More models, camera moves, the cast, start formats, the Files view, and new kinds of media  |
 
 The visual reference for the editor is the prototype in [apps/prototype](../../apps/prototype).
 
