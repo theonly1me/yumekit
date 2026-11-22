@@ -24,7 +24,7 @@ describe("yumekit doctor", () => {
   });
 
   it("says ok for each need when FFmpeg and Chromium are installed", async () => {
-    const workspace = await createCliWorkspace();
+    const workspace = await createCliWorkspace({ home: "user" });
 
     const run = await workspace.run(["doctor"]);
 

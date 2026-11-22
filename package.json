@@ -16,7 +16,7 @@
     "check-imports": "node --experimental-strip-types scripts/importRules/checkImports.ts",
     "test": "vitest run",
     "format": "prettier --write .",
-    "pack-release": "pnpm build && node --experimental-strip-types scripts/release/packRelease.ts",
+    "pack-release": "tsc --build --clean && pnpm build && node --experimental-strip-types scripts/release/packRelease.ts",
     "check-release": "node --experimental-strip-types scripts/release/installCheck/main.ts"
   },
   "devDependencies": {
