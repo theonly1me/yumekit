@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import type { EngineClient } from "../engine/engineClient.js";
-import type { Output, SceneClip } from "../engine/snapshot.js";
-import { stillFrameOf, stillScaleOf } from "../scenes/useSceneStills.js";
+import type { EngineClient } from "../../engine/engineClient.js";
+import type { Output, SceneClip } from "../../engine/snapshot.js";
+import { stillFrameOf, stillScaleOf } from "../../scenes/useSceneStills.js";
 
-export type MakingPicture =
+export type ScenePicture =
   { kind: "ready"; source: string } | { kind: "failed" };
 
 const picturesInOneCall = 8;
@@ -29,7 +29,7 @@ async function callForPictures(options: {
   name: "preview_frames" | "preview_scenes";
   input: object;
   keys: string[];
-  pictures: Map<string, MakingPicture>;
+  pictures: Map<string, ScenePicture>;
 }): Promise<void> {
   const reply = await options.client.callTool({
     name: options.name,
@@ -50,15 +50,15 @@ async function callForPictures(options: {
   });
 }
 
-async function picturesOf(options: {
+export async function picturesOf(options: {
   client: EngineClient;
   output: Output;
+  scale: number;
   clips: SceneClip[];
   unplacedSceneIds: string[];
-}): Promise<Map<string, MakingPicture>> {
-  const { client, output } = options;
-  const scale = stillScaleOf(output);
-  const pictures = new Map<string, MakingPicture>();
+}): Promise<Map<string, ScenePicture>> {
+  const { client, output, scale } = options;
+  const pictures = new Map<string, ScenePicture>();
   for (const group of groupsOf(options.clips)) {
     await callForPictures({
       client,
@@ -80,21 +80,27 @@ async function picturesOf(options: {
   return pictures;
 }
 
-export function useMakingPictures(options: {
+export function useScenePictures(options: {
   client: EngineClient;
   output: Output;
   clips: SceneClip[];
   unplacedSceneIds: string[];
   revision: number;
-}): ReadonlyMap<string, MakingPicture> {
+}): ReadonlyMap<string, ScenePicture> {
   const { client, output, clips, unplacedSceneIds, revision } = options;
-  const [pictures, setPictures] = useState<ReadonlyMap<string, MakingPicture>>(
+  const [pictures, setPictures] = useState<ReadonlyMap<string, ScenePicture>>(
     new Map(),
   );
 
   useEffect(() => {
     let isCurrent = true;
-    picturesOf({ client, output, clips, unplacedSceneIds })
+    picturesOf({
+      client,
+      output,
+      scale: stillScaleOf(output),
+      clips,
+      unplacedSceneIds,
+    })
       .then((made) => {
         if (isCurrent) setPictures(made);
       })

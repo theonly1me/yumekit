@@ -2,14 +2,76 @@
   gap: 28px;
 }
 
-.making-steps li {
+.making .making-body {
+  width: min(1180px, 100%);
+}
+
+.making-desk {
   display: grid;
-  grid-template-columns: 18px minmax(0, 1fr) auto;
-  gap: 12px;
-  align-items: center;
-  padding: 13px 0;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 40px;
+  align-items: start;
+}
+
+.making-side {
+  display: grid;
+  gap: 28px;
+}
+
+.making-wait {
+  padding-top: 13px;
+  border-top: 1px solid var(--line);
+}
+
+.making-part {
+  min-width: 0;
+}
+
+.making-steps li {
   border-top: 1px solid var(--line);
   color: var(--faint);
+}
+
+.step-row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) auto;
+  gap: 2px 12px;
+  align-items: center;
+  padding: 13px 0;
+  border: 0;
+  border-radius: 0;
+  text-align: left;
+  font-size: var(--step-0);
+  font-weight: 400;
+  white-space: normal;
+  color: inherit;
+}
+
+button.step-row:hover {
+  background: none;
+}
+
+.step-see {
+  grid-column: 2 / -1;
+  font-size: var(--step--2);
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--line-strong);
+}
+
+button.step-row:hover .step-see {
+  color: var(--text);
+}
+
+.making-steps li[data-open="true"] {
+  border-top-color: var(--text);
+}
+
+.making-steps li[data-open="true"] .step-see {
+  color: var(--text);
+  text-decoration: none;
 }
 
 .making-steps em {
@@ -44,29 +106,7 @@
   animation: pulse 1s ease-in-out infinite alternate;
 }
 
-.making-cards {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 12px;
-  font-size: var(--step--2);
-  color: var(--muted);
-}
-
-.making-card {
-  display: grid;
-  gap: 6px;
-}
-
-.making-card .thumb {
-  display: grid;
-  place-items: center;
-  background: var(--surface);
-  margin-bottom: 0;
-}
-
-.thumb-words {
-  padding: 0 6px;
-  text-align: center;
+.making-steps li[data-status="skipped"] em {
   color: var(--faint);
 }
 
@@ -75,6 +115,10 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 12px 20px;
+}
+
+.making-failure {
+  color: var(--accent);
 }
 
 @keyframes pulse {
@@ -92,21 +136,14 @@
   }
 }
 
-@media (max-width: 560px) {
-  .making-cards {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+@media (min-width: 900px) {
+  .making-desk {
+    grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+    gap: clamp(28px, 5vw, 72px);
   }
-}
 
-.making-steps li[data-status="skipped"] em {
-  color: var(--faint);
-}
-
-.making-failure {
-  color: var(--accent);
-}
-
-.making-card {
-  min-width: 0;
-  grid-template-columns: minmax(0, 1fr);
+  .making-side {
+    position: sticky;
+    top: 24px;
+  }
 }

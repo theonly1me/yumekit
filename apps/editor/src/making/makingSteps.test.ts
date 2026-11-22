@@ -6,6 +6,7 @@ import { makingStepsOf } from "./makingSteps.js";
 const emptySnapshot: Snapshot = {
   revision: 1,
   project: { name: "Tea", framesPerSecond: 30, outputs: [] },
+  script: "",
   scenes: [],
   sceneCode: {},
   timelines: [],

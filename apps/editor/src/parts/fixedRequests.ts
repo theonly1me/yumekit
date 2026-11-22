@@ -6,7 +6,12 @@ import {
 
 export type FixedRequest =
   | { kind: "update-the-video" }
-  | { kind: "change-the-picture"; words: string; aboutClipId: string }
+  | {
+      kind: "change-the-picture";
+      words: string;
+      aboutClipId: string;
+      model?: ModelTarget;
+    }
   | { kind: "use-my-own-picture"; fileName: string; aboutClipId: string }
   | { kind: "record-the-changed-lines" }
   | { kind: "another-voice"; voiceName: string; model?: ModelTarget }
@@ -40,7 +45,9 @@ function requestSentenceOf(request: FixedRequest): string {
 export function fixedRequestTextOf(request: FixedRequest): string {
   const sentence = requestSentenceOf(request);
   const model =
-    request.kind === "another-voice" || request.kind === "make-this-music"
+    request.kind === "another-voice" ||
+    request.kind === "make-this-music" ||
+    request.kind === "change-the-picture"
       ? request.model
       : undefined;
   return model === undefined

@@ -1,9 +1,7 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { EngineClient } from "../engine/engineClient.js";
 import { useFirstChat, type AnswerEntry, type FirstChat } from "./firstChat.js";
 import { startFailureOf, type StartFailure } from "./firstRequestFailure.js";
-
-const readyPauseMilliseconds = 1_200;
 
 export type MakingGate =
   | { kind: "loading" }
@@ -47,19 +45,9 @@ export function useMakingGate(options: {
   const answerState =
     chatState.kind === "ready" ? chatState.chat.answer?.state : undefined;
 
-  useEffect(() => {
-    if (decision !== "making") return;
-    if (answerState !== "done" && answerState !== "stopped") return;
-    const timer = window.setTimeout(
-      () => {
-        setDecision("editor");
-      },
-      answerState === "done" ? readyPauseMilliseconds : 0,
-    );
-    return () => {
-      window.clearTimeout(timer);
-    };
-  }, [decision, answerState]);
+  if (decision === "making" && answerState === "stopped") {
+    setDecision("editor");
+  }
 
   const onOpenEditor = () => {
     setDecision("editor");

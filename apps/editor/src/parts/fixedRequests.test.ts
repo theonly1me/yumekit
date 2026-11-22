@@ -34,6 +34,24 @@ describe("the fixed requests", () => {
     );
   });
 
+  it("adds the model that the person picked for one new picture", () => {
+    expect(
+      fixedRequestTextOf({
+        kind: "change-the-picture",
+        words: "a night sky",
+        aboutClipId: "opening",
+        model: {
+          server: "openai",
+          serverLabel: "OpenAI",
+          model: "gpt-image-1",
+          modelLabel: "gpt-image-1",
+        },
+      }),
+    ).toBe(
+      "Change the picture of this scene: a night sky Use the model gpt-image-1 of OpenAI.",
+    );
+  });
+
   it("sends a request about a scene with its clip", async () => {
     const asked: unknown[] = [];
 

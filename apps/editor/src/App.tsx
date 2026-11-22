@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { z } from "zod";
+import { chatRequestsOf } from "./chat/chatRequests.js";
 import {
   createEngineClient,
   type EngineClient,
@@ -52,6 +53,11 @@ function ProjectScreens(props: {
               .catch(() => undefined);
           }}
           onOpenEditor={gate.onOpenEditor}
+          ask={async (request) => {
+            const asked = await chatRequestsOf(client).ask(request);
+            if (asked.ok) gate.onOpenEditor();
+            return asked.ok;
+          }}
         />
       );
     case "editor":

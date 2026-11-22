@@ -5,6 +5,7 @@ export function TopBar(props: {
   theme: Theme;
   onTheme: (theme: Theme) => void;
   exportLabel: string;
+  onStepView: (stepId: "script" | "pictures") => void;
   onSettings: () => void;
   onExport: () => void;
 }) {
@@ -24,6 +25,22 @@ export function TopBar(props: {
           }}
         >
           Use the {otherTheme} theme
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            props.onStepView("script");
+          }}
+        >
+          Script
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            props.onStepView("pictures");
+          }}
+        >
+          Pictures
         </button>
         <button type="button" onClick={props.onSettings}>
           Settings

@@ -1,9 +1,9 @@
 import type { Page, Route } from "playwright";
 import { afterAll, describe, expect, it } from "vitest";
-import { closeBrowser, openEditor } from "../testing/editorPage.js";
-import { scriptAndTwoScenes } from "../testing/makingCalls.js";
-import { browsersPath } from "../testing/runEngine.js";
-import { runHome, type RunningHome } from "../testing/runHome.js";
+import { closeBrowser, openEditor } from "../../testing/editorPage.js";
+import { scriptAndTwoScenes } from "../../testing/makingCalls.js";
+import { browsersPath } from "../../testing/runEngine.js";
+import { runHome, type RunningHome } from "../../testing/runHome.js";
 
 const homes: RunningHome[] = [];
 
@@ -27,25 +27,24 @@ async function startTallRequest(page: Page): Promise<void> {
   await page.getByRole("button", { name: /^TikTok/ }).click();
   await page.getByRole("button", { name: /^Instagram Reel/ }).click();
   await page.getByRole("button", { name: "Make the video" }).click();
+  await page.getByRole("button", { name: /^Make the pictures/ }).click();
 }
 
 function cardFacts(page: Page) {
-  return page
-    .locator(".making-card:not([data-empty]) .thumb")
-    .evaluateAll((thumbs) =>
-      thumbs.map((thumb) => {
-        const box = thumb.getBoundingClientRect();
-        const image = thumb.querySelector("img");
-        return {
-          isTall: box.height > box.width * 1.7,
-          naturalSize:
-            image === null ? null : [image.naturalWidth, image.naturalHeight],
-        };
-      }),
-    );
+  return page.locator(".picture-card .picture").evaluateAll((thumbs) =>
+    thumbs.map((thumb) => {
+      const box = thumb.getBoundingClientRect();
+      const image = thumb.querySelector("img");
+      return {
+        isTall: box.height > box.width * 1.7,
+        naturalSize:
+          image === null ? null : [image.naturalWidth, image.naturalHeight],
+      };
+    }),
+  );
 }
 
-describe("the Making cards", () => {
+describe("the scene cards of the Pictures view", () => {
   it("show each scene with no clip in the tall shape of the output", async () => {
     const { page, close } = await openTallMaking({ withChromium: true });
 
@@ -69,16 +68,18 @@ describe("the Making cards", () => {
 
     await startTallRequest(page);
 
-    const cardTexts = () =>
-      page.locator(".making-card:not([data-empty])").allTextContents();
+    const cardTexts = () => page.locator(".picture-card").allTextContents();
     await expect
       .poll(cardTexts)
-      .toEqual(["Making the pictureCalm tea", "Making the pictureWarm tea"]);
+      .toEqual([
+        "Making the picture1. Calm tea",
+        "Making the picture2. Warm tea",
+      ]);
     await Promise.all(heldRequests.map((route) => route.fallback()));
     await page.unroute("**/api/tools/preview_scenes");
     await expect
       .poll(cardTexts)
-      .toEqual(["No pictureCalm tea", "No pictureWarm tea"]);
+      .toEqual(["No picture1. Calm tea", "No picture2. Warm tea"]);
     await close();
   });
 });

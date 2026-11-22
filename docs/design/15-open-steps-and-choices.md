@@ -203,3 +203,24 @@ These rules came from the build of WP40.
 15. The Voice view and the Music view show the line `MadeWith` of WP38 for the pick of Settings, under "What the voice says" and "In your video now". A second line in one-time mode sits under "Who speaks" and under "Or describe the music". Its pick adds the sentence of the model to the fixed request.
 16. The text of "Back to graphics" of WP39 moves into the table of fixed requests, as the kind `back-to-graphics`.
 17. Until the frame of WP37 is on `main`, the editor opens a view in a sheet with its title, the locked line, and "Stop".
+
+## Details of WP37
+
+WP37 made these choices where this document and the prototype give no rule.
+
+1. The Script view uses Tiptap 3.35.0: `@tiptap/react`, `@tiptap/starter-kit`, `@tiptap/markdown`, `@tiptap/pm`, and `@tiptap/core`, each with the MIT license. The documents of `@tiptap/markdown` call it an early release. A test keeps a heading, bold, italic, and a list through a save and a load, so Milkdown is not needed.
+2. "Heading" makes a heading of level 2, as in the prototype. A heading of level 1 from the AI stays.
+3. The editor reads `script` from `GET /api/project`. The engine already sends it.
+4. A view takes `ask` (item 6 of "Details of WP40"). On the Making screen, a sent request opens the editor, so the person sees it in the chat. In the editor, the sheet stays open and locks, and the side panel shows the Chat tab. A request that does not start shows "The request did not start. Try again in a moment."
+5. The line under the script page is empty before a change, because the editor cannot know if the video matches the script. "Update the video" saves the text that waits first.
+6. "Undo my changes" calls `undo` one time for each save of the view, when the last change of the project is the last save of the view. Otherwise it calls `set_script` with the script from before the first save, so it never undoes a change of another writer.
+7. With two or more outputs, the Pictures view shows one button for each output, with the names of its platforms and its shape.
+8. The fields of a scene are the kit form of the Scene tab, inside a `fieldset` that is off while the view is locked. A scene with its own code shows one line in place of the fields.
+9. A scene with no clip has no `about_clip_id`, so the view shows no "Change the picture" and no "Use my own picture" for it. One line says "This scene is not in the video yet. Ask the AI in the chat to change its picture."
+10. "Download the picture" saves `<scene id>.png`. A scene with a clip uses `render_still` at the frame of item 27 of document 13. A scene with no clip uses `preview_scenes` at scale 1, because `render_still` needs a frame of the output.
+11. "Use my own picture" sends the file to `POST /api/uploads?name=<file name>` with `upload` of the engine client. The request names the `originalName` of the new asset. A failed upload shows its message and sends no request. `upload-too-large` says "This file is larger than 500 megabytes. Pick a smaller picture." The prototype has "Remove my picture". This document has no rule for it, so the view leaves it out.
+12. The step "Put it together" opens the view "The video", with "Open the editor". The steps Voice and Music open the Voice view and the Music view of WP40 in the frame.
+13. A view is locked on the Making screen while the first answer runs, and in the editor while a chat request runs.
+14. The scene cards of the Making screen move into the Pictures view. The hook that reads their pictures is now `parts/pictures/useScenePictures.ts`.
+15. The editor has one sheet for the four views, with the frame of WP37. It replaces the sheet of item 17 of "Details of WP40". While a request runs, the frame shows the locked line with "Stop". On the Making screen, the frame has no "Stop", because "Stop" is next to the steps.
+16. The Pictures view shows `MadeWith` of WP38 for the pick of Settings above the cards. A second line in one-time mode sits under "Change the picture". The kind `change-the-picture` of the fixed requests takes `model`, as `another-voice` and `make-this-music` do.

@@ -39,7 +39,7 @@ function stepTexts(page: Awaited<ReturnType<typeof startMaking>>["page"]) {
 }
 
 describe("the Making screen", () => {
-  it("follows the calls of the first request, shows each scene, and ends in the editor", async () => {
+  it("follows the calls of the first request, and stays when the video is ready", async () => {
     const { home, page, close } = await startMaking({
       calls: scriptAndTwoScenes,
       ending: "done",
@@ -48,24 +48,64 @@ describe("the Making screen", () => {
     await expect
       .poll(() => stepTexts(page))
       .toEqual([
-        "done Write the scriptThe script is ready",
-        "done Make the pictures2 pictures are ready",
+        "done Write the scriptThe script is readyOpen now",
+        "done Make the pictures2 pictures are readySee and change",
         "now Record the voiceWorking",
         "waiting Choose the music",
         "waiting Put it together",
       ]);
-    expect(
-      await page
-        .locator(".making-card:not([data-empty]) > span:not(.thumb)")
-        .allTextContents(),
-    ).toEqual(["Calm tea", "Warm tea"]);
     await home.finishRequest();
     await expect
       .poll(() => stepTexts(page))
       .toContain("skipped Record the voiceSkipped");
     await expect
+      .poll(() =>
+        page.getByRole("heading", { name: "Your video is ready" }).count(),
+      )
+      .toBe(1);
+    await page.waitForTimeout(2_000);
+    expect(await page.getByRole("button", { name: "Export" }).count()).toBe(0);
+
+    await page.getByRole("button", { name: "Open the editor" }).first().click();
+
+    await expect
       .poll(() => page.getByRole("button", { name: "Export" }).count())
       .toBe(1);
+    await close();
+  });
+
+  it("opens the first done step by itself, locks it while the request runs, and opens it after the answer", async () => {
+    const { home, page, close } = await startMaking({
+      calls: scriptAndTwoScenes,
+      ending: "done",
+    });
+    const scriptPage = page.getByRole("textbox", {
+      name: "The script of the video",
+    });
+    const lockedLine = page.getByText("The AI still works on the video.", {
+      exact: false,
+    });
+
+    await expect.poll(() => scriptPage.locator("h1").textContent()).toBe("Tea");
+    expect(await scriptPage.locator("strong").textContent()).toBe("calm");
+    expect(await scriptPage.getAttribute("contenteditable")).toBe("false");
+    expect(await page.getByRole("button", { name: "Bold" }).isDisabled()).toBe(
+      true,
+    );
+    expect(await lockedLine.count()).toBe(1);
+
+    await home.finishRequest();
+
+    await expect
+      .poll(() => scriptPage.getAttribute("contenteditable"))
+      .toBe("true");
+    expect(await lockedLine.count()).toBe(0);
+    await page.getByRole("button", { name: /^Make the pictures/ }).click();
+    await expect
+      .poll(() =>
+        page.locator(".picture-card > span:not(.picture)").allTextContents(),
+      )
+      .toEqual(["1. Calm tea", "2. Warm tea"]);
     await close();
   });
 
@@ -93,7 +133,7 @@ describe("the Making screen", () => {
     await close();
   });
 
-  it("stops the request with Stop and shows the editor", async () => {
+  it("stops the request with Stop, and shows the editor with open views", async () => {
     const { page, close } = await startMaking({ calls: [], ending: "done" });
 
     await page.getByRole("button", { name: "Stop" }).click();
@@ -101,6 +141,10 @@ describe("the Making screen", () => {
     await expect
       .poll(() => page.getByRole("button", { name: "Export" }).count())
       .toBe(1);
+    await page.getByRole("button", { name: "Script", exact: true }).click();
+    expect(await page.getByRole("button", { name: "Bold" }).isDisabled()).toBe(
+      false,
+    );
     await close();
   });
 });
