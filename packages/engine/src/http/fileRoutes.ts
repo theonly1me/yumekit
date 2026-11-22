@@ -1,6 +1,7 @@
 import { join } from "node:path";
 import { fileInside } from "../files/fileInside.js";
 import { sendFile } from "../files/sendFile.js";
+import { downloadDispositionOf } from "../uploads/downloadName.js";
 import { anySegment, type Exchange, type Route } from "./exchange.js";
 import { notFound, type Failure } from "./responses.js";
 
@@ -37,6 +38,12 @@ export const fileRoutes: Route[] = [
         .assets.find((candidate) => candidate.id === assetId);
       if (asset === undefined) {
         return Promise.resolve(notFound("The project has no such asset."));
+      }
+      if (exchange.query.get("download") === "1") {
+        exchange.response.setHeader(
+          "Content-Disposition",
+          downloadDispositionOf(asset),
+        );
       }
       return sendFileInside({
         exchange,
