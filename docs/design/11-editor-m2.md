@@ -20,7 +20,7 @@ Document 13 replaces the screens of this document. The engine, the preview, and 
 
 ## The engine
 
-Package `@yumekit/engine` (Node). It may import `project`, `render`, `tools`, `harness-mcp`, and `scene-kit/schemas`. The dependency table of document 01 gets this row, and `apps/cli` may import `engine`.
+Package `@yumekit/engine` (Node). It may import `project`, `render`, `tools`, `harness-mcp`, `brain`, and `scene-kit/schemas`. The dependency table of document 01 gets this row, and `apps/cli` may import `engine`.
 
 ```ts
 function startEngine(options: {
