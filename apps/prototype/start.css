@@ -4,8 +4,12 @@
   padding: clamp(40px, 8vh, 96px) var(--gutter) 96px;
 }
 
-.start-body,
 .making-body {
+  width: min(1180px, 100%);
+  display: grid;
+}
+
+.start-body {
   width: min(760px, 100%);
   display: grid;
   gap: 48px;
@@ -114,8 +118,7 @@ button.choice {
 }
 
 .recent-list,
-.making-steps,
-.making-cards {
+.making-steps {
   list-style: none;
   margin: 0;
   padding: 0;

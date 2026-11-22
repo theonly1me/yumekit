@@ -39,9 +39,9 @@ function rowMarkup(row) {
   return `
     <li class="sound-row" data-on="${value.on}">
       <span class="sound-name">${row.name}</span>
-      <span class="sound-choice">${value.on ? escapeText(value.choice) : "Off"}</span>
+      <span class="sound-choice">${value.on ? escapeText(value.file?.name ?? value.choice) : "Off"}</span>
       <label class="switch"><input type="checkbox" data-toggle="${row.id}" ${value.on ? "checked" : ""} /> On</label>
-      <button type="button" data-open-row="${row.id}" aria-expanded="${open}">${open ? "Close" : "Change"}</button>
+      ${row.id === "captions" ? `<button type="button" data-open-row="${row.id}" aria-expanded="${open}">${open ? "Close" : "Change"}</button>` : `<button type="button" data-open-part="${row.id}">Open</button>`}
       ${open ? choicesMarkup(row) : ""}
     </li>`;
 }
@@ -80,6 +80,11 @@ export function renderLowerRows({ element }) {
             ? undefined
             : button.dataset.openRow,
       }),
+    );
+  });
+  element.querySelectorAll("[data-open-part]").forEach((button) => {
+    button.addEventListener("click", () =>
+      change({ sheet: button.dataset.openPart, playing: false }),
     );
   });
   element.querySelectorAll("[data-choice]").forEach((button) => {

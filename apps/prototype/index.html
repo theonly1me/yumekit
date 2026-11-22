@@ -4,12 +4,15 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex, nofollow" />
-    <title>yumekit editor design, fourth pass</title>
+    <title>yumekit editor design, fifth pass</title>
     <link rel="stylesheet" href="fonts.css" />
     <link rel="stylesheet" href="tokens.css" />
     <link rel="stylesheet" href="shell.css" />
     <link rel="stylesheet" href="start.css" />
     <link rel="stylesheet" href="making.css" />
+    <link rel="stylesheet" href="parts.css" />
+    <link rel="stylesheet" href="pictures.css" />
+    <link rel="stylesheet" href="sound.css" />
     <link rel="stylesheet" href="frame.css" />
     <link rel="stylesheet" href="editor.css" />
     <link rel="stylesheet" href="soundRows.css" />
@@ -23,11 +26,18 @@
   </head>
   <body>
     <header class="review-bar">
-      <p>Editor design, fourth pass</p>
+      <p>Editor design, fifth pass</p>
       <nav class="review-nav" aria-label="Screens to review">
         <button type="button" class="tab" data-go="start">Start</button>
         <button type="button" class="tab" data-go="making">Making</button>
         <button type="button" class="tab" data-go="editor">Editor</button>
+        <button type="button" class="tab" data-go="editor:script">
+          Script
+        </button>
+        <button type="button" class="tab" data-go="editor:pictures">
+          Pictures
+        </button>
+        <button type="button" class="tab" data-go="editor:music">Music</button>
         <button type="button" class="tab" data-go="editor:clip">
           Make a real video clip
         </button>
@@ -65,6 +75,8 @@
             <p class="project-name" id="project-name"></p>
           </div>
           <div class="bar-actions">
+            <button type="button" data-open-sheet="script">Script</button>
+            <button type="button" data-open-sheet="pictures">Pictures</button>
             <button type="button" data-open-sheet="settings">Settings</button>
             <button type="button" class="primary" data-open-sheet="export">
               Export

@@ -3,6 +3,7 @@ import { renderExportSheet } from "./exportSheet.js";
 import { renderLowerRows } from "./lowerRows.js";
 import { renderMaking, stopMaking } from "./making.js";
 import { renderNotes } from "./notes.js";
+import { renderPartSheet } from "./parts.js";
 import { renderPreview } from "./preview.js";
 import { renderScenesRow } from "./scenesRow.js";
 import { renderSettings } from "./settings.js";
@@ -15,8 +16,13 @@ const sheets = {
   clip: renderClipSheet,
   export: renderExportSheet,
   settings: renderSettings,
+  script: renderPartSheet("script"),
+  pictures: renderPartSheet("pictures"),
+  voice: renderPartSheet("voice"),
+  music: renderPartSheet("music"),
 };
-const shown = { screen: undefined };
+const partSheets = new Set(["script", "pictures", "voice", "music"]);
+const shown = { screen: undefined, sheet: undefined };
 
 function storedTheme() {
   try {
@@ -41,7 +47,9 @@ function renderSheet() {
   const sheet = element("sheet");
   sheet.hidden = state.sheet === undefined;
   document.body.dataset.sheet = state.sheet ?? "none";
-  if (state.sheet !== undefined) {
+  const entered = shown.sheet !== state.sheet;
+  shown.sheet = state.sheet;
+  if (state.sheet !== undefined && (entered || !partSheets.has(state.sheet))) {
     sheets[state.sheet]({ element: element("sheet-content") });
   }
 }

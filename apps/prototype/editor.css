@@ -144,3 +144,22 @@
     display: block;
   }
 }
+
+@media (max-width: 560px) {
+  .editor-bar {
+    padding: 0 var(--gutter);
+    gap: 8px;
+  }
+
+  .project-name {
+    display: none;
+  }
+
+  .bar-actions {
+    gap: 4px;
+  }
+
+  .bar-actions button {
+    padding: 6px 10px;
+  }
+}

@@ -34,6 +34,8 @@ export const state = {
   usedSeconds: 4,
   playing: false,
   playheadSeconds: 0,
+  script: undefined,
+  ownPictures: new Map(),
 };
 
 export function onChange(listener) {
