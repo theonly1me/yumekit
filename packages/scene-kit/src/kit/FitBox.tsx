@@ -30,7 +30,10 @@ function fitContent(options: { box: HTMLElement; content: HTMLElement }) {
     step < largestFitSteps && overflows({ box, content });
     step += 1
   ) {
-    const ratio = box.clientHeight / Math.max(1, content.offsetHeight);
+    const ratio = Math.min(
+      box.clientHeight / Math.max(1, content.offsetHeight),
+      box.clientWidth / Math.max(1, content.scrollWidth),
+    );
     fit *= Math.min(largestShrink, Math.max(smallestShrink, ratio));
     box.style.setProperty(fitVariable, String(fit));
   }

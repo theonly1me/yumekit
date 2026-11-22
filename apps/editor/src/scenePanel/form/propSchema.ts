@@ -14,6 +14,8 @@ export interface PropSchema {
   minItems?: number | undefined;
   maxItems?: number | undefined;
   assetKind?: AssetKind | undefined;
+  assetKinds?: AssetKind[] | undefined;
+  title?: string | undefined;
   items?: PropSchema | undefined;
   properties?: Record<string, PropSchema> | undefined;
   required?: string[] | undefined;
@@ -30,6 +32,8 @@ export const propSchemaSchema: z.ZodType<PropSchema> = z.lazy(() =>
     minItems: z.number().optional(),
     maxItems: z.number().optional(),
     assetKind: z.enum(assetKinds).optional(),
+    assetKinds: z.array(z.enum(assetKinds)).min(1).optional(),
+    title: z.string().optional(),
     items: propSchemaSchema.optional(),
     properties: z.record(z.string(), propSchemaSchema).optional(),
     required: z.array(z.string()).optional(),

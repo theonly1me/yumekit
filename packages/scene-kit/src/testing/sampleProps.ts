@@ -1,4 +1,9 @@
 import type { JsonObject, SceneAsset } from "@yumekit/scene";
+import {
+  launchLongProps,
+  launchSceneNames,
+  launchTypicalProps,
+} from "./launchSceneProps.js";
 
 export const longText =
   "How one small team turns one idea into a long explainer, three shorts, and a set of stills with the AI tools it owns now";
@@ -11,6 +16,7 @@ export const kitSceneNames = [
   "bar-chart",
   "quote",
   "video-clip",
+  ...launchSceneNames,
 ] as const;
 
 export const typicalProps: Record<(typeof kitSceneNames)[number], JsonObject> =
@@ -45,6 +51,7 @@ export const typicalProps: Record<(typeof kitSceneNames)[number], JsonObject> =
       caption: "A generated clip",
       focus: { x: 0.5, y: 0.4 },
     },
+    ...launchTypicalProps,
   };
 
 export const longProps: Record<(typeof kitSceneNames)[number], JsonObject> = {
@@ -66,6 +73,7 @@ export const longProps: Record<(typeof kitSceneNames)[number], JsonObject> = {
   },
   quote: { quote: longText, source: longText },
   "video-clip": { assetId: "clip", caption: longText },
+  ...launchLongProps,
 };
 
 export async function testImageAsset(): Promise<SceneAsset> {

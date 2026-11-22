@@ -53,6 +53,34 @@ describe("fieldsOf", () => {
     ]);
   });
 
+  it("makes one asset field for a prop that takes an image or a video", () => {
+    const [field] = fieldsOf({
+      type: "object",
+      required: ["assetId"],
+      properties: {
+        assetId: { type: "string", assetKinds: ["image", "video"] },
+      },
+    });
+
+    expect(field).toMatchObject({
+      kind: "asset",
+      label: "Image or video",
+      assetKinds: ["image", "video"],
+    });
+  });
+
+  it("uses the title of a prop as its label", () => {
+    const fields = fieldsOf({
+      type: "object",
+      properties: {
+        frame: { type: "string", enum: ["browser", "phone"], title: "Device" },
+        assetId: { type: "string", assetKind: "audio", title: "Voice" },
+      },
+    });
+
+    expect(fields.map((field) => field.label)).toEqual(["Device", "Voice"]);
+  });
+
   it("shows a string that allows more than 200 characters as long text", () => {
     const [short, long, unlimited] = fieldsOf({
       type: "object",

@@ -162,7 +162,13 @@ export function ObjectListField(
             </p>
             {edits.actionsOf(index)}
           </div>
-          <div className="object-fields">
+          <div
+            className={
+              field.fields.every((subfield) => subfield.kind === "text")
+                ? "object-fields stacked"
+                : "object-fields"
+            }
+          >
             {field.fields.map((subfield) => (
               <div key={subfield.name}>
                 {props.fieldOf({
