@@ -31,3 +31,11 @@ export type { Edit, EditFailure } from "./edits/index.js";
 export type { ProjectStore } from "./store/projectStore.js";
 export { createProject, type CreateFailure } from "./store/createProject.js";
 export { openProject, type OpenFailure } from "./store/openProject.js";
+export {
+  captionComponent,
+  isCaptionScene,
+  isCaptionTrack,
+  scenesRowOf,
+  type RowScene,
+  type RowTrack,
+} from "./scenesRow/index.js";

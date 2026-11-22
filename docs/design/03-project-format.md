@@ -72,8 +72,8 @@ type SceneSource =
 
 type Timeline = { outputId: string; tracks: Track[] };
 type Track =
-  | { id: string; kind: "scene"; clips: SceneClip[] }
-  | { id: string; kind: "audio"; clips: AudioClip[] };
+  | { id: string; kind: "scene"; clips: SceneClip[]; off?: boolean }
+  | { id: string; kind: "audio"; clips: AudioClip[]; off?: boolean };
 
 type SceneClip = {
   id: string;
@@ -142,6 +142,8 @@ How a timeline reads:
 - At frame `f`, a scene clip is visible when `startFrame <= f < startFrame + durationFrames`. The scene gets the frame `f - startFrame + sceneStartFrame`.
 - `sceneStartFrame` cuts the start of a scene. The stage mounts the scene with a length of `sceneStartFrame + durationFrames`, so each frame it asks for is inside the scene.
 - The length of an output is the largest clip end over all of its tracks.
+- A track with `off: true` draws no picture and plays no sound. It still counts for the length of the output. The format version stays 1, because a track without the field is valid.
+- The scenes row of a timeline is its first scene track that is not a caption track. A caption track is a scene track whose clips all show `caption-words` scenes. `scenesRowOf` and `isCaptionTrack` from `@yumekit/project` apply this rule. The entry `@yumekit/project/scenes-row` gives the same functions with no Node code, for the editor.
 
 ## The store
 
