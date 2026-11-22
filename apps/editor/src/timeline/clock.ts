@@ -2,15 +2,16 @@ export function clockText(options: {
   frame: number;
   framesPerSecond: number;
 }): string {
-  const seconds = options.frame / options.framesPerSecond;
+  const seconds = Math.floor(options.frame / options.framesPerSecond);
   const minutes = Math.floor(seconds / 60);
-  const rest = (seconds % 60).toFixed(2).padStart(5, "0");
-  return `${String(minutes)}:${rest}`;
+  return `${String(minutes)}:${String(seconds % 60).padStart(2, "0")}`;
 }
 
 export function secondsText(options: {
   frames: number;
   framesPerSecond: number;
 }): string {
-  return `${(options.frames / options.framesPerSecond).toFixed(1)} s`;
+  const seconds =
+    Math.round((options.frames / options.framesPerSecond) * 10) / 10;
+  return `${String(seconds)} ${seconds === 1 ? "second" : "seconds"}`;
 }

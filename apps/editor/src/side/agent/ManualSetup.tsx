@@ -20,7 +20,7 @@ function ManualBlocks(props: { serverCommand: ServerCommand }) {
         ])}
         copyLabel="Copy the command"
       />
-      <div className="switch" role="group" aria-label="Agent">
+      <div className="segments" role="group" aria-label="Agent">
         {manualSetups.map((candidate) => (
           <button
             key={candidate.id}

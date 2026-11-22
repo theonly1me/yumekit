@@ -149,11 +149,11 @@ fieldset label.model {
   color: var(--accent);
 }
 
-.switch.segments {
+.segments {
   justify-self: start;
   margin-top: 6px;
 }
 
-.field .switch.segments {
+.field .segments {
   display: inline-flex;
 }

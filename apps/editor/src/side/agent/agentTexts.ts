@@ -38,7 +38,7 @@ export function promptOf(options: {
     "Connect yourself to my yumekit project.",
     "1. Run this command. Use your own name for <agent>: claude-code, codex, or cursor.",
     `   ${yumekit} agent connect --agent <agent> --project ${shellQuoted(options.projectFolder)}`,
-    "2. Tell me how to reload your MCP servers, or reload them if you can.",
+    "2. Tell me how to reload your tool servers, or reload them if you can.",
     "3. Then call the yumekit tool get_project and tell me what the project holds.",
   ].join("\n");
 }

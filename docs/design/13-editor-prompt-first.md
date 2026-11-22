@@ -122,6 +122,28 @@ The prototype is the reference for each screen. This list gives the behavior beh
 2. "Limits" shows `limits.generatedVideoSeconds` of the project, with the seconds used, and a field to change it.
 3. The old Agent tab moves to Settings as "Use an agent in your own terminal".
 
+### Details of the editor layout
+
+WP29 made these choices where this document and the prototype give no rule.
+
+1. The editor reads the platform catalog from the entry `@yumekit/project/platforms`. The entry has no Node code, as `@yumekit/project/scenes-row`. Document 01 and `scripts/importRules` permit it.
+2. The prototype has the theme switch only in its review bar. The editor keeps it as a quiet text button in the top bar, before Settings. At the width of a phone, the button is not shown, and the theme stays as it is.
+3. The prototype has no control to remove a platform. The open list of "Add a platform" shows a quiet button "Remove <platform>" for each platform that the project has. It calls `remove_platform`. When the output has no other platform and the project has another output, the tool removes the output with its timeline. `Cmd+Z` brings it back.
+4. The platform tabs use the roles `tablist` and `tab`. A tab of an output with no platform shows the label of the output and its shape, such as "16:9". When a part of the shape is more than 32, the tab shows the size.
+5. The line under the preview gives the platform and the size only. The words "Click the text in the video to change it" come with WP33, because a click in the preview does nothing before then.
+6. A click on a card picks it and moves the playhead to its start, as in the prototype. It does not open the Scene tab. A second click on the picked card removes the pick. The pick stays while the playhead moves, so item 5 of "Details of the editor" in document 11 applies only to the card that the playhead shows. The Scene tab is off when no scene is picked.
+7. A card shows the still of document 11 in a 16:9 box, with the full still in it. So a card has one size for each shape.
+8. A sound row shows the `text` or the `prompt` of the first clip of its track. The captions row shows "Word by word", because the caption scene shows one word at a time. A second music track gets the row "Music 2". The switch shows the stored state, so it changes when the new snapshot arrives.
+9. The line "The voice may not match the scenes now." shows after a result with `voice_may_not_match: true`, and goes after a later result with `false`. A reload removes it.
+10. The editor words the failures of a direct change from their `kind`, for example "A scene must be at least one second long." For another kind, it shows "The change did not apply." with the message of the tool.
+11. The name of the scene is a text field. The editor calls `put_scene` with the new title when the field loses focus or the person presses Enter. "Edit text" puts the cursor in the first text field of the form and selects its text. A custom scene and a form with no text field get the cursor in the name field.
+12. Export shows one row for each platform tab, then one row for each output with no platform. Before an export, a row shows the file name from the rule of "Details of platforms", copied in the editor. After an export, each row takes its file from `files` of the result. "Show the file" opens the video in a new tab, as "Open the video" did in document 11. The progress is one line for each row, with no count of frames. A failure shows under the first row of its output. The other rows of that output say "Did not export".
+13. The line under the Export button names the real folder, which ends in `renders`. The editor shows the message of a failed export as the tool gives it, as "Details of Render" in document 11 says. Such a message can name a frame.
+14. Settings shows "Limits" read only, with the seconds used and the limit. No harness tool and no engine request changes `limits.generatedVideoSeconds`, so the row tells the person to set it in `media-tools.json`.
+15. The Chat tab and Settings both show the agent setup of document 11. Line 2 of the prompt says "tool servers", because the interface does not show the word MCP. The command and the configuration blocks keep their text, because the person copies them as they are.
+16. The Make a clip sheet has the title "Make a real video clip" and the layout of the sheets of the prototype. Its texts say "first picture" and give times in seconds. "Add the key" in the sheet opens Settings with that tool open. The full rework is WP32.
+17. While a sheet is open, the editor below it is `inert`.
+
 ## The start screen
 
 `yumekit` with no arguments starts the home server and opens it in the browser. `yumekit open <folder>` stays.

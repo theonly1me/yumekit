@@ -1,20 +1,18 @@
 import type { Scene } from "../engine/snapshot.js";
-
-const videoComponent = "video-clip";
+import { isVideoScene } from "../scenes/SceneCards.js";
 
 export function MakeClipEntry(props: { scene: Scene; onOpen: () => void }) {
-  const { source } = props.scene;
-  const isVideo = source.kind === "kit" && source.component === videoComponent;
+  const isVideo = isVideoScene(props.scene);
   return (
     <div className="group">
       <h3>Picture</h3>
       <p className="fact">
         {isVideo
-          ? "A clip from a video model. Make it again with another model or other settings."
-          : "Drawn from code. A video model can make this scene as a real clip."}
+          ? "This scene shows a video clip. Make it again with another model or other settings."
+          : "This scene shows a still picture. A video model can make it as a real video clip."}
       </p>
       <button type="button" onClick={props.onOpen}>
-        Make a clip for this scene
+        Make a real video clip
       </button>
     </div>
   );

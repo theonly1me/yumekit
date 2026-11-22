@@ -18,21 +18,13 @@ export function AgentPane(props: {
 }) {
   const { state, connects, connect } = useAgents(props.client);
   if (state.kind === "loading") {
-    return (
-      <>
-        <h2>Connect an agent</h2>
-        <p className="fact">Reading the agents.</p>
-      </>
-    );
+    return <p className="fact">Reading the agents.</p>;
   }
   if (state.kind === "failed") {
     return (
-      <>
-        <h2>Connect an agent</h2>
-        <p className="failure" role="alert">
-          {state.message}
-        </p>
-      </>
+      <p className="failure" role="alert">
+        {state.message}
+      </p>
     );
   }
   const { agents, connected, serverCommand } = state.agents;
@@ -41,8 +33,7 @@ export function AgentPane(props: {
     ...agents.filter((agent) => !agent.installed),
   ];
   return (
-    <>
-      <h2>Connect an agent</h2>
+    <div className="agent-pane">
       <p className="agent-state" data-connected={connected > 0} role="status">
         {connectedText(connected)}
       </p>
@@ -67,6 +58,6 @@ export function AgentPane(props: {
         />
       </div>
       <ManualSetup serverCommand={serverCommand} />
-    </>
+    </div>
   );
 }

@@ -60,7 +60,7 @@ A package may import only the packages in its row. CI must fail on any other imp
 | `brain`       | nothing from yumekit                                                          |
 | `engine`      | `project`, `render`, `tools`, `harness-mcp`, `brain`, and `scene-kit/schemas` |
 | `apps/cli`    | `project`, `render`, `tools`, `harness-mcp`, `engine`                         |
-| `apps/editor` | only `project/scenes-row` at run time                                         |
+| `apps/editor` | only `project/scenes-row` and `project/platforms` at run time                 |
 | `tools/*`     | nothing from yumekit                                                          |
 
 Two more rules:

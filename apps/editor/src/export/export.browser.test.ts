@@ -1,11 +1,7 @@
 import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { closeBrowser, openEditor } from "../testing/editorPage.js";
-import {
-  buildRenderProject,
-  probeVideo,
-  renderClipFrames,
-} from "../testing/renderProject.js";
+import { buildRenderProject, probeVideo } from "../testing/renderProject.js";
 import { runEngine, type RunningEngine } from "../testing/runEngine.js";
 
 let engine: RunningEngine | undefined;
@@ -15,11 +11,11 @@ function runningEngine(): RunningEngine {
   return engine;
 }
 
-async function openRenderSheet(outputLabel: "Wide" | "Tall") {
+async function openExportSheet(outputLabel: "Wide" | "Tall") {
   const editor = await openEditor(runningEngine().url);
   const { page } = editor;
-  await page.getByRole("button", { name: "Render", exact: true }).click();
-  const sheet = page.getByRole("dialog", { name: "Render" });
+  await page.getByRole("button", { name: "Export", exact: true }).click();
+  const sheet = page.getByRole("dialog");
   const other = outputLabel === "Wide" ? "Tall" : "Wide";
   await sheet
     .getByRole("checkbox", { name: new RegExp(`^${other}`) })
@@ -40,40 +36,44 @@ afterAll(async () => {
   await engine?.remove();
 });
 
-describe("render from the editor", () => {
-  it("shows the progress of a render and ends with a file that ffprobe reads", async () => {
-    const { page, sheet, close } = await openRenderSheet("Wide");
+describe("export from the editor", () => {
+  it("shows the progress of an export and ends with a file that ffprobe reads", async () => {
+    const { page, sheet, close } = await openExportSheet("Wide");
     await page.evaluate(() => {
       const seen = new Set<string>();
       new MutationObserver(() => {
-        for (const match of document.body.innerText.matchAll(
-          /\d+ of \d+ frames/g,
-        )) {
-          seen.add(match[0]);
+        for (const bar of document.querySelectorAll('[role="progressbar"]')) {
+          seen.add(bar.getAttribute("aria-valuenow") ?? "");
         }
         document.body.dataset["seenProgress"] = [...seen].join("|");
       }).observe(document.body, {
         subtree: true,
         childList: true,
-        characterData: true,
+        attributeFilter: ["aria-valuenow"],
       });
     });
 
-    await sheet.getByRole("button", { name: "Render 1 file" }).click();
+    await sheet.getByRole("button", { name: "Export 1 video" }).click();
 
     await expect
-      .poll(() => sheet.getByText(/^Done, 4\.0 seconds$/).count(), {
-        timeout: 60_000,
-      })
+      .poll(
+        () => sheet.getByRole("button", { name: "Show the file" }).count(),
+        {
+          timeout: 60_000,
+        },
+      )
       .toBe(1);
     const seenProgress = await page.evaluate(
       () => document.body.dataset["seenProgress"] ?? "",
     );
-    expect(seenProgress).toMatch(
-      new RegExp(`of ${String(renderClipFrames)} frames`),
-    );
+    expect(
+      seenProgress.split("|").some((percent) => {
+        const value = Number(percent);
+        return value > 0 && value < 100;
+      }),
+    ).toBe(true);
+    expect(await sheet.getByText("Your videos are ready").count()).toBe(1);
     const file = join(runningEngine().projectFolder, "renders", "wide.mp4");
-    expect(await sheet.getByText(file, { exact: true }).count()).toBe(1);
     const probe = await probeVideo(file);
     expect(probe.format.duration).toBeCloseTo(4, 1);
     expect(probe.streams).toContainEqual({
@@ -84,26 +84,26 @@ describe("render from the editor", () => {
 
     const [video] = await Promise.all([
       page.waitForEvent("popup"),
-      sheet.getByRole("button", { name: "Open the video" }).click(),
+      sheet.getByRole("button", { name: "Show the file" }).click(),
     ]);
     await video.waitForURL(/^blob:/);
     await close();
   });
 
-  it("shows a failed render in plain words and opens the scene at the failed frame", async () => {
-    const { page, sheet, scrubberFrame, close } = await openRenderSheet("Tall");
+  it("shows a failed export in plain words and opens the scene where it failed", async () => {
+    const { page, sheet, scrubberFrame, close } = await openExportSheet("Tall");
 
-    await sheet.getByRole("button", { name: "Render 1 file" }).click();
+    await sheet.getByRole("button", { name: "Export 1 video" }).click();
 
     const failure = sheet.getByRole("alert");
     await expect.poll(() => failure.count(), { timeout: 60_000 }).toBe(1);
     const message = (await failure.textContent()) ?? "";
     expect(message).toContain("This scene breaks on purpose.");
-    expect(await sheet.getByText("Did not render").count()).toBe(1);
+    expect(await sheet.getByText("Did not export").count()).toBe(1);
     expect(
       await sheet
         .getByText(
-          "Ask your agent to correct the scene Broken, or change it in the Scene panel.",
+          "Ask your agent to correct the scene Broken, or change it in the Scene tab.",
         )
         .count(),
     ).toBe(1);
@@ -112,33 +112,38 @@ describe("render from the editor", () => {
 
     await sheet.getByRole("button", { name: "Open this scene" }).click();
 
-    expect(await page.getByRole("dialog", { name: "Render" }).count()).toBe(0);
+    expect(await page.getByRole("dialog").count()).toBe(0);
     await expect
-      .poll(() => page.getByRole("heading", { level: 2 }).textContent())
+      .poll(() =>
+        page.getByLabel("Name of the scene", { exact: true }).inputValue(),
+      )
       .toBe("Broken");
     expect(
       await page
-        .getByRole("button", { name: "Tall", exact: true })
-        .getAttribute("aria-pressed"),
+        .getByRole("tab", { name: /^Tall/ })
+        .getAttribute("aria-selected"),
     ).toBe("true");
     expect(await scrubberFrame()).toBe(failedFrame);
     await close();
   });
 
-  it("keeps a render running after the sheet closes, and shows it again when the sheet opens", async () => {
-    const { page, sheet, close } = await openRenderSheet("Wide");
-    await sheet.getByRole("button", { name: "Render 1 file" }).click();
+  it("keeps an export running after the sheet closes, and shows it again when the sheet opens", async () => {
+    const { page, sheet, close } = await openExportSheet("Wide");
+    await sheet.getByRole("button", { name: "Export 1 video" }).click();
 
     await page.getByRole("button", { name: "Close" }).click();
 
-    const topButton = page.getByRole("button", { name: /^Render(ing \d+%)?$/ });
-    expect(await topButton.textContent()).toMatch(/^Rendering \d+%$/);
+    const topButton = page.getByRole("button", {
+      name: /^Export(ing \d+%)?$/,
+    });
+    expect(await topButton.textContent()).toMatch(/^Exporting \d+%$/);
     await topButton.click();
-    const reopened = page.getByRole("dialog", { name: "Render" });
+    const reopened = page.getByRole("dialog");
     await expect
-      .poll(() => reopened.getByText(/^Done, 4\.0 seconds$/).count(), {
-        timeout: 60_000,
-      })
+      .poll(
+        () => reopened.getByRole("button", { name: "Show the file" }).count(),
+        { timeout: 60_000 },
+      )
       .toBe(1);
     expect(
       await reopened.getByRole("checkbox", { name: /^Wide/ }).isChecked(),
@@ -147,7 +152,7 @@ describe("render from the editor", () => {
       await reopened.getByRole("checkbox", { name: /^Tall/ }).isChecked(),
     ).toBe(false);
     await reopened.getByRole("button", { name: "Close" }).click();
-    expect(await topButton.textContent()).toBe("Render");
+    expect(await topButton.textContent()).toBe("Export");
     await close();
   });
 });

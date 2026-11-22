@@ -1,0 +1,162 @@
+button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+button.large {
+  font-size: var(--step-0);
+  padding: 11px 26px;
+}
+
+button.link {
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--line-strong);
+  font-size: inherit;
+}
+
+.fact {
+  color: var(--muted);
+  font-size: var(--step--1);
+  max-width: 62ch;
+}
+
+.fact strong {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.fact.lead {
+  font-size: var(--step-0);
+}
+
+.wordmark {
+  font-size: var(--step-0);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.segments {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-self: start;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+}
+
+.segments button {
+  border: 0;
+  padding: 5px 14px;
+  color: var(--muted);
+}
+
+.segments button[aria-pressed="true"] {
+  background: var(--raised);
+  color: var(--text);
+  box-shadow: 0 0 0 1px var(--line-strong);
+}
+
+.stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--step--1);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.stepper button {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  line-height: 1;
+}
+
+label.switch {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  color: var(--muted);
+  font-size: var(--step--1);
+  cursor: pointer;
+}
+
+.progress {
+  display: block;
+  height: 3px;
+  background: var(--line);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress i {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transition: width 120ms linear;
+}
+
+.progress.small {
+  width: 120px;
+}
+
+.field-label {
+  font-size: var(--step--2);
+  color: var(--muted);
+}
+
+.change-failure {
+  font-size: var(--step--1);
+  color: var(--accent);
+}
+
+.group {
+  border-top: 1px solid var(--line);
+  padding-top: 18px;
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+}
+
+.group h3,
+.group h4 {
+  font-size: var(--step--1);
+  color: var(--muted);
+  font-weight: 400;
+  margin: 0;
+}
+
+pre.config {
+  justify-self: stretch;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  font-family: var(--body);
+  font-size: var(--step--2);
+  line-height: 1.6;
+  color: var(--muted);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  margin: 0;
+}
+
+.copy-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progress i {
+    transition: none;
+  }
+}

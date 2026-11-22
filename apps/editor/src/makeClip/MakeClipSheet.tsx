@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState, type SubmitEvent } from "react";
+import { useRef, useState, type SubmitEvent } from "react";
 import type { EngineClient } from "../engine/engineClient.js";
 import type { Output, SceneClip, Snapshot } from "../engine/snapshot.js";
 import { useEngineEvents } from "../engine/useEngineEvents.js";
+import { Sheet } from "../sheets/Sheet.js";
 import { useMediaServers } from "../tools/useMediaServers.js";
 import type { Phase } from "./ClipAction.js";
 import { ClipForm, type ClipDraft } from "./ClipForm.js";
@@ -20,7 +21,6 @@ export function MakeClipSheet(props: {
   onPlaced: (made: MadeClip) => void;
 }) {
   const { client, snapshot, output } = props;
-  const closeButton = useRef<HTMLButtonElement>(null);
   const callId = useRef("");
   const media = useMediaServers(client);
   const servers =
@@ -44,10 +44,6 @@ export function MakeClipSheet(props: {
   const sceneTitle =
     snapshot.scenes.find((scene) => scene.id === target.sceneId)?.title ??
     target.sceneId;
-
-  useEffect(() => {
-    closeButton.current?.focus();
-  }, []);
 
   useEngineEvents({
     client,
@@ -102,25 +98,9 @@ export function MakeClipSheet(props: {
   };
 
   return (
-    <div
-      className="sheet"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="make-clip-title"
-      onKeyDown={(event) => {
-        if (event.key === "Escape") props.onClose();
-      }}
-    >
-      <button
-        ref={closeButton}
-        type="button"
-        className="tab sheet-close"
-        onClick={props.onClose}
-      >
-        Close
-      </button>
+    <Sheet titleId="make-clip-title" onClose={props.onClose}>
       <form className="sheet-body wide" onSubmit={make}>
-        <h2 id="make-clip-title">Make a clip</h2>
+        <h2 id="make-clip-title">Make a real video clip</h2>
         {phase.kind === "made" ? (
           <MadeClipResult
             client={client}
@@ -167,6 +147,6 @@ export function MakeClipSheet(props: {
           />
         )}
       </form>
-    </div>
+    </Sheet>
   );
 }

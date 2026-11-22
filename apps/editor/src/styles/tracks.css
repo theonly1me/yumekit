@@ -6,7 +6,8 @@
 
 .track {
   display: grid;
-  grid-template-columns: 76px minmax(0, 1fr);
+  grid-template-columns: 84px minmax(0, 1fr);
+  gap: 16px;
   align-items: center;
   font-size: var(--step--2);
   color: var(--muted);
@@ -74,7 +75,7 @@
 
 .playhead-layer {
   position: absolute;
-  left: 76px;
+  left: 100px;
   right: 0;
   top: 0;
   bottom: 0;

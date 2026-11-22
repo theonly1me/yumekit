@@ -1,19 +1,19 @@
-import { useCallback, useMemo, useState } from "react";
+import { useState } from "react";
 import type { EngineClient } from "../engine/engineClient.js";
-import type { SceneClip, Snapshot } from "../engine/snapshot.js";
-import { Preview } from "../preview/Preview.js";
-import { usePlayback } from "../preview/usePlayback.js";
-import { useSound } from "../preview/useSound.js";
-import { useRenderSheet } from "../render/useRenderSheet.js";
-import { useHistory } from "../scenePanel/history/useHistory.js";
-import { ScenePanel } from "../scenePanel/ScenePanel.js";
-import { AgentPane } from "../side/agent/AgentPane.js";
-import { SidePanel, type SideTab } from "../side/SidePanel.js";
+import type { Snapshot } from "../engine/snapshot.js";
+import { useExportSheet } from "../export/useExportSheet.js";
 import { useClipTools } from "../makeClip/useClipTools.js";
-import { useEditorFacts } from "./useEditorFacts.js";
-import { LowerArea, type LowerView } from "./LowerArea.js";
+import { PlatformTabs } from "../platforms/PlatformTabs.js";
+import { Preview } from "../preview/Preview.js";
+import { sceneEditsOf } from "../scenes/sceneEdits.js";
+import { useDirectChanges } from "../scenes/useDirectChanges.js";
+import { useHistory } from "../scenePanel/history/useHistory.js";
+import { SettingsSheet } from "../settings/SettingsSheet.js";
+import { EditorSide } from "./EditorSide.js";
+import { LowerArea } from "./LowerArea.js";
 import { TopBar } from "./TopBar.js";
 import { Transport } from "./Transport.js";
+import { useEditorView } from "./useEditorView.js";
 import { useKeyboard } from "./useKeyboard.js";
 import { useTheme } from "./useTheme.js";
 
@@ -22,171 +22,156 @@ export function Editor(props: {
   snapshot: Snapshot;
   projectFolder: string;
 }) {
-  const { client, snapshot } = props;
+  const { client, snapshot, projectFolder } = props;
   const framesPerSecond = snapshot.project.framesPerSecond;
-  const [chosenOutputId, setOutputId] = useState<string>();
-  const [wantedFrame, setFrame] = useState(0);
-  const [pickedClipId, setPickedClipId] = useState<string>();
-  const [sideTab, setSideTab] = useState<SideTab>("agent");
-  const [lowerView, setLowerView] = useState<LowerView>("scenes");
   const { theme, setTheme } = useTheme();
-  const render = useRenderSheet({
+  const [isTimelineOpen, setTimelineOpen] = useState(false);
+  const [settingsServerId, setSettingsServerId] = useState<string>();
+  const [isSettingsOpen, setSettingsOpen] = useState(false);
+  const view = useEditorView({ client, snapshot });
+  const { facts, playback } = view;
+  const exporting = useExportSheet({
     client,
     snapshot,
-    projectFolder: props.projectFolder,
-    onShowScene: (scene) => {
-      setOutputId(scene.outputId);
-      setPickedClipId(scene.clipId);
-      setFrame(scene.frame);
-      setSideTab("scene");
-    },
+    projectFolder,
+    onShowScene: view.showScene,
   });
-  const facts = useEditorFacts({
-    snapshot,
-    chosenOutputId,
-    wantedFrame,
-    pickedClipId,
-  });
-  const { output, frame, lengthFrames } = facts;
-  const playback = usePlayback({
-    frame,
-    frameCount: lengthFrames,
-    framesPerSecond,
-    setFrame,
-  });
-  useSound({
-    client,
-    clips: facts.audioClips,
-    framesPerSecond,
-    run: playback.run,
-  });
-  const { pause } = playback;
-
-  const moveTo = useCallback(
-    (next: number) => {
-      pause();
-      setFrame(Math.min(Math.max(0, next), Math.max(0, lengthFrames - 1)));
-    },
-    [pause, lengthFrames],
-  );
-  const step = useCallback(
-    (frames: number) => {
-      moveTo(frame + frames);
-    },
-    [moveTo, frame],
-  );
-  const pickClip = (clip: { id: string; startFrame: number }) => {
-    setPickedClipId(clip.id);
-    moveTo(clip.startFrame);
-  };
-  const pickScene = (clip: SceneClip) => {
-    pickClip(clip);
-    setSideTab("scene");
-  };
   const clipTools = useClipTools({
     client,
     snapshot,
-    output,
-    onOpen: pause,
-    onToolsTab: () => {
-      setSideTab("tools");
+    output: facts.output,
+    onOpen: playback.pause,
+    onAddKey: (serverId) => {
+      setSettingsServerId(serverId);
+      setSettingsOpen(true);
     },
-    onPlaced: pickClip,
+    onPlaced: view.pickClip,
   });
+  const isSheetOpen = exporting.isOpen || clipTools.isOpen || isSettingsOpen;
   useKeyboard({
-    isActive: !render.isOpen && !clipTools.isOpen,
+    isActive: !isSheetOpen,
     onToggle: playback.toggle,
-    onStep: step,
+    onStep: view.step,
   });
-  const history = useHistory({
-    client,
-    isActive: !render.isOpen && !clipTools.isOpen,
-  });
-  const sidePane = useMemo(() => {
-    if (sideTab === "agent") {
-      return <AgentPane client={client} projectFolder={props.projectFolder} />;
-    }
-    if (sideTab === "tools") return clipTools.toolsPane;
-    return (
-      <>
-        <ScenePanel
-          client={client}
-          snapshot={snapshot}
-          clip={facts.sceneClip}
-          scene={facts.scene}
-          history={history}
-        />
-        {clipTools.entryFor({ scene: facts.scene, clip: facts.sceneClip })}
-      </>
-    );
-  }, [
-    sideTab,
-    props.projectFolder,
-    clipTools,
-    client,
-    snapshot,
-    facts.sceneClip,
-    facts.scene,
-    history,
-  ]);
+  const history = useHistory({ client, isActive: !isSheetOpen });
+  const changes = useDirectChanges(client);
+  const edits = sceneEditsOf({ changes, onPicked: view.setPicked });
+  const { output, tab } = facts;
 
-  if (output === undefined) {
+  if (output === undefined || tab === undefined) {
     return (
       <main className="state">
-        <h1>This project has no output</h1>
-        <p>Ask your agent to add an output, for example a wide video.</p>
+        <h1>This project has no video shape yet</h1>
+        <p>Ask your agent to add a platform, for example YouTube.</p>
       </main>
     );
   }
   return (
-    <div className="editor" data-view={lowerView}>
-      <TopBar
-        projectName={snapshot.project.name}
-        outputs={snapshot.project.outputs}
-        outputId={output.id}
-        theme={theme}
-        onOutput={(outputId) => {
-          pause();
-          setOutputId(outputId);
-        }}
-        onTheme={setTheme}
-        renderLabel={render.label}
-        onRender={() => {
-          pause();
-          render.open();
-        }}
-      />
-      <main className="center">
-        <Preview client={client} output={output} frame={frame} />
-        <Transport
-          frame={frame}
-          frameCount={lengthFrames}
-          framesPerSecond={framesPerSecond}
-          isPlaying={playback.isPlaying}
-          onToggle={playback.toggle}
-          onScrub={moveTo}
+    <div className="editor">
+      <div className="editor-grid" inert={isSheetOpen}>
+        <TopBar
+          projectName={snapshot.project.name}
+          theme={theme}
+          onTheme={setTheme}
+          exportLabel={exporting.label}
+          onSettings={() => {
+            playback.pause();
+            setSettingsOpen(true);
+          }}
+          onExport={() => {
+            playback.pause();
+            exporting.open();
+          }}
         />
-        <LowerArea
+        <main className="stage">
+          <div className="preview">
+            <PlatformTabs
+              tabs={facts.tabs}
+              activeKey={tab.key}
+              outputs={snapshot.project.outputs}
+              failure={changes.failureOf("platforms")}
+              onTab={view.chooseTab}
+              onAdd={(platformId) => {
+                view.chooseTab(`platform:${platformId}`);
+                changes
+                  .run({
+                    area: "platforms",
+                    name: "add_platform",
+                    input: { platform_id: platformId },
+                  })
+                  .catch(() => undefined);
+              }}
+              onRemove={(platformId) => {
+                changes
+                  .run({
+                    area: "platforms",
+                    name: "remove_platform",
+                    input: { platform_id: platformId },
+                  })
+                  .catch(() => undefined);
+              }}
+            />
+            <Preview
+              client={client}
+              output={output}
+              frame={facts.frame}
+              framesPerSecond={framesPerSecond}
+              hint={`${tab.name}, ${String(output.widthPixels)} x ${String(output.heightPixels)}.`}
+            />
+            <Transport
+              frame={facts.frame}
+              frameCount={facts.lengthFrames}
+              framesPerSecond={framesPerSecond}
+              isPlaying={playback.isPlaying}
+              onToggle={playback.toggle}
+              onScrub={view.moveTo}
+            />
+          </div>
+          <LowerArea
+            client={client}
+            snapshot={snapshot}
+            output={output}
+            timeline={facts.timeline}
+            mainClips={facts.mainClips}
+            lengthFrames={facts.lengthFrames}
+            frame={facts.frame}
+            picked={view.pickedCard}
+            shownClipId={facts.shownClipId}
+            selectedClipId={facts.selectedClipId}
+            changes={changes}
+            edits={edits}
+            isTimelineOpen={isTimelineOpen}
+            onTimelineOpen={setTimelineOpen}
+            onPickCard={view.toggleCard}
+            onPick={view.pickClip}
+            onSeek={view.moveTo}
+            onEditText={view.editText}
+            onMakeClip={clipTools.open}
+          />
+        </main>
+        <EditorSide
           client={client}
           snapshot={snapshot}
-          output={output}
-          timeline={facts.timeline}
-          mainClips={facts.mainClips}
-          lengthFrames={lengthFrames}
-          frame={frame}
-          selectedClipId={facts.selectedClipId}
-          view={lowerView}
-          onView={setLowerView}
-          onPick={pickClip}
-          onPickScene={pickScene}
-          onSeek={moveTo}
+          projectFolder={projectFolder}
+          view={view}
+          history={history}
+          pictureGroupFor={clipTools.entryFor}
+          onLength={edits.resize}
         />
-      </main>
-      <SidePanel tab={sideTab} onTab={setSideTab}>
-        {sidePane}
-      </SidePanel>
-      {render.sheet}
+      </div>
+      {exporting.sheet}
       {clipTools.sheet}
+      {isSettingsOpen ? (
+        <SettingsSheet
+          client={client}
+          projectFolder={projectFolder}
+          openServerId={settingsServerId}
+          onOpenServer={setSettingsServerId}
+          onClose={() => {
+            setSettingsOpen(false);
+          }}
+        />
+      ) : undefined}
     </div>
   );
 }

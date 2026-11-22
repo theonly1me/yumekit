@@ -30,9 +30,8 @@ export function MadeClipResult(props: {
       <div className="made-clip-facts">
         <p className="clip-price">The clip is in the scene</p>
         <p className="fact">
-          <strong>{props.made.assetId}</strong> now plays in place of{" "}
-          <strong>{props.sceneTitle}</strong>, from frame{" "}
-          {props.made.startFrame}.
+          The new clip now plays in place of <strong>{props.sceneTitle}</strong>
+          .
         </p>
         <div className="key-actions">
           <button type="button" className="primary" onClick={props.onBack}>

@@ -38,7 +38,7 @@ export function Timeline(props: {
   const { timeline, scenes, assets, lengthFrames } = props;
   if (lengthFrames === 0) {
     return (
-      <p className="lower-empty">
+      <p className="fact">
         This output has no clips yet. Connect an agent to build it.
       </p>
     );

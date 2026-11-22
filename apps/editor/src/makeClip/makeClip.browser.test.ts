@@ -37,7 +37,7 @@ afterAll(async () => {
 });
 
 describe("Make a clip", () => {
-  it("opens the key guide in Tools for a model whose server needs a key", async () => {
+  it("opens the key guide in Settings for a model whose server needs a key", async () => {
     const editor = await openEditor(runningEngine().url);
     const { page } = editor;
     await openMakeClip(page);
@@ -46,7 +46,14 @@ describe("Make a clip", () => {
     expect(await page.getByText("Key test server needs a key").count()).toBe(1);
     await page.getByRole("button", { name: "Add the Test key" }).click();
 
-    expect(await page.getByRole("dialog").count()).toBe(0);
+    expect(
+      await page
+        .getByRole("dialog", { name: "Make a real video clip" })
+        .count(),
+    ).toBe(0);
+    expect(await page.getByRole("dialog", { name: "Settings" }).count()).toBe(
+      1,
+    );
     const row = page.getByRole("button", { name: /Key test server/ });
     expect(await row.getAttribute("aria-expanded")).toBe("true");
     expect(await page.getByText("Open the key page and sign in.").count()).toBe(
@@ -111,7 +118,7 @@ describe("Make a clip", () => {
     ]);
     await page.getByRole("button", { name: "Back to the editor" }).click();
     const picture = page
-      .frameLocator('iframe[title="Preview of the current frame"]')
+      .frameLocator('iframe[title="Preview of the video"]')
       .locator('img[src*="clip-first"]');
     await expect
       .poll(() =>

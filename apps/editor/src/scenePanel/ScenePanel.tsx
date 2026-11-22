@@ -1,9 +1,12 @@
+import type { ReactNode } from "react";
 import type { EngineClient } from "../engine/engineClient.js";
 import type { Scene, SceneClip, Snapshot } from "../engine/snapshot.js";
-import { secondsText } from "../timeline/clock.js";
+import { LengthStepper } from "../scenes/LengthStepper.js";
 import { KitForm } from "./form/KitForm.js";
 import { HistoryGroup } from "./history/HistoryGroup.js";
 import type { History } from "./history/useHistory.js";
+import { SceneName } from "./SceneName.js";
+import { useFirstTextFocus } from "./useFirstTextFocus.js";
 import { useKitScenes } from "./useKitScenes.js";
 import "./scenePanel.css";
 
@@ -60,38 +63,34 @@ function CustomCode(props: { code: string | undefined }) {
 export function ScenePanel(props: {
   client: EngineClient;
   snapshot: Snapshot;
-  clip: SceneClip | undefined;
-  scene: Scene | undefined;
+  clip: SceneClip;
+  scene: Scene;
   history: History;
+  focusRequest: number;
+  pictureGroup: ReactNode;
+  onLength: (durationFrames: number) => void;
 }) {
   const { client, snapshot, clip, scene } = props;
-  const framesPerSecond = snapshot.project.framesPerSecond;
-  if (clip === undefined || scene === undefined) {
-    return (
-      <>
-        <h2>Scene</h2>
-        <p className="fact">
-          Pick a scene in the scenes row or a scene clip in the timeline.
-        </p>
-        <HistoryGroup history={props.history} />
-      </>
-    );
-  }
+  const panel = useFirstTextFocus({
+    request: props.focusRequest,
+    hasForm: scene.source.kind === "kit",
+  });
   return (
-    <>
-      <h2>{scene.title}</h2>
-      <p className="fact">
-        {scene.source.kind === "kit" ? (
-          <>
-            Kit scene <strong>{scene.source.component}</strong>.
-          </>
-        ) : (
-          "Custom scene with its own code."
-        )}{" "}
-        Starts at frame <strong>{clip.startFrame}</strong>, runs{" "}
-        <strong>{clip.durationFrames}</strong> frames (
-        {secondsText({ frames: clip.durationFrames, framesPerSecond })}).
-      </p>
+    <div className="scene-panel" ref={panel}>
+      <SceneName
+        key={`${scene.id}:${scene.title}`}
+        client={client}
+        scene={scene}
+        code={snapshot.sceneCode[scene.id]}
+      />
+      <div className="field">
+        <span className="field-label">Length</span>
+        <LengthStepper
+          durationFrames={clip.durationFrames}
+          framesPerSecond={snapshot.project.framesPerSecond}
+          onLength={props.onLength}
+        />
+      </div>
       {scene.source.kind === "kit" ? (
         <KitScene
           client={client}
@@ -102,7 +101,8 @@ export function ScenePanel(props: {
       ) : (
         <CustomCode code={snapshot.sceneCode[scene.id]} />
       )}
+      {props.pictureGroup}
       <HistoryGroup history={props.history} />
-    </>
+    </div>
   );
 }

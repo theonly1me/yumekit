@@ -1,0 +1,60 @@
+.export-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.export-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px 20px;
+  padding: 13px 0;
+  border-top: 1px solid var(--line);
+  font-size: var(--step-0);
+}
+
+.export-row label {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-size: var(--step-0);
+  color: var(--text);
+  flex: 1 1 200px;
+}
+
+.export-row em {
+  font-style: normal;
+  font-size: var(--step--1);
+  color: var(--muted);
+}
+
+.export-file {
+  font-size: var(--step--1);
+  color: var(--muted);
+  flex: 1 1 200px;
+  overflow-wrap: anywhere;
+}
+
+.export-note,
+.export-failure {
+  flex-basis: 100%;
+}
+
+.export-failure {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+}
+
+.export-failure > p:first-child {
+  color: var(--accent);
+  font-size: var(--step--1);
+}
+
+.export-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

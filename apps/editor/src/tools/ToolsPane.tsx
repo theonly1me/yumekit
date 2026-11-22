@@ -21,9 +21,9 @@ export function ToolsPane(props: {
   const { state, requests } = useMediaServers(props.client);
   return (
     <>
-      <h2>Tools</h2>
       <p className="fact">
-        Each tool makes media with your own account. Pick a tool to add its key.
+        Each tool makes pictures, voice, music, or video with your own account.
+        Pick a tool to add its key.
       </p>
       {state.kind === "loading" ? (
         <p className="fact">Reading the media tools.</p>
@@ -62,11 +62,11 @@ export function ToolsPane(props: {
         </ul>
       ) : undefined}
       <div className="group">
-        <h3>Add another tool</h3>
+        <h4>Add another tool</h4>
         <p className="fact">
-          Any MCP server that makes images, voice, music, or video works. Put it
-          in <strong>media-tools.json</strong> of the project, then run{" "}
-          <strong>yumekit open</strong> again.
+          Another media tool server that makes pictures, voice, music, or video
+          also works. Put it in <strong>media-tools.json</strong> of the
+          project, then run <strong>yumekit open</strong> again.
         </p>
       </div>
     </>

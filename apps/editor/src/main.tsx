@@ -5,13 +5,12 @@ import { takeTokenFromAddress } from "./engine/sessionToken.js";
 import { readTheme } from "./shell/useTheme.js";
 import "./styles/fonts.css";
 import "./styles/tokens.css";
+import "./styles/shell.css";
 import "./styles/editor.css";
-import "./styles/scrub.css";
-import "./styles/lower.css";
+import "./styles/preview.css";
 import "./styles/tracks.css";
 import "./styles/side.css";
 import "./styles/states.css";
-import "./styles/narrow.css";
 
 const rootElement = document.getElementById("root");
 

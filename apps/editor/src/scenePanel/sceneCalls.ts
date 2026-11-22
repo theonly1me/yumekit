@@ -18,9 +18,11 @@ export type CallOutcome =
       message: string;
       hint: string | undefined;
       issues: FailureIssue[];
+      failureKind?: string;
     };
 
 const toolFailureSchema = z.object({
+  kind: z.string().optional(),
   message: z.string(),
   hint: z.string().optional(),
   issues: z
@@ -66,7 +68,15 @@ function outcomeOf(reply: Reply<ToolResult>): CallOutcome {
     };
   }
   const { message, hint, issues = [] } = failure.data;
-  return { kind: "rejected", message, hint, issues };
+  return {
+    kind: "rejected",
+    message,
+    hint,
+    issues,
+    ...(failure.data.kind === undefined
+      ? {}
+      : { failureKind: failure.data.kind }),
+  };
 }
 
 export function callInOrder(options: {

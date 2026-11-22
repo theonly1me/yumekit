@@ -25,23 +25,30 @@ afterAll(async () => {
   await engine?.remove();
 });
 
-describe("the scenes row and the timeline", () => {
-  it("moves the playhead to the start of a scene picked in the scenes row", async () => {
+describe("the scene cards and the detailed timeline", () => {
+  it("moves the playhead to the start of a scene card that the person picks", async () => {
     const editor = await openEditor(runningEngine().url);
 
     await editor.page.getByRole("button", { name: /Second counter/ }).click();
 
     expect(await editor.scrubberFrame()).toBe(clipLengthFrames);
     await expect.poll(editor.previewFrame).toBe(clipLengthFrames);
+    await editor.page.getByRole("tab", { name: "Scene 2" }).click();
     await expect
-      .poll(() => editor.page.getByRole("heading", { level: 2 }).textContent())
+      .poll(() =>
+        editor.page
+          .getByLabel("Name of the scene", { exact: true })
+          .inputValue(),
+      )
       .toBe("Second counter");
     await editor.close();
   });
 
   it("moves the playhead to a clip and to a point of the ruler in the timeline", async () => {
     const editor = await openEditor(runningEngine().url);
-    await editor.page.getByRole("button", { name: "Timeline" }).click();
+    await editor.page
+      .getByRole("switch", { name: "Detailed timeline" })
+      .check();
 
     await editor.page
       .getByRole("button", { name: "Second counter", exact: true })
@@ -91,7 +98,9 @@ describe("the scenes row and the timeline", () => {
 
   it("steps one frame with the arrow keys, and plays and pauses with Space", async () => {
     const editor = await openEditor(runningEngine().url);
-    await editor.page.getByRole("slider", { name: "Frame" }).fill("10");
+    await editor.page
+      .getByRole("slider", { name: "Position in the video" })
+      .fill("10");
     await editor.page.locator("body").click({ position: { x: 5, y: 5 } });
 
     await editor.page.keyboard.press("ArrowRight");

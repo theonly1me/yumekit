@@ -54,9 +54,7 @@ describe("the editor failure states", () => {
   it("shows an empty project, then that the engine is not reachable after it stops", async () => {
     const editor = await openEditor(runningEngine().url);
     await expect
-      .poll(() =>
-        editor.page.getByText("This output has no scenes yet").count(),
-      )
+      .poll(() => editor.page.getByText("This video has no scenes yet").count())
       .toBe(1);
 
     await runningEngine().stop();

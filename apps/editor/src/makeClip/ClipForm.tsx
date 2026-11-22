@@ -1,4 +1,5 @@
 import type { EngineClient } from "../engine/engineClient.js";
+import { clockText, secondsText } from "../timeline/clock.js";
 import type { Output, SceneClip, Snapshot } from "../engine/snapshot.js";
 import { outputLabel } from "../timeline/timelineFacts.js";
 import type { MediaServersState } from "../tools/useMediaServers.js";
@@ -37,8 +38,17 @@ export function ClipForm(props: {
       <div className="clip-column">
         <p className="fact">
           For the scene <strong>{props.sceneTitle}</strong> in{" "}
-          <strong>{outputLabel(output)}</strong>, from frame {target.startFrame}{" "}
-          for {target.durationFrames} frames.
+          <strong>{outputLabel(output)}</strong>, from{" "}
+          {clockText({
+            frame: target.startFrame,
+            framesPerSecond: snapshot.project.framesPerSecond,
+          })}{" "}
+          for{" "}
+          {secondsText({
+            frames: target.durationFrames,
+            framesPerSecond: snapshot.project.framesPerSecond,
+          })}
+          .
         </p>
         <div className="field">
           <label htmlFor="clip-prompt">What happens in the clip</label>

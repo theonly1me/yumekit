@@ -35,14 +35,18 @@ export function FirstFrame(props: {
       <div className="first-frame">
         <Picture client={client} assetId={props.assetId} />
         <p className="fact">
-          <strong>First frame</strong>
+          <strong>First picture</strong>
           {props.assetId === undefined
             ? "The clip starts from a still image. Make one from a prompt."
             : `The clip starts from the image ${props.assetId}.`}
         </p>
       </div>
       {images.length > 1 ? (
-        <div className="frame-picks" role="group" aria-label="Image assets">
+        <div
+          className="frame-picks"
+          role="group"
+          aria-label="Pictures of the project"
+        >
           {images
             .slice(-shownImageCount)
             .reverse()
@@ -52,7 +56,7 @@ export function FirstFrame(props: {
                 type="button"
                 className="frame-pick"
                 aria-pressed={image.id === props.assetId}
-                aria-label={`Use ${image.id} as the first frame`}
+                aria-label={`Use ${image.id} as the first picture`}
                 onClick={() => {
                   props.onPick(image.id);
                 }}

@@ -18,7 +18,7 @@ function keptUrlOf(options: { fileName: string; blob: Blob }): string {
   return url;
 }
 
-export async function openRenderFile(options: {
+export async function openVideoFile(options: {
   client: EngineClient;
   fileName: string;
 }): Promise<OpenOutcome> {

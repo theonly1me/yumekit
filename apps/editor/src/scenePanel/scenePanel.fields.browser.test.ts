@@ -1,5 +1,9 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { closeBrowser, openEditor } from "../testing/editorPage.js";
+import {
+  closeBrowser,
+  openEditor,
+  openSceneTab,
+} from "../testing/editorPage.js";
 import { runEngine, type RunningEngine } from "../testing/runEngine.js";
 import {
   buildKitSceneProject,
@@ -15,11 +19,8 @@ function runningEngine(): RunningEngine {
 
 async function openScene(title: string) {
   const editor = await openEditor(runningEngine().url);
-  await editor.page.getByRole("button", { name: new RegExp(title) }).click();
-  await expect
-    .poll(() => editor.page.getByRole("heading", { level: 2 }).textContent())
-    .toBe(title);
-  const form = editor.page.getByRole("form", { name: "Props of this scene" });
+  await openSceneTab({ page: editor.page, title });
+  const form = editor.page.getByRole("form", { name: "Fields of this scene" });
   return { ...editor, form };
 }
 
