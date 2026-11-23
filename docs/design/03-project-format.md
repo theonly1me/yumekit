@@ -80,8 +80,21 @@ type SceneSource =
 
 type Timeline = { outputId: string; tracks: Track[] };
 type Track =
-  | { id: string; kind: "scene"; clips: SceneClip[]; off?: boolean }
-  | { id: string; kind: "audio"; clips: AudioClip[]; off?: boolean };
+  | {
+      id: string;
+      kind: "scene";
+      clips: SceneClip[];
+      off?: boolean;
+      madeBy?: MadeBy;
+    }
+  | {
+      id: string;
+      kind: "audio";
+      clips: AudioClip[];
+      off?: boolean;
+      madeBy?: MadeBy;
+    };
+type MadeBy = "person" | "ai";
 
 type SceneClip = {
   id: string;
@@ -90,11 +103,13 @@ type SceneClip = {
   durationFrames: number;
   sceneStartFrame: number;
   transition?: SceneTransition;
+  madeBy?: MadeBy;
 };
 
 type SceneTransition = {
   kind: "fade" | "slide" | "wipe" | "zoom";
   durationFrames: number;
+  madeBy?: MadeBy;
 };
 
 type AudioClip = {
@@ -104,6 +119,7 @@ type AudioClip = {
   durationFrames: number;
   assetStartFrame: number;
   gainDecibels: number;
+  madeBy?: MadeBy;
 };
 
 type AssetIndex = { assets: Asset[] };

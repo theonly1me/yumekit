@@ -49,7 +49,7 @@ The list comes from a survey of the public pages of current AI video products on
 - The first catalog: `free` ("No format", the first pick), `explainer`, `product-ad`, `story`, `talking-head`, `list` ("5 tips"), `quote`, and `news`.
 - The start screen shows the formats as a row of choices above the platforms. `POST /api/home/projects` takes `format_id` and `plan_first`. The home server adds the direction of the format to the first request, below the line of the platforms.
 - "Show me the plan first" is a switch on the start screen. With it, the first request ends with the sentence "Stop after the script and the pictures of each scene, drawn by code. Make no voice, no music, and no paid clip yet. Ask me to continue."
-- The Making screen then shows "Continue" next to "Open the editor" when the answer ends. "Continue" is the fixed request "The plan is good. Make the rest of the video."
+- The Making screen then shows "Continue" next to "Open the editor" when the answer ends. "Continue" is the fixed request "The plan is good. Make the rest of the video." (Since WP57 of document 18: "The plan is good. Use the script and the scenes as they are now, and make the rest of the video.")
 
 ## The Files view (N6)
 
@@ -331,7 +331,7 @@ The builder read the camera guides below on 2026-11-23.
 
 The builder read the list of fal models at `api.fal.ai/v1/models` on 2026-11-23, then each model page, its `llms.txt` page, and its schema at `fal.ai/api/openapi/queue/openapi.json?endpoint_id=<id>`. This part builds the kind `talking-clip` of WP47.
 
-1. The capability is `talking-clip` with the tool `generate_talking_clip`. It is in the list of capabilities of `@yumekit/tools`, in `defaults` of `media-tools.json`, and in the picker of Settings with the row "Talking clips". The picker has 7 rows now. The harness has no new tool, so it still has 46 tools.
+1. The capability is `talking-clip` with the tool `generate_talking_clip`. It is in the list of capabilities of `@yumekit/tools`, in `defaults` of `media-tools.json`, and in the picker of Settings with the row "Talking clips". The picker has 7 rows now. The harness has no new tool, so it still has 46 tools. (WP57 of document 18 adds `replace_narration`, `replace_music`, and `set_project_name`, so the harness has 49 tools.)
 2. `generate_talking_clip` takes `media_path` (a PNG, JPEG, or WebP picture, or an MP4, MOV, or WebM video of the person), `audio_path` (the voice: WAV, MP3, M4A, AAC, OGG, or FLAC), and the optional `prompt` (how the person moves). It returns one MP4 video file with the voice as its sound, about as long as the voice.
 3. A talking model names what it takes in `accepts`: `image_input` or `video_input`, as a sharper model does. With no `model`, a server uses its default model when that model takes the kind of the file, or else the first model of its catalog that takes it. A model for the other kind is a failure before any request.
 4. `generate_asset` with `talking-clip` needs `media_asset_id` (an image or video asset) and `voice_asset_id` (an audio asset). The optional `voice_part` is `{ start_seconds, duration_seconds, lead_seconds? }`. With it, the harness cuts that part of the voice file with the new `cutAudio` of `@yumekit/render`, puts `lead_seconds` of silence before it, and writes a 48 kHz WAV file to `.cache/voice-parts/<asset id>.wav` of the project. Document 01 lists `cutAudio`.
