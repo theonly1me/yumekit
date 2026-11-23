@@ -73,7 +73,8 @@ export function useEditorView(options: {
       setPicked(undefined);
       return;
     }
-    pickClip(clip);
+    setPickedClipId(clip.id);
+    moveTo(stillFrameOf(clip));
   };
   const { pickedClip, pickedScene, pickedNumber } = facts;
   const pickedCard: PickedCard | undefined =

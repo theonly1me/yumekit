@@ -23,6 +23,7 @@ export type FixedRequest =
   | { kind: "use-my-file"; fileName: string }
   | { kind: "continue-after-the-plan" }
   | { kind: "make-the-rest" }
+  | { kind: "add-captions" }
   | { kind: "try-the-step-again"; part: "voice" | "music" }
   | { kind: "record-a-voice-line"; aboutClipId: string }
   | {
@@ -69,9 +70,11 @@ function requestSentenceOf(request: FixedRequest): string {
     case "use-my-file":
       return `Use my file ${request.fileName} in the video where it fits best.`;
     case "continue-after-the-plan":
-      return "The plan is good. Make the rest of the video.";
+      return "The plan is good. Use the script and the scenes as they are now, and make the rest of the video.";
     case "make-the-rest":
       return "Make the rest of the video.";
+    case "add-captions":
+      return "Add captions that follow the voice.";
     case "try-the-step-again":
       return request.part === "voice"
         ? "Record the voice of the video again."

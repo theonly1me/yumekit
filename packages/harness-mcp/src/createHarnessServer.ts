@@ -70,7 +70,12 @@ export function createHarnessServer(options: HarnessOptions): McpServer {
     { instructions: serverInstructions },
   );
   const pictures = createPictureRenderer({ folder: options.store.folder });
-  for (const tool of harnessToolsOf({ ...options, pictures })) {
+  const tools = harnessToolsOf({
+    ...options,
+    pictures,
+    callerOf: () => "ai",
+  });
+  for (const tool of tools) {
     registerMcpTool({ server, tool });
   }
   const closeServer = server.close.bind(server);

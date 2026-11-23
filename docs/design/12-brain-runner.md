@@ -223,7 +223,12 @@ The `CURSOR_CONFIG_DIR` of the run keeps the permissions and the approval mode o
 16. Never use the free test service for a voice or for music in a video. With no other voice ready, use the natural voice of this computer (document 18).
 17. Make one voice that covers the whole video, with one line of the script for each scene, word for word.
 18. When a video has a voice with captions, the text of a scene supports the voice. It does not show a second sentence at the same time.
-19. If the voice does not know a name, give how it sounds in common English words in the input `pronunciations`, for example `{"Hoshi": "hoe she"}`. Keep the name in the text.
+19. If the voice does not know a name, give how it sounds in common English words in `input.pronunciations` of `generate_asset` or in `pronunciations` of `replace_narration`, for example `{"Hoshi": "hoe she"}`. Keep the name in the text.
+20. Change only what the request asks for, with the smallest tool. Write the whole timeline only for a new video, or when the person asks to build the video again.
+21. To record the voice again, or to change the voice, call `replace_narration`. To change the music, call `replace_music`. They keep the music, the video clips, the sounds, and the transitions.
+22. A call that would remove what the person made fails and lists it. Keep those things. Give `remove_person_work` true only when the person asked for that removal in this request.
+23. The script is the source of the voice. The voice says the lines of the script of now, word for word. To say other words, change the script first with `set_script`.
+24. Once you know what the video is about, give the project a short title with `set_project_name`.
 
 ## The chat of the engine
 

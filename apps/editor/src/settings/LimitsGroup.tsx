@@ -15,7 +15,7 @@ export function LimitsGroup(props: { client: EngineClient }) {
         />
       ) : (
         <div className="setting-row">
-          <span>Real video in each project</span>
+          <span>AI video in each project</span>
           <span className="limit-value">
             {state.kind === "failed" ? state.message : "Reading the limit"}
           </span>

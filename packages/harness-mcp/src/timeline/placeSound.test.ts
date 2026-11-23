@@ -48,6 +48,7 @@ describe("place_sound", () => {
         durationFrames: 30,
         assetStartFrame: 0,
         gainDecibels: -6,
+        madeBy: "ai",
       },
     ]);
   });
@@ -96,6 +97,7 @@ describe("place_sound", () => {
         asset_id: "line-one",
         start_frame: 0,
         partial: true,
+        with_captions: false,
       },
     });
 

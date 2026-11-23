@@ -51,7 +51,10 @@ export interface FirstChat {
   lastNotice: string | undefined;
 }
 
-const continueText = fixedRequestTextOf({ kind: "continue-after-the-plan" });
+const continueTexts = [
+  fixedRequestTextOf({ kind: "continue-after-the-plan" }),
+  "The plan is good. Make the rest of the video.",
+];
 
 function planAndRestOf(options: {
   requests: Extract<ChatEntry, { kind: "request" }>[];
@@ -66,7 +69,7 @@ function planAndRestOf(options: {
     return { phase: "whole", answer: planAnswer };
   }
   if (
-    continueRequest?.text !== continueText ||
+    !continueTexts.includes(continueRequest?.text ?? "") ||
     planAnswer === undefined ||
     restAnswer === undefined
   ) {

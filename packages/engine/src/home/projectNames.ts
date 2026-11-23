@@ -3,7 +3,7 @@ import { join } from "node:path";
 
 const wordsInName = 6;
 const longestFolderName = 48;
-const longestProjectName = 60;
+const longestProjectName = 40;
 const mostFolderNumbers = 1_000;
 
 function firstWordsOf(request: string): string[] {
@@ -11,10 +11,18 @@ function firstWordsOf(request: string): string[] {
   return firstLine.split(/\s+/).filter(Boolean).slice(0, wordsInName);
 }
 
+function cutAtWord(words: string[]): string {
+  const [first = ""] = words;
+  let name = first.slice(0, longestProjectName);
+  for (const word of words.slice(1)) {
+    if (name.length + 1 + word.length > longestProjectName) break;
+    name = `${name} ${word}`;
+  }
+  return name;
+}
+
 export function projectNameOf(request: string): string {
-  const words = firstWordsOf(request).join(" ");
-  const trimmed = words
-    .slice(0, longestProjectName)
+  const trimmed = cutAtWord(firstWordsOf(request))
     .replace(/[\s.,;:!?]+$/, "")
     .trim();
   if (trimmed === "") return "New video";

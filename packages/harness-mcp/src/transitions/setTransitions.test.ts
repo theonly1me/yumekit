@@ -14,7 +14,7 @@ function transitionsOf(options: { harness: Harness; outputId: string }) {
   return row.clips.map((clip) => [clip.id, clip.transition]);
 }
 
-const fadeOf12Frames = { kind: "fade", durationFrames: 12 };
+const fadeOf12Frames = { kind: "fade", durationFrames: 12, madeBy: "ai" };
 
 describe("set_transitions", () => {
   it("sets the kind on each scene after the first, in each output, with 0.4 seconds as the default length", async () => {
@@ -79,7 +79,7 @@ describe("set_transitions", () => {
     expect(transitionsOf({ harness, outputId: "wide" })).toEqual([
       ["one", undefined],
       ["two", undefined],
-      ["three", { kind: "zoom", durationFrames: 12 }],
+      ["three", { kind: "zoom", durationFrames: 12, madeBy: "ai" }],
     ]);
     expect(transitionsOf({ harness, outputId: "tall" })[2]).toEqual([
       "three",

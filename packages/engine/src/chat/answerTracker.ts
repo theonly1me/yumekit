@@ -15,13 +15,31 @@ export interface AnswerTracker {
   noteCall: (tool: string) => CallNote;
 }
 
+const quoteMarks: Record<string, number> = {
+  '"': 0,
+  "\u201c": 1,
+  "\u201d": -1,
+};
+
+function firstSentenceOf(text: string): string {
+  let depth = 0;
+  for (let index = 0; index < text.length; index += 1) {
+    const character = text.charAt(index);
+    const change = quoteMarks[character];
+    if (change !== undefined) {
+      depth = change === 0 ? (depth > 0 ? 0 : 1) : Math.max(0, depth + change);
+    }
+    const next = text.charAt(index + 1);
+    if (depth === 0 && /[.!?]/.test(character) && /\s|^$/.test(next)) {
+      return text.slice(0, index + 1);
+    }
+  }
+  return text;
+}
+
 export function changeSummaryOf(text: string): string {
-  const [firstSentence] = text
-    .trim()
-    .split(/(?<=[.!?])\s+/)
-    .map((sentence) => sentence.trim())
-    .filter((sentence) => sentence !== "");
-  if (firstSentence === undefined) return aiChangedSummary;
+  const firstSentence = firstSentenceOf(text.trim()).trim();
+  if (firstSentence === "") return aiChangedSummary;
   return firstSentence.slice(0, summaryLimit);
 }
 

@@ -26,6 +26,7 @@ export async function changeProject(options: {
   client: EngineClient;
   name: string;
   input: object;
+  actId?: string | undefined;
 }): Promise<ChangeOutcome> {
   const outcome = await callInOrder(options);
   if (outcome.kind === "done") {

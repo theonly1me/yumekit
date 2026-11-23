@@ -22,7 +22,8 @@ const scenario = scenarioSchema.parse(
 );
 const programArguments = process.argv.slice(2);
 const isContinue =
-  programArguments.at(-1) === "The plan is good. Make the rest of the video.";
+  programArguments.at(-1) ===
+  "The plan is good. Use the script and the scenes as they are now, and make the rest of the video.";
 const turn = isContinue
   ? { calls: scenario.restCalls, waitFile: scenario.restWaitFile }
   : { calls: scenario.calls, waitFile: scenario.waitFile };

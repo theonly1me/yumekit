@@ -61,6 +61,19 @@ describe("the summary of a change by the AI", () => {
     ).toBe("I made the video shorter.");
   });
 
+  it("ends at a period outside quotation marks", () => {
+    expect(
+      changeSummaryOf(
+        'I changed the heading to "Calm. Focused." on scene 2. Then I checked it.',
+      ),
+    ).toBe('I changed the heading to "Calm. Focused." on scene 2.');
+    expect(
+      changeSummaryOf(
+        "I wrote \u201cWired. Then crashed?\u201d as the hook. Done.",
+      ),
+    ).toBe("I wrote \u201cWired. Then crashed?\u201d as the hook.");
+  });
+
   it("is cut at 140 characters", () => {
     expect(changeSummaryOf(`${"a".repeat(200)}. Done.`)).toBe("a".repeat(140));
   });

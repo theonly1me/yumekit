@@ -51,6 +51,7 @@ describe("place_video with replace_clip_id", () => {
         startFrame: 0,
         durationFrames: 90,
         sceneStartFrame: 0,
+        madeBy: "ai",
       },
     ]);
 

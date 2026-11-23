@@ -41,6 +41,7 @@ yumekit makes short videos on the computer of the person. It has no server and n
    4. `preview_scenes` to look at each scene during its entry and after it settled.
    5. `generate_asset` for a voice, then `place_narration`.
    6. `set_timeline`, then `set_transitions` once for the whole video.
+   7. For a later change, use the smallest tool: `replace_narration` records the voice again, `replace_music` changes the music. Write the whole timeline only for a new video.
 5. To let the person watch and change the video, run `yumekit open <folder>`.
 6. Export only on request: the person clicks "Export" in the editor, or you call `render_video`.
 
@@ -54,5 +55,6 @@ yumekit makes short videos on the computer of the person. It has no server and n
 
 - Each failure of a tool has a `kind`, a message, and often a hint. Read the hint first.
 - `browser-not-installed`: run `yumekit setup`.
+- `would-remove-the-work-of-the-person`: the call would remove a file, a clip, or a transition that the person made. Keep each thing that the failure lists. Give `remove_person_work: true` only when the person asked for that removal.
 - `media-key-missing`: say which key is missing and that the person can add it in Settings. Then make the rest of the video.
 - For anything else, run `yumekit doctor` and report its lines to the person.

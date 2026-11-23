@@ -143,4 +143,15 @@ describe("the other places that talk to the chat", () => {
       .toEqual(["You\nMake it shorter", "AI\nDone."]);
     await editor.close();
   });
+
+  it("sends a suggestion about the whole video, also when a scene is picked", async () => {
+    const editor = await openEditor(runningEngine().url);
+    await editor.page.locator(".card").first().click();
+    const suggestions = editor.page.getByRole("group", { name: "Suggestions" });
+
+    await suggestions.getByRole("button", { name: "Make it shorter" }).click();
+
+    await expect.poll(() => lastRequestText()).toBe("Make it shorter");
+    await editor.close();
+  });
 });

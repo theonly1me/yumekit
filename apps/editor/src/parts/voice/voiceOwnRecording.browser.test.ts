@@ -83,7 +83,7 @@ describe("the own recording of the voice view", () => {
           .locator(".sound-name")
           .allTextContents(),
       )
-      .toEqual(["Voice", "Music", "Captions"]);
+      .toEqual(["Voice", "Music", "Sounds", "Captions"]);
     expect(
       await editor.page
         .getByRole("list", { name: "Sound" })

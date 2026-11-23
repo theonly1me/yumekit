@@ -8,7 +8,13 @@ import {
 import { isVoiceOld, oldVoiceText } from "./oldVoice.js";
 import type { SoundPartName, SoundRow } from "./soundRowFacts.js";
 
-export type SoundAction = StepAction | "record-the-voice-again";
+export type SoundAction =
+  | StepAction
+  | "record-the-voice-again"
+  | "add-a-voice"
+  | "add-music"
+  | "add-a-sound"
+  | "add-captions";
 
 export interface SoundNote {
   part: SoundPartName;
@@ -43,6 +49,33 @@ function missingNoteOf(options: {
     : { part, name: partNames[part], ...why };
 }
 
+const emptyNotes = {
+  voice: {
+    part: "voice",
+    name: "Voice",
+    text: "No voice yet.",
+    actions: ["add-a-voice"],
+  },
+  music: {
+    part: "music",
+    name: "Music",
+    text: "No music yet.",
+    actions: ["add-music"],
+  },
+  sounds: {
+    part: "music",
+    name: "Sounds",
+    text: "No sounds yet.",
+    actions: ["add-a-sound"],
+  },
+  captions: {
+    part: "voice",
+    name: "Captions",
+    text: "No captions.",
+    actions: ["add-captions"],
+  },
+} satisfies Record<string, SoundNote>;
+
 export function soundNotesOf(options: {
   rows: SoundRow[];
   snapshot: Snapshot;
@@ -65,8 +98,13 @@ export function soundNotesOf(options: {
   }
   for (const part of ["voice", "music"] as const) {
     if (hasPart(part)) continue;
-    const note = missingNoteOf({ ...options, part });
-    if (note !== undefined) notes.push(note);
+    notes.push(missingNoteOf({ ...options, part }) ?? emptyNotes[part]);
+  }
+  if (!rows.some((row) => row.name.startsWith("Sounds"))) {
+    notes.push(emptyNotes.sounds);
+  }
+  if (!rows.some((row) => row.name === "Captions")) {
+    notes.push(emptyNotes.captions);
   }
   return notes;
 }

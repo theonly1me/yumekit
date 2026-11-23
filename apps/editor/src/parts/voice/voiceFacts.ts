@@ -1,20 +1,13 @@
-import type { Asset, Snapshot } from "../../engine/snapshot.js";
+import type { Snapshot } from "../../engine/snapshot.js";
 import { voiceTrackOf, type AudioTrack } from "../../sound/soundRowFacts.js";
 import {
-  clipAt,
   isCaptionTrack,
   mainSceneClipsOf,
 } from "../../timeline/timelineFacts.js";
 import type { MediaServers } from "../../tools/mediaServers.js";
-import type { SoundPiece } from "../sound/useSoundPlayer.js";
-import { sceneNameOf } from "../../names/index.js";
+import { voiceLinesOf, type VoiceLine } from "./voiceLines.js";
 
-export interface VoiceLine {
-  clipId: string;
-  piece: SoundPiece;
-  sceneLabel: string;
-  words: string;
-}
+export type { VoiceLine } from "./voiceLines.js";
 
 export interface VoiceFacts {
   track: AudioTrack | undefined;
@@ -24,18 +17,8 @@ export interface VoiceFacts {
   hasCaptions: boolean;
 }
 
-function wordsOf(asset: Asset | undefined): string {
-  if (asset === undefined) return "";
-  if (asset.source.kind === "import") {
-    return `Your recording ${asset.source.originalName}`;
-  }
-  const { text } = asset.source.input;
-  return typeof text === "string" ? text : "";
-}
-
 export function voiceFactsOf(snapshot: Snapshot): VoiceFacts {
   const { assets, scenes } = snapshot;
-  const framesPerSecond = snapshot.project.framesPerSecond;
   const timeline = snapshot.timelines.find(
     (candidate) => voiceTrackOf({ timeline: candidate, assets }) !== undefined,
   );
@@ -43,29 +26,8 @@ export function voiceFactsOf(snapshot: Snapshot): VoiceFacts {
     timeline === undefined ? undefined : voiceTrackOf({ timeline, assets });
   const sceneClips =
     timeline === undefined ? [] : mainSceneClipsOf({ timeline, scenes });
-  const clips = [...(track?.clips ?? [])].sort(
-    (...[first, second]) => first.startFrame - second.startFrame,
-  );
-  const lines = clips.map((clip) => {
-    const sceneClip = clipAt({ clips: sceneClips, frame: clip.startFrame });
-    const scene = scenes.find(
-      (candidate) => candidate.id === sceneClip?.sceneId,
-    );
-    const number = sceneClip === undefined ? 0 : sceneClips.indexOf(sceneClip);
-    return {
-      clipId: clip.id,
-      piece: {
-        assetId: clip.assetId,
-        startSeconds: clip.assetStartFrame / framesPerSecond,
-        lengthSeconds: clip.durationFrames / framesPerSecond,
-      },
-      sceneLabel:
-        scene === undefined
-          ? "No scene"
-          : `Scene ${String(number + 1)}: ${sceneNameOf({ scene, assets })}`,
-      words: wordsOf(assets.find((asset) => asset.id === clip.assetId)),
-    };
-  });
+  const clips = track?.clips ?? [];
+  const lines = voiceLinesOf({ track, sceneClips, scenes, assets });
   const voiceAssets = clips.flatMap((clip) =>
     assets.filter((asset) => asset.id === clip.assetId),
   );

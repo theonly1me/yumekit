@@ -62,6 +62,7 @@ export async function importUpload(options: {
     call: () =>
       context.harness.call({
         name: "import_asset",
+        by: "person",
         input: {
           asset_id: assetId,
           kind: kind.value,

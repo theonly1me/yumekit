@@ -47,7 +47,7 @@ describe("the voice view", () => {
 
     await expect
       .poll(() => rows.getByRole("button").allTextContents())
-      .toEqual(["Open", "Open", "Change"]);
+      .toEqual(["Open", "Open", "Add a sound", "Change"]);
     await editor.page.getByRole("button", { name: "Open the voice" }).click();
 
     await editor.page

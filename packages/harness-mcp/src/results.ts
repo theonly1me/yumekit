@@ -10,6 +10,7 @@ export interface HarnessFailure {
   message: string;
   hint: string;
   issues?: FailureIssue[];
+  removed?: string[];
 }
 
 export type Outcome<Value, Failure> =

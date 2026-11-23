@@ -27,7 +27,7 @@ import { talkingVoiceOf, voicePathInput } from "./talkingVoice.js";
 import { videoInputOf } from "./videoChoices.js";
 import { roundedSeconds, videoLimitFailureOf } from "./videoLimit.js";
 
-async function generateAsset(options: {
+export async function generateAsset(options: {
   context: HarnessContext;
   request: GenerateAssetInput;
   onProgress: ProgressListener | undefined;

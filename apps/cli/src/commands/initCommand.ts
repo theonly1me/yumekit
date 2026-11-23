@@ -85,6 +85,7 @@ export async function initCommand(args: string[]): Promise<CommandResult> {
     name,
     framesPerSecond: frameRate.value,
     outputs: outputs.length === 0 ? [defaultOutput] : outputs,
+    look: "midnight",
   });
   if (!created.ok) return failed(created.failure.message);
   return {

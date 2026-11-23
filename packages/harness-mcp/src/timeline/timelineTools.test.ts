@@ -50,6 +50,7 @@ describe("timeline tools", () => {
         startFrame: 0,
         durationFrames: 30,
         sceneStartFrame: 0,
+        madeBy: "ai",
       },
     ]);
   });

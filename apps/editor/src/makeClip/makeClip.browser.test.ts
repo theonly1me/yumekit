@@ -146,8 +146,8 @@ describe("Make a clip", () => {
           startFrame,
         })),
       ).toEqual([
-        { id: "second", sceneId: "second", startFrame: 30 },
         { id: "video-clip-first", sceneId: "video-clip-first", startFrame: 0 },
+        { id: "second", sceneId: "second", startFrame: 30 },
       ]);
     }
     await page.getByRole("button", { name: "Back to the editor" }).click();

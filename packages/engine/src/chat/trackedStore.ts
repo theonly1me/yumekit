@@ -45,6 +45,11 @@ export function trackStore(store: ProjectStore): TrackedStore {
         reportIfCommitted({ kind: "edit", result });
         return result;
       },
+      applyChange: async (change) => {
+        const result = await store.applyChange(change);
+        reportIfCommitted({ kind: "edit", result });
+        return result;
+      },
       undo: async () => {
         const result = await store.undo();
         reportIfCommitted({ kind: "undo", result });
