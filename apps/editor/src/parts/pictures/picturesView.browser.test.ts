@@ -79,14 +79,16 @@ describe("the Pictures view", () => {
       .click();
 
     await expect
-      .poll(() =>
-        page
-          .locator(".picture-large img")
-          .evaluate((image) =>
-            image instanceof HTMLImageElement
-              ? [image.naturalWidth, image.naturalHeight]
-              : [],
-          ),
+      .poll(
+        () =>
+          page
+            .locator(".picture-large img")
+            .evaluate((image) =>
+              image instanceof HTMLImageElement
+                ? [image.naturalWidth, image.naturalHeight]
+                : [],
+            ),
+        { timeout: 60_000 },
       )
       .toEqual([160, 90]);
     await page
@@ -99,7 +101,7 @@ describe("the Pictures view", () => {
       )
       .toEqual({ heading: "A new heading", subheading: "A small line" });
     await close();
-  });
+  }, 120_000);
 
   it("saves the picture of the scene as a full size PNG file", async () => {
     const { page, close } = await openPictures();

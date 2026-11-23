@@ -212,3 +212,19 @@ These rules came from the build of WP44.
 11. A fixed request ends each sentence with a period, also after the words of the person. A question mark or an exclamation mark that the person typed stays.
 12. The Script view loads only when a person opens it, with the line "Loading the script." React has its own file in the build. So the editor build has no file larger than 500 kB, and the main file is about a third of its old size.
 13. Below 640 pixels, the buttons of the views in the top bar ("Script", "Pictures", "Files") are in one menu "Open". The bar then fits at the width of a phone. Each new view of the bar goes into the same list.
+
+## Details of WP42
+
+1. An entry of the old form has no `kind`. The store reads it as `person`, because the old cast held "the recurring characters". The format version stays 1. The next write of `bible.json` adds the field.
+2. The file format sets no limit on `referenceAssetIds`, so an old project with more pictures still loads. `put_cast_member` and `set_bible` take 4 pictures or fewer. Each picture is an image asset, or the call fails with `asset-not-found`.
+3. `put_cast_member` takes `cast_id`, `kind`, `name`, `description`, and `reference_asset_ids?`. It adds the entry at the end of the cast, or replaces the entry with that id in place. Without `reference_asset_ids`, an entry that exists keeps its pictures, and a new entry has none.
+4. `remove_cast_member` takes `cast_id`. Each cast tool sends one `setBible` edit, so each call is one undo step. The pictures of a removed entry stay in the project.
+5. An unknown id in `cast_ids`, `put_cast_member`, or `remove_cast_member` is the failure `cast-member-not-found`, with the ids of the cast in the hint. `cast_ids` with `speech` or `music` is the failure `invalid-value`.
+6. The sentence of an entry is `<name>: <description>.`, or `<name>.` with no description. The sentences go after an empty line at the end of the prompt, in the order of `cast_ids`.
+7. A model accepts reference pictures when its description has the setting `reference_image_paths` of the kind `image-files`. The servers that list `reference_images` in `accepts` also have that setting. Its `maximum` limits the list. The pictures of `reference_asset_ids` come first, then the pictures of each entry in the order of `cast_ids`, with no repeats.
+8. `MediaTools` gets `chosenModel({ capability, server?, model? })`. It gives the described model that a call with the same choice uses, with the same rules as `run`. A server with no description gives no model, so the call gets only the sentences.
+9. The source record of the asset holds the prompt with the sentences and the merged `reference_asset_ids`. So a change of an entry makes a new file, and the same entry reuses the earlier file.
+10. The editor makes the id of a new entry from its name, for example `blue-mug`, with a number after it when the id is in use.
+11. "Make a picture of this" is the fixed request `make-a-cast-picture` of the editor: `Make a picture of "<name>" from the cast. It looks like this: <description>. Add the picture to the pictures of that cast entry.` The view closes, and the chat shows the request. The row has it while the entry has fewer than 4 pictures.
+12. "Add a picture" uploads the file with `POST /api/uploads?name=<file name>` of document 15, then the person saves the entry. A file that is not a picture shows "This file is not a picture." and the entry does not get it.
+13. "Cast" is in the list of views of the top bar, after "Pictures". So below 640 pixels it is in the menu "Open" too. At that width the bar does not cut off the menu, so each item of the menu can take a click.

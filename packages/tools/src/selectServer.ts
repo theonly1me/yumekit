@@ -3,8 +3,8 @@ import type { ServerConnection, StartedServer } from "./connectServer.js";
 import { firstReadyServer } from "./serverOrder.js";
 import type {
   Capability,
+  MediaModelChoice,
   MediaToolFailure,
-  MediaToolRequest,
   Outcome,
 } from "./types.js";
 
@@ -23,7 +23,7 @@ export function isStarted(
 
 function withModel(options: {
   connection: StartedServer;
-  request: MediaToolRequest;
+  request: MediaModelChoice;
   configuredDefault: MediaDefault | undefined;
 }): SelectedServer {
   const { connection, request, configuredDefault } = options;
@@ -97,7 +97,7 @@ export async function serverWithNoPick(options: {
 export async function selectServer(options: {
   connections: ServerConnection[];
   defaults: MediaDefaults;
-  request: MediaToolRequest;
+  request: MediaModelChoice;
 }): Promise<Outcome<SelectedServer, MediaToolFailure>> {
   const { request, connections } = options;
   const { capability } = request;

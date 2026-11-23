@@ -17,7 +17,7 @@ describe("story tools", () => {
     expect(harness.store.read().script).toBe("A short story.");
   });
 
-  it("set_bible stores the cast with reference asset ids and an empty list by default", async () => {
+  it("set_bible stores the cast as people with an empty list of reference asset ids by default", async () => {
     const harness = await startHarness();
 
     await harness.call({
@@ -37,6 +37,7 @@ describe("story tools", () => {
       cast: [
         {
           id: "fox",
+          kind: "person",
           name: "Fox",
           description: "A red fox",
           referenceAssetIds: [],

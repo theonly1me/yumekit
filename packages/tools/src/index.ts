@@ -43,6 +43,7 @@ export type {
   JsonValue,
   KeyCheck,
   MediaLimits,
+  MediaModelChoice,
   MediaServerEntry,
   MediaToolFailure,
   MediaToolProgress,

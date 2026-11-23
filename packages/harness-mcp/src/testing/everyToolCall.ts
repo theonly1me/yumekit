@@ -28,6 +28,16 @@ export function everyToolCall(importSourcePath: string): ScriptedCall[] {
       },
     },
     {
+      name: "put_cast_member",
+      input: {
+        cast_id: "lake",
+        kind: "place",
+        name: "Lake",
+        description: "A cold lake",
+      },
+    },
+    { name: "remove_cast_member", input: { cast_id: "lake" } },
+    {
       name: "add_output",
       input: {
         output_id: "tall",

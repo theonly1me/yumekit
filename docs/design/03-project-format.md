@@ -66,6 +66,7 @@ type Bible = {
 };
 type CastMember = {
   id: string;
+  kind: "person" | "place" | "product";
   name: string;
   description: string;
   referenceAssetIds: string[];
