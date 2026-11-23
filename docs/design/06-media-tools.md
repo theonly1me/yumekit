@@ -34,7 +34,7 @@ yumekit reads two files with the same shape. The project file wins for a server 
 - `defaults` names the server for each capability when a tool call gives no server. An entry is a server name, or `{ "server": "...", "model": "..." }` (document 10).
 - `limits` is optional. `generatedVideoSeconds` is the limit of document 09, a number of 0 or more, and 30 by default. The project file wins over the user file. `MediaTools.limits()` gives the merged value.
 - The `yumekit` command passes the commands of the bundled servers as `bundledServers`. A file can use a bundled server by its name with no `command`.
-- With no file (user or project), yumekit connects each bundled server, in the order `sample`, `openai`, `gemini`, `fal`, `local-voice`. A bundled server with a missing key starts, and the editor shows that it needs a key.
+- With no file (user or project), yumekit connects each bundled server, in the order `sample`, `openai`, `gemini`, `fal`, `local-voice`, `local-music`. A bundled server with a missing key starts, and the editor shows that it needs a key.
 - With a file, yumekit connects the servers of the file first. Then it connects each bundled server that the file does not name.
 - An entry `"<name>": { "disabled": true }` turns off that server, also a bundled one.
 - The order of the servers does not change how a call selects a server: the server of the call, then `defaults`, then the order with no pick of document 15. That order puts `sample` last.
@@ -176,7 +176,7 @@ A configuration file that is not valid is the failure `invalid-configuration-fil
 How `run` selects a server:
 
 1. It uses `server` from the request. If the request has none, it uses the server of the `defaults` entry for the capability.
-2. If neither names a server, it uses the order with no pick of document 15: the first started server with the capability and each key that it needs, in the order `openai`, `gemini`, `fal`, each other server in configuration order, `local-voice`, and `sample` last (document 18). `align` with no `defaults` entry uses the server of the `speech` entry when that server has `align`.
+2. If neither names a server, it uses the order with no pick of document 15: the first started server with the capability and each key that it needs, in the order `openai`, `gemini`, `fal`, each other server in configuration order, `local-voice`, `local-music`, and `sample` last (documents 18 and 19). `align` with no `defaults` entry uses the server of the `speech` entry when that server has `align`.
 3. A name that no file defines is `server-not-found`. A server that started without the tool is `no-server-for-capability`.
 
 How the files merge:
@@ -195,6 +195,7 @@ The client adds `output_directory` and `file_stem` after the fields of `input`, 
 | `tools/gemini-media` | `image`, `speech`, `music`, `video`                                                     | The Gemini API key of the user | Reads `GEMINI_API_KEY`. See documents 09 and 16. Not tested with a real key yet. Tests use recorded shapes from the documents.                                          |
 | `tools/fal-media`    | `image`, `video`, `sound-effect`, `talking-clip`, `sharper`                             | The fal API key of the user    | Reads `FAL_KEY`. Document 10 has its endpoints, and document 16 its models. Not tested with a real key yet. Tests use recorded shapes from the documents of 2026-11-22. |
 | `tools/local-voice`  | `speech`                                                                                | Free, on this computer         | One open voice model, Heart, that downloads once. Document 18 has the facts                                                                                             |
+| `tools/local-music`  | `music`                                                                                 | Free, on this computer         | Music beds made from code, with no download. It offers only the styles that the owner approved. Document 19 has the facts                                               |
 
 ### `tools/sample-media`
 
