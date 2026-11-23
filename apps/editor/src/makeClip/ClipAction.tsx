@@ -59,9 +59,8 @@ function LimitReached(props: { limit: VideoLimit }) {
       <p className="clip-price">Over the limit of this project</p>
       <p className="fact">
         This project has used {usedSeconds} of {limitSeconds} seconds of real
-        video. Use a shorter clip, or raise{" "}
-        <strong>limits.generatedVideoSeconds</strong> in{" "}
-        <strong>media-tools.json</strong>.
+        video. Use a shorter clip, or raise the limit in{" "}
+        <strong>Settings</strong>, under Limits.
       </p>
     </>
   );

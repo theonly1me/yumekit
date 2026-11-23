@@ -54,6 +54,10 @@ export function Editor(props: {
     output: facts.output,
     onOpen: playback.pause,
     onPlaced: view.pickClip,
+    ask: (input) => {
+      editorChat.focusBox();
+      return editorChat.chat.send(input);
+    },
   });
   const stepSheet = useStepSheet({
     client,

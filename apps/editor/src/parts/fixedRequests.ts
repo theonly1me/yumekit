@@ -20,7 +20,12 @@ export type FixedRequest =
   | { kind: "back-to-graphics"; aboutClipId: string }
   | { kind: "make-a-cast-picture"; name: string; description: string }
   | { kind: "use-my-file"; fileName: string }
-  | { kind: "continue-after-the-plan" };
+  | { kind: "continue-after-the-plan" }
+  | {
+      kind: "let-the-ai-make-the-clip";
+      aboutClipId: string;
+      model?: ModelTarget;
+    };
 
 export type AskTheAi = (input: AskInput) => Promise<boolean>;
 
@@ -59,6 +64,8 @@ function requestSentenceOf(request: FixedRequest): string {
       return `Use my file ${request.fileName} in the video where it fits best.`;
     case "continue-after-the-plan":
       return "The plan is good. Make the rest of the video.";
+    case "let-the-ai-make-the-clip":
+      return "Make a real video clip for this scene. Write the prompt and pick the camera move yourself.";
   }
 }
 
@@ -72,7 +79,8 @@ export function fixedRequestTextOf(request: FixedRequest): string {
   const model =
     request.kind === "another-voice" ||
     request.kind === "make-this-music" ||
-    request.kind === "change-the-picture"
+    request.kind === "change-the-picture" ||
+    request.kind === "let-the-ai-make-the-clip"
       ? request.model
       : undefined;
   return model === undefined

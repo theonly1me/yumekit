@@ -137,6 +137,7 @@ export function everyToolCall(importSourcePath: string): ScriptedCall[] {
         capability: "video",
         input: { prompt: "a lake at dawn", duration_seconds: 1 },
         first_frame_asset_id: "still",
+        camera_move: "push-in",
       },
     },
     {

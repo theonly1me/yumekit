@@ -5,6 +5,7 @@ import type {
   MediaServer,
   MediaServers,
 } from "../tools/mediaServers.js";
+import type { ModelTarget } from "../settings/services/index.js";
 import { isServerReady, labelOf } from "../tools/serverFacts.js";
 
 export interface ModelChoice {
@@ -81,4 +82,17 @@ export function pickedChoiceOf(options: {
 
 export function takesFirstPicture(model: MediaModel): boolean {
   return model.accepts === undefined || model.accepts.includes("first_frame");
+}
+
+export function takesLastPicture(model: MediaModel): boolean {
+  return model.accepts?.includes("last_frame") === true;
+}
+
+export function modelTargetOf(choice: ModelChoice): ModelTarget {
+  return {
+    server: choice.server.server,
+    serverLabel: choice.serverLabel,
+    model: choice.model.id,
+    modelLabel: choice.model.label,
+  };
 }

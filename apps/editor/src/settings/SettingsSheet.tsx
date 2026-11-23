@@ -6,6 +6,7 @@ import { AgentPane } from "../side/agent/AgentPane.js";
 import { ToolsPane } from "../tools/ToolsPane.js";
 import { AiGroup } from "./AiGroup.js";
 import type { VideoStyleId } from "../videoStyle/videoStyles.js";
+import { CalmRow } from "./CalmRow.js";
 import { LimitsGroup } from "./LimitsGroup.js";
 import { LookRow } from "./LookRow.js";
 import { ServicesGroup } from "./services/index.js";
@@ -30,6 +31,10 @@ export function SettingsSheet(props: {
         <h2 id="settings-title">Settings</h2>
         <VideoStyleGroup client={props.client} videoStyle={props.videoStyle}>
           <LookRow client={props.client} look={props.look} />
+          <CalmRow
+            client={props.client}
+            calm={props.snapshot.project.calm === true}
+          />
           <BetweenScenesRow client={props.client} snapshot={props.snapshot} />
         </VideoStyleGroup>
         <AiGroup client={props.client} chat={props.chat} />

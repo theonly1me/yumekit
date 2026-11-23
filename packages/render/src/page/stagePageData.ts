@@ -6,6 +6,7 @@ export type PageSceneSource =
 
 export interface StagePageData {
   look: LookId;
+  calm: boolean;
   project: StageProject;
   sceneSources: Record<string, PageSceneSource>;
 }

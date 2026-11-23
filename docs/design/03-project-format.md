@@ -34,6 +34,7 @@ type Project = {
   outputs: Output[];
   videoStyle?: VideoStyle;
   look?: LookId;
+  calm?: boolean;
 };
 
 type VideoStyle = "graphics" | "ai-video" | "mix";
@@ -221,7 +222,7 @@ function openProject(options: {
 | `removeOutput`       | `outputId`                      | Removes an output and its timeline                                                                                                |
 | `setOutputPlatforms` | `outputId`, `platforms`         | Replaces the platforms of one output. The store keeps them in catalog order. An empty list removes the field                      |
 | `setVideoStyle`      | `videoStyle`                    | Sets the video style of the project (document 15)                                                                                 |
-| `setLook`            | `look`                          | Changes the look of the project (document 17)                                                                                     |
+| `setLook`            | `look`, `calm?`                 | Changes the look of the project, and its calm motion when `calm` is given (document 17)                                           |
 | `setScript`          | `script`                        | Replaces `script.md`                                                                                                              |
 | `setBible`           | `bible`                         | Replaces `bible.json`                                                                                                             |
 | `putScene`           | `scene`, `code?`                | Adds or replaces a scene. `code` is required for a module scene                                                                   |

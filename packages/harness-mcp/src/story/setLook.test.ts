@@ -28,6 +28,39 @@ describe("the look tools", () => {
     expect(harness.store.read().project.look).toBeUndefined();
   });
 
+  it("get_project gives calm false for a project with no value", async () => {
+    const harness = await startHarness();
+
+    const { data } = await harness.call({ name: "get_project" });
+
+    expect(data["calm"]).toBe(false);
+  });
+
+  it("set_look with only calm keeps the look, and a later look keeps calm", async () => {
+    const harness = await startHarness();
+    await harness.call({ name: "set_look", arguments: { look: "neon" } });
+
+    const calmed = await harness.call({
+      name: "set_look",
+      arguments: { calm: true },
+    });
+    await harness.call({ name: "set_look", arguments: { look: "studio" } });
+    const { data } = await harness.call({ name: "get_project" });
+
+    expect(calmed.data).toMatchObject({ look: "neon", calm: true });
+    expect(data).toMatchObject({ look: "studio", calm: true });
+  });
+
+  it("set_look with neither look nor calm fails and changes nothing", async () => {
+    const harness = await startHarness();
+
+    const result = await harness.call({ name: "set_look", arguments: {} });
+
+    expect(result.isError).toBe(true);
+    expect(result.data["kind"]).toBe("invalid-value");
+    expect(harness.store.read().project).not.toHaveProperty("look");
+  });
+
   it("set_look refuses a look that yumekit does not have and changes nothing", async () => {
     const harness = await startHarness();
 
