@@ -35,6 +35,7 @@ export function emptyValueOf(field: Field): JsonValue {
       return false;
     case "text-list":
     case "object-list":
+    case "asset-list":
       return [];
     case "group":
       return newItemOf(field.fields);

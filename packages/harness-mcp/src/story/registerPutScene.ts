@@ -5,6 +5,7 @@ import { applyEditsResult } from "../applyEditsResult.js";
 import type { HarnessContext } from "../context.js";
 import { idInput, jsonObjectInput } from "../inputs.js";
 import { failureResult } from "../results.js";
+import { checkKitMarks } from "./checkKitMarks.js";
 import { checkKitProps, checkModuleCode } from "./checkScene.js";
 
 const putSceneInput = {
@@ -49,7 +50,13 @@ async function putScene(options: {
     notes: input.notes ?? "",
   };
   if (input.kit_component !== undefined && input.code === undefined) {
-    const failure = checkKitProps({ component: input.kit_component, props });
+    const failure =
+      checkKitProps({ component: input.kit_component, props }) ??
+      checkKitMarks({
+        component: input.kit_component,
+        props,
+        assets: context.store.read().assets,
+      });
     if (failure) return failureResult(failure);
     const scene: Scene = {
       ...common,

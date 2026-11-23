@@ -17,6 +17,12 @@ export type Field = FieldBase &
     | { kind: "asset"; assetKinds: readonly AssetKind[] }
     | { kind: "text-list"; itemLabel: string; maxItems: number | undefined }
     | {
+        kind: "asset-list";
+        itemLabel: string;
+        maxItems: number | undefined;
+        assetKinds: readonly AssetKind[];
+      }
+    | {
         kind: "object-list";
         itemLabel: string;
         maxItems: number | undefined;
@@ -47,6 +53,15 @@ function fieldOf(options: {
   const { name, schema, isRequired } = options;
   const base = { name, label: schema.title ?? labelOf(name), isRequired };
   const assetKinds = assetKindsOf(schema);
+  if (assetKinds.length > 0 && schema.type === "array") {
+    return {
+      ...base,
+      kind: "asset-list",
+      itemLabel: labelOf(assetKinds.join(" or ")),
+      maxItems: schema.maxItems,
+      assetKinds,
+    };
+  }
   if (assetKinds.length > 0) {
     return {
       ...base,

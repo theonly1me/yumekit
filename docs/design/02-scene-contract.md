@@ -19,7 +19,11 @@ type SceneAsset = {
   durationFrames?: number;
   words?: SceneWord[];
   framePictures?: { urlPrefix: string; count: number };
+  marks?: SceneAssetMark[];
 };
+
+type SceneRegion = { x: number; y: number; width: number; height: number };
+type SceneAssetMark = { name: string; region?: SceneRegion; seconds?: number };
 
 type SceneWord = { text: string; startFrame: number; endFrame: number };
 

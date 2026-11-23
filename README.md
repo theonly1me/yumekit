@@ -9,7 +9,7 @@ yumekit turns an idea into editable content for YouTube, TikTok, Instagram, and 
 You type what you want. The AI program that you already have (Claude Code, Codex, or Cursor) writes the script, makes the scenes, records a voice, and puts the video together. You watch each step, and you can change each part.
 
 - **One video for each platform.** YouTube, YouTube Shorts, TikTok, Instagram Reel, Instagram post, X, LinkedIn, and square, each in its own shape.
-- **Scenes drawn by code.** 19 scene types and 5 looks, with motion and transitions. The text is exact, a change costs nothing, and the result is the same each time.
+- **Scenes drawn by code.** 26 scene types and 5 looks, with motion and transitions. The text is exact, a change costs nothing, and the result is the same each time.
 - **Real video clips when you want them.** A scene can become a clip from a video model, with a camera move and a first and a last picture. You pick "Graphics", "AI video", or "Mix" for a video.
 - **A voice with no key.** yumekit has a natural voice that runs on your computer, after one download of 148 MB.
 - **Any model that you have a key for.** Pictures, voice, music, video clips, sound effects, talking clips, and a sharper copy, from OpenAI, Google Gemini, and fal. You pick the service and the model for each kind.
