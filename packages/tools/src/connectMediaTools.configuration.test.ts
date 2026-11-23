@@ -44,6 +44,7 @@ describe("connectMediaTools configuration", () => {
           "music",
           "video",
           "sound-effect",
+          "talking-clip",
           "sharper",
         ],
       },

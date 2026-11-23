@@ -1,0 +1,18 @@
+{
+  "endpoint_id": "fal-ai/sync-lipsync/v3/image-to-video",
+  "page": "https://fal.ai/models/fal-ai/sync-lipsync/v3/image-to-video",
+  "schema_url": "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=fal-ai/sync-lipsync/v3/image-to-video",
+  "read_on": "2026-11-23",
+  "required": ["image_url", "audio_url"],
+  "properties": {
+    "audio_url": {
+      "types": ["string"]
+    },
+    "enable_safety_checker": {
+      "types": ["boolean"]
+    },
+    "image_url": {
+      "types": ["string"]
+    }
+  }
+}

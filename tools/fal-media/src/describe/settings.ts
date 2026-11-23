@@ -1,6 +1,7 @@
 import type { AcceptedInput } from "../catalog/acceptedInput.ts";
 import type { ImageModel } from "../catalog/image/index.ts";
 import type { SoundModel } from "../catalog/sound/index.ts";
+import type { TalkingModel } from "../catalog/talking/index.ts";
 import { videoAccepts, type VideoModel } from "../catalog/video/index.ts";
 
 export type MediaModelSetting =
@@ -127,3 +128,17 @@ export const sharperSettings: MediaModelSetting[] = [
     default: 2,
   },
 ];
+
+export function talkingSettings(model: TalkingModel): MediaModelSetting[] {
+  const { resolutions } = model;
+  if (resolutions === undefined) return [];
+  return [
+    {
+      name: "resolution",
+      label: "Resolution",
+      kind: "choice",
+      choices: [...resolutions.choices],
+      default: resolutions.default,
+    },
+  ];
+}

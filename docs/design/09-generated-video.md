@@ -109,9 +109,9 @@ A scene must not use a `<video>` element. `checkSceneCode` returns `scene-compil
 
 `generate_asset` with the capability `video` already exists. This design adds one tool and one limit.
 
-| Tool          | Input                                                                                                             | What it does                                                                                                                                                                     |
-| ------------- | ----------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `place_video` | `output_id`, `asset_id`, `start_frame?`, `duration_frames?`, `replace_clip_id?`, `focus?`, `sound_gain_decibels?` | `removeClip` for a replaced clip, `putScene` for a `video-clip` scene, `addClip` on the first scene track that is not a caption track, and `addClip` for the sound, in one batch |
+| Tool          | Input                                                                                                                             | What it does                                                                                                                                                                     |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `place_video` | `output_id`, `asset_id`, `start_frame?`, `duration_frames?`, `replace_clip_id?`, `focus?`, `sound_gain_decibels?`, `quiet_voice?` | `removeClip` for a replaced clip, `putScene` for a `video-clip` scene, `addClip` on the first scene track that is not a caption track, and `addClip` for the sound, in one batch |
 
 - The scene id is `video-` followed by the asset id. If the scene exists, the tool uses it and changes no props.
 - `duration_frames` is the length of the asset by default.
@@ -134,7 +134,7 @@ The server instructions of document 05 get one step after step 5: "For a shot th
 ```
 
 - The default is 30. The project file wins over the user file. The value 0 turns generated video off.
-- Before a call with the capability `video`, the harness adds the length of each video asset with a source of kind `tool` to `duration_seconds` of the request. If the sum is larger than the limit, the harness makes no call and returns the failure `generated-video-limit-reached` with the seconds used, the seconds requested, and the limit.
+- Before a call with the capability `video` or `talking-clip` (document 16), the harness adds the length of each video asset with a source of kind `tool` to `duration_seconds` of the request. If the sum is larger than the limit, the harness makes no call and returns the failure `generated-video-limit-reached` with the seconds used, the seconds requested, and the limit.
 - A repeated request that reuses a file does not count again.
 - The message of the failure tells the agent to ask the person, and names the field that the person changes.
 - The limit counts each generated video asset in the project, placed or not. Undo of the `generate_asset` call frees its seconds. The cost guard of milestone 4 replaces this limit with a spend record.

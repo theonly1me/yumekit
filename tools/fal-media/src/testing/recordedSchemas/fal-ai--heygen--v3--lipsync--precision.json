@@ -1,0 +1,38 @@
+{
+  "endpoint_id": "fal-ai/heygen/v3/lipsync/precision",
+  "page": "https://fal.ai/models/fal-ai/heygen/v3/lipsync/precision",
+  "schema_url": "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=fal-ai/heygen/v3/lipsync/precision",
+  "read_on": "2026-11-23",
+  "required": ["video_url", "audio_url"],
+  "properties": {
+    "audio_url": {
+      "types": ["string"]
+    },
+    "disable_music_track": {
+      "types": ["boolean"]
+    },
+    "enable_caption": {
+      "types": ["boolean"]
+    },
+    "enable_dynamic_duration": {
+      "types": ["boolean"]
+    },
+    "enable_speech_enhancement": {
+      "types": ["boolean"]
+    },
+    "end_time": {
+      "types": ["number", "null"],
+      "minimum": 0
+    },
+    "start_time": {
+      "types": ["number", "null"],
+      "minimum": 0
+    },
+    "title": {
+      "types": ["string", "null"]
+    },
+    "video_url": {
+      "types": ["string"]
+    }
+  }
+}

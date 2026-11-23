@@ -40,7 +40,13 @@ const setting = z.discriminatedUnion("kind", [
 const describedModel = z.strictObject({
   id: z.string(),
   label: z.string(),
-  capability: z.enum(["image", "video", "sound-effect", "sharper"]),
+  capability: z.enum([
+    "image",
+    "video",
+    "sound-effect",
+    "talking-clip",
+    "sharper",
+  ]),
   is_default: z.boolean(),
   settings: z.array(setting),
   prices: z.array(

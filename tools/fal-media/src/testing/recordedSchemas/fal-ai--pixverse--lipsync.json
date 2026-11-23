@@ -1,0 +1,41 @@
+{
+  "endpoint_id": "fal-ai/pixverse/lipsync",
+  "page": "https://fal.ai/models/fal-ai/pixverse/lipsync",
+  "schema_url": "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=fal-ai/pixverse/lipsync",
+  "read_on": "2026-11-23",
+  "required": ["video_url"],
+  "properties": {
+    "audio_url": {
+      "types": ["string", "null"]
+    },
+    "enable_safety_checker": {
+      "types": ["boolean"]
+    },
+    "text": {
+      "types": ["string", "null"]
+    },
+    "video_url": {
+      "types": ["string"]
+    },
+    "voice_id": {
+      "types": ["string"],
+      "enum": [
+        "Emily",
+        "James",
+        "Isabella",
+        "Liam",
+        "Chloe",
+        "Adrian",
+        "Harper",
+        "Ava",
+        "Sophia",
+        "Julia",
+        "Mason",
+        "Jack",
+        "Oliver",
+        "Ethan",
+        "Auto"
+      ]
+    }
+  }
+}

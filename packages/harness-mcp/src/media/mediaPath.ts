@@ -3,6 +3,15 @@ import type { JsonObject, ProjectSnapshot } from "@yumekit/project";
 import type { HarnessFailure, Outcome } from "../results.js";
 import type { GenerateAssetInput } from "./generateAssetInput.js";
 
+const missingTextByCapability: Partial<
+  Record<GenerateAssetInput["capability"], string>
+> = {
+  sharper:
+    "A sharper copy needs media_asset_id, the picture or the video clip to copy.",
+  "talking-clip":
+    "A talking clip needs media_asset_id, the picture or the video clip of the person.",
+};
+
 export function mediaPathInput(options: {
   snapshot: ProjectSnapshot;
   projectFolder: string;
@@ -10,14 +19,15 @@ export function mediaPathInput(options: {
 }): Outcome<JsonObject, HarnessFailure> {
   const { snapshot, request } = options;
   const assetId = request.media_asset_id;
-  if (request.capability !== "sharper") {
+  const missingText = missingTextByCapability[request.capability];
+  if (missingText === undefined) {
     if (assetId === undefined) return { ok: true, value: {} };
     return {
       ok: false,
       failure: {
         kind: "invalid-value",
-        message: `media_asset_id is for a sharper copy, not for ${request.capability}.`,
-        hint: "Leave out media_asset_id, or use the capability sharper.",
+        message: `media_asset_id is for a sharper copy or a talking clip, not for ${request.capability}.`,
+        hint: "Leave out media_asset_id, or use the capability sharper or talking-clip.",
       },
     };
   }
@@ -38,7 +48,7 @@ export function mediaPathInput(options: {
       kind: "asset-not-found",
       message:
         assetId === undefined
-          ? "A sharper copy needs media_asset_id, the picture or the video clip to copy."
+          ? missingText
           : `The project has no picture or video asset "${assetId}".`,
       hint: `Use one of these asset ids: ${ids.length === 0 ? "none" : ids.join(", ")}.`,
     },

@@ -7,6 +7,7 @@ const kindSchema = z.enum([
   "music",
   "video",
   "sound-effect",
+  "talking-clip",
   "sharper",
 ]);
 
@@ -69,6 +70,7 @@ export const kindNames: Record<MediaKind, string> = {
   music: "Music",
   video: "Video clips",
   "sound-effect": "Sounds",
+  "talking-clip": "Talking clips",
   sharper: "Sharper copy",
 };
 

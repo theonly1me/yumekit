@@ -1,0 +1,19 @@
+{
+  "endpoint_id": "veed/fabric-1.0",
+  "page": "https://fal.ai/models/veed/fabric-1.0",
+  "schema_url": "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=veed/fabric-1.0",
+  "read_on": "2026-11-23",
+  "required": ["image_url", "audio_url", "resolution"],
+  "properties": {
+    "audio_url": {
+      "types": ["string"]
+    },
+    "image_url": {
+      "types": ["string"]
+    },
+    "resolution": {
+      "types": ["string"],
+      "enum": ["720p", "480p"]
+    }
+  }
+}

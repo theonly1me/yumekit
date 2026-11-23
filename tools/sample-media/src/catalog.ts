@@ -1,14 +1,16 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
+import { free, newKindModels, readOn } from "./newKindModels.ts";
 
 type Capability =
-  "image" | "speech" | "align" | "music" | "video" | "sound-effect" | "sharper";
-
-const readOn = "2026-11-21";
-
-const free = (unit: "image" | "second" | "minute") => [
-  { usd: 0, unit, when: {} },
-];
+  | "image"
+  | "speech"
+  | "align"
+  | "music"
+  | "video"
+  | "sound-effect"
+  | "talking-clip"
+  | "sharper";
 
 const sidePixels = (setting: { name: string; label: string }) => ({
   ...setting,
@@ -108,45 +110,7 @@ export const sampleDescription = {
       accepts: ["first_frame", "last_frame", "reference_images"],
       tested: true,
     },
-    {
-      id: "sample-sound-effect",
-      label: "Short high tone",
-      capability: "sound-effect",
-      is_default: true,
-      settings: [
-        {
-          name: "duration_seconds",
-          label: "Length in seconds",
-          kind: "whole-number",
-          minimum: 1,
-          maximum: 30,
-          default: 1,
-        },
-      ],
-      prices: free("second"),
-      read_on: readOn,
-      tested: true,
-    },
-    {
-      id: "sample-sharper",
-      label: "Plain larger copy",
-      capability: "sharper",
-      is_default: true,
-      settings: [
-        {
-          name: "scale",
-          label: "Times larger",
-          kind: "whole-number",
-          minimum: 2,
-          maximum: 4,
-          default: 2,
-        },
-      ],
-      prices: free("second"),
-      read_on: readOn,
-      accepts: ["image_input", "video_input"],
-      tested: true,
-    },
+    ...newKindModels,
   ],
 } as const;
 

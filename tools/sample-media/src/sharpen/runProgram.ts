@@ -5,7 +5,7 @@ import type { Outcome } from "../toolResults.ts";
 const runFile = promisify(execFile);
 
 export const ffmpegNeededMessage =
-  "The sample sharpen_media needs FFmpeg, and ffmpeg or ffprobe is not on the PATH. Install FFmpeg (macOS: brew install ffmpeg. Debian or Ubuntu: sudo apt-get install ffmpeg), then start the server again.";
+  "This sample tool needs FFmpeg, and ffmpeg or ffprobe is not on the PATH. Install FFmpeg (macOS: brew install ffmpeg. Debian or Ubuntu: sudo apt-get install ffmpeg), then start the server again.";
 
 function lastLineOf(text: string): string {
   return (

@@ -1,6 +1,7 @@
 import { imageModels } from "../catalog/image/index.ts";
 import { sharperModels } from "../catalog/sharper/index.ts";
 import { soundModels } from "../catalog/sound/index.ts";
+import { talkingModels } from "../catalog/talking/index.ts";
 import { videoAccepts, videoModels } from "../catalog/video/index.ts";
 import { getKeyUrl } from "../falApi.ts";
 import {
@@ -8,6 +9,7 @@ import {
   imageSettings,
   sharperSettings,
   soundSettings,
+  talkingSettings,
   videoSettings,
 } from "./settings.ts";
 
@@ -73,6 +75,12 @@ export function describeServer() {
         capability: "sound-effect" as const,
         settings: soundSettings(model),
         accepts: [],
+      })),
+      ...talkingModels.map((model) => ({
+        ...sharedFields(model),
+        capability: "talking-clip" as const,
+        settings: talkingSettings(model),
+        accepts: [model.takes === "image" ? "image_input" : "video_input"],
       })),
       ...sharperModels.map((model) => ({
         ...sharedFields(model),
