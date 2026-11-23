@@ -15,6 +15,7 @@ const toolByCapability = {
   music: "generate_music",
   video: "generate_video",
   "sound-effect": "generate_sound_effect",
+  "talking-clip": "generate_talking_clip",
   sharper: "sharpen_media",
 } as const;
 
@@ -73,6 +74,12 @@ async function connectSample() {
       prompt: "a door slams",
       output_directory: folder,
       file_stem: "door",
+    },
+    "talking-clip": {
+      media_path: join(folder, "fox.png"),
+      audio_path: speechFile,
+      output_directory: folder,
+      file_stem: "fox-talking",
     },
     sharper: {
       media_path: join(folder, "fox.png"),

@@ -83,6 +83,34 @@ export async function writeImage(options: {
   return path;
 }
 
+export function fakeWav(seconds: number): Buffer {
+  const sampleRate = 8000;
+  const dataBytes = Math.round(seconds * sampleRate) * 2;
+  const header = Buffer.alloc(44);
+  header.write("RIFF", 0, "latin1");
+  header.writeUInt32LE(36 + dataBytes, 4);
+  header.write("WAVEfmt ", 8, "latin1");
+  header.writeUInt32LE(16, 16);
+  header.writeUInt16LE(1, 20);
+  header.writeUInt16LE(1, 22);
+  header.writeUInt32LE(sampleRate, 24);
+  header.writeUInt32LE(sampleRate * 2, 28);
+  header.writeUInt16LE(2, 32);
+  header.writeUInt16LE(16, 34);
+  header.write("data", 36, "latin1");
+  header.writeUInt32LE(dataBytes, 40);
+  return Buffer.concat([header, Buffer.alloc(dataBytes)]);
+}
+
+export async function writeVoice(options: {
+  folder: string;
+  seconds: number;
+}): Promise<string> {
+  const path = join(options.folder, "voice.wav");
+  await writeFile(path, fakeWav(options.seconds));
+  return path;
+}
+
 export async function bodyOf(request: Request): Promise<unknown> {
   return request.clone().json();
 }

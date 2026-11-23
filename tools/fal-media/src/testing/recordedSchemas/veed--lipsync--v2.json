@@ -1,0 +1,15 @@
+{
+  "endpoint_id": "veed/lipsync/v2",
+  "page": "https://fal.ai/models/veed/lipsync/v2",
+  "schema_url": "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=veed/lipsync/v2",
+  "read_on": "2026-11-23",
+  "required": ["video_url", "audio_url"],
+  "properties": {
+    "audio_url": {
+      "types": ["string"]
+    },
+    "video_url": {
+      "types": ["string"]
+    }
+  }
+}

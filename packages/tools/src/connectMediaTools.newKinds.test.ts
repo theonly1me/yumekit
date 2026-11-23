@@ -55,4 +55,40 @@ describe("the new kinds through the sample server", () => {
       { kind: "image", width_pixels: 400, height_pixels: 200 },
     ]);
   });
+
+  it("makes a talking clip of a picture with the voice as its sound with generate_talking_clip", async () => {
+    const { tools, outputDirectory } = await connectFixture({});
+    const picture = await tools.run({
+      capability: "image",
+      input: { prompt: "a face", width_pixels: 200, height_pixels: 100 },
+      outputDirectory,
+      fileStem: "face",
+    });
+    const voice = await tools.run({
+      capability: "speech",
+      input: { text: "hello there friend" },
+      outputDirectory,
+      fileStem: "voice",
+    });
+    if (!picture.ok || !voice.ok) throw new Error("the inputs failed");
+    const [face] = picture.value.result.files;
+    const [line] = voice.value.result.files;
+
+    const outcome = await tools.run({
+      capability: "talking-clip",
+      input: { media_path: face?.path ?? "", audio_path: line?.path ?? "" },
+      outputDirectory,
+      fileStem: "face-talking",
+    });
+
+    if (!outcome.ok) throw new Error(outcome.failure.kind);
+    expect(outcome.value).toMatchObject({
+      server: "sample",
+      model: "sample-talking-clip",
+    });
+    expect(outcome.value.result.files).toMatchObject([
+      { kind: "video", width_pixels: 200, height_pixels: 100 },
+    ]);
+    expect(outcome.value.result.files[0]?.duration_seconds).toBeCloseTo(0.9, 6);
+  });
 });

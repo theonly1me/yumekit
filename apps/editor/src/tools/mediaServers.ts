@@ -8,6 +8,7 @@ const capabilitySchema = z.enum([
   "music",
   "video",
   "sound-effect",
+  "talking-clip",
   "sharper",
 ]);
 

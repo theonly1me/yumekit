@@ -26,6 +26,12 @@ describe("the fixed requests", () => {
     ).toBe("Draw this scene by code, with no video clip.");
     expect(
       fixedRequestTextOf({
+        kind: "record-a-voice-line",
+        aboutClipId: "second",
+      }),
+    ).toBe("Record a voice line for this scene.");
+    expect(
+      fixedRequestTextOf({
         kind: "make-a-cast-picture",
         name: "Mia",
         description: "Short black hair",

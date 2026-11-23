@@ -8,6 +8,22 @@ export interface ReferenceIds {
   lastFrameAssetId?: string | undefined;
   cameraMoveId?: string | undefined;
   mediaAssetId?: string | undefined;
+  voiceAssetId?: string | undefined;
+  voicePart?: VoicePartIds | undefined;
+}
+
+interface VoicePartIds {
+  start_seconds: number;
+  duration_seconds: number;
+  lead_seconds?: number | undefined;
+}
+
+function voicePartRecord(part: VoicePartIds): JsonObject {
+  const { lead_seconds: leadSeconds, ...timing } = part;
+  return {
+    ...timing,
+    ...(leadSeconds === undefined ? {} : { lead_seconds: leadSeconds }),
+  };
 }
 
 function imagePathOf(options: {
@@ -97,5 +113,11 @@ export function recordedInputOf(options: {
     ...(ids.mediaAssetId === undefined
       ? {}
       : { media_asset_id: ids.mediaAssetId }),
+    ...(ids.voiceAssetId === undefined
+      ? {}
+      : { voice_asset_id: ids.voiceAssetId }),
+    ...(ids.voicePart === undefined
+      ? {}
+      : { voice_part: voicePartRecord(ids.voicePart) }),
   };
 }

@@ -51,9 +51,10 @@ A server has a capability when it lists a tool with the name in this table. Wire
 | `music`        | `generate_music`        | `prompt`, `duration_seconds`, `output_directory`, `file_stem`   |                                                                                                               |
 | `video`        | `generate_video`        | `prompt`, `duration_seconds`, `output_directory`, `file_stem`   | `first_frame_path`, `last_frame_path`, `reference_image_paths`, `width_pixels`, `height_pixels`, `with_audio` |
 | `sound-effect` | `generate_sound_effect` | `prompt`, `output_directory`, `file_stem`                       | `duration_seconds`                                                                                            |
+| `talking-clip` | `generate_talking_clip` | `media_path`, `audio_path`, `output_directory`, `file_stem`     | `prompt`                                                                                                      |
 | `sharper`      | `sharpen_media`         | `media_path`, `scale` (2 or 4), `output_directory`, `file_stem` |                                                                                                               |
 
-Document 09 has the rules for a video server. Document 16 ("Details of WP47") has the rules for a sound effect server and a sharper server.
+Document 09 has the rules for a video server. Document 16 ("Details of WP47") has the rules for a sound effect server and a sharper server, and "Details of the talking clips" the rules for a talking clip server.
 
 Each generate tool and `align_words` also accept the optional input `model` (document 10).
 
@@ -89,7 +90,14 @@ The harness validates each result against the schema. A result that does not mat
 
 ```ts
 type Capability =
-  "image" | "speech" | "align" | "music" | "video" | "sound-effect" | "sharper";
+  | "image"
+  | "speech"
+  | "align"
+  | "music"
+  | "video"
+  | "sound-effect"
+  | "talking-clip"
+  | "sharper";
 
 type MediaTools = {
   list: () => {
@@ -180,12 +188,12 @@ The client adds `output_directory` and `file_stem` after the fields of `input`, 
 
 ## Bundled servers in milestone 1
 
-| Folder               | Capabilities                                                            | Cost                           | Notes                                                                                                                                                                   |
-| -------------------- | ----------------------------------------------------------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `tools/sample-media` | `image`, `speech`, `align`, `music`, `video`, `sound-effect`, `sharper` | Free, no network               | Made for tests and for work on yumekit. See below                                                                                                                       |
-| `tools/openai-media` | `image`, `speech`, `align`                                              | The OpenAI API key of the user | Reads `OPENAI_API_KEY`                                                                                                                                                  |
-| `tools/gemini-media` | `image`, `speech`, `music`, `video`                                     | The Gemini API key of the user | Reads `GEMINI_API_KEY`. See documents 09 and 16. Not tested with a real key yet. Tests use recorded shapes from the documents.                                          |
-| `tools/fal-media`    | `image`, `video`, `sound-effect`, `sharper`                             | The fal API key of the user    | Reads `FAL_KEY`. Document 10 has its endpoints, and document 16 its models. Not tested with a real key yet. Tests use recorded shapes from the documents of 2026-11-22. |
+| Folder               | Capabilities                                                                            | Cost                           | Notes                                                                                                                                                                   |
+| -------------------- | --------------------------------------------------------------------------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tools/sample-media` | `image`, `speech`, `align`, `music`, `video`, `sound-effect`, `talking-clip`, `sharper` | Free, no network               | Made for tests and for work on yumekit. See below                                                                                                                       |
+| `tools/openai-media` | `image`, `speech`, `align`                                                              | The OpenAI API key of the user | Reads `OPENAI_API_KEY`                                                                                                                                                  |
+| `tools/gemini-media` | `image`, `speech`, `music`, `video`                                                     | The Gemini API key of the user | Reads `GEMINI_API_KEY`. See documents 09 and 16. Not tested with a real key yet. Tests use recorded shapes from the documents.                                          |
+| `tools/fal-media`    | `image`, `video`, `sound-effect`, `talking-clip`, `sharper`                             | The fal API key of the user    | Reads `FAL_KEY`. Document 10 has its endpoints, and document 16 its models. Not tested with a real key yet. Tests use recorded shapes from the documents of 2026-11-22. |
 
 ### `tools/sample-media`
 
@@ -197,6 +205,7 @@ The sample server gives the same file for the same input, with no model.
 - `generate_music` writes a WAV file with a low tone of the requested length.
 - `generate_video` writes an MP4 file with FFmpeg, as document 09 says. It accepts a `duration_seconds` up to 60.
 - `generate_sound_effect` writes a WAV file with a short high tone, 1 second long, or `duration_seconds` up to 30.
+- `generate_talking_clip` writes an MP4 with FFmpeg: the picture, or the video in a loop, with the voice file as its sound, as long as the voice. The lips do not move.
 - `sharpen_media` writes a real larger copy with FFmpeg: a PNG for a picture and an MP4 for a video, with the sound of the video. It adds no detail.
 
 ### `tools/openai-media`

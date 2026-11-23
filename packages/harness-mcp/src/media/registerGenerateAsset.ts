@@ -22,8 +22,9 @@ import { mediaPathInput } from "./mediaPath.js";
 import { mediaFailureOf } from "./mediaFailures.js";
 import { recordedInputOf, referencePathsInput } from "./referencePaths.js";
 import { reuseAsset, summaryOf } from "./reuseAsset.js";
+import { talkingVoiceOf, voicePathInput } from "./talkingVoice.js";
 import { videoInputOf } from "./videoChoices.js";
-import { videoLimitFailureOf } from "./videoLimit.js";
+import { roundedSeconds, videoLimitFailureOf } from "./videoLimit.js";
 
 async function generateAsset(options: {
   context: HarnessContext;
@@ -51,11 +52,15 @@ async function generateAsset(options: {
     lastFrameAssetId: request.last_frame_asset_id,
     cameraMoveId: request.camera_move,
     mediaAssetId: request.media_asset_id,
+    voiceAssetId: request.voice_asset_id,
+    voicePart: request.voice_part,
   };
   const paths = referencePathsInput({ snapshot, projectFolder, ids });
   if (!paths.ok) return failureResult(paths.failure);
   const mediaPath = mediaPathInput({ snapshot, projectFolder, request });
   if (!mediaPath.ok) return failureResult(mediaPath.failure);
+  const voice = talkingVoiceOf({ snapshot, projectFolder, request });
+  if (!voice.ok) return failureResult(voice.failure);
   const tool = toolNameByCapability[request.capability];
   const input = recordedInputOf({ input: request.input, ids });
   const existing = findReusableAsset({
@@ -74,19 +79,33 @@ async function generateAsset(options: {
       hint: "Choose another asset_id. Call list_assets to see the ids in use.",
     });
   }
-  if (request.capability === "video") {
+  if (request.capability === "video" || voice.value !== undefined) {
     const limitFailure = videoLimitFailureOf({
       snapshot,
-      input: request.input,
+      input:
+        voice.value === undefined
+          ? request.input
+          : { duration_seconds: roundedSeconds(voice.value.seconds) },
       limitSeconds: context.mediaTools.limits().generatedVideoSeconds,
     });
     if (limitFailure) return failureResult(limitFailure);
   }
+  const voicePath = await voicePathInput({
+    voice: voice.value,
+    projectFolder,
+    assetId: request.asset_id,
+  });
+  if (!voicePath.ok) return failureResult(voicePath.failure);
   const ran = await context.mediaTools.run({
     capability: request.capability,
     ...(request.server === undefined ? {} : { server: request.server }),
     ...(request.model === undefined ? {} : { model: request.model }),
-    input: { ...sentInput.value, ...paths.value, ...mediaPath.value },
+    input: {
+      ...sentInput.value,
+      ...paths.value,
+      ...mediaPath.value,
+      ...voicePath.value,
+    },
     outputDirectory: assetFilesFolder(projectFolder),
     fileStem: request.asset_id,
     ...(onProgress === undefined ? {} : { onProgress }),

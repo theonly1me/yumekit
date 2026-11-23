@@ -23,6 +23,7 @@ const realOutputByTool = {
   align_words: "Spreads the words evenly",
   generate_video: "with a frame counter as large text",
   generate_sound_effect: "one short high tone",
+  generate_talking_clip: "with the voice file as its sound",
   sharpen_media: "a plain larger copy",
 } as const;
 

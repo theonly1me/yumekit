@@ -21,6 +21,7 @@ const capabilityWords: Record<Capability, string> = {
   music: "music",
   video: "video",
   "sound-effect": "sound effects",
+  "talking-clip": "talking clips",
   sharper: "sharper copies",
 };
 

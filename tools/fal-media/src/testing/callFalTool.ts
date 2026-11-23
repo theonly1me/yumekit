@@ -10,6 +10,7 @@ export async function callFalTool(options: {
     | "generate_image"
     | "generate_video"
     | "generate_sound_effect"
+    | "generate_talking_clip"
     | "sharpen_media";
   arguments: (folder: string) => Promise<Record<string, unknown>>;
   respond?: (request: Request) => Promise<Response>;

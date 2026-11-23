@@ -1,0 +1,30 @@
+{
+  "endpoint_id": "minimax/h3-max/lip-sync/image-to-video",
+  "page": "https://fal.ai/models/minimax/h3-max/lip-sync/image-to-video",
+  "schema_url": "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=minimax/h3-max/lip-sync/image-to-video",
+  "read_on": "2026-11-23",
+  "required": ["image_url", "audio_url"],
+  "properties": {
+    "audio_url": {
+      "types": ["string"]
+    },
+    "enable_safety_checker": {
+      "types": ["boolean"]
+    },
+    "enable_transcription": {
+      "types": ["boolean"]
+    },
+    "image_url": {
+      "types": ["string"]
+    },
+    "resolution": {
+      "types": ["string"],
+      "enum": ["480P", "768P", "1080P", "2K"]
+    },
+    "seed": {
+      "types": ["integer", "null"],
+      "minimum": 0,
+      "maximum": 2147483647
+    }
+  }
+}

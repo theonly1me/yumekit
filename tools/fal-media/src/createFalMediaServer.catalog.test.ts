@@ -10,7 +10,13 @@ describe("describe_media_server", () => {
 
     expect(media.requests).toHaveLength(0);
     expect(parsed.keys.map((key) => key.variable)).toEqual(["FAL_KEY"]);
-    for (const capability of ["image", "video", "sound-effect", "sharper"]) {
+    for (const capability of [
+      "image",
+      "video",
+      "sound-effect",
+      "talking-clip",
+      "sharper",
+    ]) {
       expect(
         parsed.models.filter(
           (model) => model.capability === capability && model.is_default,
@@ -31,7 +37,7 @@ describe("describe_media_server", () => {
     expect(makersOf(idsOf("video")).size).toBeGreaterThanOrEqual(6);
   });
 
-  it("lists at least 2 sound effect models, 2 sharper models for pictures, and 2 for video", async () => {
+  it("lists at least 2 sound effect models, and 2 sharper and 2 talking clip models each for pictures and for video", async () => {
     const { parsed } = await describeWithNoKey();
     const countOf = (options: { capability: string; accepts?: string }) =>
       parsed.models.filter(
@@ -47,6 +53,12 @@ describe("describe_media_server", () => {
     ).toBeGreaterThanOrEqual(2);
     expect(
       countOf({ capability: "sharper", accepts: "video_input" }),
+    ).toBeGreaterThanOrEqual(2);
+    expect(
+      countOf({ capability: "talking-clip", accepts: "image_input" }),
+    ).toBeGreaterThanOrEqual(2);
+    expect(
+      countOf({ capability: "talking-clip", accepts: "video_input" }),
     ).toBeGreaterThanOrEqual(2);
   });
 
@@ -92,6 +104,7 @@ describe("describe_media_server", () => {
       image: await media.inputFieldsOf("generate_image"),
       video: await media.inputFieldsOf("generate_video"),
       "sound-effect": await media.inputFieldsOf("generate_sound_effect"),
+      "talking-clip": await media.inputFieldsOf("generate_talking_clip"),
       sharper: await media.inputFieldsOf("sharpen_media"),
     };
 
