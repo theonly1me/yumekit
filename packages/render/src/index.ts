@@ -19,3 +19,7 @@ export {
 } from "./renderVideo.js";
 export { checkSceneCode } from "./sceneCode/checkSceneCode.js";
 export { findFfmpeg } from "./video/findFfmpeg.js";
+export {
+  createPictureRenderer,
+  type PictureRenderer,
+} from "./pictures/createPictureRenderer.js";

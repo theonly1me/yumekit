@@ -249,7 +249,7 @@ Package `apps/editor` (browser): React, TypeScript, and Vite, built to static fi
 These rules came from the build of WP21.
 
 1. The scenes row shows one still for each clip of the first scene track that is not a caption track, in start order. A caption track is a scene track whose clips all show `caption-words` scenes, as in `place_narration`.
-2. Each still comes from one call of `preview_frames` for up to 8 clips, so the stills of a project cost one renderer page and no extra preview page. The frame is 75% into the clip, where kit motion has settled. The scale is the smallest of 0.25, 0.5, and 1 that gives a still 380 pixels wide or more. The editor reads the stills again after each `project-changed`.
+2. Each still comes from one call of `preview_frames` for up to 8 clips, so the stills of a project cost one renderer page and no extra preview page. The frame is 75% into the clip, where kit motion has settled. The scale is the smallest of 0.25, 0.5, and 1 that gives a still 380 pixels wide or more. After each `project-changed`, the editor asks only for the stills whose key changed (document 04, "Details of WP53").
 3. A still is the full frame of the output, so it also shows the captions of that frame.
 4. The output switch shows the label of each output with a capital first letter. `yumekit init` sets the label to the id.
 5. A clip picked in the scenes row or the timeline stays selected while the playhead is inside it. Otherwise the selection follows the clip of the first scene track at the playhead. A pick in the scenes row also opens the Scene tab.

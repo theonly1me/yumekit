@@ -2,12 +2,9 @@ import { startHomeServer } from "@yumekit/engine";
 import { failed, usageError, type CommandResult } from "../../commandResult.js";
 import { parseCommandLine } from "../../options.js";
 import { serverCommandOf } from "../../serverCommand.js";
+import { stopOnEnd } from "../../ending/stopOnEnd.js";
 import { openBrowser } from "../open/openBrowser.js";
-import {
-  builtEditorFolder,
-  closeOnSignal,
-  portOption,
-} from "../open/serving.js";
+import { builtEditorFolder, portOption } from "../open/serving.js";
 
 export async function homeCommand(args: string[]): Promise<CommandResult> {
   const parsed = parseCommandLine({
@@ -29,7 +26,7 @@ export async function homeCommand(args: string[]): Promise<CommandResult> {
     return failed(`The port ${String(started.failure.port)} is not free.`);
   }
   const home = started.value;
-  closeOnSignal({
+  stopOnEnd({
     close: home.close,
     stoppedLine: "yumekit: stopped.",
   });

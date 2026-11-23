@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { EngineClient } from "../../engine/engineClient.js";
-import type { Output } from "../../engine/snapshot.js";
+import type { Output, Snapshot } from "../../engine/snapshot.js";
 import type { PictureCard } from "./usePictureCards.js";
 import { picturesOf, type ScenePicture } from "./useScenePictures.js";
 
@@ -10,9 +10,9 @@ export function useLargePicture(options: {
   client: EngineClient;
   output: Output;
   card: PictureCard;
-  revision: number;
+  snapshot: Snapshot;
 }): ScenePicture | undefined {
-  const { client, output, card, revision } = options;
+  const { client, output, card, snapshot } = options;
   const [picture, setPicture] = useState<ScenePicture>();
   const { key, clip, scene } = card;
 
@@ -20,6 +20,7 @@ export function useLargePicture(options: {
     let isCurrent = true;
     picturesOf({
       client,
+      snapshot,
       output,
       scale: largePictureScale,
       clips: clip === undefined ? [] : [clip],
@@ -34,7 +35,7 @@ export function useLargePicture(options: {
     return () => {
       isCurrent = false;
     };
-  }, [client, output, key, clip, scene.id, revision]);
+  }, [client, snapshot, output, key, clip, scene.id]);
 
   return picture;
 }

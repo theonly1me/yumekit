@@ -1,13 +1,17 @@
 import type { Browser, Page } from "playwright-core";
 import type { RenderFailure, RenderScale } from "../renderFailure.js";
-import type { SeekResult } from "../page/stagePageData.js";
+import type { SeekResult, StagePageLoad } from "../page/stagePageData.js";
+
+export type PictureUse = "still" | "video";
 
 export interface BrowserStagePage {
+  load: (pageLoad: StagePageLoad) => Promise<void>;
   seek: (frame: number) => Promise<SeekResult>;
-  screenshot: () => Promise<Uint8Array>;
+  screenshot: (use: PictureUse) => Promise<Uint8Array>;
+  close: () => Promise<void>;
 }
 
-export interface StagePage extends BrowserStagePage {
+export interface StagePage extends Omit<BrowserStagePage, "load" | "close"> {
   videoFramesFailure: () => RenderFailure | undefined;
 }
 
@@ -48,7 +52,16 @@ export async function openStagePage(options: {
   const page = await context.newPage();
   await page.goto(options.pageUrl);
   await waitForStage(page);
+  const protocol = await context.newCDPSession(page);
   return {
+    load: (pageLoad) =>
+      page.evaluate(async (stageLoad) => {
+        const stage = window.yumekitStage;
+        if (stage === undefined) {
+          throw new Error("The stage page is not ready");
+        }
+        await stage.load(stageLoad);
+      }, JSON.stringify(pageLoad)),
     seek: (frame) =>
       page.evaluate(async (stageFrame) => {
         const stage = window.yumekitStage;
@@ -57,6 +70,24 @@ export async function openStagePage(options: {
         }
         return stage.seek(stageFrame);
       }, frame),
-    screenshot: () => page.screenshot({ type: "png", caret: "initial" }),
+    screenshot: async (use) => {
+      if (use === "still") {
+        return page.screenshot({ type: "png", caret: "initial" });
+      }
+      const captured = await protocol.send("Page.captureScreenshot", {
+        format: "png",
+        optimizeForSpeed: true,
+        clip: {
+          x: 0,
+          y: 0,
+          width: output.widthPixels,
+          height: output.heightPixels,
+          scale,
+        },
+        captureBeyondViewport: false,
+      });
+      return Buffer.from(captured.data, "base64");
+    },
+    close: () => context.close(),
   };
 }

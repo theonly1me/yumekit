@@ -1,5 +1,5 @@
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import { renderSceneFrame, type RenderScale } from "@yumekit/render";
+import type { RenderScale } from "@yumekit/render";
 import { z } from "zod";
 import type { HarnessContext } from "../context.js";
 import { idInput, scaleInput } from "../inputs.js";
@@ -48,28 +48,27 @@ async function sceneStillsResult(options: {
     width_pixels: number;
     height_pixels: number;
   }[] = [];
-  for (const sceneId of sceneIds) {
-    const rendered = await renderSceneFrame({
-      folder: context.store.folder,
-      outputId,
-      sceneId,
-      durationFrames,
-      frame,
-      scale,
-    });
-    if (!rendered.ok) return failureResult(renderFailureOf(rendered.failure));
+  const rendered = await context.pictures.renderSceneFrames({
+    outputId,
+    sceneIds,
+    durationFrames,
+    frame,
+    scale,
+  });
+  if (!rendered.ok) return failureResult(renderFailureOf(rendered.failure));
+  rendered.value.forEach((...[picture, index]) => {
     images.push({
       type: "image",
-      data: Buffer.from(rendered.value.png).toString("base64"),
+      data: Buffer.from(picture.png).toString("base64"),
       mimeType: "image/png",
     });
     pictures.push({
-      scene_id: sceneId,
+      scene_id: sceneIds[index] ?? "",
       frame,
-      width_pixels: rendered.value.widthPixels,
-      height_pixels: rendered.value.heightPixels,
+      width_pixels: picture.widthPixels,
+      height_pixels: picture.heightPixels,
     });
-  }
+  });
   return {
     content: [
       {

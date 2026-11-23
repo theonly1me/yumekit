@@ -54,6 +54,7 @@ export async function encodeRange(options: {
       const drawn = await drawFrame({
         stagePage,
         frame: range.firstFrame + framesDone,
+        use: "video",
       });
       if (!drawn.ok) {
         encoder.stop();

@@ -1,5 +1,6 @@
-import { fail, type Outcome } from "./outcome.js";
+import type { Outcome } from "./outcome.js";
 import { loadOutput } from "./project/loadOutput.js";
+import { sceneAloneOf } from "./project/sceneAlone.js";
 import type { RenderFailure, RenderScale } from "./renderFailure.js";
 import { renderLoadedFrame, type RenderedFrame } from "./renderFrame.js";
 
@@ -15,37 +16,16 @@ export async function renderSceneFrame(options: {
   if (!loaded.ok) {
     return loaded;
   }
-  const { snapshot, output } = loaded.value;
-  if (!snapshot.scenes.some((scene) => scene.id === options.sceneId)) {
-    return fail({
-      kind: "scene-not-found",
-      sceneId: options.sceneId,
-      message: `The project has no scene "${options.sceneId}".`,
-    });
+  const alone = sceneAloneOf({
+    loaded: loaded.value,
+    sceneId: options.sceneId,
+    durationFrames: options.durationFrames,
+  });
+  if (!alone.ok) {
+    return alone;
   }
   return renderLoadedFrame({
-    loaded: {
-      ...loaded.value,
-      timeline: {
-        outputId: output.id,
-        tracks: [
-          {
-            id: "scene",
-            kind: "scene",
-            clips: [
-              {
-                id: options.sceneId,
-                sceneId: options.sceneId,
-                startFrame: 0,
-                durationFrames: options.durationFrames,
-                sceneStartFrame: 0,
-              },
-            ],
-          },
-        ],
-      },
-      frameCount: options.durationFrames,
-    },
+    loaded: alone.value,
     frame: options.frame,
     scale: options.scale,
   });

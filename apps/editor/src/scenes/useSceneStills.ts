@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import type { EngineClient } from "../engine/engineClient.js";
-import type { Output, SceneClip } from "../engine/snapshot.js";
+import type { Output, SceneClip, Snapshot } from "../engine/snapshot.js";
+import { timelineOf } from "../timeline/timelineFacts.js";
+import { clipPictureKey } from "./pictureKeys.js";
+import { askForPictures } from "./pictureStore.js";
 
-const framesInOneCall = 8;
 const stillScales = [0.25, 0.5, 1] as const;
 const smallestStillWidthPixels = 380;
 
@@ -25,47 +27,54 @@ export function stillScaleOf(output: Output): number {
 
 async function stillsOf(options: {
   client: EngineClient;
+  snapshot: Snapshot;
   output: Output;
   clips: SceneClip[];
 }): Promise<Map<string, string>> {
-  const { client, output, clips } = options;
-  const stills = new Map<string, string>();
-  for (let first = 0; first < clips.length; first += framesInOneCall) {
-    const group = clips.slice(first, first + framesInOneCall);
-    const reply = await client.callTool({
-      name: "preview_frames",
-      input: {
-        output_id: output.id,
-        frames: group.map(stillFrameOf),
-        scale: stillScaleOf(output),
-      },
-    });
-    if (!reply.ok || reply.value.isError) continue;
-    group.forEach((...[clip, index]) => {
-      const image = reply.value.images[index];
-      if (image !== undefined) {
-        stills.set(
-          stillKey({ outputId: output.id, clipId: clip.id }),
-          `data:${image.mimeType};base64,${image.base64}`,
-        );
-      }
-    });
-  }
-  return stills;
+  const { snapshot, output, clips } = options;
+  const scale = stillScaleOf(output);
+  const timeline = timelineOf({ snapshot, outputId: output.id });
+  const asks = clips.map((clip) => {
+    const frame = stillFrameOf(clip);
+    return {
+      clip,
+      key: clipPictureKey({ snapshot, timeline, output, scale, frame }),
+      target: { kind: "frame" as const, frame },
+    };
+  });
+  const pictures = await askForPictures({
+    caller: options.client,
+    outputId: output.id,
+    scale,
+    asks,
+  });
+  return new Map(
+    asks.flatMap((ask) => {
+      const picture = pictures.get(ask.key);
+      return picture?.kind === "ready"
+        ? [
+            [
+              stillKey({ outputId: output.id, clipId: ask.clip.id }),
+              picture.source,
+            ] as const,
+          ]
+        : [];
+    }),
+  );
 }
 
 export function useSceneStills(options: {
   client: EngineClient;
+  snapshot: Snapshot;
   output: Output;
   clips: SceneClip[];
-  revision: number;
 }): ReadonlyMap<string, string> {
-  const { client, output, clips, revision } = options;
+  const { client, snapshot, output, clips } = options;
   const [stills, setStills] = useState<ReadonlyMap<string, string>>(new Map());
 
   useEffect(() => {
     let isCurrent = true;
-    stillsOf({ client, output, clips })
+    stillsOf({ client, snapshot, output, clips })
       .then((made) => {
         if (isCurrent) setStills(made);
       })
@@ -75,7 +84,7 @@ export function useSceneStills(options: {
     return () => {
       isCurrent = false;
     };
-  }, [client, output, clips, revision]);
+  }, [client, snapshot, output, clips]);
 
   return stills;
 }

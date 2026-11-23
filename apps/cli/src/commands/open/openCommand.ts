@@ -4,7 +4,8 @@ import { failed, usageError, type CommandResult } from "../../commandResult.js";
 import { parseCommandLine } from "../../options.js";
 import { realFolderOf, serverCommandOf } from "../../serverCommand.js";
 import { openBrowser } from "./openBrowser.js";
-import { builtEditorFolder, closeOnSignal, portOption } from "./serving.js";
+import { stopOnEnd } from "../../ending/stopOnEnd.js";
+import { builtEditorFolder, portOption } from "./serving.js";
 
 function showUrl(options: { url: string; withBrowser: boolean }): void {
   if (options.withBrowser) openBrowser(options.url);
@@ -57,7 +58,7 @@ export async function openCommand(args: string[]): Promise<CommandResult> {
     }
   }
   const engine = started.value;
-  closeOnSignal({
+  stopOnEnd({
     close: engine.close,
     stoppedLine: "yumekit: the engine stopped.",
   });

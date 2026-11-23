@@ -79,6 +79,38 @@ describe("render mode guards", () => {
     expect(document.querySelector("[data-yumekit-guard]")).toBeNull();
   });
 
+  it("removes every guard on dispose when a scene throws in its dispose", async () => {
+    const { stage } = stageForTest({
+      project: stageProject([
+        [
+          clip({
+            id: "one",
+            sceneId: "bad",
+            startFrame: 0,
+            durationFrames: 30,
+          }),
+        ],
+      ]),
+      loadScene: () =>
+        Promise.resolve({
+          mount: () =>
+            Promise.resolve({
+              seek: () => Promise.resolve(),
+              dispose: () => {
+                throw new Error("The scene broke in dispose");
+              },
+            }),
+        }),
+      mode: "render",
+    });
+    await stage.seek(1);
+    expect(() => {
+      stage.dispose();
+    }).toThrow("The scene broke in dispose");
+    expect(Date.now()).not.toBe(Date.UTC(2000, 0, 1));
+    expect(typeof new XMLHttpRequest().open).toBe("function");
+  });
+
   it("applies no guard in preview mode", async () => {
     const { element, stage } = noiseStage("preview");
     expect(Date.now()).not.toBe(Date.UTC(2000, 0, 1));

@@ -5,6 +5,7 @@ import { createHarnessServer } from "@yumekit/harness-mcp";
 import { openProject } from "@yumekit/project";
 import { connectMediaTools, findBundledServers } from "@yumekit/tools";
 import { failed, usageError, type CommandResult } from "../commandResult.js";
+import { stopOnEnd } from "../ending/stopOnEnd.js";
 import { parseCommandLine, stringOption } from "../options.js";
 import { serveBridge } from "./bridge/serveBridge.js";
 
@@ -49,11 +50,13 @@ export async function mcpCommand(args: string[]): Promise<CommandResult> {
     );
   }
   const server = createHarnessServer({ store: opened.value, mediaTools });
-  server.server.onclose = () => {
-    mediaTools.close().catch((error: unknown) => {
-      process.stderr.write(`yumekit: ${String(error)}\n`);
-    });
-  };
   await server.connect(new StdioServerTransport());
+  stopOnEnd({
+    close: async () => {
+      await server.close();
+      await mediaTools.close();
+    },
+    endsWithInput: true,
+  });
   return { kind: "serving" };
 }

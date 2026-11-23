@@ -25,7 +25,7 @@ export function PictureDetail(
     client,
     output,
     card,
-    revision: snapshot.revision,
+    snapshot,
   });
   const clipId = card.clip?.id;
   const ask = async (request: FixedRequest): Promise<boolean> => {

@@ -5,11 +5,19 @@ import {
   type VideoFrameServer,
 } from "../videoFrames/videoFrameServer.js";
 
-export function pageHtmlOf(entryFile: string): string {
+export const moduleImporterScript =
+  "<script>window.yumekitImport = (url) => import(url);</script>";
+
+export function pageHtmlOf(options: {
+  entryFile: string;
+  headScripts?: string[];
+}): string {
+  const { entryFile, headScripts = [] } = options;
   return [
     "<!doctype html>",
     '<html><head><meta charset="utf-8">',
     "<style>html, body { margin: 0; background: #000000; overflow: hidden; }</style>",
+    ...headScripts,
     '</head><body><div id="stage"></div>',
     `<script type="module" src="/@fs${encodeURI(entryFile)}"></script>`,
     "</body></html>",
