@@ -175,6 +175,30 @@ The tests use real Chromium and real FFmpeg. They do not compare against stored 
 
 CI installs Chromium with Playwright and installs FFmpeg.
 
+## Faster pictures
+
+Measured on 2026-11-22 and 2026-11-23: each preview picture starts its own browser, the Making screen asks for each picture again after each change, a large picture of the Pictures view takes 17 to 23 seconds on a CI runner, and 90 frames of a scene on a moving backdrop take 14.6 seconds where a flat scene takes 6.2 seconds. The extra time of the backdrop is the PNG encoding of each frame.
+
+| Id  | Decision                                                                                                              | Why                                                                                    |
+| --- | --------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| R1  | An engine keeps one browser for its pictures: `preview_frame`, `preview_frames`, `preview_scenes`, and `render_still` | The start of a browser costs more than the picture                                     |
+| R2  | One call draws each of its frames on one page                                                                         | A page load for each frame repeats the same work                                       |
+| R3  | A video render takes its frames in the fastest form that loses no pixel                                               | The encoder makes the file. The PNG of a frame is thrown away                          |
+| R4  | The editor asks again only for the picture of a scene that changed                                                    | A change of one scene must not draw six scenes                                         |
+| R5  | An engine and a home server stop each process that they started, for each way that they end                           | A browser or a media server that stays alive is a defect on the computer of the person |
+
+- R1: the browser starts with the first picture. It closes after 60 seconds with no picture, and when the engine closes. A project change needs no new browser: the page loads the project again. A command with no engine, such as `yumekit frame`, starts its own browser as before.
+- R1: a picture that fails because the browser ended gets one new browser and one more try.
+- R2 and R1 keep the repeat check of this document: a frame of a kept page equals the same frame of a new page. A test proves it for a kit scene and for a custom scene.
+- R3: the builder measures the choices that the browser has for a screenshot without loss (for example the speed setting of the screenshot command of the browser protocol, and raw pixels), with 90 frames of a `glow` scene at full size. The builder takes the fastest one that gives the same decoded pixels as today. If no choice without loss is at least 1.5 times faster, the builder reports the numbers and stops this part: a form with loss is a decision of the design.
+- R3 applies to `render_video` only. A still and a preview stay PNG.
+- R4: the editor keeps each scene picture with a key of the scene content (its code or component, its props, the look, and the output size). It asks only for keys that it does not have.
+- R5: the ways to end are the end of the command, `SIGINT`, `SIGTERM`, `SIGHUP`, and a failure that is not handled. The processes are the media servers, the browsers, the engines of a home server, and an agent program that runs. A test starts a home server with an open project, sends `SIGTERM`, and finds no process of it after 5 seconds.
+
+Targets on the computer of the owner, each measured before and after in the pull request: a second card picture in under 1.5 seconds, the six pictures of a project after one scene change in the time of one picture, and 90 frames of a `glow` scene at full size in at most 1.5 times the time of a flat scene.
+
+Work package WP53 holds R1 to R5.
+
 ## Not in milestone 1
 
 - Parallel render workers and faster capture. Each pull request that touches the renderer reports frames per second for the test project, so later work has a baseline.
