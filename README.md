@@ -17,29 +17,43 @@ You type what you want. The AI program that you already have (Claude Code, Codex
 - **An editor that a person can use.** Change a text in the video with a click, change the script, the pictures, the voice, and the music, and undo each change.
 - **Everything stays on your computer.** A project is a folder of plain files. yumekit has no server and no account.
 
-## Install
+## Get started
 
-yumekit needs Node.js 22 or later, and FFmpeg.
+You need Node.js 22 or later, and FFmpeg. If FFmpeg is missing, `yumekit doctor` gives the command that installs it on your system.
 
 ```sh
 npm install -g yumekit
-yumekit doctor
+yumekit setup
+yumekit
 ```
 
-`yumekit doctor` checks FFmpeg, the browser of the renderer, and the agent programs. Each line that is not "ok" says what to do. To get the browser, run `yumekit setup`.
+1. `npm install -g yumekit` installs yumekit.
+2. `yumekit setup` downloads the browser that draws your videos. It runs one time.
+3. `yumekit` opens the start screen in your browser. Type what you want to make, and click "Make the video".
 
-## First video
+yumekit asks the AI program on your computer (Claude Code, Codex, or Cursor) to make the video, so one of them must be installed and signed in. Your projects are folders in `~/Documents/yumekit`.
 
-1. Run `yumekit`. It prints the URL of the start screen and opens it in the browser.
-2. Type what you want to make. If you want, pick a format, the platforms, the look, and how long it is.
-3. Click "Make the video". yumekit makes the project in `~/Documents/yumekit` and asks the AI program on your computer to make it. With "Show me the plan first", the AI stops after the script and the pictures, and you click "Continue".
-4. Open each step to check it, then open the editor. Change what you want, then click "Export".
+If something does not work, run `yumekit doctor`. It checks Node.js, FFmpeg, the browser, and the agent programs, and each line that is not "ok" says what to do.
 
-The start screen lists your recent projects. To open a project folder directly, run `yumekit open <folder>`.
+## Or let your agent do it
+
+Paste this into Claude Code, Codex, Cursor, or another coding agent:
+
+```text
+Read https://github.com/theonly1me/yumekit/blob/main/skills/yumekit/SKILL.md and set up yumekit on this computer. Then start it for me.
+```
+
+The file tells the agent how to install yumekit, how to check the computer, and how to make a video with the yumekit tools. In a clone of this repository, the same file is `skills/yumekit/SKILL.md`.
+
+## What you do after the first video
+
+- Open each step to check it: the script, the pictures, the voice, and the music.
+- Open the editor to change a text with a click, to change a scene, and to ask the AI for a change.
+- Click "Export" for one file for each platform.
 
 ## Keys
 
-yumekit needs no key for the AI: it uses the sign-in of your agent program. A media service needs its own key, which you add in Settings of the editor or with `yumekit keys set <VARIABLE>`. yumekit keeps a key on your computer and sends it only to its own service. A model that nobody has run with yumekit yet shows "Not tested with yumekit yet".
+yumekit needs no key for the AI: it uses the sign-in of your agent program. It needs no key for a voice. A media service needs its own key, which you add in Settings of the editor or with `yumekit keys set <VARIABLE>`. yumekit keeps a key on your computer and sends it only to its own service. A model that nobody has run with yumekit yet shows "Not tested with yumekit yet".
 
 ## Use an agent
 
@@ -63,39 +77,9 @@ npx -y yumekit mcp --project /path/to/my-video
 - The render is code on our own open stack (headless Chromium and FFmpeg), so each frame stays editable.
 - The agent and the person change a project through the same edit operations.
 
-## Package map
+## Design and code
 
-| Folder                 | What it owns                                                          |
-| ---------------------- | --------------------------------------------------------------------- |
-| `packages/project`     | The project folder format, the schema, validation, undo, and events.  |
-| `packages/render`      | Frames and video files from scenes. Hides Chromium and FFmpeg.        |
-| `packages/tools`       | Connections to media MCP servers, cost estimates, and the budget cap. |
-| `packages/brain`       | Agent CLI detection, sessions, and the event stream.                  |
-| `packages/harness-mcp` | The MCP tools that map to project edits and jobs.                     |
-| `packages/engine`      | The engine process: the job queue, the editor server, and wiring.     |
-| `packages/scene-kit`   | Scene components and style packs.                                     |
-| `apps/editor`          | The React web editor.                                                 |
-| `apps/cli`             | The `yumekit` command.                                                |
-| `tools/`               | Bundled MCP tool servers, one folder for each.                        |
-
-## Design
-
-Read `docs/design/README.md` first. Agents also read `AGENTS.md`.
-
-## Work on yumekit
-
-You need Node.js 22 or later and pnpm. The version of pnpm is pinned in `package.json`.
-
-1. Enable pnpm: `corepack enable pnpm`.
-2. Install the dependencies: `pnpm install`.
-3. Run the linter and the format check: `pnpm lint`.
-4. Run the type check: `pnpm typecheck`.
-5. Run the tests: `pnpm test`.
-6. Build each package: `pnpm build`.
-
-To format the files, run `pnpm format`.
-
-To make the npm package file, run `pnpm run pack-release`. Then run `pnpm run check-release`, which installs that file in a temporary folder and makes a short video with it. Document 14 in `docs/design` has the release steps.
+The design is in `docs/design`: read `docs/design/README.md` first. To build yumekit from its source and to change it, read `CONTRIBUTING.md`.
 
 ## License
 
