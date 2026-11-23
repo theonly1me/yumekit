@@ -28,7 +28,11 @@ export function whole(text: string): string {
   });
 }
 
-export function toolUse(options: { callId: string; tool: string }): string {
+export function toolUse(options: {
+  callId: string;
+  tool: string;
+  input?: Record<string, unknown>;
+}): string {
   return line({
     type: "assistant",
     message: {
@@ -37,7 +41,7 @@ export function toolUse(options: { callId: string; tool: string }): string {
           type: "tool_use",
           id: options.callId,
           name: `mcp__yumekit__${options.tool}`,
-          input: {},
+          input: options.input ?? {},
         },
       ],
     },

@@ -118,7 +118,12 @@ describe("Make this person talk", () => {
     for (const outputId of ["wide", "tall"]) {
       await runningEngine().callTool({
         name: "place_narration",
-        input: { output_id: outputId, asset_id: "voice", start_frame: 0 },
+        input: {
+          output_id: outputId,
+          asset_id: "voice",
+          start_frame: 0,
+          partial: true,
+        },
       });
     }
     const editor = await openEditor(runningEngine().url);

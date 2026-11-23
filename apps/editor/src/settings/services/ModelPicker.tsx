@@ -8,11 +8,8 @@ import {
   type MediaChoice,
   type ModelTarget,
 } from "./mediaChoices.js";
+import { ServiceLine } from "./ServiceLine.js";
 import "./services.css";
-
-const serviceLines: Partial<Record<string, string>> = {
-  "local-voice": "Free. It runs on your computer.",
-};
 
 type PickState =
   | { kind: "idle" }
@@ -102,9 +99,7 @@ export function ModelPicker(props: {
                 {service.state === "ready" ? "Ready" : "Needs a key"}
               </span>
             </h4>
-            {serviceLines[service.server] === undefined ? undefined : (
-              <p className="fact">{serviceLines[service.server]}</p>
-            )}
+            <ServiceLine client={props.client} service={service} />
             <ul className="model-options">
               {targetsOf(service).map((target) => (
                 <li key={target.model ?? target.server}>

@@ -30,6 +30,11 @@ export const progressServerCommand: ServerCommand = {
   args: [fileURLToPath(new URL("./progressMediaServer.ts", import.meta.url))],
 };
 
+export const downloadServerCommand: ServerCommand = {
+  command: process.execPath,
+  args: [fileURLToPath(new URL("./downloadMediaServer.ts", import.meta.url))],
+};
+
 export const missingServerCommand: ServerCommand = {
   command: "yumekit-command-that-does-not-exist",
   args: [],

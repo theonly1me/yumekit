@@ -6,11 +6,15 @@ import {
   shownRequestTextOf,
 } from "../chat/requestEntryText.js";
 import type { EngineClient } from "../engine/engineClient.js";
+import { stepProgressSchema } from "../chat/chatSchemas.js";
 import { fixedRequestTextOf } from "../parts/fixedRequests.js";
 
 const stepSchema = z.object({
   tool: z.string(),
   state: z.enum(["running", "done", "failed"]),
+  capability: z.string().optional(),
+  reason: z.string().optional(),
+  progress: stepProgressSchema.optional(),
 });
 
 const entrySchema = z.discriminatedUnion("kind", [
@@ -23,6 +27,7 @@ const entrySchema = z.discriminatedUnion("kind", [
   z.object({
     kind: z.literal("answer"),
     id: z.string(),
+    text: z.string().default(""),
     state: z.enum(["running", "done", "stopped", "failed"]),
     steps: z.array(stepSchema),
   }),

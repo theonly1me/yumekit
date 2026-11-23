@@ -1,47 +1,53 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { describeLocalVoice, registerDescribeTool } from "./catalog.ts";
 import type { FetchFile } from "./naturalVoice/download.ts";
-import { modelFolderOf, type NaturalModel } from "./naturalVoice/modelFiles.ts";
+import {
+  modelFolderOf,
+  sizeTextOf,
+  type NaturalModel,
+} from "./naturalVoice/modelFiles.ts";
 import type { LoadSpeaker } from "./naturalVoice/naturalSpeaker.ts";
 import { createNaturalVoice } from "./naturalVoice/naturalVoice.ts";
-import { registerSpeechTool } from "./speech/registerSpeechTool.ts";
-import type { RunProgram } from "./systemVoice/runProgram.ts";
-import { systemVoiceOf } from "./systemVoice/systemVoice.ts";
+import { approvedVoicesOf, type VoiceEntry } from "./naturalVoice/voices.ts";
+import {
+  registerPrepareTool,
+  registerSpeechTool,
+} from "./speech/registerSpeechTool.ts";
 
 export function createLocalVoiceServer(options: {
-  platform: NodeJS.Platform;
   environment: NodeJS.ProcessEnv;
-  runProgram: RunProgram;
   fetchFile: FetchFile;
   loadSpeaker: LoadSpeaker;
   naturalModel: NaturalModel;
+  voices: VoiceEntry[];
 }): McpServer {
   const server = new McpServer({
     name: "yumekit-local-voice",
     version: "0.0.0",
   });
-  const systemVoice = systemVoiceOf({
-    platform: options.platform,
-    run: options.runProgram,
-  });
+  const { naturalModel, voices } = options;
   const naturalVoice = createNaturalVoice({
     folder: modelFolderOf({
       environment: options.environment,
-      model: options.naturalModel,
+      model: naturalModel,
     }),
-    model: options.naturalModel,
+    model: naturalModel,
+    voices,
     fetchFile: options.fetchFile,
     loadSpeaker: options.loadSpeaker,
   });
+  const downloadLine = `Getting the natural voice, one time, ${sizeTextOf(naturalModel)}`;
+  const [firstVoice] = approvedVoicesOf(voices);
   registerDescribeTool({
     server,
-    describe: () =>
-      describeLocalVoice({
-        systemVoice,
-        naturalVoice,
-        naturalModel: options.naturalModel,
-      }),
+    describe: () => describeLocalVoice({ naturalVoice, naturalModel, voices }),
   });
-  registerSpeechTool({ server, systemVoice, naturalVoice });
+  registerSpeechTool({
+    server,
+    naturalVoice,
+    defaultVoice: firstVoice?.name ?? "",
+    downloadLine,
+  });
+  registerPrepareTool({ server, naturalVoice, downloadLine });
   return server;
 }

@@ -3,6 +3,7 @@ import { checkKeyToolName } from "./convention.js";
 import type { StartedServer } from "./connectServer.js";
 import { errorMessage } from "./errorMessage.js";
 import { isTimeout, textOfContent } from "./runTool.js";
+import type { ServerPool } from "./serverPool.js";
 import type { CheckKeyFailure, KeyCheck, Outcome } from "./types.js";
 
 const keyCheckSchema = z.object({ valid: z.boolean(), message: z.string() });
@@ -57,4 +58,34 @@ export async function callCheckKey(options: {
     };
   }
   return { ok: true, value: parsed.data };
+}
+
+export async function checkServerKey(options: {
+  pool: ServerPool;
+  server: string;
+  toolTimeoutSeconds: number;
+}): Promise<Outcome<KeyCheck, CheckKeyFailure>> {
+  const { server } = options;
+  const connection = options.pool
+    .connections()
+    .find((candidate) => candidate.name === server);
+  if (!connection) {
+    return { ok: false, failure: { kind: "server-not-found", server } };
+  }
+  if (connection.status === "failed") {
+    return {
+      ok: false,
+      failure: {
+        kind: "server-failed-to-start",
+        server,
+        message: connection.message,
+      },
+    };
+  }
+  const refreshed = await options.pool.refresh(connection);
+  if (!refreshed.ok) return refreshed;
+  return callCheckKey({
+    connection: refreshed.value,
+    toolTimeoutSeconds: options.toolTimeoutSeconds,
+  });
 }

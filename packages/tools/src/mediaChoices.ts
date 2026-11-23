@@ -59,6 +59,7 @@ function serviceFor(options: {
       id: model.id,
       label: model.label,
       isDefault: model.is_default,
+      ...(model.download === undefined ? {} : { download: model.download }),
     }));
   return { ...options.facts, models };
 }

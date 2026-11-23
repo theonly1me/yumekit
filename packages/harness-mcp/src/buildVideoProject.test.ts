@@ -102,6 +102,7 @@ describe("a 10 second video with generated clips, built with tool calls only", (
         asset_id: "voice",
         start_frame: 0,
         with_captions: true,
+        partial: true,
       },
     });
 

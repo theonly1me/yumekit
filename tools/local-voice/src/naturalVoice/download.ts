@@ -12,6 +12,20 @@ const bytesBetweenReports = 4_000_000;
 
 export type FetchFile = (url: string) => Promise<Response>;
 
+export const needsNetworkMessage =
+  "The voice needs one download. Connect to the internet and try again.";
+
+async function fetched(options: {
+  fetchFile: FetchFile;
+  url: string;
+}): Promise<Response | undefined> {
+  try {
+    return await options.fetchFile(options.url);
+  } catch {
+    return undefined;
+  }
+}
+
 async function hasFile(options: {
   folder: string;
   file: ModelFile;
@@ -43,7 +57,12 @@ async function downloadFile(options: {
   onBytes: (bytes: number) => Promise<void>;
 }): Promise<Outcome<true, string>> {
   const { folder, file } = options;
-  const response = await options.fetchFile(`${options.sourceUrl}/${file.name}`);
+  const response = await fetched({
+    fetchFile: options.fetchFile,
+    url: `${options.sourceUrl}/${file.name}`,
+  });
+  if (response === undefined)
+    return { ok: false, failure: needsNetworkMessage };
   if (!response.ok || response.body === null) {
     await response.body?.cancel();
     return {
@@ -55,6 +74,7 @@ async function downloadFile(options: {
   const hash = createHash("sha256");
   let received = 0;
   const handle = await open(partPath, "w");
+  let isCut = false;
   try {
     const reader = response.body.getReader();
     for (
@@ -69,8 +89,14 @@ async function downloadFile(options: {
       await handle.write(chunk);
       await options.onBytes(chunk.byteLength);
     }
+  } catch {
+    isCut = true;
   } finally {
     await handle.close();
+  }
+  if (isCut) {
+    await rm(partPath, { force: true });
+    return { ok: false, failure: needsNetworkMessage };
   }
   if (received !== file.bytes || hash.digest("hex") !== file.sha256) {
     await rm(partPath, { force: true });
@@ -114,6 +140,10 @@ export async function downloadModel(options: {
         },
       });
       if (!downloaded.ok) return downloaded;
+      if (done > reported) {
+        reported = done;
+        await options.onProgress({ done, total: totalBytesOf(options.model) });
+      }
     }
     return { ok: true, value: true };
   } catch (error) {

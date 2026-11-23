@@ -120,7 +120,7 @@ export function Editor(props: {
             <Preview
               client={client}
               output={output}
-              frame={facts.frame}
+              frame={view.previewFrame}
               framesPerSecond={framesPerSecond}
               hint={`Click the text in the video to change it. ${tab.name}, ${String(output.widthPixels)} x ${String(output.heightPixels)}.`}
               snapshot={snapshot}

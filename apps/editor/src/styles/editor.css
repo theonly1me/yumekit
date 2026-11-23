@@ -122,7 +122,7 @@
 
   .stage {
     overflow: visible;
-    padding: 12px var(--gutter) 96px;
+    padding: 12px var(--gutter) 120px;
   }
 
   .editor-bar {

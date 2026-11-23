@@ -12,14 +12,14 @@ function runningEngine(): RunningEngine {
 }
 
 beforeAll(async () => {
-  engine = await runEngine();
+  engine = await runEngine({ withVoiceServer: true });
   await buildCounterProject(engine);
   await engine.callTool({
     name: "generate_asset",
     input: {
       asset_id: "voice",
       capability: "speech",
-      server: "sample",
+      server: "voice",
       input: { text: "A short line" },
     },
   });
@@ -30,6 +30,7 @@ beforeAll(async () => {
       asset_id: "voice",
       start_frame: 0,
       with_captions: true,
+      partial: true,
     },
   });
 });
@@ -44,7 +45,11 @@ describe("the sound rows", () => {
     const editor = await openEditor(runningEngine().url);
     const rows = editor.page.getByRole("list", { name: "Sound" });
     await expect
-      .poll(() => rows.locator(".sound-name").allTextContents())
+      .poll(() =>
+        rows
+          .locator(".sound-row:not(.sound-note) .sound-name")
+          .allTextContents(),
+      )
       .toEqual(["Voice", "Captions"]);
 
     await editor.page.getByRole("switch", { name: "Voice on" }).click();
@@ -80,6 +85,50 @@ describe("the sound rows", () => {
           .count(),
       )
       .toBe(1);
+    await editor.close();
+  });
+
+  it("says why the video has no music, with Add a key and Use my own music, which open the Music view", async () => {
+    const editor = await openEditor(runningEngine().url);
+    const note = editor.page.locator(".sound-note[data-part='music']");
+
+    await expect
+      .poll(() => note.locator(".sound-note-text").textContent())
+      .toBe("No music yet. Music needs a key, or your own file.");
+    expect(await note.getByRole("button").allTextContents()).toEqual([
+      "Add a key",
+      "Use my own music",
+    ]);
+    await note.getByRole("button", { name: "Use my own music" }).click();
+
+    await expect
+      .poll(() => editor.page.getByText("Use my own music").count())
+      .toBeGreaterThan(1);
+    await editor.close();
+  });
+
+  it("says that the voice says an older text after a change of its line, and an undo clears it", async () => {
+    await runningEngine().callTool({
+      name: "set_script",
+      input: { script: "A short line" },
+    });
+    const editor = await openEditor(runningEngine().url);
+    const oldNote = editor.page.locator(".sound-note[data-part='voice']");
+    await expect.poll(() => oldNote.count()).toBe(0);
+
+    await runningEngine().callTool({
+      name: "set_script",
+      input: { script: "A longer line" },
+    });
+    await expect
+      .poll(() => oldNote.locator(".sound-note-text").textContent())
+      .toBe("The voice says an older text.");
+    expect(await oldNote.getByRole("button").allTextContents()).toEqual([
+      "Record the voice again",
+    ]);
+    await runningEngine().callTool({ name: "undo", input: {} });
+
+    await expect.poll(() => oldNote.count()).toBe(0);
     await editor.close();
   });
 });

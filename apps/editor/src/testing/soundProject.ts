@@ -21,7 +21,7 @@ export async function buildSoundProject(engine: RunningEngine): Promise<void> {
     input: {
       asset_id: "voice",
       capability: "speech",
-      server: "sample",
+      server: "voice",
       input: { text: "A short line" },
     },
   });
@@ -72,6 +72,7 @@ export async function buildSoundProject(engine: RunningEngine): Promise<void> {
         asset_id: "voice",
         start_frame: 0,
         with_captions: true,
+        partial: true,
       },
     });
   }

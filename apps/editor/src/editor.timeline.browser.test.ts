@@ -70,6 +70,7 @@ describe("the scene cards and the detailed timeline", () => {
     await expect
       .poll(() => editor.page.getByText("First counter").count())
       .toBe(1);
+    await editor.showStart();
     await editor.page.evaluate(() => {
       document.documentElement.dataset["loadMarker"] = "kept";
     });

@@ -7,7 +7,7 @@ import {
   type TurnEnd,
 } from "@yumekit/brain";
 import { agentCatalog } from "../agents/agentCatalog.js";
-import { createAnswerTracker } from "./answerTracker.js";
+import type { AnswerTracker } from "./answerTracker.js";
 import type { ChangeLedger } from "./changeLedger.js";
 import type { ChatLog } from "./chatLog.js";
 import type { AnswerEntry } from "./chatTypes.js";
@@ -46,7 +46,7 @@ export interface RequestRun {
   log: ChatLog;
   ledger: ChangeLedger;
   requestText: string;
-  answer: AnswerEntry;
+  tracker: AnswerTracker;
   serverCommand: ServerCommand;
   workingFolder: string;
   onTurn: (turn: Turn) => void;
@@ -55,7 +55,7 @@ export interface RequestRun {
 
 async function runAttempt(options: {
   run: RequestRun;
-  tracker: ReturnType<typeof createAnswerTracker>;
+  tracker: AnswerTracker;
 }): Promise<{ end: TurnEnd; sawSession: boolean }> {
   const { run, tracker } = options;
   let sawSession = false;
@@ -77,7 +77,7 @@ async function runAttempt(options: {
 export async function runRequest(run: RequestRun): Promise<void> {
   const { log, ledger } = run;
   ledger.beginRequest();
-  const tracker = createAnswerTracker({ log, answer: run.answer });
+  const { tracker } = run;
   const resumed = run.log.sessionId() !== undefined;
   let attempt = await runAttempt({ run, tracker });
   const isResumeFailure =

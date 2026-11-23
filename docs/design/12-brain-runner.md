@@ -219,6 +219,11 @@ The `CURSOR_CONFIG_DIR` of the run keeps the permissions and the approval mode o
 12. Prefer a kit scene. Write scene code only when no kit scene can show the idea, and then follow the part Motion design of the scene guide.
 13. Check each new scene with `preview_scenes` twice: with frame 10 for its entry, and with no frame for its settled picture. Correct what looks wrong.
 14. Set how the scenes change with one call of `set_transitions` for the whole video.
+15. Before the first picture, add each person, place, and product that shows in two or more scenes to the cast. Give the cast ids in each call that shows them.
+16. Never use the free test service for a voice or for music in a video. With no other voice ready, use the natural voice of this computer (document 18).
+17. Make one voice that covers the whole video, with one line of the script for each scene, word for word.
+18. When a video has a voice with captions, the text of a scene supports the voice. It does not show a second sentence at the same time.
+19. If the voice does not know a name, give how it sounds in common English words in the input `pronunciations`, for example `{"Hoshi": "hoe she"}`. Keep the name in the text.
 
 ## The chat of the engine
 

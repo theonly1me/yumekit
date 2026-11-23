@@ -83,3 +83,4 @@ export {
   type AssetUse,
   type UsesProject,
 } from "./assetUses/index.js";
+export { voiceMatchesScript } from "./voiceScript/index.js";

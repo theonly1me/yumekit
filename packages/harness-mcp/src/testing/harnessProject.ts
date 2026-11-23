@@ -23,6 +23,18 @@ export const sampleServerCommand = {
   ],
 };
 
+export const voiceServerCommand = {
+  command: process.execPath,
+  args: [
+    fileURLToPath(
+      new URL(
+        "../../../tools/src/testing/voiceMediaServer.ts",
+        import.meta.url,
+      ),
+    ),
+  ],
+};
+
 export const smallOutput: Output = {
   id: "wide",
   label: "Wide",
@@ -34,6 +46,7 @@ export interface HarnessProjectOptions {
   outputs?: Output[];
   mediaToolsFile?: object;
   beforeConnect?: () => Promise<unknown>;
+  withLocalVoice?: boolean;
 }
 
 export interface HarnessProject {
@@ -71,7 +84,12 @@ export async function startHarnessProject(
   await options?.beforeConnect?.();
   const connected = await connectMediaTools({
     projectFolder: store.folder,
-    bundledServers: { sample: sampleServerCommand },
+    bundledServers: {
+      sample: sampleServerCommand,
+      ...(options?.withLocalVoice === true
+        ? { "local-voice": voiceServerCommand }
+        : {}),
+    },
   });
   if (!connected.ok) throw new Error(connected.failure.message);
   const mediaTools = connected.value;

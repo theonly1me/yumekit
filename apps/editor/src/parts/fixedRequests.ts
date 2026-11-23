@@ -22,6 +22,8 @@ export type FixedRequest =
   | { kind: "make-a-cast-picture"; name: string; description: string }
   | { kind: "use-my-file"; fileName: string }
   | { kind: "continue-after-the-plan" }
+  | { kind: "make-the-rest" }
+  | { kind: "try-the-step-again"; part: "voice" | "music" }
   | { kind: "record-a-voice-line"; aboutClipId: string }
   | {
       kind: "let-the-ai-make-the-clip";
@@ -68,6 +70,12 @@ function requestSentenceOf(request: FixedRequest): string {
       return `Use my file ${request.fileName} in the video where it fits best.`;
     case "continue-after-the-plan":
       return "The plan is good. Make the rest of the video.";
+    case "make-the-rest":
+      return "Make the rest of the video.";
+    case "try-the-step-again":
+      return request.part === "voice"
+        ? "Record the voice of the video again."
+        : "Make the music of the video again.";
     case "record-a-voice-line":
       return "Record a voice line for this scene.";
     case "let-the-ai-make-the-clip":

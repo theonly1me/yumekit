@@ -4,7 +4,7 @@ import { timelineOf } from "../testing/narrationFixture.js";
 import { generateVideo } from "../testing/videoFixture.js";
 
 async function harnessWithVideoAndSpeech(): Promise<Harness> {
-  const harness = await startHarness();
+  const harness = await startHarness({ withLocalVoice: true });
   await generateVideo({ harness, assetId: "fox", seconds: 1 });
   await harness.call({
     name: "generate_asset",
@@ -29,6 +29,7 @@ const placeVoice = {
     asset_id: "voice",
     start_frame: 0,
     with_captions: true,
+    partial: true,
   },
 };
 

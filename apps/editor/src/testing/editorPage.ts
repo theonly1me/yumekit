@@ -4,6 +4,7 @@ export interface EditorPage {
   page: Page;
   previewFrame: () => Promise<number>;
   scrubberFrame: () => Promise<number>;
+  showStart: () => Promise<void>;
   close: () => Promise<void>;
 }
 
@@ -39,6 +40,13 @@ export async function openEditor(url: string): Promise<EditorPage> {
           .getByRole("slider", { name: "Position in the video" })
           .inputValue(),
       ),
+    showStart: async () => {
+      const slider = page.getByRole("slider", {
+        name: "Position in the video",
+      });
+      await slider.fill("1");
+      await slider.fill("0");
+    },
     close: () => context.close(),
   };
 }

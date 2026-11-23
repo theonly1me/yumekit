@@ -1,9 +1,18 @@
 import { z } from "zod";
 
+export const stepProgressSchema = z.object({
+  done: z.number(),
+  total: z.number().optional(),
+  message: z.string().optional(),
+});
+
 const stepSchema = z.object({
   callId: z.string(),
   tool: z.string(),
   state: z.enum(["running", "done", "failed"]),
+  capability: z.string().optional(),
+  reason: z.string().optional(),
+  progress: stepProgressSchema.optional(),
 });
 
 const aboutSchema = z.object({

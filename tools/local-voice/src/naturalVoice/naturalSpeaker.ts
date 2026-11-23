@@ -15,13 +15,17 @@ export interface NaturalSpeaker {
   }) => Promise<SpokenAudio>;
 }
 
-export type LoadSpeaker = (
-  folder: string,
-) => Promise<Outcome<NaturalSpeaker, string>>;
+export type LoadSpeaker = (options: {
+  folder: string;
+  wordListPaths: string[];
+}) => Promise<Outcome<NaturalSpeaker, string>>;
 
 const largestThreadCount = 4;
 
-export const loadKokoroSpeaker: LoadSpeaker = async (folder) => {
+export const loadKokoroSpeaker: LoadSpeaker = async ({
+  folder,
+  wordListPaths,
+}) => {
   try {
     const { default: sherpa } = await import("sherpa-onnx-node");
     const speaker = await sherpa.OfflineTts.createAsync({
@@ -30,7 +34,9 @@ export const loadKokoroSpeaker: LoadSpeaker = async (folder) => {
           model: join(folder, "model.int8.onnx"),
           voices: join(folder, "voices.bin"),
           tokens: join(folder, "tokens.txt"),
-          lexicon: join(folder, "lexicon-us-en.txt"),
+          lexicon: [join(folder, "lexicon-us-en.txt"), ...wordListPaths].join(
+            ",",
+          ),
         },
         numThreads: Math.min(largestThreadCount, availableParallelism()),
         provider: "cpu",

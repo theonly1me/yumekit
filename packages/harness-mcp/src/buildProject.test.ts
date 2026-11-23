@@ -88,6 +88,7 @@ describe("a small project built with tool calls only", () => {
         asset_id: "voice",
         start_frame: 0,
         with_captions: true,
+        partial: true,
       },
     });
     const preview = await step({

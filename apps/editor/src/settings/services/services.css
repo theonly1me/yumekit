@@ -75,3 +75,18 @@ button.service-reset {
 .made-with .link {
   font-size: var(--step--1);
 }
+
+.service-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.service-line .fact {
+  margin: 0;
+}
+
+.service-line button {
+  padding: 4px 12px;
+}

@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { mkdtemp, writeFile } from "node:fs/promises";
+import { mkdtemp } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
@@ -11,73 +11,28 @@ import {
 import { createLocalVoiceServer } from "../createLocalVoiceServer.ts";
 import type { NaturalModel } from "../naturalVoice/modelFiles.ts";
 import type { NaturalSpeaker } from "../naturalVoice/naturalSpeaker.ts";
-import type { ProgramCall, RunProgram } from "../systemVoice/runProgram.ts";
+import { kokoroVoices, type VoiceEntry } from "../naturalVoice/voices.ts";
 
-export const sayListing = [
-  "Albert              en_US    # Hello! My name is Albert.",
-  "Daniel              en_GB    # Hello! My name is Daniel.",
-  "Samantha            en_US    # Hello! My name is Samantha.",
-  "Thomas              fr_FR    # Bonjour, je m’appelle Thomas.",
-].join("\n");
-
-export const lexiconWords = [
-  "meet",
-  "lumen",
-  "the",
-  "lamp",
-  "it",
-  "costs",
-  "forty",
-  "nine",
-  "dollars",
-  "in",
-  "twenty",
-  "six",
-  "hello",
+export const lexiconLines = [
+  "meet m ˈ i t",
+  "lumen l ˈ u m ə n",
+  "the ð ə",
+  "lamp l ˈ æ m p",
+  "it ɪ t",
+  "costs k ˈ ɔ s t s",
+  "forty f ˈ ɔ ɹ T i",
+  "nine n ˈ I n",
+  "dollars d ˈ ɑ l ə ɹ z",
+  "in ɪ n",
+  "twenty t w ˈ ɛ n T i",
+  "six s ˈ ɪ k s",
+  "hello h ə l ˈ O",
+  "hoe h ˈ O",
+  "she ʃ i",
+  "you j u",
+  "may m ˈ A",
+  "kit k ˈ ɪ t",
 ];
-
-export function fakeWav(seconds: number): Buffer {
-  const sampleRate = 8000;
-  const dataLength = Math.round(seconds * sampleRate) * 2;
-  const bytes = Buffer.alloc(44 + dataLength);
-  bytes.write("RIFF", 0, "ascii");
-  bytes.writeUInt32LE(36 + dataLength, 4);
-  bytes.write("WAVEfmt ", 8, "ascii");
-  bytes.writeUInt32LE(16, 16);
-  bytes.writeUInt16LE(1, 20);
-  bytes.writeUInt16LE(1, 22);
-  bytes.writeUInt32LE(sampleRate, 24);
-  bytes.writeUInt32LE(sampleRate * 2, 28);
-  bytes.writeUInt16LE(2, 32);
-  bytes.writeUInt16LE(16, 34);
-  bytes.write("data", 36, "ascii");
-  bytes.writeUInt32LE(dataLength, 40);
-  return bytes;
-}
-
-export function fakeSay(options: {
-  calls: ProgramCall[];
-  seconds: number;
-}): RunProgram {
-  return async (call) => {
-    options.calls.push(call);
-    if (call.args.includes("?")) {
-      return {
-        kind: "finished",
-        exitCode: 0,
-        output: sayListing,
-        errorOutput: "",
-      };
-    }
-    const outputIndex = call.args.indexOf("-o");
-    const path = call.args[outputIndex + 1];
-    if (path !== undefined) await writeFile(path, fakeWav(options.seconds));
-    return { kind: "finished", exitCode: 0, output: "", errorOutput: "" };
-  };
-}
-
-export const noProgram: RunProgram = () =>
-  Promise.resolve({ kind: "not-found", message: "spawn espeak-ng ENOENT" });
 
 export function fakeModel(): {
   model: NaturalModel;
@@ -85,10 +40,7 @@ export function fakeModel(): {
 } {
   const contents = new Map<string, Buffer>([
     ["model.int8.onnx", Buffer.from("model")],
-    [
-      "lexicon-us-en.txt",
-      Buffer.from(lexiconWords.map((word) => `${word} x`).join("\n")),
-    ],
+    ["lexicon-us-en.txt", Buffer.from(lexiconLines.join("\n"))],
   ]);
   const served = new Map<string, Buffer>();
   const files = [...contents].map(([name, bytes]) => {
@@ -113,12 +65,16 @@ export interface SpokenCall {
   text: string;
   speakerId: number;
   speed: number;
+  wordListPaths: string[];
 }
 
-export function fakeSpeaker(spoken: SpokenCall[]): NaturalSpeaker {
+function fakeSpeaker(options: {
+  spoken: SpokenCall[];
+  wordListPaths: string[];
+}): NaturalSpeaker {
   return {
     speak: (call) => {
-      spoken.push(call);
+      options.spoken.push({ ...call, wordListPaths: options.wordListPaths });
       return Promise.resolve({
         samples: new Float32Array(24000).fill(0.25),
         sampleRate: 24000,
@@ -127,32 +83,40 @@ export function fakeSpeaker(spoken: SpokenCall[]): NaturalSpeaker {
   };
 }
 
+export type FetchFake = (url: string) => Promise<Response>;
+
+export function servingFetch(options: {
+  served: Map<string, Buffer>;
+  fetched: string[];
+}): FetchFake {
+  return (url) => {
+    options.fetched.push(url);
+    const bytes = options.served.get(url);
+    return Promise.resolve(
+      bytes === undefined
+        ? new Response("gone", { status: 404 })
+        : new Response(bytes),
+    );
+  };
+}
+
 export async function connectLocalVoice(options: {
-  platform: NodeJS.Platform;
-  runProgram: RunProgram;
   configurationFolder: string;
-  fetched?: string[];
+  fetchFile: FetchFake;
   spoken?: SpokenCall[];
-  served?: Map<string, Buffer>;
   model?: NaturalModel;
+  voices?: VoiceEntry[];
 }) {
-  const served = options.served ?? new Map<string, Buffer>();
   const server = createLocalVoiceServer({
-    platform: options.platform,
     environment: { YUMEKIT_CONFIG_DIRECTORY: options.configurationFolder },
-    runProgram: options.runProgram,
-    fetchFile: (url) => {
-      options.fetched?.push(url);
-      const bytes = served.get(url);
-      return Promise.resolve(
-        bytes === undefined
-          ? new Response("gone", { status: 404 })
-          : new Response(bytes),
-      );
-    },
-    loadSpeaker: () =>
-      Promise.resolve({ ok: true, value: fakeSpeaker(options.spoken ?? []) }),
+    fetchFile: options.fetchFile,
+    loadSpeaker: ({ wordListPaths }) =>
+      Promise.resolve({
+        ok: true,
+        value: fakeSpeaker({ spoken: options.spoken ?? [], wordListPaths }),
+      }),
     naturalModel: options.model ?? fakeModel().model,
+    voices: options.voices ?? kokoroVoices,
   });
   const client = new Client({ name: "test", version: "0.0.0" });
   const [clientTransport, serverTransport] =
@@ -163,8 +127,20 @@ export async function connectLocalVoice(options: {
     callTool: async (call: {
       name: string;
       arguments: Record<string, unknown>;
-    }) => CallToolResultSchema.parse(await client.callTool(call)),
-    client,
+      onProgress?: (progress: {
+        progress: number;
+        message?: string | undefined;
+      }) => void;
+    }) => {
+      const { onProgress } = call;
+      return CallToolResultSchema.parse(
+        await client.callTool(
+          { name: call.name, arguments: call.arguments },
+          undefined,
+          onProgress === undefined ? undefined : { onprogress: onProgress },
+        ),
+      );
+    },
   };
 }
 

@@ -25,6 +25,7 @@ describe("Calm motion in Settings", () => {
     started.push(engine);
     await buildKitSceneProject(engine);
     const editor = await openEditor(engine.url);
+    await editor.showStart();
     const firstWord = editor.page
       .frameLocator('iframe[title="Preview of the video"]')
       .locator("h1 span")

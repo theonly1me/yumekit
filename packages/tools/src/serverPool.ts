@@ -5,6 +5,7 @@ import {
   type ServerConnection,
   type StartedServer,
 } from "./connectServer.js";
+import { describeServer } from "./describeServer.js";
 import { readKeyStates } from "./keys/index.js";
 import type { MediaToolFailure, Outcome } from "./types.js";
 
@@ -18,6 +19,7 @@ export interface ServerPool {
   refresh: (
     connection: StartedServer,
   ) => Promise<Outcome<StartedServer, StartFailure>>;
+  redescribe: (connection: StartedServer) => Promise<void>;
   close: () => Promise<void>;
 }
 
@@ -87,6 +89,21 @@ export function createServerPool(
       const started = restarts.get(connection) ?? restart(connection);
       restarts.set(connection, started);
       return started;
+    },
+    redescribe: async (connection) => {
+      const index = connections.indexOf(connection);
+      if (index < 0) return;
+      const described = await describeServer(connection.client);
+      connections.splice(index, 1, {
+        name: connection.name,
+        status: connection.status,
+        client: connection.client,
+        command: connection.command,
+        capabilities: connection.capabilities,
+        toolNames: connection.toolNames,
+        passedEnvironment: connection.passedEnvironment,
+        ...described,
+      });
     },
     close: async () => {
       await Promise.all(

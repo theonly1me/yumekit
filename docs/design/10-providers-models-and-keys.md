@@ -56,6 +56,7 @@ type MediaModel = {
     | "video_input"
   )[];
   tested?: boolean;
+  download?: { bytes: number; ready: boolean };
 };
 
 type MediaModelSetting =
@@ -96,6 +97,7 @@ Rules:
 7. `describe_media_server` works with no key, and makes no network request.
 8. The harness validates the result against the schema. A result that does not match is `media-tool-invalid-result`, and the server stays usable without a description.
 9. `accepts` and `tested` are optional, so an older description stays valid. Document 16 gives their meaning.
+10. `download` is optional. A model that runs on this computer and needs one download gives its size in bytes and whether its files are there. Such a server has the tool `prepare_model`. Document 18, "Details of WP55", gives the rules.
 
 A model catalog is a constant in the server package. The price rule of document 06 changes: a server can return `cost_usd` as an estimate from its catalog when the response of the provider gives no amount. The result then has `cost_is_estimate: true`.
 

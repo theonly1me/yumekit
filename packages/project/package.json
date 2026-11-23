@@ -33,6 +33,10 @@
     "./camera-moves": {
       "types": "./dist/cameraMoves/catalog.d.ts",
       "default": "./dist/cameraMoves/catalog.js"
+    },
+    "./voice-script": {
+      "types": "./dist/voiceScript/index.d.ts",
+      "default": "./dist/voiceScript/index.js"
     }
   },
   "files": [

@@ -14,6 +14,7 @@ import type { DirectChanges } from "../scenes/useDirectChanges.js";
 import { useSceneStills } from "../scenes/useSceneStills.js";
 import { SoundRows } from "../sound/SoundRows.js";
 import { soundRowsOf, type SoundPartName } from "../sound/soundRowFacts.js";
+import { useSoundNotes } from "../sound/useSoundNotes.js";
 import { Timeline, type PickedClip } from "../timeline/Timeline.js";
 import type { EditorChat } from "./useEditorChat.js";
 
@@ -50,6 +51,18 @@ export function LowerArea(props: {
     clips: mainClips,
   });
   const sceneFailure = changes.failureOf("scenes");
+  const soundRows = soundRowsOf({
+    timeline: props.timeline,
+    scenes: snapshot.scenes,
+    assets: snapshot.assets,
+  });
+  const soundNotes = useSoundNotes({
+    client,
+    snapshot,
+    rows: soundRows,
+    editorChat,
+    onOpenSound: props.onOpenSound,
+  });
   return (
     <>
       <section className="scenes-row" aria-label="Scenes and actions">
@@ -132,11 +145,10 @@ export function LowerArea(props: {
       </section>
       <section className="lower-rows" aria-label="Sound and timeline">
         <SoundRows
-          rows={soundRowsOf({
-            timeline: props.timeline,
-            scenes: snapshot.scenes,
-            assets: snapshot.assets,
-          })}
+          rows={soundRows}
+          notes={soundNotes.notes}
+          isChatRunning={editorChat.chat.isRunning}
+          onNoteAction={soundNotes.onNoteAction}
           failure={changes.failureOf("sound")}
           onChange={(rowName) => {
             editorChat.fillBox(changeStartOf(rowName));

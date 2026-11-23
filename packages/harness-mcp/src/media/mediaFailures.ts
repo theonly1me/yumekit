@@ -41,6 +41,7 @@ function failureHint(failure: MediaToolFailure): string {
 }
 
 export type MediaHarnessFailure = HarnessFailure & {
+  reason?: string;
   server?: string;
   variable?: string;
   get_key_url?: string;
@@ -53,6 +54,9 @@ export function mediaFailureOf(failure: MediaToolFailure): MediaHarnessFailure {
     message: failureMessage(failure),
     hint: failureHint(failure),
   };
+  if (failure.kind === "media-tool-failed") {
+    return { ...base, reason: failure.message };
+  }
   if (failure.kind !== "media-key-missing") return base;
   return {
     ...base,

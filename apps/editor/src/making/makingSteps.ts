@@ -1,5 +1,12 @@
 import type { Snapshot } from "../engine/snapshot.js";
 import type { AnswerEntry, MakingPhase } from "./firstChat.js";
+import {
+  stepProgressOf,
+  stepWhyOf,
+  type SoundStepId,
+  type StepProgress,
+  type StepWhy,
+} from "./stepReasons.js";
 
 export type StepState = "waiting" | "now" | "done" | "skipped";
 
@@ -8,6 +15,12 @@ export interface MakingStep {
   label: string;
   state: StepState;
   fact: string;
+  why?: StepWhy;
+  progress?: StepProgress;
+}
+
+function isSoundStep(id: MakingStep["id"]): id is SoundStepId {
+  return id === "voice" || id === "music";
 }
 
 function doneCount(options: { answer: AnswerEntry; tool: string }): number {
@@ -51,8 +64,9 @@ export function makingStepsOf(options: {
   answer: AnswerEntry;
   snapshot: Snapshot;
   phase: MakingPhase;
+  musicIsReady: boolean;
 }): MakingStep[] {
-  const { answer, snapshot, phase } = options;
+  const { answer, snapshot, phase, musicIsReady } = options;
   const called = (tool: string) => doneCount({ answer, tool }) > 0;
   const hasEnded = answer.state !== "running";
   const isWaitingForContinue = isPlanReady({ answer, phase });
@@ -113,13 +127,29 @@ export function makingStepsOf(options: {
         state: "waiting",
         fact: "Waits for Continue",
       };
-    if (hasEnded || index < lastDoneIndex)
+    const progress = isSoundStep(step.id)
+      ? stepProgressOf({ stepId: step.id, answer })
+      : undefined;
+    if (progress !== undefined)
+      return {
+        id: step.id,
+        label: step.label,
+        state: "now",
+        fact: "Working",
+        progress,
+      };
+    if (hasEnded || index < lastDoneIndex) {
+      const why = isSoundStep(step.id)
+        ? stepWhyOf({ stepId: step.id, answer, musicIsReady })
+        : undefined;
       return {
         id: step.id,
         label: step.label,
         state: "skipped",
-        fact: "Skipped",
+        fact: why === undefined ? "Skipped" : "",
+        ...(why === undefined ? {} : { why }),
       };
+    }
     return index === nowIndex
       ? { id: step.id, label: step.label, state: "now", fact: "Working" }
       : { id: step.id, label: step.label, state: "waiting", fact: "" };

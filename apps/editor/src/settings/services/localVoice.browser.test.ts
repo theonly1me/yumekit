@@ -30,8 +30,8 @@ afterAll(async () => {
   await engine?.remove();
 });
 
-describe("the voice of this computer in the Services group", () => {
-  it("is the voice with no pick and no key, and the list says that it is free and shows the size of the natural voice", async () => {
+describe("the natural voice in the Services group", () => {
+  it("is the voice with no pick and no key, and the picker says that it is free, shows its one download, and offers to get it now", async () => {
     const editor = await openEditor(runningEngine().url);
     const { page } = editor;
     await openTools(page);
@@ -41,21 +41,20 @@ describe("the voice of this computer in the Services group", () => {
       .getByRole("listitem")
       .filter({ hasText: "Voice" })
       .first();
-    await expect
-      .poll(() => voiceRow.textContent())
-      .toContain("Voice of this computer, System voice");
+    await expect.poll(() => voiceRow.textContent()).toContain("Natural voice");
 
     await page.getByRole("button", { name: "Change Voice" }).click();
     const list = page.getByRole("group", { name: "Models for Voice" });
     const service = list
       .locator(".model-service")
-      .filter({ hasText: "Voice of this computer" });
+      .filter({ hasText: "Natural voice" });
     await expect
       .poll(() => service.textContent())
-      .toContain("Free. It runs on your computer.");
-    await expect
-      .poll(() => service.textContent())
-      .toContain("Natural voice. Download once, 148 MB");
+      .toContain("Free. It runs on your computer. One download of 148 MB.");
+    expect(
+      await service.getByRole("button", { name: "Get it now" }).count(),
+    ).toBe(1);
+    expect(await service.textContent()).not.toContain("System voice");
     await editor.close();
   });
 });

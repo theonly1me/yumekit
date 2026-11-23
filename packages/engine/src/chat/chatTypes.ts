@@ -4,6 +4,15 @@ const stepSchema = z.object({
   callId: z.string(),
   tool: z.string(),
   state: z.enum(["running", "done", "failed"]),
+  capability: z.string().optional(),
+  reason: z.string().optional(),
+  progress: z
+    .object({
+      done: z.number(),
+      total: z.number().optional(),
+      message: z.string().optional(),
+    })
+    .optional(),
 });
 
 const aboutSchema = z.object({

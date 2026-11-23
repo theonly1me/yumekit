@@ -63,7 +63,7 @@ describe("the editor preview", () => {
     await editor.close();
   });
 
-  it("changes the shape of the preview when another platform tab is picked", async () => {
+  it("changes the shape of the preview when another platform tab is picked, and shows the settled first scene while the position stays at the start", async () => {
     const editor = await openEditor(runningEngine().url);
     const preview = editor.page.locator(".frame");
     await expect.poll(() => preview.getAttribute("data-output")).toBe("wide");
@@ -82,7 +82,8 @@ describe("the editor preview", () => {
           .getAttribute("src"),
       )
       .toContain("output=tall");
-    await expect.poll(editor.previewFrame).toBe(0);
+    await expect.poll(editor.previewFrame).toBe(23);
+    expect(await editor.scrubberFrame()).toBe(0);
     await editor.close();
   });
 
