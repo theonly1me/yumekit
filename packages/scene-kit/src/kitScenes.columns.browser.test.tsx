@@ -9,7 +9,7 @@ import {
 import { wideOutput } from "./testing/mountKitScene.js";
 import { longProps, typicalProps } from "./testing/sampleProps.js";
 
-const columnScenes = ["bullet-list", "bar-chart"] as const;
+const columnScenes = ["bullet-list", "bar-chart", "checklist"] as const;
 const propsBySize = { typical: typicalProps, long: longProps };
 
 async function columnsOf(options: {

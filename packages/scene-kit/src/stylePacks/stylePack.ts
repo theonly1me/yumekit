@@ -15,6 +15,8 @@ export interface TextUnits {
   value: number;
   label: number;
   caption: number;
+  number: number;
+  statement: number;
 }
 
 export const backdropKinds = ["flat", "glow", "grid", "grain"] as const;

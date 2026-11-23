@@ -1,4 +1,4 @@
-import type { JsonObject, SceneOutput } from "@yumekit/scene";
+import type { JsonObject, SceneAsset, SceneOutput } from "@yumekit/scene";
 import { mountKitScene } from "./mountKitScene.js";
 
 export const unitPixels = 1080 / 100;
@@ -8,6 +8,7 @@ export async function mountSettled(options: {
   name: string;
   props: JsonObject;
   output: SceneOutput;
+  assets?: Record<string, SceneAsset>;
 }): Promise<HTMLElement> {
   const { element, mounted } = await mountKitScene({
     ...options,

@@ -29,7 +29,7 @@ function fieldsOf(options: { path: string; shape: z.core.$ZodShape }) {
 }
 
 describe("kitSceneSchemas", () => {
-  it("lists the seven kit scenes of the design", () => {
+  it("lists the nineteen kit scenes of the design", () => {
     expect(Object.keys(kitSceneSchemas)).toEqual([
       "title-card",
       "bullet-list",
@@ -38,6 +38,18 @@ describe("kitSceneSchemas", () => {
       "bar-chart",
       "quote",
       "video-clip",
+      "hero",
+      "stat",
+      "compare",
+      "steps",
+      "chat",
+      "device",
+      "split",
+      "logo-reveal",
+      "checklist",
+      "end-card",
+      "lower-third",
+      "kinetic",
     ]);
   });
 
@@ -73,17 +85,19 @@ describe("kitSceneSchemas", () => {
         const assetId: unknown = z.toJSONSchema(entry.props).properties?.[
           "assetId"
         ];
-        return typeof assetId === "object" &&
-          assetId !== null &&
-          "assetKind" in assetId
-          ? [[name, assetId.assetKind]]
-          : [];
+        if (typeof assetId !== "object" || assetId === null) return [];
+        if ("assetKind" in assetId) return [[name, assetId.assetKind]];
+        return "assetKinds" in assetId ? [[name, assetId.assetKinds]] : [];
       },
     );
     expect(assetKinds).toEqual([
       ["image-pan", "image"],
       ["caption-words", "audio"],
       ["video-clip", "video"],
+      ["device", ["image", "video"]],
+      ["split", ["image", "video"]],
+      ["logo-reveal", "image"],
+      ["kinetic", "audio"],
     ]);
   });
 });

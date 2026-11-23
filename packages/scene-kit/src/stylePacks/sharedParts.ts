@@ -32,6 +32,8 @@ export const sharedTextUnits: StylePack["textUnits"] = {
     value: 7.5,
     label: 5.5,
     caption: 5,
+    number: 46,
+    statement: 24,
   },
   square: {
     title: 13,
@@ -41,6 +43,8 @@ export const sharedTextUnits: StylePack["textUnits"] = {
     value: 7,
     label: 5,
     caption: 5,
+    number: 30,
+    statement: 19,
   },
   tall: {
     title: 14,
@@ -50,6 +54,8 @@ export const sharedTextUnits: StylePack["textUnits"] = {
     value: 7.5,
     label: 5.5,
     caption: 5.5,
+    number: 42,
+    statement: 20,
   },
 };
 

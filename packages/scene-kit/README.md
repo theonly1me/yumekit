@@ -11,15 +11,27 @@ Ready scene components and style packs. Documents 01 and 02 in `docs/design` are
 - `loadStylePackFonts(stylePack)`: loads the fonts of a style pack. The stage page calls it before the first frame.
 - `kitSceneSchemas`, `lookIds`, and `looks` from `@yumekit/scene-kit/schemas`: the purpose and the `zod` props schema of each kit scene, and the id, the label, and one line for each look. This entry has no browser code, so Node code can load it.
 
-| Component       | What it shows                                                    |
-| --------------- | ---------------------------------------------------------------- |
-| `title-card`    | A large heading, an optional smaller line, and one accent shape  |
-| `bullet-list`   | A heading and 1 to 6 items that appear one after another         |
-| `image-pan`     | One image with a slow pan or zoom, and an optional caption       |
-| `caption-words` | The words of a narration, each from the frame where it is spoken |
-| `bar-chart`     | A heading and 1 to 8 bars that grow, each with a label and value |
-| `quote`         | A sentence that appears word by word, with an optional source    |
-| `video-clip`    | One video asset that fills the picture, and an optional caption  |
+| Component       | What it shows                                                     |
+| --------------- | ----------------------------------------------------------------- |
+| `title-card`    | A large heading, an optional smaller line, and one accent shape   |
+| `bullet-list`   | A heading and 1 to 6 items that appear one after another          |
+| `image-pan`     | One image with a slow pan or zoom, and an optional caption        |
+| `caption-words` | The words of a narration, each from the frame where it is spoken  |
+| `bar-chart`     | A heading and 1 to 8 bars that grow, each with a label and value  |
+| `quote`         | A sentence that appears word by word, with an optional source     |
+| `video-clip`    | One video asset that fills the picture, and an optional caption   |
+| `hero`          | A headline word by word, with a line drawn under one word         |
+| `stat`          | One large number that counts up and lands with a pulse            |
+| `compare`       | Two sides with a title and the same rows, the new side wins       |
+| `steps`         | 2 to 5 numbered steps, joined by a line that draws                |
+| `chat`          | A typed request and the answer, as two bubbles                    |
+| `device`        | A picture or a video in a browser window or a phone               |
+| `split`         | A picture or a video on one half and a heading on the other       |
+| `logo-reveal`   | A name and a logo in a ring that draws                            |
+| `checklist`     | A heading and items that get a check one after another            |
+| `end-card`      | A closing line, a button, and an address                          |
+| `lower-third`   | An overlay with a name and a role above the captions              |
+| `kinetic`       | 1 to 4 short lines, one at a time, as large as the picture allows |
 
 A scene treats its props as untrusted input. It draws a default for a missing or wrong value and never throws.
 

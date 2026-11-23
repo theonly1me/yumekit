@@ -14,7 +14,7 @@ export type Field = FieldBase &
     | { kind: "number"; isInteger: boolean }
     | { kind: "choice"; options: string[] }
     | { kind: "switch" }
-    | { kind: "asset"; assetKind: AssetKind }
+    | { kind: "asset"; assetKinds: readonly AssetKind[] }
     | { kind: "text-list"; itemLabel: string; maxItems: number | undefined }
     | {
         kind: "object-list";
@@ -34,19 +34,25 @@ function singularLabelOf(name: string): string {
   return labelOf(name.endsWith("s") ? name.slice(0, -1) : name);
 }
 
+function assetKindsOf(schema: PropSchema): readonly AssetKind[] {
+  if (schema.assetKinds !== undefined) return schema.assetKinds;
+  return schema.assetKind === undefined ? [] : [schema.assetKind];
+}
+
 function fieldOf(options: {
   name: string;
   schema: PropSchema;
   isRequired: boolean;
 }): Field | undefined {
   const { name, schema, isRequired } = options;
-  const base = { name, label: labelOf(name), isRequired };
-  if (schema.assetKind !== undefined) {
+  const base = { name, label: schema.title ?? labelOf(name), isRequired };
+  const assetKinds = assetKindsOf(schema);
+  if (assetKinds.length > 0) {
     return {
       ...base,
-      label: labelOf(schema.assetKind),
+      label: schema.title ?? labelOf(assetKinds.join(" or ")),
       kind: "asset",
-      assetKind: schema.assetKind,
+      assetKinds,
     };
   }
   if (schema.enum !== undefined) {

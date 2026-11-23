@@ -13,13 +13,17 @@ const assetNouns = {
 } as const;
 
 function emptyAssetLabelOf(options: {
-  assetKind: keyof typeof assetNouns;
+  assetKinds: readonly (keyof typeof assetNouns)[];
   hasAssets: boolean;
   isRequired: boolean;
 }): string {
-  const noun = assetNouns[options.assetKind];
-  if (!options.hasAssets) return `This project has no ${noun.many}`;
-  return options.isRequired ? `Pick ${noun.one}` : "None";
+  const nouns = options.assetKinds.map((assetKind) => assetNouns[assetKind]);
+  if (!options.hasAssets) {
+    return `This project has no ${nouns.map((noun) => noun.many).join(" or ")}`;
+  }
+  return options.isRequired
+    ? `Pick ${nouns.map((noun) => noun.one).join(" or ")}`
+    : "None";
 }
 
 function ChoiceSelect(props: {
@@ -100,7 +104,9 @@ export function AssetField(props: FieldProps<"asset">) {
   const { field, path, form } = props;
   const controlId = useId();
   const value = form.valueAt(path);
-  const assets = form.assets.filter((asset) => asset.kind === field.assetKind);
+  const assets = form.assets.filter((asset) =>
+    field.assetKinds.some((assetKind) => assetKind === asset.kind),
+  );
   return (
     <ChoiceSelect
       controlId={controlId}
@@ -110,7 +116,7 @@ export function AssetField(props: FieldProps<"asset">) {
       value={typeof value === "string" ? value : noChoice}
       options={assets.map((asset) => ({ value: asset.id, label: asset.id }))}
       emptyLabel={emptyAssetLabelOf({
-        assetKind: field.assetKind,
+        assetKinds: field.assetKinds,
         hasAssets: assets.length > 0,
         isRequired: field.isRequired,
       })}

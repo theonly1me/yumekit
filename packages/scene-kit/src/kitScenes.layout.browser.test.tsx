@@ -13,7 +13,12 @@ import {
 } from "./testing/mountKitScene.js";
 import { longProps, typicalProps } from "./testing/sampleProps.js";
 
-const stackedScenes = ["bullet-list", "bar-chart", "quote"] as const;
+const stackedScenes = [
+  "bullet-list",
+  "bar-chart",
+  "quote",
+  "checklist",
+] as const;
 const propsThatFitCentered = {
   ...typicalProps,
   "bar-chart": { ...typicalProps["bar-chart"], heading: "Ten minutes" },

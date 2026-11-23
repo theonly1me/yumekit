@@ -7,6 +7,8 @@ import {
   type DriftPose,
   type EnterKind,
   type MotionStyle,
+  type MotionWord,
+  words,
 } from "../motion/index.js";
 import { useStylePack } from "../stylePacks/StylePackContext.js";
 
@@ -26,6 +28,12 @@ export interface KitMotion {
     distanceUnits?: number;
   }) => MotionStyle;
   drift: (kind: DriftKind) => DriftPose;
+  wordsFrom: (options: {
+    text: string;
+    startFrame: number;
+    kind?: EnterKind;
+    eachSeconds?: number;
+  }) => (frame: number) => { words: MotionWord[]; settleFrame: number };
 }
 
 export function useKitMotion(): KitMotion {
@@ -65,6 +73,16 @@ export function useKitMotion(): KitMotion {
         kind,
         unit,
         calm,
+      }),
+    wordsFrom: (options) => (wordFrame) =>
+      words({
+        eachSeconds: secondsOf(motion.wordStaggerFrames),
+        ...options,
+        frame: wordFrame,
+        framesPerSecond,
+        wordSeconds: itemSeconds,
+        unit,
+        distanceUnits: motion.riseDistanceUnits,
       }),
   };
 }
