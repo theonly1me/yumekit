@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { mkdir } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { promisify } from "node:util";
 import { describe, expect, it } from "vitest";
@@ -17,6 +17,8 @@ function withoutFolder(options: { value: unknown; folder: string }): unknown {
   return value;
 }
 
+const speechFromTheTestServer = { defaults: { speech: "sample" } };
+
 async function twoProjects() {
   const workspace = await createCliWorkspace({ home: "user" });
   const folders = {
@@ -26,6 +28,10 @@ async function twoProjects() {
   for (const folder of Object.values(folders)) {
     await mkdir(join(folder, ".."), { recursive: true });
     await workspace.run(["init", folder, "--output", "wide:320x180"]);
+    await writeFile(
+      join(folder, "media-tools.json"),
+      JSON.stringify(speechFromTheTestServer),
+    );
   }
   const sourceImage = join(workspace.root, "Logo.png");
   await runFile("ffmpeg", [
