@@ -22,4 +22,16 @@ describe("the server instructions", () => {
       "Call set_transitions once for the whole video, not once for each clip.",
     );
   });
+
+  it("read the whole work first, write it as one piece, and keep the film calm", () => {
+    expect(serverInstructions).toContain(
+      "1. Call get_work (the whole video in one text",
+    );
+    expect(serverInstructions).toContain(
+      "send the shared code, the scenes, the frame, and the timeline in one put_work call",
+    );
+    expect(serverInstructions).toContain(
+      "Show few things on screen, and one idea in each scene. Cut on the bar. Use the same margins in each scene. Make no voice unless the person asks for one; a voice is one read of the whole script, never one recording for each line.",
+    );
+  });
 });

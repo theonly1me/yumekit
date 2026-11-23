@@ -47,3 +47,17 @@ export function putSharedCode(options: {
     sharedCode: { ...state.sharedCode, [edit.name]: edit.code },
   });
 }
+
+export function setFrame(options: {
+  state: ProjectState;
+  edit: EditOfKind<"setFrame">;
+}): EditResult {
+  const { state, edit } = options;
+  const project = { ...state.project };
+  delete project.frame;
+  return succeed({
+    ...state,
+    project:
+      edit.name === undefined ? project : { ...project, frame: edit.name },
+  });
+}

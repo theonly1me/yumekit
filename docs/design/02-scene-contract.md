@@ -187,6 +187,10 @@ export default defineReactScene(({ props }) => {
 
 A custom scene may import only `react`, `@yumekit/scene`, `@yumekit/scene-kit`, `@yumekit/scene-kit/motion` (document 17), and the shared code of the project as `./_shared/<name>` (document 19). Shared code may import the same packages, and other shared code as `./<name>`. The bundler rejects any other import with the failure `scene-import-not-permitted`. Custom scene code compiles with strict TypeScript, but it may read a prop as `props.title`. A later design adds a list of extra packages for a project, for example a 3D library.
 
+## The frame of a project
+
+A project can name one shared module as its `frame` (document 19, K9). Its default export is a `SceneModule`, as a scene has. The renderer gives it to the stage as one more scene track with one clip from frame 0 to the end of the video, above the scene tracks and below the first caption track. So the preview and the renderer draw it in the same way, and each rule of this document holds for it. Its props are `{ scenes }`: the clips of the scenes row, each as `{ index, sceneId, title, startFrame, durationFrames }`. It finds the current scene from `useFrame()` and the beat from `beatFrames`. Its box takes no pointer events, so a person can still click a text of a scene in the preview.
+
 ## Not in milestone 1
 
 - The HTML adapter, which seeks CSS animations and the Web Animations API.

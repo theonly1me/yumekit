@@ -12,6 +12,7 @@ A scene that only fades in looks like a slide. Follow these rules in each custom
 8. Take each color and each font from the look. Keep the caption area free.
 9. Each platform shape gets its own layout: stack in tall, side by side in wide. Read \`layout\` from useSceneContext. Text stays left aligned in each layout.
 10. Check each scene with \`preview_scenes\` in each output (wide and tall): at the frame after it settles (no \`frame\`), and at one frame during its entry (\`frame\` 10). Correct each defect that you see. After each build of a timeline, check the whole video with one call of \`contact_sheet\`, and correct each warning.
+11. The scenes of one video read as one film. Take the margins, the type sizes, and the timing from the shared code, so each scene has the same margins and the same type scale. Few things on screen. Cut on the bar: a scene lasts a whole number of bars (4 beats).
 
 ### Fit the motion to the clip
 

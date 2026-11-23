@@ -15,6 +15,7 @@ import type {
   StagePageData,
 } from "../page/stagePageData.js";
 import { assetFramesUrlPrefixOf } from "../videoFrames/videoFrameServer.js";
+import { frameLayerOf, frameSceneId } from "./frameLayer.js";
 import type { LoadedOutput } from "./loadOutput.js";
 
 type SceneAsset = StageProject["assets"][string];
@@ -100,7 +101,8 @@ function beatFramesOf(snapshot: ProjectSnapshot): { beatFrames?: number } {
 export async function stagePageDataOf(
   loaded: LoadedOutput,
 ): Promise<StagePageData> {
-  const { snapshot, output, timeline, folder } = loaded;
+  const { snapshot, output, timeline, folder, frameCount } = loaded;
+  const frame = frameLayerOf({ folder, snapshot, timeline, frameCount });
   const assets = await Promise.all(
     snapshot.assets.map(
       async (asset) =>
@@ -119,20 +121,28 @@ export async function stagePageDataOf(
         widthPixels: output.widthPixels,
         heightPixels: output.heightPixels,
       },
-      scenes: snapshot.scenes.map((scene) => ({
-        id: scene.id,
-        props: scene.source.props,
-      })),
-      sceneTracks: timeline.tracks.flatMap((track) =>
-        track.kind === "scene" ? [track.clips] : [],
-      ),
+      scenes: [
+        ...snapshot.scenes.map((scene) => ({
+          id: scene.id,
+          props: scene.source.props,
+        })),
+        ...(frame === undefined
+          ? []
+          : [{ id: frameSceneId, props: frame.props }]),
+      ],
+      sceneTracks:
+        frame?.sceneTracks ??
+        timeline.tracks.flatMap((track) =>
+          track.kind === "scene" ? [track.clips] : [],
+        ),
+      ...(frame === undefined ? {} : { frameSceneId }),
       assets: Object.fromEntries(assets),
     },
-    sceneSources: Object.fromEntries(
-      snapshot.scenes.map((scene) => [
-        scene.id,
-        sceneSourceOf({ folder, scene }),
-      ]),
-    ),
+    sceneSources: Object.fromEntries([
+      ...snapshot.scenes.map(
+        (scene) => [scene.id, sceneSourceOf({ folder, scene })] as const,
+      ),
+      ...(frame === undefined ? [] : [[frameSceneId, frame.source] as const]),
+    ]),
   };
 }

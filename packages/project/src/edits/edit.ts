@@ -67,6 +67,10 @@ export const editSchema = z.discriminatedUnion("kind", [
     fonts: z.array(projectFontSchema),
   }),
   z.strictObject({
+    kind: z.literal("setFrame"),
+    name: sharedCodeNameSchema.exactOptional(),
+  }),
+  z.strictObject({
     kind: z.literal("putSharedCode"),
     name: sharedCodeNameSchema,
     code: z.string(),

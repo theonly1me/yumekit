@@ -38,6 +38,7 @@ type Project = {
   calm?: boolean;
   tempo?: number;
   fonts?: ProjectFont[];
+  frame?: string;
 };
 
 type ProjectFont = {
@@ -176,7 +177,7 @@ type WordTimings = {
 9. An asset of kind `audio` or `video` has `durationFrames`.
 10. A clip id is unique within its timeline, across all tracks.
 11. A platform is on one output only. The size of the output is the size of the platform in the catalog.
-12. `tempo` is from 60 to 200. Each entry of `fonts` names an asset of kind `font`. A shared code name matches the id rule.
+12. `tempo` is from 60 to 200. Each entry of `fonts` names an asset of kind `font`. A shared code name matches the id rule. `frame` names shared code of the project (document 19, K9).
 
 How a timeline reads:
 
@@ -255,6 +256,7 @@ function openProject(options: {
 | `setTempo`           | `tempo?`                        | Sets the tempo of the project. No value removes it (document 19)                                                                  |
 | `setFonts`           | `fonts`                         | Replaces the fonts of the project. An empty list removes the field (document 19)                                                  |
 | `putSharedCode`      | `name`, `code`                  | Adds or replaces `scenes/_shared/<name>.tsx` (document 19)                                                                        |
+| `setFrame`           | `name?`                         | Names the shared code that the stage draws over the whole video. No value removes it (document 19, K9)                            |
 | `setScript`          | `script`                        | Replaces `script.md`                                                                                                              |
 | `setBible`           | `bible`                         | Replaces `bible.json`                                                                                                             |
 | `putScene`           | `scene`, `code?`                | Adds or replaces a scene. `code` is required for a module scene                                                                   |

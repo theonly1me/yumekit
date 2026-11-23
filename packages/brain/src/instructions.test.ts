@@ -50,7 +50,7 @@ describe("the instructions for the agent", () => {
 
   it("prefer a kit scene, check each scene during its entry and settled, and set the transitions once", () => {
     expect(brainInstructions).toContain(
-      "2. Call get_project first. Before the first scene, call get_scene_guide.",
+      "Before the first scene, call get_scene_guide.",
     );
     expect(brainInstructions).toContain(
       "12. Prefer a kit scene. Write scene code only when no kit scene can show the idea, and then follow the part Motion design of the scene guide.",
