@@ -92,7 +92,7 @@ A fixed request is a chat request (document 12) with a text that the editor buil
 
 ### The order with no pick
 
-Document 06 says that a call with no server uses `defaults`, then the first server that started with the capability. That gave the sample server for each kind. The new rule: with no default for a capability, the call uses the first server that has the capability and is ready, in the order `openai`, `gemini`, `fal`, each other server of the file, and `sample` last. A server is ready when it started and each key that it needs is there. If no server is ready, the call fails with `media-key-missing` for the first of them, as before.
+Document 06 says that a call with no server uses `defaults`, then the first server that started with the capability. That gave the sample server for each kind. The new rule: with no default for a capability, the call uses the first server that has the capability and is ready, in the order `openai`, `gemini`, `fal`, each other server of the file, `local-voice` (document 18), and `sample` last. A server is ready when it started and each key that it needs is there. If no server is ready, the call fails with `media-key-missing` for the first of them, as before.
 
 ### The picker
 

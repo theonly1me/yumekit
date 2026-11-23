@@ -39,7 +39,7 @@ WP34 chose these details.
 - The package does not use `bundleDependencies`. With it, a global install on macOS failed with npm 11.11.0. npm ran the install script of the registry metadata of `fsevents`, an optional dependency of Vite, in a folder with no `binding.gyp`.
 - The package does not bundle the Node.js code. The renderer gives the scene kit, the stage, and its page files to Vite as files, and finds them by package name.
 - The set of packages is `@yumekit/cli` and each workspace package that it needs through `dependencies`. `@yumekit/editor` adds its built files only.
-- `@yumekit/tools` depends on the four bundled media servers, so they are in the set. `findBundledServers` finds `@yumekit/<server>/package.json` by name and starts `dist/main.js` in that folder. Before WP34 it used a path relative to the repository.
+- `@yumekit/tools` depends on the five bundled media servers, so they are in the set. `findBundledServers` finds `@yumekit/<server>/package.json` by name and starts `dist/main.js` in that folder. Before WP34 it used a path relative to the repository.
 - `pack-release` gathers the `dependencies` of each package in the set, except `@yumekit/*` and the editor. The editor has its dependencies in its built files.
 - `pack-release` stops when a version is not exact, when two packages need different versions, or when no package in the set gives a peer dependency. It names each problem.
 - The version of a release is the `version` of the root `package.json`. The publish folder writes it into each copied `package.json`. So `yumekit --version` and the engine show the release version.

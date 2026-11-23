@@ -15,6 +15,7 @@
     { "path": "tools/sample-media" },
     { "path": "tools/openai-media" },
     { "path": "tools/gemini-media" },
-    { "path": "tools/fal-media" }
+    { "path": "tools/fal-media" },
+    { "path": "tools/local-voice" }
   ]
 }

@@ -140,6 +140,7 @@ describe("the project interface of the engine", () => {
         { server: "openai" },
         { server: "gemini" },
         { server: "fal" },
+        { server: "local-voice" },
       ],
     });
     expect(bodyOf(listed)).toMatchObject({ data: bodyOf(servers) });

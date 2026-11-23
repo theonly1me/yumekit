@@ -29,6 +29,7 @@ const userMediaTools = {
     openai: { disabled: true },
     gemini: { disabled: true },
     fal: { disabled: true },
+    "local-voice": { disabled: true },
   },
 };
 

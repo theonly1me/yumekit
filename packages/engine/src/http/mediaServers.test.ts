@@ -21,6 +21,7 @@ describe("the media servers request", () => {
           checking: checkingServer,
           gemini: { disabled: true },
           fal: { disabled: true },
+          "local-voice": { disabled: true },
           openai: { disabled: true },
         },
       },
