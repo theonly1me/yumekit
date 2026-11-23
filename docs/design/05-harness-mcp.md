@@ -75,6 +75,7 @@ Before `put_scene` sends its edit, the harness checks the scene. For a kit scene
 | `copy_timeline`   | `from_output_id`, `to_output_id`                                                                                  | `copyTimeline`                                                                                                              |
 | `place_narration` | `output_id`, `asset_id`, `start_frame`, `with_captions?`                                                          | `addClip` for the audio, and `addClip` for a `caption-words` scene on the top scene track                                   |
 | `place_video`     | `output_id`, `asset_id`, `start_frame?`, `duration_frames?`, `replace_clip_id?`, `focus?`, `sound_gain_decibels?` | `removeClip` for a replaced clip, `putScene` for a `video-clip` scene, `addClip` for the scene, and `addClip` for the sound |
+| `place_sound`     | `output_id`, `asset_id`, `start_frame`, `gain_decibels?`                                                          | `setTimeline` for a new `sounds` track, and `addClip` for the sound                                                         |
 | `undo`, `redo`    | none                                                                                                              | The store operation                                                                                                         |
 
 `set_timeline` is the usual tool for a first build, because an agent can state the whole timeline in one call. The clip tools serve small changes. `update_clip` can also change the scene of a scene clip or the asset of an audio clip. So one output can show a different scene in the same place.
@@ -87,6 +88,8 @@ What the first agent run could not learn from the descriptions, and each descrip
 - `place_narration` and `copy_timeline` name the tracks and the clip ids that they make.
 
 `place_narration` puts a speech asset on the first audio track other than `video-sound`, for its full length. With `with_captions`, it also adds a `caption-words` scene and a clip that matches the audio clip, as document 08 requires. It creates the audio track and the caption track when the output has none. All of it is one edit batch, so one undo removes it.
+
+`place_sound` puts an audio asset, usually a sound effect, on the track `sounds` of an output, as document 16 says in "Details of WP47". `place_narration` never uses a `sounds` track.
 
 `place_video` shows a video asset in an output, as document 09 says. The scene id is `video-` followed by the asset id. The scene clip goes on the first scene track that is not a caption track, or on a new scene track `scenes` below the others. The sound clip goes on the audio track `video-sound`, at -12 decibels by default, and is never longer than the video. `sound_gain_decibels` set to `off`, or an asset without `hasAudio`, adds no sound clip. With `replace_clip_id`, the tool removes that scene clip, and the sound clip of its video when the clip shows a `video-clip` scene. The video then starts at the start frame of that clip with its length, unless `start_frame` or `duration_frames` are given. A call needs `start_frame` or `replace_clip_id`. All of it is one edit batch, so one undo brings back the replaced clip.
 
@@ -109,12 +112,12 @@ The four scene clip tools change the scenes row of document 03, as document 13 s
 
 ### Media
 
-| Tool             | Input                                                                                                                                                                                              | What it does                                                                                       |
-| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `generate_asset` | `asset_id`, `capability` (`image`, `speech`, `music`, `video`), `server?`, `model?`, `input`, `reference_asset_ids?`, `cast_ids?`, `first_frame_asset_id?`, `last_frame_asset_id?`, `camera_move?` | Calls the media tool, then adds the asset with its source record                                   |
-| `import_asset`   | `asset_id`, `kind`, `source_path`, `original_name?`                                                                                                                                                | Copies a file of the user into the project and adds the asset                                      |
-| `remove_asset`   | `asset_id`                                                                                                                                                                                         | Removes the record of an asset that nothing uses, with the edit `removeAsset`. The file stays      |
-| `align_words`    | `asset_id`, `text`                                                                                                                                                                                 | Makes word timings for a speech asset that has none, and stores them with the edit `setAssetWords` |
+| Tool             | Input                                                                                                                                                                                                                                            | What it does                                                                                       |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------- |
+| `generate_asset` | `asset_id`, `capability` (`image`, `speech`, `music`, `video`, `sound-effect`, `sharper`), `server?`, `model?`, `input`, `reference_asset_ids?`, `cast_ids?`, `first_frame_asset_id?`, `last_frame_asset_id?`, `camera_move?`, `media_asset_id?` | Calls the media tool, then adds the asset with its source record                                   |
+| `import_asset`   | `asset_id`, `kind`, `source_path`, `original_name?`                                                                                                                                                                                              | Copies a file of the user into the project and adds the asset                                      |
+| `remove_asset`   | `asset_id`                                                                                                                                                                                                                                       | Removes the record of an asset that nothing uses, with the edit `removeAsset`. The file stays      |
+| `align_words`    | `asset_id`, `text`                                                                                                                                                                                                                               | Makes word timings for a speech asset that has none, and stores them with the edit `setAssetWords` |
 
 `generate_asset` saves the tool name, the server and the model that `run` reports, the input, `costUsd`, and `costIsEstimate` in the asset record. With no `server`, the defaults of the media tools configuration apply. A repeated call reuses a file only when the model also matches, if the call names one.
 
@@ -126,7 +129,7 @@ For a video, `generate_asset` reads `hasAudio` with `probeMedia`. It uses the si
 
 `remove_asset` checks the uses of the asset with `assetUsesOf` from `@yumekit/project`: each scene whose props name the asset, each audio clip, and each cast member. If one exists, the failure is `asset-in-use`, and its message names each use. The tool changes nothing then. Otherwise it is one edit, so one undo brings the asset back. The file stays in `assets/files/`, because undo never restores a media file (document 03).
 
-`camera_move` and `last_frame_asset_id` follow "Details of WP41" of document 16.
+`camera_move` and `last_frame_asset_id` follow "Details of WP41" of document 16. `media_asset_id` and the capabilities `sound-effect` and `sharper` follow "Details of WP47" of document 16.
 
 `import_asset` keeps `original_name` as `originalName` of the record. With no value, it keeps the last part of `source_path`.
 
@@ -146,10 +149,11 @@ The default scale is 0.25. An agent uses these tools after each scene and before
 
 ### Finish
 
-| Tool           | Input                                                 | Result                                                                                                                        |
-| -------------- | ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `render_video` | `output_id`, `first_frame?`, `frame_count?`, `scale?` | The path of the MP4 in `renders/` as `file`, `files` with one entry for each file, the frame count, and the length in seconds |
-| `render_still` | `output_id`, `frame`                                  | The path of the PNG in `renders/`                                                                                             |
+| Tool                | Input                                                       | Result                                                                                                                                |
+| ------------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `render_video`      | `output_id`, `first_frame?`, `frame_count?`, `scale?`       | The path of the MP4 in `renders/` as `file`, `files` with one entry for each file, the frame count, and the length in seconds         |
+| `render_still`      | `output_id`, `frame`                                        | The path of the PNG in `renders/`                                                                                                     |
+| `make_sharper_copy` | `output_id`, `platform_ids?`, `scale?`, `server?`, `model?` | `files` with the path of each `renders/<name>-sharper.mp4`, the server, the model, the size, and `cost_usd` when the server gives one |
 
 An output with platforms renders once to `renders/<project name>-<platform id>.mp4` for its first platform in catalog order. Each other platform gets a hard link to that file, or a copy when the link fails. Each entry of `files` has `file` and `platform_id`. `file` is the first file. An output with no platform writes `renders/<output id>.mp4`, and its one entry has no `platform_id`.
 
@@ -167,7 +171,7 @@ The server sends these instructions to the client at the start of a session. The
 4. Make the narration with `generate_asset`. Read the word timings to set the length of each scene.
 5. Make the images with `generate_asset`. Put the style of the bible in each prompt.
 6. For a shot that code cannot draw, make a still image first. Check it with the person or with `preview_frame`. Then call `generate_asset` with the capability `video`, `first_frame_asset_id`, and a `camera_move`, and add the clip with `place_video`.
-7. Build the timeline with `set_timeline`, one output at a time. Add each narration with `place_narration`. Use `copy_timeline` for the next output, then change it. Call `set_transitions` once for the whole video, not once for each clip.
+7. Build the timeline with `set_timeline`, one output at a time. Add each narration with `place_narration`. Use `copy_timeline` for the next output, then change it. Call `set_transitions` once for the whole video, not once for each clip. Where a moment needs a sound, make it with `generate_asset` and the capability `sound-effect`, and add it with `place_sound`.
 8. Check frames with `preview_frames`. Correct each scene that has a defect.
 9. Call `render_video` for each output.
 

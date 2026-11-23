@@ -1,0 +1,43 @@
+{
+  "endpoint_id": "fal-ai/seedvr/upscale/image",
+  "page": "https://fal.ai/models/fal-ai/seedvr/upscale/image",
+  "schema_url": "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=fal-ai/seedvr/upscale/image",
+  "read_on": "2026-11-23",
+  "required": ["image_url"],
+  "properties": {
+    "enable_safety_checker": {
+      "types": ["boolean"]
+    },
+    "image_url": {
+      "types": ["string"]
+    },
+    "noise_scale": {
+      "types": ["number"],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "output_format": {
+      "types": ["string"],
+      "enum": ["png", "jpg", "webp"]
+    },
+    "seed": {
+      "types": ["integer", "null"]
+    },
+    "sync_mode": {
+      "types": ["boolean"]
+    },
+    "target_resolution": {
+      "types": ["string"],
+      "enum": ["720p", "1080p", "1440p", "2160p"]
+    },
+    "upscale_factor": {
+      "types": ["number"],
+      "minimum": 1,
+      "maximum": 10
+    },
+    "upscale_mode": {
+      "types": ["string"],
+      "enum": ["target", "factor"]
+    }
+  }
+}

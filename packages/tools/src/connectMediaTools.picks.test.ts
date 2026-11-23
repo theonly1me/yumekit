@@ -114,6 +114,8 @@ describe("connectMediaTools picks", () => {
       "speech",
       "music",
       "video",
+      "sound-effect",
+      "sharper",
     ]);
     expect(pictures?.services).toMatchObject([
       {

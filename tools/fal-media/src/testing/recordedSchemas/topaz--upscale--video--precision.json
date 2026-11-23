@@ -1,0 +1,79 @@
+{
+  "endpoint_id": "topaz/upscale/video/precision",
+  "page": "https://fal.ai/models/topaz/upscale/video/precision",
+  "schema_url": "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=topaz/upscale/video/precision",
+  "read_on": "2026-11-23",
+  "required": ["video_url"],
+  "properties": {
+    "H264_output": {
+      "types": ["boolean"]
+    },
+    "compression": {
+      "types": ["null", "number"],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "enable_safety_checker": {
+      "types": ["boolean"]
+    },
+    "grain": {
+      "types": ["null", "number"],
+      "minimum": 0,
+      "maximum": 0.1
+    },
+    "halo": {
+      "types": ["null", "number"],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "model": {
+      "types": ["string"],
+      "enum": [
+        "Proteus",
+        "Proteus Natural",
+        "Iris",
+        "Iris Low Quality",
+        "Dione DV",
+        "Dione TV",
+        "Dione Robust",
+        "Dione Dehalo",
+        "Dione Robust Dehalo",
+        "Artemis High Quality",
+        "Artemis Medium Quality",
+        "Artemis Low Quality",
+        "Artemis Strong Halo",
+        "Artemis Medium Halo",
+        "Artemis Aliasing & Moire",
+        "Gaia HQ",
+        "Gaia CG",
+        "Gaia 2",
+        "Rhea",
+        "Theia Fine Tune Detail",
+        "Theia Fine Tune Fidelity"
+      ]
+    },
+    "noise": {
+      "types": ["null", "number"],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "recover_detail": {
+      "types": ["null", "number"],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "target_fps": {
+      "types": ["integer", "null"],
+      "minimum": 16,
+      "maximum": 60
+    },
+    "upscale_factor": {
+      "types": ["number"],
+      "minimum": 1,
+      "maximum": 4
+    },
+    "video_url": {
+      "types": ["string"]
+    }
+  }
+}

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { startHarness } from "./testing/harnessFixture.js";
+import { documentedToolNames } from "./testing/documentedToolNames.js";
 
 const titleScene = {
   scene_id: "intro",
@@ -15,52 +16,7 @@ describe("read tools", () => {
     const { tools } = await harness.client.listTools();
 
     expect(tools.map((tool) => tool.name).sort()).toEqual(
-      [
-        "get_project",
-        "get_scene",
-        "get_timeline",
-        "list_assets",
-        "get_asset_words",
-        "list_kit_scenes",
-        "get_scene_guide",
-        "list_media_tools",
-        "set_script",
-        "set_bible",
-        "put_cast_member",
-        "remove_cast_member",
-        "add_output",
-        "remove_output",
-        "add_platform",
-        "remove_platform",
-        "set_look",
-        "put_scene",
-        "remove_scene",
-        "set_timeline",
-        "add_clip",
-        "update_clip",
-        "remove_clip",
-        "copy_timeline",
-        "place_narration",
-        "place_video",
-        "resize_scene_clip",
-        "move_scene_clip",
-        "remove_scene_clip",
-        "duplicate_scene_clip",
-        "set_track_off",
-        "set_video_style",
-        "set_transitions",
-        "undo",
-        "redo",
-        "generate_asset",
-        "import_asset",
-        "remove_asset",
-        "align_words",
-        "preview_frame",
-        "preview_frames",
-        "preview_scenes",
-        "render_video",
-        "render_still",
-      ].sort(),
+      [...documentedToolNames].sort(),
     );
   });
 

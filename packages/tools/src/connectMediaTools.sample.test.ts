@@ -27,13 +27,21 @@ function onlyFile<Value>(files: Value[]): Value {
 }
 
 describe("connectMediaTools with the sample server", () => {
-  it("lists the sample server with image, speech, align, and music when no file exists", async () => {
+  it("lists the sample server with each capability, sound effects and sharper copies included, when no file exists", async () => {
     const { tools } = await connectFixture({});
 
     expect(tools.list()).toMatchObject([
       {
         server: "sample",
-        capabilities: ["image", "speech", "align", "music", "video"],
+        capabilities: [
+          "image",
+          "speech",
+          "align",
+          "music",
+          "video",
+          "sound-effect",
+          "sharper",
+        ],
       },
     ]);
   });

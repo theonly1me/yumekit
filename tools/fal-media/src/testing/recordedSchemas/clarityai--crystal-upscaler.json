@@ -1,0 +1,29 @@
+{
+  "endpoint_id": "clarityai/crystal-upscaler",
+  "page": "https://fal.ai/models/clarityai/crystal-upscaler",
+  "schema_url": "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=clarityai/crystal-upscaler",
+  "read_on": "2026-11-23",
+  "required": ["image_url"],
+  "properties": {
+    "creativity": {
+      "types": ["number"],
+      "minimum": 0,
+      "maximum": 10
+    },
+    "enable_safety_checker": {
+      "types": ["boolean"]
+    },
+    "image_url": {
+      "types": ["string"]
+    },
+    "output_format": {
+      "types": ["string"],
+      "enum": ["png", "jpg"]
+    },
+    "scale_factor": {
+      "types": ["number"],
+      "minimum": 1,
+      "maximum": 200
+    }
+  }
+}

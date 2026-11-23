@@ -1,0 +1,29 @@
+{
+  "endpoint_id": "bria/increase-resolution",
+  "page": "https://fal.ai/models/bria/increase-resolution",
+  "schema_url": "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=bria/increase-resolution",
+  "read_on": "2026-11-23",
+  "required": ["image_url"],
+  "properties": {
+    "desired_increase": {
+      "types": ["integer"],
+      "enum": [2, 4]
+    },
+    "image_url": {
+      "types": ["string"]
+    },
+    "output_type": {
+      "types": ["string"],
+      "enum": ["png", "jpeg"]
+    },
+    "preserve_alpha": {
+      "types": ["boolean"]
+    },
+    "preserve_color": {
+      "types": ["boolean"]
+    },
+    "sync_mode": {
+      "types": ["boolean"]
+    }
+  }
+}

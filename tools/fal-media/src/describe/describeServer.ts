@@ -1,7 +1,15 @@
 import { imageModels } from "../catalog/image/index.ts";
+import { sharperModels } from "../catalog/sharper/index.ts";
+import { soundModels } from "../catalog/sound/index.ts";
 import { videoAccepts, videoModels } from "../catalog/video/index.ts";
 import { getKeyUrl } from "../falApi.ts";
-import { imageAccepts, imageSettings, videoSettings } from "./settings.ts";
+import {
+  imageAccepts,
+  imageSettings,
+  sharperSettings,
+  soundSettings,
+  videoSettings,
+} from "./settings.ts";
 
 interface CatalogEntry {
   id: string;
@@ -59,6 +67,18 @@ export function describeServer() {
         capability: "video" as const,
         settings: videoSettings(model),
         accepts: videoAccepts(model),
+      })),
+      ...soundModels.map((model) => ({
+        ...sharedFields(model),
+        capability: "sound-effect" as const,
+        settings: soundSettings(model),
+        accepts: [],
+      })),
+      ...sharperModels.map((model) => ({
+        ...sharedFields(model),
+        capability: "sharper" as const,
+        settings: sharperSettings,
+        accepts: [model.takes === "image" ? "image_input" : "video_input"],
       })),
     ],
   };

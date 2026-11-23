@@ -1,7 +1,14 @@
 import { z } from "zod";
 import type { EngineClient } from "../../engine/engineClient.js";
 
-const kindSchema = z.enum(["image", "speech", "music", "video"]);
+const kindSchema = z.enum([
+  "image",
+  "speech",
+  "music",
+  "video",
+  "sound-effect",
+  "sharper",
+]);
 
 const keySchema = z.object({
   variable: z.string(),
@@ -61,6 +68,8 @@ export const kindNames: Record<MediaKind, string> = {
   speech: "Voice",
   music: "Music",
   video: "Video clips",
+  "sound-effect": "Sounds",
+  sharper: "Sharper copy",
 };
 
 export function mediaChoiceRequests(client: EngineClient) {

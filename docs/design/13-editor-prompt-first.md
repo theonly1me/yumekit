@@ -101,7 +101,7 @@ The prototype is the reference for each screen. This list gives the behavior beh
 | Chat     | The requests, the answers, each change with "Undo", the suggestions, and the prompt box with the scene chip. Document 12 has the interface            |
 | Scene    | The form of document 11 for the picked scene, with the length and the name of the scene. It is a tab next to Chat                                     |
 | Clip     | "Make a real video clip" for the picked scene: the prompt from the scene, the models with a price, the length, and the key guide in place when needed |
-| Export   | One row for each platform with a check box, the file name, the progress, and "Show the file"                                                          |
+| Export   | One row for each platform with a check box, the file name, the progress, and "Show the file". The switch "Sharper" of document 16 is under the row    |
 | Settings | AI (which agent program), Media tools and keys (the Tools pane of document 11), and Limits                                                            |
 
 #### The editor
@@ -111,7 +111,7 @@ The prototype is the reference for each screen. This list gives the behavior beh
 3. The "+" between two cards opens one line: "Describe the new scene". The editor sends it to the chat as a request that names the two neighbor scenes.
 4. "Edit text" opens the Scene tab and puts the cursor in the first text field.
 5. A click on a text in the preview changes it in place (work package WP33). Before WP33, the click opens the Scene tab, as "Edit text" does.
-6. A sound row shows when its track exists. The voice row is the track with the voice clips. The captions row is the caption track. The music row is each other audio track, except `video-sound`. The switch calls `set_track_off`. "Change" puts a start of a request in the prompt box, for example "Change the voice to ", and moves the cursor there.
+6. A sound row shows when its track exists. The voice row is the track with the voice clips. The captions row is the caption track. The music row is each other audio track, except `video-sound` and each `sounds` track. Each `sounds` track has the row "Sounds" (document 16, "Details of WP47"). The switch calls `set_track_off`. "Change" puts a start of a request in the prompt box, for example "Change the voice to ", and moves the cursor there.
 7. The detailed timeline is the read-only view of document 11. Drag and trim come later.
 8. The Export button replaces Render. A platform row maps to its output. The sheet renders each needed output once.
 9. A change by the person shows in the chat as one line, for example "You changed the text of scene 4.", with "Undo".

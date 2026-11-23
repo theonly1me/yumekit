@@ -1,0 +1,21 @@
+{
+  "endpoint_id": "sonilo/v1.1/text-to-sound-effects",
+  "page": "https://fal.ai/models/sonilo/v1.1/text-to-sound-effects",
+  "schema_url": "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=sonilo/v1.1/text-to-sound-effects",
+  "read_on": "2026-11-23",
+  "required": ["prompt"],
+  "properties": {
+    "audio_format": {
+      "types": ["string"],
+      "enum": ["wav", "mp3", "aac", "flac"]
+    },
+    "duration": {
+      "types": ["number"],
+      "minimum": 0.5,
+      "maximum": 180
+    },
+    "prompt": {
+      "types": ["string"]
+    }
+  }
+}

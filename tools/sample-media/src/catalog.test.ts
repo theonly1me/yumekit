@@ -14,6 +14,8 @@ const toolByCapability = {
   align: "align_words",
   music: "generate_music",
   video: "generate_video",
+  "sound-effect": "generate_sound_effect",
+  sharper: "sharpen_media",
 } as const;
 
 async function connectSample() {
@@ -47,6 +49,10 @@ async function connectSample() {
     },
   });
   const speechFile = join(folder, "speech.wav");
+  const picture = await call({
+    name: "generate_image",
+    arguments: { prompt: "a fox", output_directory: folder, file_stem: "fox" },
+  });
   const required = {
     image: { prompt: "a fox", output_directory: folder, file_stem: "image" },
     speech: { text: "one two", output_directory: folder, file_stem: "voice" },
@@ -63,8 +69,24 @@ async function connectSample() {
       output_directory: folder,
       file_stem: "video",
     },
+    "sound-effect": {
+      prompt: "a door slams",
+      output_directory: folder,
+      file_stem: "door",
+    },
+    sharper: {
+      media_path: join(folder, "fox.png"),
+      scale: 2,
+      output_directory: folder,
+      file_stem: "fox-sharper",
+    },
   } as const;
-  return { client, call, required, speechWorked: speech.isError !== true };
+  return {
+    client,
+    call,
+    required,
+    speechWorked: speech.isError !== true && picture.isError !== true,
+  };
 }
 
 describe("the sample catalog", () => {

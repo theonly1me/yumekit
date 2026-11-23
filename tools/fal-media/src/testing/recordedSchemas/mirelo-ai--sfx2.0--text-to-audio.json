@@ -1,0 +1,39 @@
+{
+  "endpoint_id": "mirelo-ai/sfx2.0/text-to-audio",
+  "page": "https://fal.ai/models/mirelo-ai/sfx2.0/text-to-audio",
+  "schema_url": "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=mirelo-ai/sfx2.0/text-to-audio",
+  "read_on": "2026-11-23",
+  "required": ["prompt"],
+  "properties": {
+    "duration": {
+      "types": ["number"],
+      "minimum": 0.1,
+      "maximum": 600
+    },
+    "negative_prompt": {
+      "types": ["null", "string"]
+    },
+    "num_samples": {
+      "types": ["integer"],
+      "minimum": 1,
+      "maximum": 4
+    },
+    "prompt": {
+      "types": ["string"]
+    },
+    "seed": {
+      "types": ["integer", "null"],
+      "minimum": -1,
+      "maximum": 9223372036854776000
+    },
+    "upload_audio_bitrate_kbps": {
+      "types": ["integer", "null"],
+      "minimum": 32,
+      "maximum": 320
+    },
+    "upload_audio_format": {
+      "types": ["string"],
+      "enum": ["wav", "mp3", "aac", "flac"]
+    }
+  }
+}

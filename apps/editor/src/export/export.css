@@ -58,3 +58,22 @@
   flex-wrap: wrap;
   gap: 8px;
 }
+
+.export-sharper {
+  display: flex;
+  flex-wrap: wrap;
+  flex-basis: 100%;
+  gap: 4px 12px;
+  align-items: center;
+  padding-left: 26px;
+}
+
+.export-sharper label {
+  flex: 0 0 auto;
+  font-size: var(--step--1);
+}
+
+.export-sharper .fact {
+  flex: 1 1 220px;
+  font-size: var(--step--1);
+}

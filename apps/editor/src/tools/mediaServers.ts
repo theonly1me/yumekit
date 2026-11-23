@@ -1,7 +1,15 @@
 import { z } from "zod";
 import type { EngineClient } from "../engine/engineClient.js";
 
-const capabilitySchema = z.enum(["image", "speech", "align", "music", "video"]);
+const capabilitySchema = z.enum([
+  "image",
+  "speech",
+  "align",
+  "music",
+  "video",
+  "sound-effect",
+  "sharper",
+]);
 
 const settingSchema = z.discriminatedUnion("kind", [
   z.object({
@@ -54,7 +62,15 @@ const modelSchema = z.object({
   read_on: z.string(),
   tested: z.boolean().optional(),
   accepts: z
-    .array(z.enum(["first_frame", "last_frame", "reference_images"]))
+    .array(
+      z.enum([
+        "first_frame",
+        "last_frame",
+        "reference_images",
+        "image_input",
+        "video_input",
+      ]),
+    )
     .optional(),
 });
 

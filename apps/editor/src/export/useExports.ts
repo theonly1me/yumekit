@@ -7,6 +7,7 @@ import {
   type ExportJob,
   type JobState,
 } from "./exportJobs.js";
+import { withSharperCopy, type SharperRequest } from "./sharpenExport.js";
 
 export type Exports = ReturnType<typeof useExports>;
 
@@ -50,7 +51,9 @@ async function exportOne(options: {
       file: entry.file,
       fileName: fileNameOf(entry.file),
       platformId: entry.platform_id,
+      isSharper: false,
     })),
+    sharperFailure: undefined,
   };
 }
 
@@ -71,7 +74,8 @@ export function useExports(client: EngineClient) {
   );
 
   const start = useCallback(
-    (outputIds: string[]) => {
+    (request: { outputIds: string[]; sharper: SharperRequest[] }) => {
+      const { outputIds, sharper } = request;
       if (isRunningNow.current || outputIds.length === 0) return;
       isRunningNow.current = true;
       setRunning(true);
@@ -104,9 +108,23 @@ export function useExports(client: EngineClient) {
             callId: job.callId,
             state: { kind: "exporting", framesDone: 0, frameCount: undefined },
           });
+          const exported = await exportOne({ client, job });
+          setState({ callId: job.callId, state: exported });
+          const request = sharper.find(
+            (each) => each.outputId === job.outputId,
+          );
+          if (exported.kind !== "done" || request === undefined) continue;
           setState({
             callId: job.callId,
-            state: await exportOne({ client, job }),
+            state: { kind: "sharpening", files: exported.files },
+          });
+          setState({
+            callId: job.callId,
+            state: await withSharperCopy({
+              client,
+              request,
+              files: exported.files,
+            }),
           });
         }
       };

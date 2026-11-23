@@ -102,6 +102,60 @@ The list comes from a survey of the public pages of current AI video products on
 - A board of connected steps.
 - Shared projects.
 
+## Details of WP47
+
+The builder read the list of fal models at `api.fal.ai/v1/models` on 2026-11-23, then each model page, its `llms.txt` page, and its schema at `fal.ai/api/openapi/queue/openapi.json?endpoint_id=<id>`. This part builds sound effects and the sharper copy. The talking clip follows in its own change.
+
+1. The capabilities are `sound-effect` with the tool `generate_sound_effect`, and `sharper` with the tool `sharpen_media`. Both are in the list of capabilities of `@yumekit/tools`, in `defaults` of `media-tools.json`, and in the picker of Settings, with the rows "Sounds" and "Sharper copy".
+2. `generate_sound_effect` takes `prompt` and the optional `duration_seconds`. It returns one audio file. A server can leave out `duration_seconds` of the file. `generate_asset` then reads the length with `probeMedia`, as it does for a video.
+3. `sharpen_media` takes `media_path` (a PNG, JPEG, or WebP picture, or an MP4, MOV, or WebM video) and `scale`, 2 or 4. It returns one file of the same kind, with its size.
+4. A sharper model names what it takes in `accepts`: `image_input` for pictures, `video_input` for video. These are two new values of `accepts` (document 10). The talking clip uses them too.
+5. With no `model`, a sharper server uses its default model when that model takes the kind of the file. Otherwise it uses the first model of its catalog that takes it. A model for the other kind is a failure that names the kind, before any request.
+6. `generate_asset` with `sharper` needs `media_asset_id`, an image or video asset. The harness gives the tool its file as `media_path`, and the source record keeps `media_asset_id`. A missing or wrong id is `asset-not-found` with the ids of the pictures and video clips. `media_asset_id` with another capability is `invalid-value`.
+7. The new tool `place_sound` puts an audio asset on the track `sounds` of an output at `start_frame`, at -6 decibels unless `gain_decibels` says otherwise. When a sound already plays there at the same time, the clip goes on `sounds-2`, then `sounds-3`. A new track goes below the other tracks. The clip stops at the end of the last scene, so a sound never makes the video longer. A start at or after that end is the failure `start-after-the-end`. It is one undo step.
+8. `place_narration` never uses a `sounds` track, also when it is the first audio track.
+9. The renderer and the preview of the editor mix each audio track that is on, so a `sounds` track plays in both with no change. A test renders a sound at 1.5 seconds and reads the volume before and after it.
+10. The Music view has the group "Sounds" between "Try another" and "Use my own music". It lists each sound of the video once, also when two outputs have it at the same frame, in the order of time: "Play", the prompt or the file name, the place ("At 0:01, in scene 2"), and "Remove". "Remove" calls `remove_clip` for the clip in each output, so it is one undo step for each output. With no sound, the group says what a sound is.
+11. "Add a sound" is the fixed request `add-a-sound`: "Add this sound to the video where it fits: `<words>`." The line `MadeWith` in one-time mode under it adds the model sentence of document 15.
+12. Each `sounds` track has the sound row "Sounds" ("Sounds 2" for the next one), with the count of its sounds and "Open", which opens the Music view. A `sounds` track is not a music row. The lead line of Export names the sounds.
+13. The new tool `make_sharper_copy` takes `output_id`, `platform_ids?` (each platform of the output by default), `scale?` (2 by default), `server?`, and `model?`. It needs the file of `render_video`, or it fails with `render-not-found`. It calls the `sharper` capability once for the output, writes `renders/<name>-sharper.mp4` next to the first chosen file, and links or copies it for each other chosen platform. The normal file stays. An unknown platform is `platform-not-found` with the platforms of the output.
+14. Export shows the switch "Sharper" under each chosen row when the sharper pick of Settings is ready and its model has `video_input` in `accepts`. The switch is off at the start. Next to it: "2 times wider and taller.", the price for the length of the row from the price for each second of the model ("Free", "About $0.70", or "Price not known"), and the model, or a line that the free test service makes a plain larger copy.
+15. After the export of an output, the editor calls `make_sharper_copy` once for the rows of that output with the switch on, with scale 2. The row then has "Show the sharper file" next to "Show the file". A failure keeps the normal file and says so under the row.
+16. The sample server gets `sample-sound-effect` (a WAV file with a short tone at 880 hertz, 1 second unless `duration_seconds` says otherwise, up to 30) and `sample-sharper` (a real larger copy with FFmpeg, a PNG for a picture and an MP4 with its sound for a video). Both have `tested: true`. `sample-sharper` accepts `image_input` and `video_input`.
+
+Sound effect models of `tools/fal-media` (`generate_sound_effect`):
+
+| Model                      | Id                                              | Length in seconds | Price in the catalog               |
+| -------------------------- | ----------------------------------------------- | ----------------- | ---------------------------------- |
+| ElevenLabs Sound Effects 3 | `elevenlabs/sound-effects/v3`                   | 1 to 30           | 0.002 US dollars a second          |
+| Mirelo SFX 2.0             | `mirelo-ai/sfx2.0/text-to-audio`                | 1 to 600          | 0.015 a second                     |
+| Sonilo 1.1 Sound Effects   | `sonilo/v1.1/text-to-sound-effects`             | 1 to 180          | 0.0018 a second                    |
+| Stable Audio 3 Small SFX   | `fal-ai/stable-audio-3/small/sfx/text-to-audio` | 1 to 120          | None. The page gives 0.0206 a file |
+
+17. ElevenLabs Sound Effects 3 is the default: it has the lowest price for each second of a model that picks a length from the prompt. With no `duration_seconds`, it gets no length and picks one. Each other model gets 5 seconds, because their defaults (30 and 8 seconds) are long for one sound.
+18. Each model asks for MP3. Mirelo SFX 2.0 gets `num_samples: 1`, because fal bills each sample and the default is 2. The Mirelo page gives 0.010 a second until 2026-12-13 and 0.015 after it. The catalog has 0.015.
+19. `cost_usd` is the price for each second times `duration_seconds`. A call with no length gives no `cost_usd`.
+
+Sharper models of `tools/fal-media` (`sharpen_media`):
+
+| Model                                 | Id                                 | Takes    | Scale field                   | Price in the catalog |
+| ------------------------------------- | ---------------------------------- | -------- | ----------------------------- | -------------------- |
+| Bria Increase Resolution for video    | `bria/video/increase-resolution`   | Video    | `desired_increase` "2" or "4" | 0.14 a second        |
+| Topaz Precision for video             | `topaz/upscale/video/precision`    | Video    | `upscale_factor` 1 to 4       | None                 |
+| SeedVR2 for video                     | `fal-ai/seedvr/upscale/video`      | Video    | `upscale_factor` 1 to 10      | None                 |
+| FlashVSR+ for video                   | `openimaginglab/flashvsr-plus`     | Video    | `upscale_factor` 1 to 4       | None                 |
+| Crystal Upscaler for video            | `clarityai/crystal-video-upscaler` | Video    | `scale_factor`                | None                 |
+| Bria Increase Resolution for pictures | `bria/increase-resolution`         | Pictures | `desired_increase` 2 or 4     | 0.04 a picture       |
+| Topaz Precision for pictures          | `topaz/upscale/image/precision`    | Pictures | `upscale_factor` 1 to 4       | None                 |
+| SeedVR2 for pictures                  | `fal-ai/seedvr/upscale/image`      | Pictures | `upscale_factor` 1 to 10      | None                 |
+| Crystal Upscaler for pictures         | `clarityai/crystal-upscaler`       | Pictures | `scale_factor`                | None                 |
+
+20. Bria Increase Resolution for video is the default: it takes exactly 2 or 4, keeps the sound, and has one price for each second. The server asks it for `mp4_h264`, because its default is WebM. Topaz gets `H264_output: true`, and SeedVR2 and FlashVSR+ get `X264 (.mp4)`. Each picture model asks for PNG where it can.
+21. Topaz prices by the started 24 megapixels of a picture and by the output resolution of a video. SeedVR2, FlashVSR+, and Crystal price by megapixel. These do not fit `MediaModelPrice`, so the models have an empty `prices` list and give no `cost_usd`. For Bria, `cost_usd` is 0.04 for a picture, and 0.14 times the length of the video.
+22. The server uploads a picture of at most 30 MB, the image limit of fal. The pages give no size limit for a video upload, so the server sets none. Bria takes a video under 30 seconds, and FLUX Video Upscale under 20.
+23. Left out: ElevenLabs Sound Effects V2 (fal retires it on 2027-02-01), the older Cassette sound effects, FLUX Video Upscale (its factor is 1.5 to 3, so it takes no 4), LTX 2.5 Upscale and Gemini Omni Flash 1.2 Upscale (they take a target resolution, not a scale), and the creative upscalers (Bria creative, Recraft, Topaz creative and generative), because they change the content of the picture.
+24. Each fal model has `tested: false`. The test of check 5 of document 16 sends the default of each setting of each model to a stub of fal and compares the body with the recorded schema in `tools/fal-media/src/testing/recordedSchemas`.
+
 ## Details of WP46
 
 The builder read each fact below on 2026-11-22, in `aistudio.google.com/docs` (where `ai.google.dev/gemini-api/docs` now redirects) and in `developers.openai.com/api/docs` (where `platform.openai.com/docs` now redirects). Each catalog entry keeps the URL of its page as `sourceUrl`, next to the model. The description of a server does not send it.

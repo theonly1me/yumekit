@@ -10,7 +10,7 @@ describe("describe_media_server", () => {
 
     expect(media.requests).toHaveLength(0);
     expect(parsed.keys.map((key) => key.variable)).toEqual(["FAL_KEY"]);
-    for (const capability of ["image", "video"]) {
+    for (const capability of ["image", "video", "sound-effect", "sharper"]) {
       expect(
         parsed.models.filter(
           (model) => model.capability === capability && model.is_default,
@@ -29,6 +29,25 @@ describe("describe_media_server", () => {
 
     expect(makersOf(idsOf("image")).size).toBeGreaterThanOrEqual(6);
     expect(makersOf(idsOf("video")).size).toBeGreaterThanOrEqual(6);
+  });
+
+  it("lists at least 2 sound effect models, 2 sharper models for pictures, and 2 for video", async () => {
+    const { parsed } = await describeWithNoKey();
+    const countOf = (options: { capability: string; accepts?: string }) =>
+      parsed.models.filter(
+        (model) =>
+          model.capability === options.capability &&
+          (options.accepts === undefined ||
+            model.accepts.some((input) => input === options.accepts)),
+      ).length;
+
+    expect(countOf({ capability: "sound-effect" })).toBeGreaterThanOrEqual(2);
+    expect(
+      countOf({ capability: "sharper", accepts: "image_input" }),
+    ).toBeGreaterThanOrEqual(2);
+    expect(
+      countOf({ capability: "sharper", accepts: "video_input" }),
+    ).toBeGreaterThanOrEqual(2);
   });
 
   it("keeps Seedance 2.5 as the default video model with the per second prices of its fal page", async () => {
@@ -72,6 +91,8 @@ describe("describe_media_server", () => {
     const fieldsOf = {
       image: await media.inputFieldsOf("generate_image"),
       video: await media.inputFieldsOf("generate_video"),
+      "sound-effect": await media.inputFieldsOf("generate_sound_effect"),
+      sharper: await media.inputFieldsOf("sharpen_media"),
     };
 
     for (const model of parsed.models) {

@@ -37,7 +37,15 @@ describe("connectMediaTools configuration", () => {
       },
       {
         server: "sample",
-        capabilities: ["image", "speech", "align", "music", "video"],
+        capabilities: [
+          "image",
+          "speech",
+          "align",
+          "music",
+          "video",
+          "sound-effect",
+          "sharper",
+        ],
       },
     ]);
   });

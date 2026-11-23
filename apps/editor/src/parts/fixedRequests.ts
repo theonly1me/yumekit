@@ -16,6 +16,7 @@ export type FixedRequest =
   | { kind: "record-the-changed-lines" }
   | { kind: "another-voice"; voiceName: string; model?: ModelTarget }
   | { kind: "make-this-music"; words: string; model?: ModelTarget }
+  | { kind: "add-a-sound"; words: string; model?: ModelTarget }
   | { kind: "match-the-captions" }
   | { kind: "back-to-graphics"; aboutClipId: string }
   | { kind: "make-a-cast-picture"; name: string; description: string }
@@ -54,6 +55,8 @@ function requestSentenceOf(request: FixedRequest): string {
       return `Record the voice again with the voice ${request.voiceName}.`;
     case "make-this-music":
       return `Change the music to: ${request.words}`;
+    case "add-a-sound":
+      return `Add this sound to the video where it fits: ${request.words}`;
     case "match-the-captions":
       return "Make the captions match my recording.";
     case "back-to-graphics":
@@ -79,6 +82,7 @@ export function fixedRequestTextOf(request: FixedRequest): string {
   const model =
     request.kind === "another-voice" ||
     request.kind === "make-this-music" ||
+    request.kind === "add-a-sound" ||
     request.kind === "change-the-picture" ||
     request.kind === "let-the-ai-make-the-clip"
       ? request.model

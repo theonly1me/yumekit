@@ -7,4 +7,8 @@ export {
   type ModelTarget,
 } from "./mediaChoices.js";
 export { ServicesGroup } from "./ServicesGroup.js";
-export { currentModelOf, useMediaChoices } from "./useMediaChoices.js";
+export {
+  currentModelOf,
+  useMediaChoices,
+  type MediaChoicesState,
+} from "./useMediaChoices.js";

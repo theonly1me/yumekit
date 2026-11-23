@@ -1,5 +1,6 @@
 import type { AcceptedInput } from "../catalog/acceptedInput.ts";
 import type { ImageModel } from "../catalog/image/index.ts";
+import type { SoundModel } from "../catalog/sound/index.ts";
 import { videoAccepts, type VideoModel } from "../catalog/video/index.ts";
 
 export type MediaModelSetting =
@@ -104,3 +105,25 @@ export function imageSettings(model: ImageModel): MediaModelSetting[] {
 export function imageAccepts(model: ImageModel): AcceptedInput[] {
   return model.references === undefined ? [] : ["reference_images"];
 }
+
+export function soundSettings(model: SoundModel): MediaModelSetting[] {
+  return [
+    {
+      name: "duration_seconds",
+      label: "Length in seconds",
+      kind: "whole-number",
+      ...model.durationSeconds,
+    },
+  ];
+}
+
+export const sharperSettings: MediaModelSetting[] = [
+  {
+    name: "scale",
+    label: "Times larger",
+    kind: "whole-number",
+    minimum: 2,
+    maximum: 4,
+    default: 2,
+  },
+];

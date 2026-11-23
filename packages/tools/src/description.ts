@@ -38,6 +38,8 @@ const mediaModelInputs = [
   "first_frame",
   "last_frame",
   "reference_images",
+  "image_input",
+  "video_input",
 ] as const;
 
 const mediaModelSchema = z.object({

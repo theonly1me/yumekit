@@ -34,13 +34,26 @@ type MediaServerKey = {
 type MediaModel = {
   id: string;
   label: string;
-  capability: "image" | "speech" | "align" | "music" | "video";
+  capability:
+    | "image"
+    | "speech"
+    | "align"
+    | "music"
+    | "video"
+    | "sound-effect"
+    | "sharper";
   is_default: boolean;
   settings: MediaModelSetting[];
   prices: MediaModelPrice[];
   read_on: string;
   shutdown_on?: string;
-  accepts?: ("first_frame" | "last_frame" | "reference_images")[];
+  accepts?: (
+    | "first_frame"
+    | "last_frame"
+    | "reference_images"
+    | "image_input"
+    | "video_input"
+  )[];
   tested?: boolean;
 };
 
@@ -178,11 +191,11 @@ The editor is milestone 2. These rules are its input. The engine gives the edito
 
 Document 09 named one video server. With decision P1, yumekit bundles three, and each one has its own work package.
 
-| Folder               | Runs             | Key              | Models at the start                        |
-| -------------------- | ---------------- | ---------------- | ------------------------------------------ |
-| `tools/gemini-media` | Hosted           | `GEMINI_API_KEY` | `gemini-omni-1.2-flash`                    |
-| `tools/fal-media`    | Hosted           | `FAL_KEY`        | 9 video and 8 picture models (document 16) |
-| `tools/local-video`  | On this computer | None             | Not built. LTX-2.3 is the first candidate  |
+| Folder               | Runs             | Key              | Models at the start                                                    |
+| -------------------- | ---------------- | ---------------- | ---------------------------------------------------------------------- |
+| `tools/gemini-media` | Hosted           | `GEMINI_API_KEY` | `gemini-omni-1.2-flash`                                                |
+| `tools/fal-media`    | Hosted           | `FAL_KEY`        | 9 video, 8 picture, 4 sound effect, and 9 sharper models (document 16) |
+| `tools/local-video`  | On this computer | None             | Not built. LTX-2.3 is the first candidate                              |
 
 ### `tools/fal-media`
 

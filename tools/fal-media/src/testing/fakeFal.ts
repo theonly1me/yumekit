@@ -6,6 +6,7 @@ export const fakeUrls = {
   responseUrl: "https://queue.fal.run/bytedance/seedance-2.5/requests/req-1",
   videoUrl: "https://v3b.fal.media/files/b/test/output.mp4",
   imageUrl: "https://v3b.fal.media/files/b/test/output.png",
+  soundUrl: "https://v3b.fal.media/files/b/test/output.mp3",
   uploadUrlPrefix: "https://v3b.fal.media/upload/",
   fileUrlPrefix: "https://v3b.fal.media/files/b/test/",
 } as const;
@@ -59,6 +60,8 @@ export function fakePng(options: {
   ]);
 }
 
+export const fakeMp3 = Buffer.from("ID3 fake sound", "latin1");
+
 export function fakeFal(options: {
   statuses?: string[];
   video?: Buffer;
@@ -90,6 +93,8 @@ export function fakeFal(options: {
       return Response.json({
         video: { url: fakeUrls.videoUrl },
         images: [{ url: fakeUrls.imageUrl }],
+        image: { url: fakeUrls.imageUrl },
+        audio: { url: fakeUrls.soundUrl },
         seed: 42,
       });
     }
@@ -98,6 +103,9 @@ export function fakeFal(options: {
         options.video ??
         fakeMp4({ widthPixels: 1280, heightPixels: 720, durationSeconds: 5 });
       return new Response(new Uint8Array(video));
+    }
+    if (request.url === fakeUrls.soundUrl) {
+      return new Response(new Uint8Array(fakeMp3));
     }
     if (request.url === fakeUrls.imageUrl) {
       return new Response(

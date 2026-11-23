@@ -8,6 +8,7 @@ import {
   type Timeline,
   type Track,
 } from "@yumekit/project";
+import { isSoundsTrack } from "./soundsTrack.js";
 
 const idLengthLimit = 64;
 export const videoSoundTrackId = "video-sound";
@@ -54,7 +55,10 @@ export function planNarration(options: {
   const newTracks: Track[] = [];
   const audioTrack =
     timeline.tracks.find(
-      (track) => track.kind === "audio" && track.id !== videoSoundTrackId,
+      (track) =>
+        track.kind === "audio" &&
+        track.id !== videoSoundTrackId &&
+        !isSoundsTrack(track),
     ) ??
     ({
       id: uniqueId({ base: "narration", taken: trackIds }),

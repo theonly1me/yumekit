@@ -151,7 +151,15 @@ describe("asset and reference read tools", () => {
       servers: [
         {
           server: "sample",
-          capabilities: ["image", "speech", "align", "music", "video"],
+          capabilities: [
+            "image",
+            "speech",
+            "align",
+            "music",
+            "video",
+            "sound-effect",
+            "sharper",
+          ],
           runs: "on-this-computer",
           keys: [],
         },

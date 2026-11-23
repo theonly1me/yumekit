@@ -7,6 +7,8 @@ const testWords: Record<MediaKind, string> = {
   speech: "a test tone, not a voice",
   music: "a test tone, not music",
   video: "test clips",
+  "sound-effect": "a test tone, not a real sound",
+  sharper: "a plain larger copy with no new detail",
 };
 
 export function currentNoteOf(options: {

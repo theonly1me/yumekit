@@ -18,6 +18,12 @@ export type AudioTrack = Extract<Track, { kind: "audio" }>;
 
 const voiceTrackIdPattern = /^(narration|voice)(-\d+)?$/;
 
+const soundsTrackIdPattern = /^sounds(-\d+)?$/;
+
+export function isSoundsTrack(track: AudioTrack): boolean {
+  return soundsTrackIdPattern.test(track.id);
+}
+
 function hasVoiceClip(options: { track: AudioTrack; assets: Asset[] }) {
   return options.track.clips.some((clip) =>
     options.assets.some((asset) => asset.id === clip.assetId && asset.hasWords),
@@ -48,8 +54,17 @@ export function musicTracksOf(options: {
 }): AudioTrack[] {
   const voice = voiceTrackOf(options);
   return audioTracksOf(options.timeline).filter(
-    (track) => track !== voice && track.id !== videoSoundTrackId,
+    (track) =>
+      track !== voice &&
+      track.id !== videoSoundTrackId &&
+      !isSoundsTrack(track),
   );
+}
+
+function soundsChoiceOf(track: AudioTrack): string {
+  const count = track.clips.length;
+  if (count === 0) return "No sounds yet";
+  return count === 1 ? "1 sound" : `${String(count)} sounds`;
 }
 
 function choiceOf(options: { track: AudioTrack; assets: Asset[] }): string {
@@ -101,6 +116,16 @@ export function soundRowsOf(options: {
         choice: choiceOf({ track, assets }),
       }),
     ),
+    ...audioTracksOf(timeline)
+      .filter(isSoundsTrack)
+      .map((...[track, index]) =>
+        rowOf({
+          track,
+          name: index === 0 ? "Sounds" : `Sounds ${String(index + 1)}`,
+          part: "music",
+          choice: soundsChoiceOf(track),
+        }),
+      ),
     ...(captions === undefined
       ? []
       : [rowOf({ track: captions, name: "Captions", choice: captionStyle })]),
