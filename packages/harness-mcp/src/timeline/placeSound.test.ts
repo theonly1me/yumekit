@@ -97,6 +97,7 @@ describe("place_sound", () => {
         asset_id: "line-one",
         start_frame: 0,
         partial: true,
+        with_captions: false,
       },
     });
 

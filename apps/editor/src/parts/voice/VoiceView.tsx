@@ -9,6 +9,7 @@ import { PlayButton } from "../sound/PlayButton.js";
 import { soundFileTypes, type SoundViewProps } from "../sound/soundView.js";
 import { StatusLine } from "../sound/StatusLine.js";
 import { useSoundActions } from "../sound/useSoundActions.js";
+import { useLineWords } from "./useLineWords.js";
 import { voiceChoicesOf, voiceFactsOf } from "./voiceFacts.js";
 import "../sound/soundParts.css";
 
@@ -22,6 +23,9 @@ export function VoiceView(props: SoundViewProps) {
     servers: media.state.kind === "ready" ? media.state.servers : undefined,
   });
   const actions = useSoundActions({ client, snapshot, part: "voice" });
+  const wordsOf = useLineWords({ client, assetIds: facts.assetIds });
+  const secondsOf = (frames: number) =>
+    frames / snapshot.project.framesPerSecond;
   const [onceModel, setOnceModel] = useState<ModelTarget>();
   const isOff = facts.track?.off === true;
   const changesAreOff = locked || actions.isWorking;
@@ -94,11 +98,15 @@ export function VoiceView(props: SoundViewProps) {
               <li key={line.clipId} className="voice-line">
                 <PlayButton
                   client={client}
-                  piece={line.piece}
+                  piece={{
+                    assetId: line.window.assetId,
+                    startSeconds: secondsOf(line.window.assetStartFrame),
+                    lengthSeconds: secondsOf(line.window.durationFrames),
+                  }}
                   label={line.sceneLabel}
                 />
                 <span className="voice-scene">{line.sceneLabel}</span>
-                <span className="voice-words">{line.words}</span>
+                <span className="voice-words">{wordsOf(line)}</span>
               </li>
             ))}
           </ul>

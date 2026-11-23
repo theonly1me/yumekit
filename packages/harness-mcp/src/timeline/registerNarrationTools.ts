@@ -24,7 +24,7 @@ function registerPlaceNarration(context: HarnessContext): void {
         .boolean()
         .optional()
         .describe(
-          "Also show the words as captions. Needs word timings. Default false. A voice of the free test service gets no captions.",
+          "Also show the words as captions. Needs word timings. Default true for a voice with word timings, so a new video has captions; the person switches them off in the editor. A voice of the free test service gets no captions.",
         ),
       partial: z
         .boolean()
@@ -62,7 +62,8 @@ function registerPlaceNarration(context: HarnessContext): void {
       });
       if (tooShort !== undefined) return failureResult(tooShort);
       const isTestVoice = isTestServerAsset(asset.value);
-      const withCaptions = (with_captions ?? false) && !isTestVoice;
+      const withCaptions =
+        (with_captions ?? asset.value.hasWords) && !isTestVoice;
       if (withCaptions && !asset.value.hasWords) {
         return failureResult({
           kind: "asset-has-no-words",

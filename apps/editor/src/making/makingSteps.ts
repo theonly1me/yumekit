@@ -1,4 +1,5 @@
 import type { Snapshot } from "../engine/snapshot.js";
+import { musicTracksOf, voiceTrackOf } from "../sound/soundRowFacts.js";
 import type { AnswerEntry, MakingPhase } from "./firstChat.js";
 import {
   stepProgressOf,
@@ -51,6 +52,20 @@ function picturesFact(options: {
     : `${String(count)} pictures are ready`;
 }
 
+function hasPlaced(options: {
+  snapshot: Snapshot;
+  part: SoundStepId;
+}): boolean {
+  const { snapshot, part } = options;
+  return snapshot.timelines.some((timeline) => {
+    const tracks =
+      part === "voice"
+        ? [voiceTrackOf({ timeline, assets: snapshot.assets })]
+        : musicTracksOf({ timeline, assets: snapshot.assets });
+    return tracks.some((track) => (track?.clips.length ?? 0) > 0);
+  });
+}
+
 const restStepIds = new Set<MakingStep["id"]>(["voice", "music", "together"]);
 
 export function isPlanReady(options: {
@@ -89,15 +104,20 @@ export function makingStepsOf(options: {
     {
       id: "voice",
       label: "Record the voice",
-      isDone: called("place_narration"),
+      isDone:
+        called("place_narration") ||
+        called("replace_narration") ||
+        hasPlaced({ snapshot, part: "voice" }),
       fact: "The voice is ready",
     },
     {
       id: "music",
       label: "Choose the music",
       isDone:
-        called("generate_asset") &&
-        madeAssetCount({ snapshot, tool: "generate_music" }) > 0,
+        (called("generate_asset") &&
+          madeAssetCount({ snapshot, tool: "generate_music" }) > 0) ||
+        called("replace_music") ||
+        hasPlaced({ snapshot, part: "music" }),
       fact: "The music is ready",
     },
     {

@@ -68,7 +68,7 @@ describe("the steps of the Making screen with the plan first", () => {
     const continueRequest = {
       kind: "request" as const,
       id: "second",
-      text: "The plan is good. Make the rest of the video.",
+      text: "The plan is good. Use the script and the scenes as they are now, and make the rest of the video.",
     };
     const running = stepLinesOf([
       { kind: "request", id: "first", text: planRequest },

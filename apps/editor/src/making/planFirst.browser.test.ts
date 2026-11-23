@@ -104,7 +104,7 @@ describe("the plan first", () => {
       )
       .toBe(1);
     expect((await requestTextsOf(folder)).at(-1)).toBe(
-      "The plan is good. Make the rest of the video.",
+      "The plan is good. Use the script and the scenes as they are now, and make the rest of the video.",
     );
     expect((await steps()).slice(0, 3)).toEqual([
       "done Write the scriptThe script is readySee and change",

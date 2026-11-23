@@ -27,8 +27,13 @@ function requestTextOf(options: {
       });
     case "make-the-rest":
       return fixedRequestTextOf({ kind: "make-the-rest" });
+    case "add-captions":
+      return fixedRequestTextOf({ kind: "add-captions" });
     case "add-a-key":
     case "use-my-own-music":
+    case "add-a-voice":
+    case "add-music":
+    case "add-a-sound":
       return undefined;
   }
 }
@@ -58,7 +63,9 @@ export function useSoundNotes(options: {
     onNoteAction: (choice: { note: SoundNote; action: SoundAction }) => {
       const text = requestTextOf(choice);
       if (text === undefined) {
-        options.onOpenSound("music");
+        options.onOpenSound(
+          choice.action === "add-a-voice" ? "voice" : "music",
+        );
         return;
       }
       editorChat.sendText(text);
