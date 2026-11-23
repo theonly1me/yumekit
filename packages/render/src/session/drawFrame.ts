@@ -1,10 +1,11 @@
-import type { StagePage } from "../browser/openStagePage.js";
+import type { PictureUse, StagePage } from "../browser/openStagePage.js";
 import { fail, succeed, type Outcome } from "../outcome.js";
 import type { RenderFailure } from "../renderFailure.js";
 
 export async function drawFrame(options: {
   stagePage: StagePage;
   frame: number;
+  use: PictureUse;
 }): Promise<Outcome<Uint8Array, RenderFailure>> {
   const { stagePage, frame } = options;
   const seek = await stagePage.seek(frame);
@@ -30,5 +31,5 @@ export async function drawFrame(options: {
       message: `Scene "${seek.sceneId}" failed at frame ${String(frame)}: ${seek.message}`,
     });
   }
-  return succeed(await stagePage.screenshot());
+  return succeed(await stagePage.screenshot(options.use));
 }

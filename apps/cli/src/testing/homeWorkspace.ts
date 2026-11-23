@@ -1,6 +1,7 @@
 import { chmod, mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { browsersPath } from "./processTree.js";
 import { createCliWorkspace } from "./runCli.js";
 import { runServing } from "./runOpen.js";
 
@@ -8,8 +9,11 @@ const fakeClaudeFile = fileURLToPath(
   new URL("./fakeClaudeWithBridge.ts", import.meta.url),
 );
 
-export async function startHomeWorkspace() {
+export async function startHomeWorkspace(options?: { withBrowser: boolean }) {
   const workspace = await createCliWorkspace();
+  if (options?.withBrowser === true) {
+    workspace.environment["PLAYWRIGHT_BROWSERS_PATH"] = browsersPath();
+  }
   const projectsFolder = join(workspace.root, "projects");
   const programPath = join(workspace.root, "bin", "claude");
   await mkdir(join(programPath, ".."), { recursive: true });

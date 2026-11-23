@@ -1,4 +1,5 @@
 import type { ToolAnnotations } from "@modelcontextprotocol/sdk/types.js";
+import { createPictureRenderer } from "@yumekit/render";
 import type { JsonObject } from "@yumekit/tools";
 import { z } from "zod";
 import {
@@ -75,7 +76,8 @@ async function runTool(options: {
 }
 
 export function createHarness(options: HarnessOptions): Harness {
-  const harnessTools = harnessToolsOf(options);
+  const pictures = createPictureRenderer({ folder: options.store.folder });
+  const harnessTools = harnessToolsOf({ ...options, pictures });
   const toolsByName = new Map(harnessTools.map((tool) => [tool.name, tool]));
   const running = new Set<Promise<HarnessResult>>();
   let isClosed = false;
@@ -103,6 +105,7 @@ export function createHarness(options: HarnessOptions): Harness {
     close: async () => {
       isClosed = true;
       await Promise.allSettled([...running]);
+      await pictures.close();
       await options.mediaTools.close();
     },
   };

@@ -18,26 +18,3 @@ export function portOption(
   }
   return { ok: true, port: port.value };
 }
-
-export function closeOnSignal(options: {
-  close: () => Promise<void>;
-  stoppedLine: string;
-}): void {
-  let isClosing = false;
-  const close = () => {
-    if (isClosing) return;
-    isClosing = true;
-    options
-      .close()
-      .then(() => {
-        process.stdout.write(`${options.stoppedLine}\n`);
-        process.exit(0);
-      })
-      .catch((error: unknown) => {
-        process.stderr.write(`yumekit: ${String(error)}\n`);
-        process.exit(1);
-      });
-  };
-  process.on("SIGINT", close);
-  process.on("SIGTERM", close);
-}

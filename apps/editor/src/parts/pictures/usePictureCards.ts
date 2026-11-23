@@ -46,10 +46,10 @@ export function usePictureCards(options: {
   );
   const pictures = useScenePictures({
     client: options.client,
+    snapshot,
     output,
     clips,
     unplacedSceneIds,
-    revision: snapshot.revision,
   });
   const placed = clips.flatMap((clip) => {
     const scene = snapshot.scenes.find(

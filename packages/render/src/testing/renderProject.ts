@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
   createProject,
+  openProject,
   type Edit,
   type AudioClip,
   type JsonObject,
@@ -100,4 +101,18 @@ export async function createRenderProject(options: {
     throw new Error(`applyEdits failed: ${applied.failure.message}`);
   }
   return store.folder;
+}
+
+export async function changeProject(options: {
+  folder: string;
+  edits: Edit[];
+}): Promise<void> {
+  const opened = await openProject({ folder: options.folder });
+  if (!opened.ok) {
+    throw new Error(`openProject failed: ${opened.failure.message}`);
+  }
+  const applied = await opened.value.applyEdits(options.edits);
+  if (!applied.ok) {
+    throw new Error(`applyEdits failed: ${applied.failure.message}`);
+  }
 }

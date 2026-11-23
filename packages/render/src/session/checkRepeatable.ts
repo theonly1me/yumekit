@@ -29,7 +29,7 @@ export async function checkRepeatable(options: {
   const middleFrame = range.firstFrame + Math.floor(range.frameCount / 2);
   const pictures: Uint8Array[] = [];
   for (const frame of [firstFrame, middleFrame, middleFrame, firstFrame]) {
-    const drawn = await drawFrame({ stagePage, frame });
+    const drawn = await drawFrame({ stagePage, frame, use: "still" });
     if (!drawn.ok) {
       return drawn;
     }

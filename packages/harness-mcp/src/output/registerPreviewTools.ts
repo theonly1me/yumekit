@@ -1,5 +1,5 @@
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import { renderFrame, type RenderScale } from "@yumekit/render";
+import type { RenderScale } from "@yumekit/render";
 import { z } from "zod";
 import type { HarnessContext } from "../context.js";
 import { frameInput, idInput, scaleInput } from "../inputs.js";
@@ -21,25 +21,24 @@ async function previewResult(options: {
     width_pixels: number;
     height_pixels: number;
   }[] = [];
-  for (const frame of frames) {
-    const rendered = await renderFrame({
-      folder: context.store.folder,
-      outputId,
-      frame,
-      scale,
-    });
-    if (!rendered.ok) return failureResult(renderFailureOf(rendered.failure));
+  const rendered = await context.pictures.renderFrames({
+    outputId,
+    frames,
+    scale,
+  });
+  if (!rendered.ok) return failureResult(renderFailureOf(rendered.failure));
+  rendered.value.forEach((...[picture, index]) => {
     images.push({
       type: "image",
-      data: Buffer.from(rendered.value.png).toString("base64"),
+      data: Buffer.from(picture.png).toString("base64"),
       mimeType: "image/png",
     });
     pictures.push({
-      frame,
-      width_pixels: rendered.value.widthPixels,
-      height_pixels: rendered.value.heightPixels,
+      frame: frames[index] ?? 0,
+      width_pixels: picture.widthPixels,
+      height_pixels: picture.heightPixels,
     });
-  }
+  });
   return {
     content: [
       {

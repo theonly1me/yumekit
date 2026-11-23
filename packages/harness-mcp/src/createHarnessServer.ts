@@ -1,4 +1,5 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { createPictureRenderer } from "@yumekit/render";
 import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
 import type {
   ServerNotification,
@@ -68,8 +69,14 @@ export function createHarnessServer(options: HarnessOptions): McpServer {
     { name: "yumekit", version: "0.0.0" },
     { instructions: serverInstructions },
   );
-  for (const tool of harnessToolsOf(options)) {
+  const pictures = createPictureRenderer({ folder: options.store.folder });
+  for (const tool of harnessToolsOf({ ...options, pictures })) {
     registerMcpTool({ server, tool });
   }
+  const closeServer = server.close.bind(server);
+  server.close = async () => {
+    await closeServer();
+    await pictures.close();
+  };
   return server;
 }

@@ -45,9 +45,9 @@ export function LowerArea(props: {
   const framesPerSecond = snapshot.project.framesPerSecond;
   const stills = useSceneStills({
     client,
+    snapshot,
     output,
     clips: mainClips,
-    revision: snapshot.revision,
   });
   const sceneFailure = changes.failureOf("scenes");
   return (

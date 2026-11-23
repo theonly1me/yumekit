@@ -15,6 +15,7 @@ import type { RunningEngine } from "@yumekit/engine";
 import { serverInstructions } from "@yumekit/harness-mcp";
 import { z } from "zod";
 import { failed, type CommandResult } from "../../commandResult.js";
+import { stopOnEnd } from "../../ending/stopOnEnd.js";
 import { followEngineEvents, type EngineEvents } from "./engineEvents.js";
 import { engineRequest } from "./engineRequest.js";
 
@@ -132,5 +133,6 @@ export async function serveBridge(
     process.stdin.destroy();
   };
   await server.connect(new StdioServerTransport());
+  stopOnEnd({ close: () => server.close(), endsWithInput: true });
   return { kind: "serving" };
 }

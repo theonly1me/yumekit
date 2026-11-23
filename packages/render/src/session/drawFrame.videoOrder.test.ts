@@ -24,7 +24,9 @@ describe("frames of a video asset in any order", () => {
         use: async (stagePage) => {
           const drawn: Uint8Array[] = [];
           for (const frame of [10, 3, 10]) {
-            drawn.push(valueOf(await drawFrame({ stagePage, frame })));
+            drawn.push(
+              valueOf(await drawFrame({ stagePage, frame, use: "still" })),
+            );
           }
           return { ok: true, value: drawn };
         },
