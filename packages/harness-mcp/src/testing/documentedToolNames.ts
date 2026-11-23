@@ -26,6 +26,8 @@ export const documentedToolNames = [
   "place_narration",
   "place_video",
   "place_sound",
+  "replace_narration",
+  "replace_music",
   "resize_scene_clip",
   "move_scene_clip",
   "remove_scene_clip",

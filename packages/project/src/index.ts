@@ -51,13 +51,14 @@ export {
 export type { Scene, SceneSource } from "./format/scene.js";
 export type {
   AudioClip,
+  MadeBy,
   SceneClip,
   SceneTransition,
   Timeline,
   Track,
   TransitionKind,
 } from "./format/timeline.js";
-export { transitionKinds } from "./format/timeline.js";
+export { makers, transitionKinds } from "./format/timeline.js";
 export type {
   Asset,
   AssetIndex,
@@ -66,7 +67,8 @@ export type {
 } from "./format/asset.js";
 export type { ProjectSnapshot } from "./format/state.js";
 export type { Edit, EditFailure } from "./edits/index.js";
-export type { ProjectStore } from "./store/projectStore.js";
+export type { ProjectChange, ProjectStore } from "./store/projectStore.js";
+export { personWorkFailureKind } from "./personWork/index.js";
 export { createProject, type CreateFailure } from "./store/createProject.js";
 export { openProject, type OpenFailure } from "./store/openProject.js";
 export {

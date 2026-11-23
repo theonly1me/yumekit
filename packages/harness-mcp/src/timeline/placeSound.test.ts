@@ -48,6 +48,7 @@ describe("place_sound", () => {
         durationFrames: 30,
         assetStartFrame: 0,
         gainDecibels: -6,
+        madeBy: "ai",
       },
     ]);
   });

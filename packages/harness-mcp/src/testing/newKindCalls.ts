@@ -13,6 +13,8 @@ export const soundEffectCalls: ScriptedCall[] = [
     name: "place_sound",
     input: { output_id: "wide", asset_id: "splash", start_frame: 5 },
   },
+  { name: "replace_music", input: { prompt: "a calm pad" } },
+  { name: "replace_narration", input: {} },
   {
     name: "generate_asset",
     input: {

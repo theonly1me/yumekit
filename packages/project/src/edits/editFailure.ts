@@ -6,12 +6,14 @@ export type EditFailureKind =
   | "not-found"
   | "still-referenced"
   | "clips-overlap"
-  | "invalid-value";
+  | "invalid-value"
+  | "would-remove-the-work-of-the-person";
 
 export interface EditFailure {
   kind: EditFailureKind;
   editIndex: number;
   message: string;
+  removed?: string[];
 }
 
 export type EditProblem = Omit<EditFailure, "editIndex">;

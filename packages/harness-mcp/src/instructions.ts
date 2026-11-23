@@ -11,4 +11,6 @@ Work in this order:
 8. Check frames with preview_frames. Correct each scene that has a defect.
 9. Call render_video for each output.
 
+To change a finished video, use the smallest tool: replace_narration records the voice again or changes it, replace_music changes the music, and update_clip changes one clip. Write the whole timeline with set_timeline only for a new video. A call that would remove what the person made fails with would-remove-the-work-of-the-person; give remove_person_work true only when the person asked for that removal.
+
 A failed call returns kind, message, and hint. The hint says what to call or change next. undo reverts the last change.`;

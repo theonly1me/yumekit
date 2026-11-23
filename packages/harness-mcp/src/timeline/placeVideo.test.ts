@@ -63,8 +63,10 @@ describe("place_video", () => {
             startFrame: 6,
             durationFrames: 30,
             sceneStartFrame: 0,
+            madeBy: "ai",
           },
         ],
+        madeBy: "ai",
       },
       {
         id: "video-sound",
@@ -77,8 +79,10 @@ describe("place_video", () => {
             durationFrames: 30,
             assetStartFrame: 0,
             gainDecibels: -12,
+            madeBy: "ai",
           },
         ],
+        madeBy: "ai",
       },
     ]);
   });

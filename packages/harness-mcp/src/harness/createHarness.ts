@@ -1,4 +1,6 @@
+import { AsyncLocalStorage } from "node:async_hooks";
 import type { ToolAnnotations } from "@modelcontextprotocol/sdk/types.js";
+import type { MadeBy } from "@yumekit/project";
 import { createPictureRenderer } from "@yumekit/render";
 import type { JsonObject } from "@yumekit/tools";
 import { z } from "zod";
@@ -23,6 +25,7 @@ export interface HarnessCall {
   name: string;
   input: JsonObject;
   onProgress?: ProgressListener;
+  by?: MadeBy;
 }
 
 export interface Harness {
@@ -77,7 +80,12 @@ async function runTool(options: {
 
 export function createHarness(options: HarnessOptions): Harness {
   const pictures = createPictureRenderer({ folder: options.store.folder });
-  const harnessTools = harnessToolsOf({ ...options, pictures });
+  const callers = new AsyncLocalStorage<{ by: MadeBy | undefined }>();
+  const harnessTools = harnessToolsOf({
+    ...options,
+    pictures,
+    callerOf: () => callers.getStore()?.by,
+  });
   const toolsByName = new Map(harnessTools.map((tool) => [tool.name, tool]));
   const running = new Set<Promise<HarnessResult>>();
   let isClosed = false;
@@ -90,11 +98,13 @@ export function createHarness(options: HarnessOptions): Harness {
         ? {}
         : { annotations: tool.annotations }),
     })),
-    call: async ({ name, input, onProgress }) => {
+    call: async ({ name, input, onProgress, by }) => {
       if (isClosed) return harnessClosed;
       const tool = toolsByName.get(name);
       if (tool === undefined) return toolNotFound(name);
-      const pending = runTool({ tool, input, onProgress });
+      const pending = callers.run({ by }, () =>
+        runTool({ tool, input, onProgress }),
+      );
       running.add(pending);
       try {
         return await pending;

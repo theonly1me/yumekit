@@ -4,6 +4,7 @@ import {
   type Asset,
   type Edit,
   type ProjectSnapshot,
+  type SceneTransition,
   type Timeline,
   type Track,
 } from "@yumekit/project";
@@ -20,6 +21,7 @@ export interface VideoPlacement {
   durationFrames: number;
   focus: { x: number; y: number } | undefined;
   soundGainDecibels: number | "off";
+  transition: SceneTransition | undefined;
 }
 
 export interface VideoPlan {
@@ -80,15 +82,22 @@ function videoTracksEdit(options: {
   ];
 }
 
+export function replacedClipOf(options: {
+  timeline: Timeline;
+  replaceClipId: string | undefined;
+}) {
+  return options.timeline.tracks
+    .flatMap((track) => (track.kind === "scene" ? track.clips : []))
+    .find((clip) => clip.id === options.replaceClipId);
+}
+
 export function videoTitleOf(options: {
   snapshot: ProjectSnapshot;
   timeline: Timeline;
   asset: Asset;
   replaceClipId: string | undefined;
 }): string {
-  const replacedSceneId = options.timeline.tracks
-    .flatMap((track) => (track.kind === "scene" ? track.clips : []))
-    .find((clip) => clip.id === options.replaceClipId)?.sceneId;
+  const replacedSceneId = replacedClipOf(options)?.sceneId;
   const replacedScene = options.snapshot.scenes.find(
     (scene) => scene.id === replacedSceneId,
   );
@@ -127,6 +136,9 @@ export function planVideo(options: {
       startFrame,
       durationFrames,
       sceneStartFrame: 0,
+      ...(placement.transition === undefined
+        ? {}
+        : { transition: placement.transition }),
     },
   };
   const plan = {

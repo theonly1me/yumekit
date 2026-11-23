@@ -32,6 +32,7 @@ describe("place_narration", () => {
         durationFrames: 36,
         assetStartFrame: 0,
         gainDecibels: 0,
+        madeBy: "ai",
       },
     ]);
     expect(captionTrack?.clips).toEqual([
@@ -41,6 +42,7 @@ describe("place_narration", () => {
         startFrame: 12,
         durationFrames: 36,
         sceneStartFrame: 0,
+        madeBy: "ai",
       },
     ]);
     expect(

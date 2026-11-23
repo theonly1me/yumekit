@@ -110,7 +110,7 @@ export function everyToolCall(importSourcePath: string): ScriptedCall[] {
       input: {
         asset_id: "line-one",
         capability: "speech",
-        input: { text: "one two three four" },
+        input: { text: "A fox finds a lake." },
       },
     },
     { name: "get_asset_words", input: { asset_id: "line-one" } },

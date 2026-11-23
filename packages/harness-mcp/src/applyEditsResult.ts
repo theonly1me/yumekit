@@ -21,6 +21,8 @@ const defaultEditHints: Record<EditFailureKind, string> = {
     "Call get_timeline. A clip covers the frames from start_frame to start_frame + duration_frames - 1. Move or shorten a clip with update_clip, or put it on another track.",
   "invalid-value":
     "Correct the value that the message names. Time is in whole frames. Output sizes are even numbers from 16 to 7680. Ids match ^[a-z0-9][a-z0-9-]{0,63}$.",
+  "would-remove-the-work-of-the-person":
+    "Call get_timeline and keep each thing that the message names, with its id, in the call. To change only the voice or the music, call replace_narration or replace_music. Give remove_person_work true only when the person asked for that removal in this request.",
 };
 
 export async function applyEditsResult(options: {
@@ -29,14 +31,19 @@ export async function applyEditsResult(options: {
   line: string;
   data?: StructuredData;
   hints?: EditHints;
+  keepPersonWork?: boolean;
 }): Promise<CallToolResult> {
-  const applied = await options.store.applyEdits(options.edits);
+  const applied = await options.store.applyChange({
+    edits: options.edits,
+    keepPersonWork: options.keepPersonWork ?? false,
+  });
   if (!applied.ok) {
-    const { kind, message } = applied.failure;
+    const { kind, message, removed } = applied.failure;
     return failureResult({
       kind,
       message,
       hint: options.hints?.[kind] ?? defaultEditHints[kind],
+      ...(removed === undefined ? {} : { removed }),
     });
   }
   return successResult({

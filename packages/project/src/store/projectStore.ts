@@ -1,10 +1,6 @@
-import {
-  applyEditsToState,
-  type Edit,
-  type EditFailure,
-} from "../edits/index.js";
+import type { Edit, EditFailure } from "../edits/index.js";
 import { filesSource } from "../folder/fileSources.js";
-import { projectFilesOf, type ProjectFiles } from "../folder/projectFiles.js";
+import { projectFilesOf } from "../folder/projectFiles.js";
 import { readState } from "../folder/readState.js";
 import { syncFiles } from "../folder/syncFiles.js";
 import type { WordTimings } from "../format/asset.js";
@@ -18,8 +14,15 @@ import {
   type History,
 } from "../history/history.js";
 import { fail, succeed, type Outcome } from "../outcome.js";
+import {
+  changedState,
+  haveSameContent,
+  type ProjectChange,
+} from "./changedState.js";
 import { createSerialQueue } from "./serialize.js";
 import { snapshotOf } from "./snapshot.js";
+
+export type { ProjectChange } from "./changedState.js";
 
 export interface ProjectStore {
   folder: string;
@@ -27,23 +30,15 @@ export interface ProjectStore {
   applyEdits: (
     edits: Edit[],
   ) => Promise<Outcome<{ revision: number }, EditFailure>>;
+  applyChange: (
+    change: ProjectChange,
+  ) => Promise<Outcome<{ revision: number }, EditFailure>>;
   undo: () => Promise<Outcome<{ revision: number }, "nothing-to-undo">>;
   redo: () => Promise<Outcome<{ revision: number }, "nothing-to-redo">>;
   readAssetWords: (
     assetId: string,
   ) => Promise<Outcome<WordTimings, "not-found">>;
   subscribe: (listener: (snapshot: ProjectSnapshot) => void) => () => void;
-}
-
-function haveSameContent(files: {
-  before: ProjectFiles;
-  after: ProjectFiles;
-}): boolean {
-  const { before, after } = files;
-  return (
-    before.size === after.size &&
-    [...before].every(([file, content]) => after.get(file) === content)
-  );
 }
 
 export function createProjectStore(options: {
@@ -94,16 +89,13 @@ export function createProjectStore(options: {
     return stepState.value;
   }
 
-  async function applyEdits(
-    edits: Edit[],
+  async function applyChange(
+    change: ProjectChange,
   ): Promise<Outcome<{ revision: number }, EditFailure>> {
-    const result = await applyEditsToState({ state, edits, folder });
-    if (!result.ok) {
-      return result;
-    }
-    if (
-      haveSameContent({ before: files, after: projectFilesOf(result.value) })
-    ) {
+    const result = await changedState({ state, change, folder });
+    if (!result.ok) return result;
+    const next = result.value;
+    if (haveSameContent({ before: files, after: projectFilesOf(next) })) {
       return succeed({ revision: history.revision });
     }
     const stepId = await saveStep({ folder, files });
@@ -113,7 +105,7 @@ export function createProjectStore(options: {
       ...history.redoSteps,
     ];
     const committed = await commit({
-      state: result.value,
+      state: next,
       undoSteps: undoSteps.slice(-stepsKept),
       redoSteps: [],
     });
@@ -162,7 +154,8 @@ export function createProjectStore(options: {
   return {
     folder,
     read: () => snapshot,
-    applyEdits: (edits) => serialize(() => applyEdits(edits)),
+    applyEdits: (edits) => serialize(() => applyChange({ edits })),
+    applyChange: (change) => serialize(() => applyChange(change)),
     undo: () => serialize(undo),
     redo: () => serialize(redo),
     readAssetWords: (assetId) => {

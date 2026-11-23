@@ -67,6 +67,7 @@ async function callTool(exchange: Exchange) {
       context.harness.call({
         name,
         input,
+        by: isAgent ? "ai" : "person",
         onProgress: (progress) => {
           note.onProgress(progress);
           if (callId === undefined) return;

@@ -4,6 +4,7 @@ import type { HarnessContext } from "../context.js";
 import { frameInput, idInput } from "../inputs.js";
 import { findAsset, findOutput } from "../lookups.js";
 import { failureResult, successResult } from "../results.js";
+import { notInScriptFailureOf, spokenTextOf } from "../replace/scriptText.js";
 import { isTestServerAsset, tooShortFailureOf } from "./narrationChecks.js";
 import { planNarration } from "./narrationPlan.js";
 import { lengthFramesOf } from "./wireTimeline.js";
@@ -12,7 +13,7 @@ function registerPlaceNarration(context: HarnessContext): void {
   context.tools.add({
     name: "place_narration",
     description:
-      'Put a speech asset on the audio track of an output for its full length. With with_captions, also add a caption-words scene on a caption track above the other scenes, timed to the same frames. The audio clip goes on the first audio track other than "video-sound", or on a new audio track "narration". The caption clip goes on the top scene track when it holds only captions, or on a new scene track "captions" above the others. The audio clip id is "narration-<asset_id>", the caption clip id and the caption scene id are "captions-<asset_id>", and a suffix such as "-2" keeps each id unique. The result gives audio_clip_id, caption_clip_id, and caption_scene_id. One undo removes all of it.',
+      'Put a speech asset on the audio track of an output for its full length. With with_captions, also add a caption-words scene on a caption track above the other scenes, timed to the same frames. The audio clip goes on the first audio track other than "video-sound", or on a new audio track "narration". The caption clip goes on the top scene track when it holds only captions, or on a new scene track "captions" above the others. The audio clip id is "narration-<asset_id>", the caption clip id and the caption scene id are "captions-<asset_id>", and a suffix such as "-2" keeps each id unique. The result gives audio_clip_id, caption_clip_id, and caption_scene_id. The words of the voice must be lines of the script, or it fails with text-not-in-the-script. To record the voice again or to change it, call replace_narration. One undo removes all of it.',
     inputSchema: {
       output_id: idInput("The id of the output."),
       asset_id: idInput("The id of a speech asset from generate_asset."),
@@ -48,6 +49,11 @@ function registerPlaceNarration(context: HarnessContext): void {
           hint: 'Make speech with generate_asset and capability "speech", then call place_narration with that asset_id.',
         });
       }
+      const notInScript = notInScriptFailureOf({
+        script: snapshot.script,
+        text: spokenTextOf(asset.value),
+      });
+      if (notInScript !== undefined) return failureResult(notInScript);
       const tooShort = tooShortFailureOf({
         assetFrames: durationFrames,
         videoFrames: lengthFramesOf(output.value.timeline),
