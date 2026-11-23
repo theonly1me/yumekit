@@ -1,5 +1,6 @@
 import type { Browser, Page } from "playwright-core";
 import type { RenderFailure, RenderScale } from "../renderFailure.js";
+import { settledPicture } from "./settledPicture.js";
 import type { FrameFindings } from "../page/frameFindings.js";
 import type { SeekResult, StagePageLoad } from "../page/stagePageData.js";
 
@@ -74,7 +75,9 @@ export async function openStagePage(options: {
       }, frame),
     screenshot: async (use) => {
       if (use === "still") {
-        return page.screenshot({ type: "png", caret: "initial" });
+        return settledPicture(() =>
+          page.screenshot({ type: "png", caret: "initial" }),
+        );
       }
       const captured = await protocol.send("Page.captureScreenshot", {
         format: "png",
