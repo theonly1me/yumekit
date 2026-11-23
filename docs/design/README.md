@@ -24,6 +24,7 @@ These documents are the design of yumekit. Code follows them. If code and a docu
 | [16-creator-capabilities.md](16-creator-capabilities.md)           | More models, camera moves, the cast, start formats, the Files view, and new kinds of media          |
 | [17-looks-and-motion.md](17-looks-and-motion.md)                   | Five looks, the motion functions, backdrops, twelve new kit scenes, and transitions                 |
 | [18-first-full-run.md](18-first-full-run.md)                       | Corrections from the first full run: a local voice, step reasons, captions, names, the phone layout |
+| [19-film-kit.md](19-film-kit.md)                                   | Tempo and beats, music with no key, scene types for footage and launch films, the contact sheet     |
 
 The visual reference for the editor is the prototype in [apps/prototype](../../apps/prototype).
 
