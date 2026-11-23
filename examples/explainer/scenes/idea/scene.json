@@ -1,0 +1,46 @@
+{
+  "id": "idea",
+  "notes": "The real start screen. The idea is typed in the real text box, in Geist, then the real screenshot with the typed idea takes over.",
+  "source": {
+    "kind": "module",
+    "props": {
+      "cameraFrom": {
+        "width": 1040,
+        "x": 250,
+        "y": 20
+      },
+      "cameraTo": {
+        "width": 840,
+        "x": 316,
+        "y": 112
+      },
+      "fontAssetId": "font-geist",
+      "heading": "Type an idea.",
+      "label": "Start",
+      "screenHeight": 900,
+      "screenWidth": 1440,
+      "shots": [
+        {
+          "assetId": "shot-start-blank",
+          "startSeconds": 0
+        },
+        {
+          "assetId": "shot-start-typed",
+          "startSeconds": 2.05
+        }
+      ],
+      "typed": {
+        "charactersPerSecond": 52,
+        "fontSize": 26,
+        "letterSpacing": -0.26,
+        "lineHeight": 35.1,
+        "startSeconds": 0.55,
+        "text": "Three small changes for better sleep. A calm 15 second video with a voice.",
+        "width": 760,
+        "x": 340,
+        "y": 219.3
+      }
+    }
+  },
+  "title": "Type an idea"
+}

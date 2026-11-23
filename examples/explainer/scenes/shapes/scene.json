@@ -1,0 +1,32 @@
+{
+  "id": "shapes",
+  "notes": "Real frames of the same moment from the three exported files.",
+  "source": {
+    "kind": "module",
+    "props": {
+      "fontAssetId": "font-geist",
+      "heading": "One video for each platform.",
+      "shapes": [
+        {
+          "aspect": 1.7777777777777777,
+          "assetId": "frame-youtube",
+          "name": "YouTube",
+          "ratio": "16:9"
+        },
+        {
+          "aspect": 0.5625,
+          "assetId": "frame-tiktok",
+          "name": "TikTok",
+          "ratio": "9:16"
+        },
+        {
+          "aspect": 1,
+          "assetId": "frame-square",
+          "name": "Square",
+          "ratio": "1:1"
+        }
+      ]
+    }
+  },
+  "title": "One video for each platform"
+}

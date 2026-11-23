@@ -1,0 +1,43 @@
+{
+  "id": "change",
+  "notes": "Real screenshots of the editor: a click on the heading in the preview, the new words, and the saved change.",
+  "source": {
+    "kind": "module",
+    "props": {
+      "cameraFrom": {
+        "width": 1440,
+        "x": 0,
+        "y": 30
+      },
+      "cameraTo": {
+        "width": 900,
+        "x": 70,
+        "y": 150
+      },
+      "fontAssetId": "font-geist",
+      "heading": "Change anything.",
+      "label": "Editor",
+      "screenHeight": 900,
+      "screenWidth": 1440,
+      "shots": [
+        {
+          "assetId": "shot-editor-wide",
+          "startSeconds": 0
+        },
+        {
+          "assetId": "shot-editor-edit-0",
+          "startSeconds": 0.95
+        },
+        {
+          "assetId": "shot-editor-edit-1",
+          "startSeconds": 1.4
+        },
+        {
+          "assetId": "shot-editor-edit-done-clean",
+          "startSeconds": 1.95
+        }
+      ]
+    }
+  },
+  "title": "Change anything"
+}

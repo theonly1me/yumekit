@@ -1,0 +1,108 @@
+{
+  "outputId": "wide",
+  "tracks": [
+    {
+      "clips": [
+        {
+          "durationFrames": 75,
+          "id": "idea",
+          "sceneId": "idea",
+          "sceneStartFrame": 0,
+          "startFrame": 0
+        },
+        {
+          "durationFrames": 105,
+          "id": "making",
+          "sceneId": "making",
+          "sceneStartFrame": 0,
+          "startFrame": 75,
+          "transition": {
+            "durationFrames": 9,
+            "kind": "fade"
+          }
+        },
+        {
+          "durationFrames": 90,
+          "id": "shapes",
+          "sceneId": "shapes",
+          "sceneStartFrame": 0,
+          "startFrame": 180,
+          "transition": {
+            "durationFrames": 9,
+            "kind": "fade"
+          }
+        },
+        {
+          "durationFrames": 90,
+          "id": "change",
+          "sceneId": "change",
+          "sceneStartFrame": 0,
+          "startFrame": 270,
+          "transition": {
+            "durationFrames": 9,
+            "kind": "fade"
+          }
+        },
+        {
+          "durationFrames": 90,
+          "id": "end",
+          "sceneId": "end",
+          "sceneStartFrame": 0,
+          "startFrame": 360,
+          "transition": {
+            "durationFrames": 9,
+            "kind": "fade"
+          }
+        }
+      ],
+      "id": "scenes",
+      "kind": "scene"
+    },
+    {
+      "clips": [
+        {
+          "assetId": "voice-idea",
+          "assetStartFrame": 0,
+          "durationFrames": 30,
+          "gainDecibels": 0,
+          "id": "narration-voice-idea",
+          "startFrame": 10
+        },
+        {
+          "assetId": "voice-making",
+          "assetStartFrame": 0,
+          "durationFrames": 88,
+          "gainDecibels": 0,
+          "id": "narration-voice-making",
+          "startFrame": 85
+        },
+        {
+          "assetId": "voice-shapes",
+          "assetStartFrame": 0,
+          "durationFrames": 67,
+          "gainDecibels": 0,
+          "id": "narration-voice-shapes",
+          "startFrame": 192
+        },
+        {
+          "assetId": "voice-change",
+          "assetStartFrame": 0,
+          "durationFrames": 47,
+          "gainDecibels": 0,
+          "id": "narration-voice-change",
+          "startFrame": 282
+        },
+        {
+          "assetId": "voice-end",
+          "assetStartFrame": 0,
+          "durationFrames": 71,
+          "gainDecibels": 0,
+          "id": "narration-voice-end",
+          "startFrame": 376
+        }
+      ],
+      "id": "narration",
+      "kind": "audio"
+    }
+  ]
+}

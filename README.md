@@ -1,5 +1,9 @@
 # yumekit
 
+<a href="docs/media/yumekit-explainer.mp4"><img src="docs/media/yumekit-explainer.gif" width="960" alt="yumekit in 15 seconds: you type an idea, your own AI makes the video, you get one video for each platform, and you change anything in the editor." /></a>
+
+[Watch it with sound (MP4, 15 seconds)](docs/media/yumekit-explainer.mp4). yumekit made this video. The project is in [examples/explainer](examples/explainer).
+
 Open source harness for content creation.
 
 yumekit turns an idea into editable content for YouTube, TikTok, Instagram, and more. One project makes long videos, shorts, and still images. You bring your own AI tools.
