@@ -7,13 +7,26 @@ import type { ReactNode } from "react";
 import { Backdrop } from "../backdrops/Backdrop.js";
 import { loadStylePackFonts } from "../stylePacks/loadStylePackFonts.js";
 import { StylePackContext } from "../stylePacks/StylePackContext.js";
-import { fontFamilyOf, type StylePack } from "../stylePacks/stylePack.js";
+import {
+  fontFamilyOf,
+  type BackdropKind,
+  type StylePack,
+} from "../stylePacks/stylePack.js";
 
 export type KitComponent = (props: { props: JsonObject }) => ReactNode;
 
 export interface KitSceneDefinition {
   component: KitComponent;
   paintsBackground: boolean;
+  quietBackdrop?: boolean;
+}
+
+function backdropKindOf(options: {
+  stylePack: StylePack;
+  quiet: boolean;
+}): BackdropKind {
+  const { backdrop } = options.stylePack;
+  return options.quiet && backdrop !== "grain" ? "flat" : backdrop;
 }
 
 export function defineKitScene(options: {
@@ -39,7 +52,14 @@ export function defineKitScene(options: {
         }}
       >
         {definition.paintsBackground ? (
-          <Backdrop stylePack={stylePack} seed={JSON.stringify(props)} />
+          <Backdrop
+            stylePack={stylePack}
+            kind={backdropKindOf({
+              stylePack,
+              quiet: definition.quietBackdrop === true,
+            })}
+            seed={JSON.stringify(props)}
+          />
         ) : null}
         <Component props={props} />
       </div>

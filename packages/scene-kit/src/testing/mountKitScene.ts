@@ -28,6 +28,7 @@ export async function mountKitScene(options: {
   assets?: Record<string, SceneAsset>;
   look?: string;
   calm?: boolean;
+  beatFrames?: number;
 }) {
   const look = options.look ?? "paper";
   const scenes =
@@ -49,6 +50,9 @@ export async function mountKitScene(options: {
     output,
     framesPerSecond: 30,
     durationFrames: options.durationFrames,
+    ...(options.beatFrames === undefined
+      ? {}
+      : { beatFrames: options.beatFrames }),
     props: options.props,
     findAsset: (assetId) => assets.get(assetId),
   });

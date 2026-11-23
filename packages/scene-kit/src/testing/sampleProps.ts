@@ -4,6 +4,11 @@ import {
   launchSceneNames,
   launchTypicalProps,
 } from "./launchSceneProps.js";
+import {
+  filmLongProps,
+  filmSceneNames,
+  filmTypicalProps,
+} from "./filmSceneProps.js";
 
 export const longText =
   "How one small team turns one idea into a long explainer, three shorts, and a set of stills with the AI tools it owns now";
@@ -17,6 +22,7 @@ export const kitSceneNames = [
   "quote",
   "video-clip",
   ...launchSceneNames,
+  ...filmSceneNames,
 ] as const;
 
 export const typicalProps: Record<(typeof kitSceneNames)[number], JsonObject> =
@@ -52,6 +58,7 @@ export const typicalProps: Record<(typeof kitSceneNames)[number], JsonObject> =
       focus: { x: 0.5, y: 0.4 },
     },
     ...launchTypicalProps,
+    ...filmTypicalProps,
   };
 
 export const longProps: Record<(typeof kitSceneNames)[number], JsonObject> = {
@@ -74,6 +81,7 @@ export const longProps: Record<(typeof kitSceneNames)[number], JsonObject> = {
   quote: { quote: longText, source: longText },
   "video-clip": { assetId: "clip", caption: longText },
   ...launchLongProps,
+  ...filmLongProps,
 };
 
 export async function testImageAsset(): Promise<SceneAsset> {

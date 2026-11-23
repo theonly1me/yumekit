@@ -17,6 +17,12 @@ export interface TextUnits {
   caption: number;
   number: number;
   statement: number;
+  filmHeading: number;
+  filmLine: number;
+  filmLabel: number;
+  filmNumber: number;
+  filmWordmark: number;
+  filmCommand: number;
 }
 
 export const backdropKinds = ["flat", "glow", "grid", "grain"] as const;
