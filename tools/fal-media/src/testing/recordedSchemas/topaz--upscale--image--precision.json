@@ -1,0 +1,76 @@
+{
+  "endpoint_id": "topaz/upscale/image/precision",
+  "page": "https://fal.ai/models/topaz/upscale/image/precision",
+  "schema_url": "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=topaz/upscale/image/precision",
+  "read_on": "2026-11-23",
+  "required": ["image_url"],
+  "properties": {
+    "crop_to_fill": {
+      "types": ["boolean"]
+    },
+    "denoise": {
+      "types": ["null", "number"],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "enable_safety_checker": {
+      "types": ["boolean"]
+    },
+    "face_enhancement": {
+      "types": ["boolean"]
+    },
+    "face_enhancement_creativity": {
+      "types": ["number"],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "face_enhancement_strength": {
+      "types": ["number"],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "fix_compression": {
+      "types": ["null", "number"],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "image_url": {
+      "types": ["string"]
+    },
+    "model": {
+      "types": ["string"],
+      "enum": [
+        "Standard V2",
+        "High Fidelity V3",
+        "High Fidelity V2",
+        "Low Resolution V2",
+        "CGI",
+        "Text Refine",
+        "Faces"
+      ]
+    },
+    "output_format": {
+      "types": ["string"],
+      "enum": ["jpeg", "png"]
+    },
+    "sharpen": {
+      "types": ["null", "number"],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "strength": {
+      "types": ["null", "number"],
+      "minimum": 0.01,
+      "maximum": 1
+    },
+    "subject_detection": {
+      "types": ["string"],
+      "enum": ["All", "Foreground", "Background"]
+    },
+    "upscale_factor": {
+      "types": ["number"],
+      "minimum": 1,
+      "maximum": 4
+    }
+  }
+}

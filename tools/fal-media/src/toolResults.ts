@@ -4,7 +4,7 @@ import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 
 export interface MediaFile {
   path: string;
-  kind: "video" | "image";
+  kind: "video" | "image" | "audio";
   width_pixels?: number;
   height_pixels?: number;
   duration_seconds?: number;

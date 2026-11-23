@@ -1,0 +1,51 @@
+{
+  "endpoint_id": "fal-ai/seedvr/upscale/video",
+  "page": "https://fal.ai/models/fal-ai/seedvr/upscale/video",
+  "schema_url": "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=fal-ai/seedvr/upscale/video",
+  "read_on": "2026-11-23",
+  "required": ["video_url"],
+  "properties": {
+    "enable_safety_checker": {
+      "types": ["boolean"]
+    },
+    "noise_scale": {
+      "types": ["number"],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "output_format": {
+      "types": ["string"],
+      "enum": ["X264 (.mp4)", "VP9 (.webm)", "PRORES4444 (.mov)", "GIF (.gif)"]
+    },
+    "output_quality": {
+      "types": ["string"],
+      "enum": ["low", "medium", "high", "maximum"]
+    },
+    "output_write_mode": {
+      "types": ["string"],
+      "enum": ["fast", "balanced", "small"]
+    },
+    "seed": {
+      "types": ["integer", "null"]
+    },
+    "sync_mode": {
+      "types": ["boolean"]
+    },
+    "target_resolution": {
+      "types": ["string"],
+      "enum": ["720p", "1080p", "1440p", "2160p"]
+    },
+    "upscale_factor": {
+      "types": ["number"],
+      "minimum": 1,
+      "maximum": 10
+    },
+    "upscale_mode": {
+      "types": ["string"],
+      "enum": ["target", "factor"]
+    },
+    "video_url": {
+      "types": ["string"]
+    }
+  }
+}

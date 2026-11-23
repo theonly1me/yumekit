@@ -20,6 +20,8 @@ export const choiceCapabilities = [
   "speech",
   "music",
   "video",
+  "sound-effect",
+  "sharper",
 ] as const satisfies readonly ChoiceCapability[];
 
 type ServiceFacts = Omit<ChoiceService, "models">;

@@ -1,11 +1,16 @@
 import { useState } from "react";
 import type { EngineClient } from "../engine/engineClient.js";
 import type { Snapshot } from "../engine/snapshot.js";
+import { useMediaChoices } from "../settings/services/index.js";
 import { Sheet } from "../sheets/Sheet.js";
+import { useMediaServers } from "../tools/useMediaServers.js";
 import type { ExportJob, SceneTarget } from "./exportJobs.js";
 import { exportRowsOf, leadOf, outputIdsOf, videosWord } from "./exportRows.js";
 import { ExportRowView } from "./ExportRowView.js";
 import { FailedExport } from "./FailedExport.js";
+import { sharperChoiceOf } from "./sharperChoice.js";
+import { sharperRequestsOf } from "./sharperRequests.js";
+import { SharperSwitch } from "./SharperSwitch.js";
 import type { Exports } from "./useExports.js";
 import "./export.css";
 
@@ -49,6 +54,17 @@ export function ExportSheet(props: {
   const chosenRows = rows.filter(
     (row) => row.lengthFrames > 0 && chosen.has(row.key),
   );
+  const sharperChoice = sharperChoiceOf({
+    choices: useMediaChoices(client).state,
+    servers: useMediaServers(client).state,
+  });
+  const [sharperKeys, setSharperKeys] = useState<ReadonlySet<string>>(
+    () => new Set(),
+  );
+  const sharperRows =
+    sharperChoice === undefined
+      ? []
+      : chosenRows.filter((row) => sharperKeys.has(row.key));
   const failureShownFor = new Set<string>();
 
   return (
@@ -84,6 +100,25 @@ export function ExportSheet(props: {
                   else next.delete(row.key);
                   setChosen(next);
                 }}
+                sharper={
+                  sharperChoice === undefined ||
+                  !chosen.has(row.key) ||
+                  row.lengthFrames === 0 ? undefined : (
+                    <SharperSwitch
+                      row={row}
+                      choice={sharperChoice}
+                      framesPerSecond={snapshot.project.framesPerSecond}
+                      isOn={sharperKeys.has(row.key)}
+                      isLocked={exports.isRunning}
+                      onChange={(isOn) => {
+                        const next = new Set(sharperKeys);
+                        if (isOn) next.add(row.key);
+                        else next.delete(row.key);
+                        setSharperKeys(next);
+                      }}
+                    />
+                  )
+                }
                 failure={
                   failed === undefined ? undefined : (
                     <FailedExport
@@ -113,7 +148,10 @@ export function ExportSheet(props: {
             className="primary large"
             disabled={exports.isRunning || chosenRows.length === 0}
             onClick={() => {
-              exports.start(outputIdsOf(chosenRows));
+              exports.start({
+                outputIds: outputIdsOf(chosenRows),
+                sharper: sharperRequestsOf(sharperRows),
+              });
             }}
           >
             {exports.isRunning

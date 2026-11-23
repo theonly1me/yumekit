@@ -36,6 +36,26 @@ function reportedMediaOf(options: {
   };
 }
 
+async function audioWithProbedLength(options: {
+  file: ResultFile;
+  framesPerSecond: number;
+}): Promise<Outcome<GeneratedMedia, HarnessFailure>> {
+  const probed = await probeMedia({ file: options.file.path });
+  const seconds = probed.ok ? probed.value.durationSeconds : undefined;
+  return {
+    ok: true,
+    value:
+      seconds === undefined
+        ? {}
+        : {
+            durationFrames: framesOfSeconds({
+              seconds,
+              framesPerSecond: options.framesPerSecond,
+            }),
+          },
+  };
+}
+
 export async function generatedMediaOf(options: {
   file: ResultFile;
   server: string;
@@ -43,7 +63,12 @@ export async function generatedMediaOf(options: {
 }): Promise<Outcome<GeneratedMedia, HarnessFailure>> {
   const { file, framesPerSecond } = options;
   const reported = reportedMediaOf({ file, framesPerSecond });
-  if (file.kind !== "video") return { ok: true, value: reported };
+  if (file.kind === "image") return { ok: true, value: reported };
+  if (file.kind === "audio") {
+    return reported.durationFrames === undefined
+      ? audioWithProbedLength({ file, framesPerSecond })
+      : { ok: true, value: reported };
+  }
   const probed = await probeMedia({ file: file.path });
   if (!probed.ok) {
     if (probed.failure.kind !== "media-not-readable") {

@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { falPage } from "./catalog/shapes.ts";
+import { writeFile } from "node:fs/promises";
+import { join } from "node:path";
 import { imageModels } from "./catalog/image/index.ts";
+import { sharperModels } from "./catalog/sharper/index.ts";
+import { soundModels } from "./catalog/sound/index.ts";
 import { videoModels } from "./catalog/video/index.ts";
 import {
   bodyOf,
@@ -14,7 +18,7 @@ import {
   describeWithNoKey,
   type DescribedModel,
 } from "./testing/describedModels.ts";
-import { fakeFal } from "./testing/fakeFal.ts";
+import { fakeFal, fakeMp4 } from "./testing/fakeFal.ts";
 import {
   readRecordedSchema,
   schemaProblems,
@@ -34,15 +38,26 @@ async function callsOf(model: DescribedModel): Promise<Call[]> {
   const durationSetting = model.settings.find(
     (entry) => entry.name === "duration_seconds",
   );
-  const base =
-    model.capability === "video"
-      ? {
-          duration_seconds:
-            durationSetting?.kind === "whole-number"
-              ? durationSetting.default
-              : 5,
-        }
-      : {};
+  const video = join(folder, "clip.mp4");
+  await writeFile(
+    video,
+    fakeMp4({ widthPixels: 640, heightPixels: 360, durationSeconds: 4 }),
+  );
+  const prompt = { prompt: "A red fox in snow" };
+  const baseByCapability = {
+    image: prompt,
+    video: {
+      ...prompt,
+      duration_seconds:
+        durationSetting?.kind === "whole-number" ? durationSetting.default : 5,
+    },
+    "sound-effect": prompt,
+    sharper: {
+      media_path: model.accepts.includes("video_input") ? video : firstFrame,
+      scale: 2,
+    },
+  };
+  const base = baseByCapability[model.capability];
   const fileInputs: Partial<Record<string, Record<string, unknown>>> = {
     first_frame_path: { first_frame_path: firstFrame },
     last_frame_path: {
@@ -68,7 +83,6 @@ async function callsOf(model: DescribedModel): Promise<Call[]> {
   return calls.map((call) => ({
     ...call,
     input: {
-      prompt: "A red fox in snow",
       output_directory: folder,
       file_stem: "check",
       model: model.id,
@@ -77,7 +91,12 @@ async function callsOf(model: DescribedModel): Promise<Call[]> {
   }));
 }
 
-const toolOf = { image: "generate_image", video: "generate_video" } as const;
+const toolOf = {
+  image: "generate_image",
+  video: "generate_video",
+  "sound-effect": "generate_sound_effect",
+  sharper: "sharpen_media",
+} as const;
 
 describe("each catalog model sends a body that matches the schema of its fal page", async () => {
   const { parsed } = await describeWithNoKey();
@@ -85,9 +104,12 @@ describe("each catalog model sends a body that matches the schema of its fal pag
   it.each(parsed.models.map((model) => ({ id: model.id, model })))(
     "$id",
     async ({ model }) => {
-      const catalogEntry = [...imageModels, ...videoModels].find(
-        (entry) => entry.id === model.id,
-      );
+      const catalogEntry = [
+        ...imageModels,
+        ...videoModels,
+        ...soundModels,
+        ...sharperModels,
+      ].find((entry) => entry.id === model.id);
       for (const call of await callsOf(model)) {
         const media = await connectFalMedia({
           environment: { FAL_KEY: placeholderKey },

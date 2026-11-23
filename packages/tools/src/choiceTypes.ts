@@ -1,7 +1,8 @@
+import type { Capability } from "./types.js";
 import type { MediaServerKey } from "./description.js";
 import type { KeyState } from "./keys/index.js";
 
-export type ChoiceCapability = "image" | "speech" | "music" | "video";
+export type ChoiceCapability = Exclude<Capability, "align">;
 
 export interface MediaPick {
   capability: ChoiceCapability;

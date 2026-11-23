@@ -4,7 +4,9 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { registerDescribeTool } from "./catalog.ts";
 import { registerImageTool } from "./registerImageTool.ts";
 import { registerMusicTool } from "./registerMusicTool.ts";
+import { registerSoundEffectTool } from "./registerSoundEffectTool.ts";
 import { registerSpeechTools } from "./registerSpeechTools.ts";
+import { registerSharpenTool } from "./sharpen/registerSharpenTool.ts";
 import { registerVideoTool } from "./video/registerVideoTool.ts";
 
 const server = new McpServer({
@@ -16,4 +18,6 @@ registerImageTool(server);
 registerSpeechTools(server);
 registerMusicTool(server);
 registerVideoTool(server);
+registerSoundEffectTool(server);
+registerSharpenTool(server);
 await server.connect(new StdioServerTransport());

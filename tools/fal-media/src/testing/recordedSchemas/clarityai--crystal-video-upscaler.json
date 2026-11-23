@@ -1,0 +1,20 @@
+{
+  "endpoint_id": "clarityai/crystal-video-upscaler",
+  "page": "https://fal.ai/models/clarityai/crystal-video-upscaler",
+  "schema_url": "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=clarityai/crystal-video-upscaler",
+  "read_on": "2026-11-23",
+  "required": ["video_url"],
+  "properties": {
+    "enable_safety_checker": {
+      "types": ["boolean"]
+    },
+    "scale_factor": {
+      "types": ["number"],
+      "minimum": 1,
+      "maximum": 200
+    },
+    "video_url": {
+      "types": ["string"]
+    }
+  }
+}

@@ -7,7 +7,8 @@ import type {
 } from "./choiceTypes.js";
 import type { MediaModel, MediaServerDescription } from "./description.js";
 
-export type Capability = "image" | "speech" | "align" | "music" | "video";
+export type Capability =
+  "image" | "speech" | "align" | "music" | "video" | "sound-effect" | "sharper";
 
 export type JsonValue =
   string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };

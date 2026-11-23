@@ -9,6 +9,7 @@ import { StatusLine } from "../sound/StatusLine.js";
 import { useSoundActions } from "../sound/useSoundActions.js";
 import { musicFactsOf } from "./musicFacts.js";
 import { MusicVolume } from "./MusicVolume.js";
+import { SoundsGroup } from "./SoundsGroup.js";
 import "../sound/soundParts.css";
 
 export function MusicView(props: SoundViewProps) {
@@ -117,6 +118,12 @@ export function MusicView(props: SoundViewProps) {
           once={{ chosen: onceModel, onChoose: setOnceModel }}
         />
       </section>
+      <SoundsGroup
+        client={client}
+        snapshot={snapshot}
+        locked={locked}
+        ask={props.ask}
+      />
       <section className="part-group">
         <h4>Use my own music</h4>
         <FileDrop

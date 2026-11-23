@@ -40,7 +40,7 @@ const setting = z.discriminatedUnion("kind", [
 const describedModel = z.strictObject({
   id: z.string(),
   label: z.string(),
-  capability: z.enum(["image", "video"]),
+  capability: z.enum(["image", "video", "sound-effect", "sharper"]),
   is_default: z.boolean(),
   settings: z.array(setting),
   prices: z.array(
@@ -51,7 +51,15 @@ const describedModel = z.strictObject({
     }),
   ),
   read_on: z.iso.date(),
-  accepts: z.array(z.enum(["first_frame", "last_frame", "reference_images"])),
+  accepts: z.array(
+    z.enum([
+      "first_frame",
+      "last_frame",
+      "reference_images",
+      "image_input",
+      "video_input",
+    ]),
+  ),
   tested: z.boolean(),
 });
 

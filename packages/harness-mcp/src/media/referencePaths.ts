@@ -7,6 +7,7 @@ export interface ReferenceIds {
   firstFrameAssetId: string | undefined;
   lastFrameAssetId?: string | undefined;
   cameraMoveId?: string | undefined;
+  mediaAssetId?: string | undefined;
 }
 
 function imagePathOf(options: {
@@ -93,5 +94,8 @@ export function recordedInputOf(options: {
     ...(ids.cameraMoveId === undefined
       ? {}
       : { camera_move: ids.cameraMoveId }),
+    ...(ids.mediaAssetId === undefined
+      ? {}
+      : { media_asset_id: ids.mediaAssetId }),
   };
 }

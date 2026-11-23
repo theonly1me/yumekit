@@ -1,0 +1,49 @@
+{
+  "endpoint_id": "fal-ai/stable-audio-3/small/sfx/text-to-audio",
+  "page": "https://fal.ai/models/fal-ai/stable-audio-3/small/sfx/text-to-audio",
+  "schema_url": "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=fal-ai/stable-audio-3/small/sfx/text-to-audio",
+  "read_on": "2026-11-23",
+  "required": ["prompt"],
+  "properties": {
+    "bitrate": {
+      "types": ["string"]
+    },
+    "duration": {
+      "types": ["number"],
+      "minimum": 1,
+      "maximum": 120
+    },
+    "enable_prompt_expansion": {
+      "types": ["boolean"]
+    },
+    "enable_safety_checker": {
+      "types": ["boolean"]
+    },
+    "guidance_scale": {
+      "types": ["number"],
+      "minimum": 0,
+      "maximum": 25
+    },
+    "negative_prompt": {
+      "types": ["string"]
+    },
+    "num_inference_steps": {
+      "types": ["integer"],
+      "minimum": 1,
+      "maximum": 100
+    },
+    "output_format": {
+      "types": ["string"],
+      "enum": ["mp3", "wav", "flac", "ogg", "opus", "m4a", "aac"]
+    },
+    "prompt": {
+      "types": ["string"]
+    },
+    "seed": {
+      "types": ["integer", "null"]
+    },
+    "sync_mode": {
+      "types": ["boolean"]
+    }
+  }
+}

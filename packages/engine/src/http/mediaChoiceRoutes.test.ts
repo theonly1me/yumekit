@@ -87,7 +87,14 @@ describe("the media choice requests", () => {
     };
     expect(answer.status).toBe(200);
     expect(bodyOf(answer)).toMatchObject({
-      choices: [{ capability: "image" }, speech, { capability: "music" }, {}],
+      choices: [
+        { capability: "image" },
+        speech,
+        { capability: "music" },
+        {},
+        { capability: "sound-effect" },
+        { capability: "sharper" },
+      ],
       failed_servers: [],
     });
   });

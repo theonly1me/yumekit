@@ -6,7 +6,11 @@ import {
 import { fakeFal } from "./fakeFal.ts";
 
 export async function callFalTool(options: {
-  name: "generate_image" | "generate_video";
+  name:
+    | "generate_image"
+    | "generate_video"
+    | "generate_sound_effect"
+    | "sharpen_media";
   arguments: (folder: string) => Promise<Record<string, unknown>>;
   respond?: (request: Request) => Promise<Response>;
 }) {

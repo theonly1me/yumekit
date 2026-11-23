@@ -6,12 +6,14 @@ export interface MadeFile {
   file: string;
   fileName: string;
   platformId: string | undefined;
+  isSharper: boolean;
 }
 
 export type JobState =
   | { kind: "waiting" }
   | { kind: "exporting"; framesDone: number; frameCount: number | undefined }
-  | { kind: "done"; files: MadeFile[] }
+  | { kind: "sharpening"; files: MadeFile[] }
+  | { kind: "done"; files: MadeFile[]; sharperFailure: string | undefined }
   | { kind: "failed"; message: string; failedAt: FailedAt | undefined };
 
 export interface FailedAt {
@@ -40,6 +42,8 @@ export const exportFailureSchema = z.object({
   frame: z.number().optional(),
 });
 
+const sharpeningShare = 0.9;
+
 export function fileNameOf(file: string): string {
   return file.split(/[\\/]/).pop() ?? file;
 }
@@ -47,6 +51,7 @@ export function fileNameOf(file: string): string {
 export function shareOf(state: JobState): number {
   if (state.kind === "done" || state.kind === "failed") return 1;
   if (state.kind === "waiting") return 0;
+  if (state.kind === "sharpening") return sharpeningShare;
   const { framesDone, frameCount } = state;
   return frameCount === undefined || frameCount === 0
     ? 0

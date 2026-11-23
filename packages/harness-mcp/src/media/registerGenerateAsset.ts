@@ -18,6 +18,7 @@ import {
   type GenerateAssetInput,
 } from "./generateAssetInput.js";
 import { generatedMediaOf } from "./generatedFile.js";
+import { mediaPathInput } from "./mediaPath.js";
 import { mediaFailureOf } from "./mediaFailures.js";
 import { recordedInputOf, referencePathsInput } from "./referencePaths.js";
 import { reuseAsset, summaryOf } from "./reuseAsset.js";
@@ -49,9 +50,12 @@ async function generateAsset(options: {
     firstFrameAssetId: request.first_frame_asset_id,
     lastFrameAssetId: request.last_frame_asset_id,
     cameraMoveId: request.camera_move,
+    mediaAssetId: request.media_asset_id,
   };
   const paths = referencePathsInput({ snapshot, projectFolder, ids });
   if (!paths.ok) return failureResult(paths.failure);
+  const mediaPath = mediaPathInput({ snapshot, projectFolder, request });
+  if (!mediaPath.ok) return failureResult(mediaPath.failure);
   const tool = toolNameByCapability[request.capability];
   const input = recordedInputOf({ input: request.input, ids });
   const existing = findReusableAsset({
@@ -82,7 +86,7 @@ async function generateAsset(options: {
     capability: request.capability,
     ...(request.server === undefined ? {} : { server: request.server }),
     ...(request.model === undefined ? {} : { model: request.model }),
-    input: { ...sentInput.value, ...paths.value },
+    input: { ...sentInput.value, ...paths.value, ...mediaPath.value },
     outputDirectory: assetFilesFolder(projectFolder),
     fileStem: request.asset_id,
     ...(onProgress === undefined ? {} : { onProgress }),

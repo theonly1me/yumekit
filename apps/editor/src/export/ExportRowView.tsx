@@ -20,7 +20,11 @@ function openMessageOf(outcome: OpenOutcome | undefined): ReactNode {
   );
 }
 
-function ShowFile(props: { client: EngineClient; made: MadeFile }) {
+function ShowFile(props: {
+  client: EngineClient;
+  made: MadeFile;
+  label: string;
+}) {
   const [opened, setOpened] = useState<OpenOutcome>();
   const message = openMessageOf(opened);
   return (
@@ -36,7 +40,7 @@ function ShowFile(props: { client: EngineClient; made: MadeFile }) {
             });
         }}
       >
-        Show the file
+        {props.label}
       </button>
       {message === undefined ? undefined : (
         <p className="fact export-note" role="status">
@@ -67,27 +71,65 @@ function statusOf(options: {
     return <span className="fact">Did not export</span>;
   }
   if (job.state.kind === "done") {
-    const made = job.state.files.find(
-      (file) => file.platformId === row.platformId,
-    );
-    return made === undefined ? (
-      <span className="fact">Not made</span>
-    ) : (
-      <ShowFile client={options.client} made={made} />
+    return (
+      <DoneFiles
+        client={options.client}
+        row={row}
+        files={job.state.files}
+        sharperFailure={job.state.sharperFailure}
+      />
     );
   }
   const percent = Math.round(shareOf(job.state) * 100);
+  const progressLabel =
+    job.state.kind === "sharpening"
+      ? `Making the sharper copy of ${row.name}`
+      : `Progress of ${row.name}`;
   return (
     <span
       className="progress small"
       role="progressbar"
-      aria-label={`Progress of ${row.name}`}
+      aria-label={progressLabel}
+      title={
+        job.state.kind === "sharpening" ? "Making the sharper copy" : undefined
+      }
       aria-valuemin={0}
       aria-valuemax={100}
       aria-valuenow={percent}
     >
       <i style={{ width: `${String(percent)}%` }} />
     </span>
+  );
+}
+
+function DoneFiles(props: {
+  client: EngineClient;
+  row: ExportRow;
+  files: MadeFile[];
+  sharperFailure: string | undefined;
+}) {
+  const ofRow = props.files.filter(
+    (file) => file.platformId === props.row.platformId,
+  );
+  const made = ofRow.find((file) => !file.isSharper);
+  const sharper = ofRow.find((file) => file.isSharper);
+  if (made === undefined) return <span className="fact">Not made</span>;
+  return (
+    <>
+      <ShowFile client={props.client} made={made} label="Show the file" />
+      {sharper === undefined ? undefined : (
+        <ShowFile
+          client={props.client}
+          made={sharper}
+          label="Show the sharper file"
+        />
+      )}
+      {props.sharperFailure === undefined ? undefined : (
+        <p className="fact export-note" role="status">
+          {props.sharperFailure}
+        </p>
+      )}
+    </>
   );
 }
 
@@ -98,6 +140,7 @@ export function ExportRowView(props: {
   isChosen: boolean;
   isLocked: boolean;
   onChoose: (isChosen: boolean) => void;
+  sharper: ReactNode;
   failure: ReactNode;
 }) {
   const { row } = props;
@@ -116,6 +159,7 @@ export function ExportRowView(props: {
       </label>
       <span className="export-file">{row.fileName}</span>
       {statusOf({ client: props.client, row, job: props.job })}
+      {props.sharper}
       {props.failure}
     </li>
   );

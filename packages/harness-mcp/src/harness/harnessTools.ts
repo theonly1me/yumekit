@@ -9,6 +9,7 @@ import { registerRemoveAsset } from "../media/registerRemoveAsset.js";
 import { registerPreviewTools } from "../output/registerPreviewTools.js";
 import { registerScenePreviewTool } from "../output/registerScenePreviewTool.js";
 import { registerRenderTools } from "../output/registerRenderTools.js";
+import { registerSharperCopy } from "../output/registerSharperCopy.js";
 import { registerAssetReadTools } from "../read/registerAssetReadTools.js";
 import { registerProjectReadTools } from "../read/registerProjectReadTools.js";
 import { registerReferenceTools } from "../read/registerReferenceTools.js";
@@ -19,6 +20,7 @@ import { registerSetVideoStyle } from "../story/registerSetVideoStyle.js";
 import { registerSetLook } from "../story/registerSetLook.js";
 import { registerStoryTools } from "../story/registerStoryTools.js";
 import { registerNarrationAndHistoryTools } from "../timeline/registerNarrationTools.js";
+import { registerPlaceSound } from "../timeline/registerPlaceSound.js";
 import { registerPlaceVideo } from "../timeline/registerPlaceVideo.js";
 import { registerTimelineTools } from "../timeline/registerTimelineTools.js";
 import { registerSetTransitions } from "../transitions/registerSetTransitions.js";
@@ -45,6 +47,7 @@ export function harnessToolsOf(
   registerTimelineTools(context);
   registerNarrationAndHistoryTools(context);
   registerPlaceVideo(context);
+  registerPlaceSound(context);
   registerSceneClipTools(context);
   registerSetTransitions(context);
   registerGenerateAsset(context);
@@ -54,5 +57,6 @@ export function harnessToolsOf(
   registerPreviewTools(context);
   registerScenePreviewTool(context);
   registerRenderTools(context);
+  registerSharperCopy(context);
   return context.tools.tools();
 }

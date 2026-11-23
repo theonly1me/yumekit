@@ -1,0 +1,52 @@
+{
+  "endpoint_id": "openimaginglab/flashvsr-plus",
+  "page": "https://fal.ai/models/openimaginglab/flashvsr-plus",
+  "schema_url": "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=openimaginglab/flashvsr-plus",
+  "read_on": "2026-11-23",
+  "required": ["video_url"],
+  "properties": {
+    "color_fix": {
+      "types": ["boolean"]
+    },
+    "enable_safety_checker": {
+      "types": ["boolean"]
+    },
+    "model": {
+      "types": ["string"],
+      "enum": ["turbo", "base", "v1"]
+    },
+    "preserve_audio": {
+      "types": ["boolean"]
+    },
+    "seed": {
+      "types": ["integer", "null"]
+    },
+    "sync_mode": {
+      "types": ["boolean"]
+    },
+    "temporal_compression": {
+      "types": ["integer"],
+      "enum": [1, 2, 4]
+    },
+    "upscale_factor": {
+      "types": ["number"],
+      "minimum": 1,
+      "maximum": 4
+    },
+    "video_output_type": {
+      "types": ["string"],
+      "enum": ["X264 (.mp4)", "VP9 (.webm)", "PRORES4444 (.mov)", "GIF (.gif)"]
+    },
+    "video_quality": {
+      "types": ["string"],
+      "enum": ["low", "medium", "high", "maximum"]
+    },
+    "video_url": {
+      "types": ["string"]
+    },
+    "video_write_mode": {
+      "types": ["string"],
+      "enum": ["fast", "balanced", "small"]
+    }
+  }
+}

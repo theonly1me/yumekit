@@ -20,6 +20,8 @@ const capabilityWords: Record<Capability, string> = {
   align: "word timings",
   music: "music",
   video: "video",
+  "sound-effect": "sound effects",
+  sharper: "sharper copies",
 };
 
 function sentenceCase(text: string): string {

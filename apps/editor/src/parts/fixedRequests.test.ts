@@ -7,6 +7,9 @@ describe("the fixed requests", () => {
       fixedRequestTextOf({ kind: "make-this-music", words: "slow strings" }),
     ).toBe("Change the music to: slow strings.");
     expect(
+      fixedRequestTextOf({ kind: "add-a-sound", words: "a door slams" }),
+    ).toBe("Add this sound to the video where it fits: a door slams.");
+    expect(
       fixedRequestTextOf({
         kind: "use-my-file",
         fileName: "Morning guitar.wav",
