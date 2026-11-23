@@ -1,0 +1,107 @@
+import { major, minor } from "./chords.ts";
+import type { StyleDefinition } from "./styleTypes.ts";
+
+export const cinematic: StyleDefinition = {
+  keyRoots: [2, 0, 4],
+  progressions: [
+    [
+      { root: 0, tones: minor },
+      { root: 8, tones: major },
+      { root: 3, tones: major },
+      { root: 10, tones: major },
+    ],
+    [
+      { root: 0, tones: minor },
+      { root: 5, tones: minor },
+      { root: 8, tones: major },
+      { root: 7, tones: major },
+    ],
+  ],
+  barsPerChord: 2,
+  swing: 0,
+  looseSeconds: 0.004,
+  layers: [
+    { part: "pad", from: 0, steps: ["c---------------"] },
+    { part: "rim", from: 0.15, steps: ["o.o.o.o.o.o.o.o."] },
+    { part: "bass", from: 0.25, steps: ["0---------------"] },
+    {
+      part: "strings",
+      from: 0.4,
+      until: 0.7,
+      steps: ["0.0.1.0.0.0.1.0.", "0.1.0.1.0.1.2.1."],
+    },
+    { part: "strings", from: 0.7, steps: ["0101010101010101"] },
+    { part: "tom", from: 0.35, until: 0.7, steps: ["3.........3....."] },
+    {
+      part: "tom",
+      from: 0.7,
+      steps: ["3.....3...3....."],
+      fill: "3..3..3.2.2.1111",
+    },
+    { part: "boom", from: 0.6, steps: ["X..............."] },
+    { part: "snare", from: 0.75, steps: ["........x......."] },
+    {
+      part: "lead",
+      from: 0.75,
+      vary: true,
+      steps: ["2-------1-------", "2-------3-------", "4-------3---2---"],
+    },
+  ],
+  lift: { riser: true, crash: true, breathBeforeEnd: true },
+  ending: ["boom", "crash", "pad", "bass", "strings", "lead"],
+  ranges: { pad: 50, bass: 26, strings: 38, lead: 57 },
+  sounds: {
+    kick: {
+      startHertz: 100,
+      endHertz: 40,
+      pitchSeconds: 0.06,
+      decaySeconds: 0.4,
+      click: 0.02,
+      drive: 1.5,
+    },
+    bass: {
+      harmonics: [1, 0.5, 0.33, 0.25, 0.2, 0.16, 0.14, 0.12],
+      harmonicDamping: 0,
+      attackSeconds: 0.25,
+      releaseSeconds: 0.6,
+    },
+    pad: {
+      harmonics: [1, 0.5, 0.33, 0.22, 0.14, 0.09],
+      harmonicDamping: 0,
+      attackSeconds: 1.8,
+      releaseSeconds: 2.2,
+      detuneCents: 9,
+    },
+    strings: {
+      harmonics: [1, 0.55, 0.38, 0.28, 0.2, 0.15, 0.11, 0.08],
+      harmonicDamping: 1.5,
+      attackSeconds: 0.004,
+      releaseSeconds: 0.07,
+      decaySeconds: 0.16,
+    },
+    lead: {
+      harmonics: [1, 0.7, 0.5, 0.35, 0.25, 0.18, 0.12],
+      harmonicDamping: 0,
+      attackSeconds: 0.18,
+      releaseSeconds: 0.6,
+      vibratoCents: 10,
+      drive: 1.2,
+    },
+  },
+  mix: {
+    pad: {
+      gainDecibels: -16,
+      reverb: 0.45,
+      opensWithEnergy: { lowHertz: 350, highHertz: 1800 },
+    },
+    bass: { gainDecibels: -9, lowpassHertz: 450 },
+    strings: { gainDecibels: -14, lowpassHertz: 2200, reverb: 0.3 },
+    lead: { gainDecibels: -15, lowpassHertz: 2400, reverb: 0.4 },
+    snare: { gainDecibels: -12, reverb: 0.5 },
+    rim: { gainDecibels: -21 },
+    boom: { gainDecibels: -7 },
+  },
+  brightnessHertz: 12000,
+  delayBeats: 0.5,
+  space: { roomSize: 0.88, damping: 0.55, returnDecibels: -5 },
+};

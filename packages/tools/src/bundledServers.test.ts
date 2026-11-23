@@ -48,4 +48,17 @@ describe("findBundledServers", () => {
       passEnvironment: ["YUMEKIT_CONFIG_DIRECTORY"],
     });
   });
+
+  it("resolves the music of this computer by the name local-music, with no key and no variable", async () => {
+    const servers = await findBundledServers();
+
+    expect(servers["local-music"]).toEqual({
+      command: process.execPath,
+      args: [
+        fileURLToPath(
+          new URL("../../../tools/local-music/dist/main.js", import.meta.url),
+        ),
+      ],
+    });
+  });
 });

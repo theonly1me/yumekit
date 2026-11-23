@@ -8,6 +8,7 @@ import { checkEditorPage } from "./openEditor.ts";
 import { runOrStop } from "./processes.ts";
 import {
   buildVideoProject,
+  checkLocalMusic,
   listLocalVoice,
   makeSampleAsset,
 } from "./videoProject.ts";
@@ -106,6 +107,10 @@ try {
     await step({
       name: "the local voice server starts",
       work: () => listLocalVoice(session),
+    });
+    await step({
+      name: "the local music server starts with approved styles only",
+      work: () => checkLocalMusic(session),
     });
     await step({
       name: "the sample media server makes an asset",

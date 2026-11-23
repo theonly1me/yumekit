@@ -34,6 +34,7 @@ const bundledServersByName: Record<string, BundledServer> = {
     folder: "local-voice",
     passEnvironment: ["YUMEKIT_CONFIG_DIRECTORY"],
   },
+  "local-music": { folder: "local-music" },
 };
 
 async function isFile(path: string): Promise<boolean> {

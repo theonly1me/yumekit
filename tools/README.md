@@ -8,5 +8,6 @@ This folder holds the bundled media tool servers. Each server has its own folder
 | `gemini-media` | `yumekit-gemini-media` | `video`                                                                                 |
 | `fal-media`    | `yumekit-fal-media`    | `image`, `video`, `sound-effect`, `talking-clip`, `sharper`                             |
 | `local-voice`  | `yumekit-local-voice`  | `speech`                                                                                |
+| `local-music`  | `yumekit-local-music`  | `music`                                                                                 |
 
 The servers import nothing from the yumekit packages.
