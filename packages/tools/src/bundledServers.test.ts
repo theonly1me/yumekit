@@ -34,4 +34,18 @@ describe("findBundledServers", () => {
       passEnvironment: ["FAL_KEY"],
     });
   });
+
+  it("resolves the local voice by the name local-voice and passes it the configuration folder", async () => {
+    const servers = await findBundledServers();
+
+    expect(servers["local-voice"]).toEqual({
+      command: process.execPath,
+      args: [
+        fileURLToPath(
+          new URL("../../../tools/local-voice/dist/main.js", import.meta.url),
+        ),
+      ],
+      passEnvironment: ["YUMEKIT_CONFIG_DIRECTORY"],
+    });
+  });
 });

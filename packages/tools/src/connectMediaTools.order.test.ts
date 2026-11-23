@@ -83,4 +83,40 @@ describe("connectMediaTools order with no pick", () => {
       variable: "YUMEKIT_TEST_KEY",
     });
   });
+
+  it("uses local-voice for a voice with no pick and no key, before sample", async () => {
+    const { tools, outputDirectory } = await connectFixture({
+      projectFile: {
+        mcpServers: {
+          sample: sampleServerCommand,
+          "local-voice": sampleServerCommand,
+          openai: keyedServerCommand,
+        },
+      },
+    });
+
+    const outcome = await tools.run({
+      capability: "speech",
+      input: { text: "Hello there" },
+      outputDirectory,
+      fileStem: "hello",
+    });
+
+    expect(outcome.ok && outcome.value.server).toBe("local-voice");
+  });
+
+  it("puts each other server of the file before local-voice", async () => {
+    const { tools, outputDirectory } = await connectFixture({
+      projectFile: {
+        mcpServers: {
+          "local-voice": sampleServerCommand,
+          custom: sampleServerCommand,
+        },
+      },
+    });
+
+    const outcome = await pictureCall({ tools, outputDirectory });
+
+    expect(outcome.ok && outcome.value.server).toBe("custom");
+  });
 });

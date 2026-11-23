@@ -103,6 +103,33 @@ On 2026-11-23 a verifier used the build of `main` as a first-time creator, in a 
 - A voice that copies the voice of the person.
 - A layout for a phone that is more than one column.
 
+## Details of WP54
+
+These facts and choices came from the build of WP54 on 2026-11-23. The times come from a MacBook with an M3 Max. The script was the same 15 second product line for each candidate.
+
+| Candidate                                        | License of the code                           | License of the weights | Download | Time for the script          | Word times | Languages in yumekit |
+| ------------------------------------------------ | --------------------------------------------- | ---------------------- | -------- | ---------------------------- | ---------- | -------------------- |
+| `say` of macOS, voice Samantha                   | Part of macOS                                 | Part of macOS          | None     | 1.2 seconds for 15.1 s       | No         | Each English voice   |
+| Speech interface of Windows (`System.Speech`)    | Part of Windows                               | Part of Windows        | None     | Not measured (no Windows)    | No         | Each English voice   |
+| `espeak-ng` on Linux                             | GPL-3.0, installed by the person, not bundled | Same                   | None     | Not measured (not installed) | No         | Each English voice   |
+| Kokoro 82M int8 with `sherpa-onnx-node` 2.0.1    | Apache-2.0                                    | Apache-2.0             | 148 MB   | 6.6 seconds for 12.5 s       | No         | American English     |
+| Kitten TTS nano 0.8 int8 with `sherpa-onnx-node` | Apache-2.0                                    | Apache-2.0             | 31 MB    | 1.8 seconds for 15.3 s       | No         | Not shipped          |
+
+1. The server ships both ways, as F1 says for a model that sounds clearly better. `system-voice` is the default, so a video with no key has a voice at once. `natural-voice` is the second entry, with the label "Natural voice. Download once, 148 MB" until the files are there.
+2. The builder could not hear the files. The choice rests on what the sources say. Kokoro is a neural model of 82 million parameters, and its voice list gives Heart the grade A. Samantha is the older compact voice of macOS. The owner listens to the saved files and can change the order.
+3. Kitten TTS also meets the license rule and is smaller. The server ships one model in this version. Kokoro has the larger model and the graded voice list.
+4. Not permitted by the license rule: Supertonic (OpenRAIL weights) and Pocket TTS (CC-BY-4.0 weights). `kokoro-js` uses `phonemizer`, a build of `espeak-ng`, which is GPL-3.0. `sherpa-onnx` before 2.0.0 built `espeak-ng` into its library. Version 2.0.0 removed it (pull request 4055 of `k2-fsa/sherpa-onnx`), so the package needs 2.0.0 or later.
+5. `sherpa-onnx-node` has no install script. npm installs one prebuilt package for the platform (`sherpa-onnx-darwin-arm64` and six others), from 23 MB to 35 MB. The server loads it only for `natural-voice`, so a platform with no prebuilt package still has `system-voice`.
+6. The version is 2.0.1, because the policy of pnpm rejects a version younger than one day, and the rules ask for a version of two weeks or more where one exists.
+7. The download takes five files from `huggingface.co/csukuangfj/kokoro-int8-multi-lang-v1_0` at the fixed commit `57adb37f`: the model, the voices, the American English word list, the tokens, and the license. It leaves out the `espeak-ng-data` folder of the archive. The server checks the size and the SHA-256 of each file, writes to a `.part` file, and renames it.
+8. The files go to `<configuration folder>/voices/kokoro-int8-multi-lang-v1_0`. The bundled entry passes `YUMEKIT_CONFIG_DIRECTORY` to the server for this.
+9. The pick of "Natural voice" in the picker is the act of the person that starts the download. The download runs at the first voice call after it, with MCP progress. The download and the first line took 18 seconds on the network of the owner. Rule 10 of the instructions keeps the AI from a model that the person did not name.
+10. Kokoro with a word list skips each word that the list does not have, with no sound. So the server says numbers, prices, percents, years, and ordinals as words, and it refuses a text with another unknown word. The message names each word and asks for a spelling in common words, or the voice of this computer.
+11. The server levels the natural voice to a peak of -1 dBFS. Both voices then measure about -17 LUFS, so the music level under the voice stays the same for both.
+12. No way gives word times. `generate_speech` returns none, and `place_narration` with captions asks for `align_words` first, which spreads the words evenly (the free test service with no pick). `sherpa-onnx` added a forced aligner for English in 2.0.2. A later package can use it for real word times.
+13. On Linux with no `espeak-ng` and no download, a voice call fails with "This computer has no voice program. Install espeak-ng ..., or pick the natural voice in Settings."
+14. The sources, read on 2026-11-23: `k2-fsa/sherpa-onnx` (license, `CHANGELOG.md`, `nodejs-addon-examples`, release `tts-models`), `huggingface.co/hexgrad/Kokoro-82M` (license and `VOICES.md`), `huggingface.co/KittenML/kitten-tts-nano-0.8`, `huggingface.co/Supertone/supertonic-3`, `huggingface.co/kyutai/pocket-tts`, `github.com/xenova/phonemizer.js`, and the npm registry entries of `sherpa-onnx-node` and `kokoro-js`.
+
 ## Details of WP56
 
 1. An asset gets the optional `label`, at most 200 characters. `generate_asset` sets it to the first six words of the `prompt`, or of the `text` of a voice, with a capital first letter and "..." when words were cut. `import_asset` and an upload set it to the original file name. The format version stays 1, because a project with no label stays valid.

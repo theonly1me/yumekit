@@ -25,6 +25,7 @@ export const withoutOtherBundled = {
   openai: { disabled: true },
   gemini: { disabled: true },
   fal: { disabled: true },
+  "local-voice": { disabled: true },
 };
 
 export async function engineRequest(options: {

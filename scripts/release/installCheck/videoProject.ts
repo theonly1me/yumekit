@@ -58,3 +58,15 @@ export async function makeSampleAsset(session: McpSession): Promise<string> {
     },
   });
 }
+
+export async function listLocalVoice(session: McpSession): Promise<string> {
+  const listed = await callTool({
+    session,
+    name: "list_media_tools",
+    input: {},
+  });
+  if (!listed.includes('"Voice of this computer"')) {
+    throw new Error(`list_media_tools has no local voice: ${listed}`);
+  }
+  return "local-voice started";
+}

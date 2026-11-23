@@ -6,7 +6,11 @@ import { parseArgs } from "node:util";
 import { startMcpSession } from "./mcpSession.ts";
 import { checkEditorPage } from "./openEditor.ts";
 import { runOrStop } from "./processes.ts";
-import { buildVideoProject, makeSampleAsset } from "./videoProject.ts";
+import {
+  buildVideoProject,
+  listLocalVoice,
+  makeSampleAsset,
+} from "./videoProject.ts";
 
 const releaseFolder = fileURLToPath(
   new URL("../../../release", import.meta.url),
@@ -98,6 +102,10 @@ try {
         await buildVideoProject(session);
         return "";
       },
+    });
+    await step({
+      name: "the local voice server starts",
+      work: () => listLocalVoice(session),
     });
     await step({
       name: "the sample media server makes an asset",
