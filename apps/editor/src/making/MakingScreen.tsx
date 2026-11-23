@@ -5,7 +5,8 @@ import { StepView } from "../parts/frame/StepView.js";
 import type { StartFailure } from "./firstRequestFailure.js";
 import type { AnswerEntry, FirstChat } from "./firstChat.js";
 import { StepList } from "./StepList.js";
-import { makingStepsOf, type MakingStep } from "./makingSteps.js";
+import { isPlanReady, makingStepsOf, type MakingStep } from "./makingSteps.js";
+import { MakingActions } from "./MakingActions.js";
 import { TogetherView } from "./TogetherView.js";
 import { useOpenStep } from "./useOpenStep.js";
 
@@ -66,7 +67,12 @@ function OpenPart(props: {
   return <StepView {...view} key={stepId} stepId={stepId} />;
 }
 
-function titleOf(answer: AnswerEntry): string {
+function titleOf(options: {
+  answer: AnswerEntry;
+  isPlanReady: boolean;
+}): string {
+  const { answer } = options;
+  if (options.isPlanReady) return "The plan is ready";
   if (answer.state === "running") return "Making your video";
   return answer.state === "failed"
     ? "The video is not finished"
@@ -79,10 +85,16 @@ export function MakingScreen(props: {
   chat: FirstChat & { answer: NonNullable<FirstChat["answer"]> };
   onStop: () => void;
   onOpenEditor: () => void;
+  onContinue: () => Promise<boolean>;
   ask: AskTheAi;
 }) {
   const { chat, snapshot } = props;
-  const steps = makingStepsOf({ answer: chat.answer, snapshot });
+  const steps = makingStepsOf({
+    answer: chat.answer,
+    snapshot,
+    phase: chat.phase,
+  });
+  const planReady = isPlanReady({ answer: chat.answer, phase: chat.phase });
   const open = useOpenStep(steps);
   const isRunning = chat.answer.state === "running";
   const isFailed = chat.answer.state === "failed";
@@ -91,8 +103,15 @@ export function MakingScreen(props: {
       <div className="making-body">
         <p className="fact">{requestLinesOf(chat.requestText)}</p>
         <h1 className="making-title" aria-live="polite">
-          {titleOf(chat.answer)}
+          {titleOf({ answer: chat.answer, isPlanReady: planReady })}
         </h1>
+        {planReady ? (
+          <p className="fact lead">
+            Check the script and the pictures, and change what you want. Then
+            press Continue, and the AI makes the voice, the music, and the rest
+            of the video.
+          </p>
+        ) : undefined}
         {isFailed ? (
           <p className="fact lead making-failure">
             {chat.lastNotice ?? "The AI stopped with a problem."}
@@ -105,27 +124,14 @@ export function MakingScreen(props: {
               openStepId={open.stepId}
               onOpen={open.openStep}
             />
-            <div className="making-action">
-              {isRunning ? (
-                <button type="button" onClick={props.onStop}>
-                  Stop
-                </button>
-              ) : undefined}
-              {snapshot.scenes.length > 0 || !isRunning ? (
-                <button
-                  type="button"
-                  className={isRunning ? undefined : "primary large"}
-                  onClick={props.onOpenEditor}
-                >
-                  Open the editor
-                </button>
-              ) : undefined}
-              <p className="fact">
-                {isRunning
-                  ? "You can stop at any time. What is made stays in the project."
-                  : "Or open a step to check it first."}
-              </p>
-            </div>
+            <MakingActions
+              isRunning={isRunning}
+              isPlanReady={planReady}
+              hasScene={snapshot.scenes.length > 0}
+              onStop={props.onStop}
+              onOpenEditor={props.onOpenEditor}
+              onContinue={props.onContinue}
+            />
           </div>
           <div className="making-part">
             <OpenPart

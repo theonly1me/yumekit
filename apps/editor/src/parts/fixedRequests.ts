@@ -19,7 +19,8 @@ export type FixedRequest =
   | { kind: "match-the-captions" }
   | { kind: "back-to-graphics"; aboutClipId: string }
   | { kind: "make-a-cast-picture"; name: string; description: string }
-  | { kind: "use-my-file"; fileName: string };
+  | { kind: "use-my-file"; fileName: string }
+  | { kind: "continue-after-the-plan" };
 
 export type AskTheAi = (input: AskInput) => Promise<boolean>;
 
@@ -56,6 +57,8 @@ function requestSentenceOf(request: FixedRequest): string {
       return castPictureSentenceOf(request);
     case "use-my-file":
       return `Use my file ${request.fileName} in the video where it fits best.`;
+    case "continue-after-the-plan":
+      return "The plan is good. Make the rest of the video.";
   }
 }
 

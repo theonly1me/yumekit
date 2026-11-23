@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { StartFormatId } from "@yumekit/project/start-formats";
 import type { EngineClient } from "../engine/engineClient.js";
 import type { VideoStyleId } from "../videoStyle/videoStyles.js";
 
@@ -52,6 +53,8 @@ export function makeProject(options: {
   length: ProjectLength;
   videoStyle: VideoStyleId;
   look: string;
+  formatId: StartFormatId;
+  planFirst: boolean;
 }) {
   return options.client.readJson({
     path: "/api/home/projects",
@@ -62,6 +65,8 @@ export function makeProject(options: {
       length: options.length,
       video_style: options.videoStyle,
       look: options.look,
+      format_id: options.formatId,
+      plan_first: options.planFirst,
     },
   });
 }

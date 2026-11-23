@@ -20,6 +20,16 @@ export {
   type PlatformId,
 } from "./platforms/catalog.js";
 export {
+  firstStartFormatId,
+  isStartFormatId,
+  planFirstSentence,
+  startFormatCatalog,
+  startFormatIds,
+  startFormatOf,
+  type StartFormat,
+  type StartFormatId,
+} from "./startFormats/catalog.js";
+export {
   castKinds,
   type Bible,
   type CastKind,

@@ -23,9 +23,13 @@ function firstDecisionOf(options: {
   if (options.firstRequestFailure !== undefined && chat.requestCount === 0) {
     return "failure";
   }
-  const isFirstRunning =
-    chat.requestCount === 1 && chat.answer?.state === "running";
-  return isFirstRunning ? "making" : "editor";
+  const state = chat.answer?.state;
+  const isFirstRunning = chat.requestCount === 1 && state === "running";
+  const isPlanWaiting =
+    chat.phase === "plan" && chat.requestCount === 1 && state === "done";
+  const isRestRunning =
+    chat.phase === "rest" && chat.requestCount === 2 && state === "running";
+  return isFirstRunning || isPlanWaiting || isRestRunning ? "making" : "editor";
 }
 
 export function useMakingGate(options: {

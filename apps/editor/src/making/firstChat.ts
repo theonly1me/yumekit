@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { z } from "zod";
+import { planFirstSentence } from "@yumekit/project/start-formats";
 import type { EngineClient } from "../engine/engineClient.js";
+import { fixedRequestTextOf } from "../parts/fixedRequests.js";
 
 const stepSchema = z.object({
   tool: z.string(),
@@ -25,11 +27,41 @@ export type ChatEntry = z.infer<typeof entrySchema>;
 export type AnswerEntry = Extract<ChatEntry, { kind: "answer" }>;
 export type AnswerStep = z.infer<typeof stepSchema>;
 
+export type MakingPhase = "whole" | "plan" | "rest";
+
 export interface FirstChat {
   requestCount: number;
   requestText: string;
+  phase: MakingPhase;
   answer: AnswerEntry | undefined;
   lastNotice: string | undefined;
+}
+
+const continueText = fixedRequestTextOf({ kind: "continue-after-the-plan" });
+
+function planAndRestOf(options: {
+  requests: Extract<ChatEntry, { kind: "request" }>[];
+  answers: AnswerEntry[];
+}): Pick<FirstChat, "phase" | "answer"> {
+  const [request, continueRequest] = options.requests;
+  const [planAnswer, restAnswer] = options.answers;
+  if (request?.text.endsWith(planFirstSentence) !== true) {
+    return { phase: "whole", answer: planAnswer };
+  }
+  if (
+    continueRequest?.text !== continueText ||
+    planAnswer === undefined ||
+    restAnswer === undefined
+  ) {
+    return { phase: "plan", answer: planAnswer };
+  }
+  return {
+    phase: "rest",
+    answer: {
+      ...restAnswer,
+      steps: [...planAnswer.steps, ...restAnswer.steps],
+    },
+  };
 }
 
 export type FirstChatState =
@@ -40,11 +72,10 @@ export function firstChatOf(entries: ChatEntry[]): FirstChat {
   const answers = entries.filter((entry) => entry.kind === "answer");
   const notices = entries.filter((entry) => entry.kind === "notice");
   const [request] = requests;
-  const [answer] = answers;
   return {
     requestCount: requests.length,
     requestText: request?.text ?? "",
-    answer,
+    ...planAndRestOf({ requests, answers }),
     lastNotice: notices.at(-1)?.text,
   };
 }
