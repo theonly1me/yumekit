@@ -31,6 +31,7 @@ describe("yumekit mcp", () => {
         { server: "openai" },
         { server: "gemini" },
         { server: "fal" },
+        { server: "local-voice" },
       ],
     });
     expect(project.structuredContent).toMatchObject({

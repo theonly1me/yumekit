@@ -1,0 +1,19 @@
+{
+  "name": "@yumekit/local-voice",
+  "version": "0.0.0",
+  "private": true,
+  "description": "A free media tool server that speaks with the voice of this computer, or with an open voice model that runs on this computer.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "bin": {
+    "yumekit-local-voice": "./dist/main.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.2",
+    "sherpa-onnx-node": "2.0.1",
+    "zod": "4.6.7"
+  }
+}

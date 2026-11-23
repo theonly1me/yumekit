@@ -30,6 +30,10 @@ const bundledServersByName: Record<string, BundledServer> = {
     ],
   },
   fal: { folder: "fal-media", passEnvironment: ["FAL_KEY"] },
+  "local-voice": {
+    folder: "local-voice",
+    passEnvironment: ["YUMEKIT_CONFIG_DIRECTORY"],
+  },
 };
 
 async function isFile(path: string): Promise<boolean> {
