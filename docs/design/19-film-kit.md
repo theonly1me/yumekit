@@ -78,6 +78,43 @@ Each new scene follows each rule of document 08 and document 17, draws in each l
 - A project can have the folder `scenes/_shared/` with modules that each custom scene can import as `./_shared/<name>`. `put_shared_code` writes one, with the same check as scene code.
 - A font asset loads for the whole stage when the project names it in `fonts` of `project.json`. A scene then uses the font by its family name.
 
+## The lead agent
+
+The owner set this rule on 2026-11-24: the lead agent is the creator. It carries the vision of the person, it sees all of the work, and each other agent and each media model is a tool that it calls. yumekit never calls another agent or a media model by itself for a creative step.
+
+| Id  | Decision                                                                                                                          | Why                                                                                  |
+| --- | --------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| K8  | The lead agent sees the whole video as one piece of work, in one call                                                             | Ten scenes that it wrote and checked one by one became ten styles                    |
+| K9  | A video is one composition: the scenes share one layout system, one set of parts, and one tempo                                   | The film of a free hand was one coherent piece of code. That is why it read as one   |
+| K10 | Each helper is a tool of the lead agent: a picture model, a voice, music, a video model, and a helper agent for one piece of work | The lead decides when a helper works, what it gets, and if its result is good enough |
+| K11 | A creative step from the editor goes to the lead agent as a request. An exact change stays direct                                 | The person talks to one creator. A button must not start a model behind its back     |
+
+### The whole work in one call (K8)
+
+- `get_work` gives the lead agent everything that makes the video: the script, the tempo, the look, each timeline with its clips in beats, the code of each custom scene and of each shared module, the props of each kit scene, the cast, and the assets with their labels and marks. It is text, in one result, with a size limit and a way to ask for one part when the project is large.
+- `put_work` takes several changes in one call: shared code, scenes, and a timeline. It checks all of them together, and it applies all or none, as one undo step. So the lead writes a film as one piece and not as ten calls that each pass alone.
+- The scene guide says: write the shared parts first (the frame, the type styles, the timing), then the scenes that use them.
+
+### One composition (K9)
+
+- A project can name one module of its shared code as its `frame`: a component that draws around each scene of the video, for the parts that stay on screen (a mark, a progress line, a margin grid). The stage draws it once for the whole video, above the scenes and below the captions.
+- The kit scene types for films of this document use one layout grid and one type scale from the look, so two of them next to each other read as one film.
+- The instructions of the AI get the rules of restraint: few things on screen, one idea in each scene, even cuts on the bar, the same margins in each scene, and no voice unless the person asks for one. A voice is one read of the whole script, never one recording for each short line.
+
+### Helpers as tools (K10)
+
+- The media tools stay as they are: the lead calls `generate_asset`, and it picks the model within the picks of the person.
+- A new tool, `ask_helper`, starts one helper agent with a brief from the lead and the parts of the work that the lead names. The helper has the same yumekit tools, limited to the scenes or the assets that the brief names, and it cannot export, remove the work of the person, or start a helper. Its result comes back to the lead as text with the list of what it changed. The lead checks it, and keeps or undoes it.
+- The helper runs through the same agent program as the lead (document 12), with its own short session. One helper runs at a time in the first version.
+- The chat shows a helper as a step of the lead ("A helper drew scene 3"), never as a second voice.
+
+### The editor and the lead (K11)
+
+- Direct, with no request: a text, a move, a length, a transition, a look, a file of the person, a volume, a track on or off, an undo.
+- Through the lead, as a request that the person sees in the chat: a new picture, a new voice, new music, a real video clip, a talking clip, a sound, a sharper copy. The sheets for these keep their choices (the model, the camera move, the length, the price), and their button sends the request with those choices. The lead makes the call, and it can refuse or ask when the choice does not fit the video.
+- A picker of Settings sets a default. It starts no work.
+- With no agent program, these buttons say what is missing. They do not call a model.
+
 ## Work packages
 
 | Id   | Scope                                                         | Needs |
