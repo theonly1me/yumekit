@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { newSceneRequest } from "../chat/requestTexts.js";
-import type { Output, Scene, SceneClip } from "../engine/snapshot.js";
+import type { Asset, Output, Scene, SceneClip } from "../engine/snapshot.js";
+import { sceneNameById } from "../names/index.js";
 import { secondsText } from "../timeline/clock.js";
 import {
   choiceOf,
@@ -11,6 +12,7 @@ import { TransitionMark } from "../transitions/TransitionMark.js";
 import { AddSceneForm } from "./AddSceneForm.js";
 import { SceneCard, type CardFacts } from "./SceneCard.js";
 import { stillKey } from "./useSceneStills.js";
+import { useScrollEdges } from "./useScrollEdges.js";
 import "./scenes.css";
 
 const videoComponent = "video-clip";
@@ -25,6 +27,7 @@ export function SceneCards(props: {
   output: Output;
   clips: SceneClip[];
   scenes: Scene[];
+  assets: Asset[];
   stills: ReadonlyMap<string, string>;
   pickedClipId: string | undefined;
   shownClipId: string | undefined;
@@ -44,6 +47,7 @@ export function SceneCards(props: {
     choosingInto === undefined ? undefined : clips[choosingInto];
   const order = clips.map((clip) => clip.id).join(" ");
   const { pickedClipId } = props;
+  const edges = useScrollEdges({ element: list, contentKey: order });
 
   useEffect(() => {
     if (pickedClipId === undefined) return;
@@ -66,7 +70,11 @@ export function SceneCards(props: {
     return {
       clip,
       index,
-      title: scene?.title ?? clip.sceneId,
+      title: sceneNameById({
+        sceneId: clip.sceneId,
+        scenes,
+        assets: props.assets,
+      }),
       lengthText: secondsText({ frames: clip.durationFrames, framesPerSecond }),
       isVideo: isVideoScene(scene),
       still: stills.get(stillKey({ outputId: output.id, clipId: clip.id })),
@@ -101,7 +109,13 @@ export function SceneCards(props: {
   };
   return (
     <>
-      <ol className="cards" aria-label="Scenes" ref={list}>
+      <ol
+        className="cards"
+        aria-label="Scenes"
+        ref={list}
+        data-more-before={edges.hasMoreBefore}
+        data-more-after={edges.hasMoreAfter}
+      >
         {cards.map((card) => (
           <SceneCard
             key={card.clip.id}

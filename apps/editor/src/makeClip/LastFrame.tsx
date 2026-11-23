@@ -1,8 +1,14 @@
 import type { EngineClient } from "../engine/engineClient.js";
 import type { Asset } from "../engine/snapshot.js";
+import { assetNameOf } from "../names/index.js";
 import { useAssetUrl } from "./useAssetUrl.js";
 
 const shownImageCount = 6;
+
+function nameOf(options: { assets: Asset[]; assetId: string }): string {
+  const asset = options.assets.find((each) => each.id === options.assetId);
+  return asset === undefined ? "picture" : assetNameOf(asset);
+}
 
 function Picture(props: { client: EngineClient; assetId: string | undefined }) {
   const url = useAssetUrl(props);
@@ -29,7 +35,7 @@ export function LastFrame(props: {
           <strong>End on this picture</strong>
           {props.assetId === undefined
             ? "Optional. Pick a picture, and the clip ends on it. Two clips then join with no jump."
-            : `The clip ends on the image ${props.assetId}.`}
+            : `The clip ends on the picture "${nameOf({ assets: props.assets, assetId: props.assetId })}".`}
         </p>
       </div>
       {images.length === 0 ? undefined : (
@@ -57,7 +63,7 @@ export function LastFrame(props: {
                 type="button"
                 className="frame-pick"
                 aria-pressed={image.id === props.assetId}
-                aria-label={`End on ${image.id}`}
+                aria-label={`End on ${assetNameOf(image)}`}
                 onClick={() => {
                   props.onPick(image.id);
                 }}

@@ -46,7 +46,7 @@ export function PictureDetail(
       </div>
       <div className="picture-controls">
         <h3>
-          Scene {card.number}: {card.scene.title}
+          Scene {card.number}: {card.name}
         </h3>
         <SceneFields
           client={client}

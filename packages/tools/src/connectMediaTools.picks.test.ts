@@ -131,7 +131,7 @@ describe("connectMediaTools picks", () => {
       server: "sample",
       serverLabel: "Sample (free test server)",
       model: "sample-image",
-      modelLabel: "Prompt as text on a plain color",
+      modelLabel: "Test picture",
       source: "first-ready",
       state: "ready",
     });

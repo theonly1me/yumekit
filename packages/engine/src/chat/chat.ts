@@ -26,6 +26,7 @@ export interface Chat {
   view: () => Promise<ChatView>;
   startRequest: (options: {
     text: string;
+    details?: string | undefined;
     aboutClipId: string | undefined;
   }) => Promise<Outcome<RequestEntry, ChatFailure>>;
   stop: () => boolean;
@@ -74,6 +75,7 @@ export async function createChat(options: {
   let running: Promise<void> = Promise.resolve();
   const begin = async (request: {
     text: string;
+    details?: string | undefined;
     aboutClipId: string | undefined;
   }): Promise<Outcome<RequestEntry, ChatFailure>> => {
     if (options.serverCommand === undefined) return failed(noServerCommand);
@@ -97,6 +99,7 @@ export async function createChat(options: {
       kind: "request",
       id: randomUUID(),
       text: request.text,
+      ...(request.details === undefined ? {} : { details: request.details }),
       about: about.value,
     };
     log.put(entry);
@@ -114,7 +117,10 @@ export async function createChat(options: {
       adapter,
       log,
       ledger,
-      requestText: requestTextOf({ text: request.text, about: about.value }),
+      requestText: requestTextOf({
+        text: [request.text, request.details ?? ""].join("\n").trim(),
+        about: about.value,
+      }),
       answer,
       serverCommand: options.serverCommand,
       workingFolder,

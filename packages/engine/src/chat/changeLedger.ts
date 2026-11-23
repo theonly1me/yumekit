@@ -16,11 +16,12 @@ export interface ChangeLedger {
 
 function summaryOf(caller: ToolCaller | undefined): string {
   if (caller?.by === "ai") return agentChangeSummary;
-  return personSentenceOf(caller?.tool ?? "");
+  return caller?.summary ?? personSentenceOf(caller?.tool ?? "");
 }
 
 export function createChangeLedger(log: ChatLog): ChangeLedger {
   let request: { changeId: string | undefined } | undefined;
+  const changeIdsByAct = new Map<string, string>();
   const changeOf = (changeId: string) =>
     log
       .entries()
@@ -28,10 +29,16 @@ export function createChangeLedger(log: ChatLog): ChangeLedger {
         (entry): entry is ChangeEntry =>
           entry.kind === "change" && entry.id === changeId,
       );
-  const addStep = (changeId: string) => {
+  const addStep = (step: { changeId: string; summary?: string }) => {
+    const { changeId, summary } = step;
     const change = changeOf(changeId);
     if (change === undefined) return;
-    log.put({ ...change, undoSteps: change.undoSteps + 1, undone: false });
+    log.put({
+      ...change,
+      ...(summary === undefined ? {} : { summary }),
+      undoSteps: change.undoSteps + 1,
+      undone: false,
+    });
   };
   const newChange = (options: { by: ChangeAuthor; summary: string }) => {
     const id = randomUUID();
@@ -43,18 +50,29 @@ export function createChangeLedger(log: ChatLog): ChangeLedger {
     if (caller?.by === "ai" && request !== undefined) {
       if (request.changeId === undefined) {
         request.changeId = newChange({ by: "ai", summary: aiChangingSummary });
-      } else addStep(request.changeId);
+      } else addStep({ changeId: request.changeId });
       return;
     }
     if (caller?.changeId !== undefined) {
-      addStep(caller.changeId);
+      addStep({ changeId: caller.changeId });
+      return;
+    }
+    const actChangeId =
+      caller?.actId === undefined
+        ? undefined
+        : changeIdsByAct.get(caller.actId);
+    if (actChangeId !== undefined && changeOf(actChangeId) !== undefined) {
+      addStep({ changeId: actChangeId, summary: summaryOf(caller) });
+      if (caller !== undefined) caller.changeId = actChangeId;
       return;
     }
     const changeId = newChange({
       by: caller?.by ?? "person",
       summary: summaryOf(caller),
     });
-    if (caller !== undefined) caller.changeId = changeId;
+    if (caller === undefined) return;
+    caller.changeId = changeId;
+    if (caller.actId !== undefined) changeIdsByAct.set(caller.actId, changeId);
   };
   const recordUndo = () => {
     const change = log
@@ -70,7 +88,7 @@ export function createChangeLedger(log: ChatLog): ChangeLedger {
   };
   const recordRedo = () => {
     const changeId = log.popRedo();
-    if (changeId !== undefined) addStep(changeId);
+    if (changeId !== undefined) addStep({ changeId });
   };
   return {
     onCommit: (commit) => {

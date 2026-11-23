@@ -3,6 +3,7 @@ import {
   type CameraMoveId,
 } from "@yumekit/project/camera-moves";
 import type { Asset, Scene } from "../engine/snapshot.js";
+import { distinctParts } from "./promptParts.js";
 
 const lightWords = "Natural light.";
 
@@ -61,9 +62,10 @@ export function promptOfScene(options: {
 }): string {
   const earlier = earlierPromptOf(options);
   if (earlier !== undefined) return earlier;
-  const texts = textsOf(options.scene.source.props)
-    .map(sentenceOf)
-    .filter((text) => text !== "");
-  const parts = texts.length === 0 ? [sentenceOf(options.scene.title)] : texts;
-  return `${parts.join(". ")}. ${lightWords}`;
+  const parts = distinctParts(
+    [options.scene.title, ...textsOf(options.scene.source.props)]
+      .map(sentenceOf)
+      .filter((text) => text !== ""),
+  );
+  return [...parts.map((part) => `${part}.`), lightWords].join(" ");
 }

@@ -65,7 +65,7 @@ export function Preview(props: {
   framesPerSecond: number;
   hint: string;
   snapshot: Snapshot;
-  onTextEditing: () => void;
+  onTextEditing: (clickedFrame: number | undefined) => void;
 }) {
   const { client, output, frame } = props;
   const textInPlace = useTextInPlace({
@@ -99,6 +99,9 @@ export function Preview(props: {
         role="tabpanel"
         aria-label="Preview"
         data-tall={output.heightPixels > output.widthPixels}
+        style={{
+          aspectRatio: `${String(output.widthPixels)} / ${String(output.heightPixels)}`,
+        }}
         ref={stageRef}
       >
         <div

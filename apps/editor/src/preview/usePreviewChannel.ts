@@ -56,7 +56,9 @@ export function usePreviewChannel(options: {
       }
       const message = previewMessageOf(event.data);
       if (message?.kind === "reply") created.receive(message.reply);
-      if (message?.kind === "text-editing") textInPlace.current.onEditing();
+      if (message?.kind === "text-editing") {
+        textInPlace.current.onEditing(message.frame);
+      }
       if (message?.kind === "text-changed") {
         textInPlace.current
           .save(message.change)

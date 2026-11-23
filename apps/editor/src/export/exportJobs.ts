@@ -23,9 +23,18 @@ export interface FailedAt {
 
 export type SceneTarget = FailedAt & { outputId: string };
 
+export const exportScales = [
+  { scale: 1, label: "Full" },
+  { scale: 0.5, label: "Half" },
+  { scale: 0.25, label: "Quarter" },
+] as const;
+
+export type ExportScale = (typeof exportScales)[number]["scale"];
+
 export interface ExportJob {
   callId: string;
   outputId: string;
+  scale: ExportScale;
   state: JobState;
 }
 

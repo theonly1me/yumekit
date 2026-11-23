@@ -14,6 +14,19 @@
   padding: 16px 0;
   border-top: 1px solid var(--line);
   background: var(--surface);
+  box-shadow: 0 0 0 100vmax var(--surface);
+  clip-path: inset(-40px -100vmax 0 -100vmax);
+}
+
+.start-go::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(100% + 1px);
+  height: 40px;
+  background: linear-gradient(to bottom, transparent, var(--surface));
+  pointer-events: none;
 }
 
 .plan-first {

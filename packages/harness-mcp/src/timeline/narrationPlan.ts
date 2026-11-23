@@ -105,7 +105,7 @@ export function planNarration(options: {
           kind: "putScene",
           scene: {
             id: captionSceneId,
-            title: `Captions of ${asset.id}`,
+            title: "Captions",
             notes: "Made by place_narration.",
             source: {
               kind: "kit",

@@ -1,10 +1,18 @@
 import type { ModelSetting } from "../tools/mediaServers.js";
-import type { SettingValue, SettingValues } from "./settingValues.js";
+import {
+  durationSettingName,
+  type SettingValue,
+  type SettingValues,
+} from "./settingValues.js";
 
 const longestRange = 120;
 const referenceSetting = "reference_image_paths";
 
 type Change = (change: { name: string; value: SettingValue }) => void;
+
+function secondsText(seconds: number): string {
+  return `${String(seconds)} ${seconds === 1 ? "second" : "seconds"}`;
+}
 
 function SettingField(props: {
   setting: ModelSetting;
@@ -39,13 +47,17 @@ function SettingField(props: {
   if (setting.kind === "whole-number") {
     const number = typeof value === "number" ? value : setting.default;
     const isRange = setting.maximum - setting.minimum <= longestRange;
+    const isLength = setting.name === durationSettingName;
     return (
       <div className="field">
         <label htmlFor={id}>
-          {setting.label}
+          {isLength ? "Length" : setting.label}
           {isRange ? (
             <>
-              , <output htmlFor={id}>{number}</output>
+              ,{" "}
+              <output htmlFor={id}>
+                {isLength ? secondsText(number) : number}
+              </output>
             </>
           ) : undefined}
         </label>
@@ -85,18 +97,19 @@ function SettingField(props: {
 function ReferencePicks(props: {
   label: string;
   maximum: number;
-  imageIds: string[];
+  images: { id: string; name: string }[];
   chosenIds: string[];
   onChoose: (assetIds: string[]) => void;
 }) {
   const { chosenIds } = props;
-  if (props.imageIds.length === 0) return undefined;
+  if (props.images.length === 0) return undefined;
   return (
     <fieldset className="reference-picks">
       <legend>
         {props.label}, up to {props.maximum}
       </legend>
-      {props.imageIds.map((assetId) => {
+      {props.images.map((image) => {
+        const assetId = image.id;
         const isChosen = chosenIds.includes(assetId);
         return (
           <label key={assetId}>
@@ -112,7 +125,7 @@ function ReferencePicks(props: {
                 );
               }}
             />
-            {assetId}
+            {image.name}
           </label>
         );
       })}
@@ -124,7 +137,7 @@ export function SettingsForm(props: {
   settings: ModelSetting[];
   values: SettingValues;
   onChange: Change;
-  imageIds: string[];
+  images: { id: string; name: string }[];
   referenceIds: string[];
   onReferences: (assetIds: string[]) => void;
 }) {
@@ -136,7 +149,7 @@ export function SettingsForm(props: {
             key={setting.name}
             label={setting.label}
             maximum={setting.maximum}
-            imageIds={props.imageIds}
+            images={props.images}
             chosenIds={props.referenceIds}
             onChoose={props.onReferences}
           />

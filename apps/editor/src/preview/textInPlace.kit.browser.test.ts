@@ -8,8 +8,6 @@ import {
 } from "../testing/kitSceneProject.js";
 import { runEngine, type RunningEngine } from "../testing/runEngine.js";
 
-const playClipFrames = 600;
-
 let engine: RunningEngine | undefined;
 
 function runningEngine(): RunningEngine {
@@ -63,7 +61,7 @@ describe("a text of the preview that changes in place", () => {
     const chat = chatOf(editor.page);
     await expect
       .poll(() => chat.entryTexts(1))
-      .toEqual(["You changed the text of a scene.\nUndo"]);
+      .toEqual(["You changed the text of scene 1.\nUndo"]);
     await chat.history
       .locator(".change")
       .last()
@@ -150,30 +148,6 @@ describe("a text of the preview that changes in place", () => {
       heading: "Steps",
       items: ["Alpha", "Second step", "Gamma"],
     });
-    await editor.close();
-  });
-
-  it("stops the play when the person clicks a text", async () => {
-    await runningEngine().callTool({
-      name: "resize_scene_clip",
-      input: { clip_id: "opening", duration_frames: playClipFrames },
-    });
-    const editor = await openAt({ frame: 0 });
-    await editor.page.getByRole("button", { name: "Play" }).click();
-    await expect
-      .poll(() => editor.page.getByRole("button", { name: "Pause" }).count())
-      .toBe(1);
-
-    await editor.preview.getByText("First heading").click({ force: true });
-
-    await expect
-      .poll(() => editor.page.getByRole("button", { name: "Play" }).count())
-      .toBe(1);
-    const stoppedFrame = await editor.scrubberFrame();
-    await editor.page.waitForTimeout(500);
-    expect(await editor.scrubberFrame()).toBe(stoppedFrame);
-    expect(stoppedFrame).toBeLessThan(playClipFrames);
-    await editor.page.keyboard.press("Escape");
     await editor.close();
   });
 

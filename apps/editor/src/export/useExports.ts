@@ -5,6 +5,7 @@ import {
   exportResultSchema,
   fileNameOf,
   type ExportJob,
+  type ExportScale,
   type JobState,
 } from "./exportJobs.js";
 import { withSharperCopy, type SharperRequest } from "./sharpenExport.js";
@@ -17,7 +18,10 @@ async function exportOne(options: {
 }): Promise<JobState> {
   const reply = await options.client.callTool({
     name: "render_video",
-    input: { output_id: options.job.outputId },
+    input: {
+      output_id: options.job.outputId,
+      ...(options.job.scale === 1 ? {} : { scale: options.job.scale }),
+    },
     callId: options.job.callId,
   });
   if (!reply.ok) {
@@ -74,14 +78,19 @@ export function useExports(client: EngineClient) {
   );
 
   const start = useCallback(
-    (request: { outputIds: string[]; sharper: SharperRequest[] }) => {
-      const { outputIds, sharper } = request;
+    (request: {
+      outputIds: string[];
+      sharper: SharperRequest[];
+      scale: ExportScale;
+    }) => {
+      const { outputIds, sharper, scale } = request;
       if (isRunningNow.current || outputIds.length === 0) return;
       isRunningNow.current = true;
       setRunning(true);
       const queued: ExportJob[] = outputIds.map((outputId) => ({
         callId: crypto.randomUUID(),
         outputId,
+        scale,
         state: { kind: "waiting" },
       }));
       setJobs(queued);

@@ -29,6 +29,7 @@ export function listenForTextEdits(options: {
   enqueue: (work: () => Promise<void>) => void;
   reply: (message: PreviewReply) => void;
   redraw: () => Promise<void>;
+  shownFrame: () => number | undefined;
 }): void {
   const { root, enqueue, reply, redraw } = options;
   const style = document.createElement("style");
@@ -42,7 +43,12 @@ export function listenForTextEdits(options: {
     if (!(element instanceof HTMLElement) || element.isContentEditable) {
       return;
     }
-    reply({ type: "text-editing" });
+    const frame = options.shownFrame();
+    reply(
+      frame === undefined
+        ? { type: "text-editing" }
+        : { type: "text-editing", frame },
+    );
     enqueue(async () => {
       const current = currentTextElementOf({ root, element });
       const outcome =

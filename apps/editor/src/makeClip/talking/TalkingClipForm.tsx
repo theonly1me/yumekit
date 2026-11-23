@@ -80,7 +80,7 @@ export function TalkingClipForm(props: {
                 settings={choice.model.settings}
                 values={values}
                 onChange={talkingChoice.change}
-                imageIds={[]}
+                images={[]}
                 referenceIds={[]}
                 onReferences={() => undefined}
               />

@@ -80,7 +80,15 @@ describe("a heading that comes in word by word, changed in place", () => {
   it("adds a word at the end with no lost word and no doubled word", async () => {
     const editor = await editHeadingWhileWordsComeIn();
 
-    await editor.page.keyboard.press("End");
+    await expect
+      .poll(async () => {
+        await editor.page.keyboard.press("End");
+        return editor.heading.evaluate(
+          (element) =>
+            element.ownerDocument.getSelection()?.isCollapsed === true,
+        );
+      })
+      .toBe(true);
     await editor.page.keyboard.type(" today");
     await editor.page.keyboard.press("Enter");
 

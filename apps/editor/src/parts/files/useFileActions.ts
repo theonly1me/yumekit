@@ -47,7 +47,7 @@ export function useFileActions(options: {
         workingText: `Adding ${file.name}.`,
         doneText: `${file.name} is in the project now.`,
         change: async () => {
-          const uploaded = await client.upload(file);
+          const uploaded = await client.upload({ file });
           if (uploaded.ok) return { kind: "done" };
           const { failure } = uploaded;
           const isTooLarge =

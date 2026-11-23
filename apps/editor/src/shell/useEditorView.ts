@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 import type { EngineClient } from "../engine/engineClient.js";
 import type { SceneClip, Snapshot } from "../engine/snapshot.js";
+import { sceneNameById } from "../names/index.js";
 import type { SceneToShow } from "../export/useExportSheet.js";
 import { usePlayback } from "../preview/usePlayback.js";
 import { useSound } from "../preview/useSound.js";
@@ -21,6 +22,11 @@ export function useEditorView(options: {
   const [wantedFrame, setFrame] = useState(0);
   const [pickedClipId, setPickedClipId] = useState<string>();
   const [sideTab, setSideTab] = useState<SideTab>("chat");
+  const [isSideOpen, setSideOpen] = useState(false);
+  const openSide = (tab: SideTab) => {
+    setSideTab(tab);
+    setSideOpen(true);
+  };
   const [focusRequest, setFocusRequest] = useState(0);
   const facts = useEditorFacts({ snapshot, tabKey, wantedFrame, pickedClipId });
   const { frame, lengthFrames } = facts;
@@ -73,7 +79,11 @@ export function useEditorView(options: {
       : {
           clip: pickedClip,
           number: pickedNumber,
-          title: pickedScene?.title ?? pickedClip.sceneId,
+          title: sceneNameById({
+            sceneId: pickedClip.sceneId,
+            scenes: snapshot.scenes,
+            assets: snapshot.assets,
+          }),
         };
 
   return {
@@ -86,7 +96,11 @@ export function useEditorView(options: {
     toggleCard,
     pickedCard,
     sideTab,
-    setSideTab,
+    setSideTab: openSide,
+    isSideOpen,
+    closeSide: () => {
+      setSideOpen(false);
+    },
     focusRequest,
     sceneLabel:
       pickedScene === undefined
@@ -99,7 +113,7 @@ export function useEditorView(options: {
       setTabKey(key);
     },
     editText: () => {
-      setSideTab("scene");
+      openSide("scene");
       setFocusRequest((current) => current + 1);
     },
     showScene: (scene: SceneToShow) => {
@@ -109,7 +123,7 @@ export function useEditorView(options: {
       setTabKey(tab?.key);
       setPickedClipId(scene.clipId);
       setFrame(scene.frame);
-      setSideTab("scene");
+      openSide("scene");
     },
   };
 }

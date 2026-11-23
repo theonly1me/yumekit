@@ -100,11 +100,16 @@ export function createEngineClient(token: string) {
         path: `/api/preview?output=${encodeURIComponent(outputId)}`,
         schema: previewSchema,
       }),
-    callTool: (call: { name: string; input: object; callId?: string }) =>
+    callTool: (call: {
+      name: string;
+      input: object;
+      callId?: string;
+      actId?: string;
+    }) =>
       readJson({
         path: `/api/tools/${encodeURIComponent(call.name)}`,
         schema: toolResultSchema,
-        body: { input: call.input, callId: call.callId },
+        body: { input: call.input, callId: call.callId, actId: call.actId },
       }),
     renderFile: (file: string) =>
       send({ path: `/api/renders/${encodeURIComponent(file)}` }),
@@ -115,11 +120,14 @@ export function createEngineClient(token: string) {
       });
       return sent.ok ? { ok: true, value: await sent.value.blob() } : sent;
     },
-    upload: (file: File) =>
+    upload: (upload: { file: File; actId?: string }) =>
       readJson({
-        path: `/api/uploads?name=${encodeURIComponent(file.name)}`,
+        path: `/api/uploads?${new URLSearchParams({
+          name: upload.file.name,
+          ...(upload.actId === undefined ? {} : { act: upload.actId }),
+        }).toString()}`,
         schema: uploadSchema,
-        file,
+        file: upload.file,
       }),
     assetDownload: (assetId: string) =>
       send({

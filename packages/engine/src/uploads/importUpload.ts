@@ -44,6 +44,7 @@ export async function importUpload(options: {
   file: string;
   fileName: string;
   shownName: string;
+  actId: string | undefined;
 }): Promise<Outcome<Asset, Failure>> {
   const { context, file } = options;
   const kind = await kindOf(file);
@@ -53,7 +54,11 @@ export async function importUpload(options: {
     takenIds: context.store.read().assets.map((asset) => asset.id),
   });
   const result = await context.chat.runToolCall({
-    caller: { by: "person", tool: "import_asset" },
+    caller: {
+      by: "person",
+      tool: "import_asset",
+      ...(options.actId === undefined ? {} : { actId: options.actId }),
+    },
     call: () =>
       context.harness.call({
         name: "import_asset",

@@ -45,15 +45,15 @@ async function stillOfClip(options: {
   return { kind: "done", blob: await sent.value.blob() };
 }
 
-async function stillOfScene(options: {
+export async function stillOfScene(options: {
   client: EngineClient;
-  output: Output;
+  outputId: string;
   sceneId: string;
 }): Promise<FileOutcome> {
   const reply = await options.client.callTool({
     name: "preview_scenes",
     input: {
-      output_id: options.output.id,
+      output_id: options.outputId,
       scene_ids: [options.sceneId],
       scale: 1,
     },
@@ -74,7 +74,7 @@ export function fullPictureOf(options: {
 }): Promise<FileOutcome> {
   const { client, output, card } = options;
   return card.clip === undefined
-    ? stillOfScene({ client, output, sceneId: card.scene.id })
+    ? stillOfScene({ client, outputId: output.id, sceneId: card.scene.id })
     : stillOfClip({ client, output, frame: stillFrameOf(card.clip) });
 }
 
@@ -82,7 +82,7 @@ export async function uploadPicture(options: {
   client: EngineClient;
   file: File;
 }): Promise<UploadOutcome> {
-  const uploaded = await options.client.upload(options.file);
+  const uploaded = await options.client.upload({ file: options.file });
   if (uploaded.ok) {
     const { source } = uploaded.value.asset;
     return {

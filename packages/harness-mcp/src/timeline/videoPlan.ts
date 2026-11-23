@@ -1,4 +1,5 @@
 import {
+  assetLabelOf,
   scenesRowOf,
   type Asset,
   type Edit,
@@ -14,6 +15,7 @@ const idLengthLimit = 64;
 
 export interface VideoPlacement {
   asset: Asset & { durationFrames: number };
+  title: string;
   startFrame: number;
   durationFrames: number;
   focus: { x: number; y: number } | undefined;
@@ -40,7 +42,7 @@ function sceneEditsOf(options: {
       kind: "putScene",
       scene: {
         id: sceneId,
-        title: `Video ${placement.asset.id}`,
+        title: placement.title,
         notes: "Made by place_video.",
         source: {
           kind: "kit",
@@ -76,6 +78,21 @@ function videoTracksEdit(options: {
       },
     },
   ];
+}
+
+export function videoTitleOf(options: {
+  snapshot: ProjectSnapshot;
+  timeline: Timeline;
+  asset: Asset;
+  replaceClipId: string | undefined;
+}): string {
+  const replacedSceneId = options.timeline.tracks
+    .flatMap((track) => (track.kind === "scene" ? track.clips : []))
+    .find((clip) => clip.id === options.replaceClipId)?.sceneId;
+  const replacedScene = options.snapshot.scenes.find(
+    (scene) => scene.id === replacedSceneId,
+  );
+  return replacedScene?.title ?? assetLabelOf(options.asset);
 }
 
 export function planVideo(options: {

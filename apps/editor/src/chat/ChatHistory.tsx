@@ -5,6 +5,7 @@ import { laterChangeCount, retryOf } from "./chatEntries.js";
 import type { AskInput } from "./chatRequests.js";
 import type { ChatEntry, RequestEntry } from "./chatSchemas.js";
 import { NoticeView, type NoticeAction } from "./NoticeView.js";
+import { shownRequestTextOf } from "./requestEntryText.js";
 import { StartFailureView } from "./StartFailureView.js";
 import type { Chat } from "./useChat.js";
 
@@ -71,7 +72,7 @@ export function ChatHistory(props: {
                   })}
                 </em>
               )}
-              {entry.text}
+              {shownRequestTextOf(entry)}
             </p>
           </li>
         );

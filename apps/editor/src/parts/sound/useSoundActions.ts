@@ -58,7 +58,7 @@ export function useSoundActions(options: {
         workingText: `Adding ${file.name}.`,
         doneText: doneTexts[part](file.name),
         change: async () => {
-          const uploaded = await client.upload(file);
+          const uploaded = await client.upload({ file });
           if (!uploaded.ok) {
             return { kind: "failed", message: failureTextOf(uploaded.failure) };
           }

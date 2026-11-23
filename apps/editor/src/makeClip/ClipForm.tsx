@@ -5,7 +5,10 @@ import type { MediaServersState } from "../tools/useMediaServers.js";
 import type { CameraMoveId } from "@yumekit/project/camera-moves";
 import { CameraMovePicker } from "./CameraMovePicker.js";
 import { ClipAction, type Phase } from "./ClipAction.js";
+import { assetNameOf } from "../names/index.js";
 import { FirstFrame } from "./FirstFrame.js";
+import type { ScenePicture } from "./scenePicture.js";
+import type { FirstPicture } from "./useClipMaking.js";
 import { LastFrame } from "./LastFrame.js";
 import { ModelList } from "./ModelList.js";
 import { takesFirstPicture, takesLastPicture } from "./modelChoices.js";
@@ -15,7 +18,7 @@ import type { useClipChoice } from "./useClipChoice.js";
 
 export interface ClipDraft {
   prompt: string;
-  firstFrameId: string | undefined;
+  firstPicture: FirstPicture;
   lastFrameId: string | undefined;
   cameraMoveId: CameraMoveId | undefined;
   referenceIds: string[];
@@ -23,14 +26,18 @@ export interface ClipDraft {
 
 function missingText(options: {
   hasPrompt: boolean;
-  needsPicture: boolean;
+  picture: ScenePicture["kind"] | "picked" | "not-needed";
 }): string | undefined {
-  if (options.needsPicture) {
-    return options.hasPrompt
-      ? "Pick a picture to start on."
-      : "Write what happens in the clip, and pick a picture to start on.";
+  if (!options.hasPrompt) {
+    return "Write what happens in the clip, in the box under Camera.";
   }
-  return options.hasPrompt ? undefined : "Write what happens in the clip.";
+  if (options.picture === "loading") {
+    return "One moment: yumekit makes the picture of the scene.";
+  }
+  if (options.picture === "failed") {
+    return "Pick a picture to start on, under the box of the prompt.";
+  }
+  return undefined;
 }
 
 export function ClipForm(props: {
@@ -45,6 +52,7 @@ export function ClipForm(props: {
   clipChoice: ReturnType<typeof useClipChoice>;
   draft: ClipDraft;
   onDraft: (change: Partial<ClipDraft>) => void;
+  scenePicture: ScenePicture;
   phase: Phase;
   onMake: () => void;
   onAskTheAi: () => void;
@@ -55,9 +63,14 @@ export function ClipForm(props: {
     choice === undefined ? true : takesFirstPicture(choice.model);
   const takesEnd =
     takesPicture && choice !== undefined && takesLastPicture(choice.model);
-  const imageIds = snapshot.assets
+  const images = snapshot.assets
     .filter((asset) => asset.kind === "image")
-    .map((image) => image.id);
+    .map((image) => ({ id: image.id, name: assetNameOf(image) }));
+  const pictureState = !takesPicture
+    ? "not-needed"
+    : draft.firstPicture.kind === "asset"
+      ? "picked"
+      : props.scenePicture.kind;
   const sceneName =
     props.sceneNumber === undefined
       ? props.sceneTitle
@@ -83,12 +96,6 @@ export function ClipForm(props: {
             }}
             onAskTheAi={props.onAskTheAi}
           />
-          <ModelList
-            choices={clipChoice.videoChoices}
-            chosenKey={choice?.key}
-            onChoose={clipChoice.choose}
-            priceFor={clipChoice.priceFor}
-          />
           {takesPicture ? (
             <FirstFrame
               client={client}
@@ -96,9 +103,10 @@ export function ClipForm(props: {
               output={output}
               sceneId={target.sceneId}
               imageChoices={clipChoice.imageChoices}
-              assetId={draft.firstFrameId}
-              onPick={(firstFrameId) => {
-                props.onDraft({ firstFrameId });
+              firstPicture={draft.firstPicture}
+              scenePicture={props.scenePicture}
+              onPick={(firstPicture) => {
+                props.onDraft({ firstPicture });
               }}
             />
           ) : undefined}
@@ -112,6 +120,12 @@ export function ClipForm(props: {
               }}
             />
           ) : undefined}
+          <ModelList
+            choices={clipChoice.videoChoices}
+            chosenKey={choice?.key}
+            onChoose={clipChoice.choose}
+            priceFor={clipChoice.priceFor}
+          />
         </div>
         <div className="clip-column">
           {media.kind === "failed" ? (
@@ -128,7 +142,7 @@ export function ClipForm(props: {
                 settings={choice.model.settings}
                 values={values}
                 onChange={clipChoice.change}
-                imageIds={imageIds}
+                images={images}
                 referenceIds={draft.referenceIds}
                 onReferences={(referenceIds) => {
                   props.onDraft({ referenceIds });
@@ -144,8 +158,7 @@ export function ClipForm(props: {
                 phase={props.phase}
                 missing={missingText({
                   hasPrompt: draft.prompt.trim() !== "",
-                  needsPicture:
-                    takesPicture && draft.firstFrameId === undefined,
+                  picture: pictureState,
                 })}
                 sceneName={sceneName}
                 keyRequests={props.keyRequests}

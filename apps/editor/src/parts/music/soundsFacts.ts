@@ -3,6 +3,7 @@ import { audioTracksOf, isSoundsTrack } from "../../sound/soundRowFacts.js";
 import { clipAt, mainSceneClipsOf } from "../../timeline/timelineFacts.js";
 import type { SoundPiece } from "../sound/useSoundPlayer.js";
 import { clockOf } from "./musicFacts.js";
+import { assetNameOf } from "../../names/index.js";
 
 export interface SoundPlace {
   outputId: string;
@@ -23,10 +24,10 @@ function nameOf(options: {
   assetId: string;
 }): string {
   const { asset } = options;
-  if (asset === undefined) return options.assetId;
+  if (asset === undefined) return "Sound";
   if (asset.source.kind === "import") return asset.source.originalName;
   const { prompt } = asset.source.input;
-  return typeof prompt === "string" ? prompt : asset.id;
+  return typeof prompt === "string" ? prompt : assetNameOf(asset);
 }
 
 function whereOf(options: {

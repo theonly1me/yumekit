@@ -16,7 +16,7 @@ import type { Outcome } from "../engineTypes.js";
 import type { Exchange } from "../http/exchange.js";
 import { readJsonBody } from "../http/readJsonBody.js";
 import { sendJson, type Failure } from "../http/responses.js";
-import { firstRequestTextOf, sendFirstRequest } from "./firstRequest.js";
+import { firstRequestOf, sendFirstRequest } from "./firstRequest.js";
 import type { HomeContext } from "./homeContext.js";
 import { projectLengthSchema } from "./homeTypes.js";
 import { outputsForPlatforms } from "./projectOutputs.js";
@@ -111,7 +111,7 @@ export async function createProjectRoute(exchange: Exchange<HomeContext>) {
   if (!engine.ok) return { status: 409, ...engine.failure };
   const started = await sendFirstRequest({
     engine: engine.value,
-    text: firstRequestTextOf({
+    request: firstRequestOf({
       request,
       platformIds,
       length,

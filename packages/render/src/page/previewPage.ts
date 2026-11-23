@@ -36,6 +36,7 @@ let loaded: LoadedPreview = {
   message: "The preview is not ready",
 };
 let lastSeek: SeekRequest | undefined;
+let shownFrame: number | undefined;
 let pendingWork = Promise.resolve();
 
 function reply(message: PreviewReply): void {
@@ -77,8 +78,11 @@ async function load(): Promise<void> {
       if (url === undefined) {
         throw new Error(`The preview page has no code for scene "${sceneId}"`);
       }
-      const imported: unknown = await import(url);
-      return imported;
+      const importModule = window.yumekitImport;
+      if (importModule === undefined) {
+        throw new Error("The preview page has no module importer");
+      }
+      return importModule(url);
     },
     errorLog,
     mode: "preview",
@@ -124,6 +128,7 @@ async function draw(request: SeekRequest): Promise<PreviewReply> {
       propsOf: (sceneId) => propsOfScene.get(sceneId),
     });
   }
+  if (result.ok) shownFrame = frame;
   return result.ok
     ? { type: "sought", requestId }
     : {
@@ -176,7 +181,13 @@ window.addEventListener("message", (event) => {
 });
 
 if (stageElement !== null) {
-  listenForTextEdits({ root: stageElement, enqueue, reply, redraw: refresh });
+  listenForTextEdits({
+    root: stageElement,
+    enqueue,
+    reply,
+    redraw: refresh,
+    shownFrame: () => shownFrame,
+  });
 }
 const events = new EventSource(previewEventsPath);
 events.addEventListener("open", () => {

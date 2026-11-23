@@ -6,7 +6,7 @@ import { findAsset, findOutput } from "../lookups.js";
 import { failureResult } from "../results.js";
 import { voiceLevelEdits } from "./quietVoice.js";
 import { placementFramesOf } from "./videoPlacementFrames.js";
-import { planVideo } from "./videoPlan.js";
+import { planVideo, videoTitleOf } from "./videoPlan.js";
 
 const defaultSoundGainDecibels = -12;
 
@@ -82,6 +82,12 @@ export function registerPlaceVideo(context: HarnessContext): void {
         timeline: frames.value.remainingTimeline,
         placement: {
           asset: { ...asset.value, durationFrames: assetLength },
+          title: videoTitleOf({
+            snapshot,
+            timeline: output.value.timeline,
+            asset: asset.value,
+            replaceClipId: request.replace_clip_id,
+          }),
           startFrame,
           durationFrames,
           focus: request.focus,

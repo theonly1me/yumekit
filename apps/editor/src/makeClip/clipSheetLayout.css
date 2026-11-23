@@ -1,0 +1,81 @@
+.clip-make {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+}
+
+.clip-make-price {
+  display: none;
+  font-size: var(--step-0);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.first-frame-note {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  padding: 4px;
+  font-size: var(--step--2);
+  color: var(--faint);
+  text-align: center;
+}
+
+.first-frame-field .first-frame {
+  grid-template-columns: minmax(96px, 160px) 1fr;
+}
+
+.first-frame-field .first-frame .first-frame-picture {
+  max-height: 160px;
+  justify-self: start;
+  width: 100%;
+}
+
+.frame-picks {
+  align-items: center;
+}
+
+@media (max-width: 640px) {
+  .clip-columns {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 24px;
+  }
+
+  .clip-column,
+  .clip-action {
+    display: contents;
+  }
+
+  .clip-price {
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+  }
+
+  .clip-make {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 14px;
+    margin: 0 calc(-1 * var(--gutter));
+    padding: 12px var(--gutter) calc(12px + env(safe-area-inset-bottom));
+    background: var(--ground);
+    border-top: 1px solid var(--line);
+  }
+
+  .clip-action .clip-make .primary {
+    margin-top: 0;
+  }
+
+  .clip-make-price {
+    display: inline;
+  }
+
+  .clip-missing {
+    flex: 1 1 160px;
+  }
+}

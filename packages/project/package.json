@@ -26,6 +26,10 @@
       "types": "./dist/startFormats/catalog.d.ts",
       "default": "./dist/startFormats/catalog.js"
     },
+    "./asset-labels": {
+      "types": "./dist/assetLabels/index.d.ts",
+      "default": "./dist/assetLabels/index.js"
+    },
     "./camera-moves": {
       "types": "./dist/cameraMoves/catalog.d.ts",
       "default": "./dist/cameraMoves/catalog.js"

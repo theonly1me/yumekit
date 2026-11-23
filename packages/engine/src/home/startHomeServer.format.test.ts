@@ -9,7 +9,13 @@ const createdSchema = z.object({ url: z.string() });
 
 const chatSchema = z.object({
   state: z.string(),
-  entries: z.array(z.looseObject({ kind: z.string(), text: z.string() })),
+  entries: z.array(
+    z.looseObject({
+      kind: z.string(),
+      text: z.string(),
+      details: z.string().optional(),
+    }),
+  ),
 });
 
 const answerScenario = {
@@ -35,7 +41,9 @@ async function firstRequestOf(body: object): Promise<string> {
     });
     const chat = chatSchema.parse(JSON.parse(reply.body));
     const [request] = chat.entries;
-    if (chat.state === "idle" && request !== undefined) return request.text;
+    if (chat.state === "idle" && request !== undefined) {
+      return [request.text, request.details ?? ""].join("\n").trim();
+    }
     await delay(50);
   }
   throw new Error("The first request did not end.");

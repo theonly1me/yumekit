@@ -1,5 +1,6 @@
 .preview {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 12px;
   justify-items: center;
 }
@@ -53,14 +54,17 @@
 }
 
 .frame-area {
-  --area: clamp(230px, 40vh, 480px);
   width: 100%;
-  height: var(--area);
+  min-width: 0;
+  min-height: 180px;
+  max-height: clamp(240px, 100vh - 400px, 760px);
+  max-height: clamp(240px, 100dvh - 400px, 760px);
   display: grid;
   place-items: center;
+  overflow: hidden;
   background: var(--well);
   border-radius: 4px;
-  padding: 18px;
+  padding: 10px;
 }
 
 .frame {
@@ -141,6 +145,12 @@
 
 @media (max-width: 820px) {
   .frame-area {
-    --area: clamp(220px, 44vh, 420px);
+    max-height: clamp(200px, 100vh - 230px, 640px);
+    max-height: clamp(200px, 100dvh - 230px, 640px);
+    padding: 6px;
+  }
+
+  .transport {
+    gap: 12px;
   }
 }

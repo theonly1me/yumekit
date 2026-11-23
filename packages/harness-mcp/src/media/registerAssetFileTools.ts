@@ -100,6 +100,7 @@ async function importAsset(options: {
         asset: {
           id: request.asset_id,
           kind: request.kind,
+          label: originalName.slice(0, 200),
           file: projectFileOf({
             projectFolder: context.store.folder,
             path: destination,

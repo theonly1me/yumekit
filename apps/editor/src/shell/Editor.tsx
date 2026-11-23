@@ -124,7 +124,10 @@ export function Editor(props: {
               framesPerSecond={framesPerSecond}
               hint={`Click the text in the video to change it. ${tab.name}, ${String(output.widthPixels)} x ${String(output.heightPixels)}.`}
               snapshot={snapshot}
-              onTextEditing={playback.pause}
+              onTextEditing={(clickedFrame) => {
+                if (clickedFrame === undefined) playback.pause();
+                else view.moveTo(clickedFrame);
+              }}
             />
             <Transport
               frame={facts.frame}
@@ -176,6 +179,7 @@ export function Editor(props: {
           type="button"
           className="primary ask-jump"
           onClick={editorChat.focusBox}
+          hidden={view.isSideOpen}
         >
           Ask for a change
         </button>

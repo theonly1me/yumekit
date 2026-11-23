@@ -1,5 +1,5 @@
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import type { Edit } from "@yumekit/project";
+import { assetLabelOf, type Edit } from "@yumekit/project";
 import { applyEditsResult } from "../applyEditsResult.js";
 import { withCast } from "../cast/castRequest.js";
 import type { HarnessContext } from "../context.js";
@@ -126,6 +126,7 @@ async function generateAsset(options: {
   const asset = {
     id: request.asset_id,
     kind: file.kind,
+    label: assetLabelOf({ kind: file.kind, source: { kind: "tool", input } }),
     file: projectFileOf({ projectFolder, path: file.path }),
     ...media.value,
     source: {

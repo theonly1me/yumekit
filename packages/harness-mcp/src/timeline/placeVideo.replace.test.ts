@@ -59,6 +59,30 @@ describe("place_video with replace_clip_id", () => {
     expect(timelineOf(harness)).toEqual(before);
   });
 
+  it("keeps the title of the replaced scene, and a video with no scene to replace gets its label", async () => {
+    const harness = await harnessWithSpeech();
+    await generateVideo({ harness, assetId: "fox", seconds: 1 });
+    await generateVideo({ harness, assetId: "owl", seconds: 1 });
+
+    await replace({ harness, assetId: "fox", clipId: introClipId(harness) });
+    await harness.call({
+      name: "place_video",
+      arguments: { output_id: "wide", asset_id: "owl", start_frame: 90 },
+    });
+
+    const titles = harness.store
+      .read()
+      .scenes.filter((scene) => scene.id.startsWith("video-"))
+      .map((scene) => [scene.id, scene.title]);
+    expect(titles).toEqual([
+      ["video-fox", "Intro"],
+      ["video-owl", "Clip owl"],
+    ]);
+    expect(
+      harness.store.read().assets.find((asset) => asset.id === "owl")?.label,
+    ).toBe("Clip owl");
+  });
+
   it("removes the sound clip of a replaced video clip, so a second clip takes its place", async () => {
     const harness = await harnessWithSpeech();
     await generateVideo({ harness, assetId: "fox", seconds: 1 });

@@ -9,9 +9,15 @@
 
 .side-tabs {
   display: flex;
+  align-items: center;
   gap: 22px;
   padding: 12px 22px 0;
   font-size: var(--step--1);
+}
+
+.side-close {
+  display: none;
+  margin-left: auto;
 }
 
 .side-body {
@@ -50,12 +56,30 @@
 
 @media (max-width: 820px) {
   .side {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 5;
     border-left: 0;
-    border-top: 1px solid var(--line);
-    height: 78vh;
   }
 
-  .side-tabs,
+  .side[data-open="true"] {
+    display: grid;
+  }
+
+  body:has(.side[data-open="true"]) {
+    overflow: hidden;
+  }
+
+  .side-tabs {
+    padding: 10px var(--gutter);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .side-close {
+    display: inline-flex;
+  }
+
   .scene-panel {
     padding-left: var(--gutter);
     padding-right: var(--gutter);

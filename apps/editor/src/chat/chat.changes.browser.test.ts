@@ -58,8 +58,8 @@ describe("the changes in the chat", () => {
     await expect
       .poll(() => chat.entryTexts(2))
       .toEqual([
-        "You changed the length of a scene.\nUndo",
-        "You changed the length of a scene.\nUndo",
+        "You changed the length of scene 1.\nUndo",
+        "You changed the length of scene 1.\nUndo",
       ]);
     const older = chat.history.locator(".change").nth(-2);
 
@@ -79,8 +79,8 @@ describe("the changes in the chat", () => {
     await expect
       .poll(() => chat.entryTexts(2))
       .toEqual([
-        "You changed the length of a scene.\nUndone",
-        "You changed the length of a scene.\nUndone",
+        "You changed the length of scene 1.\nUndone",
+        "You changed the length of scene 1.\nUndone",
       ]);
     await editor.close();
   });

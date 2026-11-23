@@ -56,6 +56,7 @@ export async function callTool(options: {
   name: string;
   input: object;
   callId?: string;
+  actId?: string;
   headers?: Record<string, string>;
 }): Promise<RawResponse> {
   return rawRequest({
@@ -69,6 +70,7 @@ export async function callTool(options: {
     body: JSON.stringify({
       input: options.input,
       ...(options.callId === undefined ? {} : { callId: options.callId }),
+      ...(options.actId === undefined ? {} : { actId: options.actId }),
     }),
   });
 }

@@ -20,7 +20,7 @@ export function MadeClipResult(props: {
         {url === undefined ? undefined : (
           <video
             src={url}
-            aria-label={`The clip ${props.made.assetId}`}
+            aria-label={`The clip for ${props.sceneTitle}`}
             muted
             autoPlay
             loop

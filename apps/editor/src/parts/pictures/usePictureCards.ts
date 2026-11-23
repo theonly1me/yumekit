@@ -1,3 +1,4 @@
+import { isCaptionScene } from "@yumekit/project/scenes-row";
 import { useMemo } from "react";
 import type { EngineClient } from "../../engine/engineClient.js";
 import type {
@@ -6,6 +7,7 @@ import type {
   SceneClip,
   Snapshot,
 } from "../../engine/snapshot.js";
+import { sceneNameOf } from "../../names/index.js";
 import { mainSceneClipsOf, timelineOf } from "../../timeline/timelineFacts.js";
 import {
   clipPictureKey,
@@ -17,6 +19,7 @@ import {
 export interface PictureCard {
   key: string;
   number: number;
+  name: string;
   scene: Scene;
   clip: SceneClip | undefined;
   picture: ScenePicture | undefined;
@@ -38,7 +41,9 @@ export function usePictureCards(options: {
   );
   const unplacedScenes = useMemo(() => {
     const placedSceneIds = new Set(clips.map((clip) => clip.sceneId));
-    return snapshot.scenes.filter((scene) => !placedSceneIds.has(scene.id));
+    return snapshot.scenes.filter(
+      (scene) => !placedSceneIds.has(scene.id) && !isCaptionScene(scene),
+    );
   }, [snapshot.scenes, clips]);
   const unplacedSceneIds = useMemo(
     () => unplacedScenes.map((scene) => scene.id),
@@ -67,6 +72,7 @@ export function usePictureCards(options: {
   return [...placed, ...unplaced].map((...[card, index]) => ({
     ...card,
     number: index + 1,
+    name: sceneNameOf({ scene: card.scene, assets: snapshot.assets }),
     picture: pictures.get(card.key),
   }));
 }

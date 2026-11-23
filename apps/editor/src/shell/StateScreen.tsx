@@ -11,7 +11,7 @@ function textOf(state: ScreenState): { title: string; lines: string[] } {
       return {
         title: "This page needs the link from yumekit open",
         lines: [
-          "The link holds a key that lets this page reach the project. The key leaves the address bar after the first load, so a reload loses it.",
+          "The link holds a key that lets this page reach the project. Only the tab that opened the link keeps the key.",
           "Run yumekit open with your project folder, then open the link that it prints.",
         ],
       };

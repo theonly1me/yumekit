@@ -41,6 +41,7 @@ export const assetSchema = z.strictObject({
   durationFrames: frameCountSchema.exactOptional(),
   hasAudio: z.boolean().exactOptional(),
   hasWords: z.boolean(),
+  label: z.string().max(200).exactOptional(),
   source: assetSourceSchema,
 });
 

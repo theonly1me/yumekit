@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { planFirstSentence } from "@yumekit/project/start-formats";
+import {
+  fullRequestTextOf,
+  shownRequestTextOf,
+} from "../chat/requestEntryText.js";
 import type { EngineClient } from "../engine/engineClient.js";
 import { fixedRequestTextOf } from "../parts/fixedRequests.js";
 
@@ -10,7 +14,12 @@ const stepSchema = z.object({
 });
 
 const entrySchema = z.discriminatedUnion("kind", [
-  z.object({ kind: z.literal("request"), id: z.string(), text: z.string() }),
+  z.object({
+    kind: z.literal("request"),
+    id: z.string(),
+    text: z.string(),
+    details: z.string().optional(),
+  }),
   z.object({
     kind: z.literal("answer"),
     id: z.string(),
@@ -45,7 +54,10 @@ function planAndRestOf(options: {
 }): Pick<FirstChat, "phase" | "answer"> {
   const [request, continueRequest] = options.requests;
   const [planAnswer, restAnswer] = options.answers;
-  if (request?.text.endsWith(planFirstSentence) !== true) {
+  if (
+    request === undefined ||
+    !fullRequestTextOf(request).endsWith(planFirstSentence)
+  ) {
     return { phase: "whole", answer: planAnswer };
   }
   if (
@@ -74,7 +86,7 @@ export function firstChatOf(entries: ChatEntry[]): FirstChat {
   const [request] = requests;
   return {
     requestCount: requests.length,
-    requestText: request?.text ?? "",
+    requestText: request === undefined ? "" : shownRequestTextOf(request),
     ...planAndRestOf({ requests, answers }),
     lastNotice: notices.at(-1)?.text,
   };

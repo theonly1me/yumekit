@@ -79,7 +79,7 @@ function PictureGrid(props: StepViewProps & { output: Output }) {
             >
               <PictureView picture={card.picture} shape={shape} />
               <span>
-                {card.number}. {card.scene.title}
+                {card.number}. {card.name}
               </span>
             </button>
           </li>

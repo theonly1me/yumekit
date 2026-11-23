@@ -8,7 +8,7 @@ export type ParentRequest = SeekRequest | { type: "reload" };
 
 export type PreviewReply =
   | { type: "ready"; frameCount: number }
-  | { type: "text-editing" }
+  | { type: "text-editing"; frame?: number }
   | {
       type: "text-changed";
       sceneId: string;

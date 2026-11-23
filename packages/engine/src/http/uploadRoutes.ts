@@ -30,6 +30,10 @@ const endedEarly: Failure = {
   message: "The file ended early.",
 };
 
+function actIdOf(value: string | null): string | undefined {
+  return value === null || value === "" ? undefined : value.slice(0, 200);
+}
+
 async function receiveAndImport(options: {
   exchange: Exchange;
   folder: string;
@@ -46,6 +50,7 @@ async function receiveAndImport(options: {
     file,
     fileName,
     shownName,
+    actId: actIdOf(exchange.query.get("act")),
   });
   if (!imported.ok) return imported.failure;
   sendJson({

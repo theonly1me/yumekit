@@ -22,14 +22,16 @@ export function Sheet(props: {
         if (event.key === "Escape") props.onClose();
       }}
     >
-      <button
-        ref={closeButton}
-        type="button"
-        className="sheet-close"
-        onClick={props.onClose}
-      >
-        Close
-      </button>
+      <div className="sheet-bar">
+        <button
+          ref={closeButton}
+          type="button"
+          className="sheet-close"
+          onClick={props.onClose}
+        >
+          Close
+        </button>
+      </div>
       <div className="sheet-content">{props.children}</div>
     </div>
   );

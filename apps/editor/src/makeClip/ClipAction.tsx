@@ -45,7 +45,9 @@ function summaryOf(options: {
   const seconds = secondsOf(options.values);
   const resolution = options.values["resolution"];
   const parts = [
-    seconds === undefined ? "" : `${String(seconds)} seconds`,
+    seconds === undefined
+      ? ""
+      : `${String(seconds)} ${seconds === 1 ? "second" : "seconds"}`,
     typeof resolution === "string" ? `at ${resolution}` : "",
     `with ${options.modelLabel}`,
   ];
@@ -153,17 +155,20 @@ export function ClipAction(props: {
           ? ` The price is from ${readOnText(choice.model.read_on)}.`
           : ""}
       </p>
-      <button
-        type="button"
-        className="primary"
-        disabled={props.missing !== undefined || isMaking}
-        onClick={props.onMake}
-      >
-        {isMaking ? "Making the clip" : "Make the clip"}
-      </button>
-      {props.missing === undefined ? undefined : (
-        <p className="fact">{props.missing}</p>
-      )}{" "}
+      <div className="clip-make">
+        <button
+          type="button"
+          className="primary"
+          disabled={props.missing !== undefined || isMaking}
+          onClick={props.onMake}
+        >
+          {isMaking ? "Making the clip" : "Make the clip"}
+        </button>
+        <span className="clip-make-price">{priceText(price)}</span>
+        {props.missing === undefined ? undefined : (
+          <p className="fact clip-missing">{props.missing}</p>
+        )}
+      </div>
       {isMaking ? (
         <Progress
           progress={phase.progress}

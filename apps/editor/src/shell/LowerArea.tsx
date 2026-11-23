@@ -62,6 +62,7 @@ export function LowerArea(props: {
             output={output}
             clips={mainClips}
             scenes={snapshot.scenes}
+            assets={snapshot.assets}
             stills={stills}
             pickedClipId={picked?.clip.id}
             shownClipId={props.shownClipId}

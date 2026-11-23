@@ -16,7 +16,7 @@ import {
 
 export interface TextInPlace {
   failure: string | undefined;
-  onEditing: () => void;
+  onEditing: (clickedFrame: number | undefined) => void;
   save: (change: TextChange) => Promise<{ kind: "saved" | "failed" }>;
 }
 
@@ -47,7 +47,7 @@ function rejectionText(options: {
 export function useTextInPlace(options: {
   client: EngineClient;
   snapshot: Snapshot;
-  onEditing: () => void;
+  onEditing: (clickedFrame: number | undefined) => void;
 }): TextInPlace {
   const { client, snapshot, onEditing } = options;
   const kitScenes = useKitScenes(client);
@@ -60,10 +60,13 @@ export function useTextInPlace(options: {
     latest.current = { snapshot, kitScenes };
   }, [snapshot, kitScenes]);
 
-  const startEditing = useCallback(() => {
-    setFailure(undefined);
-    onEditing();
-  }, [onEditing]);
+  const startEditing = useCallback(
+    (clickedFrame: number | undefined) => {
+      setFailure(undefined);
+      onEditing(clickedFrame);
+    },
+    [onEditing],
+  );
 
   const saveNow = useCallback<TextInPlace["save"]>(
     async (change) => {
