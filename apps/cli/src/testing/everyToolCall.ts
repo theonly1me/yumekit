@@ -96,6 +96,16 @@ export function everyToolCall(importSourcePath: string): ScriptedCall[] {
     { name: "add_platform", input: { platform_id: "square" } },
     { name: "remove_platform", input: { platform_id: "square" } },
     { name: "set_look", input: { look: "neon" } },
+    { name: "set_tempo", input: { tempo: 120 } },
+    {
+      name: "update_clip",
+      input: { output_id: "wide", clip_id: "a", duration_beats: 2 },
+    },
+    {
+      name: "put_shared_code",
+      input: { name: "theme", code: 'export const accent = "#ff3366";\n' },
+    },
+    { name: "set_fonts", input: { fonts: [] } },
     {
       name: "put_scene",
       input: {
@@ -172,6 +182,7 @@ export function everyToolCall(importSourcePath: string): ScriptedCall[] {
       name: "preview_scenes",
       input: { output_id: "wide", scene_ids: ["intro"] },
     },
+    { name: "contact_sheet", input: { output_id: "wide", every_seconds: 0.5 } },
     { name: "render_still", input: { output_id: "wide", frame: 0 } },
     {
       name: "render_video",

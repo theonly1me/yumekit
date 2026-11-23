@@ -100,7 +100,7 @@ export function addPlatformPlan(options: {
         toOutputId: platform.outputId,
       },
     ],
-    line: `${platform.name} added with the new output "${platform.outputId}", a copy of the timeline of "${nearest.id}". Check its frames with preview_frames.`,
+    line: `${platform.name} added with the new output "${platform.outputId}", a copy of the timeline of "${nearest.id}". Check it with contact_sheet.`,
   };
 }
 

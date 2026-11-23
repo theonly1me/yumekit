@@ -121,4 +121,23 @@ describe("the scene cards and the detailed timeline", () => {
       .toBe(1);
     await editor.close();
   });
+
+  it("shows a mark for each beat in the detailed timeline once the project has a tempo", async () => {
+    await runningEngine().callTool({
+      name: "set_tempo",
+      input: { tempo: 120 },
+    });
+    const editor = await openEditor(runningEngine().url);
+    await editor.page
+      .getByRole("switch", { name: "Detailed timeline" })
+      .check();
+
+    const marks = editor.page.getByTestId("beat-marks").locator(".beat");
+
+    await expect
+      .poll(() => marks.count())
+      .toBe(Math.ceil((lastFrame + 1) / 15));
+    expect(await editor.page.getByText("120 BPM").count()).toBe(1);
+    await editor.close();
+  });
 });

@@ -23,6 +23,7 @@ export function snapshotOf(options: {
     bible: state.bible,
     scenes: state.scenes,
     sceneCode: state.sceneCode,
+    sharedCode: state.sharedCode,
     timelines: state.timelines,
     assets: state.assets,
   };

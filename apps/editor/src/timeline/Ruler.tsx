@@ -1,4 +1,5 @@
 import type { MouseEvent } from "react";
+import { BeatMarks } from "./BeatMarks.js";
 
 const tickStepsSeconds = [1, 2, 5, 10, 15, 30, 60, 120, 300, 600];
 const mostTicks = 8;
@@ -18,11 +19,19 @@ function tickSecondsOf(lengthSeconds: number): number[] {
 export function Ruler(props: {
   lengthFrames: number;
   framesPerSecond: number;
+  tempo: number | undefined;
   onClick: (event: MouseEvent<HTMLDivElement>) => void;
 }) {
   const { lengthFrames, framesPerSecond } = props;
   return (
     <div className="lane ruler" data-testid="ruler" onClick={props.onClick}>
+      {props.tempo === undefined ? undefined : (
+        <BeatMarks
+          tempo={props.tempo}
+          framesPerSecond={framesPerSecond}
+          lengthFrames={lengthFrames}
+        />
+      )}
       {tickSecondsOf(lengthFrames / framesPerSecond).map((second) => (
         <span
           key={second}

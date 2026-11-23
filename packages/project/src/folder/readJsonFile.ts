@@ -4,6 +4,7 @@ import { fail, succeed, type Outcome } from "../outcome.js";
 export interface FileSource {
   read: (file: string) => Promise<string | undefined>;
   sceneIds: () => Promise<string[]>;
+  sharedCodeNames: () => Promise<string[]>;
 }
 
 export interface InvalidFile {

@@ -12,6 +12,7 @@ import { failureResult, successResult } from "../results.js";
 import { videoStyleMeanings } from "../story/videoStyleMeanings.js";
 import { lengthFramesOf, wireTimelineOf } from "../timeline/wireTimeline.js";
 import { wireSceneOf } from "../wireRecords.js";
+import { tempoFactsOf, timelineWithBeats } from "../tempo/beatFacts.js";
 import { voiceTextsOf } from "./voiceTexts.js";
 
 const readOnly = { readOnlyHint: true } as const;
@@ -19,7 +20,7 @@ const readOnly = { readOnlyHint: true } as const;
 function registerGetProject(context: HarnessContext): void {
   context.tools.add({
     name: "get_project",
-    description: `Read the project: name, frame rate, the look and calm, outputs with the platforms of each output and the length of each timeline in frames, script, voice_matches_script (false when a placed voice says words that the script no longer has, so record the voice again), bible with the cast, a list of scenes, the video style, and the revision. Call it first. All time in this harness is in whole frames at frames_per_second. video_style is the choice of the person for how the video is made: ${videoStyleMeanings}`,
+    description: `Read the project: name, frame rate, the look and calm, outputs with the platforms of each output and the length of each timeline in frames, script, voice_matches_script (false when a placed voice says words that the script no longer has, so record the voice again), bible with the cast, a list of scenes, the video style, and the revision. Call it first. All time in this harness is in whole frames at frames_per_second. With a tempo (set_tempo), tempo and frames_per_beat are set, and each time input also takes beats. fonts lists the font families of set_fonts, and shared_code the modules of put_shared_code. video_style is the choice of the person for how the video is made: ${videoStyleMeanings}`,
     inputSchema: {},
     annotations: readOnly,
     run: () => {
@@ -33,6 +34,14 @@ function registerGetProject(context: HarnessContext): void {
           video_style: videoStyleOf(project),
           look: lookOf(project),
           calm: isCalm(project),
+          ...tempoFactsOf(project),
+          fonts: (project.fonts ?? []).map((font) => ({
+            asset_id: font.assetId,
+            family: font.family,
+            ...(font.weight === undefined ? {} : { weight: font.weight }),
+            ...(font.style === undefined ? {} : { style: font.style }),
+          })),
+          shared_code: Object.keys(snapshot.sharedCode),
           outputs: project.outputs.map((output) => {
             const timeline = snapshot.timelines.find(
               (candidate) => candidate.outputId === output.id,
@@ -92,16 +101,17 @@ function registerGetTimeline(context: HarnessContext): void {
   context.tools.add({
     name: "get_timeline",
     description:
-      "Read all tracks and clips of one output, and its length in frames. Scene tracks draw in list order: the first track is at the back. The result has the same track fields as the input of set_timeline.",
+      "Read all tracks and clips of one output, and its length in frames. With a tempo (set_tempo), each clip also has start_beat and duration_beats, and the timeline has length_beats. Scene tracks draw in list order: the first track is at the back. The result has the same track fields as the input of set_timeline.",
     inputSchema: { output_id: idInput("The id of the output.") },
     annotations: readOnly,
     run: ({ input: { output_id } }) => {
-      const found = findOutput({
-        snapshot: context.store.read(),
-        outputId: output_id,
-      });
+      const snapshot = context.store.read();
+      const found = findOutput({ snapshot, outputId: output_id });
       if (!found.ok) return failureResult(found.failure);
-      const data = wireTimelineOf(found.value.timeline);
+      const data = timelineWithBeats({
+        timeline: wireTimelineOf(found.value.timeline),
+        project: snapshot.project,
+      });
       return successResult({
         line: `Timeline of "${output_id}": ${String(data.tracks.length)} tracks, ${String(data.length_frames)} frames.`,
         data,

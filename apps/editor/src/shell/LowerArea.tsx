@@ -183,6 +183,7 @@ export function LowerArea(props: {
             lengthFrames={props.lengthFrames}
             frame={props.frame}
             framesPerSecond={framesPerSecond}
+            tempo={snapshot.project.tempo}
             selectedClipId={props.selectedClipId}
             onPick={props.onPick}
             onSeek={props.onSeek}

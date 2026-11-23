@@ -17,6 +17,7 @@ export async function loadStagePage(options: {
   return {
     seek: page.seek,
     screenshot: page.screenshot,
+    inspect: page.inspect,
     videoFramesFailure: videoFrames.failure,
   };
 }

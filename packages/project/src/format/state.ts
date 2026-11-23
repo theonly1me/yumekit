@@ -11,6 +11,7 @@ export interface ProjectSnapshot {
   bible: Bible;
   scenes: Scene[];
   sceneCode: Record<string, string>;
+  sharedCode: Record<string, string>;
   timelines: Timeline[];
   assets: Asset[];
 }

@@ -28,6 +28,7 @@ type MountOptions = {
   output: SceneOutput;
   framesPerSecond: number;
   durationFrames: number;
+  beatFrames?: number;
   props: JsonObject;
   findAsset: (assetId: string) => SceneAsset | undefined;
 };
@@ -82,6 +83,7 @@ function useSceneContext(): {
   output: SceneOutput;
   framesPerSecond: number;
   durationFrames: number;
+  beatFrames: number | undefined;
   layout: "wide" | "tall" | "square";
   unit: number;
   findAsset: (assetId: string) => SceneAsset | undefined;
@@ -90,6 +92,7 @@ function useHold(): { release: () => void };
 ```
 
 - `layout` is `wide` when width divided by height is 1.2 or more, `tall` when it is 0.8 or less, and `square` for the rest.
+- `beatFrames` is the frames of one beat at the tempo of the project (document 19), and `undefined` for a project with no tempo. It can be a fraction.
 - `unit` is 1 percent of the shorter side in pixels. A scene sizes text and spacing in units, so it reads the same at each output size.
 - `useHold` makes `seek` wait until the scene calls `release`. Use it for work that finishes later, such as loaded data. A hold belongs to its component. After `release`, later seeks do not wait for it. A hold stops when its component unmounts.
 - An image that cannot decode makes `seek` reject. A frame outside the clip and a `seek` after `dispose` also reject, because each one is a defect in the caller.
@@ -182,7 +185,7 @@ export default defineReactScene(({ props }) => {
 });
 ```
 
-A custom scene may import only `react`, `@yumekit/scene`, `@yumekit/scene-kit`, and `@yumekit/scene-kit/motion` (document 17). The bundler rejects any other import with the failure `scene-import-not-permitted`. Custom scene code compiles with strict TypeScript, but it may read a prop as `props.title`. A later design adds a list of extra packages for a project, for example a 3D library.
+A custom scene may import only `react`, `@yumekit/scene`, `@yumekit/scene-kit`, `@yumekit/scene-kit/motion` (document 17), and the shared code of the project as `./_shared/<name>` (document 19). Shared code may import the same packages, and other shared code as `./<name>`. The bundler rejects any other import with the failure `scene-import-not-permitted`. Custom scene code compiles with strict TypeScript, but it may read a prop as `props.title`. A later design adds a list of extra packages for a project, for example a 3D library.
 
 ## Not in milestone 1
 

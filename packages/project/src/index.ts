@@ -8,6 +8,18 @@ export {
   type VideoStyle,
 } from "./format/project.js";
 export { isCalm, lookIds, lookOf, type LookId } from "./format/look.js";
+export { fontStyles, type ProjectFont } from "./format/fonts.js";
+export {
+  beatFramesOfSpan,
+  beatOfFrame,
+  frameOfBeat,
+  framesPerBeatOf,
+  highestTempo,
+  isWholeOrHalfBeat,
+  lowestTempo,
+  tempoGridOf,
+  type TempoGrid,
+} from "./tempo/index.js";
 export {
   findPlatform,
   inCatalogOrder,

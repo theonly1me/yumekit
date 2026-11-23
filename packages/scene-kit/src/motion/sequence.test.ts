@@ -23,6 +23,41 @@ describe("sequence", () => {
     });
     expect((starts.at(-1) ?? 0) + 15).toBeCloseTo(42, 6);
   });
+
+  it("starts each item on a beat with every beat, and rounds a beat to a frame", () => {
+    expect(
+      sequence({
+        count: 4,
+        framesPerSecond: 30,
+        startFrame: 3,
+        every: "beat",
+        beatFrames: 14.0625,
+        durationFrames: 30,
+      }),
+    ).toEqual([3, 17, 31, 45]);
+  });
+
+  it("starts each item on a half beat with every half-beat", () => {
+    expect(
+      sequence({
+        count: 3,
+        framesPerSecond: 30,
+        every: "half-beat",
+        beatFrames: 15,
+      }),
+    ).toEqual([0, 8, 15]);
+  });
+
+  it("keeps the even stagger when the project has no tempo", () => {
+    expect(
+      sequence({
+        count: 3,
+        framesPerSecond: 30,
+        every: "beat",
+        eachSeconds: 0.2,
+      }),
+    ).toEqual([0, 6, 12]);
+  });
 });
 
 describe("holdSplit", () => {

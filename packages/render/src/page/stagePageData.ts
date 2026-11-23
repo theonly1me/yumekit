@@ -1,12 +1,21 @@
 import type { LookId } from "@yumekit/scene-kit";
 import type { StageProject } from "@yumekit/stage";
+import type { FrameFindings } from "./frameFindings.js";
 
 export type PageSceneSource =
   { kind: "kit"; component: string } | { kind: "module"; file: string };
 
+export interface PageFont {
+  family: string;
+  url: string;
+  weight?: string;
+  style?: "normal" | "italic";
+}
+
 export interface StagePageData {
   look: LookId;
   calm: boolean;
+  fonts: PageFont[];
   project: StageProject;
   sceneSources: Record<string, PageSceneSource>;
 }
@@ -41,6 +50,7 @@ export type SeekResult =
 export interface StagePageApi {
   load: (pageLoadText: string) => Promise<void>;
   seek: (frame: number) => Promise<SeekResult>;
+  inspect: () => FrameFindings;
 }
 
 declare global {

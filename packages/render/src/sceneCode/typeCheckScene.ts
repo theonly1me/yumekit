@@ -5,8 +5,14 @@ import { renderPackageDirectory, sceneTypesFile } from "../packagePaths.js";
 import type { RenderFailure } from "../renderFailure.js";
 import { compileFailure, parseScene } from "./inspectSceneCode.js";
 import { sceneCompilerOptions, sceneFileName } from "./sceneCompilerOptions.js";
+import {
+  isSharedCodeId,
+  sharedCodeIdOf,
+  sharedCodePrefix,
+} from "./sharedImports.js";
 
 const checkFolder = join(renderPackageDirectory, "scene-check");
+const sharedFolder = join(checkFolder, "_shared");
 const sceneFile = join(checkFolder, sceneFileName);
 const defaultExportFile = join(checkFolder, "defaultExport.ts");
 const defaultExportCode = [
@@ -20,28 +26,34 @@ const compilerOptions: ts.CompilerOptions = {
   paths: { "@yumekit/scene": [sceneTypesFile] },
 };
 
-function createSceneHost(code: string): ts.CompilerHost {
+interface CheckedFile {
+  sceneId: string;
+  code: string;
+}
+
+function sharedFileOf(name: string): string {
+  return join(sharedFolder, `${name}.tsx`);
+}
+
+function createSceneHost(files: Map<string, CheckedFile>): ts.CompilerHost {
   const systemHost = ts.createCompilerHost(compilerOptions);
-  const virtualFiles = new Map([
-    [sceneFile, code],
-    [defaultExportFile, defaultExportCode],
-  ]);
   return {
     ...systemHost,
     getSourceFile: (...parameters) => {
       const [fileName, languageVersion] = parameters;
-      const virtualCode = virtualFiles.get(fileName);
-      return virtualCode === undefined
+      const virtual = files.get(fileName);
+      return virtual === undefined
         ? systemHost.getSourceFile(fileName, languageVersion)
-        : ts.createSourceFile(fileName, virtualCode, languageVersion, true);
+        : ts.createSourceFile(fileName, virtual.code, languageVersion, true);
     },
     fileExists: (fileName) =>
-      virtualFiles.has(fileName) || systemHost.fileExists(fileName),
+      files.has(fileName) || systemHost.fileExists(fileName),
     directoryExists: (directory) =>
       directory === checkFolder ||
+      directory === sharedFolder ||
       (systemHost.directoryExists?.(directory) ?? false),
     readFile: (fileName) =>
-      virtualFiles.get(fileName) ?? systemHost.readFile(fileName),
+      files.get(fileName)?.code ?? systemHost.readFile(fileName),
   };
 }
 
@@ -51,15 +63,49 @@ function defaultExportPosition(code: string): number {
   return defaultExport?.getStart(sourceFile) ?? 0;
 }
 
+function checkedFilesOf(options: {
+  sceneId: string;
+  code: string;
+  sharedCode: Readonly<Record<string, string>>;
+}): { files: Map<string, CheckedFile>; rootFile: string } {
+  const files = new Map<string, CheckedFile>(
+    Object.entries(options.sharedCode).map(([name, code]) => [
+      sharedFileOf(name),
+      { sceneId: sharedCodeIdOf(name), code },
+    ]),
+  );
+  const checked = { sceneId: options.sceneId, code: options.code };
+  if (isSharedCodeId(options.sceneId)) {
+    const rootFile = sharedFileOf(
+      options.sceneId.slice(sharedCodePrefix.length),
+    );
+    files.set(rootFile, checked);
+    return { files, rootFile };
+  }
+  files.set(sceneFile, checked);
+  files.set(defaultExportFile, {
+    sceneId: options.sceneId,
+    code: defaultExportCode,
+  });
+  return { files, rootFile: sceneFile };
+}
+
 export function typeCheckScene(options: {
   sceneId: string;
   code: string;
+  sharedCode?: Readonly<Record<string, string>>;
 }): Outcome<{ checked: true }, RenderFailure> {
   const { sceneId, code } = options;
+  const { files, rootFile } = checkedFilesOf({
+    sceneId,
+    code,
+    sharedCode: options.sharedCode ?? {},
+  });
   const program = ts.createProgram({
-    rootNames: [sceneFile, defaultExportFile],
+    rootNames:
+      rootFile === sceneFile ? [sceneFile, defaultExportFile] : [rootFile],
     options: compilerOptions,
-    host: createSceneHost(code),
+    host: createSceneHost(files),
   });
   const [diagnostic] = ts
     .getPreEmitDiagnostics(program)
@@ -67,14 +113,23 @@ export function typeCheckScene(options: {
   if (diagnostic === undefined) {
     return succeed({ checked: true });
   }
-  const sourceFile = parseScene(code);
-  if (diagnostic.file?.fileName === sceneFile) {
-    return fail(compileFailure({ sceneId, diagnostic, sourceFile }));
+  const failedFile = files.get(diagnostic.file?.fileName ?? "");
+  if (
+    failedFile !== undefined &&
+    diagnostic.file?.fileName !== defaultExportFile
+  ) {
+    return fail(
+      compileFailure({
+        sceneId: failedFile.sceneId,
+        diagnostic,
+        sourceFile: parseScene(failedFile.code),
+      }),
+    );
   }
   return fail(
     compileFailure({
       sceneId,
-      sourceFile,
+      sourceFile: parseScene(code),
       diagnostic: {
         ...diagnostic,
         start: defaultExportPosition(code),

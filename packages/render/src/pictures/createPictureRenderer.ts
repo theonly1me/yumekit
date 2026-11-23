@@ -1,4 +1,9 @@
 import { realpath } from "node:fs/promises";
+import {
+  drawContactSheet,
+  type ContactSheet,
+  type ContactSheetRequest,
+} from "../contactSheet/drawContactSheet.js";
 import type { Outcome } from "../outcome.js";
 import type { RenderFailure } from "../renderFailure.js";
 import {
@@ -16,6 +21,9 @@ export interface PictureRenderer {
   renderSceneFrames: (
     request: Omit<Extract<PictureRequest, { kind: "scenes" }>, "kind">,
   ) => Promise<Outcome<RenderedFrame[], RenderFailure>>;
+  renderContactSheet: (
+    request: ContactSheetRequest,
+  ) => Promise<Outcome<ContactSheet, RenderFailure>>;
   close: () => Promise<void>;
 }
 
@@ -52,7 +60,9 @@ export function createPictureRenderer(options: {
     if (stopped?.ok === true) await stopped.value.host.close();
   };
   const onStage: OnStage = async (work) => {
-    const attempt = async (isLastTry: boolean): ReturnType<OnStage> => {
+    const attempt = async (
+      isLastTry: boolean,
+    ): ReturnType<typeof work.draw> => {
       const instance = (kept ??= start());
       const started = await instance;
       if (!started.ok) return started;
@@ -92,6 +102,10 @@ export function createPictureRenderer(options: {
   return {
     renderFrames: (request) => render({ kind: "frames", ...request }),
     renderSceneFrames: (request) => render({ kind: "scenes", ...request }),
+    renderContactSheet: (request) =>
+      call(() =>
+        drawContactSheet({ folder: options.folder, request, onStage }),
+      ),
     close: async () => {
       isClosed = true;
       clearTimeout(idleTimer);

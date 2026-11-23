@@ -19,7 +19,7 @@ function createHarnessServer(options: {
 4. A failure is a result with `isError: true` and `{ kind, message, hint }`. The hint tells the agent what to do next. One exception: when an input does not match the schema of a tool, the MCP SDK answers before the tool runs. That answer has a message that names the field, and no `kind`.
 5. Each field name in a result uses `snake_case`, so an agent can send a result back as an input. Kit props keep the names of their schema.
 6. A success result has the data as `structuredContent` and also as JSON text, because some clients show only text to the model.
-7. Input names use `snake_case`. Time is in frames. A tool that takes seconds says so in the field name.
+7. Input names use `snake_case`. Time is in frames. A tool that takes seconds says so in the field name. With a tempo, each frame input of a timeline or clip tool also has a twin in beats (document 19).
 8. Each input has a schema with a description. The agent learns the tool from the schema, so the description states units and limits.
 
 ## Tools
@@ -54,6 +54,9 @@ function createHarnessServer(options: {
 | `put_scene`          | `scene_id`, `title`, `notes?`, then either `kit_component` and `props`, or `code` and `props` | `putScene`                                              |
 | `remove_scene`       | `scene_id`                                                                                    | `removeScene`                                           |
 | `set_video_style`    | `video_style` (`graphics`, `ai-video`, `mix`)                                                 | `setVideoStyle`                                         |
+| `set_tempo`          | `tempo` (60 to 200, document 19)                                                              | `setTempo`                                              |
+| `put_shared_code`    | `name`, `code` (document 19)                                                                  | `putSharedCode`                                         |
+| `set_fonts`          | `fonts` with `asset_id`, `family`, `weight?`, `style?` (document 19)                          | `setFonts`                                              |
 
 `set_video_style` follows the section "The video style" of document 15. `get_project` gives `graphics` for a project with no value. The descriptions of both tools say what each style means, and tell the agent to change the style only when the person asks.
 
@@ -142,11 +145,12 @@ For a video, `generate_asset` reads `hasAudio` with `probeMedia`. It uses the si
 
 ### See the result
 
-| Tool             | Input                                                 | Result                         |
-| ---------------- | ----------------------------------------------------- | ------------------------------ |
-| `preview_frame`  | `output_id`, `frame`, `scale?`                        | One PNG image as image content |
-| `preview_frames` | `output_id`, `frames` (1 to 8), `scale?`              | One image for each frame       |
-| `preview_scenes` | `output_id`, `scene_ids` (1 to 8), `scale?`, `frame?` | One image for each scene       |
+| Tool             | Input                                                   | Result                                                             |
+| ---------------- | ------------------------------------------------------- | ------------------------------------------------------------------ |
+| `preview_frame`  | `output_id`, `frame`, `scale?`                          | One PNG image as image content                                     |
+| `preview_frames` | `output_id`, `frames` (1 to 8), `scale?`                | One image for each frame                                           |
+| `preview_scenes` | `output_id`, `scene_ids` (1 to 8), `scale?`, `frame?`   | One image for each scene                                           |
+| `contact_sheet`  | `output_id`, `every_seconds?`, `columns?`, `beat_cuts?` | One image of the whole video, and a list of warnings (document 19) |
 
 `preview_scenes` draws each scene alone, at the size of the output. A scene needs no clip for it. The harness draws the scene as a clip of 3 seconds and takes the frame that is 75% into it, where kit motion has settled. `frame` takes another frame of that clip instead, for example 10 for the entry, and a frame past the end gives the last frame. An unknown scene id is the failure `scene-not-found`.
 
@@ -177,7 +181,7 @@ The server sends these instructions to the client at the start of a session. The
 5. Make the images with `generate_asset`. Put the style of the bible in each prompt.
 6. For a shot that code cannot draw, make a still image first. Check it with the person or with `preview_frame`. Then call `generate_asset` with the capability `video`, `first_frame_asset_id`, and a `camera_move`, and add the clip with `place_video`.
 7. Build the timeline with `set_timeline`, one output at a time. Add each narration with `place_narration`. Use `copy_timeline` for the next output, then change it. Call `set_transitions` once for the whole video, not once for each clip. Where a moment needs a sound, make it with `generate_asset` and the capability `sound-effect`, and add it with `place_sound`.
-8. Check frames with `preview_frames`. Correct each scene that has a defect.
+8. Check the whole video with one call of `contact_sheet` after each build of a timeline. Correct each warning and each scene that has a defect. Use `preview_frames` for a close look at one moment.
 9. Call `render_video` for each output.
 
 After the list, the instructions say: change a finished video with the smallest tool (`replace_narration`, `replace_music`, `update_clip`), write the whole timeline only for a new video, and give `remove_person_work` only when the person asked for that removal.

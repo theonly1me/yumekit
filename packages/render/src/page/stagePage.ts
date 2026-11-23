@@ -1,10 +1,12 @@
-import { loadStylePackFonts, stylePackOf } from "@yumekit/scene-kit";
+import { loadPageFonts } from "./loadPageFonts.js";
 import { createPageStage, type PageStage } from "./pageStage.js";
 import { createSceneErrorLog } from "./sceneErrorLog.js";
+import { frameFindingsOf } from "./frameFindings.js";
 import {
   isStagePageLoad,
   type SeekResult,
   type StagePageApi,
+  type StagePageData,
 } from "./stagePageData.js";
 
 const notLoaded: SeekResult = {
@@ -21,6 +23,7 @@ function startStagePage(): StagePageApi {
   }
   const errorLog = createSceneErrorLog();
   let stage: PageStage | undefined;
+  let project: StagePageData["project"] | undefined;
   return {
     load: async (pageLoadText) => {
       const pageLoad: unknown = JSON.parse(pageLoadText);
@@ -28,6 +31,7 @@ function startStagePage(): StagePageApi {
         throw new Error("The stage page got project data that is not valid");
       }
       const { pageData, moduleSceneUrls } = pageLoad;
+      project = pageData.project;
       const previous = stage;
       stage = undefined;
       try {
@@ -35,7 +39,7 @@ function startStagePage(): StagePageApi {
       } catch {
         element.replaceChildren();
       }
-      await loadStylePackFonts(stylePackOf(pageData.look));
+      await loadPageFonts(pageData);
       const urls = new Map(Object.entries(moduleSceneUrls));
       errorLog.takeErrors();
       stage = createPageStage({
@@ -59,6 +63,7 @@ function startStagePage(): StagePageApi {
       });
     },
     seek: (frame) => stage?.seek(frame) ?? Promise.resolve(notLoaded),
+    inspect: () => frameFindingsOf({ stageElement: element, project }),
   };
 }
 

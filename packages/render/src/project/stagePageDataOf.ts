@@ -1,7 +1,19 @@
 import { join } from "node:path";
-import { isCalm, lookOf, type Asset, type Scene } from "@yumekit/project";
+import {
+  framesPerBeatOf,
+  isCalm,
+  lookOf,
+  tempoGridOf,
+  type Asset,
+  type ProjectSnapshot,
+  type Scene,
+} from "@yumekit/project";
 import type { StageProject } from "@yumekit/stage";
-import type { PageSceneSource, StagePageData } from "../page/stagePageData.js";
+import type {
+  PageFont,
+  PageSceneSource,
+  StagePageData,
+} from "../page/stagePageData.js";
 import { assetFramesUrlPrefixOf } from "../videoFrames/videoFrameServer.js";
 import type { LoadedOutput } from "./loadOutput.js";
 
@@ -56,6 +68,35 @@ function sceneSourceOf(options: {
       };
 }
 
+function pageFontsOf(options: {
+  folder: string;
+  snapshot: ProjectSnapshot;
+}): PageFont[] {
+  const { folder, snapshot } = options;
+  return (snapshot.project.fonts ?? []).flatMap((font) => {
+    const asset = snapshot.assets.find(
+      (candidate) => candidate.id === font.assetId,
+    );
+    return asset === undefined
+      ? []
+      : [
+          {
+            family: font.family,
+            url: fileUrlOf(join(folder, asset.file)),
+            ...(font.weight === undefined
+              ? {}
+              : { weight: [font.weight].flat().join(" ") }),
+            ...(font.style === undefined ? {} : { style: font.style }),
+          },
+        ];
+  });
+}
+
+function beatFramesOf(snapshot: ProjectSnapshot): { beatFrames?: number } {
+  const grid = tempoGridOf(snapshot.project);
+  return grid === undefined ? {} : { beatFrames: framesPerBeatOf(grid) };
+}
+
 export async function stagePageDataOf(
   loaded: LoadedOutput,
 ): Promise<StagePageData> {
@@ -69,8 +110,10 @@ export async function stagePageDataOf(
   return {
     look: lookOf(snapshot.project),
     calm: isCalm(snapshot.project),
+    fonts: pageFontsOf({ folder, snapshot }),
     project: {
       framesPerSecond: snapshot.project.framesPerSecond,
+      ...beatFramesOf(snapshot),
       output: {
         id: output.id,
         widthPixels: output.widthPixels,

@@ -26,7 +26,7 @@ const putSceneInput = {
     .string()
     .optional()
     .describe(
-      "The TSX code of a custom scene. Call get_scene_guide first. Give kit_component or code, not both.",
+      "The TSX code of a custom scene. Call get_scene_guide first. Code that two or more scenes share goes in put_shared_code, and a scene imports it as ./_shared/<name>. Give kit_component or code, not both.",
     ),
   props: jsonObjectInput
     .optional()
@@ -66,6 +66,7 @@ async function putScene(options: {
     const failure = await checkModuleCode({
       sceneId: input.scene_id,
       code: input.code,
+      sharedCode: context.store.read().sharedCode,
     });
     if (failure) return failureResult(failure);
     const scene: Scene = { ...common, source: { kind: "module", props } };

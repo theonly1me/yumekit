@@ -5,7 +5,12 @@ import { projectSchema } from "../format/project.js";
 import type { ProjectState } from "../format/state.js";
 import { fail, succeed, type Outcome } from "../outcome.js";
 import { checkRules } from "../rules/index.js";
-import { readScenes, readTimelines, readWords } from "./readParts.js";
+import {
+  readScenes,
+  readSharedCode,
+  readTimelines,
+  readWords,
+} from "./readParts.js";
 import {
   parseJson,
   readJsonFile,
@@ -78,6 +83,10 @@ export async function readState(
   if (!scenes.ok) {
     return scenes;
   }
+  const sharedCode = await readSharedCode(source);
+  if (!sharedCode.ok) {
+    return sharedCode;
+  }
   const timelines = await readTimelines({
     source,
     outputIds: project.value.outputs.map((output) => output.id),
@@ -98,6 +107,7 @@ export async function readState(
     bible: bible.value,
     scenes: scenes.value.scenes,
     sceneCode: scenes.value.sceneCode,
+    sharedCode: sharedCode.value,
     timelines: timelines.value,
     assets: assetIndex.value.assets,
     words: words.value,

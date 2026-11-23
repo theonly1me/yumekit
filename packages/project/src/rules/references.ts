@@ -62,10 +62,30 @@ function checkModuleSceneCode(state: ProjectState): RuleFailure | undefined {
   };
 }
 
+function checkFontReferences(state: ProjectState): RuleFailure | undefined {
+  for (const font of state.project.fonts ?? []) {
+    const asset = state.assets.find(
+      (candidate) => candidate.id === font.assetId,
+    );
+    if (asset?.kind !== "font") {
+      return {
+        kind: asset === undefined ? "not-found" : "invalid-value",
+        message:
+          asset === undefined
+            ? `The font "${font.family}" names the asset "${font.assetId}", which does not exist.`
+            : `The font "${font.family}" names the asset "${font.assetId}", which is a ${asset.kind}, not a font.`,
+        file: "project.json",
+      };
+    }
+  }
+  return undefined;
+}
+
 export function checkReferences(state: ProjectState): RuleFailure | undefined {
   return (
     checkTimelinesMatchOutputs(state) ??
     checkCastReferences(state) ??
+    checkFontReferences(state) ??
     checkModuleSceneCode(state)
   );
 }

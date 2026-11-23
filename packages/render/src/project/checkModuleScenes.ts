@@ -11,7 +11,11 @@ export function checkModuleScenes(
     if (!sceneIds.has(sceneId)) {
       continue;
     }
-    const inspected = inspectSceneCode({ sceneId, code });
+    const inspected = inspectSceneCode({
+      sceneId,
+      code,
+      sharedNames: Object.keys(loaded.snapshot.sharedCode),
+    });
     if (!inspected.ok) {
       return inspected.failure;
     }

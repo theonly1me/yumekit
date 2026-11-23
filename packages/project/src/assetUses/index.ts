@@ -1,7 +1,8 @@
 export type AssetUse =
   | { kind: "audio-clip"; outputId: string; trackId: string; clipId: string }
   | { kind: "scene"; sceneId: string }
-  | { kind: "cast-member"; castId: string };
+  | { kind: "cast-member"; castId: string }
+  | { kind: "project-font"; family: string };
 
 export interface UsesScene {
   id: string;
@@ -20,6 +21,7 @@ export interface UsesProject {
   scenes: readonly UsesScene[];
   timelines: readonly { outputId: string; tracks: readonly UsesTrack[] }[];
   cast?: readonly { id: string; referenceAssetIds: readonly string[] }[];
+  fonts?: readonly { assetId: string; family: string }[];
 }
 
 function isAssetKey(key: string): boolean {
@@ -83,5 +85,13 @@ export function assetUsesOf(options: {
   const castUses = (project.cast ?? [])
     .filter((member) => member.referenceAssetIds.includes(assetId))
     .map((member) => ({ kind: "cast-member" as const, castId: member.id }));
-  return [...sceneUses, ...audioClipUsesOf({ project, assetId }), ...castUses];
+  const fontUses = (project.fonts ?? [])
+    .filter((font) => font.assetId === assetId)
+    .map((font) => ({ kind: "project-font" as const, family: font.family }));
+  return [
+    ...sceneUses,
+    ...audioClipUsesOf({ project, assetId }),
+    ...castUses,
+    ...fontUses,
+  ];
 }

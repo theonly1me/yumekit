@@ -75,6 +75,8 @@ function placeLabelOf(options: {
       return soundLabels[soundUseOf({ snapshot, ...use })];
     case "cast-member":
       return "The cast";
+    case "project-font":
+      return "The text of the video";
   }
 }
 
@@ -82,7 +84,16 @@ export function assetUsesIn(options: {
   snapshot: Snapshot;
   assetId: string;
 }): AssetUse[] {
-  return assetUsesOf({ project: options.snapshot, assetId: options.assetId });
+  const { snapshot, assetId } = options;
+  return assetUsesOf({
+    project: {
+      ...snapshot,
+      ...(snapshot.project.fonts === undefined
+        ? {}
+        : { fonts: snapshot.project.fonts }),
+    },
+    assetId,
+  });
 }
 
 export function placeLabelsOf(options: {

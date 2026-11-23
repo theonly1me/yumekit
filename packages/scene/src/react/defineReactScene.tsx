@@ -24,6 +24,7 @@ function sceneContextFor(options: MountOptions): SceneContextValue {
     output: options.output,
     framesPerSecond: options.framesPerSecond,
     durationFrames: options.durationFrames,
+    beatFrames: options.beatFrames,
     layout: layoutFor(options.output),
     unit: unitFor(options.output),
     findAsset: options.findAsset,

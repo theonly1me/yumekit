@@ -59,6 +59,7 @@ function initialState(
     bible: { style: "", palette: [], cast: [], voice: "" },
     scenes: [],
     sceneCode: {},
+    sharedCode: {},
     timelines: project.data.outputs.map((output) => ({
       outputId: output.id,
       tracks: [],

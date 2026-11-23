@@ -1,4 +1,5 @@
 import type { Asset } from "@yumekit/project";
+import { drawSheet, oneColorsOf } from "../browser/drawSheet.js";
 import { launchBrowser } from "../browser/launchBrowser.js";
 import {
   openStagePage,
@@ -22,6 +23,11 @@ export interface StageHost {
     framesPerSecond: number;
     assets: Asset[];
   }) => VideoFrameServer;
+  drawSheet: (options: {
+    html: string;
+    size: { widthPixels: number; heightPixels: number };
+  }) => Promise<Uint8Array>;
+  oneColorsOf: (pngs: Uint8Array[]) => Promise<(string | null)[]>;
   isConnected: () => boolean;
   close: () => Promise<void>;
 }
@@ -79,6 +85,8 @@ export async function startStageHost(options: {
         }
         return videoFrames.server;
       },
+      drawSheet: (sheet) => drawSheet({ browser, ...sheet }),
+      oneColorsOf: (pngs) => oneColorsOf({ browser, pngs }),
       isConnected: () => browser.isConnected(),
       close: async () => {
         await browser.close();

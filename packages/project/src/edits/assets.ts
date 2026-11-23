@@ -85,7 +85,10 @@ function referencesToAsset(options: {
   const castReferences = state.bible.cast
     .filter((member) => member.referenceAssetIds.includes(assetId))
     .map((member) => `cast member "${member.id}"`);
-  return [...clipReferences, ...castReferences];
+  const fontReferences = (state.project.fonts ?? [])
+    .filter((font) => font.assetId === assetId)
+    .map((font) => `the font "${font.family}" of the project`);
+  return [...clipReferences, ...castReferences, ...fontReferences];
 }
 
 export function removeAsset(options: {

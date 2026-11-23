@@ -8,6 +8,7 @@ export interface SceneContextValue {
   output: SceneOutput;
   framesPerSecond: number;
   durationFrames: number;
+  beatFrames: number | undefined;
   layout: SceneLayout;
   unit: number;
   findAsset: (assetId: string) => SceneAsset | undefined;

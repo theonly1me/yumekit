@@ -27,6 +27,7 @@ describe("createProject", () => {
       bible: { style: "", palette: [], cast: [], voice: "" },
       scenes: [],
       sceneCode: {},
+      sharedCode: {},
       timelines: [{ outputId: "wide", tracks: [] }],
       assets: [],
     });

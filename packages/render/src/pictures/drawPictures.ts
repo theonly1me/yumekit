@@ -26,13 +26,13 @@ export type PictureRequest =
 
 type Pictures = Outcome<RenderedFrame[], RenderFailure>;
 
-export type OnStage = (work: {
+export type OnStage = <Value>(work: {
   size: PageSize;
   draw: (stage: {
     host: StageHost;
     page: BrowserStagePage;
-  }) => Promise<Pictures>;
-}) => Promise<Pictures>;
+  }) => Promise<Outcome<Value, RenderFailure>>;
+}) => Promise<Outcome<Value, RenderFailure>>;
 
 interface Job {
   loaded: LoadedOutput;
