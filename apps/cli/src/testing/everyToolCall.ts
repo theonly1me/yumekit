@@ -15,6 +15,7 @@ const mainTrack = {
 export function everyToolCall(importSourcePath: string): ScriptedCall[] {
   return [
     { name: "get_project", input: {} },
+    { name: "get_work", input: {} },
     { name: "list_kit_scenes", input: {} },
     { name: "get_scene_guide", input: {} },
     { name: "list_media_tools", input: {} },
@@ -189,5 +190,7 @@ export function everyToolCall(importSourcePath: string): ScriptedCall[] {
       input: { output_id: "wide", frame_count: 10, scale: 0.25 },
     },
     ...sharperCopyCalls,
+    { name: "put_work", input: { scenes: [] } },
+    { name: "ask_helper", input: { brief: "Draw it.", scene_ids: ["intro"] } },
   ];
 }

@@ -1,4 +1,5 @@
 export const documentedToolNames = [
+  "get_work",
   "get_project",
   "get_scene",
   "get_timeline",
@@ -20,6 +21,7 @@ export const documentedToolNames = [
   "set_tempo",
   "put_scene",
   "put_shared_code",
+  "put_work",
   "set_fonts",
   "remove_scene",
   "set_timeline",
@@ -52,4 +54,5 @@ export const documentedToolNames = [
   "render_video",
   "render_still",
   "make_sharper_copy",
+  "ask_helper",
 ] as const;

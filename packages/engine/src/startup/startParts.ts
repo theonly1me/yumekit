@@ -1,5 +1,9 @@
 import { readFile } from "node:fs/promises";
-import { createHarness, type Harness } from "@yumekit/harness-mcp";
+import {
+  createHarness,
+  type AskHelper,
+  type Harness,
+} from "@yumekit/harness-mcp";
 import type { ProjectStore } from "@yumekit/project";
 import { startPreviewServer, type PreviewServer } from "@yumekit/render";
 import {
@@ -37,6 +41,7 @@ function projectInvalid(message: string): {
 export async function startParts(options: {
   projectFolder: string;
   store: ProjectStore;
+  askHelper: AskHelper;
 }): Promise<Outcome<EngineParts, EngineFailure>> {
   const { projectFolder, store } = options;
   const connected = await connectMediaTools({
@@ -49,7 +54,11 @@ export async function startParts(options: {
     );
   }
   const mediaTools = connected.value;
-  const harness = createHarness({ store, mediaTools });
+  const harness = createHarness({
+    store,
+    mediaTools,
+    askHelper: options.askHelper,
+  });
   const preview = await startPreviewServer({ projectFolder });
   if (!preview.ok) {
     await harness.close();

@@ -28,6 +28,7 @@ function createHarnessServer(options: {
 
 | Tool               | Input       | Result                                                                                                                                                                            |
 | ------------------ | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `get_work`         | `part?`, `scene_ids?` | The whole video as one text: the story, the shared code, each scene with its props and code, each timeline in beats and frames, and the assets (document 19, K8) |
 | `get_project`      | none        | Name, frame rate, `video_style`, look, calm, outputs with their `platforms`, script, bible, a list of scenes (id, title, kind), the length of each timeline, and the revision     |
 | `get_scene`        | `scene_id`  | The scene record, and the code of a module scene                                                                                                                                  |
 | `get_timeline`     | `output_id` | All tracks and clips of the output, with `off` for each track                                                                                                                     |
@@ -57,6 +58,7 @@ function createHarnessServer(options: {
 | `set_tempo`          | `tempo` (60 to 200, document 19)                                                              | `setTempo`                                              |
 | `put_shared_code`    | `name`, `code` (document 19)                                                                  | `putSharedCode`                                         |
 | `set_fonts`          | `fonts` with `asset_id`, `family`, `weight?`, `style?` (document 19)                          | `setFonts`                                              |
+| `put_work`           | `shared_code?`, `scenes?`, `timelines?`, `frame?`, `remove_person_work?` (document 19, K8)    | `putSharedCode`, `putScene`, `setFrame`, `setTimeline`  |
 
 `set_video_style` follows the section "The video style" of document 15. `get_project` gives `graphics` for a project with no value. The descriptions of both tools say what each style means, and tell the agent to change the style only when the person asks.
 
@@ -84,7 +86,7 @@ Before `put_scene` sends its edit, the harness checks the scene. For a kit scene
 | `replace_music`     | `prompt?` or `asset_id?`, `server?`, `model?`, `gain_decibels?`, `output_ids?`                                                                           | `addAsset` from `generate_asset`, and `setTimeline` for each output                                                                                                            |
 | `undo`, `redo`      | none                                                                                                                                                     | The store operation                                                                                                                                                            |
 
-`set_timeline` is the tool for a first build, because an agent can state the whole timeline in one call. For a later change, the agent uses the smallest tool: `replace_narration`, `replace_music`, or a clip tool (document 18, F12). `set_timeline`, `copy_timeline`, `remove_clip`, and `place_video` refuse a call of an agent that would remove what the person made, with `would-remove-the-work-of-the-person` (document 18, F11). The clip tools serve small changes. `update_clip` can also change the scene of a scene clip or the asset of an audio clip. So one output can show a different scene in the same place.
+`set_timeline` is the tool for a first build, because an agent can state the whole timeline in one call. For a later change, the agent uses the smallest tool: `replace_narration`, `replace_music`, or a clip tool (document 18, F12). `set_timeline`, `put_work`, `copy_timeline`, `remove_clip`, and `place_video` refuse a call of an agent that would remove what the person made, with `would-remove-the-work-of-the-person` (document 18, F11). The clip tools serve small changes. `update_clip` can also change the scene of a scene clip or the asset of an audio clip. So one output can show a different scene in the same place.
 
 What the first agent run could not learn from the descriptions, and each description must now say:
 
@@ -143,6 +145,14 @@ For a video, `generate_asset` reads `hasAudio` with `probeMedia`. It uses the si
 
 `import_asset` reads the kind, the size, and the length of the file with `probeMedia` from `@yumekit/render`. So it accepts image, audio, video, and font files. If a speech tool returns word timings, the harness stores them in the same edit. If two calls have the same capability, server, and input, the second call reuses the file of the first and does not call the tool.
 
+### Helpers
+
+| Tool         | Input                                  | Result                                                                                |
+| ------------ | -------------------------------------- | ------------------------------------------------------------------------------------- |
+| `ask_helper` | `brief`, `scene_ids?`, `asset_ids?`    | The text of a helper agent and the list of the scenes and assets that it changed (document 19, K10) |
+
+`ask_helper` works only through the engine, inside a chat request of the person. In each other session it fails with `no-helper`.
+
 ### See the result
 
 | Tool             | Input                                                   | Result                                                             |
@@ -174,9 +184,9 @@ The project name in a file name is in lower case. Each run of characters that ar
 
 The server sends these instructions to the client at the start of a session. They give the order of work:
 
-1. Call `get_project`, `list_kit_scenes`, and `list_media_tools`.
+1. Call `get_work`, `list_kit_scenes`, and `list_media_tools`.
 2. Write the script with `set_script` and the style with `set_bible`.
-3. Add each scene with `put_scene`. Prefer a kit scene. Call `get_scene_guide` before you write custom code, and follow its part Motion design. Check each new scene with `preview_scenes` twice: with frame 10 for its entry, and with no frame for its settled picture.
+3. Add each scene with `put_scene`. Prefer a kit scene. Call `get_scene_guide` before you write custom code, and follow its part Motion design. Check each new scene with `preview_scenes` twice: with frame 10 for its entry, and with no frame for its settled picture. To write the video as one piece, send the shared code, the scenes, the frame, and the timeline in one `put_work` call.
 4. Make the narration with `generate_asset`. Read the word timings to set the length of each scene.
 5. Make the images with `generate_asset`. Put the style of the bible in each prompt.
 6. For a shot that code cannot draw, make a still image first. Check it with the person or with `preview_frame`. Then call `generate_asset` with the capability `video`, `first_frame_asset_id`, and a `camera_move`, and add the clip with `place_video`.
@@ -184,7 +194,7 @@ The server sends these instructions to the client at the start of a session. The
 8. Check the whole video with one call of `contact_sheet` after each build of a timeline. Correct each warning and each scene that has a defect. Use `preview_frames` for a close look at one moment.
 9. Call `render_video` for each output.
 
-After the list, the instructions say: change a finished video with the smallest tool (`replace_narration`, `replace_music`, `update_clip`), write the whole timeline only for a new video, and give `remove_person_work` only when the person asked for that removal.
+After the list, the instructions give the rules of restraint of document 19 (K9): the shared parts first, few things on screen, one idea in each scene, cuts on the bar, the same margins, and no voice unless the person asks. Then they say: change a finished video with the smallest tool (`replace_narration`, `replace_music`, `update_clip`), write the whole timeline only for a new video, and give `remove_person_work` only when the person asked for that removal.
 
 ## What the harness does not do
 
