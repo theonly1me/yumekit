@@ -32,6 +32,7 @@ describe("yumekit mcp", () => {
         { server: "gemini" },
         { server: "fal" },
         { server: "local-voice" },
+        { server: "local-music" },
       ],
     });
     expect(project.structuredContent).toMatchObject({

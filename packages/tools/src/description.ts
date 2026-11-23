@@ -9,6 +9,16 @@ const mediaModelSettingSchema = z.discriminatedUnion("kind", [
     kind: z.literal("choice"),
     choices: z.array(z.string()).min(1),
     default: z.string(),
+    choice_details: z
+      .array(
+        z.object({
+          choice: z.string(),
+          label: z.string().min(1),
+          line: z.string(),
+          approved: z.boolean(),
+        }),
+      )
+      .optional(),
   }),
   z.object({
     ...settingBase,

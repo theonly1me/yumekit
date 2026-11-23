@@ -1,0 +1,111 @@
+import {
+  dominantNinth,
+  majorNinth,
+  majorSeventh,
+  minorNinth,
+  minorSeventh,
+} from "./chords.ts";
+import type { StyleDefinition } from "./styleTypes.ts";
+
+export const warm: StyleDefinition = {
+  keyRoots: [0, 5, 2],
+  progressions: [
+    [
+      { root: 5, tones: majorSeventh },
+      { root: 4, tones: minorSeventh },
+      { root: 2, tones: minorSeventh },
+      { root: 0, tones: majorSeventh },
+    ],
+    [
+      { root: 2, tones: minorNinth },
+      { root: 7, tones: dominantNinth },
+      { root: 0, tones: majorNinth },
+      { root: 9, tones: minorNinth },
+    ],
+  ],
+  barsPerChord: 1,
+  swing: 0.18,
+  looseSeconds: 0.007,
+  layers: [
+    {
+      part: "keys",
+      from: 0,
+      steps: ["c-----c---------", "c-------..c-----"],
+      turn: "c-----c-----c---",
+    },
+    { part: "pad", from: 0.5, steps: ["c---------------"] },
+    {
+      part: "bass",
+      from: 0.3,
+      steps: ["0-----0---5-----", "0-------..0-5---"],
+      turn: "0-----0---5---3-",
+    },
+    { part: "kick", from: 0.25, until: 0.7, steps: ["x.....x...x....."] },
+    { part: "kick", from: 0.7, steps: ["x.....x.x.x....."] },
+    {
+      part: "snare",
+      from: 0.35,
+      until: 0.6,
+      steps: ["....x.......x..."],
+      fill: "....x.......x.oo",
+    },
+    {
+      part: "snare",
+      from: 0.6,
+      steps: ["....x..o....x.o."],
+      fill: "....x..o....xooo",
+    },
+    { part: "hat", from: 0.15, until: 0.65, steps: ["x.o.x.o.x.o.x.o."] },
+    { part: "hat", from: 0.65, steps: ["x.oox.o.x.oox.o."] },
+    {
+      part: "lead",
+      from: 0.8,
+      vary: true,
+      steps: ["2-----1-0-------", "....2---3---2-1-", "4---3---2---1---"],
+    },
+  ],
+  lift: { riser: false, crash: false, breathBeforeEnd: false },
+  ending: ["keys", "pad", "bass", "kick"],
+  ranges: { bass: 33, lead: 67 },
+  sounds: {
+    kick: {
+      startHertz: 120,
+      endHertz: 48,
+      pitchSeconds: 0.03,
+      decaySeconds: 0.22,
+      click: 0.06,
+      drive: 1.5,
+    },
+    bass: {
+      harmonics: [1, 0.4, 0.18, 0.08],
+      harmonicDamping: 0.6,
+      attackSeconds: 0.01,
+      releaseSeconds: 0.08,
+      drive: 1.4,
+    },
+    pad: { detuneCents: 9, attackSeconds: 1.2, releaseSeconds: 1.5 },
+    keys: { index: 1.3, tine: 0.12, decaySeconds: 2.2, releaseSeconds: 0.3 },
+    lead: {
+      harmonics: [1, 0.08, 0.03],
+      harmonicDamping: 0,
+      attackSeconds: 0.04,
+      releaseSeconds: 0.3,
+      vibratoCents: 14,
+    },
+  },
+  mix: {
+    kick: { gainDecibels: -4 },
+    keys: { gainDecibels: -8, reverb: 0.28, lowpassHertz: 5500 },
+    pad: {
+      gainDecibels: -19,
+      opensWithEnergy: { lowHertz: 400, highHertz: 1500 },
+    },
+    bass: { gainDecibels: -8, lowpassHertz: 600 },
+    snare: { gainDecibels: -13, lowpassHertz: 6000 },
+    hat: { gainDecibels: -20, highpassHertz: 5000, lowpassHertz: 10000 },
+    lead: { gainDecibels: -16 },
+  },
+  brightnessHertz: 9500,
+  delayBeats: 0.75,
+  space: { roomSize: 0.7, damping: 0.6, returnDecibels: -4 },
+};

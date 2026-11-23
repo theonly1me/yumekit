@@ -2,6 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { buildCounterProject } from "../testing/counterProject.js";
 import { closeBrowser, openEditor } from "../testing/editorPage.js";
 import { isTrackOff } from "../testing/projectFacts.js";
+import { voiceTestServer } from "../testing/mediaTestTools.js";
 import { runEngine, type RunningEngine } from "../testing/runEngine.js";
 
 let engine: RunningEngine | undefined;
@@ -12,7 +13,14 @@ function runningEngine(): RunningEngine {
 }
 
 beforeAll(async () => {
-  engine = await runEngine({ withVoiceServer: true });
+  engine = await runEngine({
+    mediaTools: {
+      mcpServers: {
+        voice: voiceTestServer,
+        "local-music": { disabled: true },
+      },
+    },
+  });
   await buildCounterProject(engine);
   await engine.callTool({
     name: "generate_asset",

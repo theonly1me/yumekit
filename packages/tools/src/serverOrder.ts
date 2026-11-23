@@ -3,7 +3,7 @@ import { missingKeyFailureOf } from "./serverPool.js";
 import type { Capability, MediaToolFailure, Outcome } from "./types.js";
 
 const preferredServerNames = ["openai", "gemini", "fal"];
-const lastServerNames = ["local-voice", "sample"];
+const lastServerNames = ["local-voice", "local-music", "sample"];
 
 export function inNoPickOrder<Connection extends ServerConnection>(
   connections: Connection[],

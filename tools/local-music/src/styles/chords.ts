@@ -1,0 +1,9 @@
+export const major = [0, 4, 7] as const;
+export const minor = [0, 3, 7] as const;
+export const majorSeventh = [0, 4, 7, 11] as const;
+export const minorSeventh = [0, 3, 7, 10] as const;
+export const addNinth = [0, 4, 7, 14] as const;
+export const majorNinth = [0, 4, 7, 11, 14] as const;
+export const minorNinth = [0, 3, 7, 10, 14] as const;
+export const dominantNinth = [0, 4, 10, 14] as const;
+export const suspendedSecond = [0, 2, 7] as const;

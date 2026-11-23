@@ -30,6 +30,7 @@ const userMediaTools = {
     gemini: { disabled: true },
     fal: { disabled: true },
     "local-voice": { disabled: true },
+    "local-music": { disabled: true },
   },
 };
 
