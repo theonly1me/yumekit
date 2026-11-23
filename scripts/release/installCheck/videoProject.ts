@@ -70,3 +70,18 @@ export async function listLocalVoice(session: McpSession): Promise<string> {
   }
   return "local-voice started";
 }
+
+export async function checkLocalMusic(session: McpSession): Promise<string> {
+  const listed = await callTool({
+    session,
+    name: "list_media_tools",
+    input: {},
+  });
+  if (!listed.includes('"Music from this computer"')) {
+    throw new Error(`list_media_tools has no local music: ${listed}`);
+  }
+  if (listed.includes('"approved":false')) {
+    throw new Error(`The release offers a music style that waits: ${listed}`);
+  }
+  return "local-music started with approved styles only";
+}

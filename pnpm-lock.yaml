@@ -494,6 +494,9 @@ importers:
       '@yumekit/gemini-media':
         specifier: workspace:*
         version: link:../../tools/gemini-media
+      '@yumekit/local-music':
+        specifier: workspace:*
+        version: link:../../tools/local-music
       '@yumekit/local-voice':
         specifier: workspace:*
         version: link:../../tools/local-voice
@@ -517,6 +520,15 @@ importers:
         version: 4.6.7
 
   tools/gemini-media:
+    dependencies:
+      '@modelcontextprotocol/sdk':
+        specifier: 1.32.2
+        version: 1.32.2(zod@4.6.7)
+      zod:
+        specifier: 4.6.7
+        version: 4.6.7
+
+  tools/local-music:
     dependencies:
       '@modelcontextprotocol/sdk':
         specifier: 1.32.2

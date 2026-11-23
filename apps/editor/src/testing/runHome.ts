@@ -48,6 +48,7 @@ async function writeAgent(options: { root: string; making: FakeMaking }) {
 export async function runHome(options: {
   making: FakeMaking | "no-agent";
   browsersPath?: string;
+  mediaTools?: object;
 }): Promise<RunningHome> {
   const root = await mkdtemp(join(tmpdir(), "yumekit-home-"));
   const configurationDirectory = join(root, "config");
@@ -67,6 +68,12 @@ export async function runHome(options: {
         : { agentPrograms: { "claude-code": agent.programPath } }),
     }),
   );
+  if (options.mediaTools !== undefined) {
+    await writeFile(
+      join(configurationDirectory, "media-tools.json"),
+      JSON.stringify(options.mediaTools),
+    );
+  }
   const environment = {
     ...process.env,
     HOME: join(root, "home"),

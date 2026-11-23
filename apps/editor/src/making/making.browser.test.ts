@@ -15,7 +15,10 @@ afterAll(async () => {
 });
 
 async function startMaking(making: FakeMaking) {
-  const home = await runHome({ making });
+  const home = await runHome({
+    making,
+    mediaTools: { mcpServers: { "local-music": { disabled: true } } },
+  });
   homes.push(home);
   const editor = await openEditor(home.url);
   await editor.page.getByLabel("What do you want to make?").fill("Tea");

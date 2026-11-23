@@ -136,3 +136,22 @@ The owner set this rule on 2026-11-24: the lead agent is the creator. It carries
 - Music with a melody that follows a picture.
 - A recording that the product makes of itself.
 - Sound effects with no key.
+
+## Details of WP59
+
+These facts and choices came from the build of WP59 on 2026-11-24.
+
+1. `tools/local-music` is a bundled server with one model, `music-bed`, and the label "Music from this computer". It needs no key, no download, and no network. It writes a stereo WAV file at 48 kHz, leveled to -17 LUFS with a peak at -1.5 dBFS, and a dip of 2 dB at 2.6 kHz that leaves room for a voice. A call takes at most 180 seconds of music. 30 seconds take about 2 seconds on a MacBook with an M3 Max.
+2. `generate_music` takes `prompt` and `duration_seconds`, and optionally `style`, `tempo` (60 to 200, 110 by default), `seed` (1 to 999999), and `energy`. With no `style`, the words of the prompt pick one, for example "dark" or "late" picks `night`. With no `seed`, the seed comes from the prompt. With no `energy`, it is `[0.35, 0.55, 0.75, 0.8]`.
+3. The description gives the settings `style`, `tempo`, and `seed`. A choice setting can have `choice_details` with a name, one plain line, and `approved` for each choice (document 10, rule 11). The harness passes it to the agent and the editor.
+4. The styles are data in `tools/local-music/src/styles/styleList.ts`, each with `approved`. None is approved yet. A server with no approved style lists no model and no `generate_music`, so the order with no pick and the picker skip it, and the reasons of document 18 (F2) stay.
+5. The development build: the server also offers each waiting style when its folder `src` is next to `dist`, which is true for a build from the source and never for a release, because a release ships only `dist`. The editor shows a waiting style with "Not approved yet". `pnpm run check-release` fails when a release offers a style with `approved: false`.
+6. The music has bars of four beats. The end hit falls on the last bar start that leaves at least 1.6 seconds, and it plays the chord of the key, with a ring and a fade of 0.35 seconds. The energy of each bar picks the parts that play and how open the pad filter is. A bar before a new part gets a fill, and in `bright`, `night`, and `cinematic` a rise of noise. `minimal` and `cinematic` keep only the pad in the bar before the end hit.
+7. The seed picks the key, the chord order, and the patterns of a style. The same input gives the same bytes. Each sound has a smooth start and end, and the file starts and ends at 0.
+8. The owner accepted the bed of the free-hand film as a floor. `minimal` follows it on purpose: the chords i VI III VII, a four on the floor kick, off-beat hats, a clap on 2 and 4, an eighth note bass, a soft sine pad, eighth note plucks, a quiet bar, and a boom at the end.
+9. The order with no pick for `music` is `gemini`, each other server, `local-music`, and `sample` last. `local-music` comes after `local-voice` in the list of bundled servers and in the order.
+10. The Music view has the group "Music from this computer" under "In your video now", only when the server offers a style. Each style is a row with its name, its line, and "Use this". "Use this" calls `generate_asset` with the server `local-music`, the style, seed 1, and the length of the video without its music, then `replace_music` with the new asset, as one act with one undo. "Try another" makes the style in use again with a new random seed. The asset id is `music-<style>`, then `-2` and so on. With no scenes, the buttons are off and the line says to make the video first.
+11. With two or more outputs of different lengths, the music fits the longest, and `replace_music` cuts it in the shorter ones. When WP58 adds the tempo of a project, "Use this" can pass it as `tempo`.
+12. Rule 16 of the instructions of the AI adds: "With no other music ready, use the music of this computer." The description of `generate_asset` names `style`, `tempo`, `seed`, and `energy` for this server.
+13. The tests of the editor and the engine that need a project with no music service turn off `local-music`, as they turn off `local-voice`.
+14. The samples for the owner are in the folder `wp59-music` next to the worktrees, with a `README.txt` that gives the length, the loudness, the peak, and the kick times of each file. The builder could not hear them.
