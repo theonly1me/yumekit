@@ -25,7 +25,7 @@ export function CalmRow(props: { client: EngineClient; calm: boolean }) {
   };
   return (
     <div className="setting-row">
-      <label htmlFor={switchId}>
+      <label className="setting-name" htmlFor={switchId}>
         Calm motion
         <em>Scenes fade in with no move.</em>
       </label>
