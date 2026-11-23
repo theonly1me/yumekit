@@ -8,6 +8,7 @@ export const documentedToolNames = [
   "get_scene_guide",
   "list_media_tools",
   "set_script",
+  "set_project_name",
   "set_bible",
   "put_cast_member",
   "remove_cast_member",

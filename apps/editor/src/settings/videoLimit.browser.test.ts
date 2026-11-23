@@ -36,7 +36,7 @@ describe("the limit of real video in Settings", () => {
       .click();
     const settings = editor.page.getByRole("dialog", { name: "Settings" });
     const field = settings.getByRole("spinbutton", {
-      name: /^Real video in each project/,
+      name: /^AI video in each project/,
     });
 
     await expect.poll(() => field.inputValue()).toBe("30");

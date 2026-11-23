@@ -26,6 +26,7 @@ export const brainInstructions = [
   "21. To record the voice again, or to change the voice, call replace_narration. To change the music, call replace_music. They keep the music, the video clips, the sounds, and the transitions.",
   "22. A call that would remove what the person made fails and lists it. Keep those things. Give remove_person_work true only when the person asked for that removal in this request.",
   "23. The script is the source of the voice. The voice says the lines of the script of now, word for word. To say other words, change the script first with set_script.",
+  "24. Once you know what the video is about, give the project a short title with set_project_name.",
   "You have only the yumekit tools. You cannot run a command, read a file, or open a web page.",
 ].join("\n");
 

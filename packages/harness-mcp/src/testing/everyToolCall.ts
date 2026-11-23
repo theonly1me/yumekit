@@ -19,6 +19,7 @@ export function everyToolCall(importSourcePath: string): ScriptedCall[] {
     { name: "get_scene_guide", input: {} },
     { name: "list_media_tools", input: {} },
     { name: "set_script", input: { script: "A fox finds a lake." } },
+    { name: "set_project_name", input: { name: "Fox at the lake" } },
     {
       name: "set_bible",
       input: {

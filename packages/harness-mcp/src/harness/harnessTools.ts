@@ -16,6 +16,7 @@ import { registerReferenceTools } from "../read/registerReferenceTools.js";
 import { registerSceneClipTools } from "../sceneClips/registerSceneClipTools.js";
 import { registerPlatformTools } from "../story/registerPlatformTools.js";
 import { registerPutScene } from "../story/registerPutScene.js";
+import { registerSetProjectName } from "../story/registerSetProjectName.js";
 import { registerSetVideoStyle } from "../story/registerSetVideoStyle.js";
 import { registerSetLook } from "../story/registerSetLook.js";
 import { registerStoryTools } from "../story/registerStoryTools.js";
@@ -50,6 +51,7 @@ export function harnessToolsOf(
   registerAssetReadTools(context);
   registerReferenceTools(context);
   registerStoryTools(context);
+  registerSetProjectName(context);
   registerCastTools(context);
   registerPlatformTools(context);
   registerSetVideoStyle(context);

@@ -56,7 +56,7 @@ export function VideoLimitRow(props: {
         const saved = reply.value.generated_video_seconds;
         if (saved !== asked) {
           setNote(
-            `This project sets its own limit of ${String(saved)} seconds in its media-tools.json.`,
+            `This project keeps its own limit of ${String(saved)} seconds.`,
           );
         }
       })
@@ -70,7 +70,7 @@ export function VideoLimitRow(props: {
   return (
     <div className="setting-row">
       <label className="setting-name" htmlFor={fieldId}>
-        Real video in each project
+        AI video in each project
         <em>
           A video model stops when the project reaches this limit. 0 turns real
           video off. The change applies at once.
