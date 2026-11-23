@@ -1,14 +1,15 @@
 {
   "id": "end",
-  "notes": "The name, one line, and the install command.",
+  "notes": "The end card. The last frame is clean for the loop.",
   "source": {
     "kind": "module",
     "props": {
       "command": "npm install -g yumekit",
       "fontAssetId": "font-geist",
-      "line": "Open source. On your computer. With the AI you already have.",
-      "name": "yumekit"
+      "line": "Open source.",
+      "name": "yumekit",
+      "typeStart": 14
     }
   },
-  "title": "Install"
+  "title": "yumekit"
 }

@@ -1,291 +1,460 @@
 {
   "assets": [
     {
-      "contentHash": "sha256:f7d6c7df2339ee202595a7188a99c4cb97bc2af7188d5d2d09a528318274295a",
-      "durationFrames": 30,
-      "file": "assets/files/voice-idea.wav",
-      "hasWords": true,
-      "id": "voice-idea",
-      "kind": "audio",
-      "label": "Type an idea",
-      "source": {
-        "input": {
-          "text": "Type an idea."
-        },
-        "kind": "tool",
-        "model": "natural-voice",
-        "server": "local-voice",
-        "tool": "generate_speech"
-      }
-    },
-    {
-      "contentHash": "sha256:16ee666c2a3bc4f62264f79579c268e03ecb0a1f1067d3cb9cd04d20728aa383",
-      "durationFrames": 88,
-      "file": "assets/files/voice-making.wav",
-      "hasWords": true,
-      "id": "voice-making",
-      "kind": "audio",
-      "label": "Your own AI writes it, draws...",
-      "source": {
-        "input": {
-          "text": "Your own AI writes it, draws it, and voices it."
-        },
-        "kind": "tool",
-        "model": "natural-voice",
-        "server": "local-voice",
-        "tool": "generate_speech"
-      }
-    },
-    {
-      "contentHash": "sha256:763676dae4ef0afb6995440867da822ed200f358f6e69f7aa038f812722f8096",
-      "durationFrames": 67,
-      "file": "assets/files/voice-shapes.wav",
-      "hasWords": true,
-      "id": "voice-shapes",
-      "kind": "audio",
-      "label": "You get one video for every...",
-      "source": {
-        "input": {
-          "text": "You get one video for every platform."
-        },
-        "kind": "tool",
-        "model": "natural-voice",
-        "server": "local-voice",
-        "tool": "generate_speech"
-      }
-    },
-    {
-      "contentHash": "sha256:34a7b711708d328abc387927a35f2bda58ebcef696820a677bb757a7aafbad84",
-      "durationFrames": 47,
-      "file": "assets/files/voice-change.wav",
-      "hasWords": true,
-      "id": "voice-change",
-      "kind": "audio",
-      "label": "Then change anything you like",
-      "source": {
-        "input": {
-          "text": "Then change anything you like."
-        },
-        "kind": "tool",
-        "model": "natural-voice",
-        "server": "local-voice",
-        "tool": "generate_speech"
-      }
-    },
-    {
-      "contentHash": "sha256:659429faa51b0bcb222cd2e026fa9975feef7d906348f40a13e3284c5dcdacbc",
-      "durationFrames": 71,
-      "file": "assets/files/voice-end.wav",
-      "hasWords": true,
-      "id": "voice-end",
-      "kind": "audio",
-      "label": "Yumekit. Open source, on your own...",
-      "source": {
-        "input": {
-          "pronunciations": {
-            "yumekit": "you may kit"
-          },
-          "text": "yumekit. Open source, on your own computer."
-        },
-        "kind": "tool",
-        "model": "natural-voice",
-        "server": "local-voice",
-        "tool": "generate_speech"
-      }
-    },
-    {
       "contentHash": "sha256:3626eba547294501c8a4d662c7d9ea3b49734409a4c5a1ccf12fa86429b1687e",
       "file": "assets/files/font-geist.woff2",
       "hasWords": false,
       "id": "font-geist",
       "kind": "font",
-      "label": "Geist-Variable.woff2",
+      "label": "font-geist.woff2",
       "source": {
         "kind": "import",
-        "originalName": "Geist-Variable.woff2"
+        "originalName": "font-geist.woff2"
       }
     },
     {
-      "contentHash": "sha256:196768ffad67876aca6cb6c5f9eba0ac6d84f7be8b11473b38faa0ac09a38652",
-      "file": "assets/files/shot-start-blank.webp",
+      "contentHash": "sha256:b7c6a9569bd23f602e87afe13a696bbfef0290d7509bc4135e584263997d75ee",
+      "durationFrames": 261,
+      "file": "assets/files/rec-type.mp4",
+      "hasAudio": false,
       "hasWords": false,
       "heightPixels": 1800,
-      "id": "shot-start-blank",
-      "kind": "image",
-      "label": "shot-start-blank.webp",
+      "id": "rec-type",
+      "kind": "video",
+      "label": "rec-type.mp4",
       "source": {
         "kind": "import",
-        "originalName": "shot-start-blank.webp"
+        "originalName": "rec-type.mp4"
       },
       "widthPixels": 2880
     },
     {
-      "contentHash": "sha256:ecb4a653dbc6dfcb71cbe4ab70e6f579af52558d79da2a86d37d71a0f117a9f9",
-      "file": "assets/files/shot-start-typed.webp",
+      "contentHash": "sha256:8c070db3cf3b3293e815f5a65bad4a59d4c2d931bc497440dd87a6c5843b0917",
+      "durationFrames": 606,
+      "file": "assets/files/rec-making.mp4",
+      "hasAudio": false,
       "hasWords": false,
       "heightPixels": 1800,
-      "id": "shot-start-typed",
-      "kind": "image",
-      "label": "shot-start-typed.webp",
+      "id": "rec-making",
+      "kind": "video",
+      "label": "rec-making.mp4",
       "source": {
         "kind": "import",
-        "originalName": "shot-start-typed.webp"
+        "originalName": "rec-making.mp4"
       },
       "widthPixels": 2880
     },
     {
-      "contentHash": "sha256:2ca9c4212d44dbf1a6eb1d2a437a2f394df0d72101606d971cfe77ee81e7dccc",
-      "file": "assets/files/shot-making-0.webp",
+      "contentHash": "sha256:46dece020d953cc17030df049be4f78c548f2dfb0b3d5b1f017939a718cbe140",
+      "durationFrames": 162,
+      "file": "assets/files/rec-edit.mp4",
+      "hasAudio": false,
       "hasWords": false,
       "heightPixels": 1800,
-      "id": "shot-making-0",
-      "kind": "image",
-      "label": "shot-making-0.webp",
+      "id": "rec-edit",
+      "kind": "video",
+      "label": "rec-edit.mp4",
       "source": {
         "kind": "import",
-        "originalName": "shot-making-0.webp"
+        "originalName": "rec-edit.mp4"
       },
       "widthPixels": 2880
     },
     {
-      "contentHash": "sha256:d163faffcf6f0e49011fa4c587937c44115b1a77b1585a22e2dbfcce076a1bcd",
-      "file": "assets/files/shot-making-1.webp",
+      "contentHash": "sha256:11052c6b1d3390a5197abb9b48e28cf6b1645a1390bf7ef8f8a431dd282663c2",
+      "durationFrames": 306,
+      "file": "assets/files/rec-look.mp4",
+      "hasAudio": false,
       "hasWords": false,
       "heightPixels": 1800,
-      "id": "shot-making-1",
-      "kind": "image",
-      "label": "shot-making-1.webp",
+      "id": "rec-look",
+      "kind": "video",
+      "label": "rec-look.mp4",
       "source": {
         "kind": "import",
-        "originalName": "shot-making-1.webp"
+        "originalName": "rec-look.mp4"
       },
       "widthPixels": 2880
     },
     {
-      "contentHash": "sha256:80e1f74ae48896b4b2d75ac8f8ba226e71fe35e10cd1c4ebde0a10ff062fb68f",
-      "file": "assets/files/shot-making-2.webp",
+      "contentHash": "sha256:dc69680c5854bab0f2db2788cbdbe1e02496bb5fda5aa022d734b88551c39e9b",
+      "durationFrames": 90,
+      "file": "assets/files/rec-transition.mp4",
+      "hasAudio": false,
       "hasWords": false,
       "heightPixels": 1800,
-      "id": "shot-making-2",
-      "kind": "image",
-      "label": "shot-making-2.webp",
+      "id": "rec-transition",
+      "kind": "video",
+      "label": "rec-transition.mp4",
       "source": {
         "kind": "import",
-        "originalName": "shot-making-2.webp"
+        "originalName": "rec-transition.mp4"
       },
       "widthPixels": 2880
     },
     {
-      "contentHash": "sha256:eade3554f5e5b6c8e2e3f81d9138067affad9cbda1ac812f5cd95e7b4ae34b25",
-      "file": "assets/files/shot-editor-wide.webp",
+      "contentHash": "sha256:85a7377faf2fca513333b9bdef2ed8e51c7ccc83a600510152f7ec453d9979b5",
+      "durationFrames": 336,
+      "file": "assets/files/rec-export.mp4",
+      "hasAudio": false,
       "hasWords": false,
       "heightPixels": 1800,
-      "id": "shot-editor-wide",
-      "kind": "image",
-      "label": "shot-editor-wide.webp",
+      "id": "rec-export",
+      "kind": "video",
+      "label": "rec-export.mp4",
       "source": {
         "kind": "import",
-        "originalName": "shot-editor-wide.webp"
+        "originalName": "rec-export.mp4"
       },
       "widthPixels": 2880
     },
     {
-      "contentHash": "sha256:e43f4ad8a4403cc432236a811ff6c68b21ff4cefeb0ee5b4b3cf7a672f5e8926",
-      "file": "assets/files/shot-editor-edit-0.webp",
-      "hasWords": false,
-      "heightPixels": 1800,
-      "id": "shot-editor-edit-0",
-      "kind": "image",
-      "label": "shot-editor-edit-0.webp",
-      "source": {
-        "kind": "import",
-        "originalName": "shot-editor-edit-0.webp"
-      },
-      "widthPixels": 2880
-    },
-    {
-      "contentHash": "sha256:9ee3a59f25e31b864247502e8d8db282d3c56e7cbaba084291c77426034a3e1d",
-      "file": "assets/files/shot-editor-edit-1.webp",
-      "hasWords": false,
-      "heightPixels": 1800,
-      "id": "shot-editor-edit-1",
-      "kind": "image",
-      "label": "shot-editor-edit-1.webp",
-      "source": {
-        "kind": "import",
-        "originalName": "shot-editor-edit-1.webp"
-      },
-      "widthPixels": 2880
-    },
-    {
-      "contentHash": "sha256:718f29d426fc9fe57531ede38fa4fd9e5ad395088556558d4aead3a20e3d8e9b",
-      "file": "assets/files/shot-editor-edit-done-clean.webp",
-      "hasWords": false,
-      "heightPixels": 1800,
-      "id": "shot-editor-edit-done-clean",
-      "kind": "image",
-      "label": "shot-editor-edit-done-clean.webp",
-      "source": {
-        "kind": "import",
-        "originalName": "shot-editor-edit-done-clean.webp"
-      },
-      "widthPixels": 2880
-    },
-    {
-      "contentHash": "sha256:6f9fca78902e27494b91a3f49c907562738a5e0c1954c9933e87f03d9f4ff49f",
-      "file": "assets/files/frame-youtube.webp",
+      "contentHash": "sha256:051aa29b41fd63adb90937692b6ecaf27a18945ac13be899f7c0a56138f2a6b6",
+      "durationFrames": 282,
+      "file": "assets/files/example-ad.mp4",
+      "hasAudio": false,
       "hasWords": false,
       "heightPixels": 1080,
-      "id": "frame-youtube",
-      "kind": "image",
-      "label": "frame-youtube.webp",
+      "id": "example-ad",
+      "kind": "video",
+      "label": "example-ad.mp4",
       "source": {
         "kind": "import",
-        "originalName": "frame-youtube.webp"
+        "originalName": "example-ad.mp4"
       },
       "widthPixels": 1920
     },
     {
-      "contentHash": "sha256:ce8cb88263d107fd12d36dcfdc7407b0575a6ef1651fc88c953a5ef58c8ce5df",
-      "file": "assets/files/frame-tiktok.webp",
-      "hasWords": false,
-      "heightPixels": 1920,
-      "id": "frame-tiktok",
-      "kind": "image",
-      "label": "frame-tiktok.webp",
-      "source": {
-        "kind": "import",
-        "originalName": "frame-tiktok.webp"
-      },
-      "widthPixels": 1080
-    },
-    {
-      "contentHash": "sha256:f60c1f7701ed3b3332fd337b6c96afe6dcbbd9ffbbdbf5a9e24e528a0367371b",
-      "file": "assets/files/frame-square.webp",
+      "contentHash": "sha256:484f1335f889be87d8fab7495c97d2168c751a8ab931e3b49ce602adfd3b903e",
+      "durationFrames": 270,
+      "file": "assets/files/example-numbers.mp4",
+      "hasAudio": false,
       "hasWords": false,
       "heightPixels": 1080,
-      "id": "frame-square",
-      "kind": "image",
-      "label": "frame-square.webp",
+      "id": "example-numbers",
+      "kind": "video",
+      "label": "example-numbers.mp4",
       "source": {
         "kind": "import",
-        "originalName": "frame-square.webp"
+        "originalName": "example-numbers.mp4"
+      },
+      "widthPixels": 1920
+    },
+    {
+      "contentHash": "sha256:f5a4f36bee8bc8aaebf0a821cd1214f4e327106a4a7c4b2bae61d9e1961548a6",
+      "durationFrames": 270,
+      "file": "assets/files/example-coffee.mp4",
+      "hasAudio": false,
+      "hasWords": false,
+      "heightPixels": 1080,
+      "id": "example-coffee",
+      "kind": "video",
+      "label": "example-coffee.mp4",
+      "source": {
+        "kind": "import",
+        "originalName": "example-coffee.mp4"
+      },
+      "widthPixels": 1920
+    },
+    {
+      "contentHash": "sha256:67cdfa96b3708d75f8649853a75282454da614909088479aa22275cd007b278b",
+      "durationFrames": 282,
+      "file": "assets/files/hoshi-youtube.mp4",
+      "hasAudio": false,
+      "hasWords": false,
+      "heightPixels": 1080,
+      "id": "hoshi-youtube",
+      "kind": "video",
+      "label": "hoshi-youtube.mp4",
+      "source": {
+        "kind": "import",
+        "originalName": "hoshi-youtube.mp4"
+      },
+      "widthPixels": 1920
+    },
+    {
+      "contentHash": "sha256:787fbe31f6806ad82836a268c317b8d4701254a895fd40c1fe56f6c30ca810b2",
+      "durationFrames": 282,
+      "file": "assets/files/hoshi-tiktok.mp4",
+      "hasAudio": false,
+      "hasWords": false,
+      "heightPixels": 1920,
+      "id": "hoshi-tiktok",
+      "kind": "video",
+      "label": "hoshi-tiktok.mp4",
+      "source": {
+        "kind": "import",
+        "originalName": "hoshi-tiktok.mp4"
       },
       "widthPixels": 1080
     },
     {
-      "contentHash": "sha256:f210fc22e21002b9669c6e5afea05eff1f995b626e1db17ed1bfbb149e90921e",
-      "file": "assets/files/shot-making-done-voice.webp",
+      "contentHash": "sha256:85c74c4fd2ed5172ccbafb4bf2331b7548cc77967dc74cdd1e4f4a7b33bd64e1",
+      "durationFrames": 282,
+      "file": "assets/files/hoshi-square.mp4",
+      "hasAudio": false,
       "hasWords": false,
-      "heightPixels": 1800,
-      "id": "shot-making-done-voice",
-      "kind": "image",
-      "label": "shot-making-done-voice.webp",
+      "heightPixels": 1080,
+      "id": "hoshi-square",
+      "kind": "video",
+      "label": "hoshi-square.mp4",
       "source": {
         "kind": "import",
-        "originalName": "shot-making-done-voice.webp"
+        "originalName": "hoshi-square.mp4"
       },
-      "widthPixels": 2880
+      "widthPixels": 1080
+    },
+    {
+      "contentHash": "sha256:2479c2e55f4d6445342ef1a57ec655a722f070d58e89cf9704b42937986720cf",
+      "durationFrames": 25,
+      "file": "assets/files/voice-01.wav",
+      "hasWords": true,
+      "id": "voice-01",
+      "kind": "audio",
+      "label": "An idea",
+      "source": {
+        "input": {
+          "pronunciations": {
+            "yumekit": "you may kit"
+          },
+          "text": "An idea."
+        },
+        "kind": "tool",
+        "model": "natural-voice",
+        "server": "local-voice",
+        "tool": "generate_speech"
+      }
+    },
+    {
+      "contentHash": "sha256:6c4060201fcf8b3ae0f4a45300847d023eb1af9edc7eb71086d18a6808eb4ab6",
+      "durationFrames": 26,
+      "file": "assets/files/voice-02.wav",
+      "hasWords": true,
+      "id": "voice-02",
+      "kind": "audio",
+      "label": "A sentence",
+      "source": {
+        "input": {
+          "pronunciations": {
+            "yumekit": "you may kit"
+          },
+          "text": "A sentence."
+        },
+        "kind": "tool",
+        "model": "natural-voice",
+        "server": "local-voice",
+        "tool": "generate_speech"
+      }
+    },
+    {
+      "contentHash": "sha256:5ccb27589d9ec4a0d426fc7d3f857db612d0d1229daa82b8690589d691097699",
+      "durationFrames": 32,
+      "file": "assets/files/voice-03.wav",
+      "hasWords": true,
+      "id": "voice-03",
+      "kind": "audio",
+      "label": "A finished video",
+      "source": {
+        "input": {
+          "pronunciations": {
+            "yumekit": "you may kit"
+          },
+          "text": "A finished video."
+        },
+        "kind": "tool",
+        "model": "natural-voice",
+        "server": "local-voice",
+        "tool": "generate_speech"
+      }
+    },
+    {
+      "contentHash": "sha256:c11404b1e49906376e3669e329631c4d4b3764f91763a573461b3b9c75fb37d0",
+      "durationFrames": 49,
+      "file": "assets/files/voice-05.wav",
+      "hasWords": true,
+      "id": "voice-05",
+      "kind": "audio",
+      "label": "Your own AI does the work",
+      "source": {
+        "input": {
+          "pronunciations": {
+            "yumekit": "you may kit"
+          },
+          "text": "Your own AI does the work."
+        },
+        "kind": "tool",
+        "model": "natural-voice",
+        "server": "local-voice",
+        "tool": "generate_speech"
+      }
+    },
+    {
+      "contentHash": "sha256:7e9dce465907d4f6bd5be65a7ca3ec6ef0dcce46edc3328f59dd998f8ebba97f",
+      "durationFrames": 67,
+      "file": "assets/files/voice-06.wav",
+      "hasWords": true,
+      "id": "voice-06",
+      "kind": "audio",
+      "label": "Every one of these was made...",
+      "source": {
+        "input": {
+          "pronunciations": {
+            "yumekit": "you may kit"
+          },
+          "text": "Every one of these was made with yumekit."
+        },
+        "kind": "tool",
+        "model": "natural-voice",
+        "server": "local-voice",
+        "tool": "generate_speech"
+      }
+    },
+    {
+      "contentHash": "sha256:82cafef5419fe601d0305ddd1eff329e10a5c88124db8ba80d1848523affdab4",
+      "durationFrames": 57,
+      "file": "assets/files/voice-07.wav",
+      "hasWords": true,
+      "id": "voice-07",
+      "kind": "audio",
+      "label": "One idea. Every platform",
+      "source": {
+        "input": {
+          "pronunciations": {
+            "yumekit": "you may kit"
+          },
+          "text": "One idea. Every platform."
+        },
+        "kind": "tool",
+        "model": "natural-voice",
+        "server": "local-voice",
+        "tool": "generate_speech"
+      }
+    },
+    {
+      "contentHash": "sha256:5207b57c2bc320068efeaa3af53c57b9c606c4c4ecc2f4d556a0ea6ca5fa8a98",
+      "durationFrames": 42,
+      "file": "assets/files/voice-08.wav",
+      "hasWords": true,
+      "id": "voice-08",
+      "kind": "audio",
+      "label": "Click to change anything",
+      "source": {
+        "input": {
+          "pronunciations": {
+            "yumekit": "you may kit"
+          },
+          "text": "Click to change anything."
+        },
+        "kind": "tool",
+        "model": "natural-voice",
+        "server": "local-voice",
+        "tool": "generate_speech"
+      }
+    },
+    {
+      "contentHash": "sha256:b8185baec63f926ea4d897750b93760a935f0bd0d504d429893ae00e09bc5400",
+      "durationFrames": 40,
+      "file": "assets/files/voice-09.wav",
+      "hasWords": true,
+      "id": "voice-09",
+      "kind": "audio",
+      "label": "One click, a new look",
+      "source": {
+        "input": {
+          "pronunciations": {
+            "yumekit": "you may kit"
+          },
+          "text": "One click, a new look."
+        },
+        "kind": "tool",
+        "model": "natural-voice",
+        "server": "local-voice",
+        "tool": "generate_speech"
+      }
+    },
+    {
+      "contentHash": "sha256:b80e5481483591b0e579856f312c061ab02a08a1b1eeaf4559975c3d5efb98e7",
+      "durationFrames": 56,
+      "file": "assets/files/voice-10.wav",
+      "hasWords": true,
+      "id": "voice-10",
+      "kind": "audio",
+      "label": "It stays yours, on your computer",
+      "source": {
+        "input": {
+          "pronunciations": {
+            "yumekit": "you may kit"
+          },
+          "text": "It stays yours, on your computer."
+        },
+        "kind": "tool",
+        "model": "natural-voice",
+        "server": "local-voice",
+        "tool": "generate_speech"
+      }
+    },
+    {
+      "contentHash": "sha256:02b8374201e2a4fde32d769bd2ce624828a62cc2606ba6862281d4400da5e601",
+      "durationFrames": 60,
+      "file": "assets/files/voice-04.wav",
+      "hasWords": true,
+      "id": "voice-04",
+      "kind": "audio",
+      "label": "Type what you want, in plain...",
+      "source": {
+        "input": {
+          "pronunciations": {
+            "yumekit": "you may kit"
+          },
+          "text": "Type what you want, in plain words."
+        },
+        "kind": "tool",
+        "model": "natural-voice",
+        "server": "local-voice",
+        "tool": "generate_speech"
+      }
+    },
+    {
+      "contentHash": "sha256:706df84b451390c51d875b9678561442984d0b896952dfbbc8c896e8fe3e3046",
+      "durationFrames": 97,
+      "file": "assets/files/voice-11.wav",
+      "hasWords": true,
+      "id": "voice-11",
+      "kind": "audio",
+      "label": "Free to start, with the AI...",
+      "source": {
+        "input": {
+          "pronunciations": {
+            "yumekit": "you may kit"
+          },
+          "text": "Free to start, with the AI you already have. No account."
+        },
+        "kind": "tool",
+        "model": "natural-voice",
+        "server": "local-voice",
+        "tool": "generate_speech"
+      }
+    },
+    {
+      "contentHash": "sha256:82328b9ad1f62e5f452f345b05076288a84eeae9ee179cbd5f2df901fd7fc8a6",
+      "durationFrames": 88,
+      "file": "assets/files/voice-12.wav",
+      "hasWords": true,
+      "id": "voice-12",
+      "kind": "audio",
+      "label": "Yumekit. Open source. Install it with...",
+      "source": {
+        "input": {
+          "pronunciations": {
+            "yumekit": "you may kit"
+          },
+          "text": "yumekit. Open source. Install it with one line."
+        },
+        "kind": "tool",
+        "model": "natural-voice",
+        "server": "local-voice",
+        "tool": "generate_speech"
+      }
     }
   ]
 }

@@ -1,0 +1,74 @@
+{
+  "id": "montage",
+  "notes": "Three real videos that yumekit made in this session, each in another look, cut on the beat.",
+  "source": {
+    "kind": "module",
+    "props": {
+      "clips": [
+        {
+          "assetId": "example-ad",
+          "frames": 15,
+          "fromFrame": 8,
+          "look": "Midnight"
+        },
+        {
+          "assetId": "example-numbers",
+          "frames": 15,
+          "fromFrame": 60,
+          "look": "Neon"
+        },
+        {
+          "assetId": "example-coffee",
+          "frames": 15,
+          "fromFrame": 90,
+          "look": "Editorial"
+        },
+        {
+          "assetId": "example-ad",
+          "frames": 15,
+          "fromFrame": 158,
+          "look": "Midnight"
+        },
+        {
+          "assetId": "example-numbers",
+          "frames": 15,
+          "fromFrame": 190,
+          "look": "Neon"
+        },
+        {
+          "assetId": "example-coffee",
+          "frames": 15,
+          "fromFrame": 196,
+          "look": "Editorial"
+        },
+        {
+          "assetId": "example-numbers",
+          "frames": 8,
+          "fromFrame": 20,
+          "look": "Neon"
+        },
+        {
+          "assetId": "example-ad",
+          "frames": 7,
+          "fromFrame": 84,
+          "look": "Midnight"
+        },
+        {
+          "assetId": "example-coffee",
+          "frames": 8,
+          "fromFrame": 30,
+          "look": "Editorial"
+        },
+        {
+          "assetId": "example-ad",
+          "frames": 7,
+          "fromFrame": 226,
+          "look": "Midnight"
+        }
+      ],
+      "fontAssetId": "font-geist",
+      "tag": "Made with yumekit"
+    }
+  },
+  "title": "Made with yumekit"
+}

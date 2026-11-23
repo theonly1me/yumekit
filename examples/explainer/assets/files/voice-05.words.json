@@ -1,0 +1,34 @@
+{
+  "words": [
+    {
+      "endFrame": 11,
+      "startFrame": 2,
+      "text": "Your"
+    },
+    {
+      "endFrame": 17,
+      "startFrame": 11,
+      "text": "own"
+    },
+    {
+      "endFrame": 23,
+      "startFrame": 17,
+      "text": "AI"
+    },
+    {
+      "endFrame": 31,
+      "startFrame": 23,
+      "text": "does"
+    },
+    {
+      "endFrame": 38,
+      "startFrame": 31,
+      "text": "the"
+    },
+    {
+      "endFrame": 46,
+      "startFrame": 38,
+      "text": "work."
+    }
+  ]
+}

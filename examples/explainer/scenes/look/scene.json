@@ -1,0 +1,87 @@
+{
+  "id": "look",
+  "notes": "Settings, then the preview in the new look: Neon, then Editorial.",
+  "source": {
+    "kind": "module",
+    "props": {
+      "accentWord": "look.",
+      "assetId": "rec-look",
+      "camera": [
+        {
+          "frame": 0,
+          "width": 640,
+          "x": 395,
+          "y": 330
+        },
+        {
+          "frame": 14,
+          "width": 610,
+          "x": 405,
+          "y": 335
+        },
+        {
+          "frame": 15,
+          "width": 1000,
+          "x": 20,
+          "y": 95
+        },
+        {
+          "frame": 36,
+          "width": 960,
+          "x": 30,
+          "y": 105
+        },
+        {
+          "frame": 37,
+          "width": 640,
+          "x": 395,
+          "y": 330
+        },
+        {
+          "frame": 51,
+          "width": 610,
+          "x": 405,
+          "y": 335
+        },
+        {
+          "frame": 52,
+          "width": 1000,
+          "x": 20,
+          "y": 95
+        },
+        {
+          "frame": 75,
+          "width": 960,
+          "x": 30,
+          "y": 105
+        }
+      ],
+      "fontAssetId": "font-geist",
+      "heading": "One click, a new look.",
+      "label": "Editor",
+      "segments": [
+        {
+          "frames": 15,
+          "from": 0.3,
+          "to": 0.95
+        },
+        {
+          "frames": 22,
+          "from": 2.7,
+          "to": 3.6
+        },
+        {
+          "frames": 15,
+          "from": 6.4,
+          "to": 7.05
+        },
+        {
+          "frames": 23,
+          "from": 8.9,
+          "to": 9.9
+        }
+      ]
+    }
+  },
+  "title": "One click, a new look"
+}

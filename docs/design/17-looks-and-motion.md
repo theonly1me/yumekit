@@ -254,8 +254,15 @@ WP48 made these choices where this document gives no rule.
 
 ## Details of the explainer video
 
-The video at the top of the README is a yumekit project in `examples/explainer`. It made these choices where this document gives no rule.
+The video at the top of the README is a yumekit project in `examples/explainer`. Version 2 is a film of 30 seconds that replaces the first version of 15 seconds. It made these choices where this document gives no rule.
 
 1. The person asked for the theme of the yumekit app, so its custom scenes take their colors from the app tokens of `apps/editor/src/styles/tokens.css`, not from the look. Rule 8 of Motion design permits this when the person asks.
 2. A custom scene can use a font file of the project. The file is a `font` asset from `import_asset`. The scene adds it with `new FontFace(family, url)` and `document.fonts.add`, and holds the frame with `useHold` until `load()` settles, so each frame waits for the font. The scene guide still says to use the fonts of the look, because a look change cannot change such a font.
-3. The screenshots are WebP files at twice the size of the screen, so a slow move toward a part of the screen stays sharp. Prettier and ESLint skip `examples/*/scenes/` and `examples/*/script.md`, because the harness writes those files.
+3. Prettier and ESLint skip `examples/*/scenes/` and `examples/*/script.md`, because the harness writes those files.
+4. Each picture of the product is real footage. Playwright recorded the app in the dark theme with `recordVideo`. A recording of a page at a device scale of 2 holds only the pixels of scale 1, so the page ran at 2880 by 1800 with the CSS `zoom` 2: the layout of a 1440 by 900 screen with twice the pixels. The page drew its own pointer, because a recording has none.
+5. The Making screen ran for real. A stand-in program in the place of the agent called the real harness tools through the engine, with pauses, so each step became done, and Heart recorded a real voice.
+6. The footage is cut into short H.264 files of 30 frames each second before `import_asset`, so the frame pictures of the renderer stay small. Each cut is a video asset.
+7. One custom scene, `screen`, shows a recording in an app window. Its props give the cuts of the recording, each with its own speed (`segments`), and a camera path of points in the recording (`camera`). A camera point with a hard change one frame later is a cut inside the scene. `VideoFrame` in a box with `overflow: hidden` crops and moves the picture, and a scene can draw more than one `VideoFrame`, so the scene contract needed no change.
+8. The cuts sit on a grid of 120 beats each minute: one beat is 15 frames. Each scene starts on a beat, and the montage cuts on beats and half beats. A text that comes in starts 3 to 5 frames before its beat, so the beat frame already shows it.
+9. The voice is one asset for each line of the script, and the script holds only those lines, with no heading. `replace_narration` then records each line again and keeps it where it starts. The lines are long enough together (21 seconds of 30), because `replace_narration` refuses a voice under two thirds of the video. The music track is empty, and `replace_music` fills it with one call.
+10. The quality check was three rounds of contact sheets, one frame every 10 frames, and one sheet at 800 pixels wide, the size of the README. The sheets of each round are not in the repository.

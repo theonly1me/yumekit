@@ -1,33 +1,29 @@
-import { useLayoutEffect } from "react";
-import { defineReactScene, useFrame, useHold, useSceneContext } from "@yumekit/scene";
-import { drift, enter, paceFrame, sequence, words } from "@yumekit/scene-kit/motion";
+import { useLayoutEffect, type ReactNode } from "react";
+import { VideoFrame, defineReactScene, useFrame, useHold, useSceneContext } from "@yumekit/scene";
+import { drift, enter, sequence, words } from "@yumekit/scene-kit/motion";
 
 const theme = {
-  ground: "#0c0c0d",
-  surface: "#121213",
-  lineStrong: "rgb(255 255 255 / 0.18)",
-  text: "#ecebe8",
-  muted: "#908f8b",
-  faint: "#5e5d5a",
+  ground: "#0c0c0d", surface: "#121213", raised: "#1a1a1c",
+  line: "rgb(255 255 255 / 0.09)", lineStrong: "rgb(255 255 255 / 0.2)",
+  text: "#ecebe8", muted: "#908f8b", faint: "#5e5d5a", accent: "#d9c9a8",
 };
-
 const fontFamily = "Geist, 'Helvetica Neue', Helvetica, Arial, sans-serif";
-
-type Shape = { assetId: string; name: string; ratio: string; aspect: number };
 
 function textOf(value: unknown, fallback: string): string {
   return typeof value === "string" ? value : fallback;
 }
-
-function shapesOf(value: unknown): Shape[] {
-  if (!Array.isArray(value)) return [];
-  return value.slice(0, 4).map((item) => {
-    const record: Record<string, unknown> = typeof item === "object" && item !== null && !Array.isArray(item) ? { ...item } : {};
-    const aspect = typeof record.aspect === "number" && record.aspect > 0 ? record.aspect : 1;
-    return { assetId: textOf(record.assetId, ""), name: textOf(record.name, ""), ratio: textOf(record.ratio, ""), aspect };
-  });
+function numberOf(value: unknown, fallback: number): number {
+  return typeof value === "number" && Number.isFinite(value) ? value : fallback;
 }
-
+function recordOf(value: unknown): Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value) ? { ...value } : {};
+}
+function listOf(value: unknown): Record<string, unknown>[] {
+  return Array.isArray(value) ? value.map(recordOf) : [];
+}
+function bare(word: string): string {
+  return word.toLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
+}
 function useFontFile(url: string | undefined): void {
   const hold = useHold();
   useLayoutEffect(() => {
@@ -40,80 +36,94 @@ function useFontFile(url: string | undefined): void {
     face.load().then(hold.release, hold.release);
   }, [url, hold]);
 }
+function Headline(options: {
+  text: string;
+  accent: string;
+  frame: number;
+  startFrame: number;
+  size: number;
+  prop: string;
+  kind?: "rise" | "blur" | "slide-left" | "pop" | "fade" | "scale" | "wipe";
+  eachSeconds?: number;
+  wordSeconds?: number;
+  weight?: number;
+  color?: string;
+  lineHeight?: number;
+}): ReactNode {
+  const { framesPerSecond, unit } = useSceneContext();
+  const motion = words({
+    text: options.text,
+    frame: options.frame,
+    framesPerSecond,
+    startFrame: options.startFrame,
+    unit,
+    kind: options.kind ?? "rise",
+    distanceUnits: 4,
+    eachSeconds: options.eachSeconds ?? 0.06,
+    wordSeconds: options.wordSeconds ?? 0.45,
+  });
+  const accents = options.accent.split(/\s+/).map(bare).filter((word) => word !== "");
+  return (
+    <div
+      data-text-prop={options.prop}
+      style={{
+        fontSize: options.size,
+        fontWeight: options.weight ?? 600,
+        letterSpacing: "-0.045em",
+        lineHeight: options.lineHeight ?? 1.02,
+        color: options.color ?? theme.text,
+      }}
+    >
+      {motion.words.map((word, index) => (
+        <span key={index}>
+          {index === 0 ? "" : " "}
+          <span style={{ display: "inline-block", color: accents.includes(bare(word.text)) ? theme.accent : "inherit", ...word.style }}>
+            {word.text}
+          </span>
+        </span>
+      ))}
+    </div>
+  );
+}
 
 export default defineReactScene(({ props }) => {
   const frame = useFrame();
-  const { unit, framesPerSecond, durationFrames, findAsset, output } = useSceneContext();
+  const { unit, output, framesPerSecond, findAsset } = useSceneContext();
   useFontFile(findAsset(textOf(props.fontAssetId, "font-geist"))?.url);
-  const heading = textOf(props.heading, "");
-  const shapes = shapesOf(props.shapes);
-
-  const headingAt = (motionFrame: number) =>
-    words({ text: heading, frame: motionFrame, framesPerSecond, startFrame: 0.05 * framesPerSecond, unit, eachSeconds: 0.07 });
-  const starts = sequence({ count: shapes.length, framesPerSecond, startFrame: 0.25 * framesPerSecond, eachSeconds: 0.18, itemSeconds: 0.7 });
-  const settleFrame = Math.max(headingAt(0).settleFrame, (starts.at(-1) ?? 0) + 0.7 * framesPerSecond);
-  const motionFrame = paceFrame({ frame, durationFrames, settleFrame });
-  const headingWords = headingAt(motionFrame).words;
-  const float = drift({ frame, framesPerSecond, durationFrames, kind: "scale", amount: 0.5 });
-
-  const margin = 9 * unit;
-  const headingSize = 9 * unit;
-  const contentTop = margin + headingSize * 1.05 + 5.5 * unit;
-  const gap = 3.2 * unit;
-  const labelHeight = 6 * unit;
-  const contentWidth = output.widthPixels - 2 * margin;
-  const contentHeight = output.heightPixels - contentTop - margin;
-  const aspectSum = shapes.reduce((sum, shape) => sum + shape.aspect, 0);
-  const byWidth = (contentWidth - gap * Math.max(0, shapes.length - 1)) / Math.max(aspectSum, 0.1);
-  const pictureHeight = Math.min(byWidth, contentHeight - labelHeight);
-  const rowTop = contentTop + Math.max(0, (contentHeight - pictureHeight - labelHeight) / 2);
-
+  const items = listOf(props.items).map((item) => ({
+    assetId: textOf(item.assetId, ""),
+    name: textOf(item.name, ""),
+    shape: textOf(item.shape, ""),
+    ratio: numberOf(item.ratio, 1),
+  }));
+  const fromFrame = numberOf(props.fromFrame, 0);
+  const margin = 6 * unit;
+  const gap = 2.4 * unit;
+  const headingSize = 9.2 * unit;
+  const top = 7.7 * unit + headingSize * 1.1 + 3 * unit;
+  const available = output.widthPixels - 2 * margin - gap * Math.max(0, items.length - 1);
+  const ratioSum = items.reduce((sum, item) => sum + item.ratio, 0);
+  const height = Math.min(available / Math.max(0.1, ratioSum), output.heightPixels - top - 9 * unit);
+  const rowTop = top + Math.max(0, (output.heightPixels - margin - top - height - 5 * unit) / 2);
+  const starts = sequence({ count: items.length, framesPerSecond, startFrame: -3, eachSeconds: 0.2 });
+  const float = drift({ frame, framesPerSecond, durationFrames: 90, kind: "move", unit, amount: 0.6, seed: "shapes" });
   return (
     <div style={{ position: "absolute", inset: 0, overflow: "hidden", background: theme.ground, color: theme.text, fontFamily }}>
-      <h1
-        data-text-prop="heading"
-        style={{ position: "absolute", left: margin, top: margin, margin: 0, fontSize: headingSize, fontWeight: 500, letterSpacing: "-0.04em", lineHeight: 1.05, whiteSpace: "nowrap" }}
-      >
-        {headingWords.map((word, index) => (
-          <span key={index}>
-            {index === 0 ? "" : " "}
-            <span style={{ display: "inline-block", ...word.style }}>{word.text}</span>
-          </span>
-        ))}
-      </h1>
-      <div
-        style={{
-          position: "absolute",
-          left: margin,
-          top: rowTop,
-          display: "flex",
-          alignItems: "flex-start",
-          gap,
-          transform: float.transform,
-          transformOrigin: "left top",
-        }}
-      >
-        {shapes.map((shape, index) => {
-          const asset = findAsset(shape.assetId);
+      <div style={{ position: "absolute", left: 8.9 * unit, top: 7.7 * unit }}>
+        <Headline text={textOf(props.heading, "")} accent={textOf(props.accentWord, "")} frame={frame} startFrame={-3} size={headingSize} prop="heading" />
+      </div>
+      <div style={{ position: "absolute", left: margin, top: rowTop, display: "flex", alignItems: "flex-end", gap, transform: float.transform }}>
+        {items.map((item, index) => {
           const startFrame = starts[index] ?? 0;
+          const asset = findAsset(item.assetId);
           return (
-            <div key={index} style={{ ...enter({ frame: motionFrame, framesPerSecond, startFrame, kind: "rise", unit, distanceUnits: 4, durationSeconds: 0.7 }) }}>
-              <div
-                style={{
-                  width: pictureHeight * shape.aspect,
-                  height: pictureHeight,
-                  borderRadius: 0.8 * unit,
-                  border: `1px solid ${theme.lineStrong}`,
-                  overflow: "hidden",
-                  background: theme.surface,
-                  boxSizing: "border-box",
-                }}
-              >
-                {asset === undefined ? null : <img src={asset.url} style={{ width: "100%", height: "100%", display: "block", objectFit: "cover" }} />}
+            <div key={index} style={{ display: "flex", flexDirection: "column", gap: 1.6 * unit, ...enter({ frame, framesPerSecond, startFrame, kind: "rise", unit, distanceUnits: 8, durationSeconds: 0.5 }) }}>
+              <div style={{ width: height * item.ratio, height, borderRadius: 1.2 * unit, overflow: "hidden", border: `1px solid ${theme.lineStrong}`, background: theme.surface }}>
+                {asset?.kind === "video" ? <VideoFrame assetId={item.assetId} assetFrame={fromFrame + frame} /> : null}
               </div>
-              <div style={{ marginTop: 1.8 * unit, fontSize: 3 * unit, fontWeight: 500, display: "flex", gap: 1 * unit, whiteSpace: "nowrap" }}>
-                <span data-text-prop={`shapes.${String(index)}.name`}>{shape.name}</span>
-                <span style={{ color: theme.faint }}>{shape.ratio}</span>
+              <div style={{ display: "flex", gap: 1.2 * unit, fontSize: 2.3 * unit, fontWeight: 500, ...enter({ frame, framesPerSecond, startFrame: startFrame + 5, kind: "fade", unit }) }}>
+                <span data-text-prop={`items.${String(index)}.name`}>{item.name}</span>
+                <span style={{ color: theme.muted }}>{item.shape}</span>
               </div>
             </div>
           );

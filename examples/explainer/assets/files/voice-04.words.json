@@ -1,0 +1,39 @@
+{
+  "words": [
+    {
+      "endFrame": 10,
+      "startFrame": 2,
+      "text": "Type"
+    },
+    {
+      "endFrame": 17,
+      "startFrame": 10,
+      "text": "what"
+    },
+    {
+      "endFrame": 23,
+      "startFrame": 17,
+      "text": "you"
+    },
+    {
+      "endFrame": 31,
+      "startFrame": 23,
+      "text": "want,"
+    },
+    {
+      "endFrame": 39,
+      "startFrame": 34,
+      "text": "in"
+    },
+    {
+      "endFrame": 48,
+      "startFrame": 39,
+      "text": "plain"
+    },
+    {
+      "endFrame": 57,
+      "startFrame": 48,
+      "text": "words."
+    }
+  ]
+}

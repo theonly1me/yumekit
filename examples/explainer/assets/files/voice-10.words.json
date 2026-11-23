@@ -1,0 +1,34 @@
+{
+  "words": [
+    {
+      "endFrame": 6,
+      "startFrame": 2,
+      "text": "It"
+    },
+    {
+      "endFrame": 15,
+      "startFrame": 6,
+      "text": "stays"
+    },
+    {
+      "endFrame": 24,
+      "startFrame": 15,
+      "text": "yours,"
+    },
+    {
+      "endFrame": 32,
+      "startFrame": 27,
+      "text": "on"
+    },
+    {
+      "endFrame": 39,
+      "startFrame": 32,
+      "text": "your"
+    },
+    {
+      "endFrame": 53,
+      "startFrame": 39,
+      "text": "computer."
+    }
+  ]
+}

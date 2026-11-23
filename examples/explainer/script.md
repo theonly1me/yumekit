@@ -1,11 +1,23 @@
-# yumekit in 15 seconds
+An idea.
 
-Type an idea.
+A sentence.
 
-Your own AI writes it, draws it, and voices it.
+A finished video.
 
-You get one video for every platform.
+Type what you want, in plain words.
 
-Then change anything you like.
+Your own AI does the work.
 
-yumekit. Open source, on your own computer.
+Every one of these was made with yumekit.
+
+One idea. Every platform.
+
+Click to change anything.
+
+One click, a new look.
+
+It stays yours, on your computer.
+
+Free to start, with the AI you already have. No account.
+
+yumekit. Open source. Install it with one line.

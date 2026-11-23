@@ -1,6 +1,7 @@
 {
   "formatVersion": 1,
   "framesPerSecond": 30,
+  "look": "midnight",
   "name": "yumekit explainer",
   "outputs": [
     {
