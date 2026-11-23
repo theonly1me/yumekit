@@ -8,7 +8,7 @@ async function readProjectFile(folder: string): Promise<unknown> {
 }
 
 describe("yumekit init", () => {
-  it("makes a project with one 1920 by 1080 output named wide at 30 frames per second by default", async () => {
+  it("makes a project with one 1920 by 1080 output named wide at 30 frames per second, in the look midnight of the start screen, by default", async () => {
     const workspace = await createCliWorkspace();
     const folder = join(workspace.root, "my-video");
 
@@ -23,6 +23,7 @@ describe("yumekit init", () => {
       formatVersion: 1,
       name: "my-video",
       framesPerSecond: 30,
+      look: "midnight",
       outputs: [
         { id: "wide", label: "wide", widthPixels: 1920, heightPixels: 1080 },
       ],

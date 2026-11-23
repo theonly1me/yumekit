@@ -64,4 +64,44 @@ describe("a done step of the Making screen", () => {
       fact: "The voice is ready",
     });
   });
+
+  it("counts the pictures of the scenes and leaves the caption scenes out", () => {
+    const sceneOf = (options: { id: string; component: string }) => ({
+      id: options.id,
+      title: options.id,
+      notes: "",
+      source: {
+        kind: "kit" as const,
+        component: options.component,
+        props: {},
+      },
+    });
+    const steps = makingStepsOf({
+      answer: {
+        kind: "answer",
+        id: "answer",
+        state: "done",
+        text: "",
+        steps: [
+          { tool: "put_scene", state: "done" },
+          { tool: "put_scene", state: "done" },
+          { tool: "put_scene", state: "done" },
+        ],
+      },
+      snapshot: {
+        ...snapshotWithVoice,
+        scenes: [
+          sceneOf({ id: "hook", component: "title-card" }),
+          sceneOf({ id: "product", component: "title-card" }),
+          sceneOf({ id: "captions-voice", component: "caption-words" }),
+        ],
+      },
+      phase: "whole",
+      musicIsReady: true,
+    });
+
+    expect(steps.find((step) => step.id === "pictures")?.fact).toBe(
+      "2 pictures are ready",
+    );
+  });
 });

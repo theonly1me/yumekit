@@ -74,7 +74,7 @@ describe("the instructions for the agent", () => {
       "18. When a video has a voice with captions, the text of a scene supports the voice. It does not show a second sentence at the same time.",
     );
     expect(brainInstructions).toContain(
-      '19. If the voice does not know a name, give how it sounds in common English words in the input pronunciations, for example {"Hoshi": "hoe she"}. Keep the name in the text.',
+      '19. If the voice does not know a name, give how it sounds in common English words in input.pronunciations of generate_asset or in pronunciations of replace_narration, for example {"Hoshi": "hoe she"}. Keep the name in the text.',
     );
     expect(brainInstructions).toContain(
       "15. Before the first picture, add each person",

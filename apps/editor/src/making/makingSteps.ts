@@ -1,3 +1,4 @@
+import { isCaptionScene } from "@yumekit/project/scenes-row";
 import type { Snapshot } from "../engine/snapshot.js";
 import { musicTracksOf, voiceTrackOf } from "../sound/soundRowFacts.js";
 import type { AnswerEntry, MakingPhase } from "./firstChat.js";
@@ -42,11 +43,16 @@ function picturesFact(options: {
   answer: AnswerEntry;
 }): string {
   const { snapshot, answer } = options;
-  const count = Math.max(
-    snapshot.scenes.length,
-    madeAssetCount({ snapshot, tool: "generate_image" }),
-    doneCount({ answer, tool: "put_scene" }),
-  );
+  const sceneCount = snapshot.scenes.filter(
+    (scene) => !isCaptionScene(scene),
+  ).length;
+  const count =
+    sceneCount > 0
+      ? sceneCount
+      : Math.max(
+          madeAssetCount({ snapshot, tool: "generate_image" }),
+          doneCount({ answer, tool: "put_scene" }),
+        );
   return count === 1
     ? "1 picture is ready"
     : `${String(count)} pictures are ready`;
