@@ -1,0 +1,39 @@
+{
+  "words": [
+    {
+      "endFrame": 13,
+      "startFrame": 2,
+      "text": "yumekit."
+    },
+    {
+      "endFrame": 26,
+      "startFrame": 19,
+      "text": "Open"
+    },
+    {
+      "endFrame": 36,
+      "startFrame": 26,
+      "text": "source,"
+    },
+    {
+      "endFrame": 43,
+      "startFrame": 39,
+      "text": "on"
+    },
+    {
+      "endFrame": 50,
+      "startFrame": 43,
+      "text": "your"
+    },
+    {
+      "endFrame": 56,
+      "startFrame": 50,
+      "text": "own"
+    },
+    {
+      "endFrame": 68,
+      "startFrame": 56,
+      "text": "computer."
+    }
+  ]
+}

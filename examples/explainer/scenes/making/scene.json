@@ -1,0 +1,44 @@
+{
+  "id": "making",
+  "notes": "Real screenshots of the Making screen, one for each state, while the steps finish one after another.",
+  "source": {
+    "kind": "module",
+    "props": {
+      "cameraFrom": {
+        "width": 1240,
+        "x": 90,
+        "y": 50
+      },
+      "cameraTo": {
+        "width": 800,
+        "x": 112,
+        "y": 98
+      },
+      "fontAssetId": "font-geist",
+      "heading": "Your own AI makes the video.",
+      "label": "Making",
+      "screenHeight": 900,
+      "screenWidth": 1440,
+      "shots": [
+        {
+          "assetId": "shot-making-0",
+          "startSeconds": 0
+        },
+        {
+          "assetId": "shot-making-1",
+          "startSeconds": 0.8
+        },
+        {
+          "assetId": "shot-making-2",
+          "startSeconds": 1.55
+        },
+        {
+          "assetId": "shot-making-done-voice",
+          "startSeconds": 2.3
+        }
+      ],
+      "windowEnters": false
+    }
+  },
+  "title": "Your own AI makes it"
+}

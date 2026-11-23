@@ -1,0 +1,14 @@
+{
+  "id": "end",
+  "notes": "The name, one line, and the install command.",
+  "source": {
+    "kind": "module",
+    "props": {
+      "command": "npm install -g yumekit",
+      "fontAssetId": "font-geist",
+      "line": "Open source. On your computer. With the AI you already have.",
+      "name": "yumekit"
+    }
+  },
+  "title": "Install"
+}

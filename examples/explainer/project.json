@@ -1,0 +1,13 @@
+{
+  "formatVersion": 1,
+  "framesPerSecond": 30,
+  "name": "yumekit explainer",
+  "outputs": [
+    {
+      "heightPixels": 1080,
+      "id": "wide",
+      "label": "wide",
+      "widthPixels": 1920
+    }
+  ]
+}

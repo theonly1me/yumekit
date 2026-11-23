@@ -1,0 +1,29 @@
+{
+  "words": [
+    {
+      "endFrame": 9,
+      "startFrame": 2,
+      "text": "Then"
+    },
+    {
+      "endFrame": 19,
+      "startFrame": 9,
+      "text": "change"
+    },
+    {
+      "endFrame": 32,
+      "startFrame": 19,
+      "text": "anything"
+    },
+    {
+      "endFrame": 38,
+      "startFrame": 32,
+      "text": "you"
+    },
+    {
+      "endFrame": 45,
+      "startFrame": 38,
+      "text": "like."
+    }
+  ]
+}

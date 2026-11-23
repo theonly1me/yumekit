@@ -6,7 +6,13 @@ import globals from "globals";
 import tseslint from "typescript-eslint";
 
 export default defineConfig(
-  globalIgnores(["**/dist/", "**/.tsbuild/", "**/coverage/", "release/"]),
+  globalIgnores([
+    "**/dist/",
+    "**/.tsbuild/",
+    "**/coverage/",
+    "release/",
+    "examples/*/scenes/",
+  ]),
   eslint.configs.recommended,
   tseslint.configs.strictTypeChecked,
   tseslint.configs.stylisticTypeChecked,
