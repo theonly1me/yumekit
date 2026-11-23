@@ -52,16 +52,14 @@ async function videoOfThePerson(chat: ChatEngine): Promise<void> {
     body: wavBytes(3),
   });
   expect(uploaded.status).toBe(200);
+  const musicWithTheFile = {
+    ...music,
+    clips: [{ asset_id: "calmpad", start_frame: 0, duration_frames: 90 }],
+  };
   await callTool({
     ...chat.engine,
-    name: "add_clip",
-    input: {
-      output_id: "wide",
-      track_id: "music",
-      asset_id: "calmpad",
-      start_frame: 0,
-      duration_frames: 90,
-    },
+    name: "set_timeline",
+    input: { output_id: "wide", tracks: [scenesRow, musicWithTheFile] },
   });
   await callTool({
     ...chat.engine,
@@ -71,6 +69,19 @@ async function videoOfThePerson(chat: ChatEngine): Promise<void> {
 }
 
 describe("the work of the person in a chat request", () => {
+  it("names the music file in the change of the person", async () => {
+    const chat = await startChatEngine({ steps: [] });
+
+    await videoOfThePerson(chat);
+
+    expect((await chat.readChat()).entries).toContainEqual(
+      expect.objectContaining({
+        by: "person",
+        summary: "You added the music Calm pad.wav.",
+      }),
+    );
+  });
+
   it("keeps the music and each slide when the agent writes the timeline again without them", async () => {
     const resultFile = join(
       process.env["TMPDIR"] ?? "/tmp",

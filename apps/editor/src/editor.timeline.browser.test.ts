@@ -26,13 +26,14 @@ afterAll(async () => {
 });
 
 describe("the scene cards and the detailed timeline", () => {
-  it("moves the playhead to the start of a scene card that the person picks", async () => {
+  it("moves the playhead to the settled frame of a scene card that the person picks, not into its transition", async () => {
     const editor = await openEditor(runningEngine().url);
+    const settledFrame = clipLengthFrames + Math.round(clipLengthFrames * 0.75);
 
     await editor.page.getByRole("button", { name: /Second counter/ }).click();
 
-    expect(await editor.scrubberFrame()).toBe(clipLengthFrames);
-    await expect.poll(editor.previewFrame).toBe(clipLengthFrames);
+    expect(await editor.scrubberFrame()).toBe(settledFrame);
+    await expect.poll(editor.previewFrame).toBe(settledFrame);
     await editor.page.getByRole("tab", { name: "Scene 2" }).click();
     await expect
       .poll(() =>

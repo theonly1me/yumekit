@@ -19,8 +19,8 @@ export function ChatPanel(props: {
   const sendInput = (input: AskInput) => {
     chat.send(input).catch(() => undefined);
   };
-  const sendText = (text: string) => {
-    sendInput({ text, aboutClipId: chip?.clipId });
+  const sendForTheWholeVideo = (text: string) => {
+    sendInput({ text, aboutClipId: undefined });
   };
   return (
     <div className="chat-pane" hidden={props.isHidden}>
@@ -35,7 +35,7 @@ export function ChatPanel(props: {
         <Suggestions
           hasScenes={props.hasScenes}
           isRunning={chat.isRunning}
-          onSend={sendText}
+          onSend={sendForTheWholeVideo}
           onFill={box.fill}
         />
         <AskForm
