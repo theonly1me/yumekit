@@ -1,0 +1,59 @@
+{
+  "words": [
+    {
+      "endFrame": 10,
+      "startFrame": 2,
+      "text": "Free"
+    },
+    {
+      "endFrame": 14,
+      "startFrame": 10,
+      "text": "to"
+    },
+    {
+      "endFrame": 23,
+      "startFrame": 14,
+      "text": "start,"
+    },
+    {
+      "endFrame": 34,
+      "startFrame": 26,
+      "text": "with"
+    },
+    {
+      "endFrame": 40,
+      "startFrame": 34,
+      "text": "the"
+    },
+    {
+      "endFrame": 45,
+      "startFrame": 40,
+      "text": "AI"
+    },
+    {
+      "endFrame": 51,
+      "startFrame": 45,
+      "text": "you"
+    },
+    {
+      "endFrame": 63,
+      "startFrame": 51,
+      "text": "already"
+    },
+    {
+      "endFrame": 71,
+      "startFrame": 63,
+      "text": "have."
+    },
+    {
+      "endFrame": 82,
+      "startFrame": 77,
+      "text": "No"
+    },
+    {
+      "endFrame": 94,
+      "startFrame": 82,
+      "text": "account."
+    }
+  ]
+}

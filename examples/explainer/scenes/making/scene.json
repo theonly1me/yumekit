@@ -1,44 +1,49 @@
 {
   "id": "making",
-  "notes": "Real screenshots of the Making screen, one for each state, while the steps finish one after another.",
+  "notes": "The real Making screen, recorded while a stand-in agent called the real tools. Each step becomes done.",
   "source": {
     "kind": "module",
     "props": {
-      "cameraFrom": {
-        "width": 1240,
-        "x": 90,
-        "y": 50
-      },
-      "cameraTo": {
-        "width": 800,
-        "x": 112,
-        "y": 98
-      },
-      "fontAssetId": "font-geist",
-      "heading": "Your own AI makes the video.",
-      "label": "Making",
-      "screenHeight": 900,
-      "screenWidth": 1440,
-      "shots": [
+      "accentWord": "AI",
+      "assetId": "rec-making",
+      "camera": [
         {
-          "assetId": "shot-making-0",
-          "startSeconds": 0
+          "frame": 0,
+          "width": 700,
+          "x": 105,
+          "y": 60
         },
         {
-          "assetId": "shot-making-1",
-          "startSeconds": 0.8
-        },
-        {
-          "assetId": "shot-making-2",
-          "startSeconds": 1.55
-        },
-        {
-          "assetId": "shot-making-done-voice",
-          "startSeconds": 2.3
+          "frame": 75,
+          "width": 630,
+          "x": 112,
+          "y": 70
         }
       ],
+      "fontAssetId": "font-geist",
+      "heading": "Your own AI does the work.",
+      "label": "Making",
+      "layout": "side",
+      "segments": [
+        {
+          "frames": 28,
+          "from": 2,
+          "to": 8
+        },
+        {
+          "frames": 30,
+          "from": 8,
+          "to": 20
+        },
+        {
+          "frames": 17,
+          "from": 20,
+          "to": 20.2
+        }
+      ],
+      "subheading": "Claude Code, Codex, or Cursor.",
       "windowEnters": false
     }
   },
-  "title": "Your own AI makes it"
+  "title": "Your own AI does the work"
 }

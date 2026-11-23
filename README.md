@@ -1,8 +1,8 @@
 # yumekit
 
-<a href="docs/media/yumekit-explainer.mp4"><img src="docs/media/yumekit-explainer.gif" width="960" alt="yumekit in 15 seconds: you type an idea, your own AI makes the video, you get one video for each platform, and you change anything in the editor." /></a>
+<a href="docs/media/yumekit-explainer.mp4"><img src="docs/media/yumekit-explainer.gif" width="960" alt="The first 12 seconds of the yumekit film: An idea. A sentence. A finished video. Then the real app: an idea is typed, your own AI makes the video, and three real videos that yumekit made." /></a>
 
-[Watch it with sound (MP4, 15 seconds)](docs/media/yumekit-explainer.mp4). yumekit made this video. The project is in [examples/explainer](examples/explainer).
+[Watch the whole film with sound (MP4, 30 seconds)](docs/media/yumekit-explainer.mp4). yumekit made this film, and each video in it. The project is in [examples/explainer](examples/explainer).
 
 Open source harness for content creation.
 

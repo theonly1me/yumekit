@@ -1,0 +1,44 @@
+{
+  "words": [
+    {
+      "endFrame": 11,
+      "startFrame": 2,
+      "text": "Every"
+    },
+    {
+      "endFrame": 17,
+      "startFrame": 11,
+      "text": "one"
+    },
+    {
+      "endFrame": 22,
+      "startFrame": 17,
+      "text": "of"
+    },
+    {
+      "endFrame": 31,
+      "startFrame": 22,
+      "text": "these"
+    },
+    {
+      "endFrame": 37,
+      "startFrame": 31,
+      "text": "was"
+    },
+    {
+      "endFrame": 45,
+      "startFrame": 37,
+      "text": "made"
+    },
+    {
+      "endFrame": 52,
+      "startFrame": 45,
+      "text": "with"
+    },
+    {
+      "endFrame": 64,
+      "startFrame": 52,
+      "text": "yumekit."
+    }
+  ]
+}

@@ -1,32 +1,34 @@
 {
   "id": "shapes",
-  "notes": "Real frames of the same moment from the three exported files.",
+  "notes": "The video from the recorded session, exported in three shapes, playing together.",
   "source": {
     "kind": "module",
     "props": {
+      "accentWord": "platform.",
       "fontAssetId": "font-geist",
-      "heading": "One video for each platform.",
-      "shapes": [
+      "fromFrame": 6,
+      "heading": "One idea. Every platform.",
+      "items": [
         {
-          "aspect": 1.7777777777777777,
-          "assetId": "frame-youtube",
+          "assetId": "hoshi-youtube",
           "name": "YouTube",
-          "ratio": "16:9"
+          "ratio": 1.7778,
+          "shape": "16:9"
         },
         {
-          "aspect": 0.5625,
-          "assetId": "frame-tiktok",
+          "assetId": "hoshi-tiktok",
           "name": "TikTok",
-          "ratio": "9:16"
+          "ratio": 0.5625,
+          "shape": "9:16"
         },
         {
-          "aspect": 1,
-          "assetId": "frame-square",
+          "assetId": "hoshi-square",
           "name": "Square",
-          "ratio": "1:1"
+          "ratio": 1,
+          "shape": "1:1"
         }
       ]
     }
   },
-  "title": "One video for each platform"
+  "title": "One idea, every platform"
 }

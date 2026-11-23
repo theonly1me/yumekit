@@ -1,0 +1,44 @@
+{
+  "words": [
+    {
+      "endFrame": 14,
+      "startFrame": 2,
+      "text": "yumekit."
+    },
+    {
+      "endFrame": 29,
+      "startFrame": 21,
+      "text": "Open"
+    },
+    {
+      "endFrame": 39,
+      "startFrame": 29,
+      "text": "source."
+    },
+    {
+      "endFrame": 58,
+      "startFrame": 46,
+      "text": "Install"
+    },
+    {
+      "endFrame": 63,
+      "startFrame": 58,
+      "text": "it"
+    },
+    {
+      "endFrame": 71,
+      "startFrame": 63,
+      "text": "with"
+    },
+    {
+      "endFrame": 77,
+      "startFrame": 71,
+      "text": "one"
+    },
+    {
+      "endFrame": 85,
+      "startFrame": 77,
+      "text": "line."
+    }
+  ]
+}

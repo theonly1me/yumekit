@@ -1,0 +1,54 @@
+{
+  "id": "type",
+  "notes": "The real start screen, recorded. The idea is typed, then Make the video is clicked.",
+  "source": {
+    "kind": "module",
+    "props": {
+      "accentWord": "want.",
+      "assetId": "rec-type",
+      "camera": [
+        {
+          "frame": 0,
+          "width": 900,
+          "x": 300,
+          "y": 105
+        },
+        {
+          "frame": 55,
+          "width": 830,
+          "x": 330,
+          "y": 112
+        },
+        {
+          "frame": 56,
+          "width": 1000,
+          "x": 240,
+          "y": 443
+        },
+        {
+          "frame": 75,
+          "width": 940,
+          "x": 250,
+          "y": 470
+        }
+      ],
+      "fontAssetId": "font-geist",
+      "heading": "Type what you want.",
+      "label": "Start",
+      "segments": [
+        {
+          "frames": 56,
+          "from": 0.6,
+          "to": 4.45
+        },
+        {
+          "frames": 19,
+          "from": 7.8,
+          "to": 8.75
+        }
+      ],
+      "windowEnters": false
+    }
+  },
+  "title": "Type what you want"
+}
