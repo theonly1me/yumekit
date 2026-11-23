@@ -1,18 +1,17 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import type { EngineClient } from "../../engine/engineClient.js";
 import type { Output, SceneClip, Snapshot } from "../../engine/snapshot.js";
-import { useEngineEvents } from "../../engine/useEngineEvents.js";
+import { useLeadMaking } from "../../lead/useLeadMaking.js";
 import { Sheet } from "../../sheets/Sheet.js";
 import {
   currentModelOf,
   useMediaChoices,
 } from "../../settings/services/index.js";
 import { useMediaServers } from "../../tools/useMediaServers.js";
-import type { Phase } from "../ClipAction.js";
 import { outputsHoldingClip, sceneNumberOf } from "../clipOutputs.js";
-import type { MadeClip } from "../makeClip.js";
+import { madeClipOf, type MadeClip } from "../makeClip.js";
 import { MadeClipResult } from "../MadeClipResult.js";
-import { makeTalkingClip } from "./makeTalkingClip.js";
+import { talkingRequestOf } from "./makeTalkingClip.js";
 import { TalkingClipForm } from "./TalkingClipForm.js";
 import { sceneVoiceOf, speakersOf } from "./talkingFacts.js";
 import { useTalkingChoice } from "./useTalkingChoice.js";
@@ -30,12 +29,12 @@ export function TalkingClipSheet(props: {
   onRecordVoice: (clipId: string) => void;
 }) {
   const { client, snapshot, output } = props;
-  const callId = useRef("");
   const media = useMediaServers(client);
   const mediaChoices = useMediaChoices(client);
   const [target, setTarget] = useState(props.clip);
   const [speakerKey, setSpeakerKey] = useState<string>();
-  const [phase, setPhase] = useState<Phase>({ kind: "editing" });
+  const making = useLeadMaking<MadeClip>({ client, onFinished: media.reload });
+  const { phase } = making;
   const scene = snapshot.scenes.find((each) => each.id === target.sceneId);
   const speakers = scene === undefined ? [] : speakersOf({ snapshot, scene });
   const [firstSpeaker] = speakers;
@@ -60,57 +59,31 @@ export function TalkingClipSheet(props: {
   const sceneName =
     number === undefined ? sceneTitle : `scene ${String(number)}`;
 
-  useEngineEvents({
-    client,
-    onEvent: (event) => {
-      if (event.type !== "call-progress" || event.callId !== callId.current) {
-        return;
-      }
-      setPhase((current) =>
-        current.kind === "making"
-          ? { kind: "making", progress: event }
-          : current,
-      );
-    },
-  });
-
   const make = () => {
     const { choice, values } = talkingChoice;
     if (choice === undefined || speaker === undefined || voice === undefined) {
       return;
     }
     if (phase.kind === "making") return;
-    callId.current = crypto.randomUUID();
-    setPhase({ kind: "making", progress: undefined });
-    makeTalkingClip({
-      client,
+    const outputs = outputsHoldingClip({
+      snapshot,
+      clipId: target.id,
+      currentOutput: output,
+    });
+    const { assetId, request } = talkingRequestOf({
       choice,
       values,
       speaker,
       voice,
-      outputs: outputsHoldingClip({
-        snapshot,
-        clipId: target.id,
-        currentOutput: output,
-      }),
+      outputs,
       clip: target,
       assets: snapshot.assets,
-      callId: callId.current,
-    })
-      .then(async (outcome) => {
-        setPhase(
-          outcome.ok
-            ? { kind: "made", made: outcome.made }
-            : { kind: "failed", failure: outcome.failure },
-        );
-        await media.reload();
-      })
-      .catch((error: unknown) => {
-        setPhase({
-          kind: "failed",
-          failure: { kind: "defect", message: String(error) },
-        });
-      });
+    });
+    making.make({
+      exact: request,
+      find: (latest) =>
+        madeClipOf({ snapshot: latest, assetId, clip: target, outputs }),
+    });
   };
 
   return (
@@ -131,7 +104,7 @@ export function TalkingClipSheet(props: {
                 id: phase.made.sceneClipId,
                 sceneId: `video-${phase.made.assetId}`,
               });
-              setPhase({ kind: "editing" });
+              making.reset();
             }}
           />
         ) : speaker === undefined ? (
@@ -147,7 +120,7 @@ export function TalkingClipSheet(props: {
             speakers={speakers}
             speaker={speaker}
             onSpeaker={(key) => {
-              if (phase.kind === "failed") setPhase({ kind: "editing" });
+              if (phase.kind === "failed") making.reset();
               setSpeakerKey(key);
             }}
             voice={voice}
@@ -158,6 +131,11 @@ export function TalkingClipSheet(props: {
             keyRequests={media.requests}
             talkingChoice={talkingChoice}
             phase={phase}
+            leadMissing={
+              making.readiness.kind === "missing"
+                ? making.readiness.message
+                : undefined
+            }
             onMake={make}
           />
         )}

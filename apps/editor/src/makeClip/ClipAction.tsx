@@ -1,10 +1,10 @@
 import type { KeyRequests } from "../tools/requestText.js";
 import { KeyNeeded } from "./KeyNeeded.js";
+import type { LeadPhase } from "../lead/useLeadMaking.js";
 import type { MadeClip } from "./makeClip.js";
 import type { ModelChoice } from "./modelChoices.js";
 import { priceOf, priceText } from "./price.js";
 import { secondsOf, type SettingValues } from "./settingValues.js";
-import type { ToolFailure } from "./toolCalls.js";
 import "./clipAction.css";
 
 export interface CallProgress {
@@ -13,11 +13,7 @@ export interface CallProgress {
   message?: string | undefined;
 }
 
-export type Phase =
-  | { kind: "editing" }
-  | { kind: "making"; progress: CallProgress | undefined }
-  | { kind: "failed"; failure: ToolFailure }
-  | { kind: "made"; made: MadeClip };
+export type Phase = LeadPhase<MadeClip>;
 
 export interface VideoLimit {
   usedSeconds: number;
@@ -88,7 +84,7 @@ function Progress(props: {
         />
       </span>
       <p className="fact">
-        {progress?.message ?? `Waiting for ${props.server}.`}
+        {progress?.message ?? `The AI makes the clip with ${props.server}.`}
       </p>
       <p className="fact">
         You can close this. The clip goes into {props.sceneName} when it is
@@ -162,7 +158,7 @@ export function ClipAction(props: {
           disabled={props.missing !== undefined || isMaking}
           onClick={props.onMake}
         >
-          {isMaking ? "Making the clip" : "Make the clip"}
+          {isMaking ? "The AI is making the clip" : "Make the clip"}
         </button>
         <span className="clip-make-price">{priceText(price)}</span>
         {props.missing === undefined ? undefined : (

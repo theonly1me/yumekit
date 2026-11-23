@@ -1,10 +1,12 @@
 import type { AskInput } from "../chat/chatRequests.js";
+import { exactDetailsOf, type ExactRequest } from "../lead/exactRequests.js";
 import {
   oneTimeModelSentence,
   type ModelTarget,
 } from "../settings/services/index.js";
 
 export type FixedRequest =
+  | ExactRequest
   | { kind: "update-the-video" }
   | {
       kind: "change-the-picture";
@@ -47,6 +49,8 @@ function castPictureSentenceOf(options: {
 
 function requestSentenceOf(request: FixedRequest): string {
   switch (request.kind) {
+    case "exact":
+      return request.sentence;
     case "update-the-video":
       return "I changed the script. Update the video to match the script.";
     case "change-the-picture":
@@ -110,12 +114,17 @@ function aboutClipIdOf(request: FixedRequest): string | undefined {
   return "aboutClipId" in request ? request.aboutClipId : undefined;
 }
 
+export function askInputOf(request: FixedRequest): AskInput {
+  return {
+    text: fixedRequestTextOf(request),
+    ...(request.kind === "exact" ? { details: exactDetailsOf(request) } : {}),
+    aboutClipId: aboutClipIdOf(request),
+  };
+}
+
 export function sendFixedRequest(options: {
   ask: AskTheAi;
   request: FixedRequest;
 }): Promise<boolean> {
-  return options.ask({
-    text: fixedRequestTextOf(options.request),
-    aboutClipId: aboutClipIdOf(options.request),
-  });
+  return options.ask(askInputOf(options.request));
 }

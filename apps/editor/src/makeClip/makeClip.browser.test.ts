@@ -1,6 +1,8 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { requestTextsSent, setScenario } from "../testing/chatTesting.js";
 import { buildCounterProject } from "../testing/counterProject.js";
 import { closeBrowser, openEditor } from "../testing/editorPage.js";
+import { followingLeadScenario } from "../testing/fakeAgent.js";
 import {
   engineRequest,
   keyTestServer,
@@ -20,6 +22,7 @@ function runningEngine(): RunningEngine {
 
 beforeAll(async () => {
   engine = await runEngine({
+    fakeAgent: true,
     mediaTools: {
       mcpServers: {
         sample: {},
@@ -29,6 +32,7 @@ beforeAll(async () => {
     },
   });
   await buildCounterProject(engine);
+  await setScenario({ engine, scenario: followingLeadScenario });
 });
 
 afterAll(async () => {
@@ -115,7 +119,7 @@ describe("Make a clip", () => {
     await editor.close();
   });
 
-  it("makes a clip from the prompt of the scene, puts it in place of the scene on each platform, and the preview shows it", async () => {
+  it("asks the AI to make the still and the clip with the exact choices of the sheet, the clip goes in place of the scene on each platform, and the preview shows it", async () => {
     const editor = await openEditor(runningEngine().url);
     const { page } = editor;
     await openMakeClip(page);
@@ -137,6 +141,20 @@ describe("Make a clip", () => {
     await expect
       .poll(() => page.getByText("The clip is in the scene").count())
       .toBe(1);
+    const sent = await requestTextsSent(runningEngine());
+    expect(sent).toContainEqual(
+      expect.stringContaining(
+        "Make a still picture with Test picture as the first picture of the clip: A red ball.",
+      ),
+    );
+    expect(sent).toContainEqual(
+      expect.stringContaining(
+        "Make a real video clip for this scene with Test clip, 2 seconds long, from the picture still-first. Put it in place of the scene.",
+      ),
+    );
+    expect(sent.at(-1)).toContain(
+      '2. place_video {"output_id":"wide","asset_id":"clip-first","replace_clip_id":"first","remove_person_work":true}',
+    );
     for (const outputId of ["wide", "tall"]) {
       const clips = await sceneClipsOf({ engine: runningEngine(), outputId });
       expect(

@@ -1,6 +1,12 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { z } from "zod";
+import {
+  requestTextsSent,
+  setScenario,
+  writeSettings,
+} from "../../testing/chatTesting.js";
 import { closeBrowser, openEditor } from "../../testing/editorPage.js";
+import { followingLeadScenario } from "../../testing/fakeAgent.js";
 import { engineRequest, openTools } from "../../testing/mediaTestTools.js";
 import { runEngine, type RunningEngine } from "../../testing/runEngine.js";
 import { buildSoundProject } from "../../testing/soundProject.js";
@@ -13,8 +19,13 @@ function runningEngine(): RunningEngine {
 }
 
 beforeAll(async () => {
-  engine = await runEngine({ withVoiceServer: true, withChromium: true });
+  engine = await runEngine({
+    fakeAgent: true,
+    withVoiceServer: true,
+    withChromium: true,
+  });
   await buildSoundProject(engine);
+  await setScenario({ engine, scenario: followingLeadScenario });
 });
 
 afterAll(async () => {
@@ -67,7 +78,7 @@ async function musicInUse() {
 }
 
 describe("music from this computer", () => {
-  it("shows each style with its line and Not approved yet, makes the music of a style for the whole video, and Try another makes a new version", async () => {
+  it("shows each style with its line and Not approved yet, asks the AI for the music of a style for the whole video, and Try another asks for a new version", async () => {
     const editor = await openEditor(runningEngine().url);
     const { page } = editor;
     await page.getByRole("button", { name: "Open the music" }).click();
@@ -98,6 +109,11 @@ describe("music from this computer", () => {
     await expect
       .poll(() => page.getByRole("status").allTextContents())
       .toContain("The video now has Warm music.");
+    expect(await requestTextsSent(runningEngine())).toContainEqual(
+      expect.stringContaining(
+        'Use the music "Warm" from this computer, take 1, for the whole video.',
+      ),
+    );
 
     await page.getByRole("button", { name: "Try another" }).click();
     await expect
@@ -133,6 +149,29 @@ describe("music from this computer", () => {
     await expect
       .poll(() => service.textContent())
       .toContain("Free. It runs on your computer.");
+    await editor.close();
+  });
+
+  it("says what is missing and sends nothing when no AI program is ready", async () => {
+    await writeSettings({
+      engine: runningEngine(),
+      settings: { agent: "cursor" },
+    });
+    const editor = await openEditor(runningEngine().url);
+    const { page } = editor;
+    await page.getByRole("button", { name: "Open the music" }).click();
+    await page.getByRole("list", { name: "Styles of music" }).waitFor();
+
+    await expect
+      .poll(() =>
+        page
+          .getByText("Making this needs an AI program on this computer.")
+          .count(),
+      )
+      .toBe(1);
+    expect(
+      await page.getByRole("button", { name: "Use this" }).first().isDisabled(),
+    ).toBe(true);
     await editor.close();
   });
 });

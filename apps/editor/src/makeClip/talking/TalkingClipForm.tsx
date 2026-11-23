@@ -28,6 +28,7 @@ export function TalkingClipForm(props: {
   keyRequests: KeyRequests;
   talkingChoice: ReturnType<typeof useTalkingChoice>;
   phase: Phase;
+  leadMissing: string | undefined;
   onMake: () => void;
 }) {
   const { client, media, talkingChoice, speaker } = props;
@@ -92,7 +93,7 @@ export function TalkingClipForm(props: {
                   limitSeconds: media.servers.generated_video.limit_seconds,
                 }}
                 phase={props.phase}
-                missing={undefined}
+                missing={props.leadMissing}
                 sceneName={props.sceneName}
                 keyRequests={props.keyRequests}
                 onMake={props.onMake}

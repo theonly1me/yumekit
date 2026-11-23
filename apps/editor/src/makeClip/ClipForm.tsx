@@ -25,9 +25,11 @@ export interface ClipDraft {
 }
 
 function missingText(options: {
+  leadMissing: string | undefined;
   hasPrompt: boolean;
   picture: ScenePicture["kind"] | "picked" | "not-needed";
 }): string | undefined {
+  if (options.leadMissing !== undefined) return options.leadMissing;
   if (!options.hasPrompt) {
     return "Write what happens in the clip, in the box under Camera.";
   }
@@ -54,6 +56,7 @@ export function ClipForm(props: {
   onDraft: (change: Partial<ClipDraft>) => void;
   scenePicture: ScenePicture;
   phase: Phase;
+  leadMissing: string | undefined;
   onMake: () => void;
   onAskTheAi: () => void;
 }) {
@@ -157,6 +160,7 @@ export function ClipForm(props: {
                 }}
                 phase={props.phase}
                 missing={missingText({
+                  leadMissing: props.leadMissing,
                   hasPrompt: draft.prompt.trim() !== "",
                   picture: pictureState,
                 })}

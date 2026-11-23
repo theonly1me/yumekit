@@ -1,6 +1,8 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { buildCounterProject } from "../testing/counterProject.js";
+import { setScenario } from "../testing/chatTesting.js";
 import { closeBrowser, openEditor } from "../testing/editorPage.js";
+import { followingLeadScenario } from "../testing/fakeAgent.js";
 import {
   generateStill,
   openMakeClip,
@@ -18,6 +20,7 @@ function runningEngine(): RunningEngine {
 
 beforeAll(async () => {
   engine = await runEngine({
+    fakeAgent: true,
     mediaTools: {
       mcpServers: { sample: {}, ...withoutOtherBundled },
       limits: { generatedVideoSeconds: 3 },
@@ -25,6 +28,7 @@ beforeAll(async () => {
   });
   await buildCounterProject(engine);
   await generateStill(engine);
+  await setScenario({ engine, scenario: followingLeadScenario });
 });
 
 afterAll(async () => {
