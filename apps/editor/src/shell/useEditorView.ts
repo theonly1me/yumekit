@@ -6,6 +6,7 @@ import type { SceneToShow } from "../export/useExportSheet.js";
 import { usePlayback } from "../preview/usePlayback.js";
 import { useSound } from "../preview/useSound.js";
 import type { PickedCard } from "../scenes/SceneActions.js";
+import { stillFrameOf } from "../scenes/useSceneStills.js";
 import type { SideTab } from "../side/SidePanel.js";
 import { platformTabsOf } from "../platforms/platformTabFacts.js";
 import { useEditorFacts } from "./useEditorFacts.js";
@@ -20,6 +21,7 @@ export function useEditorView(options: {
   const framesPerSecond = snapshot.project.framesPerSecond;
   const [tabKey, setTabKey] = useState<string>();
   const [wantedFrame, setFrame] = useState(0);
+  const [hasMoved, setMoved] = useState(false);
   const [pickedClipId, setPickedClipId] = useState<string>();
   const [sideTab, setSideTab] = useState<SideTab>("chat");
   const [isSideOpen, setSideOpen] = useState(false);
@@ -47,6 +49,7 @@ export function useEditorView(options: {
   const moveTo = useCallback(
     (next: number) => {
       pause();
+      setMoved(true);
       setFrame(Math.min(Math.max(0, next), Math.max(0, lengthFrames - 1)));
     },
     [pause, lengthFrames],
@@ -86,8 +89,13 @@ export function useEditorView(options: {
           }),
         };
 
+  const [firstClip] = facts.mainClips;
+  const isOpening = !hasMoved && !playback.isPlaying && frame === 0;
+
   return {
     facts,
+    previewFrame:
+      isOpening && firstClip !== undefined ? stillFrameOf(firstClip) : frame,
     playback,
     moveTo,
     step,
@@ -122,6 +130,7 @@ export function useEditorView(options: {
       );
       setTabKey(tab?.key);
       setPickedClipId(scene.clipId);
+      setMoved(true);
       setFrame(scene.frame);
       openSide("scene");
     },

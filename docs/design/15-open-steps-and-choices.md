@@ -37,14 +37,17 @@ The Making screen has two columns from 900 pixels: the steps with "Stop" or "Ope
 
 A fixed request is a chat request (document 12) with a text that the editor builds. The person sees it in the chat as their own request. The table of the texts is in the editor, in one file.
 
-| Action                                   | Request text                                                                                     |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| "Update the video" after a script change | "I changed the script. Update the video to match the script."                                    |
-| "Change the picture" of a scene          | "Change the picture of this scene: `<the words of the person>`", about that scene                |
-| "Use my own picture" for a scene         | "Use my picture `<file name>` as the picture of this scene.", about that scene, after the upload |
-| A changed voice line                     | "Record the voice again for the lines that I changed in the script."                             |
-| Another voice                            | "Record the voice again with the voice `<name>`."                                                |
-| "Make this music"                        | "Change the music to: `<the words of the person>`"                                               |
+| Action                                     | Request text                                                                                     |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------ |
+| "Update the video" after a script change   | "I changed the script. Update the video to match the script."                                    |
+| "Change the picture" of a scene            | "Change the picture of this scene: `<the words of the person>`", about that scene                |
+| "Use my own picture" for a scene           | "Use my picture `<file name>` as the picture of this scene.", about that scene, after the upload |
+| A changed voice line                       | "Record the voice again for the lines that I changed in the script."                             |
+| Another voice                              | "Record the voice again with the voice `<name>`."                                                |
+| "Make this music"                          | "Change the music to: `<the words of the person>`"                                               |
+| "Make the rest" of a stopped step (doc 18) | "Make the rest of the video."                                                                    |
+| "Try again" of a failed voice step         | "Record the voice of the video again."                                                           |
+| "Try again" of a failed music step         | "Make the music of the video again."                                                             |
 
 ### Script
 

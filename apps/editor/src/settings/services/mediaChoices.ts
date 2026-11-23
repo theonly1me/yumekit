@@ -25,7 +25,15 @@ const serviceSchema = z.object({
   state: z.enum(["ready", "needs-key"]),
   keys: z.array(keySchema),
   models: z.array(
-    z.object({ id: z.string(), label: z.string(), is_default: z.boolean() }),
+    z.object({
+      id: z.string(),
+      label: z.string(),
+      is_default: z.boolean(),
+      download: z
+        .object({ bytes: z.number(), ready: z.boolean() })
+        .nullable()
+        .default(null),
+    }),
   ),
 });
 
@@ -119,7 +127,8 @@ export function targetOfCurrent(current: CurrentPick): ModelTarget {
 }
 
 export function serviceAndModelText(target: ModelTarget): string {
-  return target.modelLabel === undefined
+  return target.modelLabel === undefined ||
+    target.modelLabel === target.serverLabel
     ? target.serverLabel
     : `${target.serverLabel}, ${target.modelLabel}`;
 }
@@ -128,4 +137,17 @@ export function oneTimeModelSentence(target: ModelTarget): string {
   return target.modelLabel === undefined
     ? `Use the service ${target.serverLabel}.`
     : `Use the model ${target.modelLabel} of ${target.serverLabel}.`;
+}
+
+export const testServiceName = "sample";
+
+export function hasReadyService(options: {
+  choices: MediaChoices;
+  kind: MediaKind;
+}): boolean {
+  const choice = choiceOf(options);
+  return (choice?.services ?? []).some(
+    (service) =>
+      service.state === "ready" && service.server !== testServiceName,
+  );
 }

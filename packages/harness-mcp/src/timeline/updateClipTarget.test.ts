@@ -22,7 +22,12 @@ async function harnessWithNarration() {
   });
   const placed = await harness.call({
     name: "place_narration",
-    arguments: { output_id: "wide", asset_id: "line-one", start_frame: 0 },
+    arguments: {
+      output_id: "wide",
+      asset_id: "line-one",
+      start_frame: 0,
+      partial: true,
+    },
   });
   const audioClipId = placed.data["audio_clip_id"];
   if (typeof audioClipId !== "string") throw new Error("No audio clip id");

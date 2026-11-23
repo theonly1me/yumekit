@@ -4,6 +4,7 @@ import { useMediaServers } from "../../tools/useMediaServers.js";
 import { FileButton } from "../files/FileDrop.js";
 import { YourFile } from "../files/YourFile.js";
 import { sendFixedRequest, type FixedRequest } from "../fixedRequests.js";
+import { isVoiceOld, oldVoiceText } from "../../sound/oldVoice.js";
 import { PlayButton } from "../sound/PlayButton.js";
 import { soundFileTypes, type SoundViewProps } from "../sound/soundView.js";
 import { StatusLine } from "../sound/StatusLine.js";
@@ -68,6 +69,20 @@ export function VoiceView(props: SoundViewProps) {
         ) : (
           <MadeWith client={client} kind="speech" />
         )}
+        {facts.lines.length > 0 && isVoiceOld(snapshot) ? (
+          <div className="voice-note" role="status">
+            <p>{oldVoiceText}</p>
+            <button
+              type="button"
+              disabled={changesAreOff}
+              onClick={() => {
+                ask({ kind: "record-the-changed-lines" });
+              }}
+            >
+              Record the voice again
+            </button>
+          </div>
+        ) : undefined}
         {facts.lines.length === 0 ? (
           <p className="fact lead">
             The video has no voice yet. Ask the AI in the chat to record one, or

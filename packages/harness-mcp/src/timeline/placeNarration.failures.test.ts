@@ -1,8 +1,9 @@
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { harnessWithSpeech } from "../testing/narrationFixture.js";
 
 describe("place_narration failures", () => {
-  it("asks for align_words when captions need word timings that the asset lacks", async () => {
+  it("asks for align_words when captions need word timings that a recording of the person lacks", async () => {
     const harness = await harnessWithSpeech();
     await harness.call({
       name: "generate_asset",
@@ -12,19 +13,33 @@ describe("place_narration failures", () => {
         input: { prompt: "calm", duration_seconds: 1 },
       },
     });
+    const tune = harness.store
+      .read()
+      .assets.find((asset) => asset.id === "tune");
+    await harness.call({
+      name: "import_asset",
+      arguments: {
+        asset_id: "recording",
+        kind: "audio",
+        source_path: join(harness.store.folder, tune?.file ?? ""),
+      },
+    });
 
     const result = await harness.call({
       name: "place_narration",
       arguments: {
         output_id: "wide",
-        asset_id: "tune",
+        asset_id: "recording",
         start_frame: 0,
         with_captions: true,
+        partial: true,
       },
     });
 
     expect(result.data["kind"]).toBe("asset-has-no-words");
-    expect(result.data["hint"]).toContain('align_words with asset_id "tune"');
+    expect(result.data["hint"]).toContain(
+      'align_words with asset_id "recording"',
+    );
   });
 
   it("rejects an image asset with a hint to make speech", async () => {
@@ -52,7 +67,12 @@ describe("place_narration failures", () => {
     const place = () =>
       harness.call({
         name: "place_narration",
-        arguments: { output_id: "wide", asset_id: "line-one", start_frame: 0 },
+        arguments: {
+          output_id: "wide",
+          asset_id: "line-one",
+          start_frame: 0,
+          partial: true,
+        },
       });
 
     await place();

@@ -53,6 +53,9 @@ const mediaModelSchema = z.object({
   shutdown_on: dateText.optional(),
   accepts: z.array(z.enum(mediaModelInputs)).optional(),
   tested: z.boolean().optional(),
+  download: z
+    .object({ bytes: z.int().positive(), ready: z.boolean() })
+    .optional(),
 });
 
 const mediaServerKeySchema = z.object({

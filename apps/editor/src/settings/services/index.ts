@@ -1,5 +1,6 @@
 export { MadeWith, type OneTimeChoice } from "./MadeWith.js";
 export {
+  hasReadyService,
   kindNames,
   oneTimeModelSentence,
   serviceAndModelText,

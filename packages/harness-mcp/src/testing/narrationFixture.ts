@@ -1,7 +1,7 @@
 import { startHarness, type Harness } from "./harnessFixture.js";
 
 export async function harnessWithSpeech(): Promise<Harness> {
-  const harness = await startHarness();
+  const harness = await startHarness({ withLocalVoice: true });
   await harness.call({
     name: "put_scene",
     arguments: {

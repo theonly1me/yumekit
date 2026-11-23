@@ -1,5 +1,5 @@
 import { checkKeyToolName } from "./convention.js";
-import { callCheckKey } from "./checkKey.js";
+import { checkServerKey } from "./checkKey.js";
 import { readMediaToolsConfiguration } from "./configuration.js";
 import {
   connectServer,
@@ -8,6 +8,7 @@ import {
 } from "./connectServer.js";
 import { checkPick } from "./checkPick.js";
 import { mediaChoicesOf } from "./mediaChoices.js";
+import { prepareModel, waitsForDownload } from "./modelDownloads.js";
 import { runTool } from "./runTool.js";
 import { saveUserDefault } from "./saveUserDefault.js";
 import { saveUserVideoLimit } from "./saveUserLimit.js";
@@ -64,6 +65,7 @@ export async function connectMediaTools(options: {
       ),
     ),
   );
+  const descriptionListeners = new Set<() => void>();
   const tools: MediaTools = {
     list: () => pool.connections().filter(isStarted).map(entryOf),
     failedServers: () =>
@@ -138,6 +140,12 @@ export async function connectMediaTools(options: {
         model,
         toolTimeoutSeconds,
       });
+      if (waitsForDownload(connection)) {
+        await pool.redescribe(connection);
+        descriptionListeners.forEach((listener) => {
+          listener();
+        });
+      }
       if (!ran.ok) return ran;
       const recordedModel =
         model ??
@@ -151,26 +159,25 @@ export async function connectMediaTools(options: {
         },
       };
     },
-    checkKey: async (server) => {
-      const connection = pool
-        .connections()
-        .find((candidate) => candidate.name === server);
-      if (!connection) {
-        return { ok: false, failure: { kind: "server-not-found", server } };
-      }
-      if (connection.status === "failed") {
-        return {
-          ok: false,
-          failure: {
-            kind: "server-failed-to-start",
-            server,
-            message: connection.message,
-          },
-        };
-      }
-      const refreshed = await pool.refresh(connection);
-      if (!refreshed.ok) return refreshed;
-      return callCheckKey({ connection: refreshed.value, toolTimeoutSeconds });
+    checkKey: (server) => checkServerKey({ pool, server, toolTimeoutSeconds }),
+    prepare: async (request) => {
+      const prepared = await prepareModel({
+        pool,
+        server: request.server,
+        model: request.model,
+        onProgress: request.onProgress,
+        toolTimeoutSeconds,
+      });
+      descriptionListeners.forEach((listener) => {
+        listener();
+      });
+      return prepared;
+    },
+    onDescriptionsChanged: (listener) => {
+      descriptionListeners.add(listener);
+      return () => {
+        descriptionListeners.delete(listener);
+      };
     },
     close: () => pool.close(),
   };

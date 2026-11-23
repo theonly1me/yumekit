@@ -6,6 +6,7 @@ import type {
   UserFileFailure,
 } from "./choiceTypes.js";
 import type { MediaModel, MediaServerDescription } from "./description.js";
+import type { PrepareFailure } from "./modelDownloads.js";
 
 export type Capability =
   | "image"
@@ -121,5 +122,11 @@ export interface MediaTools {
   ) => Promise<Outcome<MediaLimits, UserFileFailure>>;
   choices: () => Promise<MediaChoices>;
   pick: (pick: MediaPick) => Promise<Outcome<MediaChoices, MediaPickFailure>>;
+  prepare: (request: {
+    server: string;
+    model?: string;
+    onProgress?: (progress: MediaToolProgress) => void;
+  }) => Promise<Outcome<true, PrepareFailure>>;
+  onDescriptionsChanged: (listener: () => void) => () => void;
   close: () => Promise<void>;
 }

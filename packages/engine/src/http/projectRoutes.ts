@@ -2,6 +2,7 @@ import { z } from "zod";
 import { personSummaryOf } from "../chat/personSummary.js";
 import { anySegment, type Exchange, type Route } from "./exchange.js";
 import { readJsonBody } from "./readJsonBody.js";
+import { noCallNote } from "../chat/stepNotes.js";
 import { notFound, sendJson } from "./responses.js";
 
 const toolCallSchema = z.strictObject({
@@ -12,6 +13,16 @@ const toolCallSchema = z.strictObject({
 
 export const clientHeader = "x-yumekit-client";
 export const agentClient = "agent";
+
+function personReasonOf(result: {
+  isError: boolean;
+  data: Record<string, unknown>;
+}): string | undefined {
+  if (!result.isError) return undefined;
+  const { reason, message } = result.data;
+  if (typeof reason === "string") return reason;
+  return typeof message === "string" ? message : undefined;
+}
 
 function sendBody(options: { exchange: Exchange; body: unknown }): void {
   sendJson({
@@ -38,6 +49,7 @@ async function callTool(exchange: Exchange) {
   if (!body.ok) return body.failure;
   const { input, callId, actId } = body.value;
   const isAgent = exchange.request.headers[clientHeader] === agentClient;
+  const note = isAgent ? context.chat.noteAiCall(name) : noCallNote;
   const result = await context.chat.runToolCall({
     caller: isAgent
       ? { by: "ai", tool: name }
@@ -55,19 +67,14 @@ async function callTool(exchange: Exchange) {
       context.harness.call({
         name,
         input,
-        ...(callId === undefined
-          ? {}
-          : {
-              onProgress: (progress) => {
-                context.events.send({
-                  type: "call-progress",
-                  callId,
-                  ...progress,
-                });
-              },
-            }),
+        onProgress: (progress) => {
+          note.onProgress(progress);
+          if (callId === undefined) return;
+          context.events.send({ type: "call-progress", callId, ...progress });
+        },
       }),
   });
+  note.finish(personReasonOf(result));
   sendBody({ exchange, body: result });
   return undefined;
 }

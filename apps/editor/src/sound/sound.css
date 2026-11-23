@@ -59,3 +59,33 @@
     justify-self: start;
   }
 }
+
+.sound-note {
+  grid-template-columns: 84px minmax(0, 1fr) auto;
+}
+
+.sound-note-text {
+  color: var(--muted);
+}
+
+.sound-note-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.sound-note-actions button {
+  padding: 4px 12px;
+}
+
+@media (max-width: 560px) {
+  .sound-note {
+    grid-template-columns: 64px minmax(0, 1fr);
+  }
+
+  .sound-note-actions {
+    grid-column: 2 / -1;
+    justify-content: flex-start;
+  }
+}

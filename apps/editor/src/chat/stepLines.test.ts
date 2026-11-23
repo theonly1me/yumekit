@@ -32,4 +32,27 @@ describe("the plain lines for the steps of an answer", () => {
       { key: "3", text: "Writing a scene", state: "failed" },
     ]);
   });
+
+  it("shows the download line of the natural voice with its percent while it runs", () => {
+    const progress = {
+      done: 74_000_000,
+      total: 148_000_000,
+      message: "Getting the natural voice, one time, 148 MB",
+    };
+    const lines = stepLinesOf([
+      { callId: "1", tool: "set_script", state: "done" },
+      {
+        callId: "2",
+        tool: "generate_asset",
+        state: "running",
+        capability: "speech",
+        progress,
+      },
+    ]);
+
+    expect(lines.map((line) => line.text)).toEqual([
+      "Writing the script",
+      "Getting the natural voice, one time, 148 MB: 50 percent",
+    ]);
+  });
 });

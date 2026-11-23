@@ -1,3 +1,4 @@
+import { voiceTestServer } from "./mediaTestTools.js";
 import { execFile, spawn } from "node:child_process";
 import { chmod, mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
@@ -43,6 +44,7 @@ export interface EngineOptions {
   withChromium?: boolean;
   agentPrograms?: string[];
   fakeAgent?: boolean;
+  withVoiceServer?: boolean;
 }
 
 async function pathWithAgents(options: {
@@ -107,10 +109,14 @@ async function createProject(options: EngineOptions): Promise<{
     ],
     { env: environment },
   );
-  if (options.mediaTools !== undefined) {
+  const mediaTools =
+    options.withVoiceServer === true
+      ? { mcpServers: { voice: voiceTestServer } }
+      : options.mediaTools;
+  if (mediaTools !== undefined) {
     await writeFile(
       join(folder, "media-tools.json"),
-      JSON.stringify(options.mediaTools),
+      JSON.stringify(mediaTools),
     );
   }
   return { root, folder, environment };

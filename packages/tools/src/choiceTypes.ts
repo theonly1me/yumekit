@@ -32,6 +32,7 @@ export interface ChoiceModel {
   id: string;
   label: string;
   isDefault: boolean;
+  download?: { bytes: number; ready: boolean };
 }
 
 export interface ChoiceService {

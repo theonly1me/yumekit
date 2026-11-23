@@ -2,7 +2,7 @@
   "name": "@yumekit/local-voice",
   "version": "0.0.0",
   "private": true,
-  "description": "A free media tool server that speaks with the voice of this computer, or with an open voice model that runs on this computer.",
+  "description": "A free media tool server that speaks with an open voice model that runs on this computer.",
   "license": "Apache-2.0",
   "type": "module",
   "bin": {

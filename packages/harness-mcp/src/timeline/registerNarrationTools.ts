@@ -4,7 +4,9 @@ import type { HarnessContext } from "../context.js";
 import { frameInput, idInput } from "../inputs.js";
 import { findAsset, findOutput } from "../lookups.js";
 import { failureResult, successResult } from "../results.js";
+import { isTestServerAsset, tooShortFailureOf } from "./narrationChecks.js";
 import { planNarration } from "./narrationPlan.js";
+import { lengthFramesOf } from "./wireTimeline.js";
 
 function registerPlaceNarration(context: HarnessContext): void {
   context.tools.add({
@@ -21,10 +23,18 @@ function registerPlaceNarration(context: HarnessContext): void {
         .boolean()
         .optional()
         .describe(
-          "Also show the words as captions. Needs word timings. Default false.",
+          "Also show the words as captions. Needs word timings. Default false. A voice of the free test service gets no captions.",
+        ),
+      partial: z
+        .boolean()
+        .optional()
+        .describe(
+          "True when this voice covers only a part of the video on purpose. Without it, a voice shorter than two thirds of the video fails with narration-too-short.",
         ),
     },
-    run: ({ input: { output_id, asset_id, start_frame, with_captions } }) => {
+    run: ({
+      input: { output_id, asset_id, start_frame, with_captions, partial },
+    }) => {
       const snapshot = context.store.read();
       const output = findOutput({ snapshot, outputId: output_id });
       if (!output.ok) return failureResult(output.failure);
@@ -38,7 +48,15 @@ function registerPlaceNarration(context: HarnessContext): void {
           hint: 'Make speech with generate_asset and capability "speech", then call place_narration with that asset_id.',
         });
       }
-      const withCaptions = with_captions ?? false;
+      const tooShort = tooShortFailureOf({
+        assetFrames: durationFrames,
+        videoFrames: lengthFramesOf(output.value.timeline),
+        framesPerSecond: snapshot.project.framesPerSecond,
+        isPartial: partial ?? false,
+      });
+      if (tooShort !== undefined) return failureResult(tooShort);
+      const isTestVoice = isTestServerAsset(asset.value);
+      const withCaptions = (with_captions ?? false) && !isTestVoice;
       if (withCaptions && !asset.value.hasWords) {
         return failureResult({
           kind: "asset-has-no-words",
@@ -56,7 +74,7 @@ function registerPlaceNarration(context: HarnessContext): void {
       return applyEditsResult({
         store: context.store,
         edits: plan.edits,
-        line: `Narration "${asset_id}" placed on "${output_id}" from frame ${String(start_frame)} to ${String(start_frame + durationFrames)}${withCaptions ? " with captions" : ""}.`,
+        line: `Narration "${asset_id}" placed on "${output_id}" from frame ${String(start_frame)} to ${String(start_frame + durationFrames)}${withCaptions ? " with captions" : ""}.${with_captions === true && isTestVoice ? " It has no captions, because the voice is a test tone of the free test service." : ""}`,
         data: {
           audio_clip_id: plan.audioClipId,
           ...(plan.captionClipId === undefined

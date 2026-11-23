@@ -39,7 +39,7 @@ function stepTexts(page: Awaited<ReturnType<typeof startMaking>>["page"]) {
 }
 
 describe("the Making screen", () => {
-  it("follows the calls of the first request, and stays when the video is ready", async () => {
+  it("follows the calls of the first request, says why the music is missing, and stays when the video is ready", async () => {
     const { home, page, close } = await startMaking({
       calls: scriptAndTwoScenes,
       ending: "done",
@@ -58,6 +58,11 @@ describe("the Making screen", () => {
     await expect
       .poll(() => stepTexts(page))
       .toContain("skipped Record the voiceSkipped");
+    await expect
+      .poll(() => stepTexts(page))
+      .toContain(
+        "skipped Choose the musicNo music yet. Music needs a key, or your own file.Add a keyUse my own music",
+      );
     await expect
       .poll(() =>
         page.getByRole("heading", { name: "Your video is ready" }).count(),

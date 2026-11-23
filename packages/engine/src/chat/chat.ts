@@ -8,6 +8,7 @@ import type { Outcome } from "../engineTypes.js";
 import type { EventHub } from "../events/eventHub.js";
 import { chooseAgent, findAgentPrograms } from "./agentChoice.js";
 import { aboutOf, requestTextOf } from "./aboutClip.js";
+import { createAnswerTracker, type AnswerTracker } from "./answerTracker.js";
 import { createChangeLedger } from "./changeLedger.js";
 import { loadChat } from "./chatFile.js";
 import { createChatLog } from "./chatLog.js";
@@ -20,6 +21,7 @@ import type {
 } from "./chatTypes.js";
 import { runRequest, signInMessageOf } from "./requestRun.js";
 import type { ToolCaller, TrackedStore } from "./trackedStore.js";
+import { noCallNote, type CallNote } from "./stepNotes.js";
 import { undoChangeWith } from "./undoChange.js";
 
 export interface Chat {
@@ -31,6 +33,7 @@ export interface Chat {
   }) => Promise<Outcome<RequestEntry, ChatFailure>>;
   stop: () => boolean;
   undoChange: (changeId: string) => Promise<Outcome<ChangeEntry, ChatFailure>>;
+  noteAiCall: (tool: string) => CallNote;
   runToolCall: <Value>(options: {
     caller: ToolCaller;
     call: () => Promise<Value>;
@@ -71,6 +74,7 @@ export async function createChat(options: {
   tracked.onCommit(ledger.onCommit);
   let phase: "idle" | "starting" | "running" = "idle";
   let turn: Turn | undefined;
+  let tracker: AnswerTracker | undefined;
   let isStopRequested = false;
   let running: Promise<void> = Promise.resolve();
   const begin = async (request: {
@@ -111,6 +115,8 @@ export async function createChat(options: {
       steps: [],
     };
     log.put(answer);
+    const answerTracker = createAnswerTracker({ log, answer });
+    tracker = answerTracker;
     phase = "running";
     isStopRequested = false;
     running = runRequest({
@@ -121,7 +127,7 @@ export async function createChat(options: {
         text: [request.text, request.details ?? ""].join("\n").trim(),
         about: about.value,
       }),
-      answer,
+      tracker: answerTracker,
       serverCommand: options.serverCommand,
       workingFolder,
       onTurn: (next) => {
@@ -134,6 +140,7 @@ export async function createChat(options: {
       .finally(() => {
         phase = "idle";
         turn = undefined;
+        tracker = undefined;
       });
     return { ok: true, value: entry };
   };
@@ -176,6 +183,7 @@ export async function createChat(options: {
       phase === "idle"
         ? undoChangeWith({ changeId, log, ledger, tracked })
         : Promise.resolve(failed(chatBusy)),
+    noteAiCall: (tool) => tracker?.noteCall(tool) ?? noCallNote,
     runToolCall: tracked.runCall,
     close: async () => {
       stop();

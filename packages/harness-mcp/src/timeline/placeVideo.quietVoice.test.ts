@@ -16,7 +16,12 @@ async function harnessWithNarration(): Promise<Harness> {
   });
   await harness.call({
     name: "place_narration",
-    arguments: { output_id: "wide", asset_id: "voice", start_frame: 0 },
+    arguments: {
+      output_id: "wide",
+      asset_id: "voice",
+      start_frame: 0,
+      partial: true,
+    },
   });
   return harness;
 }

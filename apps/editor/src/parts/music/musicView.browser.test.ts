@@ -16,7 +16,7 @@ function runningEngine(): RunningEngine {
 }
 
 beforeAll(async () => {
-  engine = await runEngine();
+  engine = await runEngine({ withVoiceServer: true });
   await buildSoundProject(engine);
 });
 

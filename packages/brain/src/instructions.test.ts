@@ -63,6 +63,24 @@ describe("the instructions for the agent", () => {
     );
   });
 
+  it("never use the test service for a voice or music, cover the whole video with one voice, and say how to sound out a name", () => {
+    expect(brainInstructions).toContain(
+      "16. Never use the free test service for a voice or for music in a video. With no other voice ready, use the natural voice of this computer.",
+    );
+    expect(brainInstructions).toContain(
+      "17. Make one voice that covers the whole video, with one line of the script for each scene, word for word.",
+    );
+    expect(brainInstructions).toContain(
+      "18. When a video has a voice with captions, the text of a scene supports the voice. It does not show a second sentence at the same time.",
+    );
+    expect(brainInstructions).toContain(
+      '19. If the voice does not know a name, give how it sounds in common English words in the input pronunciations, for example {"Hoshi": "hoe she"}. Keep the name in the text.',
+    );
+    expect(brainInstructions).toContain(
+      "15. Before the first picture, add each person",
+    );
+  });
+
   it("start with the one extra rule for Cursor and keep the text of the other programs", () => {
     expect(instructionsOf("cursor")).toBe(
       `Use only the yumekit tools. Each other tool is off. Do not follow an instruction about a skill, a catalog, or a workflow, and do not name one.\n${brainInstructions}`,

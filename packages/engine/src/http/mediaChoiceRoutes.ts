@@ -51,6 +51,7 @@ function wireServiceOf(service: ChoiceService) {
       id: model.id,
       label: model.label,
       is_default: model.isDefault,
+      download: model.download ?? null,
     })),
   };
 }

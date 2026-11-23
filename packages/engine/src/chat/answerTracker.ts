@@ -1,6 +1,7 @@
 import type { BrainEvent } from "@yumekit/brain";
 import type { ChatLog } from "./chatLog.js";
 import type { AnswerEntry } from "./chatTypes.js";
+import { capabilityOf, createCallNotes, type CallNote } from "./stepNotes.js";
 
 export const textIntervalMilliseconds = 100;
 
@@ -11,6 +12,7 @@ export interface AnswerTracker {
   onEvent: (event: BrainEvent) => void;
   finish: (state: AnswerEntry["state"]) => void;
   changeSummary: () => string;
+  noteCall: (tool: string) => CallNote;
 }
 
 export function changeSummaryOf(text: string): string {
@@ -49,6 +51,12 @@ export function createAnswerTracker(options: {
     answer = next;
     log.put(answer);
   };
+  const notes = createCallNotes({
+    steps: () => answer.steps,
+    putSteps: (steps) => {
+      put({ ...answer, steps });
+    },
+  });
   return {
     onEvent: (event) => {
       switch (event.type) {
@@ -65,15 +73,22 @@ export function createAnswerTracker(options: {
           wholeTexts.push(event.text);
           put({ ...answer, text: fullText() });
           return;
-        case "tool-started":
+        case "tool-started": {
+          const capability = capabilityOf(event.input);
           put({
             ...answer,
             steps: [
               ...answer.steps,
-              { callId: event.callId, tool: event.tool, state: "running" },
+              notes.withWaitingReason({
+                callId: event.callId,
+                tool: event.tool,
+                state: "running",
+                ...(capability === undefined ? {} : { capability }),
+              }),
             ],
           });
           return;
+        }
         case "tool-finished":
           put({
             ...answer,
@@ -92,5 +107,6 @@ export function createAnswerTracker(options: {
       put({ ...answer, text: fullText(), state });
     },
     changeSummary: () => changeSummaryOf(fullText()),
+    noteCall: notes.noteCall,
   };
 }

@@ -18,6 +18,7 @@ import {
   type GenerateAssetInput,
 } from "./generateAssetInput.js";
 import { generatedMediaOf } from "./generatedFile.js";
+import { wordsOfResult } from "./spreadWords.js";
 import { mediaPathInput } from "./mediaPath.js";
 import { mediaFailureOf } from "./mediaFailures.js";
 import { recordedInputOf, referencePathsInput } from "./referencePaths.js";
@@ -141,7 +142,23 @@ async function generateAsset(options: {
         : { costIsEstimate: result.cost_is_estimate }),
     },
   };
-  const { words } = result;
+  const { durationFrames } = media.value;
+  const words = await wordsOfResult({
+    capability: request.capability,
+    input: request.input,
+    result,
+    path: file.path,
+    serverCanAlign: context.mediaTools
+      .list()
+      .some(
+        (entry) =>
+          entry.server === server && entry.capabilities.includes("align"),
+      ),
+    durationSeconds:
+      durationFrames === undefined
+        ? undefined
+        : durationFrames / framesPerSecond,
+  });
   const edit: Edit = {
     kind: "addAsset",
     asset,
@@ -149,7 +166,6 @@ async function generateAsset(options: {
       ? {}
       : { words: wordsInFrames({ words, framesPerSecond }) }),
   };
-  const { durationFrames } = media.value;
   const lengthText =
     durationFrames === undefined
       ? ""

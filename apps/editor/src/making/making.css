@@ -147,3 +147,36 @@ button.step-row:hover .step-see {
     top: 24px;
   }
 }
+
+.step-why {
+  display: grid;
+  gap: 10px;
+  padding: 0 0 14px 30px;
+  font-size: var(--step--1);
+  color: var(--muted);
+}
+
+.step-why p {
+  margin: 0;
+}
+
+.step-why-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.step-progress {
+  position: relative;
+  display: block;
+  height: 2px;
+  overflow: hidden;
+  background: var(--line-strong);
+}
+
+.step-progress span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--text);
+  transition: width 240ms ease;
+}

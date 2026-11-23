@@ -35,7 +35,10 @@ async function putScenes(harness: Harness): Promise<void> {
 export async function harnessWithThreeScenes(options?: {
   withVoice?: boolean;
 }): Promise<Harness> {
-  const harness = await startHarness({ outputs: [wideOutput, tallOutput] });
+  const harness = await startHarness({
+    outputs: [wideOutput, tallOutput],
+    withLocalVoice: options?.withVoice === true,
+  });
   await putScenes(harness);
   await harness.call({
     name: "generate_asset",
@@ -87,6 +90,7 @@ export async function harnessWithThreeScenes(options?: {
         asset_id: "line",
         start_frame: 0,
         with_captions: true,
+        partial: true,
       },
     });
     if (placed.isError) throw new Error(placed.text);

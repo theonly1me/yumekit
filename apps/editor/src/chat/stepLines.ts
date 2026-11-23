@@ -70,10 +70,35 @@ export function stepSentenceOf(tool: string): string {
   );
 }
 
+export function progressLineOf(
+  progress: AnswerStep["progress"],
+): string | undefined {
+  if (progress?.message === undefined) return undefined;
+  const { done, total } = progress;
+  if (total === undefined || total <= 0) return progress.message;
+  return `${progress.message}: ${String(Math.floor((done / total) * 100))} percent`;
+}
+
+const makingSentences: Partial<Record<string, string>> = {
+  image: "Making a picture",
+  speech: "Recording the voice",
+  music: "Making the music",
+};
+
+function lineTextOf(step: AnswerStep): string {
+  const progressLine =
+    step.state === "running" ? progressLineOf(step.progress) : undefined;
+  const making =
+    step.tool === "generate_asset" && step.capability !== undefined
+      ? makingSentences[step.capability]
+      : undefined;
+  return progressLine ?? making ?? stepSentenceOf(step.tool);
+}
+
 export function stepLinesOf(steps: AnswerStep[]): StepLine[] {
   const lines: StepLine[] = [];
   for (const step of steps) {
-    const text = stepSentenceOf(step.tool);
+    const text = lineTextOf(step);
     const last = lines.at(-1);
     if (last?.text === text) {
       lines[lines.length - 1] = { ...last, state: step.state };

@@ -34,8 +34,14 @@ function followProjectChanges(options: {
       .then(() => options.parts.preview.refresh())
       .catch(() => undefined);
   });
+  const stopDescriptions = options.parts.mediaTools.onDescriptionsChanged(
+    () => {
+      options.events.send({ type: "media-servers-changed" });
+    },
+  );
   return async () => {
     unsubscribe();
+    stopDescriptions();
     await refreshing;
   };
 }

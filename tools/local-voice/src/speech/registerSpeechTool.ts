@@ -1,29 +1,18 @@
-import { mkdir, readFile } from "node:fs/promises";
-import { join, resolve } from "node:path";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { modelIds, naturalVoiceModel } from "../catalog.ts";
-import {
-  defaultNaturalVoice,
-  type NaturalVoice,
-  type OnDownloadProgress,
-} from "../naturalVoice/naturalVoice.ts";
-import type { SystemVoice } from "../systemVoice/systemVoice.ts";
+import { modelIds } from "../catalog.ts";
+import type { NaturalVoice } from "../naturalVoice/naturalVoice.ts";
 import {
   checkFileStem,
-  errorMessage,
   errorResult,
   successResult,
   writeOutputFile,
-  type Outcome,
 } from "../toolResults.ts";
-import { encodeLeveledWav, readWavDurationSeconds } from "./wav.ts";
+import { progressReporterOf } from "./downloadProgress.ts";
+import { encodeLeveledWav } from "./wav.ts";
 
 const speechInput = {
-  model: z
-    .enum(modelIds)
-    .optional()
-    .describe("system-voice (the default) or natural-voice"),
+  model: z.enum(modelIds).optional().describe("natural-voice"),
   text: z.string().min(1).max(4096).describe("The words to speak"),
   output_directory: z.string().min(1).describe("Folder for the new file"),
   file_stem: z.string().min(1).describe("Start of the new file name"),
@@ -39,146 +28,82 @@ const speechInput = {
     .max(2)
     .optional()
     .describe("Speed from 0.5 to 2. 1 is normal"),
+  pronunciations: z
+    .record(z.string().min(1), z.string().min(1))
+    .optional()
+    .describe(
+      'How to say a name that is not a common English word, in common English words. For example {"Hoshi": "hoe she"}. The text keeps the name.',
+    ),
 };
-
-interface SpeechRequest {
-  text: string;
-  voice: string | undefined;
-  speed: number;
-  outputDirectory: string;
-  fileStem: string;
-}
-
-type Spoken = Outcome<{ path: string; durationSeconds: number }, string>;
-
-async function speakWithSystemVoice(options: {
-  systemVoice: SystemVoice;
-  request: SpeechRequest;
-}): Promise<Spoken> {
-  const { systemVoice, request } = options;
-  const voices = await systemVoice.listVoices();
-  const [bestVoice] = voices;
-  if (bestVoice === undefined)
-    return { ok: false, failure: systemVoice.missingProgramMessage };
-  const voice = request.voice ?? bestVoice;
-  if (!voices.includes(voice)) {
-    return {
-      ok: false,
-      failure: `voice must be one of: ${voices.join(", ")}. It was ${voice}.`,
-    };
-  }
-  const directory = resolve(request.outputDirectory);
-  const path = join(directory, `${request.fileStem}.wav`);
-  try {
-    await mkdir(directory, { recursive: true });
-    const failure = await systemVoice.speak({
-      text: request.text,
-      voice,
-      speed: request.speed,
-      path,
-    });
-    if (failure !== undefined) return { ok: false, failure };
-    const durationSeconds = readWavDurationSeconds(await readFile(path));
-    if (durationSeconds === undefined || durationSeconds === 0) {
-      return {
-        ok: false,
-        failure: "The voice of this computer wrote no sound.",
-      };
-    }
-    return { ok: true, value: { path, durationSeconds } };
-  } catch (error) {
-    return {
-      ok: false,
-      failure: `Cannot make the voice file ${path}: ${errorMessage(error)}`,
-    };
-  }
-}
-
-async function speakWithNaturalVoice(options: {
-  naturalVoice: NaturalVoice;
-  request: SpeechRequest;
-  onDownloadProgress: OnDownloadProgress;
-}): Promise<Spoken> {
-  const { request } = options;
-  const spoken = await options.naturalVoice.speak({
-    text: request.text,
-    voice: request.voice ?? defaultNaturalVoice,
-    speed: request.speed,
-    onDownloadProgress: options.onDownloadProgress,
-  });
-  if (!spoken.ok) return spoken;
-  const written = await writeOutputFile({
-    outputDirectory: request.outputDirectory,
-    fileStem: request.fileStem,
-    extension: "wav",
-    bytes: encodeLeveledWav(spoken.value),
-  });
-  if (!written.ok) return written;
-  return {
-    ok: true,
-    value: {
-      path: written.value,
-      durationSeconds: spoken.value.samples.length / spoken.value.sampleRate,
-    },
-  };
-}
 
 export function registerSpeechTool(options: {
   server: McpServer;
-  systemVoice: SystemVoice;
   naturalVoice: NaturalVoice;
+  defaultVoice: string;
+  downloadLine: string;
 }): void {
   options.server.registerTool(
     "generate_speech",
     {
       description:
-        "Make a WAV file of speech on this computer, free and with no key. system-voice uses the voice of the operating system. natural-voice uses an open voice model, which downloads once at its first use. Returns no word timings.",
+        "Make a WAV file of speech on this computer with an open voice model, free and with no key. The model downloads once at its first use. Returns no word timings.",
       inputSchema: speechInput,
     },
     async (...parameters) => {
       const [input, extra] = parameters;
       const fileStem = checkFileStem(input.file_stem);
       if (!fileStem.ok) return errorResult(fileStem.failure);
-      const request: SpeechRequest = {
+      const spoken = await options.naturalVoice.speak({
         text: input.text,
-        voice: input.voice,
+        voice: input.voice ?? options.defaultVoice,
         speed: input.speed ?? 1,
+        pronunciations: input.pronunciations ?? {},
+        onDownloadProgress: progressReporterOf({
+          extra,
+          line: options.downloadLine,
+        }),
+      });
+      if (!spoken.ok) return errorResult(spoken.failure);
+      const written = await writeOutputFile({
         outputDirectory: input.output_directory,
         fileStem: fileStem.value,
-      };
-      const progressToken = extra._meta?.progressToken;
-      const spoken =
-        input.model === naturalVoiceModel
-          ? await speakWithNaturalVoice({
-              naturalVoice: options.naturalVoice,
-              request,
-              onDownloadProgress: async (progress) => {
-                if (progressToken === undefined) return;
-                await extra.sendNotification({
-                  method: "notifications/progress",
-                  params: {
-                    progressToken,
-                    progress: progress.done,
-                    total: progress.total,
-                    message: `Downloading the natural voice: ${String(Math.floor((progress.done / progress.total) * 100))} percent`,
-                  },
-                });
-              },
-            })
-          : await speakWithSystemVoice({
-              systemVoice: options.systemVoice,
-              request,
-            });
-      if (!spoken.ok) return errorResult(spoken.failure);
+        extension: "wav",
+        bytes: encodeLeveledWav(spoken.value),
+      });
+      if (!written.ok) return errorResult(written.failure);
       return successResult({
         files: [
           {
-            path: spoken.value.path,
+            path: written.value,
             kind: "audio",
-            duration_seconds: spoken.value.durationSeconds,
+            duration_seconds:
+              spoken.value.samples.length / spoken.value.sampleRate,
           },
         ],
       });
+    },
+  );
+}
+
+export function registerPrepareTool(options: {
+  server: McpServer;
+  naturalVoice: NaturalVoice;
+  downloadLine: string;
+}): void {
+  options.server.registerTool(
+    "prepare_model",
+    {
+      description:
+        "Download the files of a model that runs on this computer, once, with progress. A later call does nothing.",
+      inputSchema: { model: z.enum(modelIds).optional() },
+    },
+    async (...parameters) => {
+      const [, extra] = parameters;
+      const downloaded = await options.naturalVoice.download(
+        progressReporterOf({ extra, line: options.downloadLine }),
+      );
+      if (!downloaded.ok) return errorResult(downloaded.failure);
+      return successResult({ files: [] });
     },
   );
 }

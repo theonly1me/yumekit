@@ -13,6 +13,7 @@ export type {
 } from "./choiceTypes.js";
 export { choiceCapabilities } from "./mediaChoices.js";
 export { connectMediaTools } from "./connectMediaTools.js";
+export type { PrepareFailure } from "./modelDownloads.js";
 export {
   configurationDirectory,
   configurationDirectoryVariable,

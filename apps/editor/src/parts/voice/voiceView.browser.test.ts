@@ -24,7 +24,7 @@ function runningEngine(): RunningEngine {
 }
 
 beforeAll(async () => {
-  engine = await runEngine({ fakeAgent: true });
+  engine = await runEngine({ fakeAgent: true, withVoiceServer: true });
   await buildSoundProject(engine);
 });
 

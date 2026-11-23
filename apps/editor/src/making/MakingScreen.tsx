@@ -9,6 +9,11 @@ import { isPlanReady, makingStepsOf, type MakingStep } from "./makingSteps.js";
 import { MakingActions } from "./MakingActions.js";
 import { TogetherView } from "./TogetherView.js";
 import { useOpenStep } from "./useOpenStep.js";
+import { runStepAction } from "./stepActions.js";
+import {
+  hasReadyService,
+  useMediaChoices,
+} from "../settings/services/index.js";
 
 const waitLine =
   "When a step is done, you can open it here. You can read the script, see each picture, and listen to the voice and the music. You can change each of them.";
@@ -89,10 +94,14 @@ export function MakingScreen(props: {
   ask: AskTheAi;
 }) {
   const { chat, snapshot } = props;
+  const choices = useMediaChoices(props.client);
   const steps = makingStepsOf({
     answer: chat.answer,
     snapshot,
     phase: chat.phase,
+    musicIsReady:
+      choices.state.kind !== "ready" ||
+      hasReadyService({ choices: choices.state.choices, kind: "music" }),
   });
   const planReady = isPlanReady({ answer: chat.answer, phase: chat.phase });
   const open = useOpenStep(steps);
@@ -123,6 +132,15 @@ export function MakingScreen(props: {
               steps={steps}
               openStepId={open.stepId}
               onOpen={open.openStep}
+              onAction={({ stepId, action }) => {
+                runStepAction({
+                  action,
+                  stepId,
+                  openStep: open.openStep,
+                  ask: props.ask,
+                  onOpenEditor: props.onOpenEditor,
+                });
+              }}
             />
             <MakingActions
               isRunning={isRunning}

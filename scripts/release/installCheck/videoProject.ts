@@ -65,7 +65,7 @@ export async function listLocalVoice(session: McpSession): Promise<string> {
     name: "list_media_tools",
     input: {},
   });
-  if (!listed.includes('"Voice of this computer"')) {
+  if (!listed.includes('"Natural voice"')) {
     throw new Error(`list_media_tools has no local voice: ${listed}`);
   }
   return "local-voice started";

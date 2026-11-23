@@ -194,7 +194,7 @@ The client adds `output_directory` and `file_stem` after the fields of `input`, 
 | `tools/openai-media` | `image`, `speech`, `align`                                                              | The OpenAI API key of the user | Reads `OPENAI_API_KEY`                                                                                                                                                  |
 | `tools/gemini-media` | `image`, `speech`, `music`, `video`                                                     | The Gemini API key of the user | Reads `GEMINI_API_KEY`. See documents 09 and 16. Not tested with a real key yet. Tests use recorded shapes from the documents.                                          |
 | `tools/fal-media`    | `image`, `video`, `sound-effect`, `talking-clip`, `sharper`                             | The fal API key of the user    | Reads `FAL_KEY`. Document 10 has its endpoints, and document 16 its models. Not tested with a real key yet. Tests use recorded shapes from the documents of 2026-11-22. |
-| `tools/local-voice`  | `speech`                                                                                | Free, on this computer         | The voice of the operating system, and an open voice model that downloads once. Document 18 has the facts                                                               |
+| `tools/local-voice`  | `speech`                                                                                | Free, on this computer         | One open voice model, Heart, that downloads once. Document 18 has the facts                                                                                             |
 
 ### `tools/sample-media`
 

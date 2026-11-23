@@ -17,14 +17,14 @@ function runningEngine(): RunningEngine {
 }
 
 beforeAll(async () => {
-  engine = await runEngine({ fakeAgent: true });
+  engine = await runEngine({ fakeAgent: true, withVoiceServer: true });
   await buildCounterProject(engine);
   await engine.callTool({
     name: "generate_asset",
     input: {
       asset_id: "voice",
       capability: "speech",
-      server: "sample",
+      server: "voice",
       input: { text: "A short line" },
     },
   });
@@ -35,6 +35,7 @@ beforeAll(async () => {
       asset_id: "voice",
       start_frame: 0,
       with_captions: true,
+      partial: true,
     },
   });
   await setScenario({

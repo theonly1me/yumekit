@@ -121,6 +121,7 @@ export function everyToolCall(importSourcePath: string): ScriptedCall[] {
         asset_id: "line-one",
         start_frame: 0,
         with_captions: true,
+        partial: true,
       },
     },
     {

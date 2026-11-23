@@ -12,6 +12,7 @@ describe("place_narration", () => {
         asset_id: "line-one",
         start_frame: 12,
         with_captions: true,
+        partial: true,
       },
     });
 
@@ -71,6 +72,7 @@ describe("place_narration", () => {
           asset_id: options.assetId,
           start_frame: options.startFrame,
           with_captions: true,
+          partial: true,
         },
       });
 
@@ -94,6 +96,7 @@ describe("place_narration", () => {
         asset_id: "line-one",
         start_frame: 0,
         with_captions: true,
+        partial: true,
       },
     });
     await harness.call({ name: "undo" });

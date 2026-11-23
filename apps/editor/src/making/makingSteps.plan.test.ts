@@ -24,6 +24,7 @@ function answerOf(options: {
 }): AnswerEntry {
   return {
     kind: "answer",
+    text: "",
     id: options.id,
     state: options.state,
     steps: options.tools.map((tool) => ({ tool, state: "done" as const })),
@@ -43,6 +44,7 @@ function stepLinesOf(entries: ChatEntry[]): string[] {
     answer: chat.answer,
     snapshot: emptySnapshot,
     phase: chat.phase,
+    musicIsReady: true,
   }).map((step) => `${step.state} ${step.fact}`);
 }
 

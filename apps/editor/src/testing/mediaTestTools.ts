@@ -21,6 +21,18 @@ export const noPictureKeyTestServer = {
   args: [...keyTestServer.args, "--accepts-no-picture"],
 };
 
+export const voiceTestServer = {
+  command: process.execPath,
+  args: [
+    fileURLToPath(
+      new URL(
+        "../../../../packages/tools/src/testing/voiceMediaServer.ts",
+        import.meta.url,
+      ),
+    ),
+  ],
+};
+
 export const withoutOtherBundled = {
   openai: { disabled: true },
   gemini: { disabled: true },

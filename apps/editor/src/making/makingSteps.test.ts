@@ -32,6 +32,7 @@ function answerOf(options: {
 }): AnswerEntry {
   return {
     kind: "answer",
+    text: "",
     id: "answer",
     state: options.state,
     steps: options.tools.map((tool) => ({ tool, state: "done" as const })),
@@ -53,6 +54,7 @@ describe("the steps of the Making screen", () => {
         ],
       },
       phase: "whole",
+      musicIsReady: true,
     });
 
     expect(steps.map((step) => step.state)).toEqual([
@@ -72,6 +74,7 @@ describe("the steps of the Making screen", () => {
       }),
       snapshot: emptySnapshot,
       phase: "whole",
+      musicIsReady: true,
     });
 
     expect(steps.map((step) => `${step.state} ${step.fact}`)).toEqual([
@@ -88,6 +91,7 @@ describe("the steps of the Making screen", () => {
       answer: answerOf({ state: "running", tools: ["set_script"] }),
       snapshot: emptySnapshot,
       phase: "whole",
+      musicIsReady: true,
     });
 
     expect(steps.map((step) => step.state)).toEqual([
@@ -104,6 +108,7 @@ describe("the steps of the Making screen", () => {
       answer: answerOf({ state: "failed", tools: ["set_script"] }),
       snapshot: emptySnapshot,
       phase: "whole",
+      musicIsReady: true,
     });
 
     expect(steps.map((step) => step.state)).toEqual([
@@ -120,6 +125,7 @@ describe("the steps of the Making screen", () => {
       answer: answerOf({ state: "done", tools: ["put_scene", "put_scene"] }),
       snapshot: emptySnapshot,
       phase: "whole",
+      musicIsReady: true,
     });
 
     expect(steps.map((step) => `${step.state} ${step.fact}`)).toEqual([
