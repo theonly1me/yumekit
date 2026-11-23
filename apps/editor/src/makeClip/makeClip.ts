@@ -6,6 +6,7 @@ import {
   type ExactRequest,
   type ToolStep,
 } from "../lead/exactRequests.js";
+import { assetNameOf } from "../names/index.js";
 import type { ModelChoice } from "./modelChoices.js";
 import { secondsOf, type SettingValues } from "./settingValues.js";
 import { uniqueAssetId, type ToolFailure } from "./toolCalls.js";
@@ -84,6 +85,17 @@ export function placeSteps(options: {
   }));
 }
 
+function pictureNameOf(options: {
+  assets: Asset[];
+  assetId: string | undefined;
+}): string | undefined {
+  if (options.assetId === undefined) return undefined;
+  const asset = options.assets.find((each) => each.id === options.assetId);
+  return asset === undefined
+    ? "the picture of the scene"
+    : `the picture "${assetNameOf(asset)}"`;
+}
+
 export function clipRequestOf(options: {
   choice: ModelChoice;
   prompt: string;
@@ -136,14 +148,14 @@ export function clipRequestOf(options: {
       cameraMoveLabel: cameraMoveCatalog.find(
         (move) => move.id === options.cameraMoveId,
       )?.name,
-      startPicture:
-        options.firstFrameAssetId === undefined
-          ? undefined
-          : `the picture ${options.firstFrameAssetId}`,
-      endPicture:
-        options.lastFrameAssetId === undefined
-          ? undefined
-          : `the picture ${options.lastFrameAssetId}`,
+      startPicture: pictureNameOf({
+        assets: options.assets,
+        assetId: options.firstFrameAssetId,
+      }),
+      endPicture: pictureNameOf({
+        assets: options.assets,
+        assetId: options.lastFrameAssetId,
+      }),
       aboutClipId: clip.id,
       steps: [generate, ...placeSteps({ assetId, clipId: clip.id, outputs })],
     }),

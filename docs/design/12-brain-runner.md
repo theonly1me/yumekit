@@ -6,16 +6,16 @@ A probe on 2026-11-22 measured Claude Code 2.1.330 and Codex CLI 0.163.0 on the 
 
 ## Decisions
 
-| Id  | Decision                                                                                    | Why                                                                              |
-| --- | ------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| B1  | The engine starts the installed agent program as a child process, one process for a request | The person already has the program and its sign-in. yumekit holds no sign-in     |
-| B2  | yumekit does not use an agent SDK                                                           | The command gives the same events, and an SDK pins its own program version       |
-| B3  | One adapter for each program, behind one interface, in `@yumekit/brain`                     | The programs differ in flags, events, and how a request ends                     |
-| B4  | The agent gets the yumekit MCP server and nothing more: no shell, no file tool, no web      | A request from a chat box must not run a command on the computer                 |
-| B5  | The agent uses the `yumekit mcp` bridge to the engine that runs                             | The same tools, events, and undo history as a change by the person               |
+| Id  | Decision                                                                                                                                         | Why                                                                              |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------- |
+| B1  | The engine starts the installed agent program as a child process, one process for a request                                                      | The person already has the program and its sign-in. yumekit holds no sign-in     |
+| B2  | yumekit does not use an agent SDK                                                                                                                | The command gives the same events, and an SDK pins its own program version       |
+| B3  | One adapter for each program, behind one interface, in `@yumekit/brain`                                                                          | The programs differ in flags, events, and how a request ends                     |
+| B4  | The agent gets the yumekit MCP server and nothing more: no shell, no file tool, no web                                                           | A request from a chat box must not run a command on the computer                 |
+| B5  | The agent uses the `yumekit mcp` bridge to the engine that runs                                                                                  | The same tools, events, and undo history as a change by the person               |
 | B6  | One request runs at a time for a project. A helper that the lead starts with `ask_helper` runs inside the request of the lead (document 19, K10) | Two agents that change one project at once give a result that nobody can explain |
-| B7  | The settings, hooks, plugins, and other MCP servers of the person do not load               | They cost tokens, and they can reach mail and files                              |
-| B8  | The chat history is a file in the project, in `.yumekit/chat/`                              | A reload and a restart keep the conversation                                     |
+| B7  | The settings, hooks, plugins, and other MCP servers of the person do not load                                                                    | They cost tokens, and they can reach mail and files                              |
+| B8  | The chat history is a file in the project, in `.yumekit/chat/`                                                                                   | A reload and a restart keep the conversation                                     |
 
 ### The sign-in of the person
 

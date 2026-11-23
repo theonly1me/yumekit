@@ -121,7 +121,7 @@ describe("camera moves and the last picture in Make a clip", () => {
     });
     expect(await requestTextsSent(runningEngine())).toContainEqual(
       expect.stringContaining(
-        "with the camera move Orbit, from the picture first-still, to the picture first-still.",
+        'with the camera move Orbit, from the picture "A red ball", to the picture "A red ball".',
       ),
     );
     await editor.close();

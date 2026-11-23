@@ -149,7 +149,7 @@ describe("Make a clip", () => {
     );
     expect(sent).toContainEqual(
       expect.stringContaining(
-        "Make a real video clip for this scene with Test clip, 2 seconds long, from the picture still-first. Put it in place of the scene.",
+        'Make a real video clip for this scene with Test clip, 2 seconds long, from the picture "A red ball". Put it in place of the scene.',
       ),
     );
     expect(sent.at(-1)).toContain(

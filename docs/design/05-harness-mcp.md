@@ -26,17 +26,17 @@ function createHarnessServer(options: {
 
 ### Read
 
-| Tool               | Input       | Result                                                                                                                                                                            |
-| ------------------ | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `get_work`         | `part?`, `scene_ids?` | The whole video as one text: the story, the shared code, each scene with its props and code, each timeline in beats and frames, and the assets (document 19, K8) |
-| `get_project`      | none        | Name, frame rate, `video_style`, look, calm, outputs with their `platforms`, script, bible, a list of scenes (id, title, kind), the length of each timeline, and the revision     |
-| `get_scene`        | `scene_id`  | The scene record, and the code of a module scene                                                                                                                                  |
-| `get_timeline`     | `output_id` | All tracks and clips of the output, with `off` for each track                                                                                                                     |
-| `list_assets`      | `kind?`     | Each asset record. Word timings are not included                                                                                                                                  |
-| `get_asset_words`  | `asset_id`  | The word timings of a speech asset, from `readAssetWords`                                                                                                                         |
-| `list_kit_scenes`  | none        | Each kit scene: name, purpose, and the schema of its props, and each look with one line                                                                                           |
-| `get_scene_guide`  | none        | The reference for custom scene code: the contract, the hooks, the animation functions, the rules, Motion design (document 17), the camera moves (document 16), and three examples |
-| `list_media_tools` | none        | Each connected media server, its capabilities, its description, and the state of each key, and `generated_video` of document 09                                                   |
+| Tool               | Input                 | Result                                                                                                                                                                            |
+| ------------------ | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `get_work`         | `part?`, `scene_ids?` | The whole video as one text: the story, the shared code, each scene with its props and code, each timeline in beats and frames, and the assets (document 19, K8)                  |
+| `get_project`      | none                  | Name, frame rate, `video_style`, look, calm, outputs with their `platforms`, script, bible, a list of scenes (id, title, kind), the length of each timeline, and the revision     |
+| `get_scene`        | `scene_id`            | The scene record, and the code of a module scene                                                                                                                                  |
+| `get_timeline`     | `output_id`           | All tracks and clips of the output, with `off` for each track                                                                                                                     |
+| `list_assets`      | `kind?`               | Each asset record. Word timings are not included                                                                                                                                  |
+| `get_asset_words`  | `asset_id`            | The word timings of a speech asset, from `readAssetWords`                                                                                                                         |
+| `list_kit_scenes`  | none                  | Each kit scene: name, purpose, and the schema of its props, and each look with one line                                                                                           |
+| `get_scene_guide`  | none                  | The reference for custom scene code: the contract, the hooks, the animation functions, the rules, Motion design (document 17), the camera moves (document 16), and three examples |
+| `list_media_tools` | none                  | Each connected media server, its capabilities, its description, and the state of each key, and `generated_video` of document 09                                                   |
 
 ### Write the story
 
@@ -147,9 +147,9 @@ For a video, `generate_asset` reads `hasAudio` with `probeMedia`. It uses the si
 
 ### Helpers
 
-| Tool         | Input                                  | Result                                                                                |
-| ------------ | -------------------------------------- | ------------------------------------------------------------------------------------- |
-| `ask_helper` | `brief`, `scene_ids?`, `asset_ids?`    | The text of a helper agent and the list of the scenes and assets that it changed (document 19, K10) |
+| Tool         | Input                               | Result                                                                                              |
+| ------------ | ----------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `ask_helper` | `brief`, `scene_ids?`, `asset_ids?` | The text of a helper agent and the list of the scenes and assets that it changed (document 19, K10) |
 
 `ask_helper` works only through the engine, inside a chat request of the person. In each other session it fails with `no-helper`.
 
