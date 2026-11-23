@@ -6,7 +6,7 @@ import { useEngineEvents } from "../../engine/useEngineEvents.js";
 import { failureTextOf } from "../../tools/requestText.js";
 import type { ChoiceService } from "./mediaChoices.js";
 
-const localServers = new Set(["local-voice"]);
+const localServers = new Set(["local-voice", "local-music"]);
 const freeLine = "Free. It runs on your computer.";
 
 type GetState =

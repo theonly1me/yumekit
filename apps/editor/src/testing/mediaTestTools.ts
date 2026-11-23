@@ -38,6 +38,7 @@ export const withoutOtherBundled = {
   gemini: { disabled: true },
   fal: { disabled: true },
   "local-voice": { disabled: true },
+  "local-music": { disabled: true },
 };
 
 export async function engineRequest(options: {

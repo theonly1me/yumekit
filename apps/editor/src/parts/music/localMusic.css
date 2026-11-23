@@ -1,0 +1,31 @@
+.sound-item.style-item {
+  grid-template-columns: minmax(0, 1fr) max-content;
+}
+
+.sound-item.style-item > button {
+  justify-self: end;
+  white-space: nowrap;
+}
+
+.style-item button[aria-pressed="true"] {
+  color: var(--text);
+  border-color: var(--line-strong);
+}
+
+.style-name {
+  color: var(--text);
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.waiting-note {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 8px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  font-size: var(--step--2);
+  font-weight: 400;
+  color: var(--muted);
+  white-space: nowrap;
+}
