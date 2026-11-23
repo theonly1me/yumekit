@@ -1,5 +1,7 @@
 import { z } from "zod";
 import { platformIds } from "../platforms/catalog.js";
+import { projectFontSchema } from "./fonts.js";
+import { highestTempo, lowestTempo } from "../tempo/index.js";
 import { lookSchema } from "./look.js";
 import { idSchema } from "./values.js";
 
@@ -31,6 +33,8 @@ export const projectSchema = z.strictObject({
   videoStyle: videoStyleSchema.exactOptional(),
   look: lookSchema.exactOptional(),
   calm: z.boolean().exactOptional(),
+  tempo: z.number().min(lowestTempo).max(highestTempo).exactOptional(),
+  fonts: z.array(projectFontSchema).min(1).exactOptional(),
 });
 
 export type Output = z.infer<typeof outputSchema>;

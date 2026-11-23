@@ -63,6 +63,12 @@ describe("the instructions for the agent", () => {
     );
   });
 
+  it("check the whole video with one contact sheet after each build of the timeline", () => {
+    expect(brainInstructions).toContain(
+      "25. After each build or change of the timeline, look at the whole video with one call of contact_sheet. Correct each warning that it lists.",
+    );
+  });
+
   it("never use the test service for a voice or music, cover the whole video with one voice, and say how to sound out a name", () => {
     expect(brainInstructions).toContain(
       "16. Never use the free test service for a voice or for music in a video. With no other voice ready, use the natural voice of this computer.",

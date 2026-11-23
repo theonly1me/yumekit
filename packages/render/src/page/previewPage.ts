@@ -1,5 +1,5 @@
-import { loadStylePackFonts, stylePackOf } from "@yumekit/scene-kit";
 import { listenForTextEdits, markEditableTexts } from "./textEditing/index.js";
+import { loadPageFonts } from "./loadPageFonts.js";
 import { createPageStage, type PageStage } from "./pageStage.js";
 import {
   isPreviewData,
@@ -68,7 +68,7 @@ async function load(): Promise<void> {
       : data;
     return;
   }
-  await loadStylePackFonts(stylePackOf(data.pageData.look));
+  await loadPageFonts(data.pageData);
   const moduleSceneUrls = new Map(Object.entries(data.moduleSceneUrls));
   const stage = createPageStage({
     element,

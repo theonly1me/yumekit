@@ -4,8 +4,10 @@ import { bibleSchema } from "../format/bible.js";
 import {
   outputSchema,
   platformIdSchema,
+  projectSchema,
   videoStyleSchema,
 } from "../format/project.js";
+import { projectFontSchema, sharedCodeNameSchema } from "../format/fonts.js";
 import { lookSchema } from "../format/look.js";
 import { sceneSchema } from "../format/scene.js";
 import {
@@ -55,6 +57,19 @@ export const editSchema = z.discriminatedUnion("kind", [
     kind: z.literal("setLook"),
     look: lookSchema,
     calm: z.boolean().exactOptional(),
+  }),
+  z.strictObject({
+    kind: z.literal("setTempo"),
+    tempo: projectSchema.shape.tempo,
+  }),
+  z.strictObject({
+    kind: z.literal("setFonts"),
+    fonts: z.array(projectFontSchema),
+  }),
+  z.strictObject({
+    kind: z.literal("putSharedCode"),
+    name: sharedCodeNameSchema,
+    code: z.string(),
   }),
   z.strictObject({ kind: z.literal("setScript"), script: z.string() }),
   z.strictObject({ kind: z.literal("setBible"), bible: bibleSchema }),

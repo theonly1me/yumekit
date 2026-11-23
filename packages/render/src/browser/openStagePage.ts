@@ -1,5 +1,6 @@
 import type { Browser, Page } from "playwright-core";
 import type { RenderFailure, RenderScale } from "../renderFailure.js";
+import type { FrameFindings } from "../page/frameFindings.js";
 import type { SeekResult, StagePageLoad } from "../page/stagePageData.js";
 
 export type PictureUse = "still" | "video";
@@ -8,6 +9,7 @@ export interface BrowserStagePage {
   load: (pageLoad: StagePageLoad) => Promise<void>;
   seek: (frame: number) => Promise<SeekResult>;
   screenshot: (use: PictureUse) => Promise<Uint8Array>;
+  inspect: () => Promise<FrameFindings>;
   close: () => Promise<void>;
 }
 
@@ -88,6 +90,14 @@ export async function openStagePage(options: {
       });
       return Buffer.from(captured.data, "base64");
     },
+    inspect: () =>
+      page.evaluate(() => {
+        const stage = window.yumekitStage;
+        if (stage === undefined) {
+          throw new Error("The stage page is not ready");
+        }
+        return stage.inspect();
+      }),
     close: () => context.close(),
   };
 }

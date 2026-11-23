@@ -3,6 +3,9 @@ import type {
   ToolAnnotations,
 } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
+import type { TempoGrid } from "@yumekit/project";
+import { framesOfBeats } from "../beats/framesOfBeats.js";
+import { withBeatTwins } from "../beats/twinShape.js";
 import { failureResult } from "../results.js";
 
 export interface HarnessProgress {
@@ -41,25 +44,39 @@ export interface ToolTable {
   tools: () => HarnessTool[];
 }
 
-function harnessToolOf<Shape extends z.ZodRawShape>(
-  definition: ToolDefinition<Shape>,
-): HarnessTool {
+function invalidInput(options: { name: string; error: z.ZodError }) {
+  return failureResult({
+    kind: "invalid-input",
+    message: `Invalid arguments for tool ${options.name}: ${z.prettifyError(options.error)}`,
+    hint: "Correct each field that the message names, then call the tool again.",
+  });
+}
+
+function harnessToolOf<Shape extends z.ZodRawShape>(options: {
+  definition: ToolDefinition<Shape>;
+  tempoGrid: () => TempoGrid | undefined;
+}): HarnessTool {
+  const { definition } = options;
   const schema = z.object(definition.inputSchema);
+  const inputShape = withBeatTwins(definition.inputSchema);
+  const twinSchema = z.object(inputShape);
   return {
     name: definition.name,
     description: definition.description,
-    inputShape: definition.inputSchema,
+    inputShape,
     ...(definition.annotations === undefined
       ? {}
       : { annotations: definition.annotations }),
     run: async ({ input, onProgress }) => {
-      const parsed = await schema.safeParseAsync(input);
+      const checked = await twinSchema.safeParseAsync(input);
+      if (!checked.success) {
+        return invalidInput({ name: definition.name, error: checked.error });
+      }
+      const converted = framesOfBeats({ input, grid: options.tempoGrid() });
+      if (!converted.ok) return failureResult(converted.failure);
+      const parsed = await schema.safeParseAsync(converted.value);
       if (!parsed.success) {
-        return failureResult({
-          kind: "invalid-input",
-          message: `Invalid arguments for tool ${definition.name}: ${z.prettifyError(parsed.error)}`,
-          hint: "Correct each field that the message names, then call the tool again.",
-        });
+        return invalidInput({ name: definition.name, error: parsed.error });
       }
       return definition.run({
         input: parsed.data,
@@ -69,11 +86,13 @@ function harnessToolOf<Shape extends z.ZodRawShape>(
   };
 }
 
-export function createToolTable(): ToolTable {
+export function createToolTable(options: {
+  tempoGrid: () => TempoGrid | undefined;
+}): ToolTable {
   const tools: HarnessTool[] = [];
   return {
     add: (definition) => {
-      tools.push(harnessToolOf(definition));
+      tools.push(harnessToolOf({ definition, tempoGrid: options.tempoGrid }));
     },
     tools: () => [...tools],
   };

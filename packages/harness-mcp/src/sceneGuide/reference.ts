@@ -7,13 +7,14 @@ Prefer a kit scene (list_kit_scenes). Write custom code only when no kit scene c
 1. A custom scene is one TSX file. Send it as \`code\` to put_scene, with \`props\`. The harness checks it before it stores it.
 2. The default export is a SceneModule. Make it with \`defineReactScene(component)\`. The component gets \`{ props }\`: the JSON object that you gave to put_scene.
 3. Treat each prop as untrusted. Check its type with \`typeof\` or \`Array.isArray\`, and give a default for a missing or wrong value. You may read a prop as \`props.title\`.
-4. A scene may import only \`react\`, \`@yumekit/scene\`, \`@yumekit/scene-kit\`, and \`@yumekit/scene-kit/motion\`. Any other import fails with scene-import-not-permitted. Most scenes import \`@yumekit/scene\`, \`useStylePack\` and \`Backdrop\` from \`@yumekit/scene-kit\` for the look, and the motion functions from \`@yumekit/scene-kit/motion\` (see Motion design).
+4. A scene may import only \`react\`, \`@yumekit/scene\`, \`@yumekit/scene-kit\`, \`@yumekit/scene-kit/motion\`, and the shared code of the project as \`./_shared/<name>\`. Any other import fails with scene-import-not-permitted. Most scenes import \`@yumekit/scene\`, \`useStylePack\` and \`Backdrop\` from \`@yumekit/scene-kit\` for the look, and the motion functions from \`@yumekit/scene-kit/motion\` (see Motion design).
 5. The code compiles with strict TypeScript. A type error fails with scene-compile-failed and gives the line and the column.
 6. The scene draws inside an element with the exact size of the output in CSS pixels. Use \`position: "absolute", inset: 0\` on the root element to fill it.
 7. The picture of a frame depends only on the frame number. The same frame always gives the same pixels, and frames can be drawn in any order.
 8. The scene must draw correctly for any clip length of 1 frame or more. Fit the motion into \`durationFrames\`, for example settle by 70 percent of it.
 9. Size all text and spacing in \`unit\`, so the scene reads the same at each output size. Keep text short: a custom scene does not shrink text to fit.
 10. Put \`data-text-prop\` with the name of the prop on the element that shows a text prop, for example \`<h1 data-text-prop="title">{title}</h1>\`. A person can then click the text in the preview and change it. For a text in a list, use the path, such as \`items.0\` or \`steps.1.label\`.
+11. Write code that two or more scenes need (a theme, a helper, a small component) once, with put_shared_code. Each scene imports it as \`./_shared/<name>\`, and shared code imports other shared code as \`./<name>\`. Never copy the same code into each scene.
 
 ## Hooks and components from @yumekit/scene
 
@@ -22,6 +23,7 @@ Prefer a kit scene (list_kit_scenes). Write custom code only when no kit scene c
   - \`output: { id: string; widthPixels: number; heightPixels: number }\`
   - \`framesPerSecond: number\`
   - \`durationFrames: number\`: the length of the scene in frames.
+  - \`beatFrames: number | undefined\`: the frames of one beat at the tempo of the project (set_tempo), and undefined with no tempo. It can be a fraction, for example 14.0625. In a scene that starts on a beat, beat n is at frame \`Math.round(n * beatFrames)\`.
   - \`layout: "wide" | "tall" | "square"\`: wide when width / height is 1.2 or more, tall when it is 0.8 or less.
   - \`unit: number\`: 1 percent of the shorter side, in pixels.
   - \`findAsset(assetId: string): SceneAsset | undefined\`. A SceneAsset is \`{ url: string; kind: "image" | "audio" | "video" | "font"; widthPixels?: number; heightPixels?: number; durationFrames?: number; words?: { text: string; startFrame: number; endFrame: number }[]; framePictures?: { urlPrefix: string; count: number } }\`. Use \`url\` of an image as the \`src\` of an \`<img>\`. A video asset has \`framePictures\`: one picture for each project frame, at \`urlPrefix + n + ".jpg"\`. If it returns undefined, draw a placeholder. Never fail.
@@ -54,7 +56,7 @@ export const rulesSection = `## What a scene must not do
 | A network request, or a URL from the internet | An asset from \`findAsset\` |
 | Audio playback | An audio clip on the timeline |
 | A \`<video>\` element (put_scene rejects it with scene-compile-failed) | \`VideoFrame\` with the id of a video asset |
-| A font from the internet, or a font file in the code | The fonts of the look from \`useStylePack().fonts\` |
+| A font from the internet, or a font file in the code | The fonts of the look from \`useStylePack().fonts\`, or a font of the project from set_fonts, by its family name |
 
 ## The look
 

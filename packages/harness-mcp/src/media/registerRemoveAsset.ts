@@ -14,6 +14,8 @@ function useText(use: AssetUse): string {
       return `clip "${use.clipId}" on track "${use.trackId}" of output "${use.outputId}"`;
     case "cast-member":
       return `cast member "${use.castId}"`;
+    case "project-font":
+      return `the font "${use.family}" of the project`;
   }
 }
 
@@ -26,14 +28,20 @@ async function removeAsset(options: {
   const found = findAsset({ snapshot, assetId });
   if (!found.ok) return failureResult(found.failure);
   const uses = assetUsesOf({
-    project: { ...snapshot, cast: snapshot.bible.cast },
+    project: {
+      ...snapshot,
+      cast: snapshot.bible.cast,
+      ...(snapshot.project.fonts === undefined
+        ? {}
+        : { fonts: snapshot.project.fonts }),
+    },
     assetId,
   });
   if (uses.length > 0) {
     return failureResult({
       kind: "asset-in-use",
       message: `The asset "${assetId}" is used by: ${uses.map(useText).join(", ")}.`,
-      hint: "Change or remove each use that the message names first: put_scene for a scene, remove_clip or update_clip for a clip, set_bible for a cast member. Then call remove_asset again.",
+      hint: "Change or remove each use that the message names first: put_scene for a scene, remove_clip or update_clip for a clip, set_bible for a cast member, set_fonts for a font. Then call remove_asset again.",
     });
   }
   return applyEditsResult({

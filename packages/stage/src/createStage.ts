@@ -74,6 +74,9 @@ export function createStage(options: StageOptions): Stage {
         output: project.output,
         framesPerSecond: project.framesPerSecond,
         durationFrames: clip.sceneStartFrame + clip.durationFrames,
+        ...(project.beatFrames === undefined
+          ? {}
+          : { beatFrames: project.beatFrames }),
         props,
         findAsset: (assetId) => assets.get(assetId),
       });

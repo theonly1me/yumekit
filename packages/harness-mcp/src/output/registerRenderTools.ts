@@ -14,7 +14,7 @@ function registerRenderVideo(context: HarnessContext): void {
   context.tools.add({
     name: "render_video",
     description:
-      "Render an output to an MP4 file with sound in the renders folder of the project, and return its path, frame count, and length in seconds. An output with platforms renders once and gets one file for each platform, renders/<project name>-<platform id>.mp4; files lists each file with its platform. It can take minutes; it sends progress notifications. Check frames with preview_frames first. Default scale 1; use 0.25 with frame_count for a fast test.",
+      "Render an output to an MP4 file with sound in the renders folder of the project, and return its path, frame count, and length in seconds. An output with platforms renders once and gets one file for each platform, renders/<project name>-<platform id>.mp4; files lists each file with its platform. It can take minutes; it sends progress notifications. Check the whole video with contact_sheet first. Default scale 1; use 0.25 with frame_count for a fast test.",
     inputSchema: {
       output_id: idInput("The id of the output."),
       first_frame: frameInput(

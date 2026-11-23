@@ -8,7 +8,7 @@ import type { ProjectState } from "../format/state.js";
 import { timelineSchema, type Timeline } from "../format/timeline.js";
 import { fail, succeed, type Outcome } from "../outcome.js";
 import { sceneCodeFile, timelineFile } from "../rules/ruleFailure.js";
-import { sceneFile } from "./projectFiles.js";
+import { sceneFile, sharedCodeFile } from "./projectFiles.js";
 import {
   readJsonFile,
   readTextFile,
@@ -49,6 +49,20 @@ export async function readScenes(
     }
   }
   return succeed({ scenes, sceneCode });
+}
+
+export async function readSharedCode(
+  source: FileSource,
+): Promise<Outcome<ProjectState["sharedCode"], InvalidFile>> {
+  const sharedCode: ProjectState["sharedCode"] = {};
+  for (const name of await source.sharedCodeNames()) {
+    const code = await readTextFile({ source, file: sharedCodeFile(name) });
+    if (!code.ok) {
+      return code;
+    }
+    sharedCode[name] = code.value;
+  }
+  return succeed(sharedCode);
 }
 
 export async function readTimelines(options: {

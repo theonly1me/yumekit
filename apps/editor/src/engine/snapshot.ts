@@ -100,6 +100,10 @@ export const snapshotSchema = z.object({
     videoStyle: z.enum(videoStyleIds).optional(),
     look: z.string().optional(),
     calm: z.boolean().optional(),
+    tempo: z.number().optional(),
+    fonts: z
+      .array(z.object({ assetId: z.string(), family: z.string() }))
+      .optional(),
   }),
   bible: z.object({ cast: z.array(castEntrySchema) }),
   script: z.string(),

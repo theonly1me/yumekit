@@ -32,6 +32,7 @@ export function Timeline(props: {
   lengthFrames: number;
   frame: number;
   framesPerSecond: number;
+  tempo: number | undefined;
   selectedClipId: string | undefined;
   onPick: (clip: PickedClip) => void;
   onSeek: (frame: number) => void;
@@ -76,10 +77,13 @@ export function Timeline(props: {
   return (
     <div className="tracks" aria-label="Timeline">
       <div className="track">
-        <span />
+        <span>
+          {props.tempo === undefined ? "" : `${String(props.tempo)} BPM`}
+        </span>
         <Ruler
           lengthFrames={lengthFrames}
           framesPerSecond={props.framesPerSecond}
+          tempo={props.tempo}
           onClick={seekFromRuler}
         />
       </div>

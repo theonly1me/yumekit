@@ -1,10 +1,16 @@
-import { checkSceneCode, type RenderFailure } from "@yumekit/render";
+import {
+  checkSceneCode,
+  checkSharedCode,
+  type RenderFailure,
+} from "@yumekit/render";
 import { kitSceneSchemas } from "@yumekit/scene-kit/schemas";
 import { prettifyError, type z } from "zod";
 import type { FailureIssue, HarnessFailure } from "../results.js";
 
 const permittedImports =
-  "react, @yumekit/scene, @yumekit/scene-kit, and @yumekit/scene-kit/motion";
+  "react, @yumekit/scene, @yumekit/scene-kit, @yumekit/scene-kit/motion, and the shared code of the project as ./_shared/<name>";
+
+const sharedPrefix = "_shared/";
 
 function isKitComponent(name: string): name is keyof typeof kitSceneSchemas {
   return Object.keys(kitSceneSchemas).includes(name);
@@ -54,12 +60,20 @@ export function checkKitProps(options: {
   };
 }
 
+function fixToolOf(sceneId: string): string {
+  return sceneId.startsWith(sharedPrefix)
+    ? `put_shared_code with name "${sceneId.slice(sharedPrefix.length)}"`
+    : "put_scene";
+}
+
 function codeHint(failure: RenderFailure): string {
   switch (failure.kind) {
     case "scene-import-not-permitted":
-      return `Remove the import of "${failure.importName}". A scene may import only ${permittedImports}. Call get_scene_guide for what each one gives.`;
+      return failure.importName.startsWith("./")
+        ? "Write that shared code with put_shared_code first, or remove the import. A scene imports shared code as ./_shared/<name>. Shared code imports other shared code as ./<name>."
+        : `Remove the import of "${failure.importName}". A scene may import only ${permittedImports}. Call get_scene_guide for what each one gives.`;
     case "scene-compile-failed":
-      return `Fix the code at line ${String(failure.line)}, column ${String(failure.column)}, then call put_scene again. The default export must come from defineReactScene. Call get_scene_guide for the contract and three complete examples.`;
+      return `Fix the code at line ${String(failure.line)}, column ${String(failure.column)}, then call ${fixToolOf(failure.sceneId)} again. The default export of a scene must come from defineReactScene. Call get_scene_guide for the contract and three complete examples.`;
     default:
       return (
         failure.hint ??
@@ -68,15 +82,28 @@ function codeHint(failure: RenderFailure): string {
   }
 }
 
+function codeFailureOf(failure: RenderFailure): HarnessFailure {
+  return {
+    kind: failure.kind,
+    message: failure.message,
+    hint: codeHint(failure),
+  };
+}
+
 export async function checkModuleCode(options: {
   sceneId: string;
   code: string;
+  sharedCode: Readonly<Record<string, string>>;
 }): Promise<HarnessFailure | undefined> {
   const checked = await checkSceneCode(options);
-  if (checked.ok) return undefined;
-  return {
-    kind: checked.failure.kind,
-    message: checked.failure.message,
-    hint: codeHint(checked.failure),
-  };
+  return checked.ok ? undefined : codeFailureOf(checked.failure);
+}
+
+export async function checkSharedModuleCode(options: {
+  name: string;
+  code: string;
+  sharedCode: Readonly<Record<string, string>>;
+}): Promise<HarnessFailure | undefined> {
+  const checked = await checkSharedCode(options);
+  return checked.ok ? undefined : codeFailureOf(checked.failure);
 }

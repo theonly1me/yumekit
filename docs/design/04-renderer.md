@@ -9,6 +9,7 @@ The stage draws one output at one frame. The renderer and the editor preview bot
 ```ts
 type StageProject = {
   framesPerSecond: number;
+  beatFrames?: number;
   output: SceneOutput;
   scenes: { id: string; props: JsonObject }[];
   sceneTracks: SceneClip[][];
@@ -111,7 +112,7 @@ function checkSceneCode(options: {
 
 `renderSceneFrame` draws one scene alone at the size of the output. It replaces the timeline with one scene track that holds one clip of the scene, from frame 0, with the length `durationFrames`. It uses the same stage page as `renderFrame`. An unknown scene id is the failure `scene-not-found`. The harness tool `preview_scenes` calls it.
 
-`checkSceneCode` compiles the code of a custom scene and checks its imports. It starts no browser. The harness calls it before it stores a module scene.
+`checkSceneCode` compiles the code of a custom scene and checks its imports. It starts no browser. The harness calls it before it stores a module scene. It takes `sharedCode?`, the shared code of the project, and `checkSharedCode({ name, code, sharedCode })` checks one shared module in the same way (document 19).
 
 - `scale` changes only the pixel density. The layout is the same at each scale. At 0.25, a 1920 by 1080 output gives a 480 by 270 picture. Use it for fast checks.
 - A caller gives a folder and gets a file. The caller never starts a browser, a bundler, or FFmpeg.

@@ -30,6 +30,7 @@ export interface MountOptions {
   output: SceneOutput;
   framesPerSecond: number;
   durationFrames: number;
+  beatFrames?: number;
   props: JsonObject;
   findAsset: (assetId: string) => SceneAsset | undefined;
 }

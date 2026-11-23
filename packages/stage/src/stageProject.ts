@@ -8,6 +8,7 @@ import type {
 
 export interface StageProject {
   framesPerSecond: number;
+  beatFrames?: number;
   output: SceneOutput;
   scenes: { id: string; props: JsonObject }[];
   sceneTracks: SceneClip[][];

@@ -24,6 +24,26 @@
   border-bottom: 1px solid var(--line);
 }
 
+.beats {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.beat {
+  position: absolute;
+  bottom: 0;
+  width: 1px;
+  height: 4px;
+  background: var(--faint);
+  opacity: 0.7;
+}
+
+.beat.bar {
+  height: 8px;
+  opacity: 1;
+}
+
 .tick {
   position: absolute;
   top: 0;

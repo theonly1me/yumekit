@@ -1,10 +1,7 @@
 import ts from "typescript";
 import { fail, succeed, type Outcome } from "../outcome.js";
 import type { RenderFailure } from "../renderFailure.js";
-import {
-  isPermittedSceneImport,
-  permittedSceneImports,
-} from "./permittedImports.js";
+import { codeLabelOf, importFailureOf } from "./sharedImports.js";
 import { sceneCompilerOptions, sceneFileName } from "./sceneCompilerOptions.js";
 import { sceneImportsOf } from "./sceneImports.js";
 import { firstVideoElementOf } from "./videoElements.js";
@@ -25,7 +22,7 @@ export function compileFailure(options: {
     sceneId,
     line,
     column,
-    message: `The code of scene "${sceneId}" does not compile at line ${String(line)}, column ${String(column)}: ${ts.flattenDiagnosticMessageText(diagnostic.messageText, " ")}`,
+    message: `The code of ${codeLabelOf(sceneId)} does not compile at line ${String(line)}, column ${String(column)}: ${ts.flattenDiagnosticMessageText(diagnostic.messageText, " ")}`,
   };
 }
 
@@ -42,6 +39,7 @@ export function parseScene(code: string): ts.SourceFile {
 export function inspectSceneCode(options: {
   sceneId: string;
   code: string;
+  sharedNames?: readonly string[];
 }): Outcome<{ checked: true }, RenderFailure> {
   const { sceneId, code } = options;
   const sourceFile = parseScene(code);
@@ -56,16 +54,13 @@ export function inspectSceneCode(options: {
       compileFailure({ sceneId, diagnostic: syntaxError, sourceFile }),
     );
   }
-  const importName = sceneImportsOf(sourceFile).find(
-    (candidate) => !isPermittedSceneImport(candidate),
-  );
-  if (importName !== undefined) {
-    return fail({
-      kind: "scene-import-not-permitted",
-      sceneId,
-      importName,
-      message: `The code of scene "${sceneId}" imports "${importName}". A scene may import only ${permittedSceneImports.join(", ")}.`,
-    });
+  const importFailure = importFailureOf({
+    sceneId,
+    importNames: sceneImportsOf(sourceFile),
+    sharedNames: options.sharedNames ?? [],
+  });
+  if (importFailure !== undefined) {
+    return fail(importFailure);
   }
   const videoElement = firstVideoElementOf(sourceFile);
   if (videoElement !== undefined) {

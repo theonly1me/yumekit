@@ -11,6 +11,7 @@ my-project/
   bible.json                    style, palette, cast, voice
   scenes/<sceneId>/scene.json   one scene
   scenes/<sceneId>/scene.tsx    custom code, only for a module scene
+  scenes/_shared/<name>.tsx     code that custom scenes share (document 19)
   timelines/<outputId>.json     tracks and clips of one output
   assets/index.json             one record for each asset
   assets/files/<assetId>.<ext>  the media file
@@ -35,6 +36,15 @@ type Project = {
   videoStyle?: VideoStyle;
   look?: LookId;
   calm?: boolean;
+  tempo?: number;
+  fonts?: ProjectFont[];
+};
+
+type ProjectFont = {
+  assetId: string;
+  family: string;
+  weight?: number;
+  style?: "normal" | "italic";
 };
 
 type VideoStyle = "graphics" | "ai-video" | "mix";
@@ -166,6 +176,7 @@ type WordTimings = {
 9. An asset of kind `audio` or `video` has `durationFrames`.
 10. A clip id is unique within its timeline, across all tracks.
 11. A platform is on one output only. The size of the output is the size of the platform in the catalog.
+12. `tempo` is from 60 to 200. Each entry of `fonts` names an asset of kind `font`. A shared code name matches the id rule.
 
 How a timeline reads:
 
@@ -186,6 +197,7 @@ type ProjectSnapshot = {
   bible: Bible;
   scenes: Scene[];
   sceneCode: { [sceneId: string]: string };
+  sharedCode: { [name: string]: string };
   timelines: Timeline[];
   assets: Asset[];
 };
@@ -230,7 +242,7 @@ function openProject(options: {
 
 ## Edits
 
-`Edit` is a closed union on the field `kind`. These 18 kinds are all the ways to change a project.
+`Edit` is a closed union on the field `kind`. These 21 kinds are all the ways to change a project.
 
 | Kind                 | Fields                          | Effect                                                                                                                            |
 | -------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
@@ -240,6 +252,9 @@ function openProject(options: {
 | `setOutputPlatforms` | `outputId`, `platforms`         | Replaces the platforms of one output. The store keeps them in catalog order. An empty list removes the field                      |
 | `setVideoStyle`      | `videoStyle`                    | Sets the video style of the project (document 15)                                                                                 |
 | `setLook`            | `look`, `calm?`                 | Changes the look of the project, and its calm motion when `calm` is given (document 17)                                           |
+| `setTempo`           | `tempo?`                        | Sets the tempo of the project. No value removes it (document 19)                                                                  |
+| `setFonts`           | `fonts`                         | Replaces the fonts of the project. An empty list removes the field (document 19)                                                  |
+| `putSharedCode`      | `name`, `code`                  | Adds or replaces `scenes/_shared/<name>.tsx` (document 19)                                                                        |
 | `setScript`          | `script`                        | Replaces `script.md`                                                                                                              |
 | `setBible`           | `bible`                         | Replaces `bible.json`                                                                                                             |
 | `putScene`           | `scene`, `code?`                | Adds or replaces a scene. `code` is required for a module scene                                                                   |

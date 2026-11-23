@@ -10,6 +10,6 @@ export {
 } from "./holdSplit.js";
 export { enterKinds, type EnterKind, type MotionStyle } from "./motionStyle.js";
 export { pulse } from "./pulse.js";
-export { sequence } from "./sequence.js";
+export { sequence, type SequenceBeat } from "./sequence.js";
 export { typed } from "./typed.js";
 export { words, type MotionWord } from "./words.js";

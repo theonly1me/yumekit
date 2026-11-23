@@ -18,9 +18,14 @@ export {
   type RenderedVideo,
   type RenderVideoOptions,
 } from "./renderVideo.js";
-export { checkSceneCode } from "./sceneCode/checkSceneCode.js";
+export { checkSceneCode, checkSharedCode } from "./sceneCode/checkSceneCode.js";
 export { findFfmpeg } from "./video/findFfmpeg.js";
 export {
   createPictureRenderer,
   type PictureRenderer,
 } from "./pictures/createPictureRenderer.js";
+export type {
+  ContactSheet,
+  ContactSheetRequest,
+  SheetFrame,
+} from "./contactSheet/drawContactSheet.js";

@@ -9,6 +9,17 @@ export function sceneFile(sceneId: string): string {
   return `scenes/${sceneId}/scene.json`;
 }
 
+export const sharedFolderName = "_shared";
+export const sharedFolder = `scenes/${sharedFolderName}`;
+
+export function sharedCodeFile(name: string): string {
+  return `${sharedFolder}/${name}.tsx`;
+}
+
+export function sharedCodeNameOfFile(file: string): string | undefined {
+  return /^scenes\/_shared\/([a-z0-9][a-z0-9-]{0,63})\.tsx$/.exec(file)?.[1];
+}
+
 export function projectFilesOf(state: ProjectState): ProjectFiles {
   const files = new Map<string, string>([
     ["project.json", stableJson(state.project)],
@@ -21,6 +32,9 @@ export function projectFilesOf(state: ProjectState): ProjectFiles {
   }
   for (const [sceneId, code] of Object.entries(state.sceneCode)) {
     files.set(sceneCodeFile(sceneId), code);
+  }
+  for (const [name, code] of Object.entries(state.sharedCode)) {
+    files.set(sharedCodeFile(name), code);
   }
   for (const timeline of state.timelines) {
     files.set(timelineFile(timeline.outputId), stableJson(timeline));

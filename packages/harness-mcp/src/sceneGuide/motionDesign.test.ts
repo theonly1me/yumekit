@@ -7,7 +7,7 @@ const callsWithEachOption = {
     'enter({ frame, framesPerSecond, startFrame: 0, kind: "pop", durationSeconds: 0.6, unit, distanceUnits: 5, calm: false })',
   exit: 'exit({ frame, framesPerSecond, endFrame: 30, kind: "fade", durationSeconds: 0.6, unit, distanceUnits: 5, calm: false })',
   sequence:
-    "sequence({ count: 3, framesPerSecond, startFrame: 0, eachSeconds: 0.15, itemSeconds: 0.6, durationFrames })",
+    'sequence({ count: 3, framesPerSecond, startFrame: 0, eachSeconds: 0.15, itemSeconds: 0.6, durationFrames, every: "beat", beatFrames })',
   words:
     'words({ text: "a b", frame, framesPerSecond, startFrame: 0, kind: "rise", unit, distanceUnits: 5, calm: false, eachSeconds: 0.09, wordSeconds: 0.6 })',
   typed:
@@ -59,7 +59,7 @@ import { countUp, draw, drift, enter, exit, holdSplit, paceFrame, pulse, sequenc
 
 export default defineReactScene(() => {
   const frame = useFrame();
-  const { unit, framesPerSecond, durationFrames } = useSceneContext();
+  const { unit, framesPerSecond, durationFrames, beatFrames } = useSceneContext();
   const results = {
 ${Object.entries(callsWithEachOption)
   .map(([name, call]) => `    ${name}: ${call},`)

@@ -1,6 +1,11 @@
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
-import type { ProjectFiles } from "./projectFiles.js";
+import {
+  sharedCodeNameOfFile,
+  sharedFolder,
+  sharedFolderName,
+  type ProjectFiles,
+} from "./projectFiles.js";
 import type { FileSource } from "./readJsonFile.js";
 
 function isMissingError(error: unknown): boolean {
@@ -28,8 +33,25 @@ async function listSceneFolders(folder: string): Promise<string[]> {
       withFileTypes: true,
     });
     return entries
-      .filter((entry) => entry.isDirectory())
+      .filter((entry) => entry.isDirectory() && entry.name !== sharedFolderName)
       .map((entry) => entry.name)
+      .toSorted();
+  } catch (error) {
+    if (isMissingError(error)) {
+      return [];
+    }
+    throw error;
+  }
+}
+
+async function listSharedCodeNames(folder: string): Promise<string[]> {
+  try {
+    const entries = await readdir(join(folder, "scenes", sharedFolderName), {
+      withFileTypes: true,
+    });
+    return entries
+      .map((entry) => sharedCodeNameOfFile(`${sharedFolder}/${entry.name}`))
+      .filter((name) => name !== undefined)
       .toSorted();
   } catch (error) {
     if (isMissingError(error)) {
@@ -43,6 +65,7 @@ export function folderSource(folder: string): FileSource {
   return {
     read: (file) => readFileIfPresent(join(folder, file)),
     sceneIds: () => listSceneFolders(folder),
+    sharedCodeNames: () => listSharedCodeNames(folder),
   };
 }
 
@@ -54,6 +77,13 @@ export function filesSource(files: ProjectFiles): FileSource {
         [...files.keys()]
           .map((file) => /^scenes\/([^/]+)\/scene\.json$/.exec(file)?.[1])
           .filter((sceneId) => sceneId !== undefined)
+          .toSorted(),
+      ),
+    sharedCodeNames: () =>
+      Promise.resolve(
+        [...files.keys()]
+          .map(sharedCodeNameOfFile)
+          .filter((name) => name !== undefined)
           .toSorted(),
       ),
   };

@@ -34,6 +34,10 @@
       "types": "./dist/cameraMoves/catalog.d.ts",
       "default": "./dist/cameraMoves/catalog.js"
     },
+    "./tempo": {
+      "types": "./dist/tempo/index.d.ts",
+      "default": "./dist/tempo/index.js"
+    },
     "./voice-script": {
       "types": "./dist/voiceScript/index.d.ts",
       "default": "./dist/voiceScript/index.js"
