@@ -2,6 +2,7 @@ import { assetLabelOf, type ProjectSnapshot } from "@yumekit/project";
 import { z } from "zod";
 
 const timelineInputSchema = z.looseObject({
+  output_id: z.string(),
   tracks: z.array(
     z.looseObject({
       id: z.string(),
@@ -29,11 +30,12 @@ export function addedSoundSentenceOf(options: {
   const parsed = timelineInputSchema.safeParse(options.input);
   if (!parsed.success) return undefined;
   const { snapshot } = options;
+  const timeline = snapshot.timelines.find(
+    (candidate) => candidate.outputId === parsed.data.output_id,
+  );
   const placed = new Set(
-    snapshot.timelines.flatMap((timeline) =>
-      timeline.tracks.flatMap((track) =>
-        track.kind === "audio" ? track.clips.map((clip) => clip.assetId) : [],
-      ),
+    (timeline?.tracks ?? []).flatMap((track) =>
+      track.kind === "audio" ? track.clips.map((clip) => clip.assetId) : [],
     ),
   );
   for (const track of parsed.data.tracks) {

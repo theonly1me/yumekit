@@ -56,6 +56,7 @@ export async function placeSoundFile(options: {
   snapshot: Snapshot;
   part: SoundPartName;
   asset: Asset;
+  actId: string;
 }): Promise<SoundChange> {
   const { client, snapshot, asset } = options;
   const assetFrames = asset.durationFrames ?? 0;
@@ -80,6 +81,7 @@ export async function placeSoundFile(options: {
       client,
       name: "set_timeline",
       input: timelineWithSound({ timeline, assetId: asset.id, ...plan }),
+      actId: options.actId,
     });
     if (changed.kind === "failed") return changed;
   }

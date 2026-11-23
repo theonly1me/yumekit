@@ -5,12 +5,11 @@ import type { HarnessContext } from "../context.js";
 import { idInput } from "../inputs.js";
 import { failureResult } from "../results.js";
 import { tooShortFailureOf } from "../timeline/narrationChecks.js";
-import { assetOf, makeAsset, type MadeAsset } from "./makeAsset.js";
+import { recordVoices } from "./recordVoice.js";
 import { captionSceneOf } from "./captionScene.js";
 import { narrationSwapOf } from "./narrationSwap.js";
 import { notInScriptFailureOf, spokenTextOf } from "./scriptText.js";
 import { lengthWithout, outputIdsOf } from "./soundRoles.js";
-import { voiceRequestOf } from "./voiceRequest.js";
 
 const replaceNarrationInput = {
   text: z
@@ -57,12 +56,11 @@ export function registerReplaceNarration(context: HarnessContext): void {
   context.tools.add({
     name: "replace_narration",
     description:
-      'Record the voice again and put it, with its captions, in the place of the old voice in each output. Use it for "Record the voice again" and for another voice. By default it says the whole script of now with the voice of the old narration. It changes no other clip, no scene, and no transition, so the music, the video clips, the sounds, and the transitions stay. One undo brings the old voice back.',
+      'Record the voice again and put it, with its captions, in the place of the old voice in each output. Use it for "Record the voice again" and for another voice. By default it says the script of now with the voice of the old narration. When the old voice has one clip for each line of the script, it records each line and puts it where the old line started, and a line that did not change keeps its recording. It changes no other clip, no scene, and no transition, so the music, the video clips, the sounds, and the transitions stay. One undo brings the old voice back.',
     inputSchema: replaceNarrationInput,
     run: async ({ input, onProgress }) => {
       const snapshot = context.store.read();
-      const text = input.text ?? snapshot.script.trim();
-      if (input.asset_id === undefined && text === "") {
+      if (input.asset_id === undefined && snapshot.script.trim() === "") {
         return failureResult({
           kind: "no-script",
           message:
@@ -70,20 +68,37 @@ export function registerReplaceNarration(context: HarnessContext): void {
           hint: "Write the script with set_script, then call replace_narration again.",
         });
       }
-      const made: MadeAsset =
-        input.asset_id === undefined
-          ? await madeVoice({ context, input, text, onProgress })
-          : assetOf({ context, assetId: input.asset_id });
-      if (!made.ok) return made.result;
-      const { asset } = made;
-      const notInScript = notInScriptFailureOf({
-        script: snapshot.script,
-        text: spokenTextOf(asset),
+      const made = await recordVoices({
+        context,
+        wish: {
+          text: input.text,
+          assetId: input.asset_id,
+          choice: {
+            voice: input.voice,
+            server: input.server,
+            model: input.model,
+            pronunciations: input.pronunciations,
+          },
+        },
+        onProgress,
       });
-      if (notInScript !== undefined) return failureResult(notInScript);
+      if (!made.ok) return made.result;
+      for (const asset of made.assets) {
+        const notInScript = notInScriptFailureOf({
+          script: snapshot.script,
+          text: spokenTextOf(asset),
+        });
+        if (notInScript !== undefined) return failureResult(notInScript);
+      }
       const latest = context.store.read();
-      const caption = captionSceneOf({ snapshot: latest, asset });
-      const edits: Edit[] = [...caption.edits];
+      const edits: Edit[] = [];
+      const pieces = made.assets.map((asset) => {
+        const caption = captionSceneOf({ snapshot: latest, asset });
+        edits.push(...caption.edits);
+        return { asset, captionSceneId: caption.sceneId };
+      });
+      let voiceFrames = 0;
+      for (const piece of pieces) voiceFrames += piece.asset.durationFrames;
       for (const outputId of outputIdsOf({
         snapshot: latest,
         outputIds: input.output_ids,
@@ -95,12 +110,11 @@ export function registerReplaceNarration(context: HarnessContext): void {
         const swap = narrationSwapOf({
           snapshot: latest,
           timeline,
-          asset,
-          captionSceneId: caption.sceneId,
+          pieces,
           withCaptions: input.with_captions,
         });
         const tooShort = tooShortFailureOf({
-          assetFrames: asset.durationFrames,
+          assetFrames: voiceFrames,
           videoFrames: lengthWithout({
             timeline,
             trackIds: timeline.tracks
@@ -113,42 +127,13 @@ export function registerReplaceNarration(context: HarnessContext): void {
         if (tooShort !== undefined) return failureResult(tooShort);
         edits.push({ kind: "setTimeline", timeline: swap.timeline });
       }
+      const assetIds = made.assets.map((asset) => asset.id);
       return applyEditsResult({
         store: context.store,
         edits,
-        line: `The voice "${asset.id}" replaced the old voice. Nothing else changed.`,
-        data: { asset_id: asset.id, duration_frames: asset.durationFrames },
+        line: `The new voice (${assetIds.join(", ")}) replaced the old voice. Nothing else changed.`,
+        data: { asset_ids: assetIds, duration_frames: voiceFrames },
       });
     },
-  });
-}
-
-function madeVoice(options: {
-  context: HarnessContext;
-  input: z.infer<z.ZodObject<typeof replaceNarrationInput>>;
-  text: string;
-  onProgress: Parameters<typeof makeAsset>[0]["onProgress"];
-}): Promise<MadeAsset> {
-  const { context, input, text } = options;
-  const notInScript = notInScriptFailureOf({
-    script: context.store.read().script,
-    text,
-  });
-  if (notInScript !== undefined) {
-    return Promise.resolve({ ok: false, result: failureResult(notInScript) });
-  }
-  return makeAsset({
-    context,
-    request: voiceRequestOf({
-      snapshot: context.store.read(),
-      choice: {
-        text,
-        voice: input.voice,
-        server: input.server,
-        model: input.model,
-        pronunciations: input.pronunciations,
-      },
-    }),
-    onProgress: options.onProgress,
   });
 }

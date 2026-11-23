@@ -83,12 +83,19 @@ export function callInOrder(options: {
   client: EngineClient;
   name: string;
   input: object;
+  actId?: string | undefined;
 }): Promise<CallOutcome> {
-  const { client, name, input } = options;
+  const { client, name, input, actId } = options;
   const previous = queues.get(client) ?? Promise.resolve();
   const call = previous
     .catch(() => undefined)
-    .then(() => client.callTool({ name, input }))
+    .then(() =>
+      client.callTool({
+        name,
+        input,
+        ...(actId === undefined ? {} : { actId }),
+      }),
+    )
     .then(outcomeOf);
   queues.set(client, call);
   return call;

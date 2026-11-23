@@ -58,7 +58,8 @@ export function useSoundActions(options: {
         workingText: `Adding ${file.name}.`,
         doneText: doneTexts[part](file.name),
         change: async () => {
-          const uploaded = await client.upload({ file });
+          const actId = crypto.randomUUID();
+          const uploaded = await client.upload({ file, actId });
           if (!uploaded.ok) {
             return { kind: "failed", message: failureTextOf(uploaded.failure) };
           }
@@ -67,6 +68,7 @@ export function useSoundActions(options: {
             snapshot,
             part,
             asset: uploaded.value.asset,
+            actId,
           });
         },
       });
