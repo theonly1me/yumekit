@@ -30,6 +30,7 @@ export const projectSchema = z.strictObject({
   outputs: z.array(outputSchema),
   videoStyle: videoStyleSchema.exactOptional(),
   look: lookSchema.exactOptional(),
+  calm: z.boolean().exactOptional(),
 });
 
 export type Output = z.infer<typeof outputSchema>;

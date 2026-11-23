@@ -11,7 +11,7 @@ import { Quote } from "./scenes/Quote.js";
 import { TitleCard } from "./scenes/TitleCard.js";
 import { VideoClip } from "./scenes/VideoClip.js";
 import type { StylePack } from "./stylePacks/stylePack.js";
-import { stylePackOf } from "./stylePacks/stylePacks.js";
+import { calmStylePackOf, stylePackOf } from "./stylePacks/stylePacks.js";
 
 const kitSceneDefinitions: Record<string, KitSceneDefinition> = {
   "title-card": { component: TitleCard, paintsBackground: true },
@@ -32,15 +32,23 @@ function kitScenesFor(stylePack: StylePack): Record<string, SceneModule> {
   );
 }
 
-const kitScenesByLook = new Map<string, Record<string, SceneModule>>();
+const kitScenesByPack = new Map<string, Record<string, SceneModule>>();
 
-export function kitScenesOf(look: string): Record<string, SceneModule> {
-  const stylePack = stylePackOf(look);
-  const known = kitScenesByLook.get(stylePack.id);
+function knownKitScenesFor(stylePack: StylePack): Record<string, SceneModule> {
+  const key = `${stylePack.id}${stylePack.motion.calm === true ? "-calm" : ""}`;
+  const known = kitScenesByPack.get(key);
   if (known !== undefined) return known;
   const made = kitScenesFor(stylePack);
-  kitScenesByLook.set(stylePack.id, made);
+  kitScenesByPack.set(key, made);
   return made;
+}
+
+export function kitScenesOf(look: string): Record<string, SceneModule> {
+  return knownKitScenesFor(stylePackOf(look));
+}
+
+export function calmKitScenesOf(look: string): Record<string, SceneModule> {
+  return knownKitScenesFor(calmStylePackOf(look));
 }
 
 export const kitScenes: Record<string, SceneModule> = kitScenesOf("paper");

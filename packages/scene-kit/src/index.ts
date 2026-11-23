@@ -1,5 +1,5 @@
 export { Backdrop } from "./backdrops/Backdrop.js";
-export { kitScenes, kitScenesOf } from "./kitScenes.js";
+export { calmKitScenesOf, kitScenes, kitScenesOf } from "./kitScenes.js";
 export {
   isLookId,
   lookIds,

@@ -51,7 +51,11 @@ export const editSchema = z.discriminatedUnion("kind", [
     kind: z.literal("setVideoStyle"),
     videoStyle: videoStyleSchema,
   }),
-  z.strictObject({ kind: z.literal("setLook"), look: lookSchema }),
+  z.strictObject({
+    kind: z.literal("setLook"),
+    look: lookSchema,
+    calm: z.boolean().exactOptional(),
+  }),
   z.strictObject({ kind: z.literal("setScript"), script: z.string() }),
   z.strictObject({ kind: z.literal("setBible"), bible: bibleSchema }),
   z.strictObject({

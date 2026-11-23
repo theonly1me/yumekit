@@ -52,6 +52,7 @@ export interface StylePack {
     staggerFrames: number;
     wordStaggerFrames: number;
     settleShareOfClip: number;
+    calm?: true;
   };
   layout: {
     marginUnits: number;

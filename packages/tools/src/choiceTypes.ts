@@ -20,6 +20,11 @@ export type MediaPickFailure =
   | { kind: "invalid-configuration-file"; file: string; message: string }
   | { kind: "configuration-not-written"; file: string; message: string };
 
+export type UserFileFailure = Extract<
+  MediaPickFailure,
+  { kind: "invalid-configuration-file" | "configuration-not-written" }
+>;
+
 export type ServiceState = "ready" | "needs-key";
 
 export interface ChoiceModel {

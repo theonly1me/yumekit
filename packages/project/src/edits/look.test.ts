@@ -1,6 +1,6 @@
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { createProject, lookOf, openProject } from "../index.js";
+import { createProject, isCalm, lookOf, openProject } from "../index.js";
 import {
   createTestProject,
   readProjectFile,
@@ -30,6 +30,27 @@ describe("the look of a project", () => {
     );
     await store.undo();
     expect(lookOf(store.read().project)).toBe("paper");
+  });
+
+  it("reads a project with no calm value as not calm", async () => {
+    const store = await createTestProject();
+
+    expect(isCalm(store.read().project)).toBe(false);
+  });
+
+  it("setLook with calm writes calm next to the look, and keeps it when a later setLook leaves it out", async () => {
+    const store = await createTestProject();
+
+    await store.applyEdits([{ kind: "setLook", look: "neon", calm: true }]);
+    await store.applyEdits([{ kind: "setLook", look: "studio" }]);
+
+    expect(store.read().project).toMatchObject({ look: "studio", calm: true });
+    expect(await readProjectFile({ store, file: "project.json" })).toContain(
+      '"calm": true',
+    );
+    await store.undo();
+    await store.undo();
+    expect(isCalm(store.read().project)).toBe(false);
   });
 
   it("createProject takes a look, and openProject reads it back", async () => {

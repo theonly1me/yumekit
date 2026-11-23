@@ -8,5 +8,12 @@ export function setLook(options: {
   edit: EditOfKind<"setLook">;
 }): EditResult {
   const { state, edit } = options;
-  return succeed({ ...state, project: { ...state.project, look: edit.look } });
+  return succeed({
+    ...state,
+    project: {
+      ...state.project,
+      look: edit.look,
+      ...(edit.calm === undefined ? {} : { calm: edit.calm }),
+    },
+  });
 }

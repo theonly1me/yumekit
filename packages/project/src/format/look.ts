@@ -17,3 +17,7 @@ export const lookOfProjectWithNoLook: LookId = "paper";
 export function lookOf(project: { look?: LookId }): LookId {
   return project.look ?? lookOfProjectWithNoLook;
 }
+
+export function isCalm(project: { calm?: boolean }): boolean {
+  return project.calm === true;
+}
