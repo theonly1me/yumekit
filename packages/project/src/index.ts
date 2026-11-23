@@ -30,6 +30,14 @@ export {
   type StartFormatId,
 } from "./startFormats/catalog.js";
 export {
+  cameraMoveCatalog,
+  cameraMoveIds,
+  findCameraMove,
+  isCameraMoveId,
+  type CameraMove,
+  type CameraMoveId,
+} from "./cameraMoves/catalog.js";
+export {
   castKinds,
   type Bible,
   type CastKind,
