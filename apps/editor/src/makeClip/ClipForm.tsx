@@ -2,16 +2,22 @@ import type { EngineClient } from "../engine/engineClient.js";
 import type { Output, SceneClip, Snapshot } from "../engine/snapshot.js";
 import type { KeyRequests } from "../tools/requestText.js";
 import type { MediaServersState } from "../tools/useMediaServers.js";
+import type { CameraMoveId } from "@yumekit/project/camera-moves";
+import { CameraMovePicker } from "./CameraMovePicker.js";
 import { ClipAction, type Phase } from "./ClipAction.js";
 import { FirstFrame } from "./FirstFrame.js";
+import { LastFrame } from "./LastFrame.js";
 import { ModelList } from "./ModelList.js";
-import { takesFirstPicture } from "./modelChoices.js";
+import { takesFirstPicture, takesLastPicture } from "./modelChoices.js";
+import { PromptField } from "./PromptField.js";
 import { SettingsForm } from "./SettingsForm.js";
 import type { useClipChoice } from "./useClipChoice.js";
 
 export interface ClipDraft {
   prompt: string;
   firstFrameId: string | undefined;
+  lastFrameId: string | undefined;
+  cameraMoveId: CameraMoveId | undefined;
   referenceIds: string[];
 }
 
@@ -41,11 +47,14 @@ export function ClipForm(props: {
   onDraft: (change: Partial<ClipDraft>) => void;
   phase: Phase;
   onMake: () => void;
+  onAskTheAi: () => void;
 }) {
   const { client, snapshot, output, target, media, clipChoice, draft } = props;
   const { choice, values } = clipChoice;
   const takesPicture =
     choice === undefined ? true : takesFirstPicture(choice.model);
+  const takesEnd =
+    takesPicture && choice !== undefined && takesLastPicture(choice.model);
   const imageIds = snapshot.assets
     .filter((asset) => asset.kind === "image")
     .map((image) => image.id);
@@ -61,18 +70,19 @@ export function ClipForm(props: {
       </p>
       <div className="clip-columns">
         <div className="clip-column">
-          <div className="field">
-            <label htmlFor="clip-prompt">What happens in the clip</label>
-            <textarea
-              id="clip-prompt"
-              rows={3}
-              value={draft.prompt}
-              placeholder="A street basketball player jumps for a dunk. Low angle, golden hour."
-              onChange={(change) => {
-                props.onDraft({ prompt: change.target.value });
-              }}
-            />
-          </div>
+          <CameraMovePicker
+            chosen={draft.cameraMoveId}
+            onChoose={(cameraMoveId) => {
+              props.onDraft({ cameraMoveId });
+            }}
+          />
+          <PromptField
+            prompt={draft.prompt}
+            onPrompt={(prompt) => {
+              props.onDraft({ prompt });
+            }}
+            onAskTheAi={props.onAskTheAi}
+          />
           <ModelList
             choices={clipChoice.videoChoices}
             chosenKey={choice?.key}
@@ -89,6 +99,16 @@ export function ClipForm(props: {
               assetId={draft.firstFrameId}
               onPick={(firstFrameId) => {
                 props.onDraft({ firstFrameId });
+              }}
+            />
+          ) : undefined}
+          {takesEnd ? (
+            <LastFrame
+              client={client}
+              assets={snapshot.assets}
+              assetId={draft.lastFrameId}
+              onPick={(lastFrameId) => {
+                props.onDraft({ lastFrameId });
               }}
             />
           ) : undefined}

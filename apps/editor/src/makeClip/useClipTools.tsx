@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { EngineClient } from "../engine/engineClient.js";
 import type { Output, Scene, SceneClip, Snapshot } from "../engine/snapshot.js";
+import { sendFixedRequest, type AskTheAi } from "../parts/fixedRequests.js";
 import { MakeClipEntry } from "./MakeClipEntry.js";
 import { MakeClipSheet } from "./MakeClipSheet.js";
 
@@ -10,6 +11,7 @@ export function useClipTools(options: {
   output: Output | undefined;
   onOpen: () => void;
   onPlaced: (clip: { id: string; startFrame: number }) => void;
+  ask: AskTheAi;
 }) {
   const { client, snapshot, output } = options;
   const [clipFor, setClipFor] = useState<SceneClip>();
@@ -37,6 +39,17 @@ export function useClipTools(options: {
         clip={clipFor}
         onClose={() => {
           setClipFor(undefined);
+        }}
+        onAskTheAi={(model) => {
+          setClipFor(undefined);
+          sendFixedRequest({
+            ask: options.ask,
+            request: {
+              kind: "let-the-ai-make-the-clip",
+              aboutClipId: clipFor.id,
+              ...(model === undefined ? {} : { model }),
+            },
+          }).catch(() => undefined);
         }}
         onPlaced={(made) => {
           setClipFor(undefined);

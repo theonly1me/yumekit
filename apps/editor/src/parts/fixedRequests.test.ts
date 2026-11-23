@@ -32,6 +32,23 @@ describe("the fixed requests", () => {
     );
   });
 
+  it("gives the text of Let the AI write it of document 16, with the model of the sheet", () => {
+    expect(
+      fixedRequestTextOf({
+        kind: "let-the-ai-make-the-clip",
+        aboutClipId: "second",
+        model: {
+          server: "sample",
+          serverLabel: "Sample",
+          model: "sample-video",
+          modelLabel: "Plain color",
+        },
+      }),
+    ).toBe(
+      "Make a real video clip for this scene. Write the prompt and pick the camera move yourself. Use the model Plain color of Sample.",
+    );
+  });
+
   it("adds the model that the person picked for one request", () => {
     expect(
       fixedRequestTextOf({
