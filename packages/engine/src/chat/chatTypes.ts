@@ -17,6 +17,7 @@ export const chatEntrySchema = z.discriminatedUnion("kind", [
     kind: z.literal("request"),
     id: z.string(),
     text: z.string(),
+    details: z.string().optional(),
     about: aboutSchema.nullable(),
   }),
   z.object({

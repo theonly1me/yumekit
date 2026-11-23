@@ -2,6 +2,7 @@ import type { Asset, Snapshot } from "../../engine/snapshot.js";
 import { musicTracksOf, type AudioTrack } from "../../sound/soundRowFacts.js";
 import type { SoundPiece } from "../sound/useSoundPlayer.js";
 import { musicGainUnderVoice } from "../sound/soundChanges.js";
+import { assetNameOf } from "../../names/index.js";
 
 export interface MusicFacts {
   track: AudioTrack | undefined;
@@ -16,7 +17,7 @@ function nameOf(asset: Asset): string {
   if (asset.source.kind === "import") return asset.source.originalName;
   const { prompt, text } = asset.source.input;
   if (typeof prompt === "string") return prompt;
-  return typeof text === "string" ? text : asset.id;
+  return typeof text === "string" ? text : assetNameOf(asset);
 }
 
 export function clockOf(seconds: number): string {

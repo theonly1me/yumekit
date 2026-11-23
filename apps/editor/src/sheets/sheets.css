@@ -4,20 +4,29 @@
   z-index: 5;
   background: var(--ground);
   overflow-y: auto;
-  padding: 72px var(--gutter) 96px;
+  overflow-x: hidden;
+  padding: 0 var(--gutter) 96px;
+}
+
+.sheet-bar {
+  position: sticky;
+  top: 0;
+  z-index: 6;
+  display: flex;
+  justify-content: flex-end;
+  margin: 0 calc(-1 * var(--gutter));
+  padding: 14px 20px;
+  background: var(--ground);
 }
 
 .sheet-content {
   display: grid;
   justify-items: center;
+  padding-top: 8px;
 }
 
-.sheet-close {
-  position: fixed;
-  top: 14px;
-  right: 20px;
-  z-index: 6;
-  background: var(--ground);
+.sheet-content > * {
+  min-width: 0;
 }
 
 .sheet-body {

@@ -44,9 +44,18 @@
   justify-self: start;
 }
 
-@media (max-width: 560px) {
+@media (max-width: 640px) {
   .sound-row {
-    grid-template-columns: 64px minmax(0, 1fr) auto auto;
-    gap: 8px 10px;
+    grid-template-columns: 64px minmax(0, 1fr) auto;
+    gap: 6px 10px;
+  }
+
+  .sound-row > .sound-choice {
+    grid-column: 2 / -1;
+  }
+
+  .sound-row > .switch {
+    grid-column: 2;
+    justify-self: start;
   }
 }

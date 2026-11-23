@@ -1,4 +1,9 @@
-import type { Asset, ProjectSnapshot, Scene } from "@yumekit/project";
+import {
+  assetLabelOf,
+  type Asset,
+  type ProjectSnapshot,
+  type Scene,
+} from "@yumekit/project";
 
 export function wireSceneOf(options: {
   scene: Scene;
@@ -43,6 +48,7 @@ export function wireAssetOf(asset: Asset) {
   return {
     id: asset.id,
     kind: asset.kind,
+    label: assetLabelOf(asset),
     file: asset.file,
     ...(asset.widthPixels === undefined
       ? {}

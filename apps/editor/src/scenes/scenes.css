@@ -5,11 +5,36 @@
 }
 
 .cards {
+  --edge-fade: 56px;
   list-style: none;
   margin: 0;
-  padding: 4px 2px 6px;
+  padding: 4px 2px 10px;
   display: flex;
   overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+
+.cards[data-more-after="true"] {
+  mask-image: linear-gradient(
+    to right,
+    #000 calc(100% - var(--edge-fade)),
+    transparent
+  );
+}
+
+.cards[data-more-before="true"] {
+  mask-image: linear-gradient(to right, transparent, #000 var(--edge-fade));
+}
+
+.cards[data-more-before="true"][data-more-after="true"] {
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 var(--edge-fade),
+    #000 calc(100% - var(--edge-fade)),
+    transparent
+  );
 }
 
 .card-slot {

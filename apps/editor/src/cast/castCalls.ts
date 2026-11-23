@@ -53,7 +53,7 @@ export async function uploadPicture(options: {
   client: EngineClient;
   file: File;
 }): Promise<UploadOutcome> {
-  const uploaded = await options.client.upload(options.file);
+  const uploaded = await options.client.upload({ file: options.file });
   if (!uploaded.ok) {
     return { ok: false, message: failureTextOf(uploaded.failure) };
   }

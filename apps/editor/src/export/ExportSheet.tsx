@@ -3,8 +3,10 @@ import type { EngineClient } from "../engine/engineClient.js";
 import type { Snapshot } from "../engine/snapshot.js";
 import { useMediaChoices } from "../settings/services/index.js";
 import { Sheet } from "../sheets/Sheet.js";
+import { sceneNameById } from "../names/index.js";
 import { useMediaServers } from "../tools/useMediaServers.js";
-import type { ExportJob, SceneTarget } from "./exportJobs.js";
+import type { ExportJob, ExportScale, SceneTarget } from "./exportJobs.js";
+import { ExportSize } from "./ExportSize.js";
 import { exportRowsOf, leadOf, outputIdsOf, videosWord } from "./exportRows.js";
 import { ExportRowView } from "./ExportRowView.js";
 import { FailedExport } from "./FailedExport.js";
@@ -17,14 +19,27 @@ import "./export.css";
 function headlineOf(exports: Exports): string {
   if (exports.isRunning) return "Exporting";
   if (exports.jobs.length === 0) return "Export the video";
-  return exports.jobs.every((job) => job.state.kind === "done")
-    ? "Your videos are ready"
-    : "The export did not finish";
+  const files = exports.jobs.flatMap((job) =>
+    job.state.kind === "done" ? job.state.files : [],
+  );
+  if (!exports.jobs.every((job) => job.state.kind === "done")) {
+    return "The export did not finish";
+  }
+  return files.length === 1 ? "Your video is ready" : "Your videos are ready";
 }
 
 function rendersFolderOf(projectFolder: string): string {
   const separator = projectFolder.includes("\\") ? "\\" : "/";
   return `${projectFolder.replace(/[\\/]+$/, "")}${separator}renders`;
+}
+
+function shortRendersFolderOf(projectFolder: string): string {
+  const folderName =
+    projectFolder
+      .split(/[\\/]+/)
+      .filter((part) => part !== "")
+      .at(-1) ?? "";
+  return `${folderName}/renders`;
 }
 
 export function ExportSheet(props: {
@@ -66,6 +81,7 @@ export function ExportSheet(props: {
       ? []
       : chosenRows.filter((row) => sharperKeys.has(row.key));
   const failureShownFor = new Set<string>();
+  const [scale, setScale] = useState<ExportScale>(1);
 
   return (
     <Sheet titleId="export-title" onClose={props.onClose}>
@@ -92,6 +108,7 @@ export function ExportSheet(props: {
                 client={client}
                 row={row}
                 job={job}
+                scale={job?.scale ?? scale}
                 isChosen={chosen.has(row.key)}
                 isLocked={exports.isRunning}
                 onChoose={(isChosen) => {
@@ -125,9 +142,13 @@ export function ExportSheet(props: {
                       message={failed.message}
                       failedAt={failed.failedAt}
                       sceneTitle={
-                        snapshot.scenes.find(
-                          (scene) => scene.id === failed.failedAt?.sceneId,
-                        )?.title
+                        failed.failedAt === undefined
+                          ? undefined
+                          : sceneNameById({
+                              sceneId: failed.failedAt.sceneId,
+                              scenes: snapshot.scenes,
+                              assets: snapshot.assets,
+                            })
                       }
                       onOpenScene={(failedAt) => {
                         props.onOpenScene({
@@ -142,6 +163,11 @@ export function ExportSheet(props: {
             );
           })}
         </ul>
+        <ExportSize
+          scale={scale}
+          isLocked={exports.isRunning}
+          onScale={setScale}
+        />
         <div className="start-action">
           <button
             type="button"
@@ -151,6 +177,7 @@ export function ExportSheet(props: {
               exports.start({
                 outputIds: outputIdsOf(chosenRows),
                 sharper: sharperRequestsOf(sharperRows),
+                scale,
               });
             }}
           >
@@ -159,8 +186,11 @@ export function ExportSheet(props: {
               : `Export ${videosWord(chosenRows.length)}`}
           </button>
           <p className="fact">
-            Files go to {rendersFolderOf(props.projectFolder)} on this computer.
-            Nothing is uploaded.
+            Files go to{" "}
+            <span title={rendersFolderOf(props.projectFolder)}>
+              {shortRendersFolderOf(props.projectFolder)}
+            </span>{" "}
+            on this computer. Nothing is uploaded.
           </p>
         </div>
       </div>

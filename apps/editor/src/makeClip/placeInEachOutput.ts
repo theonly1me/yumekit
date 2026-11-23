@@ -7,6 +7,7 @@ export async function placeInEachOutput(options: {
   assetId: string;
   clipId: string;
   outputs: [Output, ...Output[]];
+  actId: string;
 }): Promise<
   { ok: true; sceneClipId: string } | { ok: false; failure: ToolFailure }
 > {
@@ -15,6 +16,7 @@ export async function placeInEachOutput(options: {
     const placed = await callTool({
       client: options.client,
       name: "place_video",
+      actId: options.actId,
       input: {
         output_id: output.id,
         asset_id: options.assetId,

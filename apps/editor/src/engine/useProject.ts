@@ -11,6 +11,16 @@ export type ProjectState =
 const firstReconnectMilliseconds = 500;
 const longestReconnectMilliseconds = 5_000;
 
+function closeQuietly(socket: WebSocket): void {
+  if (socket.readyState !== WebSocket.CONNECTING) {
+    socket.close();
+    return;
+  }
+  socket.addEventListener("open", () => {
+    socket.close();
+  });
+}
+
 export function useProject(client: EngineClient): ProjectState {
   const [state, setState] = useState<ProjectState>({ kind: "loading" });
 
@@ -83,7 +93,7 @@ export function useProject(client: EngineClient): ProjectState {
     return () => {
       isClosed = true;
       window.clearTimeout(reconnectTimer);
-      socket?.close();
+      if (socket !== undefined) closeQuietly(socket);
     };
   }, [client]);
 

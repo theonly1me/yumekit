@@ -26,7 +26,11 @@ async function requestTextsOf(folder: string): Promise<string[]> {
     .parse(JSON.parse(text))
     .entries.flatMap((entry) =>
       entry.kind === "request" && typeof entry["text"] === "string"
-        ? [entry["text"]]
+        ? [
+            [entry["text"], entry["details"]]
+              .filter((part) => typeof part === "string")
+              .join("\n"),
+          ]
         : [],
     );
 }

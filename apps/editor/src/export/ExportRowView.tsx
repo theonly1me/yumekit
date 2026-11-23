@@ -55,15 +55,17 @@ function statusOf(options: {
   client: EngineClient;
   row: ExportRow;
   job: ExportJob | undefined;
+  scale: number;
 }): ReactNode {
-  const { row, job } = options;
+  const { row, job, scale } = options;
   if (row.lengthFrames === 0) {
     return <span className="fact">No scenes yet</span>;
   }
   if (job === undefined) {
     return (
       <span className="fact">
-        {row.output.widthPixels} x {row.output.heightPixels}
+        {Math.round(row.output.widthPixels * scale)} x{" "}
+        {Math.round(row.output.heightPixels * scale)}
       </span>
     );
   }
@@ -137,6 +139,7 @@ export function ExportRowView(props: {
   client: EngineClient;
   row: ExportRow;
   job: ExportJob | undefined;
+  scale: number;
   isChosen: boolean;
   isLocked: boolean;
   onChoose: (isChosen: boolean) => void;
@@ -158,7 +161,12 @@ export function ExportRowView(props: {
         {row.name} <em>{row.shape}</em>
       </label>
       <span className="export-file">{row.fileName}</span>
-      {statusOf({ client: props.client, row, job: props.job })}
+      {statusOf({
+        client: props.client,
+        row,
+        job: props.job,
+        scale: props.scale,
+      })}
       {props.sharper}
       {props.failure}
     </li>

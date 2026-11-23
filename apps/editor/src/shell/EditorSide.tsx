@@ -30,6 +30,8 @@ export function EditorSide(props: {
       tab={view.sideTab}
       sceneLabel={view.sceneLabel}
       onTab={view.setSideTab}
+      isOpen={view.isSideOpen}
+      onClose={view.closeSide}
     >
       {isScene ? (
         <ScenePanel

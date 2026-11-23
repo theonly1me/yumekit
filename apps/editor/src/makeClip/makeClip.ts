@@ -83,6 +83,7 @@ export async function makeClip(options: {
     client,
     name: "generate_asset",
     callId: options.callId,
+    actId: options.callId,
     input: {
       asset_id: uniqueAssetId({
         base: `clip-${clip.sceneId}`,
@@ -117,6 +118,7 @@ export async function makeClip(options: {
     assetId,
     clipId: clip.id,
     outputs,
+    actId: options.callId,
   });
   if (!placed.ok) return placed;
   return {

@@ -3,6 +3,7 @@ import type { MediaServers } from "../../tools/mediaServers.js";
 import { clockOf } from "../music/musicFacts.js";
 import { yourFileText } from "./YourFile.js";
 import { assetUsesIn, soundUseOf, placeLabelsOf } from "./fileUses.js";
+import { assetNameOf } from "../../names/index.js";
 
 export type FileGroupId =
   "pictures" | "videos" | "voice" | "music" | "sounds" | "fonts";
@@ -38,13 +39,6 @@ export interface FileGroup {
   id: FileGroupId;
   title: string;
   rows: FileRow[];
-}
-
-function nameOf(asset: Asset): string {
-  if (asset.source.kind === "import") return asset.source.originalName;
-  const { prompt, text } = asset.source.input;
-  if (typeof prompt === "string" && prompt !== "") return prompt;
-  return typeof text === "string" && text !== "" ? text : asset.id;
 }
 
 function sizeTextOf(options: { asset: Asset; framesPerSecond: number }) {
@@ -119,7 +113,7 @@ export function fileGroupsOf(options: {
     groupId: groupOf({ snapshot, asset }),
     row: {
       asset,
-      name: nameOf(asset),
+      name: assetNameOf(asset),
       sizeText: sizeTextOf({ asset, framesPerSecond }),
       madeBy: madeByOf({ asset, servers }),
       uses: placeLabelsOf({

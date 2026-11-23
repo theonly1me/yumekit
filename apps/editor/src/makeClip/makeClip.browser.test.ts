@@ -55,7 +55,7 @@ describe("Make a clip", () => {
     expect(listed).toEqual([
       {
         server: "Sample (free test server)",
-        models: ["Plain color with a frame counterFree"],
+        models: ["Test clipFree"],
       },
       {
         server: "Key test server",
@@ -88,12 +88,12 @@ describe("Make a clip", () => {
     await page.getByRole("button", { name: "720p" }).click();
     await expect.poll(() => price.textContent()).toBe("About $0.50");
     expect(await listedPrice.textContent()).toBe("About $0.50");
-    await page.getByLabel(/Length in seconds/).fill("6");
+    await page.getByLabel(/^Length,/).fill("6");
     await expect.poll(() => price.textContent()).toBe("About $1.50");
     expect(await listedPrice.textContent()).toBe("About $1.50");
     await page.getByRole("button", { name: "480p" }).click();
     await expect.poll(() => price.textContent()).toBe("About $0.60");
-    await page.getByLabel("Plain color with a frame counter").check();
+    await page.getByLabel("Test clip").check();
     await expect.poll(() => price.textContent()).toBe("Free");
     await editor.close();
   });
@@ -119,18 +119,19 @@ describe("Make a clip", () => {
     const editor = await openEditor(runningEngine().url);
     const { page } = editor;
     await openMakeClip(page);
-    await page.getByLabel("Plain color with a frame counter").check();
+    await page.getByLabel("Test clip").check();
 
     expect(await page.getByLabel("What happens in the clip").inputValue()).toBe(
       "First counter. Natural light.",
     );
+    await page.getByRole("button", { name: "Make a new picture" }).click();
     await page.getByLabel("What the still shows").fill("A red ball");
     await page.getByRole("button", { name: "Make the still" }).click();
     await expect
       .poll(() =>
-        page.getByText("The clip starts from the image").textContent(),
+        page.getByText("The clip starts from the picture").textContent(),
       )
-      .toContain("still-first");
+      .toContain("A red ball");
     await page.getByRole("button", { name: "Make the clip" }).click();
 
     await expect

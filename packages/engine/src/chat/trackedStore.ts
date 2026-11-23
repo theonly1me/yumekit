@@ -5,6 +5,8 @@ import type { ChangeAuthor } from "./chatTypes.js";
 export interface ToolCaller {
   by: ChangeAuthor;
   tool: string;
+  summary?: string;
+  actId?: string;
   changeId?: string;
 }
 

@@ -6,6 +6,7 @@ import type {
 } from "../engine/snapshot.js";
 import { Ruler } from "./Ruler.js";
 import { audioClipLabel, isCaptionTrack, trackLabel } from "./timelineFacts.js";
+import { sceneNameById } from "../names/index.js";
 
 export interface PickedClip {
   id: string;
@@ -93,9 +94,11 @@ export function Timeline(props: {
                     clipButton({
                       ...clip,
                       kind: isCaptions ? "narration" : "scene",
-                      label:
-                        scenes.find((scene) => scene.id === clip.sceneId)
-                          ?.title ?? clip.sceneId,
+                      label: sceneNameById({
+                        sceneId: clip.sceneId,
+                        scenes,
+                        assets: props.assets,
+                      }),
                     }),
                   )
                 : track.clips.map((clip) =>

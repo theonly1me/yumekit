@@ -27,7 +27,7 @@ export const sampleDescription = {
   models: [
     {
       id: "sample-image",
-      label: "Prompt as text on a plain color",
+      label: "Test picture",
       capability: "image",
       is_default: true,
       settings: [
@@ -47,7 +47,7 @@ export const sampleDescription = {
     },
     {
       id: "sample-speech",
-      label: "Quiet tone with even word timings",
+      label: "Test tone",
       capability: "speech",
       is_default: true,
       settings: [],
@@ -67,7 +67,7 @@ export const sampleDescription = {
     },
     {
       id: "sample-music",
-      label: "Low tone",
+      label: "Test tone",
       capability: "music",
       is_default: true,
       settings: [
@@ -86,7 +86,7 @@ export const sampleDescription = {
     },
     {
       id: "sample-video",
-      label: "Plain color with a frame counter",
+      label: "Test clip",
       capability: "video",
       is_default: true,
       settings: [

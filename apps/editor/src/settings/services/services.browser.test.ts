@@ -60,11 +60,11 @@ describe("the Services group of Settings", () => {
       .poll(() => rows.allTextContents())
       .toEqual([
         expect.stringMatching(
-          /^Pictures.*Sample \(free test server\), Prompt as text on a plain color/,
+          /^Pictures.*Sample \(free test server\), Test picture/,
         ),
-        expect.stringMatching(/^Voice.*Quiet tone with even word timings/),
-        expect.stringMatching(/^Music.*Low tone/),
-        expect.stringMatching(/^Video clips.*Plain color with a frame counter/),
+        expect.stringMatching(/^Voice.*Test tone/),
+        expect.stringMatching(/^Music.*Test tone/),
+        expect.stringMatching(/^Video clips.*Test clip/),
         expect.stringMatching(/^Sounds.*Short high tone/),
         expect.stringMatching(
           /^Talking clips.*Your picture or video with the voice/,
@@ -111,9 +111,7 @@ describe("the Services group of Settings", () => {
 
     await page.getByRole("button", { name: "Change Pictures" }).click();
     const list = page.getByRole("group", { name: "Models for Pictures" });
-    await list
-      .getByRole("button", { name: "Prompt as text on a plain color" })
-      .click();
+    await list.getByRole("button", { name: "Test picture" }).click();
     await expect
       .poll(() => userDefaults())
       .toMatchObject({ image: { server: "sample", model: "sample-image" } });

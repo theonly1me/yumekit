@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { personSummaryOf } from "../chat/personSummary.js";
 import { anySegment, type Exchange, type Route } from "./exchange.js";
 import { readJsonBody } from "./readJsonBody.js";
 import { notFound, sendJson } from "./responses.js";
@@ -6,6 +7,7 @@ import { notFound, sendJson } from "./responses.js";
 const toolCallSchema = z.strictObject({
   input: z.record(z.string(), z.json()),
   callId: z.string().min(1).max(200).optional(),
+  actId: z.string().min(1).max(200).optional(),
 });
 
 export const clientHeader = "x-yumekit-client";
@@ -34,10 +36,21 @@ async function callTool(exchange: Exchange) {
     schema: toolCallSchema,
   });
   if (!body.ok) return body.failure;
-  const { input, callId } = body.value;
+  const { input, callId, actId } = body.value;
   const isAgent = exchange.request.headers[clientHeader] === agentClient;
   const result = await context.chat.runToolCall({
-    caller: { by: isAgent ? "ai" : "person", tool: name },
+    caller: isAgent
+      ? { by: "ai", tool: name }
+      : {
+          by: "person",
+          tool: name,
+          summary: personSummaryOf({
+            tool: name,
+            input,
+            snapshot: context.store.read(),
+          }),
+          ...(actId === undefined ? {} : { actId }),
+        },
     call: () =>
       context.harness.call({
         name,

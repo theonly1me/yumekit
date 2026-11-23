@@ -5,6 +5,7 @@ import {
   isCaptionTrack,
   mainSceneClipsOf,
 } from "../../timeline/timelineFacts.js";
+import { sceneNameById } from "../../names/index.js";
 
 export type SoundUse = "voice" | "music" | "sounds" | "video-sound";
 
@@ -51,7 +52,7 @@ function sceneLabelOf(options: { snapshot: Snapshot; sceneId: string }) {
     );
     if (index >= 0) return `Scene ${String(index + 1)}`;
   }
-  const title = scenes.find((scene) => scene.id === sceneId)?.title ?? sceneId;
+  const title = sceneNameById({ sceneId, scenes, assets: snapshot.assets });
   return `The scene ${title}, not in the video`;
 }
 

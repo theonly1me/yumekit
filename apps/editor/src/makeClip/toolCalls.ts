@@ -26,6 +26,7 @@ export async function callTool(options: {
   name: string;
   input: object;
   callId?: string;
+  actId?: string;
 }): Promise<CallOutcome> {
   const { client, ...call } = options;
   const reply = await client.callTool(call);

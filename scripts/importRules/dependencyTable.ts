@@ -30,6 +30,7 @@ export const permittedImports: Record<string, Permission[]> = {
     { importName: "@yumekit/project/platforms" },
     { importName: "@yumekit/project/start-formats" },
     { importName: "@yumekit/project/asset-uses" },
+    { importName: "@yumekit/project/asset-labels" },
     { importName: "@yumekit/project/camera-moves" },
     sceneKit,
   ],

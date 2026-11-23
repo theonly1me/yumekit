@@ -1,4 +1,5 @@
 import type { AnswerEntry } from "./chatSchemas.js";
+import { MarkdownText } from "./markdown/MarkdownText.js";
 import { stepLinesOf } from "./stepLines.js";
 
 const stateLabels: Partial<Record<AnswerEntry["state"], string>> = {
@@ -19,7 +20,9 @@ export function AnswerView(props: { answer: AnswerEntry; text: string }) {
         {isRunning && isEmpty ? (
           <p className="thinking">Working on it</p>
         ) : undefined}
-        {text === "" ? undefined : <p className="answer-text">{text}</p>}
+        {text === "" ? undefined : (
+          <MarkdownText className="answer-text" text={text} />
+        )}
         {lines.length === 0 ? undefined : (
           <ul className="steps" aria-label="Steps">
             {lines.map((line) => (

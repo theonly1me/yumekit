@@ -33,22 +33,27 @@ function formatLinesOf(formatId: StartFormatId): string[] {
     : [`Format: ${format.name}. ${format.direction}`];
 }
 
-export function firstRequestTextOf(options: {
+export interface FirstRequest {
+  text: string;
+  details: string;
+}
+
+export function firstRequestOf(options: {
   request: string;
   platformIds: PlatformId[];
   length: ProjectLength;
   formatId: StartFormatId;
   planFirst: boolean;
-}): string {
+}): FirstRequest {
   const names = options.platformIds.map((id) => platformOf(id).name);
-  return [
-    options.request.trim(),
+  const details = [
     `Platforms: ${names.join(", ")}.`,
     ...formatLinesOf(options.formatId),
     lengthLineOf(options.length),
     betweenScenesLine,
     ...(options.planFirst ? [planFirstSentence] : []),
   ].join("\n");
+  return { text: options.request.trim(), details };
 }
 
 async function failureOf(response: Response): Promise<FirstRequestFailure> {
@@ -64,7 +69,7 @@ async function failureOf(response: Response): Promise<FirstRequestFailure> {
 
 export async function sendFirstRequest(options: {
   engine: EngineAddress;
-  text: string;
+  request: FirstRequest;
 }): Promise<Outcome<{ started: true }, FirstRequestFailure>> {
   try {
     const response = await fetch(`${options.engine.origin}/api/chat/requests`, {
@@ -73,7 +78,7 @@ export async function sendFirstRequest(options: {
         authorization: `Bearer ${options.engine.token}`,
         "content-type": "application/json",
       },
-      body: JSON.stringify({ text: options.text }),
+      body: JSON.stringify(options.request),
       signal: AbortSignal.timeout(requestWaitMilliseconds),
     });
     if (response.status !== 202) {

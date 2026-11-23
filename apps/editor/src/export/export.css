@@ -77,3 +77,9 @@
   flex: 1 1 220px;
   font-size: var(--step--1);
 }
+
+.export-size {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+}

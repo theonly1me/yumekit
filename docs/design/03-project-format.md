@@ -117,6 +117,7 @@ type Asset = {
   durationFrames?: number;
   hasAudio?: boolean;
   hasWords: boolean;
+  label?: string;
   source: AssetSource;
 };
 type AssetSource =

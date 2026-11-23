@@ -40,12 +40,12 @@ describe("the inputs that a video model accepts", () => {
     await openMakeClip(page);
     const sheet = page.getByRole("dialog", { name: "Make a real video clip" });
     const startPicture = sheet.getByText("Start on this picture");
-    await sheet.getByLabel("Plain color with a frame counter").check();
+    await sheet.getByLabel("Test clip").check();
 
     expect(await startPicture.count()).toBe(1);
     await sheet.getByLabel("Test video model").check();
     await expect.poll(() => startPicture.count()).toBe(0);
-    await sheet.getByLabel("Plain color with a frame counter").check();
+    await sheet.getByLabel("Test clip").check();
     await expect.poll(() => startPicture.count()).toBe(1);
     await editor.close();
   });

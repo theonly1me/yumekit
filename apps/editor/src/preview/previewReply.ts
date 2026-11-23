@@ -4,7 +4,7 @@ import type { TextChange } from "./textChange.js";
 
 export type PreviewMessage =
   | { kind: "reply"; reply: PreviewReply }
-  | { kind: "text-editing" }
+  | { kind: "text-editing"; frame: number | undefined }
   | { kind: "text-changed"; change: TextChange };
 
 const previewReplySchema = z.discriminatedUnion("type", [
@@ -20,7 +20,10 @@ const previewReplySchema = z.discriminatedUnion("type", [
 ]);
 
 const textMessageSchema = z.discriminatedUnion("type", [
-  z.object({ type: z.literal("text-editing") }),
+  z.object({
+    type: z.literal("text-editing"),
+    frame: z.number().int().min(0).optional(),
+  }),
   z.object({
     type: z.literal("text-changed"),
     sceneId: z.string(),
@@ -34,7 +37,9 @@ export function previewMessageOf(data: unknown): PreviewMessage | undefined {
   if (reply.success) return { kind: "reply", reply: reply.data };
   const text = textMessageSchema.safeParse(data);
   if (!text.success) return undefined;
-  if (text.data.type === "text-editing") return { kind: "text-editing" };
+  if (text.data.type === "text-editing") {
+    return { kind: "text-editing", frame: text.data.frame };
+  }
   const { sceneId, path, text: changedText } = text.data;
   return { kind: "text-changed", change: { sceneId, path, text: changedText } };
 }

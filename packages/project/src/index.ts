@@ -30,6 +30,11 @@ export {
   type StartFormatId,
 } from "./startFormats/catalog.js";
 export {
+  assetLabelOf,
+  labelOfWords,
+  type LabeledAsset,
+} from "./assetLabels/index.js";
+export {
   cameraMoveCatalog,
   cameraMoveIds,
   findCameraMove,

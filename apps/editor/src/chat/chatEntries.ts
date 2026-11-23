@@ -47,6 +47,10 @@ export function retryOf(options: {
     .slice(answerIndex + 1)
     .find((entry) => entry.kind === "request");
   return request?.kind === "request"
-    ? { text: request.text, aboutClipId: request.about?.clipId }
+    ? {
+        text: request.text,
+        details: request.details,
+        aboutClipId: request.about?.clipId,
+      }
     : undefined;
 }

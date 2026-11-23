@@ -98,7 +98,9 @@ describe("a new project from the home server", () => {
     });
     expect(chat.entries[0]).toMatchObject({
       kind: "request",
-      text: "A 15 second video about green tea.\nWarm and calm.\nPlatforms: YouTube, YouTube Shorts, TikTok.\nLength: 15 seconds.\nBetween scenes: a fade from each scene to the next.",
+      text: "A 15 second video about green tea.\nWarm and calm.",
+      details:
+        "Platforms: YouTube, YouTube Shorts, TikTok.\nLength: 15 seconds.\nBetween scenes: a fade from each scene to the next.",
     });
     expect(chat.entries[1]).toMatchObject({ kind: "answer", state: "done" });
   });

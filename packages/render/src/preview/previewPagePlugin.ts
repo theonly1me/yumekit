@@ -6,6 +6,7 @@ import {
   previewPagePath,
 } from "../page/previewData.js";
 import {
+  moduleImporterScript,
   pageHtmlOf,
   sendHtml,
   serveAssetFrames,
@@ -29,7 +30,10 @@ export function previewPagePlugin(options: {
         const [, response] = parameters;
         sendHtml({
           response,
-          html: pageHtmlOf({ entryFile: previewPageEntryFile }),
+          html: pageHtmlOf({
+            entryFile: previewPageEntryFile,
+            headScripts: [moduleImporterScript],
+          }),
         });
       });
       server.middlewares.use(previewDataPath, (...parameters) => {

@@ -90,14 +90,18 @@ describe("camera moves and the last picture in Make a clip", () => {
     const editor = await openEditor(runningEngine().url);
     const { page } = editor;
     await openMakeClip(page);
-    await page.getByLabel("Plain color with a frame counter").check();
+    await page.getByLabel("Test clip").check();
     await page
       .getByRole("group", { name: "Camera" })
       .getByRole("button", { name: "Orbit" })
       .click();
     await page
+      .getByRole("group", { name: "Pictures to start on" })
+      .getByRole("button", { name: "Start on A red ball" })
+      .click();
+    await page
       .getByRole("group", { name: "Pictures to end on" })
-      .getByRole("button", { name: "End on first-still" })
+      .getByRole("button", { name: "End on A red ball" })
       .click();
     await page.getByRole("button", { name: "Make the clip" }).click();
 
@@ -118,7 +122,7 @@ describe("camera moves and the last picture in Make a clip", () => {
     const { page } = editor;
     await openMakeClip(page);
 
-    await page.getByLabel("Plain color with a frame counter").check();
+    await page.getByLabel("Test clip").check();
     expect(await page.getByText("End on this picture").count()).toBe(1);
     await page.getByLabel("Test video model").check();
     expect(await page.getByText("End on this picture").count()).toBe(0);
@@ -130,7 +134,7 @@ describe("camera moves and the last picture in Make a clip", () => {
     const editor = await openEditor(runningEngine().url);
     const { page } = editor;
     await openMakeClip(page);
-    await page.getByLabel("Plain color with a frame counter").check();
+    await page.getByLabel("Test clip").check();
 
     await page.getByRole("button", { name: "Let the AI write it" }).click();
 
@@ -138,7 +142,7 @@ describe("camera moves and the last picture in Make a clip", () => {
       .poll(() => requestTextsSent(runningEngine()))
       .toContainEqual(
         expect.stringContaining(
-          "Make a real video clip for this scene. Write the prompt and pick the camera move yourself. Use the model Plain color with a frame counter of Sample (free test server).",
+          "Make a real video clip for this scene. Write the prompt and pick the camera move yourself. Use the model Test clip of Sample (free test server).",
         ),
       );
     expect(

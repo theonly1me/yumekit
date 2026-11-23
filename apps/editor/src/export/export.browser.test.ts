@@ -72,7 +72,12 @@ describe("export from the editor", () => {
         return value > 0 && value < 100;
       }),
     ).toBe(true);
-    expect(await sheet.getByText("Your videos are ready").count()).toBe(1);
+    expect(await sheet.getByText("Your video is ready").count()).toBe(1);
+    expect(
+      await sheet
+        .getByText("project/renders", { exact: true })
+        .getAttribute("title"),
+    ).toMatch(/[\\/]project[\\/]renders$/);
     const file = join(runningEngine().projectFolder, "renders", "wide.mp4");
     const probe = await probeVideo(file);
     expect(probe.format.duration).toBeCloseTo(4, 1);

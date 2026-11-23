@@ -9,6 +9,8 @@ import type {
   Timeline,
 } from "../engine/snapshot.js";
 
+import { assetNameOf } from "../names/index.js";
+
 export function timelineOf(options: {
   snapshot: Snapshot;
   outputId: string;
@@ -66,10 +68,10 @@ export function audioClipLabel(options: {
     (candidate) => candidate.id === options.clip.assetId,
   );
   if (asset?.source.kind === "import") return asset.source.originalName;
-  if (asset === undefined) return options.clip.assetId;
+  if (asset === undefined) return "Sound";
   const { text, prompt } = asset.source.input;
   if (typeof text === "string") return text;
-  return typeof prompt === "string" ? prompt : options.clip.assetId;
+  return typeof prompt === "string" ? prompt : assetNameOf(asset);
 }
 
 export function outputLabel(output: Output): string {

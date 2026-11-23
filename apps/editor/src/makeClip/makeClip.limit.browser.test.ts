@@ -40,7 +40,7 @@ describe("the limit of generated video in Make a clip", () => {
     const price = page.locator(".clip-price");
     await expect.poll(() => price.textContent()).toBe("Free");
 
-    await page.getByLabel(/Length in seconds/).fill("4");
+    await page.getByLabel(/^Length,/).fill("4");
 
     await expect
       .poll(() => price.textContent())
@@ -59,7 +59,11 @@ describe("the limit of generated video in Make a clip", () => {
     const { page } = editor;
     await openMakeClip(page);
     await page.getByLabel("What happens in the clip").fill("A slow pan");
-    await page.getByLabel(/Length in seconds/).fill("2");
+    await page
+      .getByRole("group", { name: "Pictures to start on" })
+      .getByRole("button", { name: "Start on A red ball" })
+      .click();
+    await page.getByLabel(/^Length,/).fill("2");
     await runningEngine().callTool({
       name: "generate_asset",
       input: {

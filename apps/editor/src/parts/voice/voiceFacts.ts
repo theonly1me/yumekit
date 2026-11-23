@@ -7,6 +7,7 @@ import {
 } from "../../timeline/timelineFacts.js";
 import type { MediaServers } from "../../tools/mediaServers.js";
 import type { SoundPiece } from "../sound/useSoundPlayer.js";
+import { sceneNameOf } from "../../names/index.js";
 
 export interface VoiceLine {
   clipId: string;
@@ -61,7 +62,7 @@ export function voiceFactsOf(snapshot: Snapshot): VoiceFacts {
       sceneLabel:
         scene === undefined
           ? "No scene"
-          : `Scene ${String(number + 1)}: ${scene.title}`,
+          : `Scene ${String(number + 1)}: ${sceneNameOf({ scene, assets })}`,
       words: wordsOf(assets.find((asset) => asset.id === clip.assetId)),
     };
   });

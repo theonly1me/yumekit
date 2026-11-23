@@ -6,6 +6,8 @@ export function SidePanel(props: {
   tab: SideTab;
   sceneLabel: string | undefined;
   onTab: (tab: SideTab) => void;
+  isOpen: boolean;
+  onClose: () => void;
   children: ReactNode;
 }) {
   const shown: SideTab =
@@ -19,7 +21,14 @@ export function SidePanel(props: {
     },
   ];
   return (
-    <aside className="side" aria-label="Chat and the picked scene">
+    <aside
+      className="side"
+      aria-label="Chat and the picked scene"
+      data-open={props.isOpen}
+      onKeyDown={(event) => {
+        if (event.key === "Escape" && props.isOpen) props.onClose();
+      }}
+    >
       <div className="side-tabs" role="tablist" aria-label="Side panel">
         {tabs.map((tab) => (
           <button
@@ -38,6 +47,9 @@ export function SidePanel(props: {
             {tab.label}
           </button>
         ))}
+        <button type="button" className="side-close" onClick={props.onClose}>
+          Close
+        </button>
       </div>
       <div
         className="side-body"

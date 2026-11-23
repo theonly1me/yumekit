@@ -6,6 +6,7 @@ import { sendJson, type Failure } from "./responses.js";
 
 const requestBodySchema = z.strictObject({
   text: z.string().trim().min(1).max(20_000),
+  details: z.string().trim().min(1).max(20_000).optional(),
   about_clip_id: z.string().min(1).max(200).nullable().optional(),
 });
 
@@ -32,6 +33,7 @@ async function startRequest(exchange: Exchange) {
   if (!body.ok) return body.failure;
   const started = await exchange.context.chat.startRequest({
     text: body.value.text,
+    details: body.value.details,
     aboutClipId: body.value.about_clip_id ?? undefined,
   });
   if (!started.ok) return httpFailureOf(started.failure);

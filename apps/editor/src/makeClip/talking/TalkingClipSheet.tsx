@@ -18,6 +18,7 @@ import { sceneVoiceOf, speakersOf } from "./talkingFacts.js";
 import { useTalkingChoice } from "./useTalkingChoice.js";
 import "../makeClip.css";
 import "./talking.css";
+import { sceneNameById } from "../../names/index.js";
 
 export function TalkingClipSheet(props: {
   client: EngineClient;
@@ -50,7 +51,11 @@ export function TalkingClipSheet(props: {
       kind: "talking-clip",
     }),
   });
-  const sceneTitle = scene?.title ?? target.sceneId;
+  const sceneTitle = sceneNameById({
+    sceneId: target.sceneId,
+    scenes: snapshot.scenes,
+    assets: snapshot.assets,
+  });
   const number = sceneNumberOf({ snapshot, output, clipId: target.id });
   const sceneName =
     number === undefined ? sceneTitle : `scene ${String(number)}`;
