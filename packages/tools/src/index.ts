@@ -8,6 +8,7 @@ export type {
   MediaChoices,
   MediaPick,
   MediaPickFailure,
+  UserFileFailure,
   ServiceState,
 } from "./choiceTypes.js";
 export { choiceCapabilities } from "./mediaChoices.js";

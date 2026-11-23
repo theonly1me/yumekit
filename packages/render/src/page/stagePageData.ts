@@ -6,8 +6,25 @@ export type PageSceneSource =
 
 export interface StagePageData {
   look: LookId;
+  calm: boolean;
   project: StageProject;
   sceneSources: Record<string, PageSceneSource>;
+}
+
+export interface StagePageLoad {
+  pageData: StagePageData;
+  moduleSceneUrls: Record<string, string>;
+}
+
+export function isStagePageLoad(value: unknown): value is StagePageLoad {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "pageData" in value &&
+    typeof value.pageData === "object" &&
+    "moduleSceneUrls" in value &&
+    typeof value.moduleSceneUrls === "object"
+  );
 }
 
 export type SeekResult =
@@ -22,11 +39,13 @@ export type SeekResult =
     };
 
 export interface StagePageApi {
+  load: (pageLoadText: string) => Promise<void>;
   seek: (frame: number) => Promise<SeekResult>;
 }
 
 declare global {
   interface Window {
     yumekitStage?: StagePageApi;
+    yumekitImport?: (url: string) => Promise<unknown>;
   }
 }

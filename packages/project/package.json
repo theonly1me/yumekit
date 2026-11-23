@@ -21,6 +21,14 @@
     "./platforms": {
       "types": "./dist/platforms/catalog.d.ts",
       "default": "./dist/platforms/catalog.js"
+    },
+    "./start-formats": {
+      "types": "./dist/startFormats/catalog.d.ts",
+      "default": "./dist/startFormats/catalog.js"
+    },
+    "./camera-moves": {
+      "types": "./dist/cameraMoves/catalog.d.ts",
+      "default": "./dist/cameraMoves/catalog.js"
     }
   },
   "files": [

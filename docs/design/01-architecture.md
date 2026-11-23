@@ -35,7 +35,7 @@ With no editor, the engine is the process that `yumekit mcp` starts, and it serv
 | `@yumekit/scene-kit`   | Browser | Ready scene components and style packs                                        | `kitScenes` for the browser, and `kitSceneSchemas` from the entry `@yumekit/scene-kit/schemas`, which has no browser code                           |
 | `@yumekit/project`     | Node    | The folder format, schemas, validation, edit commands, undo, change events    | `createProject`, `openProject`, the `ProjectStore` it returns, and `scenesRowOf`                                                                    |
 | `@yumekit/stage`       | Browser | Drawing one output at one frame from project data and scene modules           | `createStage`                                                                                                                                       |
-| `@yumekit/render`      | Node    | Frames and video files. Hides Chromium, the bundler, and FFmpeg               | `renderFrame`, `renderSceneFrame`, `renderVideo`, `checkSceneCode`                                                                                  |
+| `@yumekit/render`      | Node    | Frames and video files. Hides Chromium, the bundler, and FFmpeg               | `renderFrame`, `renderSceneFrame`, `renderVideo`, `checkSceneCode`, `createPictureRenderer`                                                         |
 | `@yumekit/tools`       | Node    | Connections to media MCP servers and the media tool convention                | `connectMediaTools`                                                                                                                                 |
 | `@yumekit/harness-mcp` | Node    | The MCP tools that map to edits, media jobs, and renders                      | `createHarnessServer`                                                                                                                               |
 | `@yumekit/brain`       | Node    | The adapters that run the agent program of the person (document 12)           | `createClaudeCodeAdapter`, `createCodexAdapter`, `brainInstructions`, `personSentenceOf`                                                            |
@@ -48,20 +48,20 @@ With no editor, the engine is the process that `yumekit mcp` starts, and it serv
 
 A package may import only the packages in its row. CI must fail on any other import between packages.
 
-| Package       | May import                                                                                        |
-| ------------- | ------------------------------------------------------------------------------------------------- |
-| `scene`       | nothing from yumekit                                                                              |
-| `scene-kit`   | `scene`                                                                                           |
-| `project`     | nothing from yumekit                                                                              |
-| `stage`       | `scene`, and types only from `project`                                                            |
-| `render`      | `project`, `stage`, `scene-kit`                                                                   |
-| `tools`       | nothing from yumekit                                                                              |
-| `harness-mcp` | `project`, `render`, `tools`, and `scene-kit/schemas`                                             |
-| `brain`       | nothing from yumekit                                                                              |
-| `engine`      | `project`, `render`, `tools`, `harness-mcp`, `brain`, and `scene-kit/schemas`                     |
-| `apps/cli`    | `project`, `render`, `tools`, `harness-mcp`, `engine`                                             |
-| `apps/editor` | only `project/scenes-row`, `project/platforms`, `project/asset-uses`, and `scene-kit` at run time |
-| `tools/*`     | nothing from yumekit                                                                              |
+| Package       | May import                                                                                                                                         |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `scene`       | nothing from yumekit                                                                                                                               |
+| `scene-kit`   | `scene`                                                                                                                                            |
+| `project`     | nothing from yumekit                                                                                                                               |
+| `stage`       | `scene`, and types only from `project`                                                                                                             |
+| `render`      | `project`, `stage`, `scene-kit`                                                                                                                    |
+| `tools`       | nothing from yumekit                                                                                                                               |
+| `harness-mcp` | `project`, `render`, `tools`, and `scene-kit/schemas`                                                                                              |
+| `brain`       | nothing from yumekit                                                                                                                               |
+| `engine`      | `project`, `render`, `tools`, `harness-mcp`, `brain`, and `scene-kit/schemas`                                                                      |
+| `apps/cli`    | `project`, `render`, `tools`, `harness-mcp`, `engine`                                                                                              |
+| `apps/editor` | only `project/scenes-row`, `project/platforms`, `project/asset-uses`, `project/start-formats`, `project/camera-moves`, and `scene-kit` at run time |
+| `tools/*`     | nothing from yumekit                                                                                                                               |
 
 Two more rules:
 

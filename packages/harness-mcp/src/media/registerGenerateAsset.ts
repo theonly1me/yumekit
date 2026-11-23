@@ -21,6 +21,7 @@ import { generatedMediaOf } from "./generatedFile.js";
 import { mediaFailureOf } from "./mediaFailures.js";
 import { recordedInputOf, referencePathsInput } from "./referencePaths.js";
 import { reuseAsset, summaryOf } from "./reuseAsset.js";
+import { videoInputOf } from "./videoChoices.js";
 import { videoLimitFailureOf } from "./videoLimit.js";
 
 async function generateAsset(options: {
@@ -37,10 +38,17 @@ async function generateAsset(options: {
   });
   if (!castApplied.ok) return failureResult(castApplied.failure);
   const request = castApplied.value;
+  const sentInput = await videoInputOf({
+    request,
+    mediaTools: context.mediaTools,
+  });
+  if (!sentInput.ok) return failureResult(sentInput.failure);
   const projectFolder = context.store.folder;
   const ids = {
     referenceAssetIds: request.reference_asset_ids,
     firstFrameAssetId: request.first_frame_asset_id,
+    lastFrameAssetId: request.last_frame_asset_id,
+    cameraMoveId: request.camera_move,
   };
   const paths = referencePathsInput({ snapshot, projectFolder, ids });
   if (!paths.ok) return failureResult(paths.failure);
@@ -74,7 +82,7 @@ async function generateAsset(options: {
     capability: request.capability,
     ...(request.server === undefined ? {} : { server: request.server }),
     ...(request.model === undefined ? {} : { model: request.model }),
-    input: { ...request.input, ...paths.value },
+    input: { ...sentInput.value, ...paths.value },
     outputDirectory: assetFilesFolder(projectFolder),
     fileStem: request.asset_id,
     ...(onProgress === undefined ? {} : { onProgress }),

@@ -7,7 +7,7 @@ export {
   type Project,
   type VideoStyle,
 } from "./format/project.js";
-export { lookIds, lookOf, type LookId } from "./format/look.js";
+export { isCalm, lookIds, lookOf, type LookId } from "./format/look.js";
 export {
   findPlatform,
   inCatalogOrder,
@@ -19,6 +19,24 @@ export {
   type Platform,
   type PlatformId,
 } from "./platforms/catalog.js";
+export {
+  firstStartFormatId,
+  isStartFormatId,
+  planFirstSentence,
+  startFormatCatalog,
+  startFormatIds,
+  startFormatOf,
+  type StartFormat,
+  type StartFormatId,
+} from "./startFormats/catalog.js";
+export {
+  cameraMoveCatalog,
+  cameraMoveIds,
+  findCameraMove,
+  isCameraMoveId,
+  type CameraMove,
+  type CameraMoveId,
+} from "./cameraMoves/catalog.js";
 export {
   castKinds,
   type Bible,

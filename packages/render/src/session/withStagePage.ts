@@ -1,16 +1,10 @@
-import { launchBrowser } from "../browser/launchBrowser.js";
-import { openStagePage, type StagePage } from "../browser/openStagePage.js";
+import type { StagePage } from "../browser/openStagePage.js";
 import { fail, type Outcome } from "../outcome.js";
 import { checkModuleScenes } from "../project/checkModuleScenes.js";
 import type { LoadedOutput } from "../project/loadOutput.js";
-import { stagePageDataOf } from "../project/stagePageDataOf.js";
 import type { RenderFailure, RenderScale } from "../renderFailure.js";
-import {
-  startStageServer,
-  type StageServer,
-} from "../server/startStageServer.js";
-import { stagePagePath, stagePagePlugin } from "../server/stagePagePlugin.js";
-import { createVideoFrameServer } from "../videoFrames/videoFrameServer.js";
+import { loadStagePage } from "./loadStagePage.js";
+import { startStageHost } from "./stageHost.js";
 
 export async function withStagePage<Value>(options: {
   loaded: LoadedOutput;
@@ -22,36 +16,15 @@ export async function withStagePage<Value>(options: {
   if (sceneFailure !== undefined) {
     return fail(sceneFailure);
   }
-  const pageData = await stagePageDataOf(loaded);
-  const launched = await launchBrowser();
-  if (!launched.ok) {
-    return launched;
+  const started = await startStageHost({ projectFolder: loaded.folder });
+  if (!started.ok) {
+    return started;
   }
-  const browser = launched.value;
-  let server: StageServer | undefined;
+  const host = started.value;
   try {
-    const videoFrames = createVideoFrameServer({
-      projectFolder: loaded.folder,
-      framesPerSecond: loaded.snapshot.project.framesPerSecond,
-      assets: loaded.snapshot.assets,
-    });
-    server = await startStageServer({
-      projectFolder: loaded.folder,
-      pagePlugin: stagePagePlugin({ pageData, videoFrames }),
-    });
-    const browserPage = await openStagePage({
-      browser,
-      pageUrl: `${server.origin}${stagePagePath}`,
-      origin: server.origin,
-      output: loaded.output,
-      scale,
-    });
-    return await options.use({
-      ...browserPage,
-      videoFramesFailure: videoFrames.failure,
-    });
+    const page = await host.openPage({ output: loaded.output, scale });
+    return await options.use(await loadStagePage({ host, page, loaded }));
   } finally {
-    await browser.close();
-    await server?.close();
+    await host.close();
   }
 }

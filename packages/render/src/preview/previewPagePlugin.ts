@@ -27,7 +27,10 @@ export function previewPagePlugin(options: {
     configureServer(server) {
       server.middlewares.use(previewPagePath, (...parameters) => {
         const [, response] = parameters;
-        sendHtml({ response, html: pageHtmlOf(previewPageEntryFile) });
+        sendHtml({
+          response,
+          html: pageHtmlOf({ entryFile: previewPageEntryFile }),
+        });
       });
       server.middlewares.use(previewDataPath, (...parameters) => {
         const [request, response, next] = parameters;

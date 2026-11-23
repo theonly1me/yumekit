@@ -1,3 +1,4 @@
+import { cameraMoveCatalog } from "@yumekit/project";
 import { checkSceneCode } from "@yumekit/render";
 import { describe, expect, it } from "vitest";
 import { sceneGuide, sceneGuideExamples } from "./index.js";
@@ -57,6 +58,13 @@ describe("scene guide", () => {
       'data-text-prop={"points." + String(index)}',
     );
     expect(sceneGuideExamples[1].code).toContain('data-text-prop="label"');
+  });
+
+  it("lists each camera move id with its line for a person", () => {
+    expect(sceneGuide).toContain("## Camera moves of a video clip");
+    for (const move of cameraMoveCatalog) {
+      expect(sceneGuide).toContain(`- \`${move.id}\`: ${move.line}`);
+    }
   });
 
   it("contains the code of each example", () => {

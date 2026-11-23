@@ -69,6 +69,8 @@ export async function makeClip(options: {
   prompt: string;
   values: SettingValues;
   firstFrameAssetId: string | undefined;
+  lastFrameAssetId: string | undefined;
+  cameraMoveId: string | undefined;
   referenceAssetIds: string[];
   outputs: [Output, ...Output[]];
   clip: SceneClip;
@@ -97,6 +99,12 @@ export async function makeClip(options: {
       ...(options.firstFrameAssetId === undefined
         ? {}
         : { first_frame_asset_id: options.firstFrameAssetId }),
+      ...(options.lastFrameAssetId === undefined
+        ? {}
+        : { last_frame_asset_id: options.lastFrameAssetId }),
+      ...(options.cameraMoveId === undefined
+        ? {}
+        : { camera_move: options.cameraMoveId }),
       ...(options.referenceAssetIds.length === 0
         ? {}
         : { reference_asset_ids: options.referenceAssetIds }),

@@ -3,15 +3,23 @@ import type { EngineClient } from "../engine/engineClient.js";
 import type { Output, SceneClip, Snapshot } from "../engine/snapshot.js";
 import { useEngineEvents } from "../engine/useEngineEvents.js";
 import { Sheet } from "../sheets/Sheet.js";
-import { currentModelOf, useMediaChoices } from "../settings/services/index.js";
+import {
+  currentModelOf,
+  useMediaChoices,
+  type ModelTarget,
+} from "../settings/services/index.js";
 import { useMediaServers } from "../tools/useMediaServers.js";
 import type { Phase } from "./ClipAction.js";
 import { ClipForm, type ClipDraft } from "./ClipForm.js";
 import { MadeClipResult } from "./MadeClipResult.js";
 import { outputsHoldingClip, sceneNumberOf } from "./clipOutputs.js";
 import { makeClip, type MadeClip } from "./makeClip.js";
-import { takesFirstPicture } from "./modelChoices.js";
-import { promptOfScene } from "./scenePrompt.js";
+import {
+  modelTargetOf,
+  takesFirstPicture,
+  takesLastPicture,
+} from "./modelChoices.js";
+import { earlierCameraMoveOf, promptOfScene } from "./scenePrompt.js";
 import { useClipChoice } from "./useClipChoice.js";
 import "./makeClip.css";
 
@@ -22,6 +30,7 @@ export function MakeClipSheet(props: {
   clip: SceneClip;
   onClose: () => void;
   onPlaced: (made: MadeClip) => void;
+  onAskTheAi: (model: ModelTarget | undefined) => void;
 }) {
   const { client, snapshot, output } = props;
   const callId = useRef("");
@@ -36,6 +45,11 @@ export function MakeClipSheet(props: {
         ? ""
         : promptOfScene({ scene, assets: snapshot.assets }),
     firstFrameId: undefined,
+    lastFrameId: undefined,
+    cameraMoveId:
+      scene === undefined
+        ? undefined
+        : earlierCameraMoveOf({ scene, assets: snapshot.assets }),
     referenceIds: [],
   }));
   const [phase, setPhase] = useState<Phase>({ kind: "editing" });
@@ -86,6 +100,11 @@ export function MakeClipSheet(props: {
       prompt: draft.prompt.trim(),
       values,
       firstFrameAssetId: takesPicture ? firstFrameId : undefined,
+      lastFrameAssetId:
+        takesPicture && takesLastPicture(choice.model)
+          ? draft.lastFrameId
+          : undefined,
+      cameraMoveId: draft.cameraMoveId,
       referenceAssetIds: draft.referenceIds,
       outputs: outputsHoldingClip({
         snapshot,
@@ -165,6 +184,11 @@ export function MakeClipSheet(props: {
             }}
             phase={phase}
             onMake={make}
+            onAskTheAi={() => {
+              props.onAskTheAi(
+                choice === undefined ? undefined : modelTargetOf(choice),
+              );
+            }}
           />
         )}
       </div>

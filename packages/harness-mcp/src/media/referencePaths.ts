@@ -5,6 +5,8 @@ import type { HarnessFailure, Outcome } from "../results.js";
 export interface ReferenceIds {
   referenceAssetIds: string[] | undefined;
   firstFrameAssetId: string | undefined;
+  lastFrameAssetId?: string | undefined;
+  cameraMoveId?: string | undefined;
 }
 
 function imagePathOf(options: {
@@ -53,6 +55,11 @@ export function referencePathsInput(options: {
           assetId: ids.firstFrameAssetId,
         });
   if (firstFrame !== undefined && !firstFrame.ok) return firstFrame;
+  const lastFrame =
+    ids.lastFrameAssetId === undefined
+      ? undefined
+      : imagePathOf({ snapshot, projectFolder, assetId: ids.lastFrameAssetId });
+  if (lastFrame !== undefined && !lastFrame.ok) return lastFrame;
   return {
     ok: true,
     value: {
@@ -62,6 +69,7 @@ export function referencePathsInput(options: {
       ...(firstFrame === undefined
         ? {}
         : { first_frame_path: firstFrame.value }),
+      ...(lastFrame === undefined ? {} : { last_frame_path: lastFrame.value }),
     },
   };
 }
@@ -79,5 +87,11 @@ export function recordedInputOf(options: {
     ...(ids.firstFrameAssetId === undefined
       ? {}
       : { first_frame_asset_id: ids.firstFrameAssetId }),
+    ...(ids.lastFrameAssetId === undefined
+      ? {}
+      : { last_frame_asset_id: ids.lastFrameAssetId }),
+    ...(ids.cameraMoveId === undefined
+      ? {}
+      : { camera_move: ids.cameraMoveId }),
   };
 }

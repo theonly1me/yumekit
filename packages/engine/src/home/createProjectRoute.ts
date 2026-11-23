@@ -5,6 +5,7 @@ import {
   inCatalogOrder,
   lookIds,
   platformIds,
+  startFormatIds,
   videoStyles,
   type LookId,
   type PlatformId,
@@ -35,6 +36,8 @@ const createBodySchema = z.strictObject({
   length: projectLengthSchema,
   video_style: z.enum(videoStyles).default("graphics"),
   look: z.enum(lookIds).default("midnight"),
+  format_id: z.enum(startFormatIds).default("free"),
+  plan_first: z.boolean().default(false),
 });
 
 function notCreated(message: string): Failure {
@@ -88,7 +91,14 @@ export async function createProjectRoute(exchange: Exchange<HomeContext>) {
     schema: createBodySchema,
   });
   if (!body.ok) return body.failure;
-  const { request, length, video_style: videoStyle, look } = body.value;
+  const {
+    request,
+    length,
+    video_style: videoStyle,
+    look,
+    format_id: formatId,
+    plan_first: planFirst,
+  } = body.value;
   const platformIds = inCatalogOrder(body.value.platform_ids);
   const made = await queued({
     context: exchange.context,
@@ -101,7 +111,13 @@ export async function createProjectRoute(exchange: Exchange<HomeContext>) {
   if (!engine.ok) return { status: 409, ...engine.failure };
   const started = await sendFirstRequest({
     engine: engine.value,
-    text: firstRequestTextOf({ request, platformIds, length }),
+    text: firstRequestTextOf({
+      request,
+      platformIds,
+      length,
+      formatId,
+      planFirst,
+    }),
   });
   const url = started.ok
     ? engine.value.url

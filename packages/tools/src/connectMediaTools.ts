@@ -10,6 +10,7 @@ import { checkPick } from "./checkPick.js";
 import { mediaChoicesOf } from "./mediaChoices.js";
 import { runTool } from "./runTool.js";
 import { saveUserDefault } from "./saveUserDefault.js";
+import { saveUserVideoLimit } from "./saveUserLimit.js";
 import {
   describedDefaultModel,
   isStarted,
@@ -47,6 +48,7 @@ export async function connectMediaTools(options: {
   if (!configurationRead.ok) return configurationRead;
   const configuration = configurationRead.value;
   let defaults = configuration.defaults;
+  let limits = configuration.limits;
   const toolTimeoutSeconds =
     options.toolTimeoutSeconds ?? defaultToolTimeoutSeconds;
   const pool = createServerPool(
@@ -72,7 +74,15 @@ export async function connectMediaTools(options: {
           server: connection.name,
           message: connection.message,
         })),
-    limits: () => ({ ...configuration.limits }),
+    limits: () => ({ ...limits }),
+    setVideoLimit: async (seconds) => {
+      const saved = await saveUserVideoLimit(seconds);
+      if (!saved.ok) return saved;
+      const reread = await readMediaToolsConfiguration(options);
+      if (!reread.ok) return reread;
+      limits = reread.value.limits;
+      return { ok: true, value: { ...limits } };
+    },
     choices: () =>
       mediaChoicesOf({ connections: pool.connections(), defaults }),
     pick: async (pick) => {

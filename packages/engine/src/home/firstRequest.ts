@@ -1,4 +1,10 @@
-import { platformOf, type PlatformId } from "@yumekit/project";
+import {
+  planFirstSentence,
+  platformOf,
+  startFormatOf,
+  type PlatformId,
+  type StartFormatId,
+} from "@yumekit/project";
 import { z } from "zod";
 import type { Outcome } from "../engineTypes.js";
 import type { EngineAddress, ProjectLength } from "./homeTypes.js";
@@ -20,17 +26,28 @@ function lengthLineOf(length: ProjectLength): string {
     : `Length: ${String(length)} seconds.`;
 }
 
+function formatLinesOf(formatId: StartFormatId): string[] {
+  const format = startFormatOf(formatId);
+  return format.direction === ""
+    ? []
+    : [`Format: ${format.name}. ${format.direction}`];
+}
+
 export function firstRequestTextOf(options: {
   request: string;
   platformIds: PlatformId[];
   length: ProjectLength;
+  formatId: StartFormatId;
+  planFirst: boolean;
 }): string {
   const names = options.platformIds.map((id) => platformOf(id).name);
   return [
     options.request.trim(),
     `Platforms: ${names.join(", ")}.`,
+    ...formatLinesOf(options.formatId),
     lengthLineOf(options.length),
     betweenScenesLine,
+    ...(options.planFirst ? [planFirstSentence] : []),
   ].join("\n");
 }
 

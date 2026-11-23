@@ -20,7 +20,7 @@ async function startHome(making: Parameters<typeof runHome>[0]["making"]) {
 }
 
 describe("the start screen", () => {
-  it("starts with YouTube, TikTok, and 30 seconds, and keeps the button off while the prompt is empty", async () => {
+  it("starts with No format, YouTube, TikTok, and 30 seconds, and keeps the button off while the prompt is empty", async () => {
     const home = await startHome({ calls: [], ending: "done" });
     const { page, close } = await openEditor(home.url);
     const button = page.getByRole("button", { name: "Make the video" });
@@ -33,11 +33,17 @@ describe("the start screen", () => {
       .allTextContents();
 
     expect(pressed).toEqual([
+      "No format",
       "YouTube16:9, 1920 x 1080",
       "TikTok9:16, 1080 x 1920",
       "GraphicsEach scene is drawn by code. It is exact, and it costs nothing.",
       "30 seconds",
     ]);
+    expect(
+      await page
+        .getByRole("switch", { name: "Show me the plan first" })
+        .isChecked(),
+    ).toBe(false);
     expect(await button.isDisabled()).toBe(true);
     await expect
       .poll(() =>

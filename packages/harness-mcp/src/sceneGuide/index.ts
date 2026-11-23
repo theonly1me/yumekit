@@ -1,3 +1,4 @@
+import { cameraMovesSection } from "./cameraMoves.js";
 import { sceneGuideExamples } from "./examples.js";
 import { motionDesignSection } from "./motionDesign.js";
 import { contractSection, rulesSection } from "./reference.js";
@@ -29,6 +30,7 @@ export const sceneGuide = [
   contractSection,
   rulesSection,
   motionDesignSection,
+  cameraMovesSection,
   ...[...sceneGuideExamples.entries()].map(([index, example]) =>
     exampleSection({ number: index + 1, example }),
   ),

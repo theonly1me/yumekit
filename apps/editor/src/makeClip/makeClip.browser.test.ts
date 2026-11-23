@@ -122,7 +122,7 @@ describe("Make a clip", () => {
     await page.getByLabel("Plain color with a frame counter").check();
 
     expect(await page.getByLabel("What happens in the clip").inputValue()).toBe(
-      "First counter. Slow camera move, natural light.",
+      "First counter. Natural light.",
     );
     await page.getByLabel("What the still shows").fill("A red ball");
     await page.getByRole("button", { name: "Make the still" }).click();

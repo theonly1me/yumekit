@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
 import type { LookId } from "@yumekit/scene-kit";
+import {
+  firstStartFormatId,
+  type StartFormatId,
+} from "@yumekit/project/start-formats";
 import type { ClientFailure, EngineClient } from "../engine/engineClient.js";
 import type { VideoStyleId } from "../videoStyle/videoStyles.js";
 import {
@@ -34,6 +38,8 @@ export function useStartChoices(client: EngineClient) {
   const [length, setLength] = useState<ProjectLength>(30);
   const [videoStyle, setVideoStyle] = useState<VideoStyleId>("graphics");
   const [look, setLook] = useState<LookId>("midnight");
+  const [formatId, setFormatId] = useState<StartFormatId>(firstStartFormatId);
+  const [planFirst, setPlanFirst] = useState(false);
   const [busy, setBusy] = useState<Busy>("idle");
   const [makeFailure, setMakeFailure] = useState<string>();
   const [openFailure, setOpenFailure] = useState<string>();
@@ -62,6 +68,8 @@ export function useStartChoices(client: EngineClient) {
       length,
       videoStyle,
       look,
+      formatId,
+      planFirst,
     });
     if (reply.ok) {
       window.location.assign(reply.value.url);
@@ -102,6 +110,10 @@ export function useStartChoices(client: EngineClient) {
     setVideoStyle,
     look,
     setLook,
+    formatId,
+    setFormatId,
+    planFirst,
+    setPlanFirst,
     busy,
     makeFailure,
     openFailure,

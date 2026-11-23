@@ -40,8 +40,17 @@ export function createStage(options: StageOptions): Stage {
       return;
     }
     mountedClips.delete(clipId);
-    mounted.scene.dispose();
     mounted.box.remove();
+    mounted.scene.dispose();
+  }
+
+  function failureOfUnmount(clipId: string): unknown[] {
+    try {
+      unmount(clipId);
+      return [];
+    } catch (error) {
+      return [error];
+    }
   }
 
   async function mount(visible: VisibleClip): Promise<MountedClip> {
@@ -121,11 +130,17 @@ export function createStage(options: StageOptions): Stage {
     },
     dispose: () => {
       isDisposed = true;
-      for (const clipId of [...mountedClips.keys()]) {
-        unmount(clipId);
-      }
+      const failures = [...mountedClips.keys()].flatMap((clipId) =>
+        failureOfUnmount(clipId),
+      );
       guards.remove();
       element.replaceChildren();
+      const [firstFailure] = failures;
+      if (firstFailure !== undefined) {
+        throw firstFailure instanceof Error
+          ? firstFailure
+          : new Error("A scene failed in its dispose", { cause: firstFailure });
+      }
     },
   };
 }

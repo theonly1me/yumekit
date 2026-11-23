@@ -8,6 +8,8 @@ import { useStartChoices } from "./useStartChoices.js";
 import { VideoStyleChoices } from "../videoStyle/VideoStyleChoices.js";
 import { aiVideoLimitLineOf, usesAiVideo } from "../videoStyle/videoStyles.js";
 import { LookChoices } from "../looks/LookChoices.js";
+import { PlanFirstSwitch } from "./startFormats/PlanFirstSwitch.js";
+import { StartFormatChoices } from "./startFormats/StartFormatChoices.js";
 
 const examplePrompt =
   "A 30 second video that explains my app to new users. Friendly, with a voice and music.";
@@ -54,6 +56,13 @@ export function StartScreen(props: { client: EngineClient }) {
             }}
           />
           <div className="start-group">
+            <h2>What kind of video?</h2>
+            <StartFormatChoices
+              chosen={start.formatId}
+              onChoose={start.setFormatId}
+            />
+          </div>
+          <div className="start-group">
             <h2>Where will it go?</h2>
             <p className="fact">
               Pick one or more. You get one video for each, in its own shape.
@@ -98,7 +107,7 @@ export function StartScreen(props: { client: EngineClient }) {
             <h2>Look</h2>
             <LookChoices chosen={start.look} onChoose={start.setLook} />
           </div>
-          <div className="start-action">
+          <div className="start-go">
             <button
               type="submit"
               className="primary large"
@@ -109,6 +118,12 @@ export function StartScreen(props: { client: EngineClient }) {
                 ? "Making the project"
                 : "Make the video"}
             </button>
+            <PlanFirstSwitch
+              isOn={start.planFirst}
+              onChange={start.setPlanFirst}
+            />
+          </div>
+          <div className="start-action">
             <p className="fact">
               {actionLineOf({ start })}{" "}
               {start.busy === "making" ? undefined : (

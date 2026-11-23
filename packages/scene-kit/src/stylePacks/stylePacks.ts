@@ -17,3 +17,11 @@ export const stylePacks: Record<LookId, StylePack> = {
 export function stylePackOf(look: string): StylePack {
   return isLookId(look) ? stylePacks[look] : paperStylePack;
 }
+
+export function calmStylePackOf(look: string): StylePack {
+  const stylePack = stylePackOf(look);
+  return {
+    ...stylePack,
+    motion: { ...stylePack.motion, riseDistanceUnits: 0, calm: true },
+  };
+}

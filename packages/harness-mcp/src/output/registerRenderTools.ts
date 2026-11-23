@@ -1,6 +1,5 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { renderFrame } from "@yumekit/render";
 import type { HarnessContext } from "../context.js";
 import { durationInput, frameInput, idInput, scaleInput } from "../inputs.js";
 import { failureResult, successResult } from "../results.js";
@@ -75,24 +74,26 @@ function registerRenderStill(context: HarnessContext): void {
       ),
     },
     run: async ({ input: { output_id, frame } }) => {
-      const rendered = await renderFrame({
-        folder: context.store.folder,
+      const rendered = await context.pictures.renderFrames({
         outputId: output_id,
-        frame,
+        frames: [frame],
       });
       if (!rendered.ok) return failureResult(renderFailureOf(rendered.failure));
+      const [picture] = rendered.value;
+      if (picture === undefined)
+        throw new Error("render_still drew no picture");
       const file = join(
         rendersFolder(context),
         `${output_id}-frame-${String(frame)}.png`,
       );
       await mkdir(rendersFolder(context), { recursive: true });
-      await writeFile(file, rendered.value.png);
+      await writeFile(file, picture.png);
       return successResult({
         line: `Rendered frame ${String(frame)} of "${output_id}" to ${file}.`,
         data: {
           file,
-          width_pixels: rendered.value.widthPixels,
-          height_pixels: rendered.value.heightPixels,
+          width_pixels: picture.widthPixels,
+          height_pixels: picture.heightPixels,
         },
       });
     },

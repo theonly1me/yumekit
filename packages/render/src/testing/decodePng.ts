@@ -8,7 +8,7 @@ export interface DecodedPicture {
   pixelAt: (point: { x: number; y: number }) => [number, number, number];
 }
 
-export async function decodePng(png: Uint8Array): Promise<DecodedPicture> {
+export async function rgbPixelsOf(png: Uint8Array): Promise<Buffer> {
   const ffmpeg = spawn(
     "ffmpeg",
     [
@@ -28,7 +28,11 @@ export async function decodePng(png: Uint8Array): Promise<DecodedPicture> {
   ffmpeg.stdout.on("data", (chunk: Buffer) => chunks.push(chunk));
   ffmpeg.stdin.end(png);
   await once(ffmpeg, "close");
-  const pixels = Buffer.concat(chunks);
+  return Buffer.concat(chunks);
+}
+
+export async function decodePng(png: Uint8Array): Promise<DecodedPicture> {
+  const pixels = await rgbPixelsOf(png);
   const { widthPixels, heightPixels } = pngSizeOf(png);
   return {
     widthPixels,

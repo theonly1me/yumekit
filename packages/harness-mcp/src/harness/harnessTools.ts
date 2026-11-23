@@ -1,4 +1,5 @@
 import type { ProjectStore } from "@yumekit/project";
+import type { PictureRenderer } from "@yumekit/render";
 import type { MediaTools } from "@yumekit/tools";
 import { registerCastTools } from "../cast/registerCastTools.js";
 import { registerAlignWords } from "../media/registerAlignWords.js";
@@ -28,7 +29,9 @@ export interface HarnessOptions {
   mediaTools: MediaTools;
 }
 
-export function harnessToolsOf(options: HarnessOptions): HarnessTool[] {
+export function harnessToolsOf(
+  options: HarnessOptions & { pictures: PictureRenderer },
+): HarnessTool[] {
   const context = { tools: createToolTable(), ...options };
   registerProjectReadTools(context);
   registerAssetReadTools(context);

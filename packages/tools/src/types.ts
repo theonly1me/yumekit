@@ -3,6 +3,7 @@ import type {
   MediaChoices,
   MediaPick,
   MediaPickFailure,
+  UserFileFailure,
 } from "./choiceTypes.js";
 import type { MediaModel, MediaServerDescription } from "./description.js";
 
@@ -107,6 +108,9 @@ export interface MediaTools {
   checkKey: (server: string) => Promise<Outcome<KeyCheck, CheckKeyFailure>>;
   failedServers: () => { server: string; message: string }[];
   limits: () => MediaLimits;
+  setVideoLimit: (
+    seconds: number,
+  ) => Promise<Outcome<MediaLimits, UserFileFailure>>;
   choices: () => Promise<MediaChoices>;
   pick: (pick: MediaPick) => Promise<Outcome<MediaChoices, MediaPickFailure>>;
   close: () => Promise<void>;

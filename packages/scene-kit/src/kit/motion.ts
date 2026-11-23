@@ -13,6 +13,7 @@ import {
 import { useStylePack } from "../stylePacks/StylePackContext.js";
 
 export interface KitMotion {
+  calm: boolean;
   framesPerSecond: number;
   unit: number;
   itemSeconds: number;
@@ -44,7 +45,9 @@ export function useKitMotion(): KitMotion {
   const framesOf = (referenceFrames: number) =>
     secondsOf(referenceFrames) * framesPerSecond;
   const itemSeconds = secondsOf(motion.riseFrames);
+  const calm = motion.calm === true;
   return {
+    calm,
     framesPerSecond,
     unit,
     itemSeconds,
@@ -60,6 +63,7 @@ export function useKitMotion(): KitMotion {
         framesPerSecond,
         unit,
         durationSeconds: itemSeconds,
+        calm,
       }),
     drift: (kind) =>
       drift({
@@ -68,6 +72,7 @@ export function useKitMotion(): KitMotion {
         durationFrames,
         kind,
         unit,
+        calm,
       }),
     wordsFrom: (options) => (wordFrame) =>
       words({

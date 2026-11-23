@@ -1,39 +1,48 @@
-import { fail, succeed, type Outcome } from "./outcome.js";
-import { pngSizeOf } from "./png.js";
-import { checkFrame } from "./project/frameRange.js";
+import { fail, type Outcome } from "./outcome.js";
 import { loadOutput, type LoadedOutput } from "./project/loadOutput.js";
 import type { RenderFailure, RenderScale } from "./renderFailure.js";
-import { drawFrame } from "./session/drawFrame.js";
+import {
+  checkFrames,
+  drawStills,
+  type RenderedFrame,
+} from "./session/drawStills.js";
 import { withStagePage } from "./session/withStagePage.js";
 
-export interface RenderedFrame {
-  png: Uint8Array;
-  widthPixels: number;
-  heightPixels: number;
+export type { RenderedFrame } from "./session/drawStills.js";
+
+function onlyPicture(
+  drawn: Outcome<RenderedFrame[], RenderFailure>,
+): Outcome<RenderedFrame, RenderFailure> {
+  if (!drawn.ok) {
+    return drawn;
+  }
+  const [picture] = drawn.value;
+  if (picture === undefined) {
+    throw new Error("A frame was drawn with no picture");
+  }
+  return { ok: true, value: picture };
 }
 
-export function renderLoadedFrame(options: {
+export async function renderLoadedFrame(options: {
   loaded: LoadedOutput;
   frame: number;
   scale: RenderScale | undefined;
 }): Promise<Outcome<RenderedFrame, RenderFailure>> {
-  const rangeFailure = checkFrame({
-    frame: options.frame,
+  const frames = [options.frame];
+  const rangeFailure = checkFrames({
+    frames,
     outputFrameCount: options.loaded.frameCount,
   });
   if (rangeFailure !== undefined) {
-    return Promise.resolve(fail(rangeFailure));
+    return fail(rangeFailure);
   }
-  return withStagePage({
-    loaded: options.loaded,
-    scale: options.scale ?? 1,
-    use: async (stagePage) => {
-      const drawn = await drawFrame({ stagePage, frame: options.frame });
-      return drawn.ok
-        ? succeed({ png: drawn.value, ...pngSizeOf(drawn.value) })
-        : drawn;
-    },
-  });
+  return onlyPicture(
+    await withStagePage({
+      loaded: options.loaded,
+      scale: options.scale ?? 1,
+      use: (stagePage) => drawStills({ stagePage, frames }),
+    }),
+  );
 }
 
 export async function renderFrame(options: {
