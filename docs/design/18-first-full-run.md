@@ -98,6 +98,64 @@ On 2026-11-23 a verifier used the build of `main` as a first-time creator, in a 
 3. WP56: a browser test at 390 pixels finds no page wider than the window on the start screen, the Making screen, the editor, and each sheet. A reload of the editor keeps the page. No test project shows an id in a view: a test reads the text of each view and looks for the asset ids and the scene ids.
 4. After the three packages, a verifier runs the same journey again and reports what stays.
 
+## The second full run
+
+On 2026-11-23 the verifier ran the same journey on commit cab2fbe. Nine of the ten findings of the first run were corrected or mostly corrected. One new finding stops a release: after "Record the voice again", the AI wrote the timeline again, and the music file of the person, a video clip that the person made, and each transition were gone, with no word about it. An undo brought them back.
+
+| Id  | Decision                                                                                     | Why                                                                       |
+| --- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| F11 | The project knows what a person made, and a tool call of an AI cannot remove it by accident  | A rule in a text for the AI is not a protection. The harness is           |
+| F12 | Each common change has its own small tool, so the AI does not write the whole timeline again | A whole timeline in one call loses what the caller did not know           |
+| F13 | The script is the source of the voice                                                        | A person changes the script in the plan, and the voice must say that text |
+| F14 | Each row of the editor always shows, with its state                                          | A row that is absent looks like a missing feature                         |
+
+### What a person made (F11)
+
+- A clip, a track, and a transition get `madeBy: "person"` when a person makes or changes them through the editor: a music or a voice file of the person, a clip from "Make a real video clip", a transition, a sound that the person placed, and a scene that the person added. A call with the header of an agent sets `madeBy: "ai"`. A project with no value counts as `ai`.
+- `set_timeline`, `copy_timeline`, `remove_clip`, and `place_video` compare the timeline before and after. If the call of an agent removes or replaces a thing with `madeBy: "person"`, it fails with `would-remove-the-work-of-the-person`. The failure lists each thing in plain words ("the music Calm pad.wav", "the video clip of scene 4", "6 transitions"), and it says how to keep them and that `remove_person_work: true` permits the removal.
+- The instructions of the AI say: give `remove_person_work: true` only when the person asked for that removal in this request.
+- A call by a person is never refused by this rule.
+- `place_video` keeps the transition and the place of the clip that it replaces. A timeline file keeps its clips in the order of their start.
+
+### Small tools (F12)
+
+- `replace_narration`: it records the voice again for the script of now, or for the scenes that the call names, and puts the new voice and its captions in the place of the old ones. It changes no other track, no scene, and no transition. "Record the voice again" and a change of the voice use it.
+- `replace_music`: the same for the music, from a prompt or from an asset.
+- The instructions of the AI get one rule: "Change only what the request asks for, with the smallest tool. Write the whole timeline only for a new video, or when the person asks to build the video again."
+
+### The script and the voice (F13)
+
+- Before a voice call, the harness gives the script of now to the AI in the result of `get_project`, and `place_narration` and `replace_narration` refuse a text that is not in the script with `text-not-in-the-script`, with the lines of the script. The AI then uses the script, or changes the script first with `set_script`.
+- "Continue" after the plan says: "The plan is good. Use the script and the scenes as they are now, and make the rest of the video."
+- When the text of a scene and its line of the script differ, the Pictures view and the Voice view say so on that scene, with "Use the script line" and "Keep the text of the scene".
+
+### Rows and states (F14)
+
+- The editor always shows the rows Voice, Music, Sounds, and Captions. A row with nothing says so and offers its action: "No sounds yet." with "Add a sound", and "No captions." with "Add captions".
+- With a voice from a real voice service or from the natural voice, a new video gets captions, off or on by the pick of the person in the row. The rule of F4 about a second sentence stays.
+- A step of the Making screen that is done has its mark and the word "ready", also when the AI wrote a sentence about it.
+- The Voice view and the narration row show for each scene only the words of that scene, and Play plays that part.
+
+### Small points
+
+- A pick of a scene shows that scene at its settled frame, not the first frame of its transition.
+- A suggestion chip of the chat is about the whole video, also when a scene is picked.
+- The name of a project comes from the AI, as a short title, with the tool `set_project_name`. Until then it is the first words of the idea, cut at a word and at 40 letters.
+- A change by the person names its file: "You added the music Calm pad.wav." One upload with its placement is one entry.
+- The first sentence of an answer ends at a period that is outside quotation marks.
+- A scene drawn by code shows no "Made with" line. A file of the person shows its real name with no scene title in front.
+- Settings says "AI video in each project", and it tells a person nothing about a file to edit.
+- At 390 pixels no control sits under the button "Ask for a change".
+
+Work package WP57 holds F11 to F14 and the small points.
+
+### Checks of WP57
+
+1. A project with a music file of the person, a clip of the person, and a `slide` on each scene: a `set_timeline` call of an agent that leaves them out fails and lists the three kinds. The same call with `remove_person_work: true` works. The same call by a person works.
+2. `replace_narration` changes the voice and the captions and no other byte of each timeline.
+3. A voice text that is not in the script fails with the lines of the script.
+4. One real run with the cheap model: after a music upload, a clip, and a `slide` for the whole video, "Record the voice again" keeps all three.
+
 ## Not in this version
 
 - Free music that runs on the computer.
