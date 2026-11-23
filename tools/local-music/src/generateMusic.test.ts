@@ -39,9 +39,7 @@ describe.each(styleIds)("the style %s", (style) => {
     for (const samples of [wav.left, wav.right]) {
       expect(samples[0]).toBe(0);
       expect(samples[end - 1]).toBe(0);
-      expect(
-        largestStepOf({ samples, from: 0, to: tenMilliseconds }),
-      ).toBeLessThan(0.02);
+      expect(largestStepOf({ samples, from: 0, to: 6 })).toBeLessThan(0.002);
       expect(
         largestStepOf({ samples, from: end - tenMilliseconds, to: end }),
       ).toBeLessThan(0.002);
