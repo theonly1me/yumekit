@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { imageModels } from "./catalog/image/index.ts";
 import { sharperModels } from "./catalog/sharper/index.ts";
 import { soundModels } from "./catalog/sound/index.ts";
+import { talkingModels } from "./catalog/talking/index.ts";
 import { videoModels } from "./catalog/video/index.ts";
 import {
   bodyOf,
@@ -13,6 +14,7 @@ import {
   resultText,
   temporaryFolder,
   writeImage,
+  writeVoice,
 } from "./testing/connectFalMedia.ts";
 import {
   describeWithNoKey,
@@ -52,6 +54,11 @@ async function callsOf(model: DescribedModel): Promise<Call[]> {
         durationSetting?.kind === "whole-number" ? durationSetting.default : 5,
     },
     "sound-effect": prompt,
+    "talking-clip": {
+      media_path: model.accepts.includes("video_input") ? video : firstFrame,
+      audio_path: await writeVoice({ folder, seconds: 6 }),
+      prompt: "Nods while speaking",
+    },
     sharper: {
       media_path: model.accepts.includes("video_input") ? video : firstFrame,
       scale: 2,
@@ -95,6 +102,7 @@ const toolOf = {
   image: "generate_image",
   video: "generate_video",
   "sound-effect": "generate_sound_effect",
+  "talking-clip": "generate_talking_clip",
   sharper: "sharpen_media",
 } as const;
 
@@ -108,6 +116,7 @@ describe("each catalog model sends a body that matches the schema of its fal pag
         ...imageModels,
         ...videoModels,
         ...soundModels,
+        ...talkingModels,
         ...sharperModels,
       ].find((entry) => entry.id === model.id);
       for (const call of await callsOf(model)) {

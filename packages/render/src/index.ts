@@ -3,6 +3,7 @@ export {
   findBrowser,
   type ProgramCommand,
 } from "./browser/browserSetup.js";
+export { cutAudio, type AudioCut } from "./media/cutAudio.js";
 export { probeMedia, type ProbedMedia } from "./media/probeMedia.js";
 export type { Outcome } from "./outcome.js";
 export {

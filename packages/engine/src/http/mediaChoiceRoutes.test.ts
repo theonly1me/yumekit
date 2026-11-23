@@ -93,6 +93,7 @@ describe("the media choice requests", () => {
         { capability: "music" },
         {},
         { capability: "sound-effect" },
+        { capability: "talking-clip" },
         { capability: "sharper" },
       ],
       failed_servers: [],

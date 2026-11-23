@@ -9,6 +9,7 @@ export const toolNameByCapability = {
   music: "generate_music",
   video: "generate_video",
   "sound-effect": "generate_sound_effect",
+  "talking-clip": "generate_talking_clip",
   sharper: "sharpen_media",
 } as const satisfies Record<Capability, string>;
 
@@ -22,6 +23,7 @@ export const capabilities = [
   "music",
   "video",
   "sound-effect",
+  "talking-clip",
   "sharper",
 ] as const satisfies readonly Capability[];
 

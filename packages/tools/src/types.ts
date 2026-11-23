@@ -8,7 +8,14 @@ import type {
 import type { MediaModel, MediaServerDescription } from "./description.js";
 
 export type Capability =
-  "image" | "speech" | "align" | "music" | "video" | "sound-effect" | "sharper";
+  | "image"
+  | "speech"
+  | "align"
+  | "music"
+  | "video"
+  | "sound-effect"
+  | "talking-clip"
+  | "sharper";
 
 export type JsonValue =
   string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };

@@ -4,6 +4,7 @@ import type { HarnessContext } from "../context.js";
 import { durationInput, frameInput, idInput } from "../inputs.js";
 import { findAsset, findOutput } from "../lookups.js";
 import { failureResult } from "../results.js";
+import { voiceLevelEdits } from "./quietVoice.js";
 import { placementFramesOf } from "./videoPlacementFrames.js";
 import { planVideo } from "./videoPlan.js";
 
@@ -38,13 +39,19 @@ const placeVideoInput = {
     .describe(
       'The level of the sound of the video, in decibels, 0 or less. The default is -12, so narration stays in front. "off" adds no sound clip.',
     ),
+  quiet_voice: z
+    .boolean()
+    .optional()
+    .describe(
+      "true for a talking clip whose sound is the voice: the voice clips under the sound of the video are turned down for that time, so the voice does not play twice. A voice clip that is longer is cut in parts, and only the part under the video is turned down. Without it, a voice part that an earlier talking clip turned down there plays again.",
+    ),
 };
 
 export function registerPlaceVideo(context: HarnessContext): void {
   context.tools.add({
     name: "place_video",
     description:
-      'Show a video asset in an output, with its sound. Makes a video-clip scene "video-<asset_id>" (or uses that scene when it exists, with no change to its props), adds a clip of it on the first scene track that is not a caption track (or on a new scene track "scenes" below the others), and adds the sound of the video on the audio track "video-sound". Each video asset gets its own scene, so to show several clips, call place_video once for each asset. A video without sound gets no sound clip, and the "video-sound" track appears only when a sound clip is added. The clip ids are "video-<asset_id>" and "video-sound-<asset_id>", and a suffix such as "-2" keeps each id unique. With replace_clip_id, the video takes the place of that scene clip: the tool removes the clip, and the sound clip of its video when it shows a video-clip scene, and places the video at its start frame with its length, unless start_frame or duration_frames are given. The result gives scene_id, scene_clip_id, and sound_clip_id. One undo removes all of it and brings back a replaced clip.',
+      'Show a video asset in an output, with its sound. Makes a video-clip scene "video-<asset_id>" (or uses that scene when it exists, with no change to its props), adds a clip of it on the first scene track that is not a caption track (or on a new scene track "scenes" below the others), and adds the sound of the video on the audio track "video-sound". Each video asset gets its own scene, so to show several clips, call place_video once for each asset. A video without sound gets no sound clip, and the "video-sound" track appears only when a sound clip is added. The clip ids are "video-<asset_id>" and "video-sound-<asset_id>", and a suffix such as "-2" keeps each id unique. With replace_clip_id, the video takes the place of that scene clip: the tool removes the clip, and the sound clip of its video when it shows a video-clip scene, and places the video at its start frame with its length, unless start_frame or duration_frames are given. The result gives scene_id, scene_clip_id, and sound_clip_id. With quiet_voice true, the voice under the sound of the video is turned down. One undo removes all of it and brings back a replaced clip.',
     inputSchema: placeVideoInput,
     run: ({ input: request }) => {
       const snapshot = context.store.read();
@@ -83,10 +90,24 @@ export function registerPlaceVideo(context: HarnessContext): void {
         },
       });
       const endFrame = startFrame + durationFrames;
+      const soundLength = Math.min(durationFrames, assetLength);
+      const voiceEdits = voiceLevelEdits({
+        timeline: frames.value.remainingTimeline,
+        assets: snapshot.assets,
+        window: { startFrame, endFrame: startFrame + soundLength },
+        quiet: request.quiet_voice === true && plan.soundClipId !== undefined,
+        takenIds: [
+          ...output.value.timeline.tracks.flatMap((track) =>
+            track.clips.map((clip) => clip.id),
+          ),
+          plan.sceneClipId,
+          ...(plan.soundClipId === undefined ? [] : [plan.soundClipId]),
+        ],
+      });
       return applyEditsResult({
         store: context.store,
-        edits: [...frames.value.removeEdits, ...plan.edits],
-        line: `Video "${request.asset_id}" placed on "${request.output_id}" from frame ${String(startFrame)} to ${String(endFrame)}${plan.soundClipId === undefined ? " with no sound clip" : " with its sound"}.`,
+        edits: [...frames.value.removeEdits, ...plan.edits, ...voiceEdits],
+        line: `Video "${request.asset_id}" placed on "${request.output_id}" from frame ${String(startFrame)} to ${String(endFrame)}${plan.soundClipId === undefined ? " with no sound clip" : " with its sound"}${voiceEdits.length > 0 ? ", and the voice level changed under it" : ""}.`,
         data: {
           scene_id: plan.sceneId,
           scene_clip_id: plan.sceneClipId,

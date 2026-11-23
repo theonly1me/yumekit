@@ -158,6 +158,7 @@ describe("asset and reference read tools", () => {
             "music",
             "video",
             "sound-effect",
+            "talking-clip",
             "sharper",
           ],
           runs: "on-this-computer",

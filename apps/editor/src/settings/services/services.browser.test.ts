@@ -66,6 +66,9 @@ describe("the Services group of Settings", () => {
         expect.stringMatching(/^Music.*Low tone/),
         expect.stringMatching(/^Video clips.*Plain color with a frame counter/),
         expect.stringMatching(/^Sounds.*Short high tone/),
+        expect.stringMatching(
+          /^Talking clips.*Your picture or video with the voice/,
+        ),
         expect.stringMatching(/^Sharper copy.*Plain larger copy/),
       ]);
     await editor.close();

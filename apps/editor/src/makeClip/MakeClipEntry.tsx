@@ -1,7 +1,11 @@
 import type { Scene } from "../engine/snapshot.js";
 import { isVideoScene } from "../scenes/SceneCards.js";
 
-export function MakeClipEntry(props: { scene: Scene; onOpen: () => void }) {
+export function MakeClipEntry(props: {
+  scene: Scene;
+  onOpen: () => void;
+  onTalk: (() => void) | undefined;
+}) {
   const isVideo = isVideoScene(props.scene);
   return (
     <div className="group">
@@ -14,6 +18,11 @@ export function MakeClipEntry(props: { scene: Scene; onOpen: () => void }) {
       <button type="button" onClick={props.onOpen}>
         Make a real video clip
       </button>
+      {props.onTalk === undefined ? undefined : (
+        <button type="button" onClick={props.onTalk}>
+          Make this person talk
+        </button>
+      )}
     </div>
   );
 }

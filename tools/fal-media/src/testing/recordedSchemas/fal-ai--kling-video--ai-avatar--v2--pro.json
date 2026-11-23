@@ -1,0 +1,21 @@
+{
+  "endpoint_id": "fal-ai/kling-video/ai-avatar/v2/pro",
+  "page": "https://fal.ai/models/fal-ai/kling-video/ai-avatar/v2/pro",
+  "schema_url": "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=fal-ai/kling-video/ai-avatar/v2/pro",
+  "read_on": "2026-11-23",
+  "required": ["image_url", "audio_url"],
+  "properties": {
+    "audio_url": {
+      "types": ["string"]
+    },
+    "enable_safety_checker": {
+      "types": ["boolean"]
+    },
+    "image_url": {
+      "types": ["string"]
+    },
+    "prompt": {
+      "types": ["string"]
+    }
+  }
+}

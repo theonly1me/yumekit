@@ -1,0 +1,25 @@
+{
+  "endpoint_id": "heygen/avatar-6/image-to-video",
+  "page": "https://fal.ai/models/heygen/avatar-6/image-to-video",
+  "schema_url": "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=heygen/avatar-6/image-to-video",
+  "read_on": "2026-11-23",
+  "required": ["image_url", "audio_url"],
+  "properties": {
+    "audio_url": {
+      "types": ["string"]
+    },
+    "enable_safety_checker": {
+      "types": ["boolean"]
+    },
+    "image_url": {
+      "types": ["string"]
+    },
+    "motion_prompt": {
+      "types": ["string", "null"]
+    },
+    "resolution": {
+      "types": ["string"],
+      "enum": ["1080p", "2k"]
+    }
+  }
+}

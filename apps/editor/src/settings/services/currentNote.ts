@@ -8,6 +8,7 @@ const testWords: Record<MediaKind, string> = {
   music: "a test tone, not music",
   video: "test clips",
   "sound-effect": "a test tone, not a real sound",
+  "talking-clip": "your picture with the voice, with no moving lips",
   sharper: "a plain larger copy with no new detail",
 };
 

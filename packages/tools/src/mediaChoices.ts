@@ -21,6 +21,7 @@ export const choiceCapabilities = [
   "music",
   "video",
   "sound-effect",
+  "talking-clip",
   "sharper",
 ] as const satisfies readonly ChoiceCapability[];
 
