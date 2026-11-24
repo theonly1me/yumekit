@@ -69,6 +69,28 @@ describe("fieldsOf", () => {
     });
   });
 
+  it("makes a list of asset pickers for a list of asset ids", () => {
+    const [field] = fieldsOf({
+      type: "object",
+      properties: {
+        assetIds: {
+          type: "array",
+          maxItems: 3,
+          assetKinds: ["video", "image"],
+          items: { type: "string" },
+        },
+      },
+    });
+
+    expect(field).toMatchObject({
+      kind: "asset-list",
+      label: "Asset ids",
+      itemLabel: "Video or image",
+      maxItems: 3,
+      assetKinds: ["video", "image"],
+    });
+  });
+
   it("uses the title of a prop as its label", () => {
     const fields = fieldsOf({
       type: "object",

@@ -23,6 +23,20 @@ export interface SceneAsset {
   durationFrames?: number;
   words?: SceneWord[];
   framePictures?: { urlPrefix: string; count: number };
+  marks?: SceneAssetMark[];
+}
+
+export interface SceneRegion {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+export interface SceneAssetMark {
+  name: string;
+  region?: SceneRegion;
+  seconds?: number;
 }
 
 export interface MountOptions {

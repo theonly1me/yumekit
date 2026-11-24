@@ -1,6 +1,7 @@
 import type { SceneModule } from "@yumekit/scene";
 import {
   defineKitScene,
+  type KitComponent,
   type KitSceneDefinition,
 } from "./kit/defineKitScene.js";
 import { BarChart } from "./scenes/BarChart.js";
@@ -10,6 +11,13 @@ import { Chat } from "./scenes/chat/Chat.js";
 import { Checklist } from "./scenes/checklist/Checklist.js";
 import { Compare } from "./scenes/compare/Compare.js";
 import { Device } from "./scenes/device/Device.js";
+import { Command } from "./scenes/film/command/Command.js";
+import { Counts } from "./scenes/film/counts/Counts.js";
+import { Footage } from "./scenes/film/footage/Footage.js";
+import { Lines } from "./scenes/film/lines/Lines.js";
+import { LookSwap } from "./scenes/film/lookSwap/LookSwap.js";
+import { Shapes } from "./scenes/film/shapes/Shapes.js";
+import { Wall } from "./scenes/film/wall/Wall.js";
 import { EndCard } from "./scenes/endCard/EndCard.js";
 import { Hero } from "./scenes/hero/Hero.js";
 import { ImagePan } from "./scenes/ImagePan.js";
@@ -24,6 +32,17 @@ import { TitleCard } from "./scenes/TitleCard.js";
 import { VideoClip } from "./scenes/VideoClip.js";
 import type { StylePack } from "./stylePacks/stylePack.js";
 import { calmStylePackOf, stylePackOf } from "./stylePacks/stylePacks.js";
+
+function filmSceneDefinitions(
+  components: Record<string, KitComponent>,
+): Record<string, KitSceneDefinition> {
+  return Object.fromEntries(
+    Object.entries(components).map(([name, component]) => [
+      name,
+      { component, paintsBackground: true, quietBackdrop: true },
+    ]),
+  );
+}
 
 const kitSceneDefinitions: Record<string, KitSceneDefinition> = {
   "title-card": { component: TitleCard, paintsBackground: true },
@@ -45,6 +64,15 @@ const kitSceneDefinitions: Record<string, KitSceneDefinition> = {
   "end-card": { component: EndCard, paintsBackground: true },
   "lower-third": { component: LowerThird, paintsBackground: false },
   kinetic: { component: Kinetic, paintsBackground: true },
+  ...filmSceneDefinitions({
+    footage: Footage,
+    wall: Wall,
+    shapes: Shapes,
+    lines: Lines,
+    "look-swap": LookSwap,
+    command: Command,
+    counts: Counts,
+  }),
 };
 
 function kitScenesFor(stylePack: StylePack): Record<string, SceneModule> {

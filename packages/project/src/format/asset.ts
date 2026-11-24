@@ -1,5 +1,6 @@
 import { posix } from "node:path";
 import { z } from "zod";
+import { assetMarksSchema } from "./assetMarks.js";
 import { frameCountSchema, idSchema, jsonObjectSchema } from "./values.js";
 
 const assetFilesFolder = "assets/files/";
@@ -42,6 +43,7 @@ export const assetSchema = z.strictObject({
   hasAudio: z.boolean().exactOptional(),
   hasWords: z.boolean(),
   label: z.string().max(200).exactOptional(),
+  marks: assetMarksSchema.exactOptional(),
   source: assetSourceSchema,
 });
 

@@ -43,6 +43,7 @@ async function sceneAssetOf(options: {
     ...(asset.durationFrames === undefined
       ? {}
       : { durationFrames: asset.durationFrames }),
+    ...(asset.marks === undefined ? {} : { marks: asset.marks }),
     ...(words?.ok === true ? { words: words.value.words } : {}),
     ...(asset.kind === "video" && asset.durationFrames !== undefined
       ? {

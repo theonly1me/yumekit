@@ -8,6 +8,7 @@ import { idInput } from "../inputs.js";
 import { failureResult } from "../results.js";
 import { assetFilesFolder, projectFileOf } from "./assetFiles.js";
 import { extensionsByKind, importedMediaOf } from "./importedMedia.js";
+import { assetMarkOf, markInput } from "./markInputs.js";
 
 const importAssetInput = {
   asset_id: idInput("The id of the new asset."),
@@ -28,6 +29,13 @@ const importAssetInput = {
     .optional()
     .describe(
       "The name of the file that the person knows, to show and to download under. By default the last part of source_path.",
+    ),
+  marks: z
+    .array(markInput)
+    .max(32)
+    .optional()
+    .describe(
+      "Optional named regions and moments of a video or an image, for example the prompt box of a screen recording. The footage kit scene takes a mark name in place of a region. Add one later with mark_asset.",
     ),
 };
 
@@ -106,6 +114,9 @@ async function importAsset(options: {
             path: destination,
           }),
           ...imported.value,
+          ...(request.marks === undefined || request.marks.length === 0
+            ? {}
+            : { marks: request.marks.map(assetMarkOf) }),
           source: {
             kind: "import",
             originalName,

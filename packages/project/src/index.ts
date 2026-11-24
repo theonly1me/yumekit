@@ -77,6 +77,13 @@ export type {
   AssetSource,
   WordTimings,
 } from "./format/asset.js";
+export {
+  assetMarkSchema,
+  assetMarksSchema,
+  assetRegionSchema,
+  type AssetMark,
+  type AssetRegion,
+} from "./format/assetMarks.js";
 export type { ProjectSnapshot } from "./format/state.js";
 export type { Edit, EditFailure } from "./edits/index.js";
 export type { ProjectChange, ProjectStore } from "./store/projectStore.js";

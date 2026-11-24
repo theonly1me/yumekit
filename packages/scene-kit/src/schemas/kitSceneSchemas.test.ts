@@ -29,7 +29,7 @@ function fieldsOf(options: { path: string; shape: z.core.$ZodShape }) {
 }
 
 describe("kitSceneSchemas", () => {
-  it("lists the nineteen kit scenes of the design", () => {
+  it("lists the twenty-six kit scenes of the design", () => {
     expect(Object.keys(kitSceneSchemas)).toEqual([
       "title-card",
       "bullet-list",
@@ -50,6 +50,13 @@ describe("kitSceneSchemas", () => {
       "end-card",
       "lower-third",
       "kinetic",
+      "footage",
+      "wall",
+      "shapes",
+      "lines",
+      "look-swap",
+      "command",
+      "counts",
     ]);
   });
 
@@ -98,6 +105,7 @@ describe("kitSceneSchemas", () => {
       ["split", ["image", "video"]],
       ["logo-reveal", "image"],
       ["kinetic", "audio"],
+      ["footage", ["video", "image"]],
     ]);
   });
 });

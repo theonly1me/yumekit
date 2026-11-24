@@ -32,6 +32,15 @@ Ready scene components and style packs. Documents 01 and 02 in `docs/design` are
 | `end-card`      | A closing line, a button, and an address                          |
 | `lower-third`   | An overlay with a name and a role above the captions              |
 | `kinetic`       | 1 to 4 short lines, one at a time, as large as the picture allows |
+| `footage`       | A region of a recording or a picture, large, with a heading       |
+| `wall`          | 2 to 16 videos or pictures as an even grid                        |
+| `shapes`        | One to three videos in their own shapes, in step                  |
+| `lines`         | 1 to 4 short lines, one on each beat, the old ones dimmed         |
+| `look-swap`     | One video for each look, cut on the beat                          |
+| `command`       | A wordmark and a command that types itself in a pill              |
+| `counts`        | 1 to 3 numbers that count up next to their labels                 |
+
+The last seven are the film scenes of document 19. They share one layout grid and one type scale, so two of them next to each other read as one film.
 
 A scene treats its props as untrusted input. It draws a default for a missing or wrong value and never throws.
 

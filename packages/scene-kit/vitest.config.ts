@@ -11,7 +11,9 @@ export default defineProject({
       configureServer(server) {
         server.middlewares.use("/test-frame-pictures/", (...parameters) => {
           const [request, response] = parameters;
-          const pictureIndex = /^\/(\d+)\.jpg$/.exec(request.url ?? "")?.[1];
+          const pictureIndex = /^\/(?:[a-z]+-)?(\d+)\.jpg$/.exec(
+            request.url ?? "",
+          )?.[1];
           if (pictureIndex === undefined) {
             response.statusCode = 404;
             response.end();
