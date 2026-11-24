@@ -6,6 +6,10 @@
   width: min(1180px, 100%);
 }
 
+.making-request {
+  --folded-lines: 3;
+}
+
 .making-desk {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
