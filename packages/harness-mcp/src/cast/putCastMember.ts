@@ -1,4 +1,6 @@
 import {
+  castFactLimits,
+  castPromptLimits,
   type Bible,
   type CastMember,
   type ProjectSnapshot,
@@ -122,8 +124,7 @@ function memberOf(options: {
 export function registerPutCastMember(context: HarnessContext): void {
   context.tools.add({
     name: "put_cast_member",
-    description:
-      "Add or replace one person, place, product, or prop of the cast. The cast keeps it the same in each picture and each video clip: give its id in cast_ids of generate_asset for each one that shows it. For a film, each entry is a sheet: the facts in words, the prompt of each sheet picture (checked by review_plan before any money), and the pictures (a person: front, side, back, and the face close up, then the hands with the prop; a place: a wide establishing picture; a prop: two sides). The result lists each fact that is a bare number and each part that a person's description lacks.",
+    description: `Add or replace one person, place, product, or prop of the cast. The cast keeps it the same in each picture and each video clip: give its id in cast_ids of generate_asset for each one that shows it. For a film, each entry is a sheet: the facts in words, the prompt of each sheet picture (checked by review_plan before any money), and the pictures (a person: front, side, back, and the face close up, then the hands with the prop; a place: a wide establishing picture; a prop: two sides). The result lists each fact that is a bare number and each part that a person's description lacks. One fact, brief fact, or restriction has at most ${String(castFactLimits.characters)} characters, and an entry has at most ${String(castFactLimits.count)} of each; split a long one in two. One sheet prompt has at most ${String(castPromptLimits.characters)} characters.`,
     inputSchema: putCastMemberInput,
     run: ({ input }) => {
       const snapshot = context.store.read();

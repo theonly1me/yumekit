@@ -36,8 +36,6 @@ function memberText(member: CastMember) {
     name: member.name,
     description: member.description,
     facts: member.facts ?? [],
-    sheetPrompts: member.sheetPrompts ?? [],
-    restrictions: member.restrictions ?? [],
     briefFacts: member.briefFacts ?? [],
   };
 }

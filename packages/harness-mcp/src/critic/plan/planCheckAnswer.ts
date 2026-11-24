@@ -31,7 +31,7 @@ function nextStepOf(options: {
   const calibrate = `Make the sheets, then the easiest shot "${review.easiestShotId}" and the hardest shot "${review.hardestShotId}" first.`;
   if (review.verdict === "pass") return calibrate;
   if (!isPlanCheckUsedUp(plan)) {
-    return "Correct each fault in the plan, the facts, or the prompts, and call review_plan again. Sheets can be made now; no start picture or clip runs before a pass. After a second fail, the plan check is used up and the work starts with the open faults as notes.";
+    return "This was the first failed check of 2. Correct each fault in the plan, the facts, or the prompts, and call review_plan again. Sheet pictures can be made now. Start pictures and clips run after a pass, or after a second fail, when the check is used up and the open faults go to the critic of each shot as notes.";
   }
   const brief = openBriefFaultsOf({ bible, plan });
   const blocked =

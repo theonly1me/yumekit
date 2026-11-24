@@ -57,3 +57,11 @@ export function agentLineOf(agents: HomeAgent[]): string {
   }
   return `The AI is ${inUse.name} on this computer. No key needed.`;
 }
+
+export const longestRequestCharacters = 20_000;
+
+export function requestLimitLineOf(length: number): string | undefined {
+  return length >= longestRequestCharacters
+    ? `The request is at its limit of ${longestRequestCharacters.toLocaleString("en-US")} characters, so yumekit keeps no more. Shorten it, or send the rest in the chat after the start.`
+    : undefined;
+}

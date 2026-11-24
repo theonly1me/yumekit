@@ -60,7 +60,7 @@ function reviewLine(options: {
 }): string {
   const { review } = options.plan;
   if (review === undefined) {
-    return "Plan check: not checked by the critic yet. No start picture or clip runs before review_plan passes.";
+    return "Plan check: not checked by the critic yet. Sheet pictures can start now. A start picture or a clip runs after review_plan passes, or after two failed checks, when the check is used up.";
   }
   if (isPlanCheckUsedUp(options.plan)) {
     const open = options.plan.shots.filter(
@@ -79,7 +79,7 @@ function reviewLine(options: {
   const verdict =
     review.verdict === "pass"
       ? "passed by the critic"
-      : `failed by the critic: ${review.faults.join("; ")}`;
+      : `failed by the critic (${String(options.plan.failedPlanChecks ?? 1)} of 2 checks): ${review.faults.join("; ")}. Correct the plan and call review_plan again; after the second fail, the check is used up and start pictures and clips can run`;
   return `Plan check: ${verdict}. Difficulty 1 to 5: ${difficulty}. Easiest "${review.easiestShotId}", hardest "${review.hardestShotId}": make them first.${review.notes.length === 0 ? "" : ` Notes: ${review.notes.join("; ")}.`}`;
 }
 
