@@ -37,7 +37,7 @@ The list comes from a survey of the public pages of current AI video products on
 
 ## The cast (N3)
 
-- `cast` of `bible.json` (document 03) gets its form: `id`, `kind` (`person`, `place`, or `product`), `name`, `description`, and `referenceAssetIds` (0 to 4 picture assets).
+- `cast` of `bible.json` (document 03) gets its form: `id`, `kind` (`person`, `place`, or `product`), `name`, `description`, and `referenceAssetIds` (0 to 4 picture assets). Document 20 adds the kind `prop` and the fixed `facts` of an entry.
 - The tools `put_cast_member` and `remove_cast_member` change one entry, each as one undo step. `get_project` gives the cast.
 - `generate_asset` takes the optional `cast_ids`. The harness adds the reference pictures of each entry to `reference_asset_ids`, and adds one sentence for each entry to the prompt: its name and its description. A model that does not accept reference pictures gets only the sentences.
 - The editor has the view "Cast", from the top bar. A person adds an entry with a name, a description, and pictures: an upload (document 15), or "Make a picture of this" (a fixed request). A person removes an entry.

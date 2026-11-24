@@ -1,8 +1,9 @@
 import { useState } from "react";
 
-export type BarViewId = "script" | "pictures" | "cast" | "files";
+export type BarViewId = "story" | "script" | "pictures" | "cast" | "files";
 
 const barViews: { id: BarViewId; label: string }[] = [
+  { id: "story", label: "Story" },
   { id: "script", label: "Script" },
   { id: "pictures", label: "Pictures" },
   { id: "cast", label: "Cast" },

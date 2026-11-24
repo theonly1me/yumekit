@@ -10,6 +10,7 @@ export interface ReferenceIds {
   mediaAssetId?: string | undefined;
   voiceAssetId?: string | undefined;
   voicePart?: VoicePartIds | undefined;
+  shotId?: string | undefined;
 }
 
 interface VoicePartIds {
@@ -119,5 +120,6 @@ export function recordedInputOf(options: {
     ...(ids.voicePart === undefined
       ? {}
       : { voice_part: voicePartRecord(ids.voicePart) }),
+    ...(ids.shotId === undefined ? {} : { shot_id: ids.shotId }),
   };
 }

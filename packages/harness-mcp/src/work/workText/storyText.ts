@@ -5,6 +5,7 @@ import {
   type ProjectSnapshot,
 } from "@yumekit/project";
 import { tempoFactsOf } from "../../tempo/beatFacts.js";
+import { planLines } from "./planText.js";
 
 function tempoLine(snapshot: ProjectSnapshot): string {
   const { tempo, frames_per_beat } = tempoFactsOf(snapshot.project);
@@ -24,7 +25,11 @@ function castLines(snapshot: ProjectSnapshot): string[] {
         member.referenceAssetIds.length === 0
           ? ""
           : ` Pictures: ${member.referenceAssetIds.join(", ")}.`;
-      return `- ${member.id} (${member.kind}) ${member.name}: ${member.description}${pictures}`;
+      const facts =
+        (member.facts ?? []).length === 0
+          ? ""
+          : ` Fixed: ${(member.facts ?? []).join("; ")}.`;
+      return `- ${member.id} (${member.kind}) ${member.name}: ${member.description}${facts}${pictures}`;
     }),
   ];
 }
@@ -49,10 +54,11 @@ export function storyText(snapshot: ProjectSnapshot): string {
     tempoLine(snapshot),
     `Frame: ${project.frame === undefined ? "none" : `shared code "${project.frame}", drawn over the whole video`}.`,
     `Fonts: ${fonts === "" ? "the fonts of the look" : fonts}.`,
-    `Style: ${bible.style === "" ? "none" : bible.style}`,
+    `Style (the art direction of each picture and clip): ${bible.style === "" ? "none" : bible.style}`,
     `Palette: ${bible.palette.length === 0 ? "the colors of the look" : bible.palette.join(", ")}`,
     `Voice: ${bible.voice === "" ? "none" : bible.voice}`,
     ...castLines(snapshot),
+    ...planLines(bible.storyPlan),
     "### Script",
     snapshot.script.trim() === "" ? "(no script yet)" : snapshot.script.trim(),
   ].join("\n");

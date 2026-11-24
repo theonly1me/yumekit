@@ -9,11 +9,12 @@ import {
   type StepProgress,
   type StepWhy,
 } from "./stepReasons.js";
+import { storyStepsOf } from "./storyStep.js";
 
 export type StepState = "waiting" | "now" | "done" | "skipped";
 
 export interface MakingStep {
-  id: "script" | "pictures" | "voice" | "music" | "together";
+  id: "story" | "script" | "pictures" | "voice" | "music" | "together";
   label: string;
   state: StepState;
   fact: string;
@@ -143,7 +144,7 @@ export function makingStepsOf(options: {
     : made.findIndex(
         (...[step, index]) => !step.isDone && index > lastDoneIndex,
       );
-  return made.map((...[step, index]): MakingStep => {
+  const madeSteps = made.map((...[step, index]): MakingStep => {
     if (step.isDone)
       return { id: step.id, label: step.label, state: "done", fact: step.fact };
     if (isWaitingForContinue && restStepIds.has(step.id))
@@ -180,4 +181,5 @@ export function makingStepsOf(options: {
       ? { id: step.id, label: step.label, state: "now", fact: "Working" }
       : { id: step.id, label: step.label, state: "waiting", fact: "" };
   });
+  return [...storyStepsOf(snapshot), ...madeSteps];
 }

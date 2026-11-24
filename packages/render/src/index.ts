@@ -5,6 +5,19 @@ export {
 } from "./browser/browserSetup.js";
 export { cutAudio, type AudioCut } from "./media/cutAudio.js";
 export { probeMedia, type ProbedMedia } from "./media/probeMedia.js";
+export { saveVideoFrame } from "./media/saveVideoFrame.js";
+export {
+  measureClipMotion,
+  type ClipMotion,
+} from "./motion/measureClipMotion.js";
+export {
+  motionLimits,
+  regionNames,
+  type MotionStep,
+  type MotionWarning,
+  type MotionWarningKind,
+  type StartDifference,
+} from "./motion/motionWarnings.js";
 export type { Outcome } from "./outcome.js";
 export {
   startPreviewServer,

@@ -5,6 +5,7 @@ import { withCast } from "../cast/castRequest.js";
 import type { HarnessContext } from "../context.js";
 import type { ProgressListener } from "../harness/toolTable.js";
 import { failureResult } from "../results.js";
+import { withStory } from "../storyPlan/shotRequest.js";
 import {
   assetFilesFolder,
   findReusableAsset,
@@ -34,9 +35,11 @@ export async function generateAsset(options: {
 }): Promise<CallToolResult> {
   const { context, onProgress } = options;
   const snapshot = context.store.read();
+  const storied = withStory({ snapshot, request: options.request });
+  if (!storied.ok) return failureResult(storied.failure);
   const castApplied = await withCast({
     snapshot,
-    request: options.request,
+    request: storied.value,
     mediaTools: context.mediaTools,
   });
   if (!castApplied.ok) return failureResult(castApplied.failure);
@@ -55,6 +58,7 @@ export async function generateAsset(options: {
     mediaAssetId: request.media_asset_id,
     voiceAssetId: request.voice_asset_id,
     voicePart: request.voice_part,
+    shotId: request.shot_id,
   };
   const paths = referencePathsInput({ snapshot, projectFolder, ids });
   if (!paths.ok) return failureResult(paths.failure);

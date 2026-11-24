@@ -8,7 +8,7 @@ A project is one folder. Package `@yumekit/project` is the only code that writes
 my-project/
   project.json                  name, frame rate, outputs
   script.md                     the script, free text
-  bible.json                    style, palette, cast, voice
+  bible.json                    style, palette, cast, voice, storyPlan
   scenes/<sceneId>/scene.json   one scene
   scenes/<sceneId>/scene.tsx    custom code, only for a module scene
   scenes/_shared/<name>.tsx     code that custom scenes share (document 19)
@@ -82,12 +82,14 @@ type Bible = {
   palette: string[];
   cast: CastMember[];
   voice: string;
+  storyPlan?: StoryPlan;
 };
 type CastMember = {
   id: string;
-  kind: "person" | "place" | "product";
+  kind: "person" | "place" | "product" | "prop";
   name: string;
   description: string;
+  facts?: string[];
   referenceAssetIds: string[];
 };
 
@@ -175,6 +177,8 @@ type WordTimings = {
   words: { text: string; startFrame: number; endFrame: number }[];
 };
 ```
+
+Document 20 defines `StoryPlan`, the kind `prop`, and the fixed `facts` of a cast member.
 
 ## Rules that the store enforces
 

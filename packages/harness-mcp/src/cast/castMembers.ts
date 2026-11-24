@@ -7,6 +7,7 @@ export function wireCastMemberOf(member: CastMember) {
     kind: member.kind,
     name: member.name,
     description: member.description,
+    facts: member.facts ?? [],
     reference_asset_ids: member.referenceAssetIds,
   };
 }

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { castEntrySchema } from "../cast/castEntries.js";
+import { storyPlanSchema } from "../parts/story/storyPlanSchema.js";
 import { videoStyleIds } from "../videoStyle/videoStyles.js";
 
 const outputSchema = z.object({
@@ -115,7 +116,10 @@ export const snapshotSchema = z.object({
       .optional(),
     lookFont: z.string().optional(),
   }),
-  bible: z.object({ cast: z.array(castEntrySchema) }),
+  bible: z.object({
+    cast: z.array(castEntrySchema),
+    storyPlan: storyPlanSchema.optional(),
+  }),
   script: z.string(),
   scenes: z.array(sceneSchema),
   sceneCode: z.record(z.string(), z.string()),
