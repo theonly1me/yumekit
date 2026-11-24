@@ -4,6 +4,7 @@ import { ChangeLine } from "./ChangeLine.js";
 import { laterChangeCount, retryOf } from "./chatEntries.js";
 import type { AskInput } from "./chatRequests.js";
 import type { ChatEntry, RequestEntry } from "./chatSchemas.js";
+import { FoldedText } from "./FoldedText.js";
 import { NoticeView, type NoticeAction } from "./NoticeView.js";
 import { shownRequestTextOf } from "./requestEntryText.js";
 import { StartFailureView } from "./StartFailureView.js";
@@ -63,7 +64,7 @@ export function ChatHistory(props: {
         return (
           <li key={entry.id} className="entry you">
             <span className="who">You</span>
-            <p>
+            <div className="request-body">
               {entry.about === null ? undefined : (
                 <em>
                   {aboutText({
@@ -72,8 +73,11 @@ export function ChatHistory(props: {
                   })}
                 </em>
               )}
-              {shownRequestTextOf(entry)}
-            </p>
+              <FoldedText
+                className="request-text"
+                text={shownRequestTextOf(entry)}
+              />
+            </div>
           </li>
         );
       case "answer":

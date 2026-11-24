@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { useFitHeight } from "./useFitHeight.js";
 import type { ChatAgent } from "./chatSchemas.js";
 import type { ChatBox } from "./useChatBox.js";
 import "./askForm.css";
@@ -29,6 +30,7 @@ export function AskForm(props: {
 }) {
   const { box, chip } = props;
   const textArea = useRef<HTMLTextAreaElement>(null);
+  useFitHeight({ element: textArea, text: box.draft });
 
   useEffect(() => {
     const element = textArea.current;

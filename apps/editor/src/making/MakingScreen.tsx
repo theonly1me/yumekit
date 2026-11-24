@@ -1,3 +1,4 @@
+import { FoldedText } from "../chat/FoldedText.js";
 import type { EngineClient } from "../engine/engineClient.js";
 import type { Snapshot } from "../engine/snapshot.js";
 import type { AskTheAi } from "../parts/fixedRequests.js";
@@ -110,7 +111,10 @@ export function MakingScreen(props: {
   return (
     <main className="making" data-state={chat.answer.state}>
       <div className="making-body">
-        <p className="fact">{requestLinesOf(chat.requestText)}</p>
+        <FoldedText
+          className="fact making-request"
+          text={requestLinesOf(chat.requestText)}
+        />
         <h1 className="making-title" aria-live="polite">
           {titleOf({ answer: chat.answer, isPlanReady: planReady })}
         </h1>
