@@ -21,6 +21,7 @@ export const storyCalls: ScriptedCall[] = [
       reference_asset_ids: ["still"],
     },
   },
+  { name: "review_sheet", input: { cast_id: "lake" } },
   {
     name: "set_story_plan",
     input: {
@@ -37,10 +38,12 @@ export const storyCalls: ScriptedCall[] = [
           cast_ids: [],
           camera_size: "medium",
           camera_angle: "low",
+          camera_lens: "normal",
           seconds: 2,
-          start_state: "The ice is whole.",
-          end_state: "The ice is cracked.",
+          start_state: [],
+          end_state: [],
           inherits: "",
+          music_intensity: 2,
         },
       ],
     },
@@ -49,8 +52,26 @@ export const storyCalls: ScriptedCall[] = [
 
 export const reviewCalls: ScriptedCall[] = [
   { name: "review_clip", input: { asset_id: "clip", shot_id: "dawn" } },
+  { name: "view_for_review", input: {} },
   {
-    name: "review_clip",
-    input: { asset_id: "clip", shot_id: "dawn", verdict: "keep" },
+    name: "give_sheet_review",
+    input: { checks: [], counts: [], verdict: "fail", faults: ["x"] },
   },
+  {
+    name: "give_clip_review",
+    input: {
+      checks: [],
+      counts: [],
+      action: { happened: false, seen: "nothing" },
+      end_entries: [],
+      start_match: { matches: false, seen: "another picture" },
+      warnings: [],
+      verdict: "redo",
+      faults: ["x"],
+    },
+  },
+];
+
+export const musicCalls: ScriptedCall[] = [
+  { name: "check_music", input: { asset_id: "tune" } },
 ];

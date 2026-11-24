@@ -12,6 +12,7 @@ export type FakeStep =
 export interface FakeAgentScenario {
   steps: FakeStep[];
   helperSteps?: FakeStep[];
+  criticSteps?: FakeStep[];
   exitCode?: number;
   signedIn?: boolean;
   resumeFails?: boolean;

@@ -31,4 +31,26 @@ describe("replace_music", () => {
       ]),
     ).toEqual([[0, 90, -15]]);
   });
+
+  it("starts the music at start_seconds of the file, then repeats it from its start", async () => {
+    const harness = await harnessWithThreeScenes();
+
+    await harness.call({
+      name: "replace_music",
+      arguments: { prompt: "warm piano", start_seconds: 1 },
+    });
+    const [wide] = harness.store.read().timelines;
+    const music = wide?.tracks.find((track) => track.id === "music");
+
+    expect(
+      music?.clips.map((clip) => [
+        clip.startFrame,
+        clip.durationFrames,
+        "assetId" in clip ? clip.assetStartFrame : undefined,
+      ]),
+    ).toEqual([
+      [0, 60, 30],
+      [60, 30, 0],
+    ]);
+  });
 });

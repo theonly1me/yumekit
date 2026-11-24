@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import {
   createHarness,
+  type AskCritic,
   type AskHelper,
   type Harness,
 } from "@yumekit/harness-mcp";
@@ -42,6 +43,7 @@ export async function startParts(options: {
   projectFolder: string;
   store: ProjectStore;
   askHelper: AskHelper;
+  askCritic: AskCritic;
 }): Promise<Outcome<EngineParts, EngineFailure>> {
   const { projectFolder, store } = options;
   const connected = await connectMediaTools({
@@ -58,6 +60,7 @@ export async function startParts(options: {
     store,
     mediaTools,
     askHelper: options.askHelper,
+    askCritic: options.askCritic,
   });
   const preview = await startPreviewServer({ projectFolder });
   if (!preview.ok) {

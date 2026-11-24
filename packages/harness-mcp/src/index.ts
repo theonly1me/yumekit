@@ -26,3 +26,11 @@ export type {
   HelperRequest,
 } from "./helpers/helperTypes.js";
 export { noHelperFailure } from "./helpers/registerAskHelper.js";
+export {
+  criticToolNames,
+  isCriticTool,
+  noCriticFailure,
+  type AskCritic,
+  type CriticRequest,
+  type CriticTurn,
+} from "./critic/criticTypes.js";

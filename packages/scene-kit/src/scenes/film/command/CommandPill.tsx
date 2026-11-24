@@ -8,6 +8,7 @@ export const monospaceFamilies =
 
 export function CommandPill(props: {
   command: string;
+  prompt: string | undefined;
   shown: string;
   cursorVisible: boolean;
   motion: MotionStyle;
@@ -34,7 +35,11 @@ export function CommandPill(props: {
         color: stylePack.colors.text,
       }}
     >
-      <span style={{ color: stylePack.colors.mutedText }}>$</span>
+      {props.prompt === undefined ? null : (
+        <span style={{ color: stylePack.colors.mutedText }}>
+          {props.prompt}
+        </span>
+      )}
       <span style={{ position: "relative" }}>
         <span style={{ visibility: "hidden" }}>{props.command}</span>
         <span

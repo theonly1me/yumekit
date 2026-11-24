@@ -51,6 +51,8 @@ export const documentedToolNames = [
   "mark_asset",
   "preview_assets",
   "review_clip",
+  "review_sheet",
+  "check_music",
   "align_words",
   "preview_frame",
   "preview_frames",
@@ -60,4 +62,7 @@ export const documentedToolNames = [
   "render_still",
   "make_sharper_copy",
   "ask_helper",
+  "view_for_review",
+  "give_clip_review",
+  "give_sheet_review",
 ] as const;

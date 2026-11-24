@@ -91,6 +91,7 @@ type CastMember = {
   name: string;
   description: string;
   facts?: string[];
+  sheetReview?: SheetReview;
   referenceAssetIds: string[];
 };
 
@@ -180,7 +181,7 @@ type WordTimings = {
 };
 ```
 
-Document 20 defines `StoryPlan`, the kind `prop`, and the fixed `facts` of a cast member.
+Document 20 defines `StoryPlan`, the kind `prop`, the fixed `facts` of a cast member, and its `sheetReview` (WP66). A plan of WP66 holds the start and end states of a shot as a list of entries; a plan of WP65 with states in words still loads.
 
 ## Rules that the store enforces
 

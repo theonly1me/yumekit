@@ -22,6 +22,7 @@ export interface TrackedStore {
     call: () => Promise<Value>;
   }) => Promise<Value>;
   onCommit: (listener: (commit: StoreCommit) => void) => void;
+  callerNow: () => ToolCaller | undefined;
 }
 
 export function trackStore(store: ProjectStore): TrackedStore {
@@ -65,5 +66,6 @@ export function trackStore(store: ProjectStore): TrackedStore {
     onCommit: (next) => {
       listener = next;
     },
+    callerNow: () => callers.getStore(),
   };
 }

@@ -10,6 +10,11 @@ import type { MediaToolRequest } from "@yumekit/tools";
 import { onTestFinished } from "vitest";
 import { createHarnessServer } from "../index.js";
 import {
+  scriptedCritic,
+  type CriticLog,
+  type CriticScript,
+} from "./criticFixture.js";
+import {
   startHarnessProject,
   type HarnessProjectOptions,
 } from "./harnessProject.js";
@@ -53,6 +58,7 @@ export interface Harness {
   store: ProjectStore;
   folder: string;
   runRequests: MediaToolRequest[];
+  criticLog: CriticLog;
   call: (request: {
     name: string;
     arguments?: Record<string, unknown>;
@@ -60,11 +66,35 @@ export interface Harness {
 }
 
 export async function startHarness(
-  options?: HarnessProjectOptions,
+  options?: HarnessProjectOptions & { critic?: CriticScript | "none" },
 ): Promise<Harness> {
   const { store, mediaTools, runRequests } = await startHarnessProject(options);
-  const server = createHarnessServer({ store, mediaTools });
   const client = new Client({ name: "harness-test", version: "0.0.0" });
+  const criticLog: CriticLog = { briefs: [], answers: [] };
+  const critic = options?.critic ?? {};
+  const server = createHarnessServer({
+    store,
+    mediaTools,
+    ...(critic === "none"
+      ? {}
+      : {
+          askCritic: scriptedCritic({
+            call: async (request) => {
+              const result = CallToolResultSchema.parse(
+                await client.callTool(request, undefined, { timeout: 120_000 }),
+              );
+              return {
+                isError: result.isError === true,
+                text: result.content
+                  .map((part) => (part.type === "text" ? part.text : ""))
+                  .join("\n"),
+              };
+            },
+            script: critic,
+            log: criticLog,
+          }),
+        }),
+  });
   const [clientTransport, serverTransport] =
     InMemoryTransport.createLinkedPair();
   await Promise.all([
@@ -80,6 +110,7 @@ export async function startHarness(
     store,
     folder: store.folder,
     runRequests,
+    criticLog,
     call: async (request) => {
       const result: CallToolResult = CallToolResultSchema.parse(
         await client.callTool(request, undefined, { timeout: 120_000 }),

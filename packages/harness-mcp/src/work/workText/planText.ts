@@ -1,4 +1,5 @@
 import type { Shot, StoryPlan } from "@yumekit/project";
+import { stateText, strikeText } from "../../storyPlan/stateText.js";
 
 function reviewText(shot: Shot): string {
   const reviews = shot.reviews ?? [];
@@ -18,22 +19,35 @@ function reviewText(shot: Shot): string {
         review.endPictureAssetId === undefined
           ? ""
           : ` End picture: ${review.endPictureAssetId}.`;
-      return `Clip ${review.assetId}: ${review.verdict}${part}.${faults}${end}`;
+      const by =
+        review.by === "critic" ? "the critic" : "the maker (not checked)";
+      const missed =
+        (review.critic?.missed ?? []).length === 0
+          ? ""
+          : ` Did not happen: ${(review.critic?.missed ?? []).join("; ")}.`;
+      return `Clip ${review.assetId}: ${review.verdict} by ${by}${part}.${faults}${missed}${end}`;
     })
     .join(" ");
 }
 
 function shotLines(options: { shot: Shot; number: number }): string[] {
   const { shot } = options;
-  const camera = [shot.camera.size, shot.camera.angle, shot.camera.move]
+  const camera = [
+    shot.camera.size,
+    shot.camera.angle,
+    shot.camera.lens === undefined ? undefined : `${shot.camera.lens} lens`,
+    shot.camera.move,
+  ]
     .filter((part) => part !== undefined)
     .join(", ");
   return [
     `${String(options.number)}. ${shot.id} (${String(shot.seconds)}s, place ${shot.placeId}, cast ${shot.castIds.join(", ") || "none"}, camera ${camera})`,
     `   Purpose: ${shot.purpose}`,
     `   Action: ${shot.action}`,
-    `   Start: ${shot.startState}`,
-    `   End: ${shot.endState}`,
+    `   Start: ${stateText(shot.startState)}`,
+    `   End: ${stateText(shot.endState)}`,
+    ...(shot.strikes ?? []).map((strike) => `   Strike: ${strikeText(strike)}`),
+    `   Music: intensity ${String(shot.musicIntensity ?? "not set")}${(shot.musicHits ?? []).length === 0 ? "" : `, hits at ${(shot.musicHits ?? []).map((hit) => `${String(hit)}s`).join(", ")}`}`,
     `   Next shot inherits: ${shot.inherits === "" ? "nothing" : shot.inherits}`,
     `   ${reviewText(shot)}`,
   ];
@@ -49,6 +63,10 @@ export function planLines(plan: StoryPlan | undefined): string[] {
     `Wants: ${plan.want}. Against it: ${plan.obstacle}. Changes: ${plan.change}`,
     ...plan.shots.flatMap((...[shot, index]) =>
       shotLines({ shot, number: index + 1 }),
+    ),
+    ...(plan.musicChecks ?? []).map(
+      (check) =>
+        `Music check ${check.assetId}: fit ${String(check.fit)} from ${String(check.startSeconds)}s.${check.warnings.length === 0 ? "" : ` ${check.warnings.join(" ")}`}`,
     ),
   ];
 }

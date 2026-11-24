@@ -30,6 +30,13 @@ const replaceMusicInput = {
     .max(12)
     .optional()
     .describe("The volume. Default: the volume of the old music, or -12."),
+  start_seconds: z
+    .number()
+    .min(0)
+    .optional()
+    .describe(
+      "Where in the track the music starts, for example the best start of check_music. Default 0.",
+    ),
   output_ids: z
     .array(idInput("The id of an output."))
     .min(1)
@@ -41,7 +48,7 @@ export function registerReplaceMusic(context: HarnessContext): void {
   context.tools.add({
     name: "replace_music",
     description:
-      "Put new music in the place of the old music in each output, from a prompt or from an audio asset. The music repeats to the end of the video. It changes no other clip, no scene, and no transition. One undo brings the old music back.",
+      "Put new music in the place of the old music in each output, from a prompt or from an audio asset, from start_seconds of the track. The music repeats to the end of the video. It changes no other clip, no scene, and no transition. One undo brings the old music back.",
     inputSchema: replaceMusicInput,
     run: async ({ input, onProgress }) => {
       const snapshot = context.store.read();
@@ -104,6 +111,9 @@ export function registerReplaceMusic(context: HarnessContext): void {
               assets: latest.assets,
               asset: made.asset,
               gainDecibels: input.gain_decibels,
+              assetStartFrame: Math.round(
+                (input.start_seconds ?? 0) * latest.project.framesPerSecond,
+              ),
             }),
           })),
         line: `The music "${made.asset.id}" replaced the old music. Nothing else changed.`,

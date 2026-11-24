@@ -24,6 +24,7 @@ const stepSchema = z.union([
 const scenarioSchema = z.object({
   steps: z.array(stepSchema),
   helperSteps: z.array(stepSchema).default([]),
+  criticSteps: z.array(stepSchema).default([]),
   exitCode: z.number(),
   signedIn: z.boolean(),
   resumeFails: z.boolean(),
@@ -164,8 +165,13 @@ async function run(): Promise<number> {
     `${JSON.stringify(programArguments)}\n`,
   );
   if (scenario.resumeFails && programArguments.includes("--resume")) return 1;
+  const isCritic = (programArguments.at(-1) ?? "").startsWith("Review job");
   const steps =
-    helperToken === undefined ? scenario.steps : scenario.helperSteps;
+    helperToken === undefined
+      ? scenario.steps
+      : isCritic
+        ? scenario.criticSteps
+        : scenario.helperSteps;
   for (const step of steps) await runStep(step);
   return scenario.exitCode;
 }

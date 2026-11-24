@@ -24,6 +24,24 @@ export async function firstPictureOfTheClips(folder: string): Promise<string> {
   return file;
 }
 
+export const startPictureFilters = {
+  another: "crop=320:180:160:0,negate",
+  redrawn: "crop=320:180:10:4,gblur=sigma=2,eq=contrast=1.15",
+} as const;
+
+export async function changedPicture(options: {
+  folder: string;
+  change: keyof typeof startPictureFilters;
+}): Promise<string> {
+  const picture = await detailedPicture(options.folder);
+  const file = join(options.folder, `${options.change}.png`);
+  await runFile("ffmpeg", [
+    ...["-v", "error", "-y", "-i", picture],
+    ...["-vf", startPictureFilters[options.change], file],
+  ]);
+  return file;
+}
+
 export async function clipOf(options: {
   folder: string;
   name: string;

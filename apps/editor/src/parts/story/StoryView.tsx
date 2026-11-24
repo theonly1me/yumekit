@@ -1,13 +1,31 @@
 import type { StepViewProps } from "../frame/stepViewProps.js";
 import { ShotPictures } from "./ShotPictures.js";
+import { SheetChecks } from "./SheetChecks.js";
+import { intensityText, stateLinesOf } from "./shotWords.js";
 import { shotFactsOf, type ShotFacts } from "./storyFacts.js";
 import "./story.css";
 
 export const noPlanText =
   "This video has no story plan yet. Before the AI makes a real video clip, it writes the story: what the main character wants, what stands in the way, what changes, and each shot with one action. The plan shows here.";
 
-function ShotRow(props: { client: StepViewProps["client"]; facts: ShotFacts }) {
-  const { facts } = props;
+function StateList(props: { lines: string[] }) {
+  return (
+    <dd>
+      {props.lines.map((line) => (
+        <span key={line} className="shot-state-line">
+          {line}
+        </span>
+      ))}
+    </dd>
+  );
+}
+
+function ShotRow(props: {
+  client: StepViewProps["client"];
+  facts: ShotFacts;
+  nameOf: (castId: string) => string;
+}) {
+  const { facts, nameOf } = props;
   const { shot } = facts;
   return (
     <li className="shot-row">
@@ -23,14 +41,21 @@ function ShotRow(props: { client: StepViewProps["client"]; facts: ShotFacts }) {
           {String(facts.number)}. {shot.action}
         </span>
         <span className="fact">
-          {[facts.placeName, facts.cameraText, facts.lengthText].join(" · ")}
+          {[
+            facts.placeName,
+            facts.cameraText,
+            facts.lengthText,
+            intensityText(shot.musicIntensity),
+          ]
+            .filter((part) => part !== undefined)
+            .join(" · ")}
         </span>
         <span className="shot-purpose">{shot.purpose}</span>
         <dl className="shot-states">
           <dt>Starts</dt>
-          <dd>{shot.startState}</dd>
+          <StateList lines={stateLinesOf({ state: shot.startState, nameOf })} />
           <dt>Ends</dt>
-          <dd>{shot.endState}</dd>
+          <StateList lines={stateLinesOf({ state: shot.endState, nameOf })} />
         </dl>
         <span className="shot-verdict" data-verdict={facts.verdict}>
           {facts.verdictText}
@@ -38,10 +63,20 @@ function ShotRow(props: { client: StepViewProps["client"]; facts: ShotFacts }) {
         {facts.faults.length === 0 ? undefined : (
           <ul
             className="shot-faults"
-            aria-label={`What the check found in shot ${String(facts.number)}`}
+            aria-label={`What the critic found in shot ${String(facts.number)}`}
           >
             {facts.faults.map((fault) => (
               <li key={fault}>{fault}</li>
+            ))}
+          </ul>
+        )}
+        {facts.missed.length === 0 ? undefined : (
+          <ul
+            className="shot-faults"
+            aria-label={`What did not happen in shot ${String(facts.number)}`}
+          >
+            {facts.missed.map((missed) => (
+              <li key={missed}>{missed}</li>
             ))}
           </ul>
         )}
@@ -63,6 +98,9 @@ export function StoryView(props: StepViewProps) {
     );
   }
   const shots = shotFactsOf(props.snapshot);
+  const { cast } = props.snapshot.bible;
+  const nameOf = (castId: string) =>
+    cast.find((member) => member.id === castId)?.name ?? castId;
   return (
     <div className="files-part story-part">
       <p className="story-logline">{plan.logline}</p>
@@ -80,10 +118,16 @@ export function StoryView(props: StepViewProps) {
         </h4>
         <ol className="file-rows">
           {shots.map((facts) => (
-            <ShotRow key={facts.shot.id} client={props.client} facts={facts} />
+            <ShotRow
+              key={facts.shot.id}
+              client={props.client}
+              facts={facts}
+              nameOf={nameOf}
+            />
           ))}
         </ol>
       </section>
+      <SheetChecks snapshot={props.snapshot} />
     </div>
   );
 }

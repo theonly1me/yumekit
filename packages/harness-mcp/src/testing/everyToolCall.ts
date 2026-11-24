@@ -1,6 +1,6 @@
 import type { JsonObject } from "@yumekit/tools";
 import { sharperCopyCalls, soundEffectCalls } from "./newKindCalls.js";
-import { reviewCalls, storyCalls } from "./storyCalls.js";
+import { musicCalls, reviewCalls, storyCalls } from "./storyCalls.js";
 
 export interface ScriptedCall {
   name: string;
@@ -163,6 +163,7 @@ export function everyToolCall(importSourcePath: string): ScriptedCall[] {
       },
     },
     { name: "align_words", input: { asset_id: "tune", text: "hello world" } },
+    ...musicCalls,
     ...soundEffectCalls,
     {
       name: "import_asset",

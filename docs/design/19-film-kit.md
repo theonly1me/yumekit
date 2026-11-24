@@ -58,12 +58,12 @@ The example videos in both films were made by yumekit, and the free-hand agent u
 
 ## Scene types for a launch film (K4)
 
-| Name        | What it shows                                                                                | Main props                   |
-| ----------- | -------------------------------------------------------------------------------------------- | ---------------------------- |
-| `lines`     | 1 to 4 short lines, each as large as the width allows, one on each beat, the old ones dimmed | `lines`, `accentLine`        |
-| `look-swap` | One video asset for each look, cut on the beat, with the name of the look                    | `assetIds`, `labels`         |
-| `command`   | A command that is typed in a pill, with a cursor, under a wordmark or a line                 | `command`, `heading`, `note` |
-| `counts`    | 1 to 3 numbers that count up next to their labels                                            | `items`                      |
+| Name        | What it shows                                                                                | Main props                             |
+| ----------- | -------------------------------------------------------------------------------------------- | -------------------------------------- |
+| `lines`     | 1 to 4 short lines, each as large as the width allows, one on each beat, the old ones dimmed | `lines`, `accentLine`                  |
+| `look-swap` | One video asset for each look, cut on the beat, with the name of the look                    | `assetIds`, `labels`                   |
+| `command`   | A command that is typed in a pill, with a cursor, under a wordmark or a line                 | `command`, `heading`, `note`, `prompt` |
+| `counts`    | 1 to 3 numbers that count up next to their labels                                            | `items`                                |
 
 Each new scene follows each rule of document 08 and document 17, draws in each look, and has a wide, a tall, and a square layout.
 
@@ -195,7 +195,7 @@ These facts and choices came from the build of WP60 on 2026-11-24.
 10. `wall` takes 2 to 16 assets, not 4 to 16, because a film often has three examples. It picks the column count that makes each picture largest, and it prefers full rows when their pictures are at least 75 percent of that size. With no heading, the grid is centered between the top of the heading and the end of the content.
 11. `shapes` places one to three assets at one height, in the order of `assetIds`, in one row or more rows, whichever gives the largest pictures. Each asset keeps its own shape. Each video shows the frame `round(startSeconds × fps) + frame` of its file, so the entry on the beat never moves the time of a video.
 12. `look-swap` takes `assetIds` (2 to 6, an asset may come twice), `labels`, `marks` (one mark name for each asset), `region`, and `beatsEach` (default 1). The first look shows when the window comes in, and each next look comes `beatsEach` beats later. The last look stays to the end of the clip, so a clip of 1 frame shows the last look. Each cut starts its video at the time of its mark, so the same moment of the same content shows in each look.
-13. `command` types its command at 30 characters each second, from beat 1.5 after the wordmark. The command is in a system monospace font (`ui-monospace`, then SF Mono, Menlo, Consolas, DejaVu Sans Mono, Liberation Mono), because no look has a monospace font. The pill keeps the room of the whole command, so the layout does not move while the text types.
+13. `command` types its command at 30 characters each second, from beat 1.5 after the wordmark. The command is in a system monospace font (`ui-monospace`, then SF Mono, Menlo, Consolas, DejaVu Sans Mono, Liberation Mono), because no look has a monospace font. The pill keeps the room of the whole command, so the layout does not move while the text types. Since WP66 the scene draws a sign before the command (such as `$`) only when `prompt` gives one (document 20, C21).
 14. `counts` counts each number up over 1 second from its beat, in a row in wide and stacked in square and tall.
 15. Marks. An asset record has `marks?`: each mark has a `name` (1 to 60 characters, one name once on an asset), and a `region`, `seconds`, or both. A region stays inside the picture. Only an image or a video asset has marks. The edit `setAssetMarks` replaces the marks, as one undo step, and no marks removes the field. `import_asset` takes `marks`. `mark_asset` adds a mark, replaces a mark with the same name, or removes one with `remove: true`, and refuses a mark with no region and no time (`mark-is-empty`). `list_assets` gives `marks`.
 16. `SceneAsset` of the scene contract gets `marks`, so a scene finds a mark by name when it draws. A name matches with no regard to case and to spaces at the ends. `put_scene` refuses a `mark` of `footage`, of a stop, or of `look-swap` that its asset does not have, with `mark-not-found` and the list of the marks of the asset. A mark of an asset that does not exist is not checked, as for other asset ids.

@@ -7,6 +7,7 @@ import { PlayButton } from "../sound/PlayButton.js";
 import { soundFileTypes, type SoundViewProps } from "../sound/soundView.js";
 import { StatusLine } from "../sound/StatusLine.js";
 import { useSoundActions } from "../sound/useSoundActions.js";
+import { CheckedMusicGroup } from "./CheckedMusicGroup.js";
 import { LocalMusicGroup } from "./LocalMusicGroup.js";
 import { musicFactsOf } from "./musicFacts.js";
 import { MusicVolume } from "./MusicVolume.js";
@@ -76,6 +77,7 @@ export function MusicView(props: SoundViewProps) {
           )}
         </div>
       </section>
+      <CheckedMusicGroup client={client} snapshot={snapshot} locked={locked} />
       <LocalMusicGroup client={client} snapshot={snapshot} locked={locked} />
       <section className="part-group">
         <h4>Try another</h4>
