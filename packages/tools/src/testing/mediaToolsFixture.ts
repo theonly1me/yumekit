@@ -117,3 +117,9 @@ export const keyedServerCommand: ServerCommand = {
 };
 
 export const testKeyValue = "yumekit-test-key-7f3a9c";
+
+export const pricedServerCommand: ServerCommand = {
+  command: process.execPath,
+  args: [fileURLToPath(new URL("./pricedMediaServer.ts", import.meta.url))],
+  passEnvironment: ["YUMEKIT_PRICED_KEY", "YUMEKIT_PRICED_CALLS"],
+};

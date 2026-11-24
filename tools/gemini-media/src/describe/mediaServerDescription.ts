@@ -54,6 +54,6 @@ export type MediaModelSetting =
 
 export interface MediaModelPrice {
   usd: number;
-  unit: "second" | "image" | "minute" | "thousand-characters";
+  unit: "second" | "image" | "minute" | "thousand-characters" | "call";
   when: Record<string, string>;
 }

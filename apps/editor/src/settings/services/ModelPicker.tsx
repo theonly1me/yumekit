@@ -17,6 +17,12 @@ type PickState =
   | { kind: "saving"; target: ModelTarget }
   | { kind: "failed"; message: string };
 
+const serviceStateNames: Record<ChoiceService["state"], string> = {
+  ready: "Ready",
+  "needs-key": "Needs a key",
+  "key-not-working": "The key does not work",
+};
+
 function targetsOf(service: ChoiceService): ModelTarget[] {
   const base = { server: service.server, serverLabel: service.label };
   if (service.models.length === 0) {
@@ -69,7 +75,7 @@ export function ModelPicker(props: {
   };
 
   const choose = (options: { service: ChoiceService; target: ModelTarget }) => {
-    if (options.service.state === "needs-key") {
+    if (options.service.state !== "ready") {
       setState({ kind: "needs-key", target: options.target });
     } else {
       apply(options.target);
@@ -86,7 +92,10 @@ export function ModelPicker(props: {
         <p className="fact">No service makes {kindName.toLowerCase()} yet.</p>
       ) : undefined}
       {props.choice.services.map((service) => {
-        const missingKey = service.keys.find((key) => key.source === "missing");
+        const keyToAdd =
+          service.state === "key-not-working"
+            ? service.keys[0]
+            : service.keys.find((key) => key.source === "missing");
         const waiting =
           state.kind === "needs-key" && state.target.server === service.server
             ? state.target
@@ -95,10 +104,16 @@ export function ModelPicker(props: {
           <section key={service.server} className="model-service">
             <h4>
               {service.label}
-              <span className="model-service-state">
-                {service.state === "ready" ? "Ready" : "Needs a key"}
+              <span className="model-service-state" data-state={service.state}>
+                {serviceStateNames[service.state]}
               </span>
             </h4>
+            {service.key_problem === null ? undefined : (
+              <p className="fact key-problem">
+                The key does not work. {service.label} says:{" "}
+                {service.key_problem}
+              </p>
+            )}
             <ServiceLine client={props.client} service={service} />
             <ul className="model-options">
               {targetsOf(service).map((target) => (
@@ -117,15 +132,17 @@ export function ModelPicker(props: {
                 </li>
               ))}
             </ul>
-            {waiting !== undefined && missingKey !== undefined ? (
+            {waiting !== undefined && keyToAdd !== undefined ? (
               <div className="model-key">
                 <p className="fact">
-                  {service.label} needs a key first. yumekit uses{" "}
-                  {waiting.modelLabel ?? service.label} after the key saves.
+                  {service.label} needs{" "}
+                  {service.state === "key-not-working" ? "a new key" : "a key"}{" "}
+                  first. yumekit uses {waiting.modelLabel ?? service.label}{" "}
+                  after the key saves.
                 </p>
                 <KeyGuide
                   serverId={service.server}
-                  mediaKey={missingKey}
+                  mediaKey={keyToAdd}
                   requests={keyRequests}
                   onSaved={() => {
                     apply(waiting);

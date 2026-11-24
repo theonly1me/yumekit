@@ -17,14 +17,21 @@ const userMediaTools = {
   limits: { generatedVideoSeconds: 30 },
 };
 
-function putLimit(options: { engine: TestEngine; body: object }) {
+function putLimit(options: {
+  engine: TestEngine;
+  body: object;
+  byAgent?: boolean;
+}) {
   return rawRequest({
     port: options.engine.port,
     path: "/api/media/limits",
     method: "PUT",
     headers: withToken({
       token: options.engine.token,
-      headers: { "content-type": "application/json" },
+      headers: {
+        "content-type": "application/json",
+        ...(options.byAgent === true ? { "x-yumekit-client": "agent" } : {}),
+      },
     }),
     body: JSON.stringify(options.body),
   });
@@ -56,7 +63,10 @@ describe("the media limit request", () => {
     const tooLong = await videoOfSeconds({ engine, seconds: 2 });
 
     expect(answer.status).toBe(200);
-    expect(bodyOf(answer)).toEqual({ generated_video_seconds: 1 });
+    expect(bodyOf(answer)).toEqual({
+      generated_video_seconds: 1,
+      spending_usd: 5,
+    });
     expect(
       JSON.parse(
         await readFile(
@@ -81,5 +91,61 @@ describe("the media limit request", () => {
     );
 
     expect(answers.map((answer) => answer.status)).toEqual([400, 400, 400]);
+  });
+
+  it("saves a spending limit in US dollars and keeps the video limit", async () => {
+    const { engine, configurationDirectory } = await startedTestEngine({
+      userMediaTools,
+    });
+
+    const answer = await putLimit({ engine, body: { spending_usd: 2.5 } });
+
+    expect(answer.status).toBe(200);
+    expect(bodyOf(answer)).toEqual({
+      generated_video_seconds: 30,
+      spending_usd: 2.5,
+    });
+    expect(
+      JSON.parse(
+        await readFile(
+          join(configurationDirectory, "media-tools.json"),
+          "utf8",
+        ),
+      ),
+    ).toEqual({
+      ...userMediaTools,
+      limits: { generatedVideoSeconds: 30, spendingUsd: 2.5 },
+    });
+  });
+
+  it("refuses a limit change by the AI and changes no file", async () => {
+    const { engine, configurationDirectory } = await startedTestEngine({
+      userMediaTools,
+    });
+
+    const answer = await putLimit({
+      engine,
+      body: { spending_usd: 1000 },
+      byAgent: true,
+    });
+
+    expect(answer.status).toBe(403);
+    expect(bodyOf(answer)).toMatchObject({ kind: "limit-not-for-the-ai" });
+    expect(
+      JSON.parse(
+        await readFile(
+          join(configurationDirectory, "media-tools.json"),
+          "utf8",
+        ),
+      ),
+    ).toEqual(userMediaTools);
+  });
+
+  it("rejects a body with no limit", async () => {
+    const { engine } = await startedTestEngine({ userMediaTools });
+
+    const answer = await putLimit({ engine, body: {} });
+
+    expect(answer.status).toBe(400);
   });
 });

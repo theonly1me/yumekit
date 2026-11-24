@@ -76,7 +76,7 @@ describe("generate_image", () => {
   it("gives no cost when the page of the model gives no price", async () => {
     const { result } = await callFalTool({
       name: "generate_image",
-      arguments: () => Promise.resolve({ model: "google/nano-banana-2.1" }),
+      arguments: () => Promise.resolve({ model: "minimax/h3-image" }),
     });
 
     expect(result.isError).toBeFalsy();

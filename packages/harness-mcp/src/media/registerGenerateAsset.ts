@@ -1,29 +1,21 @@
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import { assetLabelOf, type Edit } from "@yumekit/project";
-import { applyEditsResult } from "../applyEditsResult.js";
 import { withCast } from "../cast/castRequest.js";
 import type { HarnessContext } from "../context.js";
 import type { ProgressListener } from "../harness/toolTable.js";
 import { failureResult } from "../results.js";
 import { withStory } from "../storyPlan/shotRequest.js";
-import {
-  assetFilesFolder,
-  findReusableAsset,
-  projectFileOf,
-  wordsInFrames,
-} from "./assetFiles.js";
+import { assetFilesFolder, findReusableAsset } from "./assetFiles.js";
 import {
   generateAssetDescription,
   generateAssetInput,
   toolNameByCapability,
   type GenerateAssetInput,
 } from "./generateAssetInput.js";
-import { generatedMediaOf } from "./generatedFile.js";
-import { wordsOfResult } from "./spreadWords.js";
+import { addMadeAsset } from "./made/addMadeAsset.js";
 import { mediaPathInput } from "./mediaPath.js";
 import { mediaFailureOf } from "./mediaFailures.js";
 import { recordedInputOf, referencePathsInput } from "./referencePaths.js";
-import { reuseAsset, summaryOf } from "./reuseAsset.js";
+import { reuseAsset } from "./reuseAsset.js";
 import { talkingVoiceOf, voicePathInput } from "./talkingVoice.js";
 import { videoInputOf } from "./videoChoices.js";
 import { roundedSeconds, videoLimitFailureOf } from "./videoLimit.js";
@@ -111,79 +103,21 @@ export async function generateAsset(options: {
       ...mediaPath.value,
       ...voicePath.value,
     },
+    ...(voice.value === undefined
+      ? {}
+      : { expectedSeconds: voice.value.seconds }),
     outputDirectory: assetFilesFolder(projectFolder),
     fileStem: request.asset_id,
     ...(onProgress === undefined ? {} : { onProgress }),
   });
   if (!ran.ok) return failureResult(mediaFailureOf(ran.failure));
-  const { server, model, result } = ran.value;
-  const [file] = result.files;
-  if (file === undefined) {
-    return failureResult({
-      kind: "media-tool-invalid-result",
-      message: `The media server "${server}" returned no file.`,
-      hint: "Call again, or use another server from list_media_tools.",
-    });
-  }
-  const { framesPerSecond } = snapshot.project;
-  const media = await generatedMediaOf({ file, server, framesPerSecond });
-  if (!media.ok) return failureResult(media.failure);
-  const asset = {
-    id: request.asset_id,
-    kind: file.kind,
-    label: assetLabelOf({ kind: file.kind, source: { kind: "tool", input } }),
-    file: projectFileOf({ projectFolder, path: file.path }),
-    ...media.value,
-    source: {
-      kind: "tool" as const,
-      server,
-      tool,
-      ...(model === undefined ? {} : { model }),
-      input,
-      ...(result.cost_usd === undefined ? {} : { costUsd: result.cost_usd }),
-      ...(result.cost_is_estimate === undefined
-        ? {}
-        : { costIsEstimate: result.cost_is_estimate }),
-    },
-  };
-  const { durationFrames } = media.value;
-  const words = await wordsOfResult({
-    capability: request.capability,
-    input: request.input,
-    result,
-    path: file.path,
-    serverCanAlign: context.mediaTools
-      .list()
-      .some(
-        (entry) =>
-          entry.server === server && entry.capabilities.includes("align"),
-      ),
-    durationSeconds:
-      durationFrames === undefined
-        ? undefined
-        : durationFrames / framesPerSecond,
-  });
-  const edit: Edit = {
-    kind: "addAsset",
-    asset,
-    ...(words === undefined
-      ? {}
-      : { words: wordsInFrames({ words, framesPerSecond }) }),
-  };
-  const lengthText =
-    durationFrames === undefined
-      ? ""
-      : `, ${String(durationFrames)} frames long`;
-  const wordsText =
-    words === undefined ? "" : `, with ${String(words.length)} word timings`;
-  return applyEditsResult({
-    store: context.store,
-    edits: [edit],
-    line: `Asset "${request.asset_id}" made by ${server}${lengthText}${wordsText}.`,
-    data: summaryOf({
-      asset: { ...asset, hasWords: words !== undefined },
-      reused: false,
-    }),
+  return addMadeAsset({
+    context,
+    request,
+    snapshot,
+    run: ran.value,
+    tool,
+    input,
   });
 }
 

@@ -14,6 +14,7 @@ import type {
 
 export const configurationFileName = "media-tools.json";
 const defaultGeneratedVideoSeconds = 30;
+export const defaultSpendingUsd = 5;
 
 const serverEntrySchema = z.object({
   command: z.string().min(1).optional(),
@@ -24,6 +25,7 @@ const serverEntrySchema = z.object({
 
 const limitsSchema = z.object({
   generatedVideoSeconds: z.number().nonnegative().optional(),
+  spendingUsd: z.number().nonnegative().optional(),
 });
 
 const defaultEntrySchema = z
@@ -171,6 +173,10 @@ export async function readMediaToolsConfiguration(options: {
           projectFile?.limits.generatedVideoSeconds ??
           userFile?.limits.generatedVideoSeconds ??
           defaultGeneratedVideoSeconds,
+        spendingUsd:
+          projectFile?.limits.spendingUsd ??
+          userFile?.limits.spendingUsd ??
+          defaultSpendingUsd,
       },
     },
   };

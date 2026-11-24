@@ -7,6 +7,11 @@ import type {
 } from "./choiceTypes.js";
 import type { MediaModel, MediaServerDescription } from "./description.js";
 import type { PrepareFailure } from "./modelDownloads.js";
+import type { CostBasis, SpendingRecordNotValid } from "./spending/ledger.js";
+import type {
+  SpendingLimitReached,
+  SpendingSummary,
+} from "./spending/spendingBook.js";
 
 export type Capability =
   | "image"
@@ -49,12 +54,28 @@ export type MediaToolFailure =
       variable: string;
       getKeyUrl: string;
       steps: string[];
-    };
+    }
+  | {
+      kind: "media-key-not-working";
+      server: string;
+      message: string;
+      getKeyUrl: string;
+      steps: string[];
+    }
+  | SpendingLimitReached
+  | SpendingRecordNotValid;
 
 export type CheckKeyFailure =
   | Exclude<
       MediaToolFailure,
-      { kind: "no-server-for-capability" | "media-key-missing" }
+      {
+        kind:
+          | "no-server-for-capability"
+          | "media-key-missing"
+          | "media-key-not-working"
+          | "spending-limit-reached"
+          | "spending-record-not-valid";
+      }
     >
   | { kind: "no-check-key-tool"; server: string };
 
@@ -80,6 +101,7 @@ export interface MediaToolRequest {
   server?: string;
   model?: string;
   input: JsonObject;
+  expectedSeconds?: number;
   outputDirectory: string;
   fileStem: string;
   onProgress?: (progress: MediaToolProgress) => void;
@@ -92,12 +114,14 @@ export type MediaModelChoice = Pick<
 
 export interface MediaLimits {
   generatedVideoSeconds: number;
+  spendingUsd: number;
 }
 
 export interface MediaServerEntry {
   server: string;
   capabilities: Capability[];
   canCheckKey: boolean;
+  keyProblem?: string;
   description?: MediaServerDescription;
   descriptionFailure?: { kind: "media-tool-invalid-result"; message: string };
 }
@@ -106,6 +130,7 @@ export interface MediaToolRun {
   server: string;
   model?: string;
   result: MediaToolResult;
+  cost?: { usd: number; basis: CostBasis };
 }
 
 export interface MediaTools {
@@ -115,10 +140,12 @@ export interface MediaTools {
   ) => Promise<Outcome<MediaToolRun, MediaToolFailure>>;
   chosenModel: (choice: MediaModelChoice) => Promise<MediaModel | undefined>;
   checkKey: (server: string) => Promise<Outcome<KeyCheck, CheckKeyFailure>>;
+  checkKeys: () => Promise<void>;
+  spending: () => Promise<Outcome<SpendingSummary, SpendingRecordNotValid>>;
   failedServers: () => { server: string; message: string }[];
   limits: () => MediaLimits;
-  setVideoLimit: (
-    seconds: number,
+  setLimits: (
+    change: Partial<MediaLimits>,
   ) => Promise<Outcome<MediaLimits, UserFileFailure>>;
   choices: () => Promise<MediaChoices>;
   pick: (pick: MediaPick) => Promise<Outcome<MediaChoices, MediaPickFailure>>;

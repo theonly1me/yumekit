@@ -25,14 +25,14 @@ yumekit reads two files with the same shape. The project file wins for a server 
     "sample": { "command": "yumekit-sample-media", "args": [] }
   },
   "defaults": { "image": "openai", "speech": "openai", "align": "openai" },
-  "limits": { "generatedVideoSeconds": 30 }
+  "limits": { "generatedVideoSeconds": 30, "spendingUsd": 5 }
 }
 ```
 
 - `passEnvironment` lists the names of environment variables that the server gets. The file never holds a secret value. Document 10 says where a key lives and how a server describes its models.
 - The user file is in the configuration folder: `~/.config/yumekit`, or the folder in the environment variable `YUMEKIT_CONFIG_DIRECTORY` (document 10).
 - `defaults` names the server for each capability when a tool call gives no server. An entry is a server name, or `{ "server": "...", "model": "..." }` (document 10).
-- `limits` is optional. `generatedVideoSeconds` is the limit of document 09, a number of 0 or more, and 30 by default. The project file wins over the user file. `MediaTools.limits()` gives the merged value.
+- `limits` is optional. `generatedVideoSeconds` is the limit of document 09, a number of 0 or more, and 30 by default. `spendingUsd` is the spending limit of document 15 ("Details of WP64"), in US dollars, and 5 by default. The project file wins over the user file. `MediaTools.limits()` gives the merged value.
 - The `yumekit` command passes the commands of the bundled servers as `bundledServers`. A file can use a bundled server by its name with no `command`.
 - With no file (user or project), yumekit connects each bundled server, in the order `sample`, `openai`, `gemini`, `fal`, `local-voice`, `local-music`. A bundled server with a missing key starts, and the editor shows that it needs a key.
 - With a file, yumekit connects the servers of the file first. Then it connects each bundled server that the file does not name.
@@ -128,7 +128,12 @@ type MediaTools = {
     server: string,
   ) => Promise<Outcome<{ valid: boolean; message: string }, CheckKeyFailure>>;
   failedServers: () => { server: string; message: string }[];
-  limits: () => { generatedVideoSeconds: number };
+  limits: () => { generatedVideoSeconds: number; spendingUsd: number };
+  setLimits: (
+    change: Partial<{ generatedVideoSeconds: number; spendingUsd: number }>,
+  ) => Promise<Outcome<MediaLimits, UserFileFailure>>;
+  checkKeys: () => Promise<void>;
+  spending: () => Promise<Outcome<SpendingSummary, SpendingRecordNotValid>>;
   choices: () => Promise<MediaChoices>;
   pick: (pick: {
     capability: Exclude<Capability, "align">;
@@ -157,7 +162,7 @@ type ConnectFailure = {
 };
 ```
 
-`MediaToolFailure` kinds: `no-server-for-capability`, `server-not-found`, `server-failed-to-start`, `media-tool-failed` (with the message of the server), `media-tool-invalid-result`, `media-tool-timeout`, `media-key-missing` (with `server`, `variable`, `getKeyUrl`, and `steps`, document 10).
+`MediaToolFailure` kinds: `no-server-for-capability`, `server-not-found`, `server-failed-to-start`, `media-tool-failed` (with the message of the server), `media-tool-invalid-result`, `media-tool-timeout`, `media-key-missing` (with `server`, `variable`, `getKeyUrl`, and `steps`, document 10), `media-key-not-working`, `spending-limit-reached`, and `spending-record-not-valid` (document 15, "Details of WP64").
 
 `CheckKeyFailure` kinds: `server-not-found`, `server-failed-to-start`, `media-tool-failed`, `media-tool-invalid-result`, `media-tool-timeout`, and `no-check-key-tool` for a server that lists no `check_key`.
 

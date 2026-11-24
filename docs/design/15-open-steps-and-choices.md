@@ -18,6 +18,8 @@ This document gives the person that control. The prototype in `apps/prototype` i
 | S8  | With no pick, yumekit uses a service that is ready. The sample service is the last choice                                                         | A test tone in a real video is a defect                                                                         |
 | S9  | A project has a video style: `graphics`, `ai-video`, or `mix`                                                                                     | Scenes drawn by code are exact and free. Video clips from a model look real and cost money. A person wants both |
 | S10 | The video style is the consent for paid video clips, inside the limit of Settings                                                                 | The AI must not stop for each clip when the person asked for clips                                              |
+| S11 | A project has a spending limit in US dollars. Each paid call checks its price against it before it runs. Only the person changes it               | One run can spend real money. Seconds of video do not cover pictures, voice, and music                          |
+| S12 | A service whose key the service rejected is not ready                                                                                             | An expired key looked ready, and the first paid call failed                                                     |
 
 ## The step views
 
@@ -227,3 +229,59 @@ WP37 made these choices where this document and the prototype give no rule.
 14. The scene cards of the Making screen move into the Pictures view. The hook that reads their pictures is now `parts/pictures/useScenePictures.ts`.
 15. The editor has one sheet for the four views, with the frame of WP37. It replaces the sheet of item 17 of "Details of WP40". While a request runs, the frame shows the locked line with "Stop". On the Making screen, the frame has no "Stop", because "Stop" is next to the steps.
 16. The Pictures view shows `MadeWith` of WP38 for the pick of Settings above the cards. A second line in one-time mode sits under "Change the picture". The kind `change-the-picture` of the fixed requests takes `model`, as `another-voice` and `make-this-music` do.
+
+## Details of WP64
+
+The first film with paid media found these defects: no limit in money, no record of most paid calls, an expired key that showed as ready, music longer than the cut, and silent changes of a picture size. WP64 made these choices.
+
+### The spending limit
+
+1. A project has a spending limit in US dollars, `limits.spendingUsd` of `media-tools.json`. The user file gives the default of each project, and a project file wins, as for `generatedVideoSeconds`. With no value, the limit is 5 US dollars. A limit of 0 turns each paid call off.
+2. The default is a limit, not "no limit", because an agent in a loop can spend without end. A refused call fails loudly and says where the person changes the limit.
+3. `MediaTools.run` in `@yumekit/tools` checks the limit before each call, so each caller (`generate_asset`, `align_words`, `make_sharper_copy`, and each later caller) gets the check. The check uses the price estimate of the call. A call where the amount spent, the calls that still run, and the price together pass the limit fails with `spending-limit-reached`, with `server`, `limitUsd`, `spentUsd`, `priceUsd`, and `priceBasis`. The call never reaches the media server.
+4. The harness text of the failure names the limit, the amount spent, and the price: "This call costs about 0.40 US dollars. The project has spent 0.80 US dollars of its limit of 1.00 US dollars, so the call would pass the limit. yumekit did not make it." The hint tells the AI that only the person can raise the limit, and to make the rest with free tools.
+5. The price estimate comes from `prices` of the model in the description of the server. The price whose `when` matches the most setting values applies. A setting with no value in the input uses its default. The unit `image` and the new unit `call` count once. `second` and `minute` use `duration_seconds`, or the expected length that the harness gives (the voice of a talking clip), or the words of `text` at 2.5 words for each second. `thousand-characters` uses the length of `text`.
+6. A server that runs on this computer is free, and a price of 0 is free. A free call needs no check and makes no record, also with a limit of 0.
+7. A model with no known price counts at a cautious price of its kind. The choice was between a cautious price and a consent of the person for each call. A consent needs a person in the loop at each paid call, and the AI cannot give it for the person. A cautious price keeps the AI working and keeps the limit safe, because each cautious price is higher than each known price of its kind on 2026-11-24:
+
+   | Kind           | Cautious price         |
+   | -------------- | ---------------------- |
+   | `image`        | 0.25 US dollars a call |
+   | `speech`       | 0.10 a call            |
+   | `align`        | 0.05 a call            |
+   | `music`        | 0.50 a call            |
+   | `sound-effect` | 0.25 a call            |
+   | `video`        | 2.00 a second          |
+   | `talking-clip` | 1.00 a second          |
+   | `sharper`      | 1.00 a call            |
+
+   A length that is not known counts as 10 seconds.
+
+8. `PUT /api/media/limits` takes `generated_video_seconds`, `spending_usd`, or both, and answers with both values that apply. `spending_usd` is from 0 to 10,000 and keeps cents. A request with the header `x-yumekit-client: agent` fails with `limit-not-for-the-ai` (403) and changes no file. No harness tool changes a limit. So the AI can read the limits, and only the person can change them.
+9. Settings, group "Limits", shows "Money for paid services in each project" above the video seconds: a field in US dollars, a bar of the money spent, and the line "About $0.84 of $5.00 spent in this project. $4.16 left."
+
+### The record of paid calls
+
+10. Each paid call that runs adds one entry to `<project>/.yumekit/spending.json`: `at`, `server`, `model`, `capability`, `file_stem`, `usd`, and `basis`. The basis is `reported` (an amount from the service that is not an estimate), `catalog` (an estimate from the catalog), or `cautious` (the cautious price of item 7). A call that runs past its time counts its estimate with `timed_out: true`, because the service can charge it. A call that fails in each other way adds nothing.
+11. The record is separate from the assets. A replaced or removed asset, an asset id that is used again, and undo keep each entry. A record that is not valid fails each paid call with `spending-record-not-valid`, because a wrong total could pass the limit.
+12. The record is in `.yumekit/`, so it is not in git. A copy of a project starts at 0.
+13. `MediaTools.spending()` gives `limitUsd`, `spentUsd`, `remainingUsd`, and `paidCalls`. `list_media_tools` and `get_work` give them as `spending` and in one line. The editor reads them from `/api/media-servers`.
+14. `run` returns `cost` for a paid call: the amount of the server when it gives one, or else the estimate. `generate_asset` saves it in `costUsd` and `costIsEstimate` of the asset, and gives `cost_usd`, `cost_is_estimate`, and `price_not_known` in its result.
+
+### A key that does not work
+
+15. A key that is there can still fail: the first call with an expired OpenAI key failed with "The OpenAI API answered 401: Your API key has expired." A paid call is not a check. So yumekit checks each key with the free `check_key` tool of its server when the picker opens (`GET /api/media/choices`) and when the AI calls `list_media_tools`. The answer stays for 5 minutes. No check makes a paid call, and no log holds a key.
+16. A failed call whose text says that the service answered 401 or 403 marks the key as not working, with the text of the service. This mark stays until the key changes. A new key starts the server again, and the next check reads the new key.
+17. A service with a key that does not work has the state `key-not-working` and `key_problem` in the picker, and `key_problem` in `list_media_tools`. The order with no pick skips it. A call that names it fails with `media-key-not-working` and calls no tool. The picker shows "The key does not work", the message of the service, and the key guide for a new key.
+
+### Music that is longer than asked
+
+18. Lyria takes the length only as a wish in the prompt. After each music or sound effect call with `duration_seconds`, the harness reads the real length. When the file is more than 0.25 seconds longer, the harness cuts it to the asked length with a fade at the end of a tenth of the length (at most 1 second), as a WAV file `<asset id>-fitted.wav`. The asset uses the cut file. Its source gets `fit` with `originalFile`, `seconds`, and `fadeOutSeconds`, and the original file stays.
+19. The result gives `real_seconds`, and for a cut file `original_seconds` and `fitted`. A shorter file is not changed, and the result says so.
+20. `accepts` gets the value `length` for a model that makes the asked `duration_seconds`: the sample music and sound models, the music of this computer, and each fal sound model. A Lyria model has no `length`. The descriptions of `list_media_tools` and of the Gemini music tool say what that means.
+
+### Sizes and sound
+
+21. The OpenAI size failure names the nearest valid size, for example "The nearest valid size is width_pixels 1008 and height_pixels 1024."
+22. When a picture has another size than the asked one, the result says the real size and the next value of the `resolution` setting of the model, for example 'For a larger picture, ask again with input.resolution "2K".'
+23. Rule 32 of the instructions of the AI: a video model that always makes sound takes no `with_audio` false; the AI places its clip with `sound_gain_decibels` "off" when the film needs no sound from it. Rule 33 tells the AI about the spending limit.

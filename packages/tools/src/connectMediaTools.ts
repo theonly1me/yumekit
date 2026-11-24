@@ -8,16 +8,19 @@ import {
 } from "./connectServer.js";
 import { checkPick } from "./checkPick.js";
 import { mediaChoicesOf } from "./mediaChoices.js";
-import { prepareModel, waitsForDownload } from "./modelDownloads.js";
-import { runTool } from "./runTool.js";
+import { checkKeys } from "./keyHealth/checkKeys.js";
+import { createKeyHealth, type KeyHealth } from "./keyHealth/keyHealth.js";
+import { prepareModel } from "./modelDownloads.js";
+import { runMediaRequest } from "./runMediaRequest.js";
+import { createSpendingBook } from "./spending/spendingBook.js";
 import { saveUserDefault } from "./saveUserDefault.js";
-import { saveUserVideoLimit } from "./saveUserLimit.js";
+import { saveUserLimits } from "./saveUserLimit.js";
 import {
   describedDefaultModel,
   isStarted,
   selectServer,
 } from "./selectServer.js";
-import { createServerPool, missingKeyFailureOf } from "./serverPool.js";
+import { createServerPool } from "./serverPool.js";
 import type {
   ConnectFailure,
   MediaServerEntry,
@@ -28,11 +31,17 @@ import type {
 
 const defaultToolTimeoutSeconds = 600;
 
-function entryOf(connection: StartedServer): MediaServerEntry {
+function entryOf(options: {
+  connection: StartedServer;
+  keyHealth: KeyHealth;
+}): MediaServerEntry {
+  const { connection } = options;
+  const keyProblem = options.keyHealth.problemOf(connection);
   return {
     server: connection.name,
     capabilities: [...connection.capabilities],
     canCheckKey: connection.toolNames.includes(checkKeyToolName),
+    ...(keyProblem === undefined ? {} : { keyProblem }),
     ...(connection.description ? { description: connection.description } : {}),
     ...(connection.descriptionFailure
       ? { descriptionFailure: connection.descriptionFailure }
@@ -66,8 +75,30 @@ export async function connectMediaTools(options: {
     ),
   );
   const descriptionListeners = new Set<() => void>();
+  const notifyDescriptionsChanged = () => {
+    descriptionListeners.forEach((listener) => {
+      listener();
+    });
+  };
+  const keyHealth = createKeyHealth();
+  const spendingBook = createSpendingBook({
+    projectFolder: options.projectFolder,
+    limitUsd: () => limits.spendingUsd,
+  });
+  const runContext = {
+    pool,
+    defaults: () => defaults,
+    keyHealth,
+    spendingBook,
+    toolTimeoutSeconds,
+    onDescriptionsChanged: notifyDescriptionsChanged,
+  };
   const tools: MediaTools = {
-    list: () => pool.connections().filter(isStarted).map(entryOf),
+    list: () =>
+      pool
+        .connections()
+        .filter(isStarted)
+        .map((connection) => entryOf({ connection, keyHealth })),
     failedServers: () =>
       pool
         .connections()
@@ -77,8 +108,8 @@ export async function connectMediaTools(options: {
           message: connection.message,
         })),
     limits: () => ({ ...limits }),
-    setVideoLimit: async (seconds) => {
-      const saved = await saveUserVideoLimit(seconds);
+    setLimits: async (change) => {
+      const saved = await saveUserLimits(change);
       if (!saved.ok) return saved;
       const reread = await readMediaToolsConfiguration(options);
       if (!reread.ok) return reread;
@@ -86,7 +117,7 @@ export async function connectMediaTools(options: {
       return { ok: true, value: { ...limits } };
     },
     choices: () =>
-      mediaChoicesOf({ connections: pool.connections(), defaults }),
+      mediaChoicesOf({ connections: pool.connections(), defaults, keyHealth }),
     pick: async (pick) => {
       const checked = checkPick({ connections: pool.connections(), pick });
       if (!checked.ok) return checked;
@@ -100,6 +131,7 @@ export async function connectMediaTools(options: {
         value: await mediaChoicesOf({
           connections: pool.connections(),
           defaults,
+          keyHealth,
         }),
       };
     },
@@ -108,6 +140,7 @@ export async function connectMediaTools(options: {
         connections: pool.connections(),
         defaults,
         request: choice,
+        keyHealth,
       });
       if (!selected.ok) return undefined;
       const { connection, model } = selected.value;
@@ -120,45 +153,9 @@ export async function connectMediaTools(options: {
           candidate.capability === choice.capability,
       );
     },
-    run: async (request) => {
-      const selected = await selectServer({
-        connections: pool.connections(),
-        defaults,
-        request,
-      });
-      if (!selected.ok) return selected;
-      const missingKey = await missingKeyFailureOf(selected.value.connection);
-      if (missingKey) return { ok: false, failure: missingKey };
-      const refreshed = await pool.refresh(selected.value.connection);
-      if (!refreshed.ok) return refreshed;
-      const connection = refreshed.value;
-      const { model } = selected.value;
-      const ran = await runTool({
-        server: connection.name,
-        client: connection.client,
-        request,
-        model,
-        toolTimeoutSeconds,
-      });
-      if (waitsForDownload(connection)) {
-        await pool.redescribe(connection);
-        descriptionListeners.forEach((listener) => {
-          listener();
-        });
-      }
-      if (!ran.ok) return ran;
-      const recordedModel =
-        model ??
-        describedDefaultModel({ connection, capability: request.capability });
-      return {
-        ok: true,
-        value: {
-          server: connection.name,
-          ...(recordedModel === undefined ? {} : { model: recordedModel }),
-          result: ran.value,
-        },
-      };
-    },
+    run: (request) => runMediaRequest({ context: runContext, request }),
+    checkKeys: () => checkKeys({ pool, keyHealth, toolTimeoutSeconds }),
+    spending: () => spendingBook.summary(),
     checkKey: (server) => checkServerKey({ pool, server, toolTimeoutSeconds }),
     prepare: async (request) => {
       const prepared = await prepareModel({
@@ -168,9 +165,7 @@ export async function connectMediaTools(options: {
         onProgress: request.onProgress,
         toolTimeoutSeconds,
       });
-      descriptionListeners.forEach((listener) => {
-        listener();
-      });
+      notifyDescriptionsChanged();
       return prepared;
     },
     onDescriptionsChanged: (listener) => {

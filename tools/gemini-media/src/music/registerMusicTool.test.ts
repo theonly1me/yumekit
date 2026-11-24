@@ -79,12 +79,18 @@ describe("generate_music", () => {
     ]);
   });
 
-  it("writes an MP3 file and reads its length from the MP3 frames", async () => {
+  it("writes an MP3 file, reads its length from the MP3 frames, and gives the price of one song", async () => {
     const { result } = await callMusic({ arguments: {} });
+    const clip = await callMusic({
+      arguments: { model: "lyria-3-clip-preview" },
+    });
 
     expect(result.structuredContent).toMatchObject({
       files: [{ kind: "audio", duration_seconds: (100 * 1152) / 44100 }],
+      cost_usd: 0.08,
+      cost_is_estimate: true,
     });
+    expect(clip.result.structuredContent).toMatchObject({ cost_usd: 0.04 });
     expect(resultText(result)).toMatch(/made\.mp3/);
   });
 

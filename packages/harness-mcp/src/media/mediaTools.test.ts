@@ -24,6 +24,7 @@ describe("media tools", () => {
       duration_frames: 36,
       has_words: true,
       reused: false,
+      cost_usd: 0,
       revision: 1,
     });
     const [asset] = harness.store.read().assets;

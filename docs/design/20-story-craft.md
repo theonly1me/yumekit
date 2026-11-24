@@ -173,7 +173,7 @@ These facts and choices came from the build of WP65 on 2026-11-24.
 10. A cast id of the plan that a removed cast entry leaves behind, and a review of a removed clip, stay in the plan. The rules of the store do not check them, so the removal of an asset or an entry never fails because of the plan. The view shows the place as "A place that is not in the cast yet", and a missing clip as "No clip yet".
 11. `get_work` gives the facts of each cast entry, and the plan in the story part: each shot with its place, cast, camera, states, what it gives the next shot, and its reviews.
 12. The helpers of K10 do not get the three new tools. A helper makes one picture or one scene from the brief of the lead, and the lead keeps the plan and the review.
-13. The instructions of the AI get rules 32 and 33. The work package of the spending limit adds rules with the same numbers on another branch; the branch that merges second gives its rules the next numbers.
+13. The instructions of the AI get rules 34 and 35, after the rules 32 and 33 of the spending limit (WP64). Document 12 lists all four.
 14. The editor loads the Story view as its own file, as the Script view, so the main file of the build stays under 500 kB (498 kB with this change).
 15. The Making screen shows "Plan the story" first, done, with the count of the shots, when the project has a plan. It opens the Story view.
 16. The start picture of a shot is the first picture of its clip, or else the last picture made with its `shot_id`. With neither, the view shows the end picture of the kept part. "Play" loads the clip only on a click, as in the Files view.

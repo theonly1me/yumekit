@@ -143,3 +143,15 @@ export const imageCatalog: CatalogEntry[] = imageModels.map((facts) => ({
     tested: false,
   },
 }));
+
+export function imageCostOf(plan: {
+  model: ImageModelFacts;
+  imageSize: string | undefined;
+}): number | undefined {
+  const size = plan.imageSize ?? defaultImageSize;
+  return plan.model.prices.find(
+    (price) =>
+      price.when["resolution"] === undefined ||
+      price.when["resolution"] === size,
+  )?.usd;
+}

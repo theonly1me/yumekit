@@ -15,17 +15,31 @@ export interface AudioCut {
   startSeconds: number;
   durationSeconds: number;
   leadSeconds: number;
+  fadeOutSeconds?: number;
   target: string;
 }
 
-function cutArguments(cut: AudioCut): string[] {
+function filtersOf(cut: AudioCut): string[] {
   const leadMilliseconds = Math.round(cut.leadSeconds * 1000);
+  const fade = cut.fadeOutSeconds ?? 0;
+  return [
+    ...(leadMilliseconds > 0
+      ? [`adelay=${String(leadMilliseconds)}:all=1`]
+      : []),
+    ...(fade > 0
+      ? [
+          `afade=t=out:st=${String(cut.durationSeconds - fade)}:d=${String(fade)}`,
+        ]
+      : []),
+  ];
+}
+
+function cutArguments(cut: AudioCut): string[] {
+  const filters = filtersOf(cut);
   return [
     ...["-v", "error", "-y", "-ss", String(cut.startSeconds)],
     ...["-t", String(cut.durationSeconds), "-i", cut.file, "-vn"],
-    ...(leadMilliseconds > 0
-      ? ["-af", `adelay=${String(leadMilliseconds)}:all=1`]
-      : []),
+    ...(filters.length > 0 ? ["-af", filters.join(",")] : []),
     ...["-c:a", "pcm_s16le", "-ar", "48000", cut.target],
   ];
 }

@@ -18,6 +18,7 @@ my-project/
   assets/files/<assetId>.words.json   word timings of a speech asset
   renders/                      finished files (not in git)
   .yumekit/                     undo history and cache (not in git)
+  .yumekit/spending.json        the record of paid calls (document 15, "Details of WP64")
   .cache/                       frame pictures of video assets (not in git)
 ```
 
@@ -171,6 +172,7 @@ type AssetSource =
       input: JsonObject;
       costUsd?: number;
       costIsEstimate?: boolean;
+      fit?: { originalFile: string; seconds: number; fadeOutSeconds: number };
     };
 
 type WordTimings = {
