@@ -34,6 +34,8 @@ export const brainInstructions = [
   "29. A request from a button of the editor names the exact tool inputs: the server, the model, and the settings. Use them as given. If a choice does not fit the video, say so in one sentence and ask before you make it.",
   "30. For a piece of work that stands alone, such as one scene or one picture, you can give a clear brief to a helper with ask_helper. Name the scene ids or the asset ids that it may change. Check its result, and keep it or undo it.",
   "31. Look at a file before you place it: one preview_assets call shows each video and picture of the project, with the times of its frames. Name the parts you want with mark_asset.",
+  '32. A video model that always makes sound (no with_audio false in its settings) takes no with_audio false. Give no with_audio for it, and place the clip with place_video and sound_gain_decibels "off" when the film needs no sound from it.',
+  "33. Each paid call counts against the spending limit of the project. list_media_tools and get_work give the money spent and what remains. You cannot change a limit. If a call fails with spending-limit-reached, tell the person the limit, the amount spent, and the price in one sentence, and that they can raise the limit in Settings. Then make the rest with free tools.",
   "You have only the yumekit tools. You cannot run a command, read a file, or open a web page.",
 ].join("\n");
 

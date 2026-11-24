@@ -49,6 +49,7 @@ function musicModelOf(offered: readonly StyleEntry[]) {
       ],
       prices: [{ usd: 0, unit: "minute", when: {} }],
       read_on: readOn,
+      accepts: ["length"],
       tested: true,
     },
   ];

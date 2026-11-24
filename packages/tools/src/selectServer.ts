@@ -1,5 +1,6 @@
 import type { MediaDefault } from "./configuration.js";
 import type { ServerConnection, StartedServer } from "./connectServer.js";
+import type { KeyHealth } from "./keyHealth/keyHealth.js";
 import { firstReadyServer } from "./serverOrder.js";
 import type {
   Capability,
@@ -84,6 +85,7 @@ export async function serverWithNoPick(options: {
   connections: ServerConnection[];
   defaults: MediaDefaults;
   capability: Capability;
+  keyHealth?: KeyHealth;
 }): Promise<Outcome<StartedServer, MediaToolFailure>> {
   const followed =
     options.capability === "align" ? speechServerWithAlign(options) : undefined;
@@ -91,6 +93,7 @@ export async function serverWithNoPick(options: {
   return firstReadyServer({
     connections: options.connections.filter(isStarted),
     capability: options.capability,
+    keyHealth: options.keyHealth,
   });
 }
 
@@ -98,6 +101,7 @@ export async function selectServer(options: {
   connections: ServerConnection[];
   defaults: MediaDefaults;
   request: MediaModelChoice;
+  keyHealth?: KeyHealth;
 }): Promise<Outcome<SelectedServer, MediaToolFailure>> {
   const { request, connections } = options;
   const { capability } = request;
@@ -109,6 +113,9 @@ export async function selectServer(options: {
           connections,
           defaults: options.defaults,
           capability,
+          ...(options.keyHealth === undefined
+            ? {}
+            : { keyHealth: options.keyHealth }),
         })
       : namedServer({ connections, name: requested, capability });
   if (!selected.ok) return selected;

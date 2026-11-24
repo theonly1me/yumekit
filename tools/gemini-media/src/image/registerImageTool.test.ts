@@ -110,12 +110,16 @@ describe("generate_image", () => {
     ]);
   });
 
-  it("writes the picture and reports its size", async () => {
+  it("writes the picture and reports its size and the catalog price of its resolution", async () => {
     const { result } = await callImage({ arguments: {} });
+    const large = await callImage({ arguments: { resolution: "4K" } });
 
     expect(result.structuredContent).toMatchObject({
       files: [{ kind: "image", width_pixels: 768, height_pixels: 1376 }],
+      cost_usd: 0.0336,
+      cost_is_estimate: true,
     });
+    expect(large.result.structuredContent).toMatchObject({ cost_usd: 0.113 });
     expect(resultText(result)).toMatch(/made\.png/);
   });
 

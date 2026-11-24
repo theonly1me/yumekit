@@ -82,6 +82,7 @@ export const sampleDescription = {
       ],
       prices: free("second"),
       read_on: readOn,
+      accepts: ["length"],
       tested: true,
     },
     {

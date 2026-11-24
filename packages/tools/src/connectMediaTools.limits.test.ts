@@ -5,10 +5,13 @@ import {
 } from "./testing/mediaToolsFixture.js";
 
 describe("connectMediaTools limits", () => {
-  it("gives 30 generated video seconds when no file sets a limit", async () => {
+  it("gives 30 generated video seconds and 5 US dollars when no file sets a limit", async () => {
     const { tools } = await connectFixture({});
 
-    expect(tools.limits()).toEqual({ generatedVideoSeconds: 30 });
+    expect(tools.limits()).toEqual({
+      generatedVideoSeconds: 30,
+      spendingUsd: 5,
+    });
   });
 
   it("uses the limit of the user file when the project file has none", async () => {
@@ -17,16 +20,19 @@ describe("connectMediaTools limits", () => {
       projectFile: { mcpServers: { sample: {} } },
     });
 
-    expect(tools.limits()).toEqual({ generatedVideoSeconds: 12 });
+    expect(tools.limits()).toMatchObject({ generatedVideoSeconds: 12 });
   });
 
   it("lets the project file win over the user file", async () => {
     const { tools } = await connectFixture({
-      userFile: { limits: { generatedVideoSeconds: 12 } },
-      projectFile: { limits: { generatedVideoSeconds: 0 } },
+      userFile: { limits: { generatedVideoSeconds: 12, spendingUsd: 9 } },
+      projectFile: { limits: { generatedVideoSeconds: 0, spendingUsd: 2 } },
     });
 
-    expect(tools.limits()).toEqual({ generatedVideoSeconds: 0 });
+    expect(tools.limits()).toEqual({
+      generatedVideoSeconds: 0,
+      spendingUsd: 2,
+    });
   });
 
   it("rejects a negative limit as invalid-configuration-file", async () => {

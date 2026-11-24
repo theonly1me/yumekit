@@ -103,15 +103,15 @@ describe("generate_image failures", () => {
     expect(requests).toHaveLength(0);
   });
 
-  it("rejects a size that is not a multiple of 16", async () => {
+  it("rejects a size that is not a multiple of 16 and names the nearest valid size", async () => {
     const { result } = await callImage({
       environment: { OPENAI_API_KEY: placeholderKey },
       respond: anyImage,
-      arguments: { width_pixels: 1000, height_pixels: 1024 },
+      arguments: { width_pixels: 1010, height_pixels: 1030 },
     });
 
     expect(resultText(result)).toBe(
-      "width_pixels and height_pixels must be multiples of 16.",
+      "width_pixels and height_pixels must be multiples of 16. The nearest valid size is width_pixels 1008 and height_pixels 1024.",
     );
   });
 

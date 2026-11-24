@@ -42,6 +42,15 @@ function wireSourceOf(source: Asset["source"]) {
     ...(source.costIsEstimate === undefined
       ? {}
       : { cost_is_estimate: source.costIsEstimate }),
+    ...(source.fit === undefined
+      ? {}
+      : {
+          fit: {
+            original_file: source.fit.originalFile,
+            seconds: source.fit.seconds,
+            fade_out_seconds: source.fit.fadeOutSeconds,
+          },
+        }),
   };
 }
 

@@ -74,7 +74,7 @@ export function describeServer() {
         ...sharedFields(model),
         capability: "sound-effect" as const,
         settings: soundSettings(model),
-        accepts: [],
+        accepts: ["length"],
       })),
       ...talkingModels.map((model) => ({
         ...sharedFields(model),

@@ -24,6 +24,18 @@ export const assetSourceSchema = z.discriminatedUnion("kind", [
     input: jsonObjectSchema,
     costUsd: z.number().min(0).exactOptional(),
     costIsEstimate: z.boolean().exactOptional(),
+    fit: z
+      .strictObject({
+        originalFile: z
+          .string()
+          .refine(
+            isPathInsideAssetFiles,
+            `must be a path inside ${assetFilesFolder}`,
+          ),
+        seconds: z.number().positive(),
+        fadeOutSeconds: z.number().min(0),
+      })
+      .exactOptional(),
   }),
 ]);
 

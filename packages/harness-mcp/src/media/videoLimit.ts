@@ -41,8 +41,8 @@ export function videoLimitFailureOf(options: {
     : `The limit is ${String(limitSeconds)} seconds.`;
   return {
     kind: "generated-video-limit-reached",
-    message: `This call asks for ${String(requested)} seconds of generated video. The project already has ${String(used)} seconds. ${limitText} The person sets the limit with limits.generatedVideoSeconds in media-tools.json.`,
-    hint: "Make no more video. Ask the person whether to raise limits.generatedVideoSeconds in media-tools.json, or use a shorter clip, a still image, or a code scene instead.",
+    message: `This call asks for ${String(requested)} seconds of generated video. The project already has ${String(used)} seconds. ${limitText} The person sets the limit in Settings (limits.generatedVideoSeconds in media-tools.json). The AI cannot change it.`,
+    hint: "Make no more video. Ask the person whether to raise the limit in Settings (limits.generatedVideoSeconds in media-tools.json), or use a shorter clip, a still image, or a code scene instead.",
     used_seconds: used,
     requested_seconds: requested,
     limit_seconds: limitSeconds,

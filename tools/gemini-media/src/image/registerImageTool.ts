@@ -2,11 +2,11 @@ import { missingKeyMessage } from "../geminiApi.ts";
 import { makeFile, type GeminiTools } from "../interactions/makeFile.ts";
 import { errorResult, successResult } from "../toolResults.ts";
 import { checkImageInput, imageInput } from "./imageInput.ts";
-import { imageModels } from "./imageModels.ts";
+import { imageCostOf, imageModels } from "./imageModels.ts";
 import { imageRequestBody } from "./imageRequestBody.ts";
 import { readPictureSize } from "./pictureSize.ts";
 
-const description = `Make a picture with a Gemini image model: ${imageModels.map((model) => model.id).join(", ")}. Uses the Gemini API key of the user, which costs money for each picture.`;
+const description = `Make a picture with a Gemini image model: ${imageModels.map((model) => model.id).join(", ")}. Uses the Gemini API key of the user, which costs money for each picture. cost_usd is an estimate from the price list for the picked resolution. The model makes fixed sizes for each shape and resolution, so width_pixels and height_pixels of the file give the real size.`;
 
 export function registerImageTool(tools: GeminiTools): void {
   tools.server.registerTool(
@@ -34,6 +34,7 @@ export function registerImageTool(tools: GeminiTools): void {
       });
       if (!made.ok) return errorResult(made.failure);
       const size = readPictureSize(made.value.bytes);
+      const costUsd = imageCostOf(plan.value);
       return successResult({
         files: [
           {
@@ -44,6 +45,9 @@ export function registerImageTool(tools: GeminiTools): void {
               : { width_pixels: size.width, height_pixels: size.height }),
           },
         ],
+        ...(costUsd === undefined
+          ? {}
+          : { cost_usd: costUsd, cost_is_estimate: true }),
       });
     },
   );
