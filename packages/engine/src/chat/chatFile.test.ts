@@ -2,7 +2,7 @@ import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { describe, expect, it, onTestFinished } from "vitest";
-import { changeSummaryOf } from "./answerTracker.js";
+import { changeSummaryOf, changeSummaryOfTexts } from "./answerTracker.js";
 import { chatFilePath, loadChat } from "./chatFile.js";
 
 async function projectWithChat(content: string): Promise<string> {
@@ -72,6 +72,23 @@ describe("the summary of a change by the AI", () => {
         "I wrote \u201cWired. Then crashed?\u201d as the hook. Done.",
       ),
     ).toBe("I wrote \u201cWired. Then crashed?\u201d as the hook.");
+  });
+
+  it("comes from the closing text of the AI, not from an update on the way", () => {
+    expect(
+      changeSummaryOfTexts([
+        "Quick update: I've set the tempo, font, music, and the YouTube version. Now I'm studying the recordings.",
+        "Now I'm writing the film.",
+        "The launch film is finished and exported as one MP4. It's the YouTube version.",
+        "",
+      ]),
+    ).toBe("The launch film is finished and exported as one MP4.");
+  });
+
+  it("adds the next sentence when the first is a word or two", () => {
+    expect(
+      changeSummaryOf("Done. The script now says ready. Ask me more."),
+    ).toBe("Done. The script now says ready.");
   });
 
   it("is cut at 140 characters", () => {

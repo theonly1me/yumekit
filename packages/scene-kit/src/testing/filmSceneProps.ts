@@ -29,6 +29,7 @@ export const filmTypicalProps: Record<FilmSceneName, JsonObject> = {
     heading: "Type what you want.",
     assetId: "photo",
     region: { x: 0.2, y: 0.1, width: 0.6, height: 0.3 },
+    items: ["Claude Code", "Codex", "Cursor"],
   },
   wall: {
     heading: "Real scenes, drawn by code.",
@@ -73,10 +74,12 @@ export const filmLongProps: Record<FilmSceneName, JsonObject> = {
       { region: { x: 0.7, y: 0.8, width: 0.3, height: 0.2 } },
     ],
     speed: 2,
+    items: [textOf(40), textOf(40), textOf(40), textOf(40)],
   },
   wall: {
     heading: textOf(80),
     assetIds: Array.from({ length: 16 }, () => "photo"),
+    startSecondsEach: Array.from({ length: 16 }, (...[, index]) => index),
   },
   shapes: {
     heading: textOf(80),

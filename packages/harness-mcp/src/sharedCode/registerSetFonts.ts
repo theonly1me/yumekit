@@ -1,4 +1,4 @@
-import { fontStyles } from "@yumekit/project";
+import { fontStyles, lookOf, type Edit } from "@yumekit/project";
 import { z } from "zod";
 import { applyEditsResult } from "../applyEditsResult.js";
 import type { HarnessContext } from "../context.js";
@@ -31,9 +31,17 @@ export function registerSetFonts(context: HarnessContext): void {
   context.tools.add({
     name: "set_fonts",
     description:
-      "Load font assets for the whole video, in the preview and in the render, before the first frame. A custom scene then uses a font by its family name in fontFamily, with no font code of its own. Import each font file first with import_asset (kind font). Give each file of a family with its weight, for example a regular and a bold file. The list replaces the fonts of the project; an empty list removes them. The look keeps its own fonts for the kit scenes.",
+      "Load font assets for the whole video, in the preview and in the render, before the first frame. A custom scene then uses a font by its family name in fontFamily, with no font code of its own. Import each font file first with import_asset (kind font). Give each file of a family with its weight, for example a regular and a bold file. The list replaces the fonts of the project; an empty list removes them. The kit scenes keep the fonts of the look, unless look_font names a family of the list: then each kit scene draws its text in that family too.",
     inputSchema: {
       fonts: z.array(fontInput).max(8).describe("0 to 8 font files."),
+      look_font: z
+        .string()
+        .min(1)
+        .max(64)
+        .optional()
+        .describe(
+          "A family of fonts that the kit scenes use for their text, in the same change. Use it when the person names a font for the video.",
+        ),
     },
     run: ({ input }) => {
       const snapshot = context.store.read();
@@ -55,13 +63,35 @@ export function registerSetFonts(context: HarnessContext): void {
         ...(font.weight === undefined ? {} : { weight: font.weight }),
         ...(font.style === undefined ? {} : { style: font.style }),
       }));
+      const families = new Set(fonts.map((font) => font.family));
+      const lookFont = input.look_font ?? snapshot.project.lookFont;
+      if (input.look_font !== undefined && !families.has(input.look_font)) {
+        return failureResult({
+          kind: "font-asset-not-found",
+          message: `look_font "${input.look_font}" is not a family of the fonts of this call.`,
+          hint: `Use one of these families: ${[...families].join(", ") || "none"}.`,
+        });
+      }
+      const keepsLookFont = lookFont === undefined || families.has(lookFont);
+      const lookEdit: Edit = {
+        kind: "setLook",
+        look: lookOf(snapshot.project),
+        font: lookFont !== undefined && keepsLookFont ? lookFont : null,
+      };
+      const fontsEdit: Edit = { kind: "setFonts", fonts };
+      const edits: Edit[] =
+        lookFont === undefined
+          ? [fontsEdit]
+          : keepsLookFont
+            ? [fontsEdit, lookEdit]
+            : [lookEdit, fontsEdit];
       return applyEditsResult({
         store: context.store,
-        edits: [{ kind: "setFonts", fonts }],
+        edits,
         line:
           fonts.length === 0
             ? "The project has no fonts of its own now."
-            : `Fonts for the whole video: ${[...new Set(fonts.map((font) => font.family))].join(", ")}.`,
+            : `Fonts for the whole video: ${[...families].join(", ")}.${input.look_font === undefined ? "" : ` The kit scenes use ${input.look_font}.`}`,
         data: { families: [...new Set(fonts.map((font) => font.family))] },
       });
     },

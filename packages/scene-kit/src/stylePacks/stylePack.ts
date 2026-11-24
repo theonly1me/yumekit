@@ -4,7 +4,7 @@ export interface StyleFont {
   family: string;
   weight: number;
   fallbackFamilies: string;
-  file: URL;
+  file?: URL;
 }
 
 export interface TextUnits {
@@ -23,6 +23,7 @@ export interface TextUnits {
   filmNumber: number;
   filmWordmark: number;
   filmCommand: number;
+  filmItem: number;
 }
 
 export const backdropKinds = ["flat", "glow", "grid", "grain"] as const;

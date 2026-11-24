@@ -81,6 +81,17 @@ function checkFontReferences(state: ProjectState): RuleFailure | undefined {
   return undefined;
 }
 
+function checkLookFontReference(state: ProjectState): RuleFailure | undefined {
+  const { lookFont, fonts } = state.project;
+  if (lookFont === undefined) return undefined;
+  if ((fonts ?? []).some((font) => font.family === lookFont)) return undefined;
+  return {
+    kind: "not-found",
+    message: `The look uses the font "${lookFont}", but the project has no font with that family. Load it with set_fonts first.`,
+    file: "project.json",
+  };
+}
+
 function checkFrameReference(state: ProjectState): RuleFailure | undefined {
   const { frame } = state.project;
   if (frame === undefined || frame in state.sharedCode) return undefined;
@@ -96,6 +107,7 @@ export function checkReferences(state: ProjectState): RuleFailure | undefined {
     checkTimelinesMatchOutputs(state) ??
     checkCastReferences(state) ??
     checkFontReferences(state) ??
+    checkLookFontReference(state) ??
     checkFrameReference(state) ??
     checkModuleSceneCode(state)
   );

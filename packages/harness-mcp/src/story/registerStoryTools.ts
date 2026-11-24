@@ -3,6 +3,7 @@ import { z } from "zod";
 import { applyEditsResult } from "../applyEditsResult.js";
 import type { HarnessContext } from "../context.js";
 import { idInput } from "../inputs.js";
+import { failureResult } from "../results.js";
 
 function registerSetScript(context: HarnessContext): void {
   context.tools.add({
@@ -147,15 +148,41 @@ function registerRemoveScene(context: HarnessContext): void {
   context.tools.add({
     name: "remove_scene",
     description:
-      "Remove a scene. It fails while a clip shows the scene; remove those clips first. undo brings it back.",
-    inputSchema: { scene_id: idInput("The id of the scene to remove.") },
+      "Remove one scene (scene_id) or several (scene_ids) as one change. It fails while a clip shows a scene; remove those clips first. One undo brings all of them back. put_work can also remove scenes in the same change as a new timeline.",
+    inputSchema: {
+      scene_id: idInput("The id of the scene to remove.").optional(),
+      scene_ids: z
+        .array(idInput("The id of a scene to remove."))
+        .min(1)
+        .max(64)
+        .optional()
+        .describe(
+          "Several scenes to remove in one change, in place of scene_id.",
+        ),
+    },
     annotations: { destructiveHint: true },
-    run: ({ input: { scene_id } }) =>
-      applyEditsResult({
+    run: ({ input }) => {
+      const sceneIds = [
+        ...(input.scene_id === undefined ? [] : [input.scene_id]),
+        ...(input.scene_ids ?? []),
+      ];
+      if (sceneIds.length === 0) {
+        return failureResult({
+          kind: "invalid-value",
+          message: "remove_scene needs scene_id or scene_ids.",
+          hint: "Give the id of each scene to remove. get_project lists the scenes.",
+        });
+      }
+      return applyEditsResult({
         store: context.store,
-        edits: [{ kind: "removeScene", sceneId: scene_id }],
-        line: `Scene "${scene_id}" removed.`,
-      }),
+        edits: sceneIds.map((sceneId) => ({ kind: "removeScene", sceneId })),
+        line:
+          sceneIds.length === 1
+            ? `Scene "${sceneIds.join("")}" removed.`
+            : `${String(sceneIds.length)} scenes removed as one change: ${sceneIds.join(", ")}.`,
+        data: { scene_ids: sceneIds },
+      });
+    },
   });
 }
 

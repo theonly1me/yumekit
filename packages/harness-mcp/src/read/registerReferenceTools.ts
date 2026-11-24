@@ -15,7 +15,7 @@ function registerListKitScenes(context: HarnessContext): void {
   context.tools.add({
     name: "list_kit_scenes",
     description:
-      "List the ready kit scenes: name, purpose, and the JSON schema of the props, and the looks with one line for each. Use a name as kit_component in put_scene. Prefer a kit scene to custom code. Each kit scene draws in the look of the project; set_look changes it.",
+      "List the ready kit scenes: name, purpose, and the JSON schema of the props, and the looks with one line for each. Use a name as kit_component in put_scene. Prefer a kit scene to custom code. Each kit scene draws in the look of the project; set_look changes it, also to the own colors of the person, and set_fonts look_font gives the kit scenes the font of the person.",
     inputSchema: {},
     annotations: readOnly,
     run: () => {
@@ -27,7 +27,7 @@ function registerListKitScenes(context: HarnessContext): void {
         }),
       );
       return successResult({
-        line: `${String(kitScenes.length)} kit scenes: ${kitScenes.map((kitScene) => kitScene.name).join(", ")}. ${String(looks.length)} looks: ${looks.map((look) => look.id).join(", ")}.`,
+        line: `${String(kitScenes.length)} kit scenes: ${kitScenes.map((kitScene) => kitScene.name).join(", ")}. ${String(looks.length)} looks: ${looks.map((look) => look.id).join(", ")}. ${filmChoiceLine}`,
         data: {
           kit_scenes: kitScenes,
           looks: looks.map((look) => ({
@@ -40,6 +40,9 @@ function registerListKitScenes(context: HarnessContext): void {
     },
   });
 }
+
+const filmChoiceLine =
+  "For a launch film: lines for a claim in a few words, footage for a recording cut to its region (with a heading and up to 4 lines beside it), wall for examples (each video with its own start in startSecondsEach), shapes for one video in each platform shape, look-swap for the same content in each look, counts for numbers, and command for the end with an install command. They share one layout and one type scale, and they draw in the own colors (set_look colors) and font (set_fonts look_font) of the person.";
 
 function registerGetSceneGuide(context: HarnessContext): void {
   context.tools.add({

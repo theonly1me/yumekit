@@ -6,6 +6,7 @@ import { registerAlignWords } from "../media/registerAlignWords.js";
 import { registerImportAsset } from "../media/registerAssetFileTools.js";
 import { registerGenerateAsset } from "../media/registerGenerateAsset.js";
 import { registerMarkAsset } from "../media/registerMarkAsset.js";
+import { registerPreviewAssets } from "../media/registerPreviewAssets.js";
 import { registerRemoveAsset } from "../media/registerRemoveAsset.js";
 import { registerPreviewTools } from "../output/registerPreviewTools.js";
 import { registerScenePreviewTool } from "../output/registerScenePreviewTool.js";
@@ -86,6 +87,7 @@ export function harnessToolsOf(
   registerImportAsset(context);
   registerRemoveAsset(context);
   registerMarkAsset(context);
+  registerPreviewAssets(context);
   registerAlignWords(context);
   registerPreviewTools(context);
   registerScenePreviewTool(context);

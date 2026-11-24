@@ -1,5 +1,10 @@
 export { Backdrop } from "./backdrops/Backdrop.js";
-export { calmKitScenesOf, kitScenes, kitScenesOf } from "./kitScenes.js";
+export {
+  calmKitScenesOf,
+  kitScenes,
+  kitScenesOf,
+  kitScenesOfPack,
+} from "./kitScenes.js";
 export {
   isLookId,
   lookIds,
@@ -16,4 +21,9 @@ export {
   type StylePack,
 } from "./stylePacks/stylePack.js";
 export { activateLook, useStylePack } from "./stylePacks/StylePackContext.js";
-export { stylePackOf, stylePacks } from "./stylePacks/stylePacks.js";
+export {
+  stylePackOf,
+  stylePackOfPage,
+  stylePacks,
+} from "./stylePacks/stylePacks.js";
+export type { OwnColors, OwnLook } from "./stylePacks/ownLook.js";

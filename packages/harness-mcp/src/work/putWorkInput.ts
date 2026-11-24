@@ -2,6 +2,7 @@ import { z } from "zod";
 import { idInput, jsonObjectInput } from "../inputs.js";
 import { removePersonWorkInput } from "../timeline/personWorkInput.js";
 import { wireTrack } from "../timeline/wireTimeline.js";
+import { workRemovalsInput } from "./workRemovals.js";
 
 const workSharedCode = z.strictObject({
   name: idInput(
@@ -66,6 +67,7 @@ export const putWorkInput = {
     .describe(
       "The shared module that the stage draws over the whole video, above the scenes and below the captions: a mark, a progress line, a margin grid. Its default export comes from defineReactScene. null removes the frame.",
     ),
+  remove: workRemovalsInput,
   remove_person_work: removePersonWorkInput,
 };
 

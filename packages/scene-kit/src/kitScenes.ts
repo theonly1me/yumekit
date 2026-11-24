@@ -87,7 +87,7 @@ function kitScenesFor(stylePack: StylePack): Record<string, SceneModule> {
 const kitScenesByPack = new Map<string, Record<string, SceneModule>>();
 
 function knownKitScenesFor(stylePack: StylePack): Record<string, SceneModule> {
-  const key = `${stylePack.id}${stylePack.motion.calm === true ? "-calm" : ""}`;
+  const key = `${stylePack.name}${stylePack.motion.calm === true ? "-calm" : ""}`;
   const known = kitScenesByPack.get(key);
   if (known !== undefined) return known;
   const made = kitScenesFor(stylePack);
@@ -101,6 +101,12 @@ export function kitScenesOf(look: string): Record<string, SceneModule> {
 
 export function calmKitScenesOf(look: string): Record<string, SceneModule> {
   return knownKitScenesFor(calmStylePackOf(look));
+}
+
+export function kitScenesOfPack(
+  stylePack: StylePack,
+): Record<string, SceneModule> {
+  return knownKitScenesFor(stylePack);
 }
 
 export const kitScenes: Record<string, SceneModule> = kitScenesOf("paper");

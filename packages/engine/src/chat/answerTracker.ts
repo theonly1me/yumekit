@@ -37,10 +37,27 @@ function firstSentenceOf(text: string): string {
   return text;
 }
 
+const fewestSummaryWords = 4;
+
+function wordCountOf(text: string): number {
+  return text.split(/\s+/).filter((word) => word !== "").length;
+}
+
 export function changeSummaryOf(text: string): string {
-  const firstSentence = firstSentenceOf(text.trim()).trim();
-  if (firstSentence === "") return aiChangedSummary;
-  return firstSentence.slice(0, summaryLimit);
+  let rest = text.trim();
+  let summary = "";
+  while (rest !== "" && wordCountOf(summary) < fewestSummaryWords) {
+    const sentence = firstSentenceOf(rest);
+    summary = `${summary} ${sentence.trim()}`.trim();
+    rest = rest.slice(sentence.length).trim();
+  }
+  if (summary === "") return aiChangedSummary;
+  return summary.slice(0, summaryLimit);
+}
+
+export function changeSummaryOfTexts(texts: string[]): string {
+  const closingText = texts.findLast((text) => text.trim() !== "");
+  return changeSummaryOf(closingText ?? "");
 }
 
 export function createAnswerTracker(options: {
@@ -124,7 +141,7 @@ export function createAnswerTracker(options: {
       trailingSend = undefined;
       put({ ...answer, text: fullText(), state });
     },
-    changeSummary: () => changeSummaryOf(fullText()),
+    changeSummary: () => changeSummaryOfTexts([...wholeTexts, partText]),
     noteCall: notes.noteCall,
   };
 }

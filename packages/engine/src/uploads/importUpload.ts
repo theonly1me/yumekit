@@ -6,17 +6,23 @@ import type { EngineContext } from "../http/exchange.js";
 import type { Failure } from "../http/responses.js";
 import { uploadAssetIdOf } from "./uploadName.js";
 
-type UploadKind = "image" | "audio" | "video";
+type UploadKind = "image" | "audio" | "video" | "font";
+
+const fontExtensions = [".woff2", ".woff", ".ttf", ".otf"];
 
 const notMedia: Failure = {
   status: 400,
   kind: "file-type-not-supported",
-  message: "This file is not a picture, a sound, or a video.",
+  message: "This file is not a picture, a sound, a video, or a font.",
 };
 
 async function kindOf(file: string): Promise<Outcome<UploadKind, Failure>> {
-  if (extname(file).toLowerCase() === ".svg") {
+  const extension = extname(file).toLowerCase();
+  if (extension === ".svg") {
     return { ok: true, value: "image" };
+  }
+  if (fontExtensions.includes(extension)) {
+    return { ok: true, value: "font" };
   }
   const probed = await probeMedia({ file });
   if (probed.ok) return { ok: true, value: probed.value.kind };

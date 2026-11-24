@@ -7,6 +7,7 @@ import type { RenderFailure } from "../renderFailure.js";
 import { join } from "node:path";
 import { monoFilesOf } from "../video/audioChannels.js";
 import { audioMixOf } from "../video/audioMix.js";
+import { leveledMix, measureMix } from "../video/loudness.js";
 import { startEncoder } from "../video/encodeFrames.js";
 import { ffmpegArgumentsOf } from "../video/ffmpegArguments.js";
 import { drawFrame } from "./drawFrame.js";
@@ -33,20 +34,33 @@ export async function encodeRange(options: {
       .filter((asset) => audioAssetIds.has(asset.id))
       .map((asset) => join(loaded.folder, asset.file)),
   );
+  const mixOf = (mixOptions: { range: FrameRange; firstInputIndex: number }) =>
+    audioMixOf({
+      folder: loaded.folder,
+      timeline: loaded.timeline,
+      assets: loaded.snapshot.assets,
+      framesPerSecond,
+      monoFiles,
+      ...mixOptions,
+    });
+  const mix = mixOf({ range, firstInputIndex: 1 });
+  const wholeMix = mixOf({
+    range: { firstFrame: 0, frameCount: loaded.frameCount },
+    firstInputIndex: 0,
+  });
   const encoder = startEncoder(
     ffmpegArgumentsOf({
       framesPerSecond,
       destination: options.destination,
       videoSize: options.videoSize,
-      audioMix: audioMixOf({
-        folder: loaded.folder,
-        timeline: loaded.timeline,
-        assets: loaded.snapshot.assets,
-        range,
-        framesPerSecond,
-        firstInputIndex: 1,
-        monoFiles,
-      }),
+      audioMix:
+        mix === undefined
+          ? undefined
+          : leveledMix({
+              mix,
+              loudness:
+                wholeMix === undefined ? undefined : await measureMix(wholeMix),
+            }),
     }),
   );
   try {

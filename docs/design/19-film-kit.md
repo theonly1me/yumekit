@@ -252,3 +252,62 @@ These facts and choices came from the build of WP62 on 2026-11-24.
 16. The real run on 2026-11-24 used Claude Code 2.1.331 with `ANTHROPIC_MODEL=haiku`, no media key, and a temporary configuration and project. "Make a short 8 second launch film for a note taking app called Quill. Three scenes, with music and no voice." took 49 seconds. The AI called `get_work` first, then `set_tempo`, three `put_scene` calls with kit scenes, the music of this computer, `set_timeline` with the cuts on the beat, and one `contact_sheet`. It did not call `put_work`: it wrote three kit scenes and no code. The description of `put_scene` now points to `put_work` for two or more scenes.
 17. "Use this" for the style Night sent the request with its two tool lines. The AI called `generate_asset` and `replace_music` with the exact inputs, and the sheet showed "The video now has Night music."
 18. "Give the second scene to a helper" took 36 seconds. The lead called `ask_helper`, the helper drew the scene as custom code, and the lead checked it with `get_scene` and two `preview_scenes` calls. The change entry had one undo step.
+
+## Details of WP63
+
+These facts and choices came from the first timed film test (WP61) and the build of WP63 on 2026-11-24.
+
+### The test
+
+The lead agent (Claude Code on Opus, one chat request with the text of the brief, no help) made the 30 second launch film in 606 seconds with 49 tool calls. An agent with a free hand made the same film in 454 seconds. The limit of K7 holds, but yumekit was slower than a free hand. The export measured -20.0 LUFS with a true peak of -5.9 dB. The film of the free hand measured -12.6 LUFS.
+
+The record of the Claude Code session gives the time of each step:
+
+| Part of the work                                                                                                      | Wall time            | Calls |
+| --------------------------------------------------------------------------------------------------------------------- | -------------------- | ----- |
+| Read the work, the kit, the tools, the guide, and the assets                                                          | 17 seconds           | 6     |
+| Set the name, the tempo, the font, the platform, and the music                                                        | 5 seconds            | 5     |
+| Look at the 12 recordings: 10 temporary scenes, 2 contact sheets, 2 `preview_frames`                                  | 2 minutes 10 seconds | 6     |
+| Write the script, the bible, the music again, and 704 lines of custom code for 9 scenes, a shared module, and a frame | 3 minutes 51 seconds | 4     |
+| Check and correct (contact sheets, previews, four more writes, transitions)                                           | 2 minutes 50 seconds | 16    |
+| Remove the 10 temporary scenes and the first music, one call each                                                     | 4 seconds            | 11    |
+| Render                                                                                                                | 44 seconds           | 1     |
+
+### Why the lead wrote its own scenes (measured and inferred)
+
+1. Measured: the lead used no kit scene. Its shared module `film` drew the same parts as the film kit: `Lines` is the kit scene `lines`, `Heading`, `Window`, and `Placed` are the heading and the window of `footage`, and the end scene is `command`.
+2. Measured: the brief asked for the colors #0c0c0d, #ecebe8, #908f8b, and #d9c9a8 and the font Geist. A kit scene took its colors and fonts only from one of the five looks, and none of them has these colors. The first lines of the shared module of the lead are these four colors and `FONT = "Geist"`.
+3. Measured: two parts had no kit input. The scene "Your own AI does the work." showed a crop of a recording with the three program names beside it. `footage` had no lines beside its window. The scene of examples started each video at its own second. `wall` had one start for all.
+4. Measured: the instructions sent a film to custom code. Rule 26 said "write the shared parts first (the frame, the type styles, the timing)", rule 27 said "the same margins in each scene, from the shared code", and rule 11 said "Do not set colors or fonts that the look does not have". With colors that no look has, the only path that followed the brief was custom code.
+5. Inferred: the cause is item 2, helped by items 3 and 4. The thinking of the session is not in the record, so the reason of the agent is not measured.
+
+### The fixes
+
+1. `preview_assets` shows video and picture assets before they go in a video, with no scene and no timeline. It takes 1 to 16 assets, each with `asset_id`, `region?`, `mark?`, `from_seconds?`, `to_seconds?`, and `count?` (2 to 24, default 12). A video gives one JPEG picture with frames at even steps, with the time of each frame, a title with the id, the size, and the length, and each mark as a dashed box with its name. A frame close to the time of a mark has the name of the mark under it. A picture gives the picture, at most 1600 pixels wide. A mark gives its region and starts at its time. FFmpeg takes the frames in one pass for each file, and the kept browser of the picture tools draws the sheet. A sound or a font fails with `asset-has-no-picture`.
+2. On the 12 recordings of the test (2880 by 1800 and 1920 by 1080, 3 to 20 seconds), one call with all 12 took 1.45 seconds with the start of the browser, and 1.31 seconds the second time. A closer look at one region of one recording took 0.37 seconds. The 12 pictures are 2.3 MB.
+3. `list_assets`, `mark_asset`, the `footage` kit scene, step 1 of the server instructions, and rule 31 of the instructions of the AI point to `preview_assets`. The harness has 58 tools.
+4. `remove_scene` takes `scene_id` or `scene_ids`, as one change and one undo step. `put_work` takes `remove` with `scene_ids` and `asset_ids`. The removals come after the scenes, the frame, and the timelines of the call, in the same change. The rules of the store refuse a scene that a clip of the result still shows and an asset that a clip, a cast member, or a font still uses. Before the change, the harness also refuses an asset that a scene of the result names, with `asset-in-use`. The protection of the work of the person is the same as for the rest of `put_work`.
+5. Own colors and an own font for the kit. `project.json` gets `lookColors` (`background`, `text`, `muted`, `accent`, each a hex color) and `lookFont` (a family of `fonts`). The edit `setLook` takes `colors?` and `font?`, and `null` removes one. A look font that is not a family of `fonts` fails with `not-found`. `set_look` takes `colors` and `font`, and warns when the text or the muted color has a contrast under 4.5 to 1 on the background. `set_fonts` takes `look_font`, so a font file becomes the font of the kit in one change, and a list without that family removes the look font in the same change.
+6. The own colors replace the colors of the look in each kit scene and in each custom scene that reads `useStylePack`. The surface is the text color at 8 percent over the background. The accent is the own accent, and the bars of `bar-chart` are text, muted, and accent. A look with own colors draws a flat backdrop, because the glow of `midnight` and the grid of `neon` have colors of their own. The own font is the display font at weight 600 and the body font at weight 400. The page loads it as a font of the project, so the kit loads no file for it.
+7. `footage` takes `items`: 1 to 4 short lines beside the window in wide (the window takes 60 percent of the width), and under it in square and tall. Each line comes in on its own beat after the window, between thin lines, at the new text role `filmItem` (4.6, 4.4, and 4.6 units). `wall` takes `startSecondsEach`, one start for each video.
+8. `list_kit_scenes` gives one line that says which film scene fits which part of a launch film, and that the film scenes draw in the own colors and font. Rule 11 now tells the AI to give the colors of the person to `set_look` and the font to `set_fonts` with `look_font`. Rules 26 and 27 now say: set the look first, use the film kit scenes where they fit, and write scene code only for what no kit scene shows. The server instructions and the description of `put_work` say the same. Custom code stays permitted.
+9. Loudness: document 04 owns the decision. The renderer levels the whole mix of an export to -14 LUFS with a true peak of at most -1 dB, with one gain and a limiter when the peak needs it. On the audio of the test film, the gain is 6.14 dB with the limiter, and the result is -13.9 LUFS with a true peak of -1.5 dB.
+10. An upload of a `.woff2`, `.woff`, `.ttf`, or `.otf` file is a font asset. The Files view takes these files, lists them under Fonts, and has "Use as the font" for a font that is not the font of the video. It calls `set_fonts` with the fonts of the project, the new file, and `look_font`, as one change. The family comes from the file name before the first hyphen or underscore ("Geist-Variable.woff2" gives "Geist"), and a name with "variable" gets the weights 100 to 900. K6 fits this: the font loads for the whole stage, and the kit scenes then use it too.
+11. The summary of a change entry of the AI comes from the last text of the answer, not from the first. The last text describes the whole work. The summary is its first sentence, with the next sentences while it has fewer than 4 words ("Done. The script now says ready."), and at most 140 characters. The test run would now have "The launch film is finished and exported as one MP4."
+12. The failure text of a wrong output id already listed the outputs that exist (for example "Its outputs are: tall, wide."). The hint now says to use one of them, and that `add_platform` names a new output by its shape.
+
+### The run after the fixes
+
+The same setup ran once on 2026-11-24: a source build of this branch, a temporary configuration folder, no media key, the 12 recordings and the font added as files of the person through "Add a file", Claude Code with `ANTHROPIC_MODEL=opus` for the engine only, and one chat request with the text of the brief.
+
+| Run             | Seconds from the request to the exported file | Tool calls | Scene types                                                      | Lines of scene code |
+| --------------- | --------------------------------------------- | ---------- | ---------------------------------------------------------------- | ------------------- |
+| The test (WP61) | 606                                           | 49         | 9 custom scenes, a shared module, and a frame                    | 704                 |
+| A free hand     | 454                                           | not known  | its own code                                                     | 916                 |
+| After WP63      | 209                                           | 41         | `lines` 2, `footage` 3, `wall`, `shapes`, `look-swap`, `command` | 0                   |
+
+1. The calls: `get_work`, `list_kit_scenes`, `list_media_tools`, `get_project`, `list_assets`, `get_scene_guide`, `set_look` (the four colors of the brief), `set_fonts` (Geist with `look_font`), `set_tempo`, `set_project_name`, `preview_assets` 3, `mark_asset` 15, `generate_asset` (music), `add_platform`, `set_script`, `put_work` 2, `contact_sheet` 2, `preview_frames` 4, `set_transitions`, and `render_video`. No call failed.
+2. The lead used the new inputs: `items` of `footage` for the three program names beside the steps, and `startSecondsEach` of `wall` for the examples. It made no temporary scene and removed nothing.
+3. The film is 32 seconds, 16 bars at 120 beats. The export measures -13.8 LUFS integrated with a true peak of -1.5 dB.
+4. The change entry of the run has the summary "The launch film is done and exported as one MP4: 1920 by 1080, 30 frames a second, 32 seconds long."
+5. The agent cannot watch a video or hear sound. The owner must judge the film and the music. The lead said that the last step of the steps recording is cut at the bottom of its window.

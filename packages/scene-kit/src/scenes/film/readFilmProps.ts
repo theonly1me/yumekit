@@ -47,3 +47,12 @@ export function readTexts(options: {
       typeof item === "string" ? item.slice(0, options.maxLength) : "",
     );
 }
+
+export function readStartSecondsEach(value: unknown): (number | undefined)[] {
+  if (!Array.isArray(value)) return [];
+  return value.map((item: unknown) =>
+    typeof item === "number" && Number.isFinite(item) && item >= 0
+      ? item
+      : undefined,
+  );
+}

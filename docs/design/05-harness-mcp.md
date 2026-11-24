@@ -40,25 +40,25 @@ function createHarnessServer(options: {
 
 ### Write the story
 
-| Tool                 | Input                                                                                         | Edit                                                    |
-| -------------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
-| `set_script`         | `script`                                                                                      | `setScript`                                             |
-| `set_project_name`   | `name` (1 to 40 characters, document 18)                                                      | `setProjectName`                                        |
-| `set_bible`          | `style`, `palette`, `cast`, `voice`                                                           | `setBible`                                              |
-| `set_look`           | `look?`, `calm?` (one or both)                                                                | `setLook`                                               |
-| `put_cast_member`    | `cast_id`, `kind`, `name`, `description`, `reference_asset_ids?` (document 16, N3)            | `setBible`                                              |
-| `remove_cast_member` | `cast_id`                                                                                     | `setBible`                                              |
-| `add_output`         | `output_id`, `label`, `width_pixels`, `height_pixels`                                         | `addOutput`                                             |
-| `remove_output`      | `output_id`                                                                                   | `removeOutput`                                          |
-| `add_platform`       | `platform_id`                                                                                 | `setOutputPlatforms`, or `addOutput` and `copyTimeline` |
-| `remove_platform`    | `platform_id`                                                                                 | `setOutputPlatforms`, or `removeOutput`                 |
-| `put_scene`          | `scene_id`, `title`, `notes?`, then either `kit_component` and `props`, or `code` and `props` | `putScene`                                              |
-| `remove_scene`       | `scene_id`                                                                                    | `removeScene`                                           |
-| `set_video_style`    | `video_style` (`graphics`, `ai-video`, `mix`)                                                 | `setVideoStyle`                                         |
-| `set_tempo`          | `tempo` (60 to 200, document 19)                                                              | `setTempo`                                              |
-| `put_shared_code`    | `name`, `code` (document 19)                                                                  | `putSharedCode`                                         |
-| `set_fonts`          | `fonts` with `asset_id`, `family`, `weight?`, `style?` (document 19)                          | `setFonts`                                              |
-| `put_work`           | `shared_code?`, `scenes?`, `timelines?`, `frame?`, `remove_person_work?` (document 19, K8)    | `putSharedCode`, `putScene`, `setFrame`, `setTimeline`  |
+| Tool                 | Input                                                                                         | Edit                                                                                 |
+| -------------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `set_script`         | `script`                                                                                      | `setScript`                                                                          |
+| `set_project_name`   | `name` (1 to 40 characters, document 18)                                                      | `setProjectName`                                                                     |
+| `set_bible`          | `style`, `palette`, `cast`, `voice`                                                           | `setBible`                                                                           |
+| `set_look`           | `look?`, `calm?`, `colors?`, `font?` (one or more, document 19)                               | `setLook`                                                                            |
+| `put_cast_member`    | `cast_id`, `kind`, `name`, `description`, `reference_asset_ids?` (document 16, N3)            | `setBible`                                                                           |
+| `remove_cast_member` | `cast_id`                                                                                     | `setBible`                                                                           |
+| `add_output`         | `output_id`, `label`, `width_pixels`, `height_pixels`                                         | `addOutput`                                                                          |
+| `remove_output`      | `output_id`                                                                                   | `removeOutput`                                                                       |
+| `add_platform`       | `platform_id`                                                                                 | `setOutputPlatforms`, or `addOutput` and `copyTimeline`                              |
+| `remove_platform`    | `platform_id`                                                                                 | `setOutputPlatforms`, or `removeOutput`                                              |
+| `put_scene`          | `scene_id`, `title`, `notes?`, then either `kit_component` and `props`, or `code` and `props` | `putScene`                                                                           |
+| `remove_scene`       | `scene_id` or `scene_ids` (document 19)                                                       | `removeScene` for each scene, in one change                                          |
+| `set_video_style`    | `video_style` (`graphics`, `ai-video`, `mix`)                                                 | `setVideoStyle`                                                                      |
+| `set_tempo`          | `tempo` (60 to 200, document 19)                                                              | `setTempo`                                                                           |
+| `put_shared_code`    | `name`, `code` (document 19)                                                                  | `putSharedCode`                                                                      |
+| `set_fonts`          | `fonts` with `asset_id`, `family`, `weight?`, `style?`, and `look_font?` (document 19)        | `setFonts`, and `setLook` for `look_font`                                            |
+| `put_work`           | `shared_code?`, `scenes?`, `timelines?`, `frame?`, `remove?`, `remove_person_work?` (doc. 19) | `putSharedCode`, `putScene`, `setFrame`, `setTimeline`, `removeScene`, `removeAsset` |
 
 `set_video_style` follows the section "The video style" of document 15. `get_project` gives `graphics` for a project with no value. The descriptions of both tools say what each style means, and tell the agent to change the style only when the person asks.
 
@@ -156,12 +156,13 @@ For a video, `generate_asset` reads `hasAudio` with `probeMedia`. It uses the si
 
 ### See the result
 
-| Tool             | Input                                                   | Result                                                             |
-| ---------------- | ------------------------------------------------------- | ------------------------------------------------------------------ |
-| `preview_frame`  | `output_id`, `frame`, `scale?`                          | One PNG image as image content                                     |
-| `preview_frames` | `output_id`, `frames` (1 to 8), `scale?`                | One image for each frame                                           |
-| `preview_scenes` | `output_id`, `scene_ids` (1 to 8), `scale?`, `frame?`   | One image for each scene                                           |
-| `contact_sheet`  | `output_id`, `every_seconds?`, `columns?`, `beat_cuts?` | One image of the whole video, and a list of warnings (document 19) |
+| Tool             | Input                                                                                                  | Result                                                                                                                                  |
+| ---------------- | ------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `preview_frame`  | `output_id`, `frame`, `scale?`                                                                         | One PNG image as image content                                                                                                          |
+| `preview_frames` | `output_id`, `frames` (1 to 8), `scale?`                                                               | One image for each frame                                                                                                                |
+| `preview_scenes` | `output_id`, `scene_ids` (1 to 8), `scale?`, `frame?`                                                  | One image for each scene                                                                                                                |
+| `contact_sheet`  | `output_id`, `every_seconds?`, `columns?`, `beat_cuts?`                                                | One image of the whole video, and a list of warnings (document 19)                                                                      |
+| `preview_assets` | `assets` (1 to 16), each with `asset_id`, `region?`, `mark?`, `from_seconds?`, `to_seconds?`, `count?` | One image for each video or picture asset: its frames at even steps with their times, its size, its length, and its marks (document 19) |
 
 `preview_scenes` draws each scene alone, at the size of the output. A scene needs no clip for it. The harness draws the scene as a clip of 3 seconds and takes the frame that is 75% into it, where kit motion has settled. `frame` takes another frame of that clip instead, for example 10 for the entry, and a frame past the end gives the last frame. An unknown scene id is the failure `scene-not-found`.
 
@@ -185,9 +186,9 @@ The project name in a file name is in lower case. Each run of characters that ar
 
 The server sends these instructions to the client at the start of a session. They give the order of work:
 
-1. Call `get_work`, `list_kit_scenes`, and `list_media_tools`.
+1. Call `get_work`, `list_kit_scenes`, and `list_media_tools`. Look at each video and picture asset with one `preview_assets` call.
 2. Write the script with `set_script` and the style with `set_bible`.
-3. Add each scene with `put_scene`. Prefer a kit scene. Call `get_scene_guide` before you write custom code, and follow its part Motion design. Check each new scene with `preview_scenes` twice: with frame 10 for its entry, and with no frame for its settled picture. To write the video as one piece, send the shared code, the scenes, the frame, and the timeline in one `put_work` call.
+3. Add each scene with `put_scene`. Prefer a kit scene. Give the colors and the font of the person to the kit with `set_look` and `set_fonts` (`look_font`). Call `get_scene_guide` before you write custom code, and follow its part Motion design. Check each new scene with `preview_scenes` twice: with frame 10 for its entry, and with no frame for its settled picture. To write the video as one piece, send the shared code, the scenes, the frame, and the timeline in one `put_work` call.
 4. Make the narration with `generate_asset`. Read the word timings to set the length of each scene.
 5. Make the images with `generate_asset`. Put the style of the bible in each prompt.
 6. For a shot that code cannot draw, make a still image first. Check it with the person or with `preview_frame`. Then call `generate_asset` with the capability `video`, `first_frame_asset_id`, and a `camera_move`, and add the clip with `place_video`.

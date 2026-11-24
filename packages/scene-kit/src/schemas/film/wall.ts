@@ -31,5 +31,13 @@ export const wallSchema = {
         "The number of columns. By default the scene picks the count that makes each picture largest.",
       ),
     startSeconds: filmStartSeconds,
+    startSecondsEach: z
+      .array(z.number().min(0).describe("The start second of one video."))
+      .max(wallLimits.assets)
+      .optional()
+      .describe(
+        "The start second of each video, in the order of assetIds, for example [5.9, 3.4, 1.4] to show the best moment of each. It replaces startSeconds for those videos.",
+      )
+      .meta({ title: "Start second of each" }),
   }),
 };

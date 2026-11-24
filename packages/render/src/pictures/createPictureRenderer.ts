@@ -4,6 +4,11 @@ import {
   type ContactSheet,
   type ContactSheetRequest,
 } from "../contactSheet/drawContactSheet.js";
+import {
+  drawAssetSheet,
+  type AssetSheet,
+  type AssetSheetRequest,
+} from "../assetSheet/drawAssetSheet.js";
 import type { Outcome } from "../outcome.js";
 import type { RenderFailure } from "../renderFailure.js";
 import {
@@ -24,6 +29,9 @@ export interface PictureRenderer {
   renderContactSheet: (
     request: ContactSheetRequest,
   ) => Promise<Outcome<ContactSheet, RenderFailure>>;
+  renderAssetSheet: (
+    request: AssetSheetRequest,
+  ) => Promise<Outcome<AssetSheet, RenderFailure>>;
   close: () => Promise<void>;
 }
 
@@ -80,6 +88,13 @@ export function createPictureRenderer(options: {
     };
     return attempt(false);
   };
+  const onHost = async (
+    request: AssetSheetRequest,
+  ): Promise<Outcome<AssetSheet, RenderFailure>> => {
+    const started = await (kept ??= start());
+    if (!started.ok) return started;
+    return drawAssetSheet({ host: started.value.host, request });
+  };
   const call = async <Value>(run: () => Promise<Value>): Promise<Value> => {
     if (isClosed) throw new Error("The picture renderer is closed");
     clearTimeout(idleTimer);
@@ -106,6 +121,7 @@ export function createPictureRenderer(options: {
       call(() =>
         drawContactSheet({ folder: options.folder, request, onStage }),
       ),
+    renderAssetSheet: (request) => call(() => onHost(request)),
     close: async () => {
       isClosed = true;
       clearTimeout(idleTimer);

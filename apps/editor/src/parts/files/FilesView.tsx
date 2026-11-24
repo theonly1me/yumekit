@@ -8,7 +8,7 @@ import { useFileActions } from "./useFileActions.js";
 import "./filesView.css";
 
 const projectFileTypes =
-  "image/*,audio/*,video/*,.svg,.mp3,.wav,.m4a,.mp4,.mov";
+  "image/*,audio/*,video/*,.svg,.mp3,.wav,.m4a,.mp4,.mov,.woff2,.woff,.ttf,.otf";
 
 export function FilesView(props: StepViewProps) {
   const { client, snapshot, locked } = props;
@@ -30,14 +30,17 @@ export function FilesView(props: StepViewProps) {
     onUse: (row) => {
       files.useInVideo(row.name);
     },
+    onUseFont: (row) => {
+      files.useFont({ snapshot, assetId: row.asset.id, name: row.name });
+    },
   };
 
   return (
     <div className="files-part">
       {groups.length === 0 ? (
         <p className="fact lead">
-          This video has no files yet. Add a picture, a sound, or a video clip
-          below, or ask the AI in the chat to make one.
+          This video has no files yet. Add a picture, a sound, a video clip, or
+          a font below, or ask the AI in the chat to make one.
         </p>
       ) : (
         <p className="fact">
@@ -70,7 +73,7 @@ export function FilesView(props: StepViewProps) {
         <h4>Add a file</h4>
         <FileDrop
           label="Drop a file here, or click to pick one"
-          hint="A picture, a sound, or a video clip, up to 500 megabytes. The AI can then use it in the video."
+          hint="A picture, a sound, a video clip, or a font, up to 500 megabytes. The AI can then use it in the video."
           accept={projectFileTypes}
           disabled={locked || files.isWorking}
           onFile={files.add}

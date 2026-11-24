@@ -6,6 +6,7 @@ import { failureResult } from "../results.js";
 import { personWorkSentence } from "../timeline/personWorkInput.js";
 import { timelineEditOf } from "../timeline/timelineEdit.js";
 import { checkWork, workFailureOf } from "./checkWork.js";
+import { removalEditsOf, removedAssetInUse } from "./workRemovals.js";
 import {
   putWorkInput,
   type PutWorkInput,
@@ -59,6 +60,7 @@ function editsOf(options: { input: PutWorkInput; snapshot: ProjectSnapshot }) {
     ...(input.scenes ?? []).map(sceneEditOf),
     ...frameEditsOf(input.frame),
     ...timelines.map((timeline) => timeline.edit),
+    ...removalEditsOf(input),
   ];
   return { edits, timelines };
 }
@@ -73,21 +75,29 @@ async function putWork(options: {
   if (checked.failures.length > 0) {
     return failureResult(workFailureOf(checked.failures));
   }
+  const assetInUse = removedAssetInUse({ input, snapshot });
+  if (assetInUse !== undefined) return failureResult(assetInUse);
   const { edits, timelines } = editsOf({ input, snapshot });
   if (edits.length === 0) {
     return failureResult({
       kind: "work-empty",
       message:
-        "put_work got no shared code, no scene, no timeline, and no frame.",
+        "put_work got no shared code, no scene, no timeline, no frame, and nothing to remove.",
       hint: "Give at least one part. Call get_work to read the work first.",
     });
   }
   const sharedNames = (input.shared_code ?? []).map((module) => module.name);
   const sceneIds = (input.scenes ?? []).map((scene) => scene.scene_id);
+  const removedSceneIds = input.remove?.scene_ids ?? [];
+  const removedAssetIds = input.remove?.asset_ids ?? [];
+  const removedLine =
+    removedSceneIds.length + removedAssetIds.length === 0
+      ? ""
+      : ` Removed ${countLine({ count: removedSceneIds.length, one: "scene", many: "scenes" })} and ${countLine({ count: removedAssetIds.length, one: "asset", many: "assets" })}.`;
   return applyEditsResult({
     store: context.store,
     edits,
-    line: `The work is saved as one change: ${countLine({ count: sharedNames.length, one: "shared module", many: "shared modules" })}, ${countLine({ count: sceneIds.length, one: "scene", many: "scenes" })}, ${countLine({ count: timelines.length, one: "timeline", many: "timelines" })}. One undo removes all of it.`,
+    line: `The work is saved as one change: ${countLine({ count: sharedNames.length, one: "shared module", many: "shared modules" })}, ${countLine({ count: sceneIds.length, one: "scene", many: "scenes" })}, ${countLine({ count: timelines.length, one: "timeline", many: "timelines" })}. One undo removes all of it.${removedLine}`,
     data: {
       shared_code: sharedNames,
       scene_ids: sceneIds,
@@ -99,6 +109,8 @@ async function putWork(options: {
         input.frame === undefined
           ? (snapshot.project.frame ?? null)
           : input.frame,
+      removed_scene_ids: removedSceneIds,
+      removed_asset_ids: removedAssetIds,
     },
     keepPersonWork: input.remove_person_work !== true,
   });
@@ -107,7 +119,7 @@ async function putWork(options: {
 export function registerPutWork(context: HarnessContext): void {
   context.tools.add({
     name: "put_work",
-    description: `Write the video as one piece in one call: shared code, scenes, the frame, and the timelines. The harness checks every part together, so a scene can import the shared code of the same call. When one part fails its check, nothing changes, and the failure lists each part. When all pass, the whole call is one change, and one undo removes all of it. Write the shared parts first (the frame, the type styles, the timing), then the scenes that use them, then the timeline. Read the work with get_work before you change a video that exists. ${personWorkSentence}`,
+    description: `Write the video as one piece in one call: shared code, scenes, the frame, and the timelines. The harness checks every part together, so a scene can import the shared code of the same call. When one part fails its check, nothing changes, and the failure lists each part. When all pass, the whole call is one change, and one undo removes all of it. Use kit scenes where they fit (they draw in the colors of set_look), write shared code only for what custom scenes share, then the timeline. remove takes away scenes and assets in the same change, for example the scenes that you made only to look at a file. Read the work with get_work before you change a video that exists. ${personWorkSentence}`,
     inputSchema: putWorkInput,
     run: ({ input }) => putWork({ context, input }),
   });

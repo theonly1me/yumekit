@@ -33,6 +33,7 @@ export interface FileRow {
   madeBy: string;
   uses: string[];
   lengthSeconds: number;
+  isVideoFont: boolean;
 }
 
 export interface FileGroup {
@@ -103,6 +104,16 @@ function groupOf(options: { snapshot: Snapshot; asset: Asset }): FileGroupId {
   }
 }
 
+function isVideoFontOf(options: {
+  snapshot: Snapshot;
+  assetId: string;
+}): boolean {
+  const { lookFont, fonts } = options.snapshot.project;
+  return (fonts ?? []).some(
+    (font) => font.assetId === options.assetId && font.family === lookFont,
+  );
+}
+
 export function fileGroupsOf(options: {
   snapshot: Snapshot;
   servers: MediaServers | undefined;
@@ -121,6 +132,7 @@ export function fileGroupsOf(options: {
         uses: assetUsesIn({ snapshot, assetId: asset.id }),
       }),
       lengthSeconds: (asset.durationFrames ?? 0) / framesPerSecond,
+      isVideoFont: isVideoFontOf({ snapshot, assetId: asset.id }),
     },
   }));
   return groupOrder.flatMap((id) => {

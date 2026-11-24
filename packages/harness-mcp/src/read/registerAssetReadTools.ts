@@ -11,7 +11,7 @@ function registerListAssets(context: HarnessContext): void {
   context.tools.add({
     name: "list_assets",
     description:
-      "List the asset records: id, kind, file, size, duration_frames, has_words, has_audio for a video, and the source. Word timings are not included; read them with get_asset_words.",
+      "List the asset records: id, kind, file, size, duration_frames, has_words, has_audio for a video, and the source. Word timings are not included; read them with get_asset_words. To see what a video or picture shows, call preview_assets with all of them in one call.",
     inputSchema: {
       kind: z
         .enum(["image", "audio", "video", "font"])
