@@ -18,10 +18,12 @@ const stepSchema = z.union([
   }),
   z.object({ waitForStop: z.object({ print: z.array(z.string()) }) }),
   z.object({ waitForFile: z.string() }),
+  z.object({ followRequest: z.literal(true) }),
 ]);
 
 const scenarioSchema = z.object({
   steps: z.array(stepSchema),
+  helperSteps: z.array(stepSchema).default([]),
   exitCode: z.number(),
   signedIn: z.boolean(),
   resumeFails: z.boolean(),
@@ -37,6 +39,9 @@ const scenario = scenarioSchema.parse(
 );
 const programArguments = process.argv.slice(2);
 const command = programArguments.slice(0, 2).join(" ");
+const helperToken = /"--helper","([^"]+)"/.exec(
+  programArguments.join(" "),
+)?.[1];
 
 function print(line: string): void {
   process.stdout.write(`${line}\n`);
@@ -58,6 +63,9 @@ async function callTool(options: {
         authorization: `Bearer ${engine.token}`,
         "content-type": "application/json",
         "x-yumekit-client": "agent",
+        ...(helperToken === undefined
+          ? {}
+          : { "x-yumekit-helper": helperToken }),
       },
       body: JSON.stringify({ input: options.input }),
     },
@@ -65,6 +73,54 @@ async function callTool(options: {
   const body = await response.text();
   if (options.saveResultTo !== undefined) {
     writeFileSync(options.saveResultTo, body);
+  }
+  return body;
+}
+
+const exactStepPattern = /^\d+\. ([a-z_]+) (\{.*\})$/gm;
+
+function claudeLine(options: { type: string; content: object }): string {
+  return JSON.stringify({
+    type: options.type,
+    message: { content: [options.content] },
+  });
+}
+
+async function followRequest(): Promise<void> {
+  const request = programArguments.at(-1) ?? "";
+  for (const [index, match] of [
+    ...request.matchAll(exactStepPattern),
+  ].entries()) {
+    const [, tool = "", inputText = "{}"] = match;
+    const callId = `follow-${String(index + 1)}`;
+    print(
+      claudeLine({
+        type: "assistant",
+        content: {
+          type: "tool_use",
+          id: callId,
+          name: `mcp__yumekit__${tool}`,
+          input: {},
+        },
+      }),
+    );
+    const body = await callTool({
+      name: tool,
+      input: z.record(z.string(), z.unknown()).parse(JSON.parse(inputText)),
+    });
+    const isError = z
+      .object({ isError: z.boolean() })
+      .safeParse(JSON.parse(body));
+    print(
+      claudeLine({
+        type: "user",
+        content: {
+          type: "tool_result",
+          tool_use_id: callId,
+          is_error: !isError.success || isError.data.isError,
+        },
+      }),
+    );
   }
 }
 
@@ -90,6 +146,7 @@ async function runStep(step: Step): Promise<void> {
   if ("print" in step) print(step.print);
   else if ("callTool" in step) await callTool(step.callTool);
   else if ("waitForFile" in step) await waitForFile(step.waitForFile);
+  else if ("followRequest" in step) await followRequest();
   else await waitForStop(step.waitForStop.print);
 }
 
@@ -107,7 +164,9 @@ async function run(): Promise<number> {
     `${JSON.stringify(programArguments)}\n`,
   );
   if (scenario.resumeFails && programArguments.includes("--resume")) return 1;
-  for (const step of scenario.steps) await runStep(step);
+  const steps =
+    helperToken === undefined ? scenario.steps : scenario.helperSteps;
+  for (const step of steps) await runStep(step);
   return scenario.exitCode;
 }
 

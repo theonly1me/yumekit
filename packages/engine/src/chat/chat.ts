@@ -5,11 +5,18 @@ import type { Turn } from "@yumekit/brain";
 import type { ProjectStore } from "@yumekit/project";
 import type { ServerCommand } from "../agents/agentTypes.js";
 import type { Outcome } from "../engineTypes.js";
+import type { HelperOutcome, HelperRequest } from "@yumekit/harness-mcp";
 import type { EventHub } from "../events/eventHub.js";
 import { chooseAgent, findAgentPrograms } from "./agentChoice.js";
 import { aboutOf, requestTextOf } from "./aboutClip.js";
 import { createAnswerTracker, type AnswerTracker } from "./answerTracker.js";
 import { createChangeLedger } from "./changeLedger.js";
+import { chatBusy, failed, noServerCommand } from "./chatFailures.js";
+import {
+  createHelperDesk,
+  type HelperCall,
+  type LeadRun,
+} from "./helpers/helperDesk.js";
 import { loadChat } from "./chatFile.js";
 import { createChatLog } from "./chatLog.js";
 import type {
@@ -38,22 +45,9 @@ export interface Chat {
     caller: ToolCaller;
     call: () => Promise<Value>;
   }) => Promise<Value>;
+  askHelper: (request: HelperRequest) => Promise<HelperOutcome>;
+  helperCallOf: (token: string | undefined) => HelperCall;
   close: () => Promise<void>;
-}
-
-const chatBusy: ChatFailure = {
-  kind: "chat-busy",
-  message: "The AI is still working on the last request. Wait or stop it.",
-};
-
-const noServerCommand: ChatFailure = {
-  kind: "no-server-command",
-  message:
-    "This engine cannot start the AI. Start the editor with yumekit open.",
-};
-
-function failed<Value>(failure: ChatFailure): Outcome<Value, ChatFailure> {
-  return { ok: false, failure };
 }
 
 export async function createChat(options: {
@@ -77,6 +71,8 @@ export async function createChat(options: {
   let tracker: AnswerTracker | undefined;
   let isStopRequested = false;
   let running: Promise<void> = Promise.resolve();
+  let lead: LeadRun | undefined;
+  const helpers = createHelperDesk();
   const begin = async (request: {
     text: string;
     details?: string | undefined;
@@ -117,6 +113,8 @@ export async function createChat(options: {
     log.put(answer);
     const answerTracker = createAnswerTracker({ log, answer });
     tracker = answerTracker;
+    const { serverCommand } = options;
+    lead = { adapter, serverCommand, projectFolder };
     phase = "running";
     isStopRequested = false;
     running = runRequest({
@@ -128,7 +126,7 @@ export async function createChat(options: {
         about: about.value,
       }),
       tracker: answerTracker,
-      serverCommand: options.serverCommand,
+      serverCommand,
       workingFolder,
       onTurn: (next) => {
         turn = next;
@@ -141,12 +139,14 @@ export async function createChat(options: {
         phase = "idle";
         turn = undefined;
         tracker = undefined;
+        lead = undefined;
       });
     return { ok: true, value: entry };
   };
   const stop = () => {
     if (phase !== "running") return false;
     isStopRequested = true;
+    helpers.stop();
     turn?.stop();
     return true;
   };
@@ -185,6 +185,9 @@ export async function createChat(options: {
         : Promise.resolve(failed(chatBusy)),
     noteAiCall: (tool) => tracker?.noteCall(tool) ?? noCallNote,
     runToolCall: tracked.runCall,
+    askHelper: (request) =>
+      helpers.ask({ request, lead: phase === "running" ? lead : undefined }),
+    helperCallOf: helpers.callOf,
     close: async () => {
       stop();
       await running;

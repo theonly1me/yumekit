@@ -95,7 +95,7 @@ export function registerPutScene(context: HarnessContext): void {
   context.tools.add({
     name: "put_scene",
     description:
-      "Add or replace a scene: a kit scene (kit_component and props) or a custom scene (code and props). The harness checks the props or compiles the code first and changes nothing when the check fails. A scene is not visible until a clip on a timeline shows it.",
+      "Add or replace a scene: a kit scene (kit_component and props) or a custom scene (code and props). The harness checks the props or compiles the code first and changes nothing when the check fails. A scene is not visible until a clip on a timeline shows it. For a new video, or for two or more scenes, use put_work: it writes the scenes with the shared code and the timeline in one call and one undo.",
     inputSchema: putSceneInput,
     run: ({ input }) => putScene({ context, input }),
   });

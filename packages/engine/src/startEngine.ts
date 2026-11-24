@@ -5,6 +5,7 @@ import { resolve } from "node:path";
 import { openProject, type ProjectStore } from "@yumekit/project";
 import type { ServerCommand } from "./agents/agentTypes.js";
 import { createChat, type Chat } from "./chat/chat.js";
+import { noChatHelper } from "./chat/helpers/helperDesk.js";
 import { trackStore } from "./chat/trackedStore.js";
 import { claimEngineFile } from "./engineFile/claimEngineFile.js";
 import { removeEngineFile } from "./engineFile/engineFile.js";
@@ -105,7 +106,13 @@ export async function startEngine(options: {
     };
   }
   const tracked = trackStore(store);
-  const started = await startParts({ projectFolder, store: tracked.store });
+  const helperChat: { current: Chat | undefined } = { current: undefined };
+  const started = await startParts({
+    projectFolder,
+    store: tracked.store,
+    askHelper: (request) =>
+      helperChat.current?.askHelper(request) ?? noChatHelper,
+  });
   if (!started.ok) return started;
   const parts = started.value;
   const server = createServer();
@@ -125,6 +132,7 @@ export async function startEngine(options: {
     events,
     serverCommand: options.serverCommand,
   });
+  helperChat.current = chat;
   server.on(
     "request",
     createRequestHandler({

@@ -16,4 +16,8 @@ export { createCursorAdapter } from "./cursor/cursorAdapter.js";
 export { findProgram } from "./program/findProgram.js";
 export { stopWaitMilliseconds } from "./program/runTurn.js";
 export { brainInstructions, instructionsOf } from "./instructions.js";
+export {
+  helperInstructions,
+  helperInstructionsOf,
+} from "./helperInstructions.js";
 export { defaultPersonSentence, personSentenceOf } from "./personSentences.js";

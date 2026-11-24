@@ -1,11 +1,9 @@
-import { useRef, useState } from "react";
 import type { EngineClient } from "../engine/engineClient.js";
 import type { Output, SceneClip, Snapshot } from "../engine/snapshot.js";
-import { useEngineEvents } from "../engine/useEngineEvents.js";
-import type { Phase } from "./ClipAction.js";
+import { useLeadMaking } from "../lead/useLeadMaking.js";
 import type { ClipDraft } from "./ClipForm.js";
 import { outputsHoldingClip } from "./clipOutputs.js";
-import { makeClip, type MakeOutcome } from "./makeClip.js";
+import { clipRequestOf, madeClipOf, type MadeClip } from "./makeClip.js";
 import {
   takesFirstPicture,
   takesLastPicture,
@@ -23,8 +21,10 @@ async function firstAssetOf(options: {
   firstPicture: FirstPicture;
   scenePicture: ScenePicture;
   sceneName: string;
-  actId: string;
-}): Promise<MakeOutcome | { ok: true; assetId: string }> {
+}): Promise<
+  | { ok: true; assetId: string }
+  | { ok: false; failure: { kind: string; message: string } }
+> {
   const { firstPicture, scenePicture } = options;
   if (firstPicture.kind === "asset") {
     return { ok: true, assetId: firstPicture.assetId };
@@ -43,7 +43,7 @@ async function firstAssetOf(options: {
     blob: scenePicture.blob,
     assets: options.snapshot.assets,
     name: options.sceneName,
-    actId: options.actId,
+    actId: crypto.randomUUID(),
   });
 }
 
@@ -57,82 +57,64 @@ export function useClipMaking(options: {
   onMade: () => Promise<void>;
 }) {
   const { client, snapshot, output, target } = options;
-  const callId = useRef("");
-  const [phase, setPhase] = useState<Phase>({ kind: "editing" });
-
-  useEngineEvents({
+  const making = useLeadMaking<MadeClip>({
     client,
-    onEvent: (event) => {
-      if (event.type !== "call-progress" || event.callId !== callId.current) {
-        return;
-      }
-      setPhase((current) =>
-        current.kind === "making"
-          ? { kind: "making", progress: event }
-          : current,
-      );
-    },
+    onFinished: options.onMade,
   });
 
   const run = async (request: {
     choice: ModelChoice;
     values: SettingValues;
     draft: ClipDraft;
-  }): Promise<MakeOutcome> => {
+  }) => {
     const { choice, draft } = request;
     const takesPicture = takesFirstPicture(choice.model);
     const first = takesPicture
-      ? await firstAssetOf({
-          ...options,
-          firstPicture: draft.firstPicture,
-          actId: callId.current,
-        })
+      ? await firstAssetOf({ ...options, firstPicture: draft.firstPicture })
       : undefined;
-    if (first !== undefined && !first.ok) return first;
-    return makeClip({
-      client,
+    if (first !== undefined && !first.ok) {
+      making.fail(first.failure);
+      return;
+    }
+    const outputs = outputsHoldingClip({
+      snapshot,
+      clipId: target.id,
+      currentOutput: output,
+    });
+    const { assetId, request: exact } = clipRequestOf({
       choice,
       prompt: draft.prompt.trim(),
       values: request.values,
-      firstFrameAssetId:
-        first !== undefined && "assetId" in first ? first.assetId : undefined,
+      firstFrameAssetId: first?.assetId,
       lastFrameAssetId:
         takesPicture && takesLastPicture(choice.model)
           ? draft.lastFrameId
           : undefined,
       cameraMoveId: draft.cameraMoveId,
       referenceAssetIds: draft.referenceIds,
-      outputs: outputsHoldingClip({
-        snapshot,
-        clipId: target.id,
-        currentOutput: output,
-      }),
+      outputs,
       clip: target,
       assets: snapshot.assets,
-      callId: callId.current,
+    });
+    making.make({
+      exact,
+      find: (latest) =>
+        madeClipOf({ snapshot: latest, assetId, clip: target, outputs }),
     });
   };
 
   const make = (request: Parameters<typeof run>[0]) => {
-    if (phase.kind === "making") return;
-    callId.current = crypto.randomUUID();
-    setPhase({ kind: "making", progress: undefined });
-    run(request)
-      .then(async (outcome) => {
-        setPhase(
-          outcome.ok
-            ? { kind: "made", made: outcome.made }
-            : { kind: "failed", failure: outcome.failure },
-        );
-        await options.onMade();
-      })
-      .catch((error: unknown) => {
-        setPhase({
-          kind: "failed",
-          failure: { kind: "defect", message: String(error) },
-        });
-      });
+    if (making.phase.kind === "making") return;
+    making.begin();
+    run(request).catch((error: unknown) => {
+      making.fail({ kind: "defect", message: String(error) });
+    });
   };
 
-  return { phase, setPhase, make };
+  return {
+    phase: making.phase,
+    readiness: making.readiness,
+    reset: making.reset,
+    make,
+  };
 }

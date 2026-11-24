@@ -3,6 +3,7 @@ import { z } from "zod";
 import { requestTextsSent, setScenario } from "../testing/chatTesting.js";
 import { buildCounterProject } from "../testing/counterProject.js";
 import { closeBrowser, openEditor } from "../testing/editorPage.js";
+import { claudeLines, followingLeadScenario } from "../testing/fakeAgent.js";
 import {
   engineRequest,
   generateStill,
@@ -87,6 +88,10 @@ describe("camera moves and the last picture in Make a clip", () => {
   });
 
   it("sends the picked move and the last picture with the clip", async () => {
+    await setScenario({
+      engine: runningEngine(),
+      scenario: followingLeadScenario,
+    });
     const editor = await openEditor(runningEngine().url);
     const { page } = editor;
     await openMakeClip(page);
@@ -114,6 +119,11 @@ describe("camera moves and the last picture in Make a clip", () => {
       first_frame_asset_id: "first-still",
       last_frame_asset_id: "first-still",
     });
+    expect(await requestTextsSent(runningEngine())).toContainEqual(
+      expect.stringContaining(
+        'with the camera move Orbit, from the picture "A red ball", to the picture "A red ball".',
+      ),
+    );
     await editor.close();
   });
 
@@ -150,6 +160,39 @@ describe("camera moves and the last picture in Make a clip", () => {
         .getByRole("dialog", { name: "Make a real video clip" })
         .count(),
     ).toBe(0);
+    await editor.close();
+  });
+
+  it("shows the answer of the AI in the sheet when it makes no clip", async () => {
+    await setScenario({
+      engine: runningEngine(),
+      scenario: {
+        steps: [
+          { print: claudeLines.init },
+          {
+            print: claudeLines.whole(
+              "This move does not fit a still scene. Should I use Push in?",
+            ),
+          },
+          { print: claudeLines.result("completed") },
+        ],
+      },
+    });
+    const editor = await openEditor(runningEngine().url);
+    const { page } = editor;
+    await openMakeClip(page);
+    await page.getByLabel("Test clip").check();
+    await page.getByLabel("What happens in the clip").fill("A slow spin");
+    await page
+      .getByRole("group", { name: "Pictures to start on" })
+      .getByRole("button", { name: "Start on A red ball" })
+      .click();
+
+    await page.getByRole("button", { name: "Make the clip" }).click();
+
+    await expect
+      .poll(() => page.getByRole("alert").allTextContents())
+      .toContainEqual(expect.stringContaining("Should I use Push in?"));
     await editor.close();
   });
 });

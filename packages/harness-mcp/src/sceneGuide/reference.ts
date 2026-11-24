@@ -15,6 +15,8 @@ Prefer a kit scene (list_kit_scenes). Write custom code only when no kit scene c
 9. Size all text and spacing in \`unit\`, so the scene reads the same at each output size. Keep text short: a custom scene does not shrink text to fit.
 10. Put \`data-text-prop\` with the name of the prop on the element that shows a text prop, for example \`<h1 data-text-prop="title">{title}</h1>\`. A person can then click the text in the preview and change it. For a text in a list, use the path, such as \`items.0\` or \`steps.1.label\`.
 11. Write code that two or more scenes need (a theme, a helper, a small component) once, with put_shared_code. Each scene imports it as \`./_shared/<name>\`, and shared code imports other shared code as \`./<name>\`. Never copy the same code into each scene.
+12. Write a whole film with put_work, in one call: the shared parts first (the frame, the type styles, the timing), then the scenes that use them, then the timeline. Read the video with get_work before you change it.
+13. The frame is one shared module whose default export comes from \`defineReactScene\`, as a scene has. Name it with \`frame\` of put_work. The stage draws it once for the whole video, above the scenes and below the captions. In the frame, \`useFrame()\` is the frame of the video, \`durationFrames\` is the length of the video, and \`props.scenes\` lists the clips of the scenes row as \`{ index, sceneId, title, startFrame, durationFrames }\`. The current scene is the one with \`startFrame <= frame < startFrame + durationFrames\`. The beat is \`Math.floor(frame / beatFrames)\`. Draw only the parts that stay on screen (a mark, a progress line, a margin grid), and leave the middle and the caption area clear.
 
 ## Hooks and components from @yumekit/scene
 

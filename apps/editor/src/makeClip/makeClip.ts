@@ -1,14 +1,15 @@
-import type { EngineClient } from "../engine/engineClient.js";
-import type { Asset, Output, SceneClip } from "../engine/snapshot.js";
-import type { ModelChoice } from "./modelChoices.js";
-import type { SettingValues } from "./settingValues.js";
-import { placeInEachOutput } from "./placeInEachOutput.js";
+import { cameraMoveCatalog } from "@yumekit/project/camera-moves";
+import type { Asset, Output, SceneClip, Snapshot } from "../engine/snapshot.js";
 import {
-  callTool,
-  textField,
-  uniqueAssetId,
-  type ToolFailure,
-} from "./toolCalls.js";
+  stillRequest,
+  videoClipRequest,
+  type ExactRequest,
+  type ToolStep,
+} from "../lead/exactRequests.js";
+import { assetNameOf } from "../names/index.js";
+import type { ModelChoice } from "./modelChoices.js";
+import { secondsOf, type SettingValues } from "./settingValues.js";
+import { uniqueAssetId, type ToolFailure } from "./toolCalls.js";
 
 export interface MadeClip {
   assetId: string;
@@ -31,40 +32,71 @@ function sizeInput(options: { choice: ModelChoice; output: Output }) {
     : {};
 }
 
-export async function makeStill(options: {
-  client: EngineClient;
+export function stillRequestOf(options: {
   choice: ModelChoice;
   prompt: string;
   output: Output;
   assets: Asset[];
   sceneId: string;
-}): Promise<
-  { ok: true; assetId: string } | { ok: false; failure: ToolFailure }
-> {
+  aboutClipId: string | undefined;
+}): { assetId: string; request: ExactRequest } {
   const { choice } = options;
-  const made = await callTool({
-    client: options.client,
-    name: "generate_asset",
-    input: {
-      asset_id: uniqueAssetId({
-        base: `still-${options.sceneId}`,
-        assets: options.assets,
-      }),
-      capability: "image",
-      server: choice.server.server,
-      model: choice.model.id,
-      input: { prompt: options.prompt, ...sizeInput(options) },
-    },
+  const assetId = uniqueAssetId({
+    base: `still-${options.sceneId}`,
+    assets: options.assets,
   });
-  if (!made.ok) return made;
   return {
-    ok: true,
-    assetId: textField({ data: made.data, name: "asset_id" }),
+    assetId,
+    request: stillRequest({
+      modelLabel: choice.model.label,
+      prompt: options.prompt,
+      aboutClipId: options.aboutClipId,
+      steps: [
+        {
+          tool: "generate_asset",
+          input: {
+            asset_id: assetId,
+            capability: "image",
+            server: choice.server.server,
+            model: choice.model.id,
+            input: { prompt: options.prompt, ...sizeInput(options) },
+          },
+        },
+      ],
+    }),
   };
 }
 
-export async function makeClip(options: {
-  client: EngineClient;
+export function placeSteps(options: {
+  assetId: string;
+  clipId: string;
+  outputs: Output[];
+  extra?: Record<string, unknown>;
+}): ToolStep[] {
+  return options.outputs.map((output) => ({
+    tool: "place_video",
+    input: {
+      output_id: output.id,
+      asset_id: options.assetId,
+      replace_clip_id: options.clipId,
+      remove_person_work: true,
+      ...options.extra,
+    },
+  }));
+}
+
+function pictureNameOf(options: {
+  assets: Asset[];
+  assetId: string | undefined;
+}): string | undefined {
+  if (options.assetId === undefined) return undefined;
+  const asset = options.assets.find((each) => each.id === options.assetId);
+  return asset === undefined
+    ? "the picture of the scene"
+    : `the picture "${assetNameOf(asset)}"`;
+}
+
+export function clipRequestOf(options: {
   choice: ModelChoice;
   prompt: string;
   values: SettingValues;
@@ -75,20 +107,17 @@ export async function makeClip(options: {
   outputs: [Output, ...Output[]];
   clip: SceneClip;
   assets: Asset[];
-  callId: string;
-}): Promise<MakeOutcome> {
-  const { client, choice, clip, outputs } = options;
+}): { assetId: string; request: ExactRequest } {
+  const { choice, clip, outputs } = options;
   const [output] = outputs;
-  const generated = await callTool({
-    client,
-    name: "generate_asset",
-    callId: options.callId,
-    actId: options.callId,
+  const assetId = uniqueAssetId({
+    base: `clip-${clip.sceneId}`,
+    assets: options.assets,
+  });
+  const generate: ToolStep = {
+    tool: "generate_asset",
     input: {
-      asset_id: uniqueAssetId({
-        base: `clip-${clip.sceneId}`,
-        assets: options.assets,
-      }),
+      asset_id: assetId,
       capability: "video",
       server: choice.server.server,
       model: choice.model.id,
@@ -110,24 +139,47 @@ export async function makeClip(options: {
         ? {}
         : { reference_asset_ids: options.referenceAssetIds }),
     },
-  });
-  if (!generated.ok) return generated;
-  const assetId = textField({ data: generated.data, name: "asset_id" });
-  const placed = await placeInEachOutput({
-    client,
-    assetId,
-    clipId: clip.id,
-    outputs,
-    actId: options.callId,
-  });
-  if (!placed.ok) return placed;
-  return {
-    ok: true,
-    made: {
-      assetId,
-      sceneClipId: placed.sceneClipId,
-      startFrame: clip.startFrame,
-      outputs,
-    },
   };
+  return {
+    assetId,
+    request: videoClipRequest({
+      modelLabel: choice.model.label,
+      seconds: secondsOf(options.values),
+      cameraMoveLabel: cameraMoveCatalog.find(
+        (move) => move.id === options.cameraMoveId,
+      )?.name,
+      startPicture: pictureNameOf({
+        assets: options.assets,
+        assetId: options.firstFrameAssetId,
+      }),
+      endPicture: pictureNameOf({
+        assets: options.assets,
+        assetId: options.lastFrameAssetId,
+      }),
+      aboutClipId: clip.id,
+      steps: [generate, ...placeSteps({ assetId, clipId: clip.id, outputs })],
+    }),
+  };
+}
+
+export function madeClipOf(options: {
+  snapshot: Snapshot;
+  assetId: string;
+  clip: SceneClip;
+  outputs: Output[];
+}): MadeClip | undefined {
+  const { snapshot, assetId } = options;
+  const sceneId = `video-${assetId}`;
+  const placed = snapshot.timelines
+    .flatMap((timeline) => timeline.tracks)
+    .flatMap((track) => (track.kind === "scene" ? track.clips : []))
+    .find((clip) => clip.sceneId === sceneId);
+  return placed === undefined
+    ? undefined
+    : {
+        assetId,
+        sceneClipId: placed.id,
+        startFrame: options.clip.startFrame,
+        outputs: options.outputs,
+      };
 }

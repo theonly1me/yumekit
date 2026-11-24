@@ -48,6 +48,7 @@ function toolNotFound(name: string): CallToolResult {
 function registerTools(options: {
   server: McpServer;
   engine: RunningEngine;
+  helperToken: string | undefined;
   events: EngineEvents;
   tools: Tool[];
 }): void {
@@ -91,6 +92,7 @@ function registerTools(options: {
           engine,
           method: "POST",
           path: `/api/tools/${encodeURIComponent(request.params.name)}`,
+          helperToken: options.helperToken,
           body: {
             input: request.params.arguments ?? {},
             ...(callId === undefined ? {} : { callId }),
@@ -104,11 +106,20 @@ function registerTools(options: {
   );
 }
 
-export async function serveBridge(
-  engine: RunningEngine,
-): Promise<CommandResult> {
+export async function serveBridge(options: {
+  engine: RunningEngine;
+  helperToken: string | undefined;
+}): Promise<CommandResult> {
+  const { engine, helperToken } = options;
   const listed = ListToolsResultSchema.safeParse(
-    (await engineRequest({ engine, method: "GET", path: "/api/tools" })).body,
+    (
+      await engineRequest({
+        engine,
+        method: "GET",
+        path: "/api/tools",
+        helperToken,
+      })
+    ).body,
   );
   if (!listed.success) {
     return failed(`The engine at ${engine.origin} gave no tool list.`);
@@ -127,7 +138,13 @@ export async function serveBridge(
   if (events === undefined) {
     return failed(`The engine at ${engine.origin} sends no events.`);
   }
-  registerTools({ server, engine, events, tools: listed.data.tools });
+  registerTools({
+    server,
+    engine,
+    helperToken,
+    events,
+    tools: listed.data.tools,
+  });
   server.server.onclose = () => {
     events.close();
     process.stdin.destroy();

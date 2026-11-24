@@ -20,6 +20,7 @@ export function engineRequest(options: {
   method: "GET" | "POST";
   path: string;
   body?: object;
+  helperToken?: string | undefined;
 }): Promise<EngineAnswer> {
   const answered = Promise.withResolvers<EngineAnswer>();
   const sent = request(
@@ -29,6 +30,9 @@ export function engineRequest(options: {
       headers: {
         authorization: `Bearer ${options.engine.token}`,
         "x-yumekit-client": "agent",
+        ...(options.helperToken === undefined
+          ? {}
+          : { "x-yumekit-helper": options.helperToken }),
         "content-type": "application/json",
       },
     },

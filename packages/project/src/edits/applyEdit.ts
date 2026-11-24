@@ -4,7 +4,7 @@ import { addAsset, removeAsset, setAssetWords } from "./assets.js";
 import { addClip, removeClip, updateClip } from "./clips.js";
 import type { Edit } from "./edit.js";
 import type { EditResult } from "./editFailure.js";
-import { putSharedCode, setFonts, setTempo } from "./filmSettings.js";
+import { putSharedCode, setFonts, setFrame, setTempo } from "./filmSettings.js";
 import { setLook } from "./look.js";
 import { setOutputPlatforms } from "./outputPlatforms.js";
 import { putScene, removeScene } from "./scenes.js";
@@ -41,6 +41,8 @@ export async function applyEdit(options: {
       return setTempo({ state, edit });
     case "setFonts":
       return setFonts({ state, edit });
+    case "setFrame":
+      return setFrame({ state, edit });
     case "putSharedCode":
       return putSharedCode({ state, edit });
     case "setScript":

@@ -81,11 +81,22 @@ function checkFontReferences(state: ProjectState): RuleFailure | undefined {
   return undefined;
 }
 
+function checkFrameReference(state: ProjectState): RuleFailure | undefined {
+  const { frame } = state.project;
+  if (frame === undefined || frame in state.sharedCode) return undefined;
+  return {
+    kind: "not-found",
+    message: `The project names the shared code "${frame}" as its frame, but it has no such shared code.`,
+    file: "project.json",
+  };
+}
+
 export function checkReferences(state: ProjectState): RuleFailure | undefined {
   return (
     checkTimelinesMatchOutputs(state) ??
     checkCastReferences(state) ??
     checkFontReferences(state) ??
+    checkFrameReference(state) ??
     checkModuleSceneCode(state)
   );
 }

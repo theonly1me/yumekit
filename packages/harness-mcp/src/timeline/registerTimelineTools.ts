@@ -9,19 +9,8 @@ import {
   personWorkSentence,
   removePersonWorkInput,
 } from "./personWorkInput.js";
-import { trackOf, wireTrack, type WireTrack } from "./wireTimeline.js";
-
-function transitionClipIdsOf(tracks: WireTrack[]): Set<string> {
-  const ids = new Set<string>();
-  for (const track of tracks) {
-    if (track.kind !== "scene") continue;
-    for (const clip of track.clips) {
-      if (clip.id !== undefined && clip.transition !== undefined)
-        ids.add(clip.id);
-    }
-  }
-  return ids;
-}
+import { timelineEditOf } from "./timelineEdit.js";
+import { wireTrack } from "./wireTimeline.js";
 
 function registerSetTimeline(context: HarnessContext): void {
   context.tools.add({
@@ -33,25 +22,16 @@ function registerSetTimeline(context: HarnessContext): void {
       remove_person_work: removePersonWorkInput,
     },
     run: ({ input: { output_id, tracks, remove_person_work } }) => {
-      const snapshot = context.store.read();
-      const { framesPerSecond } = snapshot.project;
-      const kept = withKeptTransitions({
-        before: snapshot.timelines.find(
-          (timeline) => timeline.outputId === output_id,
-        ),
-        tracks: tracks.map((track) => trackOf({ track, framesPerSecond })),
-        givenClipIds: transitionClipIdsOf(tracks),
+      const timeline = timelineEditOf({
+        snapshot: context.store.read(),
+        outputId: output_id,
+        tracks,
       });
       return applyEditsResult({
         store: context.store,
-        edits: [
-          {
-            kind: "setTimeline",
-            timeline: { outputId: output_id, tracks: kept.tracks },
-          },
-        ],
-        line: `Timeline of "${output_id}" set with ${String(tracks.length)} tracks.${keptLine(kept.keptCount)}`,
-        data: { kept_transitions: kept.keptCount },
+        edits: [timeline.edit],
+        line: `Timeline of "${output_id}" set with ${String(tracks.length)} tracks.${keptLine(timeline.keptCount)}`,
+        data: { kept_transitions: timeline.keptCount },
         keepPersonWork: remove_person_work !== true,
       });
     },

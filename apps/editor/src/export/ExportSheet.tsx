@@ -76,10 +76,6 @@ export function ExportSheet(props: {
   const [sharperKeys, setSharperKeys] = useState<ReadonlySet<string>>(
     () => new Set(),
   );
-  const sharperRows =
-    sharperChoice === undefined
-      ? []
-      : chosenRows.filter((row) => sharperKeys.has(row.key));
   const failureShownFor = new Set<string>();
   const [scale, setScale] = useState<ExportScale>(1);
 
@@ -176,7 +172,10 @@ export function ExportSheet(props: {
             onClick={() => {
               exports.start({
                 outputIds: outputIdsOf(chosenRows),
-                sharper: sharperRequestsOf(sharperRows),
+                sharper: sharperRequestsOf({
+                  rows: chosenRows.filter((row) => sharperKeys.has(row.key)),
+                  target: sharperChoice?.target,
+                }),
                 scale,
               });
             }}

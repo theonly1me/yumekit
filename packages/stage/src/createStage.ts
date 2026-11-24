@@ -66,6 +66,9 @@ export function createStage(options: StageOptions): Stage {
       atBack: visible.part.kind === "leaving",
     });
     box.dataset["sceneId"] = clip.sceneId;
+    if (clip.sceneId === project.frameSceneId) {
+      box.style.pointerEvents = "none";
+    }
     try {
       const sceneModule = await loadScene(clip.sceneId);
       guards.seedRandom(randomSeedOf(visible));

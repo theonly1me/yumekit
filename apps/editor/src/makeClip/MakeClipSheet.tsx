@@ -84,9 +84,9 @@ export function MakeClipSheet(props: {
     scenePicture,
     onMade: media.reload,
   });
-  const { phase, setPhase } = making;
+  const { phase } = making;
   const clearFailure = () => {
-    if (phase.kind === "failed") setPhase({ kind: "editing" });
+    if (phase.kind === "failed") making.reset();
   };
 
   return (
@@ -108,7 +108,7 @@ export function MakeClipSheet(props: {
                 sceneId: `video-${phase.made.assetId}`,
               });
               setDraft({ ...draft, firstPicture: { kind: "scene" } });
-              setPhase({ kind: "editing" });
+              making.reset();
             }}
           />
         ) : (
@@ -143,6 +143,11 @@ export function MakeClipSheet(props: {
               setDraft({ ...draft, ...change });
             }}
             phase={phase}
+            leadMissing={
+              making.readiness.kind === "missing"
+                ? making.readiness.message
+                : undefined
+            }
             onMake={() => {
               if (choice === undefined) return;
               making.make({ choice, values, draft });

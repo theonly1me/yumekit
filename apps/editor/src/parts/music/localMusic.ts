@@ -1,9 +1,10 @@
-import type { EngineClient } from "../../engine/engineClient.js";
 import type { Snapshot } from "../../engine/snapshot.js";
-import { changeProject } from "../../scenes/directChange.js";
+import {
+  musicStyleRequest,
+  type ExactRequest,
+} from "../../lead/exactRequests.js";
 import { musicTracksOf } from "../../sound/soundRowFacts.js";
 import type { MediaServers } from "../../tools/mediaServers.js";
-import type { SoundChange } from "../sound/soundChanges.js";
 import { lengthWithoutTrack } from "../sound/soundTimelines.js";
 import { musicFactsOf } from "./musicFacts.js";
 
@@ -84,40 +85,42 @@ function freeAssetIdOf(options: { snapshot: Snapshot; style: string }): string {
   return id;
 }
 
-export async function makeLocalMusic(options: {
-  client: EngineClient;
+export function musicRequestOf(options: {
   snapshot: Snapshot;
   style: MusicStyle;
   seed: number;
-}): Promise<SoundChange> {
-  const { client, snapshot, style } = options;
-  const actId = crypto.randomUUID();
-  const made = await changeProject({
-    client,
-    name: "generate_asset",
-    actId,
-    input: {
-      asset_id: freeAssetIdOf({ snapshot, style: style.choice }),
-      capability: "music",
-      server: localMusicServer,
-      input: {
-        prompt: `${style.label} music`,
-        style: style.choice,
-        seed: options.seed,
-        duration_seconds: videoSecondsOf(snapshot),
-      },
-    },
-  });
-  if (made.kind === "failed") return made;
-  const assetId = made.data["asset_id"];
-  if (typeof assetId !== "string") {
-    return { kind: "failed", message: "The music did not get a file." };
-  }
-  const placed = await changeProject({
-    client,
-    name: "replace_music",
-    actId,
-    input: { asset_id: assetId },
-  });
-  return placed.kind === "failed" ? placed : { kind: "done" };
+}): { assetId: string; request: ExactRequest } {
+  const { snapshot, style } = options;
+  const assetId = freeAssetIdOf({ snapshot, style: style.choice });
+  return {
+    assetId,
+    request: musicStyleRequest({
+      styleLabel: style.label,
+      seed: options.seed,
+      steps: [
+        {
+          tool: "generate_asset",
+          input: {
+            asset_id: assetId,
+            capability: "music",
+            server: localMusicServer,
+            input: {
+              prompt: `${style.label} music`,
+              style: style.choice,
+              seed: options.seed,
+              duration_seconds: videoSecondsOf(snapshot),
+            },
+          },
+        },
+        { tool: "replace_music", input: { asset_id: assetId } },
+      ],
+    }),
+  };
+}
+
+export function isMusicInUse(options: {
+  snapshot: Snapshot;
+  assetId: string;
+}): boolean {
+  return musicFactsOf(options.snapshot).asset?.id === options.assetId;
 }

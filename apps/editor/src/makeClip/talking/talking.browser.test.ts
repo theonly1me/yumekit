@@ -12,6 +12,7 @@ import {
   sceneClipsOf,
   withoutOtherBundled,
 } from "../../testing/mediaTestTools.js";
+import { followingLeadScenario } from "../../testing/fakeAgent.js";
 import { runEngine, type RunningEngine } from "../../testing/runEngine.js";
 
 let engine: RunningEngine | undefined;
@@ -115,6 +116,10 @@ describe("Make this person talk", () => {
     await editor.close();
   });
   it("makes the cast person speak the voice of the scene, puts the clip in the scene, and turns the voice down there", async () => {
+    await setScenario({
+      engine: runningEngine(),
+      scenario: followingLeadScenario,
+    });
     for (const outputId of ["wide", "tall"]) {
       await runningEngine().callTool({
         name: "place_narration",

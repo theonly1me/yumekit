@@ -7,10 +7,12 @@ export type FakeStep =
   | { print: string }
   | { callTool: { name: string; input: object } }
   | { waitForStop: { print: string[] } }
-  | { waitForFile: string };
+  | { waitForFile: string }
+  | { followRequest: true };
 
 export interface FakeAgentScenario {
   steps: FakeStep[];
+  helperSteps?: FakeStep[];
   exitCode?: number;
   signedIn?: boolean;
 }
@@ -139,4 +141,17 @@ export const claudeLines = {
       total_cost_usd: 0.002,
       result: message,
     }),
+};
+
+export const followingLeadScenario: FakeAgentScenario = {
+  steps: [
+    { print: claudeLines.init },
+    { followRequest: true },
+    {
+      print: claudeLines.whole(
+        "Done. I made it with the choices of the sheet.",
+      ),
+    },
+    { print: claudeLines.result("completed") },
+  ],
 };

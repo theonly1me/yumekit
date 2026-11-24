@@ -6,6 +6,7 @@ const changingPlatforms = "Changing the platforms";
 const lookingAtTheVideo = "Looking at the video";
 
 const sentencesByTool: Record<string, string> = {
+  get_work: "Reading the whole video",
   get_project: reading,
   get_timeline: reading,
   get_scene: reading,
@@ -46,6 +47,8 @@ const sentencesByTool: Record<string, string> = {
   set_look: "Changing the look",
   set_tempo: "Setting the beat",
   put_shared_code: "Writing the parts that scenes share",
+  put_work: "Writing the video as one piece",
+  ask_helper: "A helper made a part of the video",
   set_fonts: "Choosing the fonts",
   set_transitions: "Setting how the scenes change",
   preview_frame: lookingAtTheVideo,

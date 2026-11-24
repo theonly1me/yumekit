@@ -18,7 +18,7 @@ function keepStdoutForMessages(): void {
 export async function mcpCommand(args: string[]): Promise<CommandResult> {
   const parsed = parseCommandLine({
     args,
-    config: { project: { type: "string" } },
+    config: { project: { type: "string" }, helper: { type: "string" } },
   });
   if (!parsed.ok) return usageError(parsed.message);
   const projectArgument = stringOption({
@@ -28,10 +28,16 @@ export async function mcpCommand(args: string[]): Promise<CommandResult> {
   if (projectArgument === undefined || parsed.value.positionals.length > 0) {
     return usageError("mcp needs --project <folder>.");
   }
+  const helperToken = stringOption({
+    values: parsed.value.values,
+    name: "helper",
+  });
   keepStdoutForMessages();
   const folder = resolve(projectArgument);
   const runningEngine = await findRunningEngine(folder);
-  if (runningEngine !== undefined) return serveBridge(runningEngine);
+  if (runningEngine !== undefined) {
+    return serveBridge({ engine: runningEngine, helperToken });
+  }
   const opened = await openProject({ folder });
   if (!opened.ok) return failed(opened.failure.message);
   const connected = await connectMediaTools({

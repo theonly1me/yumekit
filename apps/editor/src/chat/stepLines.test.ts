@@ -55,4 +55,25 @@ describe("the plain lines for the steps of an answer", () => {
       "Getting the natural voice, one time, 148 MB: 50 percent",
     ]);
   });
+
+  it("names a helper of the AI as one step of the AI, with its work while it runs", () => {
+    const lines = stepLinesOf([
+      {
+        callId: "helper",
+        tool: "ask_helper",
+        state: "running",
+        progress: { done: 0, message: "A helper works on 1 scene" },
+      },
+    ]);
+    const done = stepLinesOf([
+      { callId: "helper", tool: "ask_helper", state: "done" },
+    ]);
+
+    expect(lines.map((line) => line.text)).toEqual([
+      "A helper works on 1 scene",
+    ]);
+    expect(done.map((line) => line.text)).toEqual([
+      "A helper made a part of the video",
+    ]);
+  });
 });

@@ -32,12 +32,17 @@ import { registerSetTempo } from "../tempo/registerSetTempo.js";
 import { registerReplaceMusic } from "../replace/registerReplaceMusic.js";
 import { registerReplaceNarration } from "../replace/registerReplaceNarration.js";
 import { registerSetTransitions } from "../transitions/registerSetTransitions.js";
+import { registerGetWork } from "../work/registerGetWork.js";
+import { registerPutWork } from "../work/registerPutWork.js";
+import type { AskHelper } from "../helpers/helperTypes.js";
+import { registerAskHelper } from "../helpers/registerAskHelper.js";
 import { callerStore } from "./callerStore.js";
 import { createToolTable, type HarnessTool } from "./toolTable.js";
 
 export interface HarnessOptions {
   store: ProjectStore;
   mediaTools: MediaTools;
+  askHelper?: AskHelper;
 }
 
 export function harnessToolsOf(
@@ -54,6 +59,7 @@ export function harnessToolsOf(
     pictures: options.pictures,
     store: callerStore({ store: options.store, callerOf: options.callerOf }),
   };
+  registerGetWork(context);
   registerProjectReadTools(context);
   registerAssetReadTools(context);
   registerReferenceTools(context);
@@ -66,6 +72,7 @@ export function harnessToolsOf(
   registerSetTempo(context);
   registerPutScene(context);
   registerPutSharedCode(context);
+  registerPutWork(context);
   registerSetFonts(context);
   registerTimelineTools(context);
   registerNarrationAndHistoryTools(context);
@@ -85,5 +92,6 @@ export function harnessToolsOf(
   registerContactSheet(context);
   registerRenderTools(context);
   registerSharperCopy(context);
+  registerAskHelper({ ...context, askHelper: options.askHelper });
   return context.tools.tools();
 }

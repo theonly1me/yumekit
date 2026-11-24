@@ -12,6 +12,7 @@ export interface StageProject {
   output: SceneOutput;
   scenes: { id: string; props: JsonObject }[];
   sceneTracks: SceneClip[][];
+  frameSceneId?: string;
   assets: Record<string, SceneAsset>;
 }
 

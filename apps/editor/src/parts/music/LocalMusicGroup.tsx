@@ -1,18 +1,32 @@
-import { useState } from "react";
 import type { EngineClient } from "../../engine/engineClient.js";
 import type { Snapshot } from "../../engine/snapshot.js";
 import { useMediaServers } from "../../tools/useMediaServers.js";
+import { useLeadMaking, type LeadPhase } from "../../lead/useLeadMaking.js";
 import type { SoundStatus } from "../sound/useSoundActions.js";
 import { StatusLine } from "../sound/StatusLine.js";
 import {
+  isMusicInUse,
   localMusicPickOf,
-  makeLocalMusic,
+  musicRequestOf,
   musicStylesOf,
   newSeedOf,
   videoSecondsOf,
   type MusicStyle,
 } from "./localMusic.js";
 import "./localMusic.css";
+
+function statusOf(phase: LeadPhase<string>): SoundStatus {
+  switch (phase.kind) {
+    case "editing":
+      return { kind: "idle" };
+    case "making":
+      return { kind: "working", text: "The AI is making the music." };
+    case "made":
+      return { kind: "done", text: `The video now has ${phase.made} music.` };
+    case "failed":
+      return { kind: "failed", text: phase.failure.message };
+  }
+}
 
 export function LocalMusicGroup(props: {
   client: EngineClient;
@@ -21,33 +35,26 @@ export function LocalMusicGroup(props: {
 }) {
   const { client, snapshot } = props;
   const { state } = useMediaServers(client);
-  const [status, setStatus] = useState<SoundStatus>({ kind: "idle" });
+  const making = useLeadMaking<string>({ client });
   if (state.kind !== "ready") return null;
   const styles = musicStylesOf(state.servers);
   if (styles.length === 0) return null;
   const current = localMusicPickOf(snapshot);
   const hasVideo = videoSecondsOf(snapshot) > 0;
+  const { phase, readiness } = making;
+  const status = statusOf(phase);
   const isWorking = status.kind === "working";
-  const isOff = props.locked || isWorking || !hasVideo;
+  const isOff =
+    props.locked || isWorking || !hasVideo || readiness.kind === "missing";
   const make = (options: { style: MusicStyle; seed: number }) => {
-    setStatus({
-      kind: "working",
-      text: `Making ${options.style.label} music.`,
+    const { assetId, request } = musicRequestOf({ snapshot, ...options });
+    making.make({
+      exact: request,
+      find: (latest) =>
+        isMusicInUse({ snapshot: latest, assetId })
+          ? options.style.label
+          : undefined,
     });
-    makeLocalMusic({ client, snapshot, ...options })
-      .then((outcome) => {
-        setStatus(
-          outcome.kind === "done"
-            ? {
-                kind: "done",
-                text: `The video now has ${options.style.label} music.`,
-              }
-            : { kind: "failed", text: outcome.message },
-        );
-      })
-      .catch((error: unknown) => {
-        setStatus({ kind: "failed", text: String(error) });
-      });
   };
   const currentStyle = styles.find((style) => style.choice === current?.style);
   return (
@@ -103,6 +110,9 @@ export function LocalMusicGroup(props: {
           <span className="fact">Another version of {currentStyle.label}.</span>
         )}
       </div>
+      {readiness.kind === "missing" ? (
+        <p className="fact">{readiness.message}</p>
+      ) : undefined}
       <StatusLine status={status} />
     </section>
   );

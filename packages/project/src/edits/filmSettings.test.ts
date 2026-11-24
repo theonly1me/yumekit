@@ -102,4 +102,25 @@ describe("tempo, fonts, and shared code of a project", () => {
     });
     expect(opened.ok && opened.value.read().scenes).toEqual([]);
   });
+
+  it("setFrame names shared code as the frame, refuses a name with no shared code, and undo removes it", async () => {
+    const store = await createTestProject();
+    await store.applyEdits([
+      { kind: "putSharedCode", name: "frame", code: "export default 1;\n" },
+    ]);
+
+    const missing = await store.applyEdits([
+      { kind: "setFrame", name: "grid" },
+    ]);
+    await store.applyEdits([{ kind: "setFrame", name: "frame" }]);
+    const named = store.read().project.frame;
+    await store.undo();
+
+    expect(missing).toMatchObject({
+      ok: false,
+      failure: { kind: "not-found" },
+    });
+    expect(named).toBe("frame");
+    expect(store.read().project.frame).toBeUndefined();
+  });
 });

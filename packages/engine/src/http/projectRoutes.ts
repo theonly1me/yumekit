@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { personSummaryOf } from "../chat/personSummary.js";
 import { anySegment, type Exchange, type Route } from "./exchange.js";
+import { helperRefusalOf, helperTokenOf, toolsFor } from "./helperCalls.js";
 import { readJsonBody } from "./readJsonBody.js";
 import { noCallNote } from "../chat/stepNotes.js";
 import { notFound, sendJson } from "./responses.js";
@@ -49,7 +50,14 @@ async function callTool(exchange: Exchange) {
   if (!body.ok) return body.failure;
   const { input, callId, actId } = body.value;
   const isAgent = exchange.request.headers[clientHeader] === agentClient;
-  const note = isAgent ? context.chat.noteAiCall(name) : noCallNote;
+  const helper = context.chat.helperCallOf(helperTokenOf(exchange));
+  const refusal = helperRefusalOf({ helper, tool: name, input });
+  if (refusal !== undefined) {
+    sendBody({ exchange, body: refusal });
+    return undefined;
+  }
+  const isLead = isAgent && helper.kind === "lead";
+  const note = isLead ? context.chat.noteAiCall(name) : noCallNote;
   const result = await context.chat.runToolCall({
     caller: isAgent
       ? { by: "ai", tool: name }
@@ -76,6 +84,9 @@ async function callTool(exchange: Exchange) {
       }),
   });
   note.finish(personReasonOf(result));
+  if (helper.kind === "helper" && !result.isError) {
+    helper.record({ tool: name, input });
+  }
   sendBody({ exchange, body: result });
   return undefined;
 }
@@ -122,7 +133,12 @@ export const projectRoutes: Route[] = [
     method: "GET",
     pattern: ["api", "tools"],
     handle: (exchange) => {
-      sendBody({ exchange, body: { tools: exchange.context.harness.tools } });
+      sendBody({
+        exchange,
+        body: {
+          tools: toolsFor({ exchange, tools: exchange.context.harness.tools }),
+        },
+      });
       return Promise.resolve(undefined);
     },
   },
