@@ -2,7 +2,7 @@ import { z } from "zod";
 import { platformIds } from "../platforms/catalog.js";
 import { projectFontSchema, sharedCodeNameSchema } from "./fonts.js";
 import { highestTempo, lowestTempo } from "../tempo/index.js";
-import { lookSchema } from "./look.js";
+import { lookColorsSchema, lookSchema } from "./look.js";
 import { idSchema } from "./values.js";
 
 export const platformIdSchema = z.enum(platformIds);
@@ -36,6 +36,8 @@ export const projectSchema = z.strictObject({
   tempo: z.number().min(lowestTempo).max(highestTempo).exactOptional(),
   fonts: z.array(projectFontSchema).min(1).exactOptional(),
   frame: sharedCodeNameSchema.exactOptional(),
+  lookColors: lookColorsSchema.exactOptional(),
+  lookFont: projectFontSchema.shape.family.exactOptional(),
 });
 
 export type Output = z.infer<typeof outputSchema>;

@@ -64,13 +64,19 @@ export function oneColorsOf(options: {
   });
 }
 
+export type SheetPictureType = "png" | "jpeg";
+
 export function drawSheet(options: {
   browser: Browser;
   html: string;
   size: { widthPixels: number; heightPixels: number };
+  pictureType?: SheetPictureType;
 }): Promise<Uint8Array> {
   return onPlainPage({
     ...options,
-    work: (page) => page.screenshot({ type: "png" }),
+    work: (page) =>
+      options.pictureType === "jpeg"
+        ? page.screenshot({ type: "jpeg", quality: 86 })
+        : page.screenshot({ type: "png" }),
   });
 }

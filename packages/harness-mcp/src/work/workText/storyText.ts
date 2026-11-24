@@ -29,6 +29,14 @@ function castLines(snapshot: ProjectSnapshot): string[] {
   ];
 }
 
+function ownLookLine(project: ProjectSnapshot["project"]): string {
+  const colors =
+    project.lookColors === undefined
+      ? "the colors of the look"
+      : `background ${project.lookColors.background}, text ${project.lookColors.text}, muted ${project.lookColors.muted}, accent ${project.lookColors.accent}`;
+  return `Kit scene colors: ${colors}. Kit scene font: ${project.lookFont ?? "the fonts of the look"}.`;
+}
+
 export function storyText(snapshot: ProjectSnapshot): string {
   const { project, bible } = snapshot;
   const fonts = (project.fonts ?? [])
@@ -37,6 +45,7 @@ export function storyText(snapshot: ProjectSnapshot): string {
   return [
     "## Story",
     `Name: ${project.name}. Video style: ${videoStyleOf(project)}. Look: ${lookOf(project)}${isCalm(project) ? ", calm" : ""}.`,
+    ownLookLine(project),
     tempoLine(snapshot),
     `Frame: ${project.frame === undefined ? "none" : `shared code "${project.frame}", drawn over the whole video`}.`,
     `Fonts: ${fonts === "" ? "the fonts of the look" : fonts}.`,

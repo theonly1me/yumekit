@@ -1,4 +1,8 @@
-import { activateLook, calmKitScenesOf, kitScenesOf } from "@yumekit/scene-kit";
+import {
+  activateLook,
+  kitScenesOfPack,
+  stylePackOfPage,
+} from "@yumekit/scene-kit";
 import { createStage, type StageOptions } from "@yumekit/stage";
 import { guardScene } from "./guardScene.js";
 import { loadSceneModule } from "./loadSceneModule.js";
@@ -9,10 +13,9 @@ import type { SeekResult, StagePageData } from "./stagePageData.js";
 const sceneTimeoutMilliseconds = 30_000;
 
 function kitScenesOfPage(pageData: StagePageData): unknown {
-  activateLook(pageData.look);
-  return pageData.calm
-    ? calmKitScenesOf(pageData.look)
-    : kitScenesOf(pageData.look);
+  const look = { look: pageData.look, own: pageData.ownLook };
+  activateLook(stylePackOfPage({ ...look, calm: false }));
+  return kitScenesOfPack(stylePackOfPage({ ...look, calm: pageData.calm }));
 }
 
 export interface PageStage {

@@ -8,6 +8,7 @@ export interface FileRowActions {
   onDownload: (row: FileRow) => void;
   onRemove: (row: FileRow) => void;
   onUse: (row: FileRow) => void;
+  onUseFont: (row: FileRow) => void;
 }
 
 function requestNameOf(row: FileRow): string {
@@ -35,7 +36,19 @@ export function FileRowView(props: {
         </span>
       </div>
       <div className="file-actions">
-        {isUsed ? undefined : (
+        {row.asset.kind !== "font" || row.isVideoFont ? undefined : (
+          <button
+            type="button"
+            aria-label={`Use ${row.name} as the font of the video`}
+            disabled={actions.isOff}
+            onClick={() => {
+              actions.onUseFont(row);
+            }}
+          >
+            Use as the font
+          </button>
+        )}
+        {isUsed || row.asset.kind === "font" ? undefined : (
           <button
             type="button"
             aria-label={`Use ${row.name} in the video`}

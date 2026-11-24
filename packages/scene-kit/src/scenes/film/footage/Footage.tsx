@@ -9,6 +9,7 @@ import { labelRowHeight, MediaWindow } from "../../../film/MediaWindow.js";
 import { placeMedia } from "../../../film/mediaPlacement.js";
 import { regionAspect, viewOf } from "../../../film/regionView.js";
 import { regionAtFrame } from "./cameraPath.js";
+import { FootageItems, placeWithItems } from "./FootageItems.js";
 import { footageShotOf, spreadFrames } from "./placeStops.js";
 import { readFootageProps } from "./readFootageProps.js";
 
@@ -19,7 +20,13 @@ export function Footage(props: { props: JsonObject }): ReactNode {
   const hasHeading = footage.heading !== undefined;
   const grid = useFilmGrid({ hasHeading });
   const windowBeat = hasHeading ? 0.5 : 0;
-  const timing = useFilmTiming({ lastEntryBeat: windowBeat });
+  const hasItems = footage.items.length > 0;
+  const firstItemBeat = windowBeat + 1;
+  const timing = useFilmTiming({
+    lastEntryBeat: hasItems
+      ? firstItemBeat + footage.items.length - 1
+      : windowBeat,
+  });
   const { findAsset, durationFrames } = useSceneContext();
   const media = filmMediaOf({ findAsset, assetId: footage.assetId });
   const shot = footageShotOf({
@@ -33,12 +40,18 @@ export function Footage(props: { props: JsonObject }): ReactNode {
     region: firstRegion?.region ?? { x: 0, y: 0, width: 1, height: 1 },
     pictureAspect: media.aspect,
   });
-  const placement = placeMedia({
-    grid,
-    aspect: boxAspect,
-    hasHeading,
-    labelHeight: labelRowHeight(grid),
-  });
+  const labelHeight = labelRowHeight(grid);
+  const withItems = hasItems
+    ? placeWithItems({
+        grid,
+        aspect: boxAspect,
+        labelHeight,
+        itemCount: footage.items.length,
+      })
+    : undefined;
+  const placement = withItems
+    ? { box: withItems.box, heading: grid.heading }
+    : placeMedia({ grid, aspect: boxAspect, hasHeading, labelHeight });
   const { box } = placement;
   const frames = spreadFrames({
     frames: shot.regions.map((entry) => entry.frame),
@@ -81,6 +94,15 @@ export function Footage(props: { props: JsonObject }): ReactNode {
           {...(view === undefined ? {} : { view })}
         />
       </MediaWindow>
+      {withItems === undefined ? null : (
+        <FootageItems
+          items={footage.items}
+          box={withItems.items}
+          grid={grid}
+          timing={timing}
+          firstBeat={firstItemBeat}
+        />
+      )}
     </>
   );
 }

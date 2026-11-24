@@ -81,7 +81,7 @@ describe("a chat request", () => {
       expect.objectContaining({
         kind: "change",
         by: "ai",
-        summary: "I will write the script.",
+        summary: "Done. The script now says ready.",
         undoSteps: 2,
         undone: false,
       }),

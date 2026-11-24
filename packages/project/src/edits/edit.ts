@@ -9,7 +9,7 @@ import {
   videoStyleSchema,
 } from "../format/project.js";
 import { projectFontSchema, sharedCodeNameSchema } from "../format/fonts.js";
-import { lookSchema } from "../format/look.js";
+import { lookColorsSchema, lookSchema } from "../format/look.js";
 import { sceneSchema } from "../format/scene.js";
 import {
   audioClipSchema,
@@ -58,6 +58,8 @@ export const editSchema = z.discriminatedUnion("kind", [
     kind: z.literal("setLook"),
     look: lookSchema,
     calm: z.boolean().exactOptional(),
+    colors: lookColorsSchema.nullable().exactOptional(),
+    font: projectFontSchema.shape.family.nullable().exactOptional(),
   }),
   z.strictObject({
     kind: z.literal("setTempo"),

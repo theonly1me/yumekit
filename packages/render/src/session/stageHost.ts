@@ -1,5 +1,9 @@
 import type { Asset } from "@yumekit/project";
-import { drawSheet, oneColorsOf } from "../browser/drawSheet.js";
+import {
+  drawSheet,
+  oneColorsOf,
+  type SheetPictureType,
+} from "../browser/drawSheet.js";
 import { launchBrowser } from "../browser/launchBrowser.js";
 import {
   openStagePage,
@@ -26,6 +30,7 @@ export interface StageHost {
   drawSheet: (options: {
     html: string;
     size: { widthPixels: number; heightPixels: number };
+    pictureType?: SheetPictureType;
   }) => Promise<Uint8Array>;
   oneColorsOf: (pngs: Uint8Array[]) => Promise<(string | null)[]>;
   isConnected: () => boolean;

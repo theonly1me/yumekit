@@ -5,7 +5,7 @@ import {
   footageSchema,
   footageStop,
 } from "../../../schemas/film/footage.js";
-import { readFilmHeading } from "../readFilmProps.js";
+import { readFilmHeading, readTexts } from "../readFilmProps.js";
 
 export function readFootageProps(props: JsonObject) {
   const { shape } = footageSchema.props;
@@ -50,6 +50,11 @@ export function readFootageProps(props: JsonObject) {
         value: props["window"],
         fallback: "plain" as const,
       }) ?? "plain",
+    items: readTexts({
+      value: props["items"],
+      maxItems: footageLimits.items,
+      maxLength: footageLimits.itemLength,
+    }).filter((item) => item !== ""),
   };
 }
 

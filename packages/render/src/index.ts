@@ -25,6 +25,10 @@ export {
   type PictureRenderer,
 } from "./pictures/createPictureRenderer.js";
 export type {
+  AssetSheet,
+  AssetSheetRequest,
+} from "./assetSheet/drawAssetSheet.js";
+export type {
   ContactSheet,
   ContactSheetRequest,
   SheetFrame,

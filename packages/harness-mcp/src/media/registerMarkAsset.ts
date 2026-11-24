@@ -66,7 +66,7 @@ export function registerMarkAsset(context: HarnessContext): void {
   context.tools.add({
     name: "mark_asset",
     description:
-      "Name a part or a moment of a video or image asset, for example the prompt box of a screen recording at 2.5 seconds. A mark with the same name replaces the old one. The footage kit scene takes the name as mark in place of region and startSeconds, and look-swap takes it in marks. Look at the asset with preview_frames or a contact sheet first to find the region.",
+      "Name a part or a moment of a video or image asset, for example the prompt box of a screen recording at 2.5 seconds. A mark with the same name replaces the old one. The footage kit scene takes the name as mark in place of region and startSeconds, and look-swap takes it in marks. Look at the asset with preview_assets first to find the region and the time: it shows the frames with their times, and a region to look closer.",
     inputSchema: markAssetInput,
     run: ({ input }) => markAsset({ context, input }),
   });

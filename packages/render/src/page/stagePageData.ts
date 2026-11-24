@@ -1,4 +1,4 @@
-import type { LookId } from "@yumekit/scene-kit";
+import type { LookId, OwnLook } from "@yumekit/scene-kit";
 import type { StageProject } from "@yumekit/stage";
 import type { FrameFindings } from "./frameFindings.js";
 
@@ -15,6 +15,7 @@ export interface PageFont {
 export interface StagePageData {
   look: LookId;
   calm: boolean;
+  ownLook: OwnLook;
   fonts: PageFont[];
   project: StageProject;
   sceneSources: Record<string, PageSceneSource>;

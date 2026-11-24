@@ -132,9 +132,11 @@ function checkSceneCode(options: {
 
 Video: H.264, `yuv420p`, constant rate factor 18, with `-movflags +faststart`. The frame rate is the frame rate of the project. The container is MP4.
 
-Audio: FFmpeg reads each audio clip of the output as an input. For each clip it trims to `assetStartFrame` and `durationFrames`, delays to `startFrame`, and applies `gainDecibels`. It mixes all clips with no automatic level change. The audio codec is AAC at 192 kbit/s, 48 kHz, stereo. An output with no audio clip gets no audio stream.
+Audio: FFmpeg reads each audio clip of the output as an input. For each clip it trims to `assetStartFrame` and `durationFrames`, delays to `startFrame`, and applies `gainDecibels`. It mixes all clips. The audio codec is AAC at 192 kbit/s, 48 kHz, stereo. An output with no audio clip gets no audio stream.
 
 A render of a frame range includes only the audio inside that range.
+
+Loudness (decision of WP63, document 19): the finished video aims at -14 LUFS integrated with a true peak of at most -1 dB, the level of a film on a video platform. The renderer decides it, not each media tool, because only the mix knows the music, the voice, the sounds, and the gain of each clip together. Before the encode, FFmpeg measures the mix of the whole output once with `loudnorm` (`print_format=json`): the integrated loudness and the true peak. The renderer then adds one fixed gain to the whole mix, `-14 - I`, at most 24 dB up or down, rounded to 0.01 dB. When the true peak plus the gain passes -1 dB, a limiter (`alimiter`, ceiling 0.8414, about -1.5 dBFS, attack 5 ms, release 50 ms, no auto level) follows the gain. One gain for the whole mix keeps the balance between the voice and the music. A render of a frame range uses the gain of the whole output, so a part sounds as it does in the whole video. The measure and the gain are pure functions of the files, so the same project gives the same sound on each render. A mix that is silent, or a measure that fails, keeps its level.
 
 The audio stream has the same length as the video stream, within one frame. Silence fills each part with no clip. A test checks the length of the audio stream with `ffprobe`.
 

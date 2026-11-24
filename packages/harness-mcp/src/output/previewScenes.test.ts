@@ -26,6 +26,23 @@ function imagesOf(call: ToolCall) {
 }
 
 describe("preview_scenes", () => {
+  it("names the outputs that exist when the output id is wrong", async () => {
+    const harness = await tallHarnessWithUnplacedScene();
+    await harness.call({
+      name: "add_platform",
+      arguments: { platform_id: "youtube" },
+    });
+
+    const result = await harness.call({
+      name: "preview_scenes",
+      arguments: { output_id: "square", scene_ids: ["intro"] },
+    });
+
+    expect(result.data["kind"]).toBe("output-not-found");
+    expect(result.text).toContain("tall");
+    expect(result.text).toContain("Use one of the output ids");
+  });
+
   it(
     "draws a scene with no clip at the size of the output and the scale",
     async () => {

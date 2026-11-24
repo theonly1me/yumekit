@@ -7,8 +7,8 @@ export const StylePackContext = createContext<StylePack | undefined>(undefined);
 
 let stylePackOfPage: StylePack = paperStylePack;
 
-export function activateLook(look: string): StylePack {
-  stylePackOfPage = stylePackOf(look);
+export function activateLook(look: string | StylePack): StylePack {
+  stylePackOfPage = typeof look === "string" ? stylePackOf(look) : look;
   return stylePackOfPage;
 }
 

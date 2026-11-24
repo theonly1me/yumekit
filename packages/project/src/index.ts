@@ -7,7 +7,13 @@ export {
   type Project,
   type VideoStyle,
 } from "./format/project.js";
-export { isCalm, lookIds, lookOf, type LookId } from "./format/look.js";
+export {
+  isCalm,
+  lookIds,
+  lookOf,
+  type LookColors,
+  type LookId,
+} from "./format/look.js";
 export { fontStyles, type ProjectFont } from "./format/fonts.js";
 export {
   beatFramesOfSpan,

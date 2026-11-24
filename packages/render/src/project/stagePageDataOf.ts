@@ -113,6 +113,14 @@ export async function stagePageDataOf(
   return {
     look: lookOf(snapshot.project),
     calm: isCalm(snapshot.project),
+    ownLook: {
+      ...(snapshot.project.lookColors === undefined
+        ? {}
+        : { colors: snapshot.project.lookColors }),
+      ...(snapshot.project.lookFont === undefined
+        ? {}
+        : { font: snapshot.project.lookFont }),
+    },
     fonts: pageFontsOf({ folder, snapshot }),
     project: {
       framesPerSecond: snapshot.project.framesPerSecond,

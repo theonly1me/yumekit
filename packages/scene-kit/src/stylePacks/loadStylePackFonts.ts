@@ -2,14 +2,15 @@ import type { StyleFont, StylePack } from "./stylePack.js";
 
 const loadingByPack = new Map<string, Promise<void>>();
 
-function fontFaceRule(font: StyleFont): string {
+function fontFaceRule(options: { font: StyleFont; file: URL }): string {
+  const { font, file } = options;
   return [
     "@font-face {",
     `font-family: "${font.family}";`,
     "font-style: normal;",
     `font-weight: ${String(font.weight)};`,
     "font-display: block;",
-    `src: url("${font.file.href}") format("woff2");`,
+    `src: url("${file.href}") format("woff2");`,
     "}",
   ].join(" ");
 }
@@ -26,7 +27,11 @@ async function declareAndLoad(stylePack: StylePack): Promise<void> {
   const fonts = [stylePack.fonts.display, stylePack.fonts.body];
   const style = document.createElement("style");
   style.dataset["yumekitStylePack"] = stylePack.name;
-  style.textContent = fonts.map(fontFaceRule).join("\n");
+  style.textContent = fonts
+    .flatMap((font) =>
+      font.file === undefined ? [] : [fontFaceRule({ font, file: font.file })],
+    )
+    .join("\n");
   document.head.append(style);
   await Promise.all(fonts.map(loadFont));
 }

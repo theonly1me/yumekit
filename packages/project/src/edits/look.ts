@@ -8,12 +8,19 @@ export function setLook(options: {
   edit: EditOfKind<"setLook">;
 }): EditResult {
   const { state, edit } = options;
+  const { lookColors, lookFont, ...project } = state.project;
+  const colors = edit.colors === undefined ? lookColors : edit.colors;
+  const font = edit.font === undefined ? lookFont : edit.font;
   return succeed({
     ...state,
     project: {
-      ...state.project,
+      ...project,
       look: edit.look,
       ...(edit.calm === undefined ? {} : { calm: edit.calm }),
+      ...(colors === undefined || colors === null
+        ? {}
+        : { lookColors: colors }),
+      ...(font === undefined || font === null ? {} : { lookFont: font }),
     },
   });
 }

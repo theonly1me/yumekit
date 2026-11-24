@@ -34,6 +34,8 @@ function registerGetProject(context: HarnessContext): void {
           video_style: videoStyleOf(project),
           look: lookOf(project),
           calm: isCalm(project),
+          look_colors: project.lookColors ?? null,
+          look_font: project.lookFont ?? null,
           ...tempoFactsOf(project),
           fonts: (project.fonts ?? []).map((font) => ({
             asset_id: font.assetId,

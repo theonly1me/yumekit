@@ -7,7 +7,12 @@ import {
   optionalRegion,
 } from "./shared.js";
 
-export const footageLimits = { stops: 4, speed: 4 } as const;
+export const footageLimits = {
+  stops: 4,
+  speed: 4,
+  items: 4,
+  itemLength: 40,
+} as const;
 
 export const footageWindows = ["plain", "none"] as const;
 
@@ -36,7 +41,7 @@ export const footageStop = z
 
 export const footageSchema = {
   purpose:
-    "One screen recording, video, or picture, cut to the region that matters and shown large, in a plain window, with an optional headline. Use a region or a mark so that small text in a recording reads on a phone. With stops, the view moves from region to region on the beat.",
+    "One screen recording, video, or picture, cut to the region that matters and shown large, in a plain window, with an optional headline and up to 4 short lines beside it. Use a region or a mark so that small text in a recording reads on a phone. Find the region with preview_assets first. With stops, the view moves from region to region on the beat.",
   props: z.strictObject({
     heading: filmHeading,
     accent: filmAccent,
@@ -73,5 +78,20 @@ export const footageSchema = {
       .describe(
         "plain draws a thin edge and round corners around the footage. none shows it with no edge. The default is plain.",
       ),
+    items: z
+      .array(
+        z
+          .string()
+          .min(1)
+          .max(footageLimits.itemLength)
+          .describe("One short line, 1 to 4 words."),
+      )
+      .min(1)
+      .max(footageLimits.items)
+      .optional()
+      .describe(
+        "1 to 4 short lines beside the footage (under it in a tall or square video), one on each beat, between thin lines. For example the names of the programs that do the work.",
+      )
+      .meta({ title: "Lines beside" }),
   }),
 };

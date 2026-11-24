@@ -102,8 +102,18 @@ export const snapshotSchema = z.object({
     calm: z.boolean().optional(),
     tempo: z.number().optional(),
     fonts: z
-      .array(z.object({ assetId: z.string(), family: z.string() }))
+      .array(
+        z.object({
+          assetId: z.string(),
+          family: z.string(),
+          weight: z
+            .union([z.number(), z.tuple([z.number(), z.number()])])
+            .optional(),
+          style: z.enum(["normal", "italic"]).optional(),
+        }),
+      )
       .optional(),
+    lookFont: z.string().optional(),
   }),
   bible: z.object({ cast: z.array(castEntrySchema) }),
   script: z.string(),

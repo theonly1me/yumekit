@@ -8,7 +8,11 @@ import { useFilmTiming } from "../../../film/filmTiming.js";
 import { MediaWindow } from "../../../film/MediaWindow.js";
 import { readField } from "../../../props/readField.js";
 import { wallLimits, wallSchema } from "../../../schemas/film/wall.js";
-import { readAssetIds, readFilmHeading } from "../readFilmProps.js";
+import {
+  readAssetIds,
+  readFilmHeading,
+  readStartSecondsEach,
+} from "../readFilmProps.js";
 import { wallCellsOf } from "./wallGrid.js";
 
 const entryBeatsAtMost = 3;
@@ -31,6 +35,9 @@ export function Wall(props: { props: JsonObject }): ReactNode {
       value: props.props["startSeconds"],
       fallback: undefined,
     }) ?? 0;
+  const startSecondsEach = readStartSecondsEach(
+    props.props["startSecondsEach"],
+  );
   const hasHeading = heading !== undefined;
   const grid = useFilmGrid({ hasHeading });
   const { findAsset } = useSceneContext();
@@ -52,8 +59,10 @@ export function Wall(props: { props: JsonObject }): ReactNode {
   const timing = useFilmTiming({
     lastEntryBeat: firstBeat + eachBeats * Math.max(0, assetIds.length - 1),
   });
-  const assetFrame =
-    Math.round(startSeconds * timing.framesPerSecond) + timing.frame;
+  const assetFrameOf = (index: number) =>
+    Math.round(
+      (startSecondsEach[index] ?? startSeconds) * timing.framesPerSecond,
+    ) + timing.frame;
   return (
     <>
       <FilmHeading
@@ -82,7 +91,7 @@ export function Wall(props: { props: JsonObject }): ReactNode {
             <FilmPicture
               assetId={assetId}
               media={cellMedia}
-              assetFrame={assetFrame}
+              assetFrame={assetFrameOf(index)}
             />
           </MediaWindow>
         );

@@ -4,7 +4,7 @@ import type { HarnessFailure } from "../results.js";
 function hintOf(failure: RenderFailure): string {
   switch (failure.kind) {
     case "output-not-found":
-      return "Call get_project and use one of its output ids.";
+      return "Use one of the output ids that the message lists. add_platform names a new output by its shape, for example wide, tall, or square.";
     case "frame-out-of-range":
       return `The output has ${String(failure.frameCount)} frames, numbered 0 to ${String(failure.frameCount - 1)}. Ask for a frame in that range. If the output has 0 frames, add clips with set_timeline first.`;
     case "scene-import-not-permitted":

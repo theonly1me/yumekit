@@ -36,9 +36,15 @@ describe("the instructions for the agent", () => {
     );
   });
 
-  it("keep the colors and the fonts of the look unless the person asks", () => {
+  it("give the colors and the font of the person to the kit scenes, and set no others", () => {
     expect(brainInstructions).toContain(
-      "Use the look of the project. Do not set colors or fonts that the look does not have, unless the person asks.",
+      "When the person gives colors or a font, give the colors to set_look and the font to set_fonts with look_font, so each kit scene draws in them. Set no other colors or fonts.",
+    );
+  });
+
+  it("look at each file with one preview_assets call before it goes in the video", () => {
+    expect(brainInstructions).toContain(
+      "31. Look at a file before you place it: one preview_assets call shows each video and picture of the project",
     );
   });
 

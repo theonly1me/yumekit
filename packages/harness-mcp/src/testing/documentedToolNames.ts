@@ -47,6 +47,7 @@ export const documentedToolNames = [
   "import_asset",
   "remove_asset",
   "mark_asset",
+  "preview_assets",
   "align_words",
   "preview_frame",
   "preview_frames",

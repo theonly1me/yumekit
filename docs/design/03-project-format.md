@@ -39,6 +39,8 @@ type Project = {
   tempo?: number;
   fonts?: ProjectFont[];
   frame?: string;
+  lookColors?: { background: string; text: string; muted: string; accent: string };
+  lookFont?: string;
 };
 
 type ProjectFont = {
@@ -257,7 +259,7 @@ function openProject(options: {
 | `removeOutput`       | `outputId`                      | Removes an output and its timeline                                                                                                |
 | `setOutputPlatforms` | `outputId`, `platforms`         | Replaces the platforms of one output. The store keeps them in catalog order. An empty list removes the field                      |
 | `setVideoStyle`      | `videoStyle`                    | Sets the video style of the project (document 15)                                                                                 |
-| `setLook`            | `look`, `calm?`                 | Changes the look of the project, and its calm motion when `calm` is given (document 17)                                           |
+| `setLook`            | `look`, `calm?`, `colors?`, `font?` | Changes the look of the project, its calm motion, and its own colors and font. `null` removes own colors or font (documents 17 and 19) |
 | `setTempo`           | `tempo?`                        | Sets the tempo of the project. No value removes it (document 19)                                                                  |
 | `setFonts`           | `fonts`                         | Replaces the fonts of the project. An empty list removes the field (document 19)                                                  |
 | `putSharedCode`      | `name`, `code`                  | Adds or replaces `scenes/_shared/<name>.tsx` (document 19)                                                                        |

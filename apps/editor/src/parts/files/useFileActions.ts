@@ -5,6 +5,8 @@ import { failureTextOf } from "../../tools/requestText.js";
 import { sendFixedRequest, type AskTheAi } from "../fixedRequests.js";
 import { notSentText } from "../frame/stepViewProps.js";
 import type { SoundStatus } from "../sound/useSoundActions.js";
+import type { Snapshot } from "../../engine/snapshot.js";
+import { lookFontInput } from "./fontChoice.js";
 import { saveAssetFile } from "./saveAssetFile.js";
 
 type Work = Promise<{ kind: "done" } | { kind: "failed"; message: string }>;
@@ -80,6 +82,18 @@ export function useFileActions(options: {
             name: "remove_asset",
             input: { asset_id: file.assetId },
           }),
+      });
+    },
+    useFont: (font: { snapshot: Snapshot; assetId: string; name: string }) => {
+      const input = lookFontInput({
+        snapshot: font.snapshot,
+        assetId: font.assetId,
+        fileName: font.name,
+      });
+      run({
+        workingText: `Setting ${font.name} as the font of the video.`,
+        doneText: `The text of the video uses ${input.look_font} now. Undo goes back.`,
+        change: () => changeProject({ client, name: "set_fonts", input }),
       });
     },
     useInVideo: (fileName: string) => {

@@ -165,7 +165,7 @@ The guide has one full example scene that uses `Backdrop`, `words`, `draw`, `seq
 
 ## Not in this version
 
-- A look that a person builds from own colors and fonts. A brand kit follows.
+- A brand kit with more than four colors, a logo, and more than one font. WP63 added own colors and one own font for each look (document 19).
 - Motion along a drawn path, and 3D.
 - A transition with a picture or a video as its mask.
 - Sound that follows a transition.
