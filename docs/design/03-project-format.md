@@ -39,7 +39,12 @@ type Project = {
   tempo?: number;
   fonts?: ProjectFont[];
   frame?: string;
-  lookColors?: { background: string; text: string; muted: string; accent: string };
+  lookColors?: {
+    background: string;
+    text: string;
+    muted: string;
+    accent: string;
+  };
   lookFont?: string;
 };
 
@@ -252,31 +257,31 @@ function openProject(options: {
 
 `Edit` is a closed union on the field `kind`. These 21 kinds are all the ways to change a project.
 
-| Kind                 | Fields                          | Effect                                                                                                                            |
-| -------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `setProjectName`     | `name`                          | Changes the name                                                                                                                  |
-| `addOutput`          | `output`                        | Adds an output and an empty timeline                                                                                              |
-| `removeOutput`       | `outputId`                      | Removes an output and its timeline                                                                                                |
-| `setOutputPlatforms` | `outputId`, `platforms`         | Replaces the platforms of one output. The store keeps them in catalog order. An empty list removes the field                      |
-| `setVideoStyle`      | `videoStyle`                    | Sets the video style of the project (document 15)                                                                                 |
+| Kind                 | Fields                              | Effect                                                                                                                                 |
+| -------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `setProjectName`     | `name`                              | Changes the name                                                                                                                       |
+| `addOutput`          | `output`                            | Adds an output and an empty timeline                                                                                                   |
+| `removeOutput`       | `outputId`                          | Removes an output and its timeline                                                                                                     |
+| `setOutputPlatforms` | `outputId`, `platforms`             | Replaces the platforms of one output. The store keeps them in catalog order. An empty list removes the field                           |
+| `setVideoStyle`      | `videoStyle`                        | Sets the video style of the project (document 15)                                                                                      |
 | `setLook`            | `look`, `calm?`, `colors?`, `font?` | Changes the look of the project, its calm motion, and its own colors and font. `null` removes own colors or font (documents 17 and 19) |
-| `setTempo`           | `tempo?`                        | Sets the tempo of the project. No value removes it (document 19)                                                                  |
-| `setFonts`           | `fonts`                         | Replaces the fonts of the project. An empty list removes the field (document 19)                                                  |
-| `putSharedCode`      | `name`, `code`                  | Adds or replaces `scenes/_shared/<name>.tsx` (document 19)                                                                        |
-| `setFrame`           | `name?`                         | Names the shared code that the stage draws over the whole video. No value removes it (document 19, K9)                            |
-| `setScript`          | `script`                        | Replaces `script.md`                                                                                                              |
-| `setBible`           | `bible`                         | Replaces `bible.json`                                                                                                             |
-| `putScene`           | `scene`, `code?`                | Adds or replaces a scene. `code` is required for a module scene                                                                   |
-| `removeScene`        | `sceneId`                       | Removes a scene and its folder                                                                                                    |
-| `addAsset`           | `asset`, `words?`               | Adds a record for a file that is already in `assets/files/`. The caller gives no `contentHash` and no `hasWords`                  |
-| `setAssetWords`      | `assetId`, `words`              | Adds or replaces the word timings of an audio asset                                                                               |
-| `setAssetMarks`      | `assetId`, `marks`              | Replaces the marks of an image or a video asset. No marks removes the field                                                       |
-| `removeAsset`        | `assetId`                       | Removes the record                                                                                                                |
-| `setTimeline`        | `timeline`                      | Replaces the timeline of one output                                                                                               |
-| `addClip`            | `outputId`, `trackId`, `clip`   | Adds one clip                                                                                                                     |
-| `updateClip`         | `outputId`, `clipId`, `changes` | Changes the timing, the gain, or the target of one clip. The target is `sceneId` for a scene clip and `assetId` for an audio clip |
-| `removeClip`         | `outputId`, `clipId`            | Removes one clip                                                                                                                  |
-| `copyTimeline`       | `fromOutputId`, `toOutputId`    | Replaces one timeline with a copy of another                                                                                      |
+| `setTempo`           | `tempo?`                            | Sets the tempo of the project. No value removes it (document 19)                                                                       |
+| `setFonts`           | `fonts`                             | Replaces the fonts of the project. An empty list removes the field (document 19)                                                       |
+| `putSharedCode`      | `name`, `code`                      | Adds or replaces `scenes/_shared/<name>.tsx` (document 19)                                                                             |
+| `setFrame`           | `name?`                             | Names the shared code that the stage draws over the whole video. No value removes it (document 19, K9)                                 |
+| `setScript`          | `script`                            | Replaces `script.md`                                                                                                                   |
+| `setBible`           | `bible`                             | Replaces `bible.json`                                                                                                                  |
+| `putScene`           | `scene`, `code?`                    | Adds or replaces a scene. `code` is required for a module scene                                                                        |
+| `removeScene`        | `sceneId`                           | Removes a scene and its folder                                                                                                         |
+| `addAsset`           | `asset`, `words?`                   | Adds a record for a file that is already in `assets/files/`. The caller gives no `contentHash` and no `hasWords`                       |
+| `setAssetWords`      | `assetId`, `words`                  | Adds or replaces the word timings of an audio asset                                                                                    |
+| `setAssetMarks`      | `assetId`, `marks`                  | Replaces the marks of an image or a video asset. No marks removes the field                                                            |
+| `removeAsset`        | `assetId`                           | Removes the record                                                                                                                     |
+| `setTimeline`        | `timeline`                          | Replaces the timeline of one output                                                                                                    |
+| `addClip`            | `outputId`, `trackId`, `clip`       | Adds one clip                                                                                                                          |
+| `updateClip`         | `outputId`, `clipId`, `changes`     | Changes the timing, the gain, or the target of one clip. The target is `sceneId` for a scene clip and `assetId` for an audio clip      |
+| `removeClip`         | `outputId`, `clipId`                | Removes one clip                                                                                                                       |
+| `copyTimeline`       | `fromOutputId`, `toOutputId`        | Replaces one timeline with a copy of another                                                                                           |
 
 The store computes `contentHash` as `sha256:` plus the hex digest, and checks that the file exists, when it applies `addAsset`. It sets `hasWords` from the word timings.
 

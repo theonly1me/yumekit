@@ -295,3 +295,19 @@ The record of the Claude Code session gives the time of each step:
 10. An upload of a `.woff2`, `.woff`, `.ttf`, or `.otf` file is a font asset. The Files view takes these files, lists them under Fonts, and has "Use as the font" for a font that is not the font of the video. It calls `set_fonts` with the fonts of the project, the new file, and `look_font`, as one change. The family comes from the file name before the first hyphen or underscore ("Geist-Variable.woff2" gives "Geist"), and a name with "variable" gets the weights 100 to 900. K6 fits this: the font loads for the whole stage, and the kit scenes then use it too.
 11. The summary of a change entry of the AI comes from the last text of the answer, not from the first. The last text describes the whole work. The summary is its first sentence, with the next sentences while it has fewer than 4 words ("Done. The script now says ready."), and at most 140 characters. The test run would now have "The launch film is finished and exported as one MP4."
 12. The failure text of a wrong output id already listed the outputs that exist (for example "Its outputs are: tall, wide."). The hint now says to use one of them, and that `add_platform` names a new output by its shape.
+
+### The run after the fixes
+
+The same setup ran once on 2026-11-24: a source build of this branch, a temporary configuration folder, no media key, the 12 recordings and the font added as files of the person through "Add a file", Claude Code with `ANTHROPIC_MODEL=opus` for the engine only, and one chat request with the text of the brief.
+
+| Run             | Seconds from the request to the exported file | Tool calls | Scene types                                                      | Lines of scene code |
+| --------------- | --------------------------------------------- | ---------- | ---------------------------------------------------------------- | ------------------- |
+| The test (WP61) | 606                                           | 49         | 9 custom scenes, a shared module, and a frame                    | 704                 |
+| A free hand     | 454                                           | not known  | its own code                                                     | 916                 |
+| After WP63      | 209                                           | 41         | `lines` 2, `footage` 3, `wall`, `shapes`, `look-swap`, `command` | 0                   |
+
+1. The calls: `get_work`, `list_kit_scenes`, `list_media_tools`, `get_project`, `list_assets`, `get_scene_guide`, `set_look` (the four colors of the brief), `set_fonts` (Geist with `look_font`), `set_tempo`, `set_project_name`, `preview_assets` 3, `mark_asset` 15, `generate_asset` (music), `add_platform`, `set_script`, `put_work` 2, `contact_sheet` 2, `preview_frames` 4, `set_transitions`, and `render_video`. No call failed.
+2. The lead used the new inputs: `items` of `footage` for the three program names beside the steps, and `startSecondsEach` of `wall` for the examples. It made no temporary scene and removed nothing.
+3. The film is 32 seconds, 16 bars at 120 beats. The export measures -13.8 LUFS integrated with a true peak of -1.5 dB.
+4. The change entry of the run has the summary "The launch film is done and exported as one MP4: 1920 by 1080, 30 frames a second, 32 seconds long."
+5. The agent cannot watch a video or hear sound. The owner must judge the film and the music. The lead said that the last step of the steps recording is cut at the bottom of its window.
