@@ -5,6 +5,7 @@ import type { HarnessContext } from "../../context.js";
 import { idInput } from "../../inputs.js";
 import { failureResult } from "../../results.js";
 import { previousEndOf } from "../../storyPlan/continuity.js";
+import { planNoteLinesOf } from "../plan/planNoteLines.js";
 import { shotNextStepOf } from "../../storyPlan/shotNextStep.js";
 import type { CriticDesk } from "../criticDesk.js";
 import type { AskCritic } from "../criticTypes.js";
@@ -88,6 +89,7 @@ export function registerReviewStart(
         shot,
         members,
         previousEnd,
+        openPlanFaults: planNoteLinesOf({ plan, shot, members }),
         pictures: [
           picture,
           ...(previousEnd === undefined ? [] : [previousEnd]),

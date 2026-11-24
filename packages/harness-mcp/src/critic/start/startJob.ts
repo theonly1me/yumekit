@@ -1,6 +1,7 @@
 import type { Asset, CastMember, Shot } from "@yumekit/project";
 import { knownLimitLinesOf } from "../../storyGuide/knownLimits.js";
 import { stateText } from "../../storyPlan/stateText.js";
+import { planNoteSectionOf } from "../plan/planNoteLines.js";
 import type { SheetAnswer } from "../sheet/sheetJob.js";
 
 export interface StartJob {
@@ -10,6 +11,7 @@ export interface StartJob {
   members: CastMember[];
   pictures: Asset[];
   previousEnd: Asset | undefined;
+  openPlanFaults: string[];
   answer: SheetAnswer | undefined;
 }
 
@@ -43,6 +45,7 @@ export function startBriefOf(job: StartJob): string {
     "",
     "The cast in the shot and their fixed facts:",
     ...memberLines(job.members),
+    ...planNoteSectionOf(job.openPlanFaults),
     "",
     "The known limits of the models:",
     ...knownLimitLinesOf([]),

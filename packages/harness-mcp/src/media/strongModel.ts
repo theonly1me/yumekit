@@ -6,11 +6,11 @@ export interface StrongChoice {
   note: string | undefined;
 }
 
-type StrongCapability = "image" | "video";
+export type StrongCapability = "image" | "video";
 
 const unitOf = { image: "image", video: "second" } as const;
 
-function basePriceOf(options: {
+export function basePriceOf(options: {
   model: MediaModel;
   capability: StrongCapability;
 }): number | undefined {
@@ -38,6 +38,66 @@ function usd(value: number): string {
   return String(Math.round(value * 10000) / 10000);
 }
 
+interface PricedModel {
+  model: MediaModel;
+  price: number;
+}
+
+async function strongPairOf(options: {
+  mediaTools: MediaTools;
+  capability: StrongCapability;
+  server: string | undefined;
+  accepts: (model: MediaModel) => boolean;
+}): Promise<
+  | {
+      server: string | undefined;
+      strongest: PricedModel | undefined;
+      fallback: PricedModel | undefined;
+    }
+  | undefined
+> {
+  const { mediaTools, capability } = options;
+  const choice = (await mediaTools.choices()).choices.find(
+    (candidate) => candidate.capability === capability,
+  );
+  const current = choice?.current;
+  const server = options.server ?? current?.server;
+  const models = (
+    mediaTools.list().find((entry) => entry.server === server)?.description
+      ?.models ?? []
+  ).filter((model) => model.capability === capability);
+  const pickedModel =
+    current?.source === "picked" &&
+    current.model !== undefined &&
+    models.some((model) => model.id === current.model && !model.is_default);
+  if (pickedModel) return undefined;
+  const priced = models.flatMap((model) => {
+    const price = basePriceOf({ model, capability });
+    return price === undefined || !options.accepts(model)
+      ? []
+      : [{ model, price }];
+  });
+  const fallback = priced.find((entry) => entry.model.is_default);
+  const strongest = priced.reduce<PricedModel | undefined>(
+    (...[best, entry]) =>
+      best === undefined || entry.price > best.price ? entry : best,
+    fallback,
+  );
+  return { server, strongest, fallback };
+}
+
+export async function strongestModelOf(options: {
+  mediaTools: MediaTools;
+  capability: StrongCapability;
+}): Promise<MediaModel | undefined> {
+  const pair = await strongPairOf({
+    ...options,
+    server: undefined,
+    accepts: () => true,
+  });
+  return pair?.strongest?.model;
+}
+
 export async function withStrongModel(options: {
   request: GenerateAssetInput;
   mediaTools: MediaTools;
@@ -48,32 +108,14 @@ export async function withStrongModel(options: {
   const { capability } = request;
   if (request.model !== undefined) return unchanged;
   if (capability !== "image" && capability !== "video") return unchanged;
-  const choice = (await mediaTools.choices()).choices.find(
-    (candidate) => candidate.capability === capability,
-  );
-  const current = choice?.current;
-  const server = request.server ?? current?.server;
-  const models = (
-    mediaTools.list().find((entry) => entry.server === server)?.description
-      ?.models ?? []
-  ).filter((model) => model.capability === capability);
-  const pickedModel =
-    current?.source === "picked" &&
-    current.model !== undefined &&
-    models.some((model) => model.id === current.model && !model.is_default);
-  if (pickedModel) return unchanged;
-  const priced = models.flatMap((model) => {
-    const price = basePriceOf({ model, capability });
-    return price === undefined || !acceptsCall({ model, request })
-      ? []
-      : [{ model, price }];
+  const pair = await strongPairOf({
+    mediaTools,
+    capability,
+    server: request.server,
+    accepts: (model) => acceptsCall({ model, request }),
   });
-  const fallback = priced.find((entry) => entry.model.is_default);
-  const strongest = priced.reduce<(typeof priced)[number] | undefined>(
-    (...[best, entry]) =>
-      best === undefined || entry.price > best.price ? entry : best,
-    fallback,
-  );
+  if (pair === undefined) return unchanged;
+  const { server, strongest, fallback } = pair;
   if (strongest === undefined || strongest.model.is_default) return unchanged;
   const defaultText =
     fallback === undefined

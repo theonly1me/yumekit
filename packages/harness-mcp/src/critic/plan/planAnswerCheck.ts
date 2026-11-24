@@ -1,7 +1,45 @@
+import { plainText } from "../../storyPlan/briefFaultGate.js";
 import type { PlanAnswer } from "./planAnswerInput.js";
+import { shotFaultsInPlanFaults } from "./repeatedFaults.js";
 import { planListItems, type PlanJob } from "./planJob.js";
 
 type Issue = string | undefined;
+
+export const blockingFaultsForOneShot = 3;
+
+function briefIssues(options: { job: PlanJob; answer: PlanAnswer }): Issue[] {
+  const { job, answer } = options;
+  return (answer.brief_faults ?? []).map((fault) => {
+    const member = job.members.find((entry) => entry.id === fault.cast_id);
+    if (member === undefined) {
+      return `brief_faults names "${fault.cast_id}", which is not a cast entry of the plan.`;
+    }
+    if (
+      !(member.briefFacts ?? []).some(
+        (fact) => plainText(fact) === plainText(fault.brief_fact),
+      )
+    ) {
+      return `"${fault.brief_fact}" is not a fact of the brief of "${member.id}". Copy its exact words, or put the fault in faults or notes.`;
+    }
+    return fault.shot_id === undefined ||
+      job.plan.shots.some((shot) => shot.id === fault.shot_id)
+      ? undefined
+      : `brief_faults names the shot "${fault.shot_id}", which the plan does not have.`;
+  });
+}
+
+function capIssues(answer: PlanAnswer): Issue[] {
+  return answer.shots.map((entry) => {
+    const count =
+      entry.faults.length +
+      (answer.brief_faults ?? []).filter(
+        (fault) => fault.shot_id === entry.shot_id,
+      ).length;
+    return count > blockingFaultsForOneShot
+      ? `Shot "${entry.shot_id}" has ${String(count)} blocking faults. Keep at most ${String(blockingFaultsForOneShot)}, the ones most likely to fail, and move the rest to notes.`
+      : undefined;
+  });
+}
 
 function coverageIssues(options: {
   job: PlanJob;
@@ -45,7 +83,8 @@ function blockingCountOf(answer: PlanAnswer): number {
     answer.faults.length +
     answer.shots.reduce((...[total, entry]) => total + entry.faults.length, 0) +
     answer.cast.reduce((...[total, entry]) => total + entry.faults.length, 0) +
-    answer.findings.filter((entry) => entry.cause === "fault").length
+    answer.findings.filter((entry) => entry.cause === "fault").length +
+    (answer.brief_faults ?? []).length
   );
 }
 
@@ -88,6 +127,9 @@ export function planAnswerIssuesOf(options: {
   return [
     ...coverageIssues(options),
     ...calibrationIssues(answer),
+    ...briefIssues(options),
+    ...capIssues(answer),
+    ...shotFaultsInPlanFaults({ plan: options.job.plan, answer }),
     verdictIssue,
   ].flatMap((issue) => (issue === undefined ? [] : [issue]));
 }

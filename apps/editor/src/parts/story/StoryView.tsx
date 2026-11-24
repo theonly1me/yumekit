@@ -79,6 +79,10 @@ function ShotRow(props: {
           <span className="fact">{checks.startText}</span>
         )}
         <TextList
+          label={`Open faults of the plan check in shot ${String(facts.number)}, which the critic looks for`}
+          lines={(shot.planNotes ?? []).map((note) => `Plan check: ${note}`)}
+        />
+        <TextList
           label={`What the critic found in the start picture of shot ${String(facts.number)}`}
           lines={checks.startFaults}
         />
@@ -141,7 +145,7 @@ export function StoryView(props: StepViewProps) {
         <dt>By the end</dt>
         <dd>{plan.change}</dd>
       </dl>
-      <PlanCheck snapshot={props.snapshot} />
+      <PlanCheck client={props.client} snapshot={props.snapshot} />
       <section className="part-group" aria-labelledby="story-shots">
         <h4 id="story-shots">
           Shots<span className="fact">{String(shots.length)}</span>

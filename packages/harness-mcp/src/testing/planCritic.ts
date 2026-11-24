@@ -44,6 +44,7 @@ export function planAnswerWith(options: {
   brief: string;
   verdict?: "pass" | "fail";
   shotFaults?: Record<string, string[]>;
+  briefFaults?: Record<string, string>[];
   findingCause?: "fault" | "harmless";
   easiest?: string;
   hardest?: string;
@@ -77,6 +78,9 @@ export function planAnswerWith(options: {
       faults: [],
       notes: [],
     })),
+    ...(options.briefFaults === undefined
+      ? {}
+      : { brief_faults: options.briefFaults }),
     faults: [],
     notes: [],
     verdict: options.verdict ?? "pass",

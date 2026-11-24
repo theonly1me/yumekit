@@ -13,7 +13,7 @@ describe("the instructions for a film with AI video", () => {
 
   it("send the work through the plan, its check, the sheets, the calibration shots, the shots, and the review in order", () => {
     expect(brainInstructions).toContain(
-      "read get_story_guide, then work in this order: the story plan with set_story_plan, with the prompt of each start picture and clip; each person, place, and prop with its facts and sheet_prompts; review_plan until the critic passes the plan; a sheet for each entry with review_sheet; the easiest and the hardest shot of the plan check; then for each shot in order its start picture and its clip with shot_id, and review_clip for the clip.",
+      "read get_story_guide, then work in this order: the story plan with set_story_plan, with the prompt of each start picture and clip; each person, place, and prop with its facts and sheet_prompts; review_plan until the critic passes the plan, at most twice (after two fails the check is used up, and the work goes on with the open faults as notes for the critic; only a broken fact of the brief still blocks); a sheet for each entry with review_sheet, which can start before the plan check; the easiest and the hardest shot of the plan check; then for each shot in order its start picture and its clip with shot_id, and review_clip for the clip.",
     );
   });
 

@@ -4,6 +4,7 @@ import { planAnswerWith } from "../testing/planCritic.js";
 import {
   passPlan,
   setPlan,
+  shotCall,
   startStoryHarness,
 } from "../testing/storyFixture.js";
 
@@ -26,7 +27,7 @@ async function filmWithPlan(critic?: Parameters<typeof startStoryHarness>[0]) {
 }
 
 describe("review_plan before the first paid call", () => {
-  it("makes no paid picture or clip of a story film before the critic passes the plan", async () => {
+  it("makes no start picture or clip of a story film before the critic passes the plan", async () => {
     const harness = await filmWithPlan({
       critic: {
         plan: (brief) =>
@@ -40,9 +41,15 @@ describe("review_plan before the first paid call", () => {
       },
     });
 
-    const before = await sheetTry({ harness, castId: "smith", assetId: "s1" });
+    const startPicture = {
+      harness,
+      assetId: "strike-start",
+      capability: "image",
+      shotId: "strike",
+    } as const;
+    const before = await shotCall(startPicture);
     const review = await passPlan(harness);
-    const after = await sheetTry({ harness, castId: "smith", assetId: "s1" });
+    const after = await shotCall(startPicture);
 
     expect(before.data).toMatchObject({ kind: "plan-not-reviewed" });
     expect(review.data).toMatchObject({ verdict: "fail" });
@@ -98,7 +105,12 @@ describe("review_plan before the first paid call", () => {
       castId: "smith",
       extra: { facts: ["Side by side, her head reaches his chin"] },
     });
-    const changed = await sheetTry({ harness, castId: "forge", assetId: "f1" });
+    const changed = await shotCall({
+      harness,
+      assetId: "strike-start",
+      capability: "image",
+      shotId: "strike",
+    });
 
     expect(other.data).toMatchObject({ kind: "prompt-not-reviewed" });
     expect(reviewed.isError).toBe(false);

@@ -89,6 +89,7 @@ const shotSchema = z.object({
   musicIntensity: z.number().optional(),
   reviews: z.array(reviewSchema).optional(),
   startReviews: z.array(startReviewSchema).optional(),
+  planNotes: z.array(z.string()).optional(),
 });
 
 const musicCheckSchema = z.object({
@@ -107,6 +108,9 @@ export const storyPlanSchema = z.object({
   musicChecks: z.array(musicCheckSchema).optional(),
   review: planReviewSchema.optional(),
   lessons: z.array(lessonSchema).optional(),
+  failedPlanChecks: z.number().optional(),
+  costEstimateUsd: z.number().optional(),
+  planNotes: z.array(z.string()).optional(),
 });
 
 export type StoryPlan = z.infer<typeof storyPlanSchema>;

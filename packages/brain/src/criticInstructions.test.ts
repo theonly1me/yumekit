@@ -30,6 +30,15 @@ describe("the instructions of the critic", () => {
     expect(criticInstructions).not.toContain("A doubt is a fault.");
   });
 
+  it("limit the blocking faults of a plan to four kinds and three for one shot", () => {
+    expect(criticInstructions).toContain(
+      "A blocking fault of a plan is only: (a) a contradiction with a fact of the person's brief, (b) a prompt that contradicts itself, (c) a known limit or a restriction of a sheet with no working form used, (d) a strike or an effect with no contact or source.",
+    );
+    expect(criticInstructions).toContain(
+      "At most 3 blocking faults for one shot; put the rest in notes.",
+    );
+  });
+
   it("start with the rule of Cursor only for Cursor", () => {
     expect(criticInstructionsOf("cursor").split("\n")[0]).toContain(
       "Use only the yumekit tools.",

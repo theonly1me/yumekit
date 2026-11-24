@@ -6,6 +6,7 @@ import {
   type StoryPlan,
 } from "@yumekit/project";
 import { planMembersOf } from "../../storyPlan/planKey.js";
+import { isPlanCheckUsedUp } from "../../critic/plan/openPlanFaults.js";
 import { isPlanReviewCurrent } from "../../storyPlan/planGate.js";
 import { sheetTriesOf } from "../../storyPlan/sheetTries.js";
 import { sourceTextOf } from "../../storyPlan/tryRules.js";
@@ -59,7 +60,13 @@ function reviewLine(options: {
 }): string {
   const { review } = options.plan;
   if (review === undefined) {
-    return "Plan check: not checked by the critic yet. No paid picture or clip runs before review_plan passes.";
+    return "Plan check: not checked by the critic yet. No start picture or clip runs before review_plan passes.";
+  }
+  if (isPlanCheckUsedUp(options.plan)) {
+    const open = options.plan.shots.filter(
+      (shot) => (shot.planNotes ?? []).length > 0,
+    );
+    return `Plan check: used up after ${String(options.plan.failedPlanChecks ?? 0)} fails, so the paid work goes on. Shots with open plan faults, which the critic checks on each start picture and clip: ${open.map((shot) => `"${shot.id}"`).join(", ") || "none"}. Easiest "${review.easiestShotId}", hardest "${review.hardestShotId}": make them first.`;
   }
   if (
     !isPlanReviewCurrent({ bible: options.snapshot.bible, plan: options.plan })

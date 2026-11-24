@@ -5,6 +5,7 @@ import { applyEditsResult } from "../applyEditsResult.js";
 import type { HarnessContext } from "../context.js";
 import type { ClipAnswer } from "../critic/clip/clipAnswerInput.js";
 import { clipBriefOf, type ClipJob } from "../critic/clip/clipJob.js";
+import { planNoteLinesOf } from "../critic/plan/planNoteLines.js";
 import { reviewOfAnswer } from "../critic/clip/clipReviewRecord.js";
 import type { CriticDesk } from "../critic/criticDesk.js";
 import type { AskCritic } from "../critic/criticTypes.js";
@@ -124,10 +125,18 @@ export function registerReviewClip(context: CriticContext): void {
       });
       if (!motion.ok) return failureResult(renderFailureOf(motion.failure));
       const ids = new Set([shot.placeId, ...shot.castIds]);
+      const members = snapshot.bible.cast.filter((member) =>
+        ids.has(member.id),
+      );
       const job: ClipJob = {
         kind: "clip",
         ...target.value,
-        members: snapshot.bible.cast.filter((member) => ids.has(member.id)),
+        members,
+        openPlanFaults: planNoteLinesOf({
+          plan: snapshot.bible.storyPlan,
+          shot,
+          members,
+        }),
         pictures: snapshot.assets,
         warnings: motion.value.warnings,
         answer: undefined,

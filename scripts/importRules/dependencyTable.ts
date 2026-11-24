@@ -35,6 +35,7 @@ export const permittedImports: Record<string, Permission[]> = {
     { importName: "@yumekit/project/voice-script" },
     { importName: "@yumekit/project/tempo" },
     { importName: "@yumekit/project/film-measure" },
+    { importName: "@yumekit/project/plan-budget" },
     sceneKit,
   ],
   "tools/*": [],

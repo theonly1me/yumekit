@@ -8,7 +8,7 @@ describe("the chat model and the reasoning effort of the picture turn", () => {
   it("passes the model and the effort of the settings to Codex", async () => {
     const codex = await connectCodexImages({
       environment: {
-        YUMEKIT_CODEX_MODEL: "gpt-6.1-sol",
+        YUMEKIT_CODEX_MODEL: "a-chat-model",
         YUMEKIT_CODEX_EFFORT: "high",
       },
     });
@@ -20,7 +20,7 @@ describe("the chat model and the reasoning effort of the picture turn", () => {
     expect(result.isError).toBeFalsy();
     expect(flags.slice(flags.indexOf("-m"), flags.indexOf("-m") + 2)).toEqual([
       "-m",
-      "gpt-6.1-sol",
+      "a-chat-model",
     ]);
     expect(flags).toContain('model_reasoning_effort="high"');
     expect(flags.indexOf("-m")).toBeLessThan(flags.indexOf("--"));

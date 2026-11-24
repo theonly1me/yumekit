@@ -45,6 +45,10 @@
     "./film-measure": {
       "types": "./dist/filmMeasure/index.d.ts",
       "default": "./dist/filmMeasure/index.js"
+    },
+    "./plan-budget": {
+      "types": "./dist/planBudget/index.d.ts",
+      "default": "./dist/planBudget/index.js"
     }
   },
   "files": [

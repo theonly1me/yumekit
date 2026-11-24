@@ -113,6 +113,9 @@ function memberOf(options: {
     ...(options.briefFacts === undefined || options.briefFacts.length === 0
       ? {}
       : { briefFacts: options.briefFacts }),
+    ...(existing?.planNotes === undefined
+      ? {}
+      : { planNotes: existing.planNotes }),
   };
 }
 

@@ -49,6 +49,41 @@ export const planAnswerInput = {
       }),
     )
     .describe("One entry for each cast entry of the plan."),
+  brief_faults: z
+    .array(
+      z.strictObject({
+        cast_id: z
+          .string()
+          .trim()
+          .min(1)
+          .describe("The cast entry whose brief fact the plan breaks."),
+        shot_id: z
+          .string()
+          .trim()
+          .min(1)
+          .optional()
+          .describe(
+            "The shot whose prompt breaks it. Leave out when a fact of the entry breaks it.",
+          ),
+        brief_fact: z
+          .string()
+          .trim()
+          .min(1)
+          .describe("The exact words of the fact from the person's brief."),
+        restore: z
+          .string()
+          .trim()
+          .min(1)
+          .describe(
+            "The exact text that the facts of the entry, or a prompt of the shot, must contain to keep the brief fact.",
+          ),
+        seen: z.string().trim().min(1).describe("What breaks it."),
+      }),
+    )
+    .optional()
+    .describe(
+      "Each place where the plan changes or drops a fact of the person's brief. Always blocking.",
+    ),
   faults: texts.describe("Blocking faults of the whole plan."),
   notes: texts.describe("Notes about the whole plan."),
   verdict: z

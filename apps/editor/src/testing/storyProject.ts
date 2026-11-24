@@ -66,6 +66,26 @@ async function sheet(options: {
   await engine.callTool({ name: "review_sheet", input: { cast_id: castId } });
 }
 
+const storyArc = {
+  logline: "A young smith forges a blade that will not break.",
+  want: "A blade for her brother",
+  obstacle: "The steel cracks when it cools",
+  change: "She folds the steel and it holds",
+};
+
+export async function lengthenStoryPlan(engine: RunningEngine): Promise<void> {
+  await engine.callTool({
+    name: "set_story_plan",
+    input: {
+      ...storyArc,
+      shots: [
+        { ...forgeShot, seconds: 10 },
+        { ...forgeShot, shot_id: "fold", seconds: 10, inherits: "" },
+      ],
+    },
+  });
+}
+
 export async function buildStoryProject(engine: RunningEngine): Promise<void> {
   await setScenario({ engine, scenario: { steps: [], criticSteps } });
   await engine.callTool({
@@ -93,10 +113,7 @@ export async function buildStoryProject(engine: RunningEngine): Promise<void> {
   await engine.callTool({
     name: "set_story_plan",
     input: {
-      logline: "A young smith forges a blade that will not break.",
-      want: "A blade for her brother",
-      obstacle: "The steel cracks when it cools",
-      change: "She folds the steel and it holds",
+      ...storyArc,
       shots: [
         forgeShot,
         {

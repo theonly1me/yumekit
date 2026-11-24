@@ -2,7 +2,10 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { closeBrowser, openEditor } from "../../testing/editorPage.js";
 import { runEngine, type RunningEngine } from "../../testing/runEngine.js";
 import { openStepSheet } from "../../testing/stepViews.js";
-import { buildStoryProject } from "../../testing/storyProject.js";
+import {
+  buildStoryProject,
+  lengthenStoryPlan,
+} from "../../testing/storyProject.js";
 import { noPlanText } from "./StoryView.js";
 
 let engine: RunningEngine | undefined;
@@ -95,6 +98,20 @@ describe("the story view", () => {
         .getByRole("button", { name: "Play the clip of shot 1" })
         .count(),
     ).toBe(1);
+    await close();
+  });
+
+  it("warns in Before the money when the plan and one retry pass the video limit", async () => {
+    await lengthenStoryPlan(runningEngine());
+    const { page, close } = await openEditor(runningEngine().url);
+    await openStepSheet({ page, name: "Story" });
+    const sheet = page.getByRole("dialog", { name: "The story" });
+
+    await expect
+      .poll(() => sheet.locator(".budget-warnings").innerText())
+      .toContain(
+        "The 2 shots of the plan have 20 seconds of video. With one retry of the two longest shots (20 seconds more), the film needs about 40 seconds, and the limit of the project is 30 seconds of generated video. Only the person can raise a limit, in Settings. The AI cannot.",
+      );
     await close();
   });
 });
