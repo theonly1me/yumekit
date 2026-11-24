@@ -90,3 +90,8 @@ button.service-reset {
 .service-line button {
   padding: 4px 12px;
 }
+
+.model-service-state[data-state="key-not-working"],
+.key-problem {
+  color: var(--accent);
+}

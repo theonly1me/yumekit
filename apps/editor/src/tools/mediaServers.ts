@@ -59,7 +59,7 @@ const settingSchema = z.discriminatedUnion("kind", [
 
 const priceSchema = z.object({
   usd: z.number(),
-  unit: z.enum(["second", "image", "minute", "thousand-characters"]),
+  unit: z.enum(["second", "image", "minute", "thousand-characters", "call"]),
   when: z.record(z.string(), z.string()),
 });
 
@@ -80,6 +80,7 @@ const modelSchema = z.object({
         "reference_images",
         "image_input",
         "video_input",
+        "length",
       ]),
     )
     .optional(),
@@ -97,6 +98,7 @@ const serverSchema = z.object({
   server: z.string(),
   capabilities: z.array(capabilitySchema),
   can_check_key: z.boolean(),
+  key_problem: z.string().optional(),
   label: z.string().optional(),
   runs: z.enum(["hosted", "on-this-computer"]).optional(),
   models: z.array(modelSchema).default([]),
@@ -112,6 +114,17 @@ export const mediaServersSchema = z.object({
     limit_seconds: z.number(),
     used_seconds: z.number(),
   }),
+  spending: z
+    .union([
+      z.object({
+        limit_usd: z.number(),
+        spent_usd: z.number(),
+        remaining_usd: z.number(),
+        paid_calls: z.number(),
+      }),
+      z.object({ record_not_valid: z.string() }),
+    ])
+    .optional(),
 });
 
 export type Capability = z.infer<typeof capabilitySchema>;

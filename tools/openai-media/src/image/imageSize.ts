@@ -4,6 +4,13 @@ const sideStepPixels = 16;
 const largestAspectRatio = 3;
 const pngSignature = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
 
+function nearestSide(pixels: number): number {
+  return Math.max(
+    sideStepPixels,
+    Math.round(pixels / sideStepPixels) * sideStepPixels,
+  );
+}
+
 export function requestedSize(options: {
   widthPixels: number | undefined;
   heightPixels: number | undefined;
@@ -22,9 +29,11 @@ export function requestedSize(options: {
     widthPixels % sideStepPixels !== 0 ||
     heightPixels % sideStepPixels !== 0
   ) {
+    const nearestWidth = nearestSide(widthPixels);
+    const nearestHeight = nearestSide(heightPixels);
     return {
       ok: false,
-      failure: `width_pixels and height_pixels must be multiples of ${String(sideStepPixels)}.`,
+      failure: `width_pixels and height_pixels must be multiples of ${String(sideStepPixels)}. The nearest valid size is width_pixels ${String(nearestWidth)} and height_pixels ${String(nearestHeight)}.`,
     };
   }
   const longSide = Math.max(widthPixels, heightPixels);

@@ -22,6 +22,7 @@ export const newKindModels = [
     ],
     prices: free("second"),
     read_on: readOn,
+    accepts: ["length"],
     tested: true,
   },
   {

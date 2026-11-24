@@ -38,7 +38,7 @@ const mediaModelSettingSchema = z.discriminatedUnion("kind", [
 
 const mediaModelPriceSchema = z.object({
   usd: z.number().nonnegative(),
-  unit: z.enum(["second", "image", "minute", "thousand-characters"]),
+  unit: z.enum(["second", "image", "minute", "thousand-characters", "call"]),
   when: z.record(z.string(), z.string()),
 });
 
@@ -50,6 +50,7 @@ const mediaModelInputs = [
   "reference_images",
   "image_input",
   "video_input",
+  "length",
 ] as const;
 
 const mediaModelSchema = z.object({

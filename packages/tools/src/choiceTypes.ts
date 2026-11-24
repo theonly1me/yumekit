@@ -26,7 +26,7 @@ export type UserFileFailure = Extract<
   { kind: "invalid-configuration-file" | "configuration-not-written" }
 >;
 
-export type ServiceState = "ready" | "needs-key";
+export type ServiceState = "ready" | "needs-key" | "key-not-working";
 
 export interface ChoiceModel {
   id: string;
@@ -39,6 +39,7 @@ export interface ChoiceService {
   server: string;
   label: string;
   state: ServiceState;
+  keyProblem?: string;
   keys: (MediaServerKey & { source: KeyState["source"] })[];
   models: ChoiceModel[];
 }

@@ -64,6 +64,7 @@ const describedModel = z.strictObject({
       "reference_images",
       "image_input",
       "video_input",
+      "length",
     ]),
   ),
   tested: z.boolean(),

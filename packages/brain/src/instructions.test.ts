@@ -48,6 +48,19 @@ describe("the instructions for the agent", () => {
     );
   });
 
+  it("place a clip of a video model that always makes sound with its sound off, and send no with_audio false", () => {
+    expect(brainInstructions).toContain(
+      'Give no with_audio for it, and place the clip with place_video and sound_gain_decibels "off"',
+    );
+  });
+
+  it("report a refused paid call by the spending limit, and leave the limit to the person", () => {
+    expect(brainInstructions).toContain("You cannot change a limit.");
+    expect(brainInstructions).toContain(
+      "they can raise the limit in Settings. Then make the rest with free tools.",
+    );
+  });
+
   it("add each recurring person, place, and product to the cast before the first picture", () => {
     expect(brainInstructions).toContain(
       "15. Before the first picture, add each person, place, and product that shows in two or more scenes to the cast. Give the cast ids in each call that shows them.",

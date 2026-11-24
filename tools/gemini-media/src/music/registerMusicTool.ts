@@ -86,7 +86,7 @@ export function registerMusicTool(tools: GeminiTools): void {
   tools.server.registerTool(
     "generate_music",
     {
-      description: `Make an MP3 file of music with a Gemini Lyria model: ${musicModels.map((model) => model.id).join(", ")}. Uses the Gemini API key of the user, which costs money for each song.`,
+      description: `Make an MP3 file of music with a Gemini Lyria model: ${musicModels.map((model) => model.id).join(", ")}. Uses the Gemini API key of the user, which costs money for each song: ${musicModels.map((model) => `${model.id} about ${String(model.usdPerSong)} US dollars`).join(", ")}, and cost_usd is that estimate. Lyria takes duration_seconds only as a wish in the prompt (lyria-3-clip-preview always makes 30 seconds), so the song can be longer or shorter: duration_seconds of the file gives the real length.`,
       inputSchema: musicInput,
     },
     async (...parameters) => {
@@ -132,6 +132,8 @@ export function registerMusicTool(tools: GeminiTools): void {
               : { duration_seconds: durationSeconds }),
           },
         ],
+        cost_usd: model.value.usdPerSong,
+        cost_is_estimate: true,
       });
     },
   );

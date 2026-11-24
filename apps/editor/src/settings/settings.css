@@ -79,3 +79,21 @@
   color: var(--text);
   cursor: pointer;
 }
+
+.spend-meter {
+  flex-basis: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--well);
+  overflow: hidden;
+}
+
+.spend-meter > span {
+  display: block;
+  height: 100%;
+  background: var(--solid);
+}
+
+.spend-meter[data-near-limit="true"] > span {
+  background: var(--accent);
+}

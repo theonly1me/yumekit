@@ -7,6 +7,7 @@ export interface MusicModelFacts {
   shortestSeconds: number;
   longestSeconds: number;
   lengthIsInPrompt: boolean;
+  usdPerSong: number;
 }
 
 export const maximumMusicImages = 10;
@@ -23,6 +24,7 @@ export const musicModels: MusicModelFacts[] = [
     shortestSeconds: 10,
     longestSeconds: 180,
     lengthIsInPrompt: true,
+    usdPerSong: 0.08,
   },
   {
     id: "lyria-3-clip-preview",
@@ -31,6 +33,7 @@ export const musicModels: MusicModelFacts[] = [
     shortestSeconds: 30,
     longestSeconds: 30,
     lengthIsInPrompt: false,
+    usdPerSong: 0.04,
   },
 ];
 
@@ -63,8 +66,8 @@ export const musicCatalog: CatalogEntry[] = musicModels.map((facts) => ({
         maximum: maximumMusicImages,
       },
     ],
-    prices: [],
-    read_on: "2026-11-22",
+    prices: [{ usd: facts.usdPerSong, unit: "call", when: {} }],
+    read_on: "2026-11-24",
     accepts: ["reference_images"],
     tested: false,
   },

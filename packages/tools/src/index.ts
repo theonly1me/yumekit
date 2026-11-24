@@ -37,6 +37,13 @@ export {
 export { keyFilePath } from "./keys/keyFile.js";
 export { listServerKeys, type ServerKeys } from "./listServerKeys.js";
 export { readUserLimits } from "./userLimits.js";
+export { defaultSpendingUsd } from "./configuration.js";
+export { cautiousPrices } from "./spending/cautiousPrice.js";
+export type { CostBasis, SpendingRecordNotValid } from "./spending/ledger.js";
+export type {
+  SpendingLimitReached,
+  SpendingSummary,
+} from "./spending/spendingBook.js";
 export type {
   Capability,
   CheckKeyFailure,

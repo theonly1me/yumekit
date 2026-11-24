@@ -6,6 +6,7 @@ import type {
   MediaChoices,
 } from "./choiceTypes.js";
 import type { ServerConnection, StartedServer } from "./connectServer.js";
+import type { KeyHealth } from "./keyHealth/keyHealth.js";
 import { readKeyStates } from "./keys/index.js";
 import {
   describedDefaultModel,
@@ -27,7 +28,11 @@ export const choiceCapabilities = [
 
 type ServiceFacts = Omit<ChoiceService, "models">;
 
-async function factsOf(connection: StartedServer): Promise<ServiceFacts> {
+async function factsOf(options: {
+  connection: StartedServer;
+  keyHealth: KeyHealth | undefined;
+}): Promise<ServiceFacts> {
+  const { connection } = options;
   const keys = connection.description?.keys ?? [];
   const states = await readKeyStates({
     variables: keys.map((key) => key.variable),
@@ -38,12 +43,17 @@ async function factsOf(connection: StartedServer): Promise<ServiceFacts> {
       states.find((state) => state.variable === key.variable)?.source ??
       "missing",
   }));
+  const keyProblem = options.keyHealth?.problemOf(connection);
+  const isMissing = keysWithSource.some((key) => key.source === "missing");
   return {
     server: connection.name,
     label: connection.description?.label ?? connection.name,
-    state: keysWithSource.some((key) => key.source === "missing")
+    state: isMissing
       ? "needs-key"
-      : "ready",
+      : keyProblem === undefined
+        ? "ready"
+        : "key-not-working",
+    ...(isMissing || keyProblem === undefined ? {} : { keyProblem }),
     keys: keysWithSource,
   };
 }
@@ -97,6 +107,7 @@ async function choiceOf(options: {
   connections: ServerConnection[];
   defaults: MediaDefaults;
   facts: Map<string, ServiceFacts>;
+  keyHealth: KeyHealth | undefined;
 }): Promise<MediaChoice> {
   const { capability, connections } = options;
   const started = inNoPickOrder(connections.filter(isStarted)).filter(
@@ -111,7 +122,14 @@ async function choiceOf(options: {
   const picked = options.defaults[capability];
   const firstReady =
     picked === undefined
-      ? await serverWithNoPick({ connections, defaults: {}, capability })
+      ? await serverWithNoPick({
+          connections,
+          defaults: {},
+          capability,
+          ...(options.keyHealth === undefined
+            ? {}
+            : { keyHealth: options.keyHealth }),
+        })
       : undefined;
   const server =
     picked?.server ?? (firstReady?.ok ? firstReady.value.name : undefined);
@@ -130,13 +148,17 @@ async function choiceOf(options: {
 export async function mediaChoicesOf(options: {
   connections: ServerConnection[];
   defaults: MediaDefaults;
+  keyHealth: KeyHealth | undefined;
 }): Promise<MediaChoices> {
   const started = options.connections.filter(isStarted);
   const facts = new Map(
-    (await Promise.all(started.map(factsOf))).map((each) => [
-      each.server,
-      each,
-    ]),
+    (
+      await Promise.all(
+        started.map((connection) =>
+          factsOf({ connection, keyHealth: options.keyHealth }),
+        ),
+      )
+    ).map((each) => [each.server, each]),
   );
   const choices = await Promise.all(
     choiceCapabilities.map((capability) =>

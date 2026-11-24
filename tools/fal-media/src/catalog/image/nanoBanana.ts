@@ -35,7 +35,7 @@ export const nanoBanana21: ImageModel = {
   id: "google/nano-banana-2.1",
   label: "Nano Banana 2.1",
   isDefault: false,
-  readOn: "2026-11-22",
+  readOn: "2026-11-24",
   tested: false,
   sources: [falPage(textEndpoint), falPage(editEndpoint)],
   choiceSettings: [
@@ -47,7 +47,11 @@ export const nanoBanana21: ImageModel = {
     },
   ],
   transparentBackground: false,
-  prices: [],
+  prices: [
+    { usd: 0.04, unit: "image", when: { resolution: "1K" } },
+    { usd: 0.059, unit: "image", when: { resolution: "2K" } },
+    { usd: 0.134, unit: "image", when: { resolution: "4K" } },
+  ],
   textToImage: (request) => ({
     endpointId: textEndpoint,
     fields: sharedFields(request),

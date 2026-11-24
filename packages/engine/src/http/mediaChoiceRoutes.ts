@@ -46,6 +46,7 @@ function wireServiceOf(service: ChoiceService) {
     server: service.server,
     label: service.label,
     state: service.state,
+    key_problem: service.keyProblem ?? null,
     keys: service.keys,
     models: service.models.map((model) => ({
       id: model.id,
@@ -80,6 +81,7 @@ function wireChoicesOf(choices: MediaChoices) {
 }
 
 async function getChoices(exchange: Exchange) {
+  await exchange.context.mediaTools.checkKeys();
   const choices = await exchange.context.mediaTools.choices();
   sendJson({
     response: exchange.response,
