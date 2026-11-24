@@ -34,7 +34,7 @@ yumekit reads two files with the same shape. The project file wins for a server 
 - `defaults` names the server for each capability when a tool call gives no server. An entry is a server name, or `{ "server": "...", "model": "..." }` (document 10).
 - `limits` is optional. `generatedVideoSeconds` is the limit of document 09, a number of 0 or more, and 30 by default. `spendingUsd` is the spending limit of document 15 ("Details of WP64"), in US dollars, and 5 by default. The project file wins over the user file. `MediaTools.limits()` gives the merged value.
 - The `yumekit` command passes the commands of the bundled servers as `bundledServers`. A file can use a bundled server by its name with no `command`.
-- With no file (user or project), yumekit connects each bundled server, in the order `sample`, `openai`, `gemini`, `fal`, `local-voice`, `local-music`. A bundled server with a missing key starts, and the editor shows that it needs a key.
+- With no file (user or project), yumekit connects each bundled server, in the order `sample`, `openai`, `gemini`, `fal`, `local-voice`, `local-music`, `codex`. A bundled server with a missing key starts, and the editor shows that it needs a key.
 - With a file, yumekit connects the servers of the file first. Then it connects each bundled server that the file does not name.
 - An entry `"<name>": { "disabled": true }` turns off that server, also a bundled one.
 - The order of the servers does not change how a call selects a server: the server of the call, then `defaults`, then the order with no pick of document 15. That order puts `sample` last.
@@ -80,7 +80,7 @@ type MediaToolResult = {
 Rules for a server:
 
 1. Write each file inside `output_directory` with a name that starts with `file_stem`. Return the absolute path.
-2. Return a failure as a result with `isError: true` and a message that a person can act on, for example "OPENAI_API_KEY is not set".
+2. Return a failure as a result with `isError: true` and a message that a person can act on, for example "OPENAI_API_KEY is not set". A failure because the plan of the person reached its usage limit also has `_meta: { "yumekit/failure": "usage-limit-reached" }`.
 3. Never write outside `output_directory`.
 4. `align_words` writes no file. It returns `files: []` and `words`.
 
@@ -162,7 +162,7 @@ type ConnectFailure = {
 };
 ```
 
-`MediaToolFailure` kinds: `no-server-for-capability`, `server-not-found`, `server-failed-to-start`, `media-tool-failed` (with the message of the server), `media-tool-invalid-result`, `media-tool-timeout`, `media-key-missing` (with `server`, `variable`, `getKeyUrl`, and `steps`, document 10), `media-key-not-working`, `spending-limit-reached`, and `spending-record-not-valid` (document 15, "Details of WP64").
+`MediaToolFailure` kinds: `no-server-for-capability`, `server-not-found`, `server-failed-to-start`, `media-tool-failed` (with the message of the server), `media-tool-invalid-result`, `media-tool-timeout`, `media-key-missing` (with `server`, `variable`, `getKeyUrl`, and `steps`, document 10), `media-key-not-working`, `media-service-not-ready` and `media-usage-limit-reached` (each with `server` and `message`, document 15, "Details of WP67"), `spending-limit-reached`, and `spending-record-not-valid` (document 15, "Details of WP64").
 
 `CheckKeyFailure` kinds: `server-not-found`, `server-failed-to-start`, `media-tool-failed`, `media-tool-invalid-result`, `media-tool-timeout`, and `no-check-key-tool` for a server that lists no `check_key`.
 
@@ -181,7 +181,7 @@ A configuration file that is not valid is the failure `invalid-configuration-fil
 How `run` selects a server:
 
 1. It uses `server` from the request. If the request has none, it uses the server of the `defaults` entry for the capability.
-2. If neither names a server, it uses the order with no pick of document 15: the first started server with the capability and each key that it needs, in the order `openai`, `gemini`, `fal`, each other server in configuration order, `local-voice`, `local-music`, and `sample` last (documents 18 and 19). `align` with no `defaults` entry uses the server of the `speech` entry when that server has `align`.
+2. If neither names a server, it uses the order with no pick of document 15: the first started server with the capability and each key that it needs, in the order `codex`, `openai`, `gemini`, `fal`, each other server in configuration order, `local-voice`, `local-music`, and `sample` last (documents 15, 18, and 19). A server with no key is ready when its `check_key` passes, and the client checks it before the call (document 15, "Details of WP67"). `align` with no `defaults` entry uses the server of the `speech` entry when that server has `align`.
 3. A name that no file defines is `server-not-found`. A server that started without the tool is `no-server-for-capability`.
 
 How the files merge:
@@ -193,14 +193,15 @@ The client adds `output_directory` and `file_stem` after the fields of `input`, 
 
 ## Bundled servers in milestone 1
 
-| Folder               | Capabilities                                                                            | Cost                           | Notes                                                                                                                                                                   |
-| -------------------- | --------------------------------------------------------------------------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `tools/sample-media` | `image`, `speech`, `align`, `music`, `video`, `sound-effect`, `talking-clip`, `sharper` | Free, no network               | Made for tests and for work on yumekit. See below                                                                                                                       |
-| `tools/openai-media` | `image`, `speech`, `align`                                                              | The OpenAI API key of the user | Reads `OPENAI_API_KEY`                                                                                                                                                  |
-| `tools/gemini-media` | `image`, `speech`, `music`, `video`                                                     | The Gemini API key of the user | Reads `GEMINI_API_KEY`. See documents 09 and 16. Not tested with a real key yet. Tests use recorded shapes from the documents.                                          |
-| `tools/fal-media`    | `image`, `video`, `sound-effect`, `talking-clip`, `sharper`                             | The fal API key of the user    | Reads `FAL_KEY`. Document 10 has its endpoints, and document 16 its models. Not tested with a real key yet. Tests use recorded shapes from the documents of 2026-11-22. |
-| `tools/local-voice`  | `speech`                                                                                | Free, on this computer         | One open voice model, Heart, that downloads once. Document 18 has the facts                                                                                             |
-| `tools/local-music`  | `music`                                                                                 | Free, on this computer         | Music beds made from code, with no download. It offers only the styles that the owner approved. Document 19 has the facts                                               |
+| Folder               | Capabilities                                                                            | Cost                                 | Notes                                                                                                                                                                   |
+| -------------------- | --------------------------------------------------------------------------------------- | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tools/sample-media` | `image`, `speech`, `align`, `music`, `video`, `sound-effect`, `talking-clip`, `sharper` | Free, no network                     | Made for tests and for work on yumekit. See below                                                                                                                       |
+| `tools/openai-media` | `image`, `speech`, `align`                                                              | The OpenAI API key of the user       | Reads `OPENAI_API_KEY`                                                                                                                                                  |
+| `tools/gemini-media` | `image`, `speech`, `music`, `video`                                                     | The Gemini API key of the user       | Reads `GEMINI_API_KEY`. See documents 09 and 16. Not tested with a real key yet. Tests use recorded shapes from the documents.                                          |
+| `tools/fal-media`    | `image`, `video`, `sound-effect`, `talking-clip`, `sharper`                             | The fal API key of the user          | Reads `FAL_KEY`. Document 10 has its endpoints, and document 16 its models. Not tested with a real key yet. Tests use recorded shapes from the documents of 2026-11-22. |
+| `tools/local-voice`  | `speech`                                                                                | Free, on this computer               | One open voice model, Heart, that downloads once. Document 18 has the facts                                                                                             |
+| `tools/local-music`  | `music`                                                                                 | Free, on this computer               | Music beds made from code, with no download. It offers only the styles that the owner approved. Document 19 has the facts                                               |
+| `tools/codex-images` | `image`                                                                                 | The ChatGPT plan of the user, no key | Runs the Codex program of the user for one turn. Counts as 0 US dollars. Tested on 2026-11-24 with Codex CLI 0.163.0. See below                                         |
 
 ### `tools/sample-media`
 
@@ -235,7 +236,14 @@ OpenAI retires models often. The table gives the models that the documents suppo
 
 ### `tools/codex-images`
 
-This server is not in milestone 1 yet. The Codex documents describe image generation only for an interactive session. They do not say that a `codex exec` run can make an image, or where the file goes. The lead agent runs one probe on the plan of the owner. If the probe gives an image in a known place, a later change adds the server with a test for that contract.
+The server makes a picture with the Codex program of the person and their ChatGPT plan. It needs no key. Document 15 ("Details of WP67") has the facts, the sources, and the real check.
+
+- `generate_image` runs one short `codex exec` turn in a new temporary folder, takes the PNG that Codex wrote in `$CODEX_HOME/generated_images/<thread id>/`, checks it, and writes it to `output_directory`. Then it removes that folder and the temporary folder.
+- Codex picks the exact size. `width_pixels` and `height_pixels` set only the shape: landscape, portrait, or square. A picture of another shape is a failure, and the server keeps no file.
+- `reference_image_paths` takes up to 5 absolute paths. Codex gets them with `--image`.
+- `check_key` is the free check of readiness: the program is there, `codex login status` says ChatGPT, and `codex features list` has `image_generation`. It makes no picture.
+- The server finds the program in `YUMEKIT_CODEX_PATH`, or else as the first `codex` on the `PATH`. It reads `CODEX_HOME`, or else uses `~/.codex`.
+- A turn that reports the usage limit of the plan returns `isError` with `_meta: { "yumekit/failure": "usage-limit-reached" }`. The client gives the failure `media-usage-limit-reached`.
 
 ## Tests
 

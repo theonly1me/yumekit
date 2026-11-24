@@ -52,7 +52,9 @@ async function factsOf(options: {
       ? "needs-key"
       : keyProblem === undefined
         ? "ready"
-        : "key-not-working",
+        : keys.length === 0
+          ? "not-ready"
+          : "key-not-working",
     ...(isMissing || keyProblem === undefined ? {} : { keyProblem }),
     keys: keysWithSource,
   };

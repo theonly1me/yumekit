@@ -26,7 +26,8 @@ export type UserFileFailure = Extract<
   { kind: "invalid-configuration-file" | "configuration-not-written" }
 >;
 
-export type ServiceState = "ready" | "needs-key" | "key-not-working";
+export type ServiceState =
+  "ready" | "needs-key" | "key-not-working" | "not-ready";
 
 export interface ChoiceModel {
   id: string;

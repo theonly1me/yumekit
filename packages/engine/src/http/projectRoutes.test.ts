@@ -142,6 +142,7 @@ describe("the project interface of the engine", () => {
         { server: "fal" },
         { server: "local-voice" },
         { server: "local-music" },
+        { server: "codex" },
       ],
     });
     expect(bodyOf(listed)).toMatchObject({ data: bodyOf(servers) });

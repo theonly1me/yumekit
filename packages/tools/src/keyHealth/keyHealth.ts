@@ -20,6 +20,10 @@ export interface KeyHealth {
     connection: StartedServer;
     message: string;
   }) => void;
+  noteUsageLimit: (options: {
+    connection: StartedServer;
+    message: string;
+  }) => void;
 }
 
 export function isRejectedKeyMessage(message: string): boolean {
@@ -57,6 +61,14 @@ export function createKeyHealth(
         message,
         checkedAtMilliseconds: now(),
         fromRealCall: true,
+      });
+    },
+    noteUsageLimit: ({ connection, message }) => {
+      states.set(connection, {
+        works: false,
+        message,
+        checkedAtMilliseconds: now(),
+        fromRealCall: false,
       });
     },
   };

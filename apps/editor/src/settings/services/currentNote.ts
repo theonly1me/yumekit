@@ -24,6 +24,9 @@ export function currentNoteOf(options: {
   if (current.state === "key-not-working") {
     return "The key of this service does not work. Add a new key, or pick another service.";
   }
+  if (current.state === "not-ready") {
+    return "This service is not ready. Pick it again after you fix it, or pick another service.";
+  }
   if (current.server === sampleServer) {
     return `The free test service makes ${testWords[kind]}. Pick another service for a real video.`;
   }

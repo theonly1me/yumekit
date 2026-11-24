@@ -92,6 +92,7 @@ export async function connectMediaTools(options: {
     spendingBook,
     toolTimeoutSeconds,
     onDescriptionsChanged: notifyDescriptionsChanged,
+    spendingLimitUsd: () => limits.spendingUsd,
   };
   const tools: MediaTools = {
     list: () =>

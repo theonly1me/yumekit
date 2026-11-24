@@ -31,6 +31,7 @@ const userMediaTools = {
     fal: { disabled: true },
     "local-voice": { disabled: true },
     "local-music": { disabled: true },
+    codex: { disabled: true },
   },
 };
 

@@ -16,6 +16,7 @@
   ],
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.32.2",
+    "@yumekit/codex-images": "workspace:*",
     "@yumekit/fal-media": "workspace:*",
     "@yumekit/gemini-media": "workspace:*",
     "@yumekit/local-music": "workspace:*",

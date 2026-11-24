@@ -10,9 +10,12 @@ async function checkOne(options: {
   pool: ServerPool;
   keyHealth: KeyHealth;
   toolTimeoutSeconds: number;
+  onlyServersWithNoKey: boolean;
 }): Promise<void> {
   const { keyHealth } = options;
-  if ((options.connection.description?.keys ?? []).length === 0) return;
+  const { description } = options.connection;
+  if (description === undefined) return;
+  if (options.onlyServersWithNoKey && description.keys.length > 0) return;
   if (!options.connection.toolNames.includes(checkKeyToolName)) return;
   if ((await missingKeyFailureOf(options.connection)) !== undefined) return;
   const refreshed = await options.pool.refresh(options.connection);
@@ -30,11 +33,15 @@ export async function checkKeys(options: {
   pool: ServerPool;
   keyHealth: KeyHealth;
   toolTimeoutSeconds: number;
+  onlyServersWithNoKey?: boolean;
 }): Promise<void> {
+  const onlyServersWithNoKey = options.onlyServersWithNoKey ?? false;
   await Promise.all(
     options.pool
       .connections()
       .filter(isStarted)
-      .map((connection) => checkOne({ ...options, connection })),
+      .map((connection) =>
+        checkOne({ ...options, connection, onlyServersWithNoKey }),
+      ),
   );
 }

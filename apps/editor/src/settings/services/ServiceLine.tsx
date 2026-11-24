@@ -8,6 +8,10 @@ import type { ChoiceService } from "./mediaChoices.js";
 
 const localServers = new Set(["local-voice", "local-music"]);
 const freeLine = "Free. It runs on your computer.";
+const planLines: Record<string, string> = {
+  codex:
+    "No key. Each picture uses your ChatGPT plan through the Codex program on this computer, so yumekit counts it as $0.",
+};
 
 type GetState =
   | { kind: "idle" }
@@ -40,6 +44,14 @@ export function ServiceLine(props: {
   });
   const waiting = waitingDownloadOf(service);
   const hasDownload = service.models.some((model) => model.download !== null);
+  const planLine = planLines[service.server];
+  if (planLine !== undefined) {
+    return (
+      <div className="service-line">
+        <p className="fact">{planLine}</p>
+      </div>
+    );
+  }
   if (!localServers.has(service.server) && !hasDownload) return undefined;
   const size = waiting?.download?.bytes;
   const getNow = () => {

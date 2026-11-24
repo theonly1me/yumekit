@@ -12,6 +12,7 @@ export default defineConfig({
           ],
           exclude: ["**/node_modules/**", "**/*.browser.test.{ts,tsx}"],
           testTimeout: 30_000,
+          env: { YUMEKIT_CODEX_PATH: "/tests-start-no-real-codex" },
         },
       },
       "packages/scene/vitest.config.ts",

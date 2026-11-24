@@ -3,7 +3,7 @@ import type { KeyHealth } from "./keyHealth/keyHealth.js";
 import { missingKeyFailureOf } from "./serverPool.js";
 import type { Capability, MediaToolFailure, Outcome } from "./types.js";
 
-const preferredServerNames = ["openai", "gemini", "fal"];
+const preferredServerNames = ["codex", "openai", "gemini", "fal"];
 const lastServerNames = ["local-voice", "local-music", "sample"];
 
 export function inNoPickOrder<Connection extends ServerConnection>(
@@ -31,12 +31,19 @@ export function keyNotWorkingFailureOf(options: {
   const problem = options.keyHealth?.problemOf(connection);
   if (problem === undefined) return undefined;
   const [key] = connection.description?.keys ?? [];
+  if (key === undefined) {
+    return {
+      kind: "media-service-not-ready",
+      server: connection.name,
+      message: problem,
+    };
+  }
   return {
     kind: "media-key-not-working",
     server: connection.name,
     message: problem,
-    getKeyUrl: key?.get_key_url ?? "",
-    steps: key === undefined ? [] : [...key.steps],
+    getKeyUrl: key.get_key_url,
+    steps: [...key.steps],
   };
 }
 

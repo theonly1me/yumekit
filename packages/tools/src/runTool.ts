@@ -20,6 +20,8 @@ import type {
   Outcome,
 } from "./types.js";
 
+const failureKindKey = "yumekit/failure";
+const usageLimitFailureKind = "usage-limit-reached";
 const requestTimeoutCode: number = ErrorCode.RequestTimeout;
 
 function toolArguments(options: {
@@ -47,6 +49,13 @@ export function textOfContent(content: unknown): string {
     .filter(Boolean)
     .join("\n");
   return text || "The media tool failed with no message";
+}
+
+function isUsageLimit(result: { _meta?: unknown }): boolean {
+  const meta = z
+    .object({ [failureKindKey]: z.string() })
+    .safeParse(result._meta);
+  return meta.success && meta.data[failureKindKey] === usageLimitFailureKind;
 }
 
 export function isTimeout(error: unknown): boolean {
@@ -135,7 +144,9 @@ export async function runTool(options: {
     return {
       ok: false,
       failure: {
-        kind: "media-tool-failed",
+        kind: isUsageLimit(result)
+          ? "media-usage-limit-reached"
+          : "media-tool-failed",
         server,
         message: textOfContent(result.content),
       },
