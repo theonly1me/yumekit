@@ -37,6 +37,9 @@ import { registerGetWork } from "../work/registerGetWork.js";
 import { registerPutWork } from "../work/registerPutWork.js";
 import type { AskHelper } from "../helpers/helperTypes.js";
 import { registerAskHelper } from "../helpers/registerAskHelper.js";
+import { registerGetStoryGuide } from "../storyGuide/registerGetStoryGuide.js";
+import { registerReviewClip } from "../storyPlan/registerReviewClip.js";
+import { registerSetStoryPlan } from "../storyPlan/registerSetStoryPlan.js";
 import { callerStore } from "./callerStore.js";
 import { createToolTable, type HarnessTool } from "./toolTable.js";
 
@@ -67,6 +70,8 @@ export function harnessToolsOf(
   registerStoryTools(context);
   registerSetProjectName(context);
   registerCastTools(context);
+  registerGetStoryGuide(context);
+  registerSetStoryPlan(context);
   registerPlatformTools(context);
   registerSetVideoStyle(context);
   registerSetLook(context);
@@ -88,6 +93,7 @@ export function harnessToolsOf(
   registerRemoveAsset(context);
   registerMarkAsset(context);
   registerPreviewAssets(context);
+  registerReviewClip(context);
   registerAlignWords(context);
   registerPreviewTools(context);
   registerScenePreviewTool(context);

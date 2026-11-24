@@ -1,5 +1,6 @@
 import type { JsonObject } from "@yumekit/tools";
 import { sharperCopyCalls, soundEffectCalls } from "./newKindCalls.js";
+import { reviewCalls, storyCalls } from "./storyCalls.js";
 
 export interface ScriptedCall {
   name: string;
@@ -136,14 +137,7 @@ export function everyToolCall(importSourcePath: string): ScriptedCall[] {
         partial: true,
       },
     },
-    {
-      name: "generate_asset",
-      input: {
-        asset_id: "still",
-        capability: "image",
-        input: { prompt: "a lake", width_pixels: 64, height_pixels: 48 },
-      },
-    },
+    ...storyCalls,
     {
       name: "generate_asset",
       input: {
@@ -152,8 +146,10 @@ export function everyToolCall(importSourcePath: string): ScriptedCall[] {
         input: { prompt: "a lake at dawn", duration_seconds: 1 },
         first_frame_asset_id: "still",
         camera_move: "push-in",
+        shot_id: "dawn",
       },
     },
+    ...reviewCalls,
     {
       name: "place_video",
       input: { output_id: "wide", asset_id: "clip", start_frame: 30 },

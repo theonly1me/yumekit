@@ -61,11 +61,25 @@ export {
   type CameraMoveId,
 } from "./cameraMoves/catalog.js";
 export {
+  castFactLimits,
   castKinds,
   type Bible,
   type CastKind,
   type CastMember,
 } from "./format/bible.js";
+export {
+  reviewVerdicts,
+  shotAngles,
+  shotSecondsRange,
+  shotSizes,
+  type ClipReview,
+  type MotionMeasures,
+  type ReviewVerdict,
+  type Shot,
+  type ShotAngle,
+  type ShotSize,
+  type StoryPlan,
+} from "./format/storyPlan.js";
 export type { Scene, SceneSource } from "./format/scene.js";
 export type {
   AudioClip,

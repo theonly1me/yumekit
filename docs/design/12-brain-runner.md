@@ -235,6 +235,11 @@ The `CURSOR_CONFIG_DIR` of the run keeps the permissions and the approval mode o
 28. Make no voice unless the person asks for one, or the video has a voice now. Music and text carry a short film well.
 29. A request from a button of the editor names the exact tool inputs: the server, the model, and the settings. Use them as given. If a choice does not fit the video, say so in one sentence and ask before you make it.
 30. For a piece of work that stands alone, such as one scene or one picture, you can give a clear brief to a helper with `ask_helper`. Name the scene ids or the asset ids that it may change. Check its result, and keep it or undo it.
+31. Look at a file before you place it: one `preview_assets` call shows each video and picture of the project, with the times of its frames. Name the parts you want with `mark_asset`.
+32. A video model that always makes sound (no `with_audio` false in its settings) takes no `with_audio` false. Give no `with_audio` for it, and place the clip with `place_video` and `sound_gain_decibels` "off" when the film needs no sound from it.
+33. Each paid call counts against the spending limit of the project. `list_media_tools` and `get_work` give the money spent and what remains. You cannot change a limit. If a call fails with `spending-limit-reached`, tell the person the limit, the amount spent, and the price in one sentence, and that they can raise the limit in Settings. Then make the rest with free tools.
+34. A film with AI video, or a story, is a chain of meaningful actions with cause and effect, in a world that stays the same. A character that only walks through places is a failure. Hands, fingers, and movement must look natural and human. An object must never move, double, or change sides (document 20).
+35. For such a film, read `get_story_guide`, then work in this order: the story plan, a sheet for each person, place, and prop, the start picture of each shot, the clip of each shot with `shot_id`, and `review_clip` for each clip. Place only a clip that you kept or cut. Make a failed clip again with a prompt that names the fault, and tell the person in one sentence why.
 
 ## The chat of the engine
 

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const castKinds = ["person", "place", "product"] as const;
+export const castKinds = ["person", "place", "product", "prop"] as const;
 
 export type CastKind = (typeof castKinds)[number];
 
@@ -8,6 +8,7 @@ export const castKindLabels: Record<CastKind, string> = {
   person: "Person",
   place: "Place",
   product: "Product",
+  prop: "Prop",
 };
 
 export const castEntrySchema = z.object({
@@ -15,6 +16,7 @@ export const castEntrySchema = z.object({
   kind: z.enum(castKinds),
   name: z.string(),
   description: z.string(),
+  facts: z.array(z.string()).optional(),
   referenceAssetIds: z.array(z.string()),
 });
 

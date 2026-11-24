@@ -16,11 +16,31 @@ const ScriptView = lazy(() =>
   })),
 );
 
+const StoryView = lazy(() =>
+  import("../story/StoryView.js").then((module) => ({
+    default: module.StoryView,
+  })),
+);
+
 export const loadingScriptText = "Loading the script.";
+
+export const loadingStoryText = "Loading the story.";
 
 function StepBody(props: StepViewProps & { stepId: StepViewId }) {
   const { stepId, ...view } = props;
   switch (stepId) {
+    case "story":
+      return (
+        <Suspense
+          fallback={
+            <p className="fact lead" role="status">
+              {loadingStoryText}
+            </p>
+          }
+        >
+          <StoryView {...view} />
+        </Suspense>
+      );
     case "script":
       return (
         <Suspense

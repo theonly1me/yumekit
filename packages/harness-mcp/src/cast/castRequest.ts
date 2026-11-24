@@ -6,11 +6,19 @@ import { findCastMembers } from "./castMembers.js";
 
 const sentenceEnd = /[.!?]$/;
 
+function factsOf(member: CastMember): string {
+  const facts = (member.facts ?? [])
+    .map((fact) => fact.trim().replace(/[.;]+$/, ""))
+    .filter((fact) => fact !== "");
+  return facts.length === 0 ? "" : ` Fixed: ${facts.join("; ")}.`;
+}
+
 function sentenceOf(member: CastMember): string {
   const description = member.description.trim();
   const sentence =
     description === "" ? member.name : `${member.name}: ${description}`;
-  return sentenceEnd.test(sentence) ? sentence : `${sentence}.`;
+  const ended = sentenceEnd.test(sentence) ? sentence : `${sentence}.`;
+  return `${ended}${factsOf(member)}`;
 }
 
 function referenceMaximumOf(model: MediaModel | undefined): number {

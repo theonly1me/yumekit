@@ -1,4 +1,9 @@
-import { castKinds, type Bible, type CastMember } from "@yumekit/project";
+import {
+  castFactLimits,
+  castKinds,
+  type Bible,
+  type CastMember,
+} from "@yumekit/project";
 import { z } from "zod";
 import { applyEditsResult } from "../applyEditsResult.js";
 import type { HarnessContext } from "../context.js";
@@ -21,6 +26,13 @@ const putCastMemberInput = {
     .string()
     .describe(
       "How the entry looks in a few words. The harness adds it to each prompt that gives its id in cast_ids.",
+    ),
+  facts: z
+    .array(z.string().trim().min(1).max(castFactLimits.characters))
+    .max(castFactLimits.count)
+    .optional()
+    .describe(
+      "The fixed facts in words, one fact each, that each picture and clip must keep. The harness adds them to each prompt. A person: age, build, hair, each garment and its colors, marks and their side, five fingers on each hand, which hand holds which prop and how. A place: where the door is, the side of its hinges and its knob, which way it opens, the window, the light, what is on each wall. A prop: size, material, colors, how a hand holds it. Leave it out to keep the facts of an entry that exists.",
     ),
   reference_asset_ids: z
     .array(idInput("An image asset that shows the entry."))
@@ -48,7 +60,7 @@ function registerPutCastMember(context: HarnessContext): void {
   context.tools.add({
     name: "put_cast_member",
     description:
-      "Add or replace one person, place, or product of the cast. The cast keeps it the same in each picture and each video clip: give its id in cast_ids of generate_asset for each one that shows it.",
+      "Add or replace one person, place, product, or prop of the cast. The cast keeps it the same in each picture and each video clip: give its id in cast_ids of generate_asset for each one that shows it. For a film, each entry is a sheet: the facts in words, and a picture (a person: front, side, back, and the face close up, then the hands with the prop; a place: a wide establishing picture; a prop: two sides).",
     inputSchema: putCastMemberInput,
     run: ({ input }) => {
       const snapshot = context.store.read();
@@ -57,6 +69,7 @@ function registerPutCastMember(context: HarnessContext): void {
       );
       const referenceAssetIds =
         input.reference_asset_ids ?? existing?.referenceAssetIds ?? [];
+      const facts = input.facts ?? existing?.facts;
       const pictures = referencePathsInput({
         snapshot,
         projectFolder: context.store.folder,
@@ -68,6 +81,7 @@ function registerPutCastMember(context: HarnessContext): void {
         kind: input.kind,
         name: input.name,
         description: input.description.trim(),
+        ...(facts === undefined ? {} : { facts }),
         referenceAssetIds,
       };
       return applyEditsResult({
@@ -78,7 +92,7 @@ function registerPutCastMember(context: HarnessContext): void {
             bible: bibleWithMember({ bible: snapshot.bible, member }),
           },
         ],
-        line: `Cast entry "${input.cast_id}" saved with ${String(referenceAssetIds.length)} pictures.`,
+        line: `Cast entry "${input.cast_id}" saved with ${String(referenceAssetIds.length)} pictures and ${String(facts?.length ?? 0)} facts.`,
         data: { cast_member: wireCastMemberOf(member) },
       });
     },

@@ -1,10 +1,12 @@
 import type { SoundViewProps } from "../sound/soundView.js";
 
-export type StepViewId = "script" | "pictures" | "voice" | "music" | "files";
+export type StepViewId =
+  "story" | "script" | "pictures" | "voice" | "music" | "files";
 
 export type StepViewProps = SoundViewProps;
 
 export const stepViewTitles: Record<StepViewId, string> = {
+  story: "The story",
   script: "The script",
   pictures: "The pictures",
   voice: "The voice",

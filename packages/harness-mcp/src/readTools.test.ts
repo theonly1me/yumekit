@@ -32,6 +32,12 @@ describe("read tools", () => {
       '6. For a shot that code cannot draw, make a still image first. Check it with the person or with preview_frame. Then call generate_asset with the capability "video", first_frame_asset_id, and a camera_move, and add the clip with place_video.',
     );
     expect(instructions).toContain("9. Call render_video for each output.");
+    expect(instructions).toContain(
+      "A film is a chain of meaningful actions with cause and effect, in a world that stays the same; a character that only walks through places is a failure. Hands, fingers, and movement must look natural and human, and an object must never move, double, or change sides.",
+    );
+    expect(instructions).toContain(
+      "call review_clip, look at the frames, the measures, and the check list, and give a verdict; place only a kept or cut clip with place_video.",
+    );
   });
 
   it("get_project gives the frame rate, the outputs with their timeline length, and the scenes", async () => {

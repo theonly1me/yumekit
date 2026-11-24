@@ -25,6 +25,7 @@ These documents are the design of yumekit. Code follows them. If code and a docu
 | [17-looks-and-motion.md](17-looks-and-motion.md)                   | Five looks, the motion functions, backdrops, twelve new kit scenes, and transitions                 |
 | [18-first-full-run.md](18-first-full-run.md)                       | Corrections from the first full run: a local voice, step reasons, captions, names, the phone layout |
 | [19-film-kit.md](19-film-kit.md)                                   | Tempo and beats, music with no key, scene types for footage and launch films, the contact sheet     |
+| [20-story-craft.md](20-story-craft.md)                             | The story plan, the sheets of the cast, the art direction, continuity, and the review of a clip     |
 
 The visual reference for the editor is the prototype in [apps/prototype](../../apps/prototype).
 
@@ -81,7 +82,7 @@ Use these words with these meanings in code and in documents.
 - One paid check of `tools/gemini-media` with a real key: a 3 second clip at 720p, and confirmation that background mode works for the model.
 - Timeline changes by drag in the editor (milestone 3), the first run screen, and a desktop shell with Tauri.
 - A spending limit for each run of a request, next to the limit of each project (document 15, "Details of WP64").
-- The cast and style rules for long content (milestone 5).
+- The cast and style rules for long content (milestone 5). Document 20 adds the sheets, the art direction, and the story plan for a film with AI video.
 - Publishing to a platform (milestone 6).
 - Sign-in in front of an engine that runs on remote infrastructure.
 - Speech after 2027-01-06, when OpenAI shuts down its speech models: a Realtime path, or another speech server.

@@ -1,9 +1,9 @@
-import { castKinds } from "@yumekit/project";
 import { z } from "zod";
 import { applyEditsResult } from "../applyEditsResult.js";
 import type { HarnessContext } from "../context.js";
 import { idInput } from "../inputs.js";
 import { failureResult } from "../results.js";
+import { registerSetBible } from "./registerSetBible.js";
 
 function registerSetScript(context: HarnessContext): void {
   context.tools.add({
@@ -18,74 +18,6 @@ function registerSetScript(context: HarnessContext): void {
         store: context.store,
         edits: [{ kind: "setScript", script }],
         line: `Script set (${String(script.length)} characters).`,
-      }),
-  });
-}
-
-const castMemberInput = z.strictObject({
-  id: idInput("The id of the cast member."),
-  kind: z
-    .enum(castKinds)
-    .optional()
-    .describe("A person, a place, or a product. Default person."),
-  name: z.string().describe("The name of the cast member."),
-  description: z
-    .string()
-    .describe("How the cast member looks. Put it in each image prompt."),
-  reference_asset_ids: z
-    .array(idInput("An image asset that shows the cast member."))
-    .max(4)
-    .optional()
-    .describe("Up to 4 image assets that show the cast member. Default none."),
-});
-
-function registerSetBible(context: HarnessContext): void {
-  context.tools.add({
-    name: "set_bible",
-    description:
-      "Replace the bible: the look and the voice that every scene and media prompt follows. Put the style in each image prompt.",
-    inputSchema: {
-      style: z
-        .string()
-        .describe(
-          "The visual style in one or two sentences, for example 'flat paper cutouts, soft light'.",
-        ),
-      palette: z
-        .array(z.string())
-        .describe("Colors as CSS hex values, for example #18203a."),
-      cast: z
-        .array(castMemberInput)
-        .optional()
-        .describe(
-          "The people, places, and products that show in two or more scenes. It replaces the whole cast. To change one entry, call put_cast_member. Default none.",
-        ),
-      voice: z
-        .string()
-        .describe(
-          "How the narration sounds, for example 'warm, calm, medium pace'.",
-        ),
-    },
-    run: ({ input: { style, palette, cast, voice } }) =>
-      applyEditsResult({
-        store: context.store,
-        edits: [
-          {
-            kind: "setBible",
-            bible: {
-              style,
-              palette,
-              voice,
-              cast: (cast ?? []).map((member) => ({
-                id: member.id,
-                kind: member.kind ?? "person",
-                name: member.name,
-                description: member.description,
-                referenceAssetIds: member.reference_asset_ids ?? [],
-              })),
-            },
-          },
-        ],
-        line: "Bible set.",
       }),
   });
 }
