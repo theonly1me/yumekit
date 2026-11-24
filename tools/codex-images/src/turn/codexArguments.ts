@@ -1,3 +1,5 @@
+import { chatSettingArgumentsOf, type ChatSettings } from "./chatSettings.ts";
+
 const featuresTurnedOff = [
   "apps",
   "plugins",
@@ -20,6 +22,7 @@ export function codexImageArgumentsOf(options: {
   prompt: string;
   workingFolder: string;
   referenceImagePaths: readonly string[];
+  chatSettings: ChatSettings;
 }): string[] {
   return [
     "exec",
@@ -33,6 +36,7 @@ export function codexImageArgumentsOf(options: {
     ...["--sandbox", "read-only"],
     ...setting({ key: "approval_policy", value: "never" }),
     ...setting({ key: "web_search", value: "disabled" }),
+    ...chatSettingArgumentsOf(options.chatSettings),
     ...["--cd", options.workingFolder],
     ...options.referenceImagePaths.flatMap((path) => ["--image", path]),
     "--",

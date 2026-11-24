@@ -72,7 +72,12 @@ describe("findBundledServers", () => {
           new URL("../../../tools/codex-images/dist/main.js", import.meta.url),
         ),
       ],
-      passEnvironment: ["CODEX_HOME", "YUMEKIT_CODEX_PATH"],
+      passEnvironment: [
+        "CODEX_HOME",
+        "YUMEKIT_CODEX_PATH",
+        "YUMEKIT_CODEX_MODEL",
+        "YUMEKIT_CODEX_EFFORT",
+      ],
     });
   });
 });

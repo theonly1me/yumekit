@@ -1,5 +1,6 @@
 import { spawn } from "node:child_process";
 import { createInterface } from "node:readline";
+import { chatSettingsOf, refusedSettingTextOf } from "./chatSettings.ts";
 import { codexImageArgumentsOf } from "./codexArguments.ts";
 import {
   emptyTurnFacts,
@@ -29,12 +30,14 @@ export function runImageTurn(options: {
   const facts = emptyTurnFacts();
   let errorText = "";
   let timedOut = false;
+  const chatSettings = chatSettingsOf(options.environment);
   const child = spawn(
     options.programPath,
     codexImageArgumentsOf({
       prompt: options.prompt,
       workingFolder: options.workingFolder,
       referenceImagePaths: options.referenceImagePaths,
+      chatSettings,
     }),
     {
       cwd: options.workingFolder,
@@ -79,12 +82,14 @@ export function runImageTurn(options: {
     }
     if (exitCode !== 0 || facts.failure !== undefined) {
       const lastErrorLine = errorText.trim().split("\n").at(-1) ?? "";
+      const message =
+        facts.failure ??
+        (lastErrorLine || "Codex stopped before it made a picture.");
       finished.resolve({
         kind: "failed",
         threadId,
         message:
-          facts.failure ??
-          (lastErrorLine || "Codex stopped before it made a picture."),
+          refusedSettingTextOf({ message, settings: chatSettings }) ?? message,
       });
       return;
     }

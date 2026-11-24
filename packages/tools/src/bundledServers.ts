@@ -37,7 +37,12 @@ const bundledServersByName: Record<string, BundledServer> = {
   "local-music": { folder: "local-music" },
   codex: {
     folder: "codex-images",
-    passEnvironment: ["CODEX_HOME", "YUMEKIT_CODEX_PATH"],
+    passEnvironment: [
+      "CODEX_HOME",
+      "YUMEKIT_CODEX_PATH",
+      "YUMEKIT_CODEX_MODEL",
+      "YUMEKIT_CODEX_EFFORT",
+    ],
   },
 };
 
