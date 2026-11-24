@@ -30,6 +30,7 @@ export async function addMadeAsset(options: {
   run: MediaToolRun;
   tool: string;
   input: JsonObject;
+  notes?: string[];
 }): Promise<CallToolResult> {
   const { context, request, snapshot, run, tool, input } = options;
   const { server, model, result } = run;
@@ -116,6 +117,7 @@ export async function addMadeAsset(options: {
     ...(model === undefined ? {} : { model }),
   });
   const notes = [
+    ...(options.notes ?? []),
     lengthNoteOf(length.value),
     sizeNoteOf({
       input: request.input,

@@ -45,7 +45,7 @@ function wholenessIssues(options: {
 function keepIssues(answer: ClipAnswer): Issue[] {
   return [
     answer.faults.length > 0
-      ? "A keep has no faults. Give cut with the clean part, or redo."
+      ? "A keep has no blocking faults. Move a difference that a viewer would not see to notes, or give cut with the clean part, or redo."
       : undefined,
     ...answer.warnings.map((entry) =>
       entry.cause === "fault"
@@ -137,7 +137,17 @@ export function clipAnswerIssuesOf(options: {
       : answer.verdict === "cut"
         ? cutIssues(options)
         : [answer.faults.length === 0 ? "A redo names its faults." : undefined];
-  return [...wholenessIssues(options), ...verdictIssues].flatMap((issue) =>
-    issue === undefined ? [] : [issue],
-  );
+  const startsElsewhere =
+    answer.verdict !== "redo" &&
+    options.job.startPicture !== undefined &&
+    options.job.warnings.some(
+      (warning) => warning.kind === "does-not-start-on-the-start-picture",
+    )
+      ? "The measure shows that the first frame is another picture than the start picture, so the clip is a redo."
+      : undefined;
+  return [
+    ...wholenessIssues(options),
+    ...verdictIssues,
+    startsElsewhere,
+  ].flatMap((issue) => (issue === undefined ? [] : [issue]));
 }

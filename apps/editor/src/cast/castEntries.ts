@@ -23,8 +23,19 @@ export const castEntrySchema = z.object({
       verdict: z.enum(["pass", "fail"]),
       faults: z.array(z.string()),
       assetIds: z.array(z.string()),
+      notes: z.array(z.string()).optional(),
     })
     .optional(),
+  sheetTries: z
+    .array(
+      z.object({
+        assetIds: z.array(z.string()),
+        verdict: z.enum(["pass", "fail"]),
+      }),
+    )
+    .optional(),
+  restrictions: z.array(z.string()).optional(),
+  briefFacts: z.array(z.string()).optional(),
 });
 
 export type CastEntry = z.infer<typeof castEntrySchema>;

@@ -105,6 +105,12 @@ export const shotInput = z.strictObject({
     .array(strikeInput)
     .optional()
     .describe("Each strike of the shot, with its one target."),
+  start_picture_prompt: words.describe(
+    "The prompt of the start picture that you will send, before the harness adds the art direction, the cast, and the lessons. Describe every visible part: each garment, each hand, the ground, the light. review_plan checks it, and the first try sends it.",
+  ),
+  video_prompt: words.describe(
+    "The prompt of the clip that you will send: the format, the start, the action in beats with seconds, the body, the physics, what must not change, what moves in the background, and no writing. review_plan checks it, and the first try sends it.",
+  ),
   music_intensity: z
     .int()
     .min(musicIntensityRange.minimum)

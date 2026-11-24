@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { passSheetAnswerOf } from "../testing/criticFixture.js";
+import { keepAnswerOf, passSheetAnswerOf } from "../testing/criticFixture.js";
+import { planAnswerWith } from "../testing/planCritic.js";
 import {
   makeForgeSheets,
   makeSheet,
+  passPlan,
   setPlan,
   shotCall,
   startStoryHarness,
@@ -35,6 +37,7 @@ describe("the order of a story film", () => {
       harness,
       shots: [{ shot_id: "strike", cast_ids: ["smith", "hammer"] }],
     });
+    await passPlan(harness);
 
     const result = await shotCall({
       harness,
@@ -71,6 +74,7 @@ describe("the order of a story film", () => {
         },
       ],
     });
+    await passPlan(harness);
 
     const result = await shotCall({
       harness,
@@ -86,8 +90,24 @@ describe("the order of a story film", () => {
   });
 
   it("makes the next shot in the same place wait for the kept clip before it, then start from its end", async () => {
-    const harness = await startStoryHarness({ videoStyle: "ai-video" });
+    const harness = await startStoryHarness({
+      videoStyle: "ai-video",
+      critic: {
+        plan: (brief) =>
+          planAnswerWith({ brief, easiest: "cool", hardest: "polish" }),
+        clip: (brief) =>
+          brief.includes('"polish-clip"')
+            ? { ...keepAnswerOf(brief), verdict: "redo", faults: ["A jump"] }
+            : keepAnswerOf(brief),
+      },
+    });
     await makeForgeSheets(harness);
+    await makeSheet({
+      harness,
+      castId: "yard",
+      kind: "place",
+      facts: ["The water trough is by the wall"],
+    });
     await setPlan({
       harness,
       shots: [
@@ -97,9 +117,33 @@ describe("the order of a story film", () => {
           start: [{ cast_id: "smith", state: "the blade is bent" }],
           end: [{ cast_id: "smith", state: "the blade hisses" }],
         },
+        { shot_id: "cool", place_id: "yard" },
+        { shot_id: "polish", place_id: "yard" },
       ],
     });
+    await passPlan(harness);
+    for (const shotId of ["cool", "polish"]) {
+      await shotCall({
+        harness,
+        assetId: `${shotId}-clip`,
+        capability: "video",
+        shotId,
+        ...(shotId === "polish" ? { firstFrameAssetId: "cool-clip-end" } : {}),
+      });
+      await harness.call({
+        name: "review_clip",
+        arguments: { asset_id: `${shotId}-clip`, shot_id: shotId },
+      });
+    }
 
+    await harness.call({
+      name: "record_lesson",
+      arguments: {
+        lesson: "Keep the trough large in the frame",
+        cause: "The clip jumped",
+        shot_id: "polish",
+      },
+    });
     const early = await shotCall({
       harness,
       assetId: "quench-start",
@@ -108,16 +152,9 @@ describe("the order of a story film", () => {
     });
     await shotCall({
       harness,
-      assetId: "start",
-      capability: "image",
-      shotId: "strike",
-    });
-    await shotCall({
-      harness,
       assetId: "strike-clip",
       capability: "video",
       shotId: "strike",
-      firstFrameAssetId: "start",
     });
     await harness.call({
       name: "review_clip",
@@ -128,7 +165,7 @@ describe("the order of a story film", () => {
       assetId: "quench-clip",
       capability: "video",
       shotId: "quench",
-      firstFrameAssetId: "start",
+      firstFrameAssetId: "cool-clip-end",
     });
     const linked = await shotCall({
       harness,

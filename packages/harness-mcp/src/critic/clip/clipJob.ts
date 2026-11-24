@@ -67,6 +67,8 @@ export function clipBriefOf(job: ClipJob): string {
     "The list (answer each item by its number):",
     clipListText(),
     "",
+    "Severity: put each fault that the film cannot use in faults (blocking), and each difference that a viewer would not see in notes. Hands, bodies, objects, contact, the source of an effect, and continuity stay blocking. Count only what is in the frame.",
+    "",
     `Steps: 1. Call view_for_review with no input to see every frame, the start picture next to the first frame${job.previousEnd === undefined ? "" : ", the end of the shot before"}, and the sheets. 2. Look closer with view_for_review and a region and a time at each hand, each face, each weapon, each contact, and each warning. 3. Call give_clip_review once with your whole answer. If it refuses, correct the answer and call it again.`,
   ].join("\n");
 }

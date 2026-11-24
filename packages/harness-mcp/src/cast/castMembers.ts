@@ -9,6 +9,8 @@ export function wireCastMemberOf(member: CastMember) {
     description: member.description,
     facts: member.facts ?? [],
     reference_asset_ids: member.referenceAssetIds,
+    sheet_prompts: member.sheetPrompts ?? [],
+    restrictions: member.restrictions ?? [],
   };
 }
 

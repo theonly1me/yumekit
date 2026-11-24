@@ -19,6 +19,7 @@ export const storyCalls: ScriptedCall[] = [
       description: "A cold lake",
       facts: ["The pier is on the left bank"],
       reference_asset_ids: ["still"],
+      sheet_prompts: ["A cold lake at dawn"],
     },
   },
   { name: "review_sheet", input: { cast_id: "lake" } },
@@ -44,8 +45,20 @@ export const storyCalls: ScriptedCall[] = [
           end_state: [],
           inherits: "",
           music_intensity: 2,
+          start_picture_prompt: "A fox at the edge of the ice",
+          video_prompt: "The fox taps the ice and it cracks",
         },
       ],
+    },
+  },
+  { name: "review_plan", input: {} },
+  { name: "review_start", input: { asset_id: "still", shot_id: "dawn" } },
+  {
+    name: "record_lesson",
+    input: {
+      lesson: "Keep the paw large in the frame",
+      cause: "The paw missed the ice",
+      shot_id: "dawn",
     },
   },
 ];
@@ -54,7 +67,25 @@ export const reviewCalls: ScriptedCall[] = [
   { name: "review_clip", input: { asset_id: "clip", shot_id: "dawn" } },
   { name: "view_for_review", input: {} },
   {
+    name: "give_plan_review",
+    input: {
+      checks: [],
+      findings: [],
+      shots: [],
+      cast: [],
+      faults: ["x"],
+      notes: [],
+      verdict: "fail",
+      easiest_shot_id: "dawn",
+      hardest_shot_id: "dawn",
+    },
+  },
+  {
     name: "give_sheet_review",
+    input: { checks: [], counts: [], verdict: "fail", faults: ["x"] },
+  },
+  {
+    name: "give_start_review",
     input: { checks: [], counts: [], verdict: "fail", faults: ["x"] },
   },
   {

@@ -52,8 +52,8 @@ export function helperRefusalOf(options: {
   if (isCriticTool(tool)) {
     return harnessFailureResult({
       kind: "critic-only",
-      message: `Only the critic that review_clip or review_sheet starts can call ${tool}.`,
-      hint: "Call review_clip or review_sheet. The critic gives the verdict.",
+      message: `Only the critic that a review starts (review_plan, review_sheet, review_start, review_clip) can call ${tool}.`,
+      hint: "Call the review tool. The critic gives the verdict.",
     });
   }
   const refusal =

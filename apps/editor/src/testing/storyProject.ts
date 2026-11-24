@@ -1,5 +1,6 @@
-import { claudeLines, setScenario } from "./chatTesting.js";
+import { setScenario } from "./chatTesting.js";
 import type { RunningEngine } from "./runEngine.js";
+import { criticSteps } from "./storyCritic.js";
 
 function smithState(state: string) {
   return [
@@ -12,46 +13,6 @@ function smithState(state: string) {
     },
   ];
 }
-
-const checks = (count: number) =>
-  Array.from({ length: count }, (...[, index]) => ({
-    item: index + 1,
-    seen: "Seen on the frames.",
-  }));
-
-const criticSteps = [
-  { print: claudeLines.init },
-  {
-    callTool: {
-      name: "give_sheet_review",
-      input: { checks: checks(6), counts: [], verdict: "pass", faults: [] },
-    },
-  },
-  {
-    callTool: {
-      name: "give_clip_review",
-      input: {
-        checks: checks(10),
-        counts: [{ object: "hammers", expected: 1, seen: 2, seconds: 0.8 }],
-        action: { happened: true, seconds: 0.3, seen: "The hammer lands." },
-        end_entries: [
-          { entry: "smith", happened: true, seconds: 0.4, seen: "Bent." },
-        ],
-        start_match: { matches: true, seen: "The same anvil." },
-        warnings: [1, 2, 3, 4, 5, 6].map((index) => ({
-          index,
-          cause: "harmless",
-          seen: "A spark.",
-        })),
-        verdict: "cut",
-        keep_from_seconds: 0,
-        keep_to_seconds: 0.5,
-        faults: ["The hammer changes hands at 0.8 seconds"],
-      },
-    },
-  },
-  { print: claudeLines.result("completed") },
-];
 
 const forgeShot = {
   shot_id: "strike",
@@ -68,6 +29,8 @@ const forgeShot = {
   end_state: smithState("the blade is bent on the anvil"),
   inherits: "The bent blade.",
   music_intensity: 3,
+  start_picture_prompt: "Aiko at the anvil, the red blade on it",
+  video_prompt: "She lifts the hammer and strikes; the blade bends",
 };
 
 async function sheet(options: {
@@ -76,6 +39,7 @@ async function sheet(options: {
   kind: string;
   name: string;
   facts: string[];
+  extra?: Record<string, unknown>;
 }): Promise<void> {
   const { engine, castId } = options;
   await engine.callTool({
@@ -95,6 +59,8 @@ async function sheet(options: {
       description: options.name,
       facts: options.facts,
       reference_asset_ids: [`${castId}-sheet`],
+      sheet_prompts: [options.name],
+      ...options.extra,
     },
   });
   await engine.callTool({ name: "review_sheet", input: { cast_id: castId } });
@@ -119,6 +85,10 @@ export async function buildStoryProject(engine: RunningEngine): Promise<void> {
     kind: "person",
     name: "Aiko",
     facts: ["The hammer is in her right hand"],
+    extra: {
+      brief_facts: ["She swings the hammer with her right hand"],
+      restrictions: ["Never show both of her hands close up"],
+    },
   });
   await engine.callTool({
     name: "set_story_plan",
@@ -141,14 +111,19 @@ export async function buildStoryProject(engine: RunningEngine): Promise<void> {
       ],
     },
   });
+  await engine.callTool({ name: "review_plan", input: {} });
   await engine.callTool({
     name: "generate_asset",
     input: {
       asset_id: "strike-start",
       capability: "image",
       shot_id: "strike",
-      input: { prompt: "The anvil", width_pixels: 64, height_pixels: 36 },
+      input: { width_pixels: 64, height_pixels: 36 },
     },
+  });
+  await engine.callTool({
+    name: "review_start",
+    input: { asset_id: "strike-start", shot_id: "strike" },
   });
   await engine.callTool({
     name: "generate_asset",
@@ -156,12 +131,19 @@ export async function buildStoryProject(engine: RunningEngine): Promise<void> {
       asset_id: "strike-clip",
       capability: "video",
       shot_id: "strike",
-      first_frame_asset_id: "strike-start",
-      input: { prompt: "She strikes", duration_seconds: 1 },
+      input: { duration_seconds: 1 },
     },
   });
   await engine.callTool({
     name: "review_clip",
     input: { asset_id: "strike-clip", shot_id: "strike" },
+  });
+  await engine.callTool({
+    name: "record_lesson",
+    input: {
+      lesson: "Keep the hammer in her right hand in every prompt",
+      cause: "The hammer changed hands in the first clip",
+      shot_id: "strike",
+    },
   });
 }

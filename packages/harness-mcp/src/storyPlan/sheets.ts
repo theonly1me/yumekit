@@ -46,13 +46,15 @@ function reviewFailureOf(members: CastMember[]): HarnessFailure | undefined {
     };
   }
   const failed = members.filter(
-    (member) => member.sheetReview?.verdict === "fail",
+    (member) =>
+      member.sheetReview?.verdict === "fail" &&
+      (member.restrictions ?? []).length === 0,
   );
   if (failed.length === 0) return undefined;
   return {
     kind: "sheet-failed-review",
     message: `The critic failed the sheet of ${failed.map((member) => `${member.id} (${(member.sheetReview?.faults ?? []).join("; ")})`).join(", ")}.`,
-    hint: "Make the sheet picture again with a prompt that names each fault, give it to put_cast_member, and call review_sheet again.",
+    hint: "Make the next try of the sheet with generate_asset and sheet_of (the rules of tries apply), give it to put_cast_member, and call review_sheet again. Or use the best version with restrictions on its cast entry, then call review_plan again.",
   };
 }
 

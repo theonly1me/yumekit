@@ -15,6 +15,7 @@ export const documentedToolNames = [
   "remove_cast_member",
   "get_story_guide",
   "set_story_plan",
+  "record_lesson",
   "add_output",
   "remove_output",
   "add_platform",
@@ -52,6 +53,8 @@ export const documentedToolNames = [
   "preview_assets",
   "review_clip",
   "review_sheet",
+  "review_plan",
+  "review_start",
   "check_music",
   "align_words",
   "preview_frame",
@@ -65,4 +68,6 @@ export const documentedToolNames = [
   "view_for_review",
   "give_clip_review",
   "give_sheet_review",
+  "give_plan_review",
+  "give_start_review",
 ] as const;

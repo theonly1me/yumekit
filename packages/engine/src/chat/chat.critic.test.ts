@@ -6,7 +6,7 @@ import { init, result, whole } from "./testing/claudeLines.js";
 import { startChatEngine, type FakeStep } from "./testing/chatEngine.js";
 
 const failedSheet = {
-  checks: [1, 2, 3, 4, 5, 6].map((item) => ({ item, seen: "Seen." })),
+  checks: [1, 2, 3, 4, 5, 6, 7, 8].map((item) => ({ item, seen: "Seen." })),
   counts: [{ object: "swords", expected: 1, seen: 2 }],
   verdict: "fail",
   faults: ["The sheet draws a sheathed sword and a bare sword"],

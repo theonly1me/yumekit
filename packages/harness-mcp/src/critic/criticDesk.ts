@@ -1,7 +1,9 @@
 import type { ClipJob } from "./clip/clipJob.js";
+import type { PlanJob } from "./plan/planJob.js";
 import type { SheetJob } from "./sheet/sheetJob.js";
+import type { StartJob } from "./start/startJob.js";
 
-export type CriticJob = ClipJob | SheetJob;
+export type CriticJob = ClipJob | SheetJob | PlanJob | StartJob;
 
 export interface CriticDesk {
   current: () => CriticJob | undefined;

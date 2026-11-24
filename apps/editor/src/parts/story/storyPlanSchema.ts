@@ -23,6 +23,38 @@ const reviewSchema = z.object({
       seconds: z.number(),
     })
     .optional(),
+  notes: z.array(z.string()).optional(),
+});
+
+const startReviewSchema = z.object({
+  assetId: z.string(),
+  verdict: z.enum(["pass", "fail"]),
+  faults: z.array(z.string()),
+  notes: z.array(z.string()),
+});
+
+const planReviewSchema = z.object({
+  verdict: z.enum(["pass", "fail"]),
+  faults: z.array(z.string()),
+  notes: z.array(z.string()),
+  shots: z.array(
+    z.object({
+      shotId: z.string(),
+      difficulty: z.number(),
+      limits: z.array(z.string()),
+      faults: z.array(z.string()),
+      notes: z.array(z.string()),
+    }),
+  ),
+  easiestShotId: z.string(),
+  hardestShotId: z.string(),
+});
+
+const lessonSchema = z.object({
+  text: z.string(),
+  cause: z.string(),
+  shotId: z.string().optional(),
+  isLimit: z.boolean(),
 });
 
 const stateEntrySchema = z.object({
@@ -56,6 +88,7 @@ const shotSchema = z.object({
   inherits: z.string(),
   musicIntensity: z.number().optional(),
   reviews: z.array(reviewSchema).optional(),
+  startReviews: z.array(startReviewSchema).optional(),
 });
 
 const musicCheckSchema = z.object({
@@ -72,6 +105,8 @@ export const storyPlanSchema = z.object({
   change: z.string(),
   shots: z.array(shotSchema),
   musicChecks: z.array(musicCheckSchema).optional(),
+  review: planReviewSchema.optional(),
+  lessons: z.array(lessonSchema).optional(),
 });
 
 export type StoryPlan = z.infer<typeof storyPlanSchema>;
@@ -79,3 +114,4 @@ export type PlanShot = z.infer<typeof shotSchema>;
 export type ShotReview = z.infer<typeof reviewSchema>;
 export type ShotState = z.infer<typeof shotStateSchema>;
 export type MusicCheckFacts = z.infer<typeof musicCheckSchema>;
+export type PlanReviewFacts = z.infer<typeof planReviewSchema>;

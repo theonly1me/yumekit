@@ -7,34 +7,21 @@ import {
 import type { GenerateAssetInput } from "../media/generateAssetInput.js";
 import type { HarnessFailure, Outcome } from "../results.js";
 import { continuityFailureOf } from "./continuity.js";
+import {
+  calibrationFailureOf,
+  calibrationShotIdsOf,
+  planGateFailureOf,
+} from "./planGate.js";
+import { firstFrameFailureOf, withPromptAdditions } from "./promptAdditions.js";
+import { withSheetTry } from "./sheetTryGate.js";
 import { sheetFailureOf } from "./sheets.js";
+import { refusalsOf } from "./shotRefusals.js";
+import { startGateFailureOf, withShotTry } from "./shotTryGate.js";
 
 type RequestOutcome = Outcome<GenerateAssetInput, HarnessFailure>;
 
 function failed(failure: HarnessFailure): RequestOutcome {
   return { ok: false, failure };
-}
-
-function withArtDirection(options: {
-  snapshot: ProjectSnapshot;
-  request: GenerateAssetInput;
-}): GenerateAssetInput {
-  const { request } = options;
-  const style = options.snapshot.bible.style.trim();
-  const prompt = request.input["prompt"];
-  const isPictureOrClip =
-    request.capability === "image" || request.capability === "video";
-  if (!isPictureOrClip || style === "" || typeof prompt !== "string") {
-    return request;
-  }
-  const sentence = /[.!?]$/.test(style) ? style : `${style}.`;
-  return {
-    ...request,
-    input: {
-      ...request.input,
-      prompt: `${prompt}\n\nArt direction: ${sentence}`,
-    },
-  };
 }
 
 function needsShot(options: {
@@ -98,16 +85,59 @@ function shotRequestOf(options: {
   };
 }
 
-export function withStory(options: {
+function startsFromPlan(options: { plan: StoryPlan; index: number }): boolean {
+  const { plan, index } = options;
+  const shot = plan.shots[index];
+  const before = plan.shots[index - 1];
+  if (shot === undefined || before === undefined) return false;
+  return (
+    calibrationShotIdsOf(plan).includes(shot.id) ||
+    refusalsOf({ shot: before }).length > 0
+  );
+}
+
+function withShot(options: {
+  snapshot: ProjectSnapshot;
+  plan: StoryPlan;
+  request: GenerateAssetInput;
+  shot: Shot;
+  index: number;
+}): RequestOutcome {
+  const { snapshot, plan, request, shot, index } = options;
+  if (request.capability !== "image" && request.capability !== "video") {
+    return failed({
+      kind: "invalid-value",
+      message: `shot_id is for a picture or a video clip, not for ${request.capability}.`,
+      hint: "Leave out shot_id, or use the capability image or video.",
+    });
+  }
+  const blocked =
+    calibrationFailureOf({ plan, shot }) ??
+    sheetFailureOf({ snapshot, shot }) ??
+    continuityFailureOf({
+      snapshot,
+      plan,
+      index,
+      request,
+      startsFromPlan: startsFromPlan({ plan, index }),
+    }) ??
+    startGateFailureOf({ snapshot, shot, request });
+  if (blocked !== undefined) return failed(blocked);
+  const tried = withShotTry({ snapshot, shot, request });
+  if (!tried.ok) return tried;
+  return { ok: true, value: shotRequestOf({ request: tried.value, shot }) };
+}
+
+function storyRequestOf(options: {
   snapshot: ProjectSnapshot;
   request: GenerateAssetInput;
 }): RequestOutcome {
-  const { snapshot } = options;
-  const request = withArtDirection(options);
+  const { snapshot, request } = options;
+  const plan = snapshot.bible.storyPlan;
   const shotId = request.shot_id;
-  if (shotId === undefined) {
-    if (!needsShot({ snapshot, request })) return { ok: true, value: request };
-    const plan = snapshot.bible.storyPlan;
+  const onlyFrame = firstFrameFailureOf(request);
+  if (onlyFrame !== undefined) return failed(onlyFrame);
+  if (shotId === undefined && needsShot(options)) {
     if (plan === undefined) return failed(planMissing());
     return failed({
       kind: "shot-not-named",
@@ -116,28 +146,33 @@ export function withStory(options: {
       hint: `Give shot_id, one of: ${plan.shots.map((shot) => shot.id).join(", ") || "none"}. Add a shot with set_story_plan when the clip shows a new one.`,
     });
   }
-  if (request.capability !== "image" && request.capability !== "video") {
-    return failed({
-      kind: "invalid-value",
-      message: `shot_id is for a picture or a video clip, not for ${request.capability}.`,
-      hint: "Leave out shot_id, or use the capability image or video.",
-    });
+  if (shotId !== undefined && plan === undefined) return failed(planMissing());
+  const found =
+    shotId === undefined || plan === undefined
+      ? undefined
+      : shotOf({ plan, shotId });
+  if (found !== undefined && !found.ok) return found;
+  const isPictureOrClip =
+    request.capability === "image" || request.capability === "video";
+  if (plan !== undefined && isPictureOrClip) {
+    const gate = planGateFailureOf({ bible: snapshot.bible, plan });
+    if (gate !== undefined) return failed(gate);
   }
-  const plan = snapshot.bible.storyPlan;
-  if (plan === undefined) return failed(planMissing());
-  const found = shotOf({ plan, shotId });
-  if (!found.ok) return found;
-  const sheetFailure = sheetFailureOf({ snapshot, shot: found.value.shot });
-  if (sheetFailure !== undefined) return failed(sheetFailure);
-  const continuityFailure = continuityFailureOf({
-    snapshot,
-    plan,
-    index: found.value.index,
-    request,
-  });
-  if (continuityFailure !== undefined) return failed(continuityFailure);
+  if (found === undefined || plan === undefined) return withSheetTry(options);
+  return withShot({ snapshot, plan, request, ...found.value });
+}
+
+export function withStory(options: {
+  snapshot: ProjectSnapshot;
+  request: GenerateAssetInput;
+}): RequestOutcome {
+  const storied = storyRequestOf(options);
+  if (!storied.ok) return storied;
   return {
     ok: true,
-    value: shotRequestOf({ request, shot: found.value.shot }),
+    value: withPromptAdditions({
+      snapshot: options.snapshot,
+      request: storied.value,
+    }),
   };
 }

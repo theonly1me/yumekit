@@ -1,11 +1,13 @@
 import { z } from "zod";
-import { sheetReviewSchema } from "./reviews.js";
+import { sheetReviewSchema, sheetTrySchema } from "./reviews.js";
 import { storyPlanSchema } from "./storyPlan.js";
 import { idSchema } from "./values.js";
 
 export const castKinds = ["person", "place", "product", "prop"] as const;
 
 export const castFactLimits = { count: 24, characters: 200 } as const;
+
+export const castPromptLimits = { count: 4, characters: 4000 } as const;
 
 export const castMemberSchema = z.strictObject({
   id: idSchema,
@@ -18,6 +20,19 @@ export const castMemberSchema = z.strictObject({
     .exactOptional(),
   referenceAssetIds: z.array(idSchema),
   sheetReview: sheetReviewSchema.exactOptional(),
+  sheetTries: z.array(sheetTrySchema).exactOptional(),
+  sheetPrompts: z
+    .array(z.string().max(castPromptLimits.characters))
+    .max(castPromptLimits.count)
+    .exactOptional(),
+  restrictions: z
+    .array(z.string().max(castFactLimits.characters))
+    .max(castFactLimits.count)
+    .exactOptional(),
+  briefFacts: z
+    .array(z.string().max(castFactLimits.characters))
+    .max(castFactLimits.count)
+    .exactOptional(),
 });
 
 export const bibleSchema = z.strictObject({

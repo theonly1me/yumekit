@@ -33,8 +33,15 @@ function castLines(snapshot: ProjectSnapshot): string[] {
       const checked =
         review === undefined
           ? " Sheet not checked by the critic."
-          : ` Sheet ${review.verdict === "pass" ? "passed" : `failed: ${review.faults.join("; ")}`}.`;
-      return `- ${member.id} (${member.kind}) ${member.name}: ${member.description}${facts}${pictures}${checked}`;
+          : ` Sheet ${review.verdict === "pass" ? "passed" : `failed: ${review.faults.join("; ")}`}.${(review.notes ?? []).length === 0 ? "" : ` Notes: ${(review.notes ?? []).join("; ")}.`}`;
+      const restrictions =
+        (member.restrictions ?? []).length === 0
+          ? ""
+          : ` Restrictions: ${(member.restrictions ?? []).join("; ")}.`;
+      const prompts = (member.sheetPrompts ?? []).length;
+      const planned =
+        prompts === 0 ? "" : ` Sheet prompts: ${String(prompts)}.`;
+      return `- ${member.id} (${member.kind}) ${member.name}: ${member.description}${facts}${pictures}${checked}${restrictions}${planned}`;
     }),
   ];
 }
@@ -63,7 +70,7 @@ export function storyText(snapshot: ProjectSnapshot): string {
     `Palette: ${bible.palette.length === 0 ? "the colors of the look" : bible.palette.join(", ")}`,
     `Voice: ${bible.voice === "" ? "none" : bible.voice}`,
     ...castLines(snapshot),
-    ...planLines(bible.storyPlan),
+    ...planLines(snapshot),
     "### Script",
     snapshot.script.trim() === "" ? "(no script yet)" : snapshot.script.trim(),
   ].join("\n");

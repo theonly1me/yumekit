@@ -1,4 +1,5 @@
 import type { SheetReview, StoryPlan } from "@yumekit/project";
+import { sheetTriesOf } from "../../storyPlan/sheetTries.js";
 import { applyEditsResult } from "../../applyEditsResult.js";
 import type { HarnessContext } from "../../context.js";
 import { idInput } from "../../inputs.js";
@@ -7,6 +8,7 @@ import type { CriticDesk } from "../criticDesk.js";
 import type { AskCritic } from "../criticTypes.js";
 import { runCritic } from "../runCritic.js";
 import { sheetBriefOf, type SheetJob } from "./sheetJob.js";
+import { sheetNextStepOf } from "./sheetNextStep.js";
 
 export function heldPropsOf(options: {
   plan: StoryPlan | undefined;
@@ -90,7 +92,17 @@ export function registerReviewSheet(
           seen: count.seen,
         })),
         answers: answer.checks,
+        notes: answer.notes,
       };
+      const tries = [
+        ...sheetTriesOf(member),
+        {
+          assetIds: member.referenceAssetIds,
+          verdict: answer.verdict,
+          faults: answer.faults,
+          notes: answer.notes,
+        },
+      ];
       const latest = context.store.read().bible;
       return applyEditsResult({
         store: context.store,
@@ -101,14 +113,19 @@ export function registerReviewSheet(
               ...latest,
               cast: latest.cast.map((candidate) =>
                 candidate.id === member.id
-                  ? { ...candidate, sheetReview: review }
+                  ? { ...candidate, sheetReview: review, sheetTries: tries }
                   : candidate,
               ),
             },
           },
         ],
-        line: `The critic says ${answer.verdict} for the sheet of "${member.id}"${answer.faults.length === 0 ? "." : `: ${answer.faults.join("; ")}. Make the sheet again with a prompt that names each fault, then review it again.`}`,
-        data: { verdict: answer.verdict, faults: answer.faults },
+        line: `The critic says ${answer.verdict} for the sheet of "${member.id}"${answer.faults.length === 0 ? "." : `: ${answer.faults.join("; ")}.`}${answer.notes.length === 0 ? "" : ` Notes, which do not fail it: ${answer.notes.join("; ")}.`} ${sheetNextStepOf({ castId: member.id, tries })}`,
+        data: {
+          verdict: answer.verdict,
+          faults: answer.faults,
+          notes: answer.notes,
+          tries: tries.length,
+        },
       });
     },
   });

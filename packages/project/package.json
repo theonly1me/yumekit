@@ -41,6 +41,10 @@
     "./voice-script": {
       "types": "./dist/voiceScript/index.d.ts",
       "default": "./dist/voiceScript/index.js"
+    },
+    "./film-measure": {
+      "types": "./dist/filmMeasure/index.d.ts",
+      "default": "./dist/filmMeasure/index.js"
     }
   },
   "files": [

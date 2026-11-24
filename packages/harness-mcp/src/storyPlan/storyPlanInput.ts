@@ -93,6 +93,8 @@ function shotOf(options: {
       : { strikes: input.strikes.map(strikeOf) }),
     musicIntensity: input.music_intensity,
     ...(input.music_hits === undefined ? {} : { musicHits: input.music_hits }),
+    startPicturePrompt: input.start_picture_prompt,
+    videoPrompt: input.video_prompt,
     ...(earlier?.reviews === undefined ? {} : { reviews: earlier.reviews }),
   };
 }
@@ -121,6 +123,8 @@ export function storyPlanOf(options: {
     ...(earlier?.musicChecks === undefined
       ? {}
       : { musicChecks: earlier.musicChecks }),
+    ...(earlier?.review === undefined ? {} : { review: earlier.review }),
+    ...(earlier?.lessons === undefined ? {} : { lessons: earlier.lessons }),
   };
 }
 

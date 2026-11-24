@@ -88,5 +88,6 @@ export function reviewOfAnswer(options: {
       : { endPictureAssetId: options.endPictureAssetId }),
     measures: options.measures,
     critic: criticRecordOf(options),
+    ...(answer.notes.length === 0 ? {} : { notes: answer.notes }),
   };
 }

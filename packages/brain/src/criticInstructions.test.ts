@@ -13,8 +13,21 @@ describe("the instructions of the critic", () => {
       "One sword in a hand and a second hilt at the waist is two swords.",
     );
     expect(criticInstructions).toContain(
-      "Never excuse a fault as style, speed, a camera swoop, or motion blur.",
+      "Never excuse a blocking fault as style, speed, a camera swoop, or motion blur.",
     );
+  });
+
+  it("sort each fault as blocking or a note, keep the bar for clips, and name the anatomy of the mirrored hands", () => {
+    expect(criticInstructions).toContain(
+      "Only a blocking fault refuses. Put notes in notes, never in faults.",
+    );
+    expect(criticInstructions).toContain(
+      "hands, bodies, objects, contact, the source of an effect, and continuity stay blocking.",
+    );
+    expect(criticInstructions).toContain(
+      "each arm must join its own shoulder and end in the hand of that side",
+    );
+    expect(criticInstructions).not.toContain("A doubt is a fault.");
   });
 
   it("start with the rule of Cursor only for Cursor", () => {

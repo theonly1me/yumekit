@@ -83,6 +83,24 @@ describe("generate_video with images", () => {
     expect(body).not.toHaveProperty("generation_config");
   });
 
+  it("refuses reference images with a first frame before any request, so the first frame is the only picture", async () => {
+    const firstFrame = await imageFile({ name: "first.png", bytes: "first" });
+    const sheet = await imageFile({ name: "sheet.png", bytes: "sheet" });
+    const { result, requests } = await callVideo({
+      respond: inOrder([finished]),
+      arguments: {
+        first_frame_path: firstFrame,
+        reference_image_paths: [sheet],
+      },
+    });
+
+    expect(result.isError).toBe(true);
+    expect(resultText(result)).toContain(
+      "reference_image_paths cannot go with first_frame_path",
+    );
+    expect(requests).toHaveLength(0);
+  });
+
   it("rejects an image that is not a PNG, JPEG, or WebP file before any request", async () => {
     const drawing = await imageFile({ name: "drawing.gif", bytes: "gif" });
     const { result, requests } = await callVideo({
