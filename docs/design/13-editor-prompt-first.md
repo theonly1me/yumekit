@@ -282,3 +282,12 @@ WP26, WP27, and WP28 start together.
 - An approval step for the script before the first pictures.
 - Safe areas for each platform, and publishing to a platform.
 - A desktop shell.
+
+### Details of WP69
+
+WP69 keeps the layout when a request is very long.
+
+1. The prompt box grows with its text up to 40 percent of the height of the Chat tab. Then the text scrolls inside the box. Send and the line under the box stay in place.
+2. A request in the chat shows at most 8 lines. A longer request ends with "Show all", and an open request ends with "Show less". The control is a button with `aria-expanded`, so the keyboard reaches it.
+3. The request on the Making screen shows at most 3 lines, with the same control. So the title and the steps stay in the first view.
+4. The chat list scrolls. A long request never changes the height of the Chat tab or of the page.

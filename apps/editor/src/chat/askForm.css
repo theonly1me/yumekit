@@ -42,6 +42,9 @@
   line-height: 1.4;
   background: transparent;
   resize: none;
+  min-height: 2.8em;
+  max-height: 40cqh;
+  overflow-y: auto;
 }
 
 .ask-form textarea:focus {

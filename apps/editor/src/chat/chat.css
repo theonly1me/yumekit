@@ -3,6 +3,7 @@
   min-height: 0;
   display: grid;
   grid-template-rows: minmax(0, 1fr) auto;
+  container-type: size;
 }
 
 .chat-pane[hidden] {
@@ -30,6 +31,12 @@
 .entry p {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+}
+
+.request-body {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
 }
 
 .who {

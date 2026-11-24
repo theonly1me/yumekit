@@ -1,0 +1,22 @@
+.folded {
+  display: grid;
+  gap: 6px;
+  justify-items: start;
+  min-width: 0;
+}
+
+.folded p {
+  justify-self: stretch;
+}
+
+.folded p[data-folded="true"] {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: var(--folded-lines, 8);
+  line-clamp: var(--folded-lines, 8);
+  overflow: hidden;
+}
+
+button.fold-toggle {
+  font-size: var(--step--1);
+}
