@@ -23,4 +23,21 @@ describe("get_story_guide", () => {
       "hinges on its left edge, a brass knob on its right edge",
     );
   });
+
+  it("teaches a fight staged for a trailer, space across a cut, the music prompt, and the end card", async () => {
+    const harness = await startHarness();
+
+    const result = await harness.call({ name: "get_story_guide" });
+    const guide = String(result.data["guide"]);
+
+    expect(guide).toContain("## Staging a fight for a trailer");
+    expect(guide).toContain("Start late, inside the action");
+    expect(guide).toContain("Fight one or two opponents, not ten.");
+    expect(guide).toContain(
+      "An effect that starts on the ground or at a random place is a fault.",
+    );
+    expect(guide).toContain("Its loudest part is the peak of the fight");
+    expect(guide).toContain("Never draw two of it on one sheet");
+    expect(guide).toContain("no prompt sign, no extra line");
+  });
 });

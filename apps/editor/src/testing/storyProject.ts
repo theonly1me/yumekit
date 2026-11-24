@@ -1,4 +1,57 @@
+import { claudeLines, setScenario } from "./chatTesting.js";
 import type { RunningEngine } from "./runEngine.js";
+
+function smithState(state: string) {
+  return [
+    {
+      cast_id: "smith",
+      where: "at the anvil",
+      screen: "center",
+      facing: "camera",
+      state,
+    },
+  ];
+}
+
+const checks = (count: number) =>
+  Array.from({ length: count }, (...[, index]) => ({
+    item: index + 1,
+    seen: "Seen on the frames.",
+  }));
+
+const criticSteps = [
+  { print: claudeLines.init },
+  {
+    callTool: {
+      name: "give_sheet_review",
+      input: { checks: checks(6), counts: [], verdict: "pass", faults: [] },
+    },
+  },
+  {
+    callTool: {
+      name: "give_clip_review",
+      input: {
+        checks: checks(10),
+        counts: [{ object: "hammers", expected: 1, seen: 2, seconds: 0.8 }],
+        action: { happened: true, seconds: 0.3, seen: "The hammer lands." },
+        end_entries: [
+          { entry: "smith", happened: true, seconds: 0.4, seen: "Bent." },
+        ],
+        start_match: { matches: true, seen: "The same anvil." },
+        warnings: [1, 2, 3, 4, 5, 6].map((index) => ({
+          index,
+          cause: "harmless",
+          seen: "A spark.",
+        })),
+        verdict: "cut",
+        keep_from_seconds: 0,
+        keep_to_seconds: 0.5,
+        faults: ["The hammer changes hands at 0.8 seconds"],
+      },
+    },
+  },
+  { print: claudeLines.result("completed") },
+];
 
 const forgeShot = {
   shot_id: "strike",
@@ -10,10 +63,11 @@ const forgeShot = {
   camera_angle: "low",
   camera_move: "push-in",
   seconds: 4,
-  start_state:
-    "The straight blade glows on the anvil. The hammer is in her right hand.",
-  end_state: "The blade is bent on the anvil.",
+  camera_lens: "normal",
+  start_state: smithState("the straight blade glows on the anvil"),
+  end_state: smithState("the blade is bent on the anvil"),
   inherits: "The bent blade.",
+  music_intensity: 3,
 };
 
 async function sheet(options: {
@@ -43,9 +97,11 @@ async function sheet(options: {
       reference_asset_ids: [`${castId}-sheet`],
     },
   });
+  await engine.callTool({ name: "review_sheet", input: { cast_id: castId } });
 }
 
 export async function buildStoryProject(engine: RunningEngine): Promise<void> {
+  await setScenario({ engine, scenario: { steps: [], criticSteps } });
   await engine.callTool({
     name: "set_video_style",
     input: { video_style: "ai-video" },
@@ -78,8 +134,8 @@ export async function buildStoryProject(engine: RunningEngine): Promise<void> {
           shot_id: "quench",
           purpose: "Show the test of the blade.",
           action: "She plunges the bent blade into the water and steam rises",
-          start_state: "The blade is bent on the anvil.",
-          end_state: "The blade cools in the water barrel.",
+          start_state: smithState("the blade is bent on the anvil"),
+          end_state: smithState("the blade cools in the water barrel"),
           inherits: "",
         },
       ],
@@ -107,16 +163,5 @@ export async function buildStoryProject(engine: RunningEngine): Promise<void> {
   await engine.callTool({
     name: "review_clip",
     input: { asset_id: "strike-clip", shot_id: "strike" },
-  });
-  await engine.callTool({
-    name: "review_clip",
-    input: {
-      asset_id: "strike-clip",
-      shot_id: "strike",
-      verdict: "cut",
-      faults: ["The hammer changes hands at 0.8 seconds"],
-      keep_from_seconds: 0,
-      keep_to_seconds: 0.5,
-    },
   });
 }

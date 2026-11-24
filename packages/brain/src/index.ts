@@ -20,4 +20,8 @@ export {
   helperInstructions,
   helperInstructionsOf,
 } from "./helperInstructions.js";
+export {
+  criticInstructions,
+  criticInstructionsOf,
+} from "./criticInstructions.js";
 export { defaultPersonSentence, personSentenceOf } from "./personSentences.js";

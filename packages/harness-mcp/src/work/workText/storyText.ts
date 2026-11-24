@@ -29,7 +29,12 @@ function castLines(snapshot: ProjectSnapshot): string[] {
         (member.facts ?? []).length === 0
           ? ""
           : ` Fixed: ${(member.facts ?? []).join("; ")}.`;
-      return `- ${member.id} (${member.kind}) ${member.name}: ${member.description}${facts}${pictures}`;
+      const review = member.sheetReview;
+      const checked =
+        review === undefined
+          ? " Sheet not checked by the critic."
+          : ` Sheet ${review.verdict === "pass" ? "passed" : `failed: ${review.faults.join("; ")}`}.`;
+      return `- ${member.id} (${member.kind}) ${member.name}: ${member.description}${facts}${pictures}${checked}`;
     }),
   ];
 }

@@ -37,9 +37,11 @@ export const storyCalls: ScriptedCall[] = [
           cast_ids: [],
           camera_size: "medium",
           camera_angle: "low",
+          camera_lens: "normal",
           seconds: 2,
-          start_state: "The ice is whole.",
-          end_state: "The ice is cracked.",
+          start_state: [],
+          end_state: [],
+          music_intensity: 2,
           inherits: "",
         },
       ],
@@ -49,8 +51,6 @@ export const storyCalls: ScriptedCall[] = [
 
 export const reviewCalls: ScriptedCall[] = [
   { name: "review_clip", input: { asset_id: "clip", shot_id: "dawn" } },
-  {
-    name: "review_clip",
-    input: { asset_id: "clip", shot_id: "dawn", verdict: "keep" },
-  },
+  { name: "review_sheet", input: { cast_id: "lake" } },
+  { name: "check_music", input: { asset_id: "still" } },
 ];

@@ -50,10 +50,17 @@ describe("the story view", () => {
       "1. She strikes the red steel and the blade bends",
     );
     expect(rows[0]).toContain(
-      "The forge · Medium shot from low, Push in · 4 seconds",
+      "The forge · Medium shot from low, normal lens, Push in · 4 seconds · Music: rising",
     );
-    expect(rows[0]).toContain("Checked and kept from 0 to 0.5 seconds.");
+    expect(rows[0]).toContain(
+      "Aiko: the straight blade glows on the anvil, at the anvil, in the middle, faces us.",
+    );
+    expect(rows[0]).toContain("The critic kept 0 to 0.5 seconds.");
     expect(rows[0]).toContain("The hammer changes hands at 0.8 seconds");
+    expect(rows[0]).toContain("2 hammers, not 1 at 0.8s");
+    expect(await sheet.locator(".sheet-checks").innerText()).toContain(
+      "The critic passed it.",
+    );
     expect(rows[1]).toContain("No clip yet.");
     await expect
       .poll(() =>

@@ -17,6 +17,12 @@ export function readCommandProps(props: JsonObject) {
       fallback: undefined,
       repair: shortenText(commandLimits.heading),
     }),
+    prompt: readField({
+      field: shape.prompt,
+      value: props["prompt"],
+      fallback: undefined,
+      repair: shortenText(commandLimits.prompt),
+    }),
     note: readField({
       field: shape.note,
       value: props["note"],

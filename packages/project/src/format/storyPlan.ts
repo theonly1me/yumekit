@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { clipReviewSchema } from "./reviews.js";
+import { shotStateSchema, strikeSchema } from "./shotStates.js";
 import { idSchema } from "./values.js";
 
 export const shotSizes = [
@@ -9,29 +11,24 @@ export const shotSizes = [
   "extreme-close-up",
 ] as const;
 
-export const shotAngles = ["eye-level", "low", "high", "overhead"] as const;
+export const shotAngles = [
+  "eye-level",
+  "low",
+  "high",
+  "overhead",
+  "over-the-shoulder",
+] as const;
 
-export const reviewVerdicts = ["keep", "cut", "redo"] as const;
+export const shotLenses = ["wide", "normal", "long"] as const;
 
 export const shotSecondsRange = { minimum: 2, maximum: 10 } as const;
 
-const motionMeasuresSchema = z.strictObject({
-  motion: z.number().min(0),
-  worldMotion: z.number().min(0),
-  cameraMotion: z.number().min(0),
-  startDifference: z.number().min(0).exactOptional(),
-  warnings: z.array(z.string()),
-});
+export const musicIntensityRange = { minimum: 1, maximum: 5 } as const;
 
-export const clipReviewSchema = z.strictObject({
-  assetId: idSchema,
-  verdict: z.enum(reviewVerdicts),
-  faults: z.array(z.string()),
-  keepFromSeconds: z.number().min(0).exactOptional(),
-  keepToSeconds: z.number().positive().exactOptional(),
-  endPictureAssetId: idSchema.exactOptional(),
-  measures: motionMeasuresSchema,
-});
+const musicIntensitySchema = z
+  .int()
+  .min(musicIntensityRange.minimum)
+  .max(musicIntensityRange.maximum);
 
 export const shotSchema = z.strictObject({
   id: idSchema,
@@ -42,16 +39,27 @@ export const shotSchema = z.strictObject({
   camera: z.strictObject({
     size: z.enum(shotSizes),
     angle: z.enum(shotAngles),
+    lens: z.enum(shotLenses).exactOptional(),
     move: idSchema.exactOptional(),
   }),
   seconds: z
     .number()
     .min(shotSecondsRange.minimum)
     .max(shotSecondsRange.maximum),
-  startState: z.string(),
-  endState: z.string(),
+  startState: shotStateSchema,
+  endState: shotStateSchema,
   inherits: z.string(),
+  strikes: z.array(strikeSchema).exactOptional(),
+  musicIntensity: musicIntensitySchema.exactOptional(),
+  musicHits: z.array(z.number().min(0)).exactOptional(),
   reviews: z.array(clipReviewSchema).exactOptional(),
+});
+
+export const musicCheckSchema = z.strictObject({
+  assetId: idSchema,
+  startSeconds: z.number().min(0),
+  fit: z.number().min(-1).max(1),
+  warnings: z.array(z.string()),
 });
 
 export const storyPlanSchema = z.strictObject({
@@ -60,12 +68,13 @@ export const storyPlanSchema = z.strictObject({
   obstacle: z.string(),
   change: z.string(),
   shots: z.array(shotSchema),
+  musicEndIntensity: musicIntensitySchema.exactOptional(),
+  musicChecks: z.array(musicCheckSchema).exactOptional(),
 });
 
 export type ShotSize = (typeof shotSizes)[number];
 export type ShotAngle = (typeof shotAngles)[number];
-export type ReviewVerdict = (typeof reviewVerdicts)[number];
-export type MotionMeasures = z.infer<typeof motionMeasuresSchema>;
-export type ClipReview = z.infer<typeof clipReviewSchema>;
+export type ShotLens = (typeof shotLenses)[number];
 export type Shot = z.infer<typeof shotSchema>;
+export type MusicCheck = z.infer<typeof musicCheckSchema>;
 export type StoryPlan = z.infer<typeof storyPlanSchema>;

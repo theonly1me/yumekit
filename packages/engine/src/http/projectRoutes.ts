@@ -136,7 +136,10 @@ export const projectRoutes: Route[] = [
       sendBody({
         exchange,
         body: {
-          tools: toolsFor({ exchange, tools: exchange.context.harness.tools }),
+          tools: toolsFor({
+            call: exchange.context.chat.helperCallOf(helperTokenOf(exchange)),
+            tools: exchange.context.harness.tools,
+          }),
         },
       });
       return Promise.resolve(undefined);

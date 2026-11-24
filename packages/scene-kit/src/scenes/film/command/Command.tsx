@@ -14,7 +14,7 @@ const charactersPerSecond = 30;
 const noteBeatsAfterTyping = 1;
 
 export function Command(props: { props: JsonObject }): ReactNode {
-  const { command, heading, note } = readCommandProps(props.props);
+  const { command, heading, note, prompt } = readCommandProps(props.props);
   const stylePack = useStylePack();
   const grid = useFilmGrid({ hasHeading: false });
   const pillBeat = heading === undefined ? 0 : 1;
@@ -67,6 +67,7 @@ export function Command(props: { props: JsonObject }): ReactNode {
       )}
       <CommandPill
         command={command}
+        prompt={prompt}
         shown={typing.shown}
         cursorVisible={typing.cursorVisible}
         motion={timing.enterAt(pillBeat)}

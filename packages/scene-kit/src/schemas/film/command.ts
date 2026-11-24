@@ -1,6 +1,11 @@
 import { z } from "zod";
 
-export const commandLimits = { command: 60, heading: 40, note: 100 } as const;
+export const commandLimits = {
+  command: 60,
+  heading: 40,
+  note: 100,
+  prompt: 3,
+} as const;
 
 export const commandSchema = {
   purpose:
@@ -19,6 +24,14 @@ export const commandSchema = {
       .max(commandLimits.heading)
       .optional()
       .describe("A wordmark or a short line above the command."),
+    prompt: z
+      .string()
+      .min(1)
+      .max(commandLimits.prompt)
+      .optional()
+      .describe(
+        "A sign before the command, for example $, only when the person asks for one. None by default.",
+      ),
     note: z
       .string()
       .min(1)

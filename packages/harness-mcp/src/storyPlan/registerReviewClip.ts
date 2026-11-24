@@ -1,100 +1,50 @@
 import { join } from "node:path";
-import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { ClipReview, Edit } from "@yumekit/project";
-import { measureClipMotion, type ClipMotion } from "@yumekit/render";
+import { measureClipMotion } from "@yumekit/render";
 import { applyEditsResult } from "../applyEditsResult.js";
 import type { HarnessContext } from "../context.js";
+import type { ClipAnswer } from "../critic/clip/clipAnswerInput.js";
+import { clipBriefOf, type ClipJob } from "../critic/clip/clipJob.js";
+import { reviewOfAnswer } from "../critic/clip/clipReviewRecord.js";
+import type { CriticDesk } from "../critic/criticDesk.js";
+import type { AskCritic } from "../critic/criticTypes.js";
+import { runCritic } from "../critic/runCritic.js";
 import { renderFailureOf } from "../output/renderFailures.js";
 import { failureResult } from "../results.js";
 import { endPictureEditOf } from "./endPicture.js";
 import { measuresOf, planWithReview } from "./reviewRecord.js";
-import { checkListOf, measuresTextOf } from "./reviewChecks.js";
-import { isPassed, notShownFailureOf } from "./reviewOrder.js";
-import {
-  reviewClipInput,
-  reviewTargetOf,
-  verdictFailureOf,
-  type ReviewClipInput,
-  type ReviewTarget,
-} from "./reviewClipInput.js";
+import { reviewClipInput, reviewTargetOf } from "./reviewClipInput.js";
 
-async function showClip(options: {
-  context: HarnessContext;
-  input: ReviewClipInput;
-  target: ReviewTarget;
-  motion: ClipMotion;
-}): Promise<CallToolResult> {
-  const { context, target, motion } = options;
-  const sheet = await context.pictures.renderAssetSheet({
-    file: join(context.store.folder, target.clip.file),
-    title: `${target.clip.id} for shot ${target.shot.id}: ${String(Math.round(target.lengthSeconds * 100) / 100)}s`,
-    kind: "video",
-    widthPixels: target.clip.widthPixels ?? 1,
-    heightPixels: target.clip.heightPixels ?? 1,
-    marks: target.clip.marks ?? [],
-    count: options.input.count ?? 12,
-  });
-  if (!sheet.ok) return failureResult(renderFailureOf(sheet.failure));
-  const checks = checkListOf({
-    shot: target.shot,
-    cast: context.store.read().bible.cast,
-  });
-  return {
-    content: [
-      {
-        type: "text",
-        text: `Frames at ${sheet.value.seconds.map((seconds) => `${String(seconds)}s`).join(", ")}, left to right and top to bottom.\n${measuresTextOf(motion)}`,
-      },
-      {
-        type: "image",
-        data: Buffer.from(sheet.value.picture).toString("base64"),
-        mimeType: "image/jpeg",
-      },
-      { type: "text", text: checks },
-    ],
-    structuredContent: {
-      asset_id: target.clip.id,
-      shot_id: target.shot.id,
-      seconds: sheet.value.seconds,
-      measures: { ...measuresOf(motion), regions: motion.regions },
-      warnings: motion.warnings,
-    },
-  };
-}
+type CriticContext = HarnessContext & {
+  critics: CriticDesk;
+  askCritic: AskCritic | undefined;
+};
 
-async function storeVerdict(options: {
-  context: HarnessContext;
-  input: ReviewClipInput & { verdict: ClipReview["verdict"] };
-  target: ReviewTarget;
-  motion: ClipMotion;
-}): Promise<CallToolResult> {
-  const { context, input, target } = options;
+async function storeReview(options: {
+  context: CriticContext;
+  job: ClipJob;
+  answer: ClipAnswer;
+  measures: ClipReview["measures"];
+  seconds: number;
+  costUsd: number | undefined;
+}) {
+  const { context, job, answer } = options;
   const snapshot = context.store.read();
-  const isKept = input.verdict !== "redo";
-  const ending = isKept
-    ? await endPictureEditOf({
-        snapshot,
-        projectFolder: context.store.folder,
-        clip: target.clip,
-        seconds: input.verdict === "cut" ? input.keep_to_seconds : undefined,
-      })
-    : undefined;
+  const ending =
+    answer.verdict === "redo"
+      ? undefined
+      : await endPictureEditOf({
+          snapshot,
+          projectFolder: context.store.folder,
+          clip: job.clip,
+          seconds:
+            answer.verdict === "cut" ? answer.keep_to_seconds : undefined,
+        });
   if (ending !== undefined && !ending.ok) return failureResult(ending.failure);
-  const review: ClipReview = {
-    assetId: target.clip.id,
-    verdict: input.verdict,
-    faults: input.faults ?? [],
-    ...(input.verdict === "cut" && input.keep_from_seconds !== undefined
-      ? { keepFromSeconds: input.keep_from_seconds }
-      : {}),
-    ...(input.verdict === "cut" && input.keep_to_seconds !== undefined
-      ? { keepToSeconds: input.keep_to_seconds }
-      : {}),
-    ...(ending === undefined
-      ? {}
-      : { endPictureAssetId: ending.value.assetId }),
-    measures: measuresOf(options.motion),
-  };
+  const review = reviewOfAnswer({
+    ...options,
+    endPictureAssetId: ending?.value.assetId,
+  });
   const { bible } = snapshot;
   const plan = bible.storyPlan;
   if (plan === undefined) throw new Error("A review target needs a plan.");
@@ -104,73 +54,89 @@ async function storeVerdict(options: {
       kind: "setBible",
       bible: {
         ...bible,
-        storyPlan: planWithReview({ plan, shotId: target.shot.id, review }),
+        storyPlan: planWithReview({ plan, shotId: job.shot.id, review }),
       },
     },
   ];
-  const endLine =
-    ending === undefined
-      ? "Make it again with a prompt that names each fault."
-      : `The end picture "${ending.value.assetId}" is the start of the next shot in the same place.`;
+  const faults =
+    review.faults.length === 0 ? "No faults." : review.faults.join("; ");
+  const next =
+    answer.verdict === "redo"
+      ? "You cannot overrule it. Make the clip again with a prompt that names each fault."
+      : answer.verdict === "cut"
+        ? `Place only ${String(answer.keep_from_seconds)}s to ${String(answer.keep_to_seconds)}s.`
+        : "Place it.";
   return applyEditsResult({
     store: context.store,
     edits,
-    line: `Review of "${target.clip.id}" for shot "${target.shot.id}": ${input.verdict}. ${endLine}`,
+    line: `The critic says ${answer.verdict} for "${job.clip.id}" of shot "${job.shot.id}": ${faults} ${next}`,
     data: {
-      verdict: input.verdict,
-      ...(ending === undefined
+      verdict: review.verdict,
+      faults: review.faults,
+      missed: review.critic?.missed ?? [],
+      ...(review.keepFromSeconds === undefined
         ? {}
-        : { end_picture_asset_id: ending.value.assetId }),
+        : { keep_from_seconds: review.keepFromSeconds }),
+      ...(review.keepToSeconds === undefined
+        ? {}
+        : { keep_to_seconds: review.keepToSeconds }),
+      ...(review.endPictureAssetId === undefined
+        ? {}
+        : { end_picture_asset_id: review.endPictureAssetId }),
       measures: review.measures,
+      critic_seconds: review.critic?.seconds ?? 0,
+      ...(options.costUsd === undefined
+        ? {}
+        : { critic_cost_usd: options.costUsd }),
     },
   });
 }
 
-export function registerReviewClip(context: HarnessContext): void {
-  const shownClips = new Set<string>();
+export function registerReviewClip(context: CriticContext): void {
   context.tools.add({
     name: "review_clip",
     description:
-      "Review a video clip of a shot before you place it. Without verdict it shows the frames, measures the motion (how much moves, by part of the picture, the camera, a hard jump, a part that changes suddenly, and the first frame against the start picture), and gives the fixed check list with the action and the end state of the shot. Look at each point, and look closer at each hand and face with preview_assets and a region. Then call it again with verdict keep, cut (with the good part), or redo (with the faults). keep and cut need the look first, in this session. keep and cut save the picture at the end of the good part for the next shot in the same place. place_video refuses a clip of a shot with no keep or cut.",
+      "Have an independent critic review a video clip of a shot before you place it. The critic is a fresh agent that sees only the frames (8 each second), the measures of motion, the shot of the plan, the sheets, and a fixed list. It never sees your prompt. It answers each warning, counts the objects that the facts count, says if the action and each end entry happened, and gives the verdict: keep, cut (with the clean part), or redo. You cannot give or overrule the verdict. A keep or cut saves the end picture for the next shot in the same place. place_video refuses a clip with no keep or cut of the critic. A review takes one to a few minutes.",
     inputSchema: reviewClipInput,
-    run: async ({ input }) => {
-      const target = reviewTargetOf({
-        snapshot: context.store.read(),
-        projectFolder: context.store.folder,
-        input,
-      });
+    run: async ({ input, onProgress }) => {
+      const snapshot = context.store.read();
+      const target = reviewTargetOf({ snapshot, input });
       if (!target.ok) return failureResult(target.failure);
-      const verdictFailure = verdictFailureOf({
-        input,
-        lengthSeconds: target.value.lengthSeconds,
-      });
-      if (verdictFailure !== undefined) return failureResult(verdictFailure);
-      const shownKey = `${input.asset_id}/${input.shot_id}`;
-      if (isPassed(input.verdict) && !shownClips.has(shownKey)) {
-        return failureResult(notShownFailureOf(input));
-      }
+      const { clip, shot, startPicture } = target.value;
       const motion = await measureClipMotion({
-        file: join(context.store.folder, target.value.clip.file),
-        ...(target.value.startPicture === undefined
+        file: join(context.store.folder, clip.file),
+        ...(startPicture === undefined
           ? {}
-          : { startPicture: target.value.startPicture }),
+          : { startPicture: join(context.store.folder, startPicture.file) }),
       });
       if (!motion.ok) return failureResult(renderFailureOf(motion.failure));
-      const { verdict } = input;
-      if (verdict === undefined) shownClips.add(shownKey);
-      return verdict === undefined
-        ? showClip({
-            context,
-            input,
-            target: target.value,
-            motion: motion.value,
-          })
-        : storeVerdict({
-            context,
-            input: { ...input, verdict },
-            target: target.value,
-            motion: motion.value,
-          });
+      const ids = new Set([shot.placeId, ...shot.castIds]);
+      const job: ClipJob = {
+        kind: "clip",
+        ...target.value,
+        members: snapshot.bible.cast.filter((member) => ids.has(member.id)),
+        pictures: snapshot.assets,
+        warnings: motion.value.warnings,
+        answer: undefined,
+      };
+      onProgress?.({ done: 0, message: "The critic looks at the clip" });
+      const turn = await runCritic({
+        askCritic: context.askCritic,
+        critics: context.critics,
+        job,
+        brief: clipBriefOf(job),
+        subject: `the clip "${clip.id}"`,
+      });
+      if (!turn.ok) return failureResult(turn.failure);
+      if (job.answer === undefined) throw new Error("runCritic checks it.");
+      return storeReview({
+        context,
+        job,
+        answer: job.answer,
+        measures: measuresOf(motion.value),
+        seconds: turn.value.seconds,
+        costUsd: turn.value.costUsd,
+      });
     },
   });
 }

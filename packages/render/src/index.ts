@@ -18,6 +18,11 @@ export {
   type MotionWarningKind,
   type StartDifference,
 } from "./motion/motionWarnings.js";
+export {
+  measureMusicCurve,
+  musicCurveStepSeconds,
+  type MusicCurve,
+} from "./music/measureMusicCurve.js";
 export type { Outcome } from "./outcome.js";
 export {
   startPreviewServer,

@@ -1,6 +1,7 @@
 import type { ProjectStore } from "@yumekit/project";
 import { onTestFinished } from "vitest";
 import { createHarness, type Harness } from "../index.js";
+import { scriptedCritic } from "./criticFixture.js";
 import {
   startHarnessProject,
   type HarnessProjectOptions,
@@ -15,7 +16,23 @@ export async function startFunctionHarness(
   options?: HarnessProjectOptions,
 ): Promise<FunctionHarness> {
   const { store, mediaTools } = await startHarnessProject(options);
-  const harness = createHarness({ store, mediaTools });
+  const holder: { harness: Harness | undefined } = { harness: undefined };
+  const harness = createHarness({
+    store,
+    mediaTools,
+    askCritic: scriptedCritic({
+      call: async (request) => {
+        const result = await holder.harness?.call({
+          name: request.name,
+          input: request.arguments,
+        });
+        return { isError: result?.isError ?? true, text: result?.text ?? "" };
+      },
+      script: {},
+      log: { briefs: [], answers: [] },
+    }),
+  });
+  holder.harness = harness;
   onTestFinished(() => harness.close());
   return { harness, store };
 }

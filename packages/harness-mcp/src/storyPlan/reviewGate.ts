@@ -19,19 +19,19 @@ export function reviewGateFailureOf(options: {
   );
   if (shot === undefined) return undefined;
   const review = (shot.reviews ?? []).findLast(
-    (candidate) => candidate.assetId === asset.id,
+    (candidate) => candidate.assetId === asset.id && candidate.by === "critic",
   );
   if (review === undefined) {
     return {
       kind: "clip-not-reviewed",
-      message: `The clip "${asset.id}" of shot "${shotId}" has no review yet.`,
-      hint: `Call review_clip with asset_id "${asset.id}" and shot_id "${shotId}", look at the frames and the check list, and give a verdict. Then place it.`,
+      message: `The clip "${asset.id}" of shot "${shotId}" has no review by the critic yet.`,
+      hint: `Call review_clip with asset_id "${asset.id}" and shot_id "${shotId}". The critic looks at the frames and gives the verdict. Then place it.`,
     };
   }
   if (review.verdict !== "redo") return undefined;
   return {
     kind: "clip-failed-review",
-    message: `The review of "${asset.id}" says redo: ${review.faults.join("; ")}.`,
-    hint: "Make the clip again with a prompt that names each fault, review it, and place the new clip.",
+    message: `The critic said redo for "${asset.id}": ${review.faults.join("; ")}.`,
+    hint: "You cannot overrule the critic. Make the clip again with a prompt that names each fault, review it, and place the new clip.",
   };
 }

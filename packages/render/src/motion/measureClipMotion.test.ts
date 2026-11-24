@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { measureClipMotion, type ClipMotion } from "../index.js";
 import { temporaryFolder } from "../testing/renderProject.js";
 import {
+  changedPicture,
   clipFilters,
   clipOf,
   firstPictureOfTheClips,
@@ -10,7 +11,7 @@ import {
 
 async function measured(options: {
   name: keyof typeof clipFilters;
-  withStartPicture?: boolean;
+  startPicture?: "its own" | "another" | "redrawn";
 }): Promise<ClipMotion> {
   const folder = await temporaryFolder();
   const file = await clipOf({
@@ -22,9 +23,11 @@ async function measured(options: {
       : {}),
   });
   const startPicture =
-    options.withStartPicture === true
+    options.startPicture === "its own"
       ? await firstPictureOfTheClips(folder)
-      : undefined;
+      : options.startPicture === undefined
+        ? undefined
+        : await changedPicture({ folder, change: options.startPicture });
   const result = await measureClipMotion({
     file,
     ...(startPicture === undefined ? {} : { startPicture }),
@@ -71,9 +74,25 @@ describe("measureClipMotion", () => {
   });
 
   it("measures no start difference for a clip that starts on its picture", async () => {
-    const motion = await measured({ name: "still", withStartPicture: true });
+    const motion = await measured({ name: "still", startPicture: "its own" });
 
     expect(motion.startDifference?.whole).toBeLessThan(1);
+    expect(kindsOf(motion)).not.toContain(
+      "does-not-start-on-the-start-picture",
+    );
+  });
+
+  it("warns only when the first frame is another picture than the start picture", async () => {
+    const motion = await measured({ name: "still", startPicture: "another" });
+
+    expect(motion.startDifference?.whole).toBeGreaterThan(10);
+    expect(kindsOf(motion)).toContain("does-not-start-on-the-start-picture");
+  });
+
+  it("reports a redrawn start picture as a number without a warning", async () => {
+    const motion = await measured({ name: "still", startPicture: "redrawn" });
+
+    expect(motion.startDifference?.whole).toBeGreaterThan(3);
     expect(kindsOf(motion)).not.toContain(
       "does-not-start-on-the-start-picture",
     );

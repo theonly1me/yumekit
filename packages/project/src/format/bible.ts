@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { sheetReviewSchema } from "./reviews.js";
 import { storyPlanSchema } from "./storyPlan.js";
 import { idSchema } from "./values.js";
 
@@ -16,6 +17,7 @@ export const castMemberSchema = z.strictObject({
     .max(castFactLimits.count)
     .exactOptional(),
   referenceAssetIds: z.array(idSchema),
+  sheetReview: sheetReviewSchema.exactOptional(),
 });
 
 export const bibleSchema = z.strictObject({

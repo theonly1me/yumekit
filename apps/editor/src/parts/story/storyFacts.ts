@@ -24,6 +24,13 @@ const angleWords: Record<string, string> = {
   low: "from low",
   high: "from high",
   overhead: "from above",
+  "over-the-shoulder": "over the shoulder",
+};
+
+const lensWords: Record<string, string> = {
+  wide: "wide lens",
+  normal: "normal lens",
+  long: "long lens",
 };
 
 export interface ShotFacts {
@@ -38,6 +45,7 @@ export interface ShotFacts {
   verdictText: string;
   verdict: ShotReview["verdict"] | "none";
   faults: string[];
+  missed: string[];
   warnings: string[];
 }
 
@@ -58,23 +66,31 @@ function verdictTextOf(options: {
 }): string {
   const { clip, review } = options;
   if (clip === undefined) return "No clip yet.";
-  if (review === undefined) return "Made. The AI checks it next.";
-  if (review.verdict === "keep") return "Checked and kept.";
-  if (review.verdict === "redo")
-    return "Did not pass the check. The AI makes it again.";
+  if (review === undefined) return "Made. The critic checks it next.";
+  if (review.by !== "critic") {
+    return "Not checked by the critic. The AI checked its own clip.";
+  }
+  if (review.verdict === "keep") return "The critic kept it.";
+  if (review.verdict === "redo") {
+    return "The critic failed it. The AI makes it again.";
+  }
   const from = review.keepFromSeconds ?? 0;
   const to = review.keepToSeconds ?? 0;
-  return `Checked and kept from ${String(from)} to ${String(to)} seconds.`;
+  return `The critic kept ${String(from)} to ${String(to)} seconds.`;
 }
 
 function cameraTextOf(shot: PlanShot): string {
   const size = sizeWords[shot.camera.size] ?? shot.camera.size;
   const angle = angleWords[shot.camera.angle] ?? shot.camera.angle;
+  const lens =
+    shot.camera.lens === undefined
+      ? undefined
+      : (lensWords[shot.camera.lens] ?? shot.camera.lens);
   const move =
     shot.camera.move === undefined
       ? undefined
       : findCameraMove(shot.camera.move)?.name;
-  return [`${size} ${angle}`, move]
+  return [`${size} ${angle}`, lens, move]
     .filter((part) => part !== undefined)
     .join(", ");
 }
@@ -117,6 +133,7 @@ export function shotFactsOf(snapshot: Snapshot): ShotFacts[] {
       verdictText: verdictTextOf({ clip, review }),
       verdict: review?.verdict ?? "none",
       faults: [...new Set([...earlierFaults, ...(review?.faults ?? [])])],
+      missed: review?.critic?.missed ?? [],
       warnings: [
         ...new Set(
           (review?.measures.warnings ?? []).map(

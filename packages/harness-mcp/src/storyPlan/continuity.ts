@@ -1,11 +1,30 @@
-import type { ClipReview, ProjectSnapshot, StoryPlan } from "@yumekit/project";
+import type {
+  Asset,
+  ClipReview,
+  ProjectSnapshot,
+  StoryPlan,
+} from "@yumekit/project";
 import type { GenerateAssetInput } from "../media/generateAssetInput.js";
 import type { HarnessFailure } from "../results.js";
 
 export function keptReviewOf(reviews: ClipReview[] | undefined) {
   return (reviews ?? []).findLast(
-    (review) => review.verdict === "keep" || review.verdict === "cut",
+    (review) =>
+      review.by === "critic" &&
+      (review.verdict === "keep" || review.verdict === "cut"),
   );
+}
+
+export function previousEndOf(options: {
+  snapshot: ProjectSnapshot;
+  plan: StoryPlan;
+  shotIndex: number;
+}): Asset | undefined {
+  const shot = options.plan.shots[options.shotIndex];
+  const before = options.plan.shots[options.shotIndex - 1];
+  if (shot === undefined || before?.placeId !== shot.placeId) return undefined;
+  const pictureId = keptReviewOf(before.reviews)?.endPictureAssetId;
+  return options.snapshot.assets.find((asset) => asset.id === pictureId);
 }
 
 function referencesOf(options: {
@@ -48,7 +67,13 @@ export function continuityFailureOf(options: {
   if (shot === undefined || before === undefined) return undefined;
   if (before.placeId !== shot.placeId) return undefined;
   const pictureId = keptReviewOf(before.reviews)?.endPictureAssetId;
-  if (pictureId === undefined) return undefined;
+  if (pictureId === undefined) {
+    return {
+      kind: "previous-shot-not-kept",
+      message: `Shot "${shot.id}" is in the same place as "${before.id}", so it starts where the kept clip of "${before.id}" ends. "${before.id}" has no clip that the critic kept yet.`,
+      hint: `Make the clip of "${before.id}" and review it with review_clip first. Its end picture is then the start of "${shot.id}".`,
+    };
+  }
   if (usesPicture({ ...options, pictureId })) return undefined;
   return {
     kind: "continuity-picture-missing",

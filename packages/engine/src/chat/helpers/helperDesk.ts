@@ -32,6 +32,10 @@ export type HelperCall =
   | { kind: "lead" }
   | { kind: "ended" }
   | {
+      kind: "critic";
+      refusalOf: (call: { tool: string }) => string | undefined;
+    }
+  | {
       kind: "helper";
       refusalOf: (call: {
         tool: string;

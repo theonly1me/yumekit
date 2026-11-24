@@ -76,6 +76,11 @@ function registerPutCastMember(context: HarnessContext): void {
         ids: { referenceAssetIds, firstFrameAssetId: undefined },
       });
       if (!pictures.ok) return failureResult(pictures.failure);
+      const keepsReview =
+        existing?.sheetReview !== undefined &&
+        JSON.stringify(existing.facts) === JSON.stringify(facts) &&
+        JSON.stringify(existing.referenceAssetIds) ===
+          JSON.stringify(referenceAssetIds);
       const member = {
         id: input.cast_id,
         kind: input.kind,
@@ -83,6 +88,9 @@ function registerPutCastMember(context: HarnessContext): void {
         description: input.description.trim(),
         ...(facts === undefined ? {} : { facts }),
         referenceAssetIds,
+        ...(keepsReview && existing.sheetReview !== undefined
+          ? { sheetReview: existing.sheetReview }
+          : {}),
       };
       return applyEditsResult({
         store: context.store,

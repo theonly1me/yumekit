@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { keepAnswerOf, type CriticScript } from "../testing/criticFixture.js";
 import type { Harness } from "../testing/harnessFixture.js";
 import {
   makeForgeSheets,
@@ -7,8 +8,11 @@ import {
   startStoryHarness,
 } from "../testing/storyFixture.js";
 
-async function storyWithClip(): Promise<Harness> {
-  const harness = await startStoryHarness({ videoStyle: "ai-video" });
+async function storyWithClip(critic?: CriticScript): Promise<Harness> {
+  const harness = await startStoryHarness({
+    videoStyle: "ai-video",
+    ...(critic === undefined ? {} : { critic }),
+  });
   await makeForgeSheets(harness);
   await setPlan({
     harness,
@@ -16,8 +20,8 @@ async function storyWithClip(): Promise<Harness> {
       { shot_id: "strike" },
       {
         shot_id: "quench",
-        start_state: "The blade is bent on the anvil.",
-        end_state: "The blade hisses in the water.",
+        start: [{ cast_id: "smith", state: "the blade is bent" }],
+        end: [{ cast_id: "smith", state: "the blade hisses in the water" }],
       },
     ],
   });
@@ -44,23 +48,23 @@ function place(harness: Harness) {
   });
 }
 
-function review(options: {
-  harness: Harness;
-  verdict?: "keep" | "cut" | "redo";
-  faults?: string[];
-}) {
-  return options.harness.call({
+function review(harness: Harness) {
+  return harness.call({
     name: "review_clip",
-    arguments: {
-      asset_id: "strike-clip",
-      shot_id: "strike",
-      ...(options.verdict === undefined ? {} : { verdict: options.verdict }),
-      ...(options.faults === undefined ? {} : { faults: options.faults }),
-    },
+    arguments: { asset_id: "strike-clip", shot_id: "strike" },
   });
 }
 
-describe("review_clip", () => {
+const redoCritic: CriticScript = {
+  clip: (brief) => ({
+    ...keepAnswerOf(brief),
+    counts: [{ object: "hammers", expected: 1, seen: 2, seconds: 0.4 }],
+    verdict: "redo",
+    faults: ["A second hammer appears in her left hand at 0.4 seconds"],
+  }),
+};
+
+describe("review_clip with the critic", () => {
   it("refuses to place a clip of a shot before its review", async () => {
     const harness = await storyWithClip();
 
@@ -69,103 +73,106 @@ describe("review_clip", () => {
     expect(result.data).toMatchObject({ kind: "clip-not-reviewed" });
   });
 
-  it("shows the frames, the measures, and the check list of the shot without storing a verdict", async () => {
+  it("gives the critic the shot, the facts, and the list, and never the prompt of the clip", async () => {
     const harness = await storyWithClip();
-    const revision = harness.store.read().revision;
 
-    const result = await review({ harness });
-    const texts = result.result.content.flatMap((part) =>
-      part.type === "text" ? [part.text] : [],
-    );
+    await review(harness);
+    const [brief = ""] = harness.criticLog.briefs.slice(-1);
 
-    expect(result.result.content.map((part) => part.type)).toEqual([
-      "text",
-      "image",
-      "text",
-    ]);
-    expect(texts[0]).toContain("Measured motion:");
-    expect(texts[1]).toContain(
-      '1. Story: did this action happen and complete? "She strikes the red steel and the blade bends"',
+    expect(brief).toContain(
+      "- Action: She hammers the red steel and the blade bends",
     );
-    expect(texts[1]).toContain("Five fingers on each hand");
-    expect(texts[1]).toContain(
-      "- FORGE: The door is on the right wall, hinges on its left edge",
+    expect(brief).toContain(
+      "The door is on the right wall, hinges on its left edge",
     );
-    expect(harness.store.read().revision).toBe(revision);
+    expect(brief).toContain("7. One camera:");
+    expect(brief).not.toContain("She strikes\n");
   });
 
-  it("refuses to keep a clip that was not looked at first", async () => {
+  it("stores the keep of the critic, saves the end picture, and lets the clip be placed", async () => {
     const harness = await storyWithClip();
 
-    const result = await review({ harness, verdict: "keep" });
-
-    expect(result.data).toMatchObject({ kind: "clip-not-shown" });
-    expect(
-      harness.store.read().bible.storyPlan?.shots[0]?.reviews,
-    ).toBeUndefined();
-  });
-
-  it("keeps a clip, saves its end picture, and lets it be placed", async () => {
-    const harness = await storyWithClip();
-    await review({ harness });
-
-    const kept = await review({ harness, verdict: "keep" });
+    const kept = await review(harness);
     const placed = await place(harness);
     const shot = harness.store.read().bible.storyPlan?.shots[0];
 
     expect(kept.data).toMatchObject({
+      verdict: "keep",
       end_picture_asset_id: "strike-clip-end",
     });
     expect(shot?.reviews?.[0]).toMatchObject({
       assetId: "strike-clip",
       verdict: "keep",
-      endPictureAssetId: "strike-clip-end",
+      by: "critic",
     });
-    expect(
-      harness.store
-        .read()
-        .assets.find((asset) => asset.id === "strike-clip-end"),
-    ).toMatchObject({ kind: "image", source: { tool: "save_end_picture" } });
     expect(placed.isError).toBe(false);
   });
 
-  it("makes the next shot in the same place start from the end picture", async () => {
-    const harness = await storyWithClip();
-    await review({ harness });
-    await review({ harness, verdict: "keep" });
+  it("cannot be given a verdict by the lead: the critic's redo is stored", async () => {
+    const harness = await storyWithClip(redoCritic);
 
-    const unlinked = await shotCall({
-      harness,
-      assetId: "quench-clip",
-      capability: "video",
-      shotId: "quench",
-      firstFrameAssetId: "start",
+    const result = await harness.call({
+      name: "review_clip",
+      arguments: {
+        asset_id: "strike-clip",
+        shot_id: "strike",
+        verdict: "keep",
+        faults: [],
+      },
     });
-    const linked = await shotCall({
-      harness,
-      assetId: "quench-clip",
-      capability: "video",
-      shotId: "quench",
-      firstFrameAssetId: "strike-clip-end",
-    });
+    const placed = await place(harness);
 
-    expect(unlinked.data).toMatchObject({ kind: "continuity-picture-missing" });
-    expect(linked.isError).toBe(false);
+    expect(result.data).toMatchObject({ verdict: "redo" });
+    expect(result.data["faults"]).toContain("2 hammers, not 1 at 0.4s");
+    expect(placed.data).toMatchObject({ kind: "clip-failed-review" });
   });
 
-  it("refuses to place a clip whose review says redo", async () => {
-    const harness = await storyWithClip();
-
-    await review({
-      harness,
-      verdict: "redo",
-      faults: ["The hammer changes hands at 2 seconds"],
+  it("refuses a keep from the critic while a count differs or the end did not happen", async () => {
+    const harness = await storyWithClip({
+      clip: (brief) => ({
+        ...keepAnswerOf(brief),
+        counts: [{ object: "swords", expected: 1, seen: 2, seconds: 0.8 }],
+        action: { happened: false, seen: "She never strikes." },
+      }),
     });
-    const result = await place(harness);
 
-    expect(result.data).toMatchObject({ kind: "clip-failed-review" });
-    expect(result.data["message"]).toContain(
-      "The hammer changes hands at 2 seconds",
-    );
+    const result = await review(harness);
+    const refused = harness.criticLog.answers.at(-1);
+
+    expect(refused?.isError).toBe(true);
+    expect(refused?.text).toContain("The count of swords differs");
+    expect(refused?.text).toContain("The action did not happen");
+    expect(result.data).toMatchObject({ kind: "critic-failed" });
+    expect(
+      harness.store.read().bible.storyPlan?.shots[0]?.reviews,
+    ).toBeUndefined();
+  });
+
+  it("fails closed with no-critic, so a sheet stays unchecked and no shot can use it", async () => {
+    const harness = await startStoryHarness({
+      videoStyle: "ai-video",
+      critic: "none",
+    });
+    await makeForgeSheets(harness);
+    await setPlan({ harness, shots: [{ shot_id: "strike" }] });
+
+    const sheet = await harness.call({
+      name: "review_sheet",
+      arguments: { cast_id: "smith" },
+    });
+    const shot = await shotCall({
+      harness,
+      assetId: "start",
+      capability: "image",
+      shotId: "strike",
+    });
+    const answer = await harness.call({
+      name: "give_clip_review",
+      arguments: keepAnswerOf("- End entries to judge: smith"),
+    });
+
+    expect(sheet.data).toMatchObject({ kind: "no-critic" });
+    expect(shot.data).toMatchObject({ kind: "sheet-not-reviewed" });
+    expect(answer.isError).toBe(true);
   });
 });

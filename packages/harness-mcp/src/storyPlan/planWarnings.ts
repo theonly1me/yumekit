@@ -1,4 +1,6 @@
 import type { CastMember, Shot, StoryPlan } from "@yumekit/project";
+import { directionWarningsOf } from "./directionWarnings.js";
+import { isSameState, spaceWarningsOf } from "./spaceWarnings.js";
 
 export const largestPlaceCount = 2;
 
@@ -11,28 +13,12 @@ function onlyPasses(action: string): boolean {
   return passageOnly.test(action) && !joinedAction.test(action);
 }
 
-function stateWords(state: string): string {
-  return state
-    .toLowerCase()
-    .replace(/[.,;:!?]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function continuityWarnings(shots: Shot[]): string[] {
-  return shots.flatMap((...[shot, index]) => {
-    const before = shots[index - 1];
-    if (before?.placeId !== shot.placeId) return [];
-    if (stateWords(before.endState) === stateWords(shot.startState)) return [];
-    return [
-      `Shot "${shot.id}" is in the same place as "${before.id}", but its start state differs from the end state before it. Start it where "${before.id}" ends: ${before.endState}`,
-    ];
-  });
-}
-
 function changeWarnings(shots: Shot[]): string[] {
   return shots.flatMap((shot) => {
-    const sameState = stateWords(shot.startState) === stateWords(shot.endState);
+    const sameState = isSameState({
+      first: shot.startState,
+      second: shot.endState,
+    });
     if (sameState) {
       return [
         `Nothing changes in shot "${shot.id}": its start state and end state are the same. Give it an action with a result.`,
@@ -89,7 +75,8 @@ export function planWarningsOf(options: {
 }): string[] {
   const { shots } = options.plan;
   return [
-    ...continuityWarnings(shots),
+    ...spaceWarningsOf(shots),
+    ...directionWarningsOf(shots),
     ...changeWarnings(shots),
     ...inheritWarnings(shots),
     ...placeWarnings(shots),

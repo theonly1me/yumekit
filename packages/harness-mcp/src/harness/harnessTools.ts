@@ -35,10 +35,11 @@ import { registerReplaceNarration } from "../replace/registerReplaceNarration.js
 import { registerSetTransitions } from "../transitions/registerSetTransitions.js";
 import { registerGetWork } from "../work/registerGetWork.js";
 import { registerPutWork } from "../work/registerPutWork.js";
+import type { AskCritic } from "../critic/criticTypes.js";
+import { registerReviewWork } from "../critic/registerReviewWork.js";
 import type { AskHelper } from "../helpers/helperTypes.js";
 import { registerAskHelper } from "../helpers/registerAskHelper.js";
 import { registerGetStoryGuide } from "../storyGuide/registerGetStoryGuide.js";
-import { registerReviewClip } from "../storyPlan/registerReviewClip.js";
 import { registerSetStoryPlan } from "../storyPlan/registerSetStoryPlan.js";
 import { callerStore } from "./callerStore.js";
 import { createToolTable, type HarnessTool } from "./toolTable.js";
@@ -47,6 +48,7 @@ export interface HarnessOptions {
   store: ProjectStore;
   mediaTools: MediaTools;
   askHelper?: AskHelper;
+  askCritic?: AskCritic;
 }
 
 export function harnessToolsOf(
@@ -93,7 +95,7 @@ export function harnessToolsOf(
   registerRemoveAsset(context);
   registerMarkAsset(context);
   registerPreviewAssets(context);
-  registerReviewClip(context);
+  registerReviewWork({ ...context, askCritic: options.askCritic });
   registerAlignWords(context);
   registerPreviewTools(context);
   registerScenePreviewTool(context);

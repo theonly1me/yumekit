@@ -8,11 +8,12 @@ export const barSection = [
 export const orderSection = [
   "## The order of work",
   "",
-  "1. The story first, with no paid call: set_story_plan with the logline, what the main character wants, what stands against it, what changes, and the shots. Correct each warning.",
-  "2. The sheets: for each person, place, and prop of the plan, make one sheet picture (generate_asset, no shot_id), look at it, and save it with its facts (put_cast_member facts and reference_asset_ids). A person also gets a picture of the hands with the prop.",
+  "1. The story first, with no paid call: set_story_plan with the logline, what the main character wants, what stands against it, what changes, and the shots with their states, strikes, camera, and music map. Correct each warning.",
+  "2. The sheets: for each person, place, and prop of the plan, make one sheet picture (generate_asset, no shot_id), save it with its facts (put_cast_member), and call review_sheet. A person who holds a prop also gets a picture of the hands with the prop. Make a failed sheet again.",
   "3. The art direction: set_bible style holds the medium, the line, the color, the light, the lens, and what never appears. The harness adds it to each picture and clip prompt.",
-  "4. For each shot: a start picture with shot_id, then the clip with shot_id and first_frame_asset_id. A shot in the same place as the shot before starts from the end picture of that shot.",
-  "5. review_clip for each clip, then a verdict. Place only a kept or cut clip with place_video.",
+  "4. Shot by shot, in order: the start picture with shot_id, the clip with shot_id and first_frame_asset_id, then review_clip. The next shot in the same place can start only after the critic kept this one, from its end picture.",
+  "5. An independent critic gives the verdict. Place only a kept clip, or the clean part of a cut clip, with place_video. Make a redo again with a prompt that names each fault.",
+  "6. The music: write its prompt from the music map, make two or three candidates when they are cheap, check_music each, and place the best fit with replace_music and its start_seconds.",
   "",
 ].join("\n");
 
@@ -24,6 +25,7 @@ export const planSection = [
   '- Each shot: its purpose; ONE action as a verb with its object and its result ("she strikes the red steel and the blade bends", never "she walks through the city"); the place; the camera (size, angle, move); 3 to 6 seconds; the start state and the end state (where each person and object is, which hand holds what, which doors are open); what the next shot inherits.',
   "- Cause and effect link the shots: each shot follows from the one before. A shot that only shows a place gets cut or merged.",
   "- A fast fight is the hardest case. Plan it as short shots, each with one strike and one result, and let the cut carry the speed.",
+  "- The camera of each shot: its size (extreme close up to wide), its angle (low, high, eye level, overhead, over the shoulder), its lens feel (wide, normal, long), and its move.",
   "",
 ].join("\n");
 
@@ -32,7 +34,8 @@ export const sheetSection = [
   "",
   '- A person: one picture with front, side, back, and the face close up, in the style of the film, on a plain background. Facts: age, build, hair, each garment and its colors, marks and their side, five fingers on each hand, which hand holds which prop and how ("the lantern stick in her right hand, fingers closed around it, thumb on top"). A second picture: the hands with the prop, large in the frame.',
   "- A place: a wide establishing picture, and a floor plan in words: where the door is, the side of its hinges and its knob, which way it opens, where the window and the light are, what is on each wall, what is outside the door.",
-  "- A prop: two sides, its size, material, colors, and how a hand holds it.",
+  "- A person also has its height against the hero and its feet as facts. Each opponent is its own entry with its own design and personality: build, face, clothes, weapon, the way it moves and fights. Copies of one design only for a uniform group.",
+  "- A prop: ONE object, from two sides, with its size, material, colors, and how a hand holds it. Never draw two of it on one sheet: a sheathed and a bare sword become two swords in the film. Two states are two entries, or one picture that the facts name as two views of one object, with a rule for where the scabbard is when the blade is out.",
   "- Repeat the fixed facts in words in each prompt: the harness adds them from the cast. Give each reference picture one job, and say what not to copy from it.",
   "",
 ].join("\n");
@@ -67,9 +70,8 @@ export const videoSection = [
 export const reviewSection = [
   "## The review",
   "",
-  "- After each clip, call review_clip. Read the measures: a still background, only a camera move, a hard jump, a part that changes suddenly, and a first frame that differs from the start picture each mean: look there.",
-  "- Then check the list on the frames, and look closer at each hand and each face at three or more times with preview_assets and a region: fingers, grip, joints, feet on the ground, the face.",
-  "- A measure finds change, not meaning. A knob that moves to the other side of a door changes only a few pixels: your eyes and the floor plan of the place find it.",
-  "- Keep, cut to the good part, or redo with a prompt that names each fault and how to avoid it. Say to the person in one sentence what you made again and why.",
+  "- review_clip and review_sheet start an independent critic: a fresh agent that sees only the frames, the measures, the plan, the sheets, and a fixed list. You cannot give or overrule its verdict.",
+  "- The critic answers each measured warning, counts what the facts count, and says if the action and each end entry happened. A keep is refused while a warning, a count, or a planned end is not right.",
+  "- Read its faults and missed ends. A redo needs a new prompt that names each fault and how to avoid it. Say to the person in one sentence what you made again and why.",
   "",
 ].join("\n");

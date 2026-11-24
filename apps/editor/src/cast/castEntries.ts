@@ -18,6 +18,13 @@ export const castEntrySchema = z.object({
   description: z.string(),
   facts: z.array(z.string()).optional(),
   referenceAssetIds: z.array(z.string()),
+  sheetReview: z
+    .object({
+      verdict: z.enum(["pass", "fail"]),
+      faults: z.array(z.string()),
+      assetIds: z.array(z.string()),
+    })
+    .optional(),
 });
 
 export type CastEntry = z.infer<typeof castEntrySchema>;

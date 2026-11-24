@@ -9,8 +9,7 @@ export const motionLimits = {
   suddenFloorPercent: 4,
   suddenTimesMedian: 3,
   suddenTimesBefore: 2,
-  startWholePercent: 3,
-  startRegionPercent: 6,
+  startWholePercent: 10,
 } as const;
 
 export const regionNames = [
@@ -156,15 +155,12 @@ function stillnessWarnings(options: {
 
 function startWarnings(start: StartDifference | undefined): MotionWarning[] {
   if (start === undefined) return [];
-  if (
-    start.whole <= motionLimits.startWholePercent &&
-    start.largestRegion <= motionLimits.startRegionPercent
-  )
-    return [];
+  if (start.whole <= motionLimits.startWholePercent) return [];
   return [
     {
       kind: "does-not-start-on-the-start-picture",
-      message: `The first frame differs from the start picture by ${String(rounded(start.whole))} percent, and by ${String(rounded(start.largestRegion))} percent in one part. The model did not start on the picture: compare the framing, the person, and each object.`,
+      seconds: 0,
+      message: `The first frame differs from the start picture by ${String(rounded(start.whole))} percent: it is another picture. The model did not start on the start picture.`,
     },
   ];
 }

@@ -1,32 +1,67 @@
 import { startHarness, type Harness, type ToolCall } from "./harnessFixture.js";
+import type { CriticScript } from "./criticFixture.js";
+
+export interface EntryDraft {
+  cast_id: string;
+  where?: string;
+  screen?: "left" | "center" | "right" | "off";
+  facing?: "camera" | "away" | "left" | "right";
+  state?: string;
+  count?: number;
+  held_by?: { cast_id: string; hand: "left" | "right" | "both" };
+  enters_from?: string;
+}
 
 export interface ShotDraft {
   shot_id: string;
   place_id?: string;
   cast_ids?: string[];
-  start_state?: string;
-  end_state?: string;
+  start?: EntryDraft[];
+  end?: EntryDraft[];
   action?: string;
   inherits?: string;
   camera_move?: string;
+  camera_size?: string;
+  camera_angle?: string;
+  strikes?: object[];
+  music_intensity?: number;
+}
+
+export function entryOf(draft: EntryDraft) {
+  return {
+    where: "at the anvil",
+    screen: "center",
+    facing: "camera",
+    state: "the blade is straight",
+    ...draft,
+  };
 }
 
 export function shotOf(draft: ShotDraft) {
+  const castIds = draft.cast_ids ?? ["smith"];
   return {
     purpose: `Show ${draft.shot_id}.`,
-    action: draft.action ?? "She strikes the red steel and the blade bends",
+    action: draft.action ?? "She hammers the red steel and the blade bends",
     place_id: draft.place_id ?? "forge",
-    cast_ids: draft.cast_ids ?? ["smith"],
-    camera_size: "medium",
-    camera_angle: "eye-level",
+    cast_ids: castIds,
+    camera_size: draft.camera_size ?? "medium",
+    camera_angle: draft.camera_angle ?? "eye-level",
+    camera_lens: "normal",
     seconds: 4,
-    start_state: draft.start_state ?? "The blade is straight on the anvil.",
-    end_state: draft.end_state ?? "The blade is bent on the anvil.",
+    start_state: (
+      draft.start ?? castIds.map((castId) => ({ cast_id: castId }))
+    ).map(entryOf),
+    end_state: (
+      draft.end ??
+      castIds.map((castId) => ({ cast_id: castId, state: "the blade is bent" }))
+    ).map(entryOf),
     inherits: draft.inherits ?? "The bent blade.",
     shot_id: draft.shot_id,
+    music_intensity: draft.music_intensity ?? 2,
     ...(draft.camera_move === undefined
       ? {}
       : { camera_move: draft.camera_move }),
+    ...(draft.strikes === undefined ? {} : { strikes: draft.strikes }),
   };
 }
 
@@ -48,8 +83,11 @@ export function setPlan(options: {
 
 export async function startStoryHarness(options?: {
   videoStyle?: "graphics" | "ai-video" | "mix";
+  critic?: CriticScript | "none";
 }): Promise<Harness> {
-  const harness = await startHarness();
+  const harness = await startHarness(
+    options?.critic === undefined ? undefined : { critic: options.critic },
+  );
   if (options?.videoStyle !== undefined) {
     await harness.call({
       name: "set_video_style",
@@ -85,6 +123,12 @@ export async function makeSheet(options: {
       reference_asset_ids: [`${castId}-sheet`],
     },
   });
+  if (options.facts.length > 0) {
+    await harness.call({
+      name: "review_sheet",
+      arguments: { cast_id: castId },
+    });
+  }
 }
 
 export async function makeForgeSheets(harness: Harness): Promise<void> {

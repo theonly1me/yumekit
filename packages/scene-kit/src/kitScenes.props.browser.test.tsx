@@ -65,7 +65,7 @@ const defaultTextsByScene: Record<(typeof kitSceneNames)[number], string[]> = {
   shapes: [],
   lines: ["Line"],
   "look-swap": [],
-  command: ["$", "command"],
+  command: ["command"],
   counts: ["0", "Count"],
 };
 
@@ -117,5 +117,22 @@ describe("kit scene props", () => {
     });
     await mounted.seek(299);
     expect(shownTexts(element)).toEqual(["First", "Third", "4", "5", "6", "7"]);
+  });
+
+  it("draws a sign before the command only when the props give one", async () => {
+    const plain = await mountKitScene({
+      name: "command",
+      durationFrames: 300,
+      props: { command: "npm install -g yumekit" },
+    });
+    await plain.mounted.seek(299);
+    const signed = await mountKitScene({
+      name: "command",
+      durationFrames: 300,
+      props: { command: "npm install -g yumekit", prompt: "$" },
+    });
+    await signed.mounted.seek(299);
+    expect(shownTexts(plain.element)).toEqual(["npm install -g yumekit"]);
+    expect(shownTexts(signed.element)).toEqual(["$", "npm install -g yumekit"]);
   });
 });

@@ -23,12 +23,22 @@ describe("set_story_plan", () => {
       id: "strike",
       placeId: "forge",
       castIds: ["smith"],
-      camera: { size: "medium", angle: "eye-level" },
+      camera: { size: "medium", angle: "eye-level", lens: "normal" },
+      startState: [
+        {
+          castId: "smith",
+          where: "at the anvil",
+          screen: "center",
+          facing: "camera",
+          state: "the blade is straight",
+        },
+      ],
+      musicIntensity: 2,
     });
     expect(harness.store.read().bible.storyPlan).toBeUndefined();
   });
 
-  it("warns when a shot in the same place starts in another state than the end before it", async () => {
+  it("warns when a character changes its place, side, or facing across a cut in the same place", async () => {
     const harness = await startHarness();
     await makeForgeSheets(harness);
 
@@ -38,15 +48,43 @@ describe("set_story_plan", () => {
         { shot_id: "strike" },
         {
           shot_id: "quench",
-          start_state: "The blade is straight in her hand.",
-          end_state: "The blade hisses in the water.",
+          start: [
+            {
+              cast_id: "smith",
+              screen: "left",
+              facing: "away",
+              state: "the blade is bent",
+            },
+          ],
+          end: [{ cast_id: "smith", state: "the blade hisses" }],
         },
       ],
     });
 
     expect(warningsOf(result.data)).toEqual([
-      'Shot "quench" is in the same place as "strike", but its start state differs from the end state before it. Start it where "strike" ends: The blade is bent on the anvil.',
+      '"smith" changes across the cut from "strike" to "quench" with no move between them: screen side (center / left), facing (camera / away). Keep the place, the screen side, and the facing across a cut, or plan a shot that shows the move.',
     ]);
+  });
+
+  it("refuses a state that misses a person of the shot or joins two in one entry", async () => {
+    const harness = await startHarness();
+
+    const result = await setPlan({
+      harness,
+      shots: [
+        {
+          shot_id: "duel",
+          cast_ids: ["smith", "brother"],
+          start: [{ cast_id: "smith", state: "both face each other" }],
+        },
+      ],
+    });
+
+    expect(result.data).toMatchObject({ kind: "state-incomplete" });
+    expect(result.data["message"]).toContain(
+      'duel.start_state has no entry for "brother".',
+    );
+    expect(harness.store.read().bible.storyPlan).toBeUndefined();
   });
 
   it("warns about a shot where nothing changes, a walk, a shot that gives nothing, many places, and missing cast", async () => {
@@ -64,20 +102,24 @@ describe("set_story_plan", () => {
         {
           shot_id: "forest",
           place_id: "forest",
-          start_state: "She stands.",
-          end_state: "She stands",
+          start: [{ cast_id: "smith", state: "She stands." }],
+          end: [{ cast_id: "smith", state: "She stands" }],
         },
         { shot_id: "room", place_id: "room" },
       ],
     });
     const warnings = warningsOf(result.data);
 
-    expect(warnings).toHaveLength(5);
-    expect(warnings[0]).toContain('The action of shot "city" walks');
-    expect(warnings[1]).toContain('Nothing changes in shot "forest"');
-    expect(warnings[2]).toContain('Shot "city" gives the next shot nothing');
-    expect(warnings[3]).toContain("The plan has 3 places (city, forest, room)");
-    expect(warnings[4]).toContain(
+    expect(warnings).toHaveLength(7);
+    expect(warnings[0]).toContain(
+      "3 shots in a row (city, forest, room) have the same size and angle",
+    );
+    expect(warnings[1]).toContain('The first shot "city" opens with a walk');
+    expect(warnings[2]).toContain('The action of shot "city" walks');
+    expect(warnings[3]).toContain('Nothing changes in shot "forest"');
+    expect(warnings[4]).toContain('Shot "city" gives the next shot nothing');
+    expect(warnings[5]).toContain("The plan has 3 places (city, forest, room)");
+    expect(warnings[6]).toContain(
       "The cast has no entry for city, smith, forest, room yet",
     );
   });

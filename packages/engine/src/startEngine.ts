@@ -5,6 +5,7 @@ import { resolve } from "node:path";
 import { openProject, type ProjectStore } from "@yumekit/project";
 import type { ServerCommand } from "./agents/agentTypes.js";
 import { createChat, type Chat } from "./chat/chat.js";
+import { noCriticFailure } from "@yumekit/harness-mcp";
 import { noChatHelper } from "./chat/helpers/helperDesk.js";
 import { trackStore } from "./chat/trackedStore.js";
 import { claimEngineFile } from "./engineFile/claimEngineFile.js";
@@ -112,6 +113,9 @@ export async function startEngine(options: {
     store: tracked.store,
     askHelper: (request) =>
       helperChat.current?.askHelper(request) ?? noChatHelper,
+    askCritic: (request) =>
+      helperChat.current?.askCritic(request) ??
+      Promise.resolve({ ok: false, failure: noCriticFailure }),
   });
   if (!started.ok) return started;
   const parts = started.value;

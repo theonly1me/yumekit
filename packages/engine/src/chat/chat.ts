@@ -5,50 +5,24 @@ import type { Turn } from "@yumekit/brain";
 import type { ProjectStore } from "@yumekit/project";
 import type { ServerCommand } from "../agents/agentTypes.js";
 import type { Outcome } from "../engineTypes.js";
-import type { HelperOutcome, HelperRequest } from "@yumekit/harness-mcp";
 import type { EventHub } from "../events/eventHub.js";
 import { chooseAgent, findAgentPrograms } from "./agentChoice.js";
 import { aboutOf, requestTextOf } from "./aboutClip.js";
 import { createAnswerTracker, type AnswerTracker } from "./answerTracker.js";
 import { createChangeLedger } from "./changeLedger.js";
+import type { Chat } from "./chatInterface.js";
 import { chatBusy, failed, noServerCommand } from "./chatFailures.js";
-import {
-  createHelperDesk,
-  type HelperCall,
-  type LeadRun,
-} from "./helpers/helperDesk.js";
+import { createHelperDesk, type LeadRun } from "./helpers/helperDesk.js";
+import { createCriticDesk, personCriticRun } from "./helpers/criticDesk.js";
 import { loadChat } from "./chatFile.js";
 import { createChatLog } from "./chatLog.js";
-import type {
-  AnswerEntry,
-  ChangeEntry,
-  ChatFailure,
-  ChatView,
-  RequestEntry,
-} from "./chatTypes.js";
+import type { AnswerEntry, ChatFailure, RequestEntry } from "./chatTypes.js";
 import { runRequest, signInMessageOf } from "./requestRun.js";
-import type { ToolCaller, TrackedStore } from "./trackedStore.js";
-import { noCallNote, type CallNote } from "./stepNotes.js";
+import type { TrackedStore } from "./trackedStore.js";
+import { noCallNote } from "./stepNotes.js";
 import { undoChangeWith } from "./undoChange.js";
 
-export interface Chat {
-  view: () => Promise<ChatView>;
-  startRequest: (options: {
-    text: string;
-    details?: string | undefined;
-    aboutClipId: string | undefined;
-  }) => Promise<Outcome<RequestEntry, ChatFailure>>;
-  stop: () => boolean;
-  undoChange: (changeId: string) => Promise<Outcome<ChangeEntry, ChatFailure>>;
-  noteAiCall: (tool: string) => CallNote;
-  runToolCall: <Value>(options: {
-    caller: ToolCaller;
-    call: () => Promise<Value>;
-  }) => Promise<Value>;
-  askHelper: (request: HelperRequest) => Promise<HelperOutcome>;
-  helperCallOf: (token: string | undefined) => HelperCall;
-  close: () => Promise<void>;
-}
+export type { Chat } from "./chatInterface.js";
 
 export async function createChat(options: {
   projectFolder: string;
@@ -73,6 +47,7 @@ export async function createChat(options: {
   let running: Promise<void> = Promise.resolve();
   let lead: LeadRun | undefined;
   const helpers = createHelperDesk();
+  const critics = createCriticDesk();
   const begin = async (request: {
     text: string;
     details?: string | undefined;
@@ -147,6 +122,7 @@ export async function createChat(options: {
     if (phase !== "running") return false;
     isStopRequested = true;
     helpers.stop();
+    critics.stop();
     turn?.stop();
     return true;
   };
@@ -187,7 +163,20 @@ export async function createChat(options: {
     runToolCall: tracked.runCall,
     askHelper: (request) =>
       helpers.ask({ request, lead: phase === "running" ? lead : undefined }),
-    helperCallOf: helpers.callOf,
+    askCritic: async (request) =>
+      critics.ask({
+        request,
+        run:
+          phase === "running"
+            ? lead
+            : await personCriticRun({
+                isPerson: tracked.callerNow()?.by === "person",
+                programs,
+                serverCommand: options.serverCommand,
+                projectFolder,
+              }),
+      }),
+    helperCallOf: (token) => critics.callOf(token) ?? helpers.callOf(token),
     close: async () => {
       stop();
       await running;
