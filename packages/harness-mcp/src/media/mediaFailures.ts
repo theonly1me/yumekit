@@ -21,6 +21,10 @@ function failureMessage(failure: MediaToolFailure): string {
       return `The media server "${failure.server}" needs the key ${failure.variable}, and it is not set. Add the key in the editor under Tools, or run \`yumekit keys set ${failure.variable}\`.`;
     case "media-key-not-working":
       return `The key of the media server "${failure.server}" does not work: ${failure.message}`;
+    case "media-service-not-ready":
+      return `The media server "${failure.server}" is not ready: ${failure.message}`;
+    case "media-usage-limit-reached":
+      return `The media server "${failure.server}" reached the usage limit of the plan of the person: ${failure.message}`;
     case "spending-limit-reached":
       return spendingLimitMessage(failure);
     case "spending-record-not-valid":
@@ -59,6 +63,10 @@ function failureHint(failure: MediaToolFailure): string {
       return "Tell the person to follow steps to get the key at get_key_url and to add it. Never ask for the value of the key in the chat. Or use another server from list_media_tools.";
     case "media-key-not-working":
       return "Tell the person in one sentence that the key does not work, with the message, and that they can add a new key in Settings. Use another ready server from list_media_tools for now.";
+    case "media-service-not-ready":
+      return "Tell the person in one sentence why the service is not ready, with the step in the message. Use another ready server from list_media_tools for now.";
+    case "media-usage-limit-reached":
+      return "Tell the person that the plan reached its usage limit. Make no more calls to this server until the limit resets. Use another ready server from list_media_tools only when the person permits paid calls, or make the rest with free tools.";
     case "spending-limit-reached":
       return "Make no more paid calls. Tell the person the limit, the amount spent, and the price, and that only they can raise the spending limit in Settings. Make the rest with free tools: graphics drawn by code, the music and the voice of this computer.";
     case "spending-record-not-valid":
@@ -96,6 +104,12 @@ export function mediaFailureOf(failure: MediaToolFailure): MediaHarnessFailure {
       price_usd: failure.priceUsd,
       price_is_cautious: failure.priceBasis === "cautious",
     };
+  }
+  if (
+    failure.kind === "media-service-not-ready" ||
+    failure.kind === "media-usage-limit-reached"
+  ) {
+    return { ...base, reason: failure.message, server: failure.server };
   }
   if (failure.kind === "media-key-not-working") {
     return {

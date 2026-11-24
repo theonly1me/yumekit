@@ -123,3 +123,9 @@ export const pricedServerCommand: ServerCommand = {
   args: [fileURLToPath(new URL("./pricedMediaServer.ts", import.meta.url))],
   passEnvironment: ["YUMEKIT_PRICED_KEY", "YUMEKIT_PRICED_CALLS"],
 };
+
+export const planServerCommand: ServerCommand = {
+  command: process.execPath,
+  args: [fileURLToPath(new URL("./planMediaServer.ts", import.meta.url))],
+  passEnvironment: ["YUMEKIT_PLAN_STATE", "YUMEKIT_PRICED_CALLS"],
+};

@@ -1,5 +1,6 @@
 import type { MediaDefault } from "./configuration.js";
 import type { KeyHealth } from "./keyHealth/keyHealth.js";
+import { checkKeys } from "./keyHealth/checkKeys.js";
 import { waitsForDownload } from "./modelDownloads.js";
 import { runTool } from "./runTool.js";
 import { describedDefaultModel, selectServer } from "./selectServer.js";
@@ -22,9 +23,40 @@ export interface RunContext {
   spendingBook: SpendingBook;
   toolTimeoutSeconds: number;
   onDescriptionsChanged: () => void;
+  spendingLimitUsd: () => number;
+}
+
+function isNoPick(options: {
+  context: RunContext;
+  request: MediaToolRequest;
+}): boolean {
+  return (
+    options.request.server === undefined &&
+    options.context.defaults()[options.request.capability] === undefined
+  );
 }
 
 export async function runMediaRequest(options: {
+  context: RunContext;
+  request: MediaToolRequest;
+}): Promise<Outcome<MediaToolRun, MediaToolFailure>> {
+  const { context } = options;
+  await checkKeys({
+    pool: context.pool,
+    keyHealth: context.keyHealth,
+    toolTimeoutSeconds: context.toolTimeoutSeconds,
+    onlyServersWithNoKey: true,
+  });
+  const ran = await runOnce(options);
+  if (ran.ok || ran.failure.kind !== "media-usage-limit-reached") return ran;
+  if (!isNoPick(options) || context.spendingLimitUsd() <= 0) return ran;
+  const next = await runOnce(options);
+  return !next.ok && next.failure.kind === "spending-limit-reached"
+    ? ran
+    : next;
+}
+
+async function runOnce(options: {
   context: RunContext;
   request: MediaToolRequest;
 }): Promise<Outcome<MediaToolRun, MediaToolFailure>> {
@@ -75,6 +107,12 @@ export async function runMediaRequest(options: {
     context.onDescriptionsChanged();
   }
   if (!ran.ok) {
+    if (ran.failure.kind === "media-usage-limit-reached") {
+      context.keyHealth.noteUsageLimit({
+        connection,
+        message: ran.failure.message,
+      });
+    }
     if (ran.failure.kind === "media-tool-failed") {
       context.keyHealth.noteFailedCall({
         connection,

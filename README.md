@@ -12,6 +12,7 @@ You type what you want. The AI program that you already have (Claude Code, Codex
 - **Scenes drawn by code.** 26 scene types and 5 looks, with motion and transitions. The text is exact, a change costs nothing, and the result is the same each time.
 - **Real video clips when you want them.** A scene can become a clip from a video model, with a camera move and a first and a last picture. You pick "Graphics", "AI video", or "Mix" for a video.
 - **A voice with no key.** yumekit has a natural voice that runs on your computer, after one download of 148 MB.
+- **Pictures with no key.** If Codex is on your computer and signed in with ChatGPT, yumekit makes pictures with your plan, also from a reference picture.
 - **Any model that you have a key for.** Pictures, voice, music, video clips, sound effects, talking clips, and a sharper copy, from OpenAI, Google Gemini, and fal. You pick the service and the model for each kind.
 - **Your own files.** Bring a picture, a sound, or a video, and save each file that yumekit makes.
 - **An editor that a person can use.** Change a text in the video with a click, change the script, the pictures, the voice, and the music, and undo each change.
@@ -53,7 +54,7 @@ The file tells the agent how to install yumekit, how to check the computer, and 
 
 ## Keys
 
-yumekit needs no key for the AI: it uses the sign-in of your agent program. It needs no key for a voice. A media service needs its own key, which you add in Settings of the editor or with `yumekit keys set <VARIABLE>`. yumekit keeps a key on your computer and sends it only to its own service. A model that nobody has run with yumekit yet shows "Not tested with yumekit yet".
+yumekit needs no key for the AI: it uses the sign-in of your agent program. It needs no key for a voice. With Codex signed in with ChatGPT, it needs no key for pictures either: each picture uses your ChatGPT plan. Any other media service needs its own key, which you add in Settings of the editor or with `yumekit keys set <VARIABLE>`. yumekit keeps a key on your computer and sends it only to its own service. A model that nobody has run with yumekit yet shows "Not tested with yumekit yet".
 
 ## Use an agent
 

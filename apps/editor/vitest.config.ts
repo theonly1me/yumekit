@@ -6,6 +6,7 @@ export default defineProject({
     include: ["src/**/*.browser.test.ts"],
     globalSetup: ["src/testing/buildEditor.ts"],
     testTimeout: 60_000,
+    env: { YUMEKIT_CODEX_PATH: "/tests-start-no-real-codex" },
     hookTimeout: 120_000,
     expect: { poll: { timeout: 20_000 } },
   },

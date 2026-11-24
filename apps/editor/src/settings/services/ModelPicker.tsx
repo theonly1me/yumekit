@@ -21,6 +21,7 @@ const serviceStateNames: Record<ChoiceService["state"], string> = {
   ready: "Ready",
   "needs-key": "Needs a key",
   "key-not-working": "The key does not work",
+  "not-ready": "Not ready",
 };
 
 function targetsOf(service: ChoiceService): ModelTarget[] {
@@ -75,7 +76,10 @@ export function ModelPicker(props: {
   };
 
   const choose = (options: { service: ChoiceService; target: ModelTarget }) => {
-    if (options.service.state !== "ready") {
+    if (
+      options.service.state === "needs-key" ||
+      options.service.state === "key-not-working"
+    ) {
       setState({ kind: "needs-key", target: options.target });
     } else {
       apply(options.target);
@@ -110,8 +114,9 @@ export function ModelPicker(props: {
             </h4>
             {service.key_problem === null ? undefined : (
               <p className="fact key-problem">
-                The key does not work. {service.label} says:{" "}
-                {service.key_problem}
+                {service.state === "not-ready"
+                  ? service.key_problem
+                  : `The key does not work. ${service.label} says: ${service.key_problem}`}
               </p>
             )}
             <ServiceLine client={props.client} service={service} />

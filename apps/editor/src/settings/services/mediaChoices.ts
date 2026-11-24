@@ -22,7 +22,7 @@ const keySchema = z.object({
 const serviceSchema = z.object({
   server: z.string(),
   label: z.string(),
-  state: z.enum(["ready", "needs-key", "key-not-working"]),
+  state: z.enum(["ready", "needs-key", "key-not-working", "not-ready"]),
   key_problem: z.string().nullable().default(null),
   keys: z.array(keySchema),
   models: z.array(
@@ -44,7 +44,13 @@ const currentSchema = z.object({
   model: z.string().nullable(),
   model_label: z.string().nullable(),
   source: z.enum(["picked", "first-ready"]),
-  state: z.enum(["ready", "needs-key", "key-not-working", "not-available"]),
+  state: z.enum([
+    "ready",
+    "needs-key",
+    "key-not-working",
+    "not-ready",
+    "not-available",
+  ]),
 });
 
 const choiceSchema = z.object({

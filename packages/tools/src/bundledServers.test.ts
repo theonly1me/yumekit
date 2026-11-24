@@ -61,4 +61,18 @@ describe("findBundledServers", () => {
       ],
     });
   });
+
+  it("resolves the pictures of Codex by the name codex, with no key and the Codex folder and program path", async () => {
+    const servers = await findBundledServers();
+
+    expect(servers["codex"]).toEqual({
+      command: process.execPath,
+      args: [
+        fileURLToPath(
+          new URL("../../../tools/codex-images/dist/main.js", import.meta.url),
+        ),
+      ],
+      passEnvironment: ["CODEX_HOME", "YUMEKIT_CODEX_PATH"],
+    });
+  });
 });

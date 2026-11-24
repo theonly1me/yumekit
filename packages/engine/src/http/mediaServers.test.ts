@@ -24,6 +24,7 @@ describe("the media servers request", () => {
           "local-voice": { disabled: true },
           "local-music": { disabled: true },
           openai: { disabled: true },
+          codex: { disabled: true },
         },
       },
     });

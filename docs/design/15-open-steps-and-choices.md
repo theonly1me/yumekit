@@ -97,7 +97,7 @@ A fixed request is a chat request (document 12) with a text that the editor buil
 
 ### The order with no pick
 
-Document 06 says that a call with no server uses `defaults`, then the first server that started with the capability. That gave the sample server for each kind. The new rule: with no default for a capability, the call uses the first server that has the capability and is ready, in the order `openai`, `gemini`, `fal`, each other server of the file, `local-voice` (document 18), `local-music` (document 19), and `sample` last. A server is ready when it started and each key that it needs is there. If no server is ready, the call fails with `media-key-missing` for the first of them, as before.
+Document 06 says that a call with no server uses `defaults`, then the first server that started with the capability. That gave the sample server for each kind. The new rule: with no default for a capability, the call uses the first server that has the capability and is ready, in the order `codex` ("Details of WP67"), `openai`, `gemini`, `fal`, each other server of the file, `local-voice` (document 18), `local-music` (document 19), and `sample` last. A server is ready when it started and each key that it needs is there. If no server is ready, the call fails with `media-key-missing` for the first of them, as before.
 
 ### The picker
 
@@ -285,3 +285,64 @@ The first film with paid media found these defects: no limit in money, no record
 21. The OpenAI size failure names the nearest valid size, for example "The nearest valid size is width_pixels 1008 and height_pixels 1024."
 22. When a picture has another size than the asked one, the result says the real size and the next value of the `resolution` setting of the model, for example 'For a larger picture, ask again with input.resolution "2K".'
 23. Rule 32 of the instructions of the AI: a video model that always makes sound takes no `with_audio` false; the AI places its clip with `sound_gain_decibels` "off" when the film needs no sound from it. Rule 33 tells the AI about the spending limit.
+
+## Details of WP67
+
+The owner asked why yumekit did not use the Codex program that the person already has. Codex CLI can make a picture with the ChatGPT plan of the person and no key. WP67 adds the bundled server `codex` (`tools/codex-images`, document 06) and made these choices.
+
+### What the sources say
+
+Read on 2026-11-24. The installed program is Codex CLI 0.163.0. The newest release on that day is 0.172.0.
+
+1. Codex has a built-in picture tool, `image_gen.imagegen`. The feature `image_generation` is stable and on by default (`codex features list`, and `codex-rs/features/src/lib.rs` at the tag `rust-v0.163.0`). The tool is there only with an OpenAI sign-in or provider (`codex-rs/ext/image-generation/src/extension.rs`).
+2. The tool uses the model `gpt-image-2` with the size `auto` and the quality `auto` (`codex-rs/ext/image-generation/src/tool.rs`). The only option of the model is a transparent background. An edit takes up to 5 pictures.
+3. The tool saves each picture as `$CODEX_HOME/generated_images/<session id>/<call id>.png` (`artifact.rs`, and `app-server/src/extensions.rs` for the root).
+4. `codex exec --json` gives no event for a picture (`codex-rs/exec/src/event_processor_with_jsonl_output.rs`). The session id is the `thread_id` of `thread.started`, so the folder of the picture is known.
+5. `codex exec --image <file>` attaches a picture to the request (`codex exec --help`).
+6. The pricing page (https://developers.openai.com/codex/pricing, which now opens https://learn.chatgpt.com/docs/pricing) says: "Image generation counts toward the same general usage limits as local messages and cloud chats." A turn with a picture uses the limits 3 to 5 times faster. The Free plan has no picture generation. With an API key sign-in, API prices apply.
+7. The same page lists "Codex SDK, codex exec, and scriptable workflows" for the Plus, Pro, Business, and Enterprise plans. The non-interactive page (https://learn.chatgpt.com/docs/non-interactive-mode) says that `codex exec` reuses the saved sign-in. The terms of use (https://openai.com/policies/terms-of-use/, in effect from 2026-01-01) forbid making an account available to others and extracting output programmatically. yumekit runs the program of the person, on the computer of the person, for that person, as a documented `codex exec` workflow. That this use is inside the terms is an inference. The owner can ask OpenAI to confirm it.
+8. The text of a usage limit starts with "You’ve hit your usage limit" (`codex-rs/protocol/src/error.rs`). A limit of the picture tool reaches the model as "image generation failed: <message>".
+9. Claude Code has no built-in way to make a picture, a sound, or a video (https://support.claude.com/en/articles/9002504-can-claude-produce-images, 2026-03-16). Cursor 2.4 can make a picture with Nano Banana Pro inside the editor (https://cursor.com/changelog/2-4, 2026-01-22). That page says nothing about the use of a plan or a key, and it describes no command line use. WP67 builds nothing for Claude Code or Cursor.
+
+### How the server runs Codex
+
+10. Each picture is one `codex exec --json --ephemeral` turn in a new temporary folder, with `--skip-git-repo-check`, `--ignore-user-config`, `--ignore-rules`, `--sandbox read-only`, `approval_policy="never"`, and `web_search="disabled"`. It turns off these features: `apps`, `plugins`, `shell_tool`, `unified_exec`, `computer_use`, `browser_use`, `browser_use_external`, `in_app_browser`, `hooks`, `multi_agent`, and `goals`. It turns on `image_generation`.
+11. The real check found the limit of this: with `code_mode_host` off, the picture tool was not there, and Codex answered "The image generation tool is unavailable in this session". So `code_mode_host` stays on. The sandbox is read-only, the folder is empty, and no shell tool is there.
+12. The project folder is never the working folder, and the request names no file of the project. A reference picture goes to Codex with `--image`.
+13. The server reads the PNG of the thread, checks the PNG header and the size, and removes `generated_images/<thread id>` after each call. It never touches another folder of `CODEX_HOME`.
+14. The time limit of a turn is 300 seconds. Then the server sends `SIGINT`, and `SIGKILL` 5 seconds later.
+
+### Codex as the lead and as a picture service
+
+15. A picture call during a chat request with Codex as the lead is a second Codex process. It has its own thread, keeps no session (`--ephemeral`), loads no `config.toml` (`--ignore-user-config`), and has its own temporary working folder. The brain uses `<project>/.yumekit/agent` and `resume` with its own thread id. The picture turn never resumes a thread.
+16. The two processes share `CODEX_HOME` only for the sign-in. A copy of `auth.json` in another folder was rejected: a token refresh in the copy can end the sign-in of the original. Codex locks `auth.json` for this (`auth.json.lock`).
+17. Both processes use the same plan. A picture uses the limits 3 to 5 times faster than a chat turn (item 6), so many pictures can stop the chat of the lead at a usage limit. The picker says that a picture uses the plan.
+
+### Ready or not
+
+18. The server has no key. It is ready when `check_key` passes: Codex is found, `codex login status` exits with 0 and says ChatGPT, and `codex features list` has `image_generation`. Each check is a local command of less than a second, and it makes no picture and no network request of yumekit.
+19. A sign-in with an API key is not ready, with its own message. With an API key, each picture costs money on that key, and the spending limit of yumekit cannot see it.
+20. The key health of WP64 now also checks a server with a description and no key that lists `check_key`. `MediaTools.run` runs this check before each call, with the 5 minute cache of WP64, so the order with no pick skips Codex when it is not installed or signed out.
+21. Such a server has the new state `not-ready`. Its reason is `keyProblem` (`key_problem` on the wire), for example "Codex is not signed in. Open a terminal and run: codex login. Pick "Sign in with ChatGPT".". The picker shows "Not ready" and the reason. A pick of it still saves, because the person can fix the sign-in later.
+22. A call that names a server that is not ready fails with `media-service-not-ready` and calls no tool, as `media-key-not-working` does for a key.
+
+### The price and the order
+
+23. The model has the price 0 for each picture. So the spending limit does not count it and the record of paid calls has no entry (WP64, item 6). The picker line says: "No key. Each picture uses your ChatGPT plan through the Codex program on this computer, so yumekit counts it as $0."
+24. The order with no pick puts `codex` first, before `openai`. The choice was between first and after the services with a key. A person with Codex and a key pays nothing extra for a picture from Codex, and a person who wants another service picks it. A pick and a server in the call still win. The cost of this choice is item 17.
+25. A usage limit is the failure `media-usage-limit-reached`. The server marks it with `_meta`, and the key health marks `codex` as not ready for 5 minutes with the message.
+26. After a usage limit, a call with no pick and no server tries the order once more, so it reaches the next ready service. It does so only when the spending limit is above 0, because that next service can cost money. Its price passes the spending check of WP64. When the spending limit refuses it, the call returns the usage limit failure. A call with a pick or a named server does not try another service.
+
+### Proof
+
+27. The tests run a fake Codex program, as the tests of the brain adapters do: ready, not installed, signed out, an API key sign-in, no picture feature, a picture, a turn with no file, a file that is not a PNG, a picture of the wrong shape, a usage limit, a time limit, and two calls at the same time with their own threads and folders. The tests of `@yumekit/tools` use a fake server with no key for the order, the state `not-ready`, and the usage limit.
+28. No test starts the real Codex. The test configuration sets `YUMEKIT_CODEX_PATH` to a path that does not exist, so the bundled server is never ready in a test.
+29. The real check ran on 2026-11-24 on the computer of the owner, with Codex CLI 0.163.0 by its real path (`/opt/homebrew/Caskroom/codex/0.163.0/bin/codex`, not the shim of the terminal app), signed in with ChatGPT. It made 3 pictures:
+
+    | Picture                                           | Seconds | File    | Size        |
+    | ------------------------------------------------- | ------- | ------- | ----------- |
+    | A red mug, landscape                              | 22      | 1.90 MB | 1672 x 941  |
+    | The character sheet of the brief, landscape       | 47      | 1.76 MB | 1536 x 1024 |
+    | His hand on the grip, with picture 2 as reference | 35      | 1.54 MB | 1536 x 1024 |
+
+    The mug ran through a direct command with the same settings. Pictures 2 and 3 ran through the built server. The sheet has the same face, hair streak, coat, sash, and sandals in each view, with clean hands. The scar is on his right side in the front and side views and on his left side in the close up. The side view shows his right side with the sword in front of it, so the side of the sword is not clear. Picture 3 kept the colors, the grip wrap, the sash knot, and the line style of the sheet, with a hand of five clean fingers. Its arm comes from his left side, so it is likely his left hand, not the right hand of the request.
