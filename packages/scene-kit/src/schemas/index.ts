@@ -7,6 +7,13 @@ import { checklistSchema } from "./checklist.js";
 import { compareSchema } from "./compare.js";
 import { deviceSchema } from "./device.js";
 import { endCardSchema } from "./endCard.js";
+import { commandSchema } from "./film/command.js";
+import { countsSchema } from "./film/counts.js";
+import { footageSchema } from "./film/footage.js";
+import { linesSchema } from "./film/lines.js";
+import { lookSwapSchema } from "./film/lookSwap.js";
+import { shapesSchema } from "./film/shapes.js";
+import { wallSchema } from "./film/wall.js";
 import { heroSchema } from "./hero.js";
 import { imagePanSchema } from "./imagePan.js";
 import { kineticSchema } from "./kinetic.js";
@@ -44,4 +51,11 @@ export const kitSceneSchemas = {
   "end-card": endCardSchema,
   "lower-third": lowerThirdSchema,
   kinetic: kineticSchema,
+  footage: footageSchema,
+  wall: wallSchema,
+  shapes: shapesSchema,
+  lines: linesSchema,
+  "look-swap": lookSwapSchema,
+  command: commandSchema,
+  counts: countsSchema,
 } satisfies Record<string, KitSceneSchema>;

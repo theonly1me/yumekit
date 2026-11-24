@@ -172,6 +172,7 @@ export function everyToolCall(importSourcePath: string): ScriptedCall[] {
       name: "import_asset",
       input: { asset_id: "logo", kind: "image", source_path: importSourcePath },
     },
+    { name: "mark_asset", input: { asset_id: "logo", name: "a", seconds: 0 } },
     { name: "remove_asset", input: { asset_id: "logo" } },
     { name: "remove_asset", input: { asset_id: "clip" } },
     { name: "list_assets", input: {} },

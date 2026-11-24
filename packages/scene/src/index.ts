@@ -4,8 +4,10 @@ export type {
   MountOptions,
   MountedScene,
   SceneAsset,
+  SceneAssetMark,
   SceneModule,
   SceneOutput,
+  SceneRegion,
   SceneWord,
 } from "./contract.js";
 export { easings, type Easing } from "./animation/easings.js";

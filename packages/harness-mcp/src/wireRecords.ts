@@ -4,6 +4,7 @@ import {
   type ProjectSnapshot,
   type Scene,
 } from "@yumekit/project";
+import { wireMarkOf } from "./media/markInputs.js";
 
 export function wireSceneOf(options: {
   scene: Scene;
@@ -61,6 +62,9 @@ export function wireAssetOf(asset: Asset) {
       : { duration_frames: asset.durationFrames }),
     has_words: asset.hasWords,
     ...(asset.hasAudio === undefined ? {} : { has_audio: asset.hasAudio }),
+    ...(asset.marks === undefined
+      ? {}
+      : { marks: asset.marks.map(wireMarkOf) }),
     source: wireSourceOf(asset.source),
   };
 }

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { assetSchema, wordTimingsSchema } from "../format/asset.js";
+import { assetMarksSchema } from "../format/assetMarks.js";
 import { bibleSchema } from "../format/bible.js";
 import {
   outputSchema,
@@ -92,6 +93,11 @@ export const editSchema = z.discriminatedUnion("kind", [
     kind: z.literal("setAssetWords"),
     assetId: idSchema,
     words: wordTimingsSchema,
+  }),
+  z.strictObject({
+    kind: z.literal("setAssetMarks"),
+    assetId: idSchema,
+    marks: assetMarksSchema,
   }),
   z.strictObject({ kind: z.literal("removeAsset"), assetId: idSchema }),
   z.strictObject({ kind: z.literal("setTimeline"), timeline: timelineSchema }),

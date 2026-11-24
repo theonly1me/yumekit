@@ -60,6 +60,13 @@ const defaultTextsByScene: Record<(typeof kitSceneNames)[number], string[]> = {
   "end-card": ["Title"],
   "lower-third": ["Name"],
   kinetic: ["Line"],
+  footage: [],
+  wall: [],
+  shapes: [],
+  lines: ["Line"],
+  "look-swap": [],
+  command: ["$", "command"],
+  counts: ["0", "Count"],
 };
 
 afterEach(() => {

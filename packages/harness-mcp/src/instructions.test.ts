@@ -8,6 +8,13 @@ describe("the server instructions", () => {
     );
   });
 
+  it("send a film cut to the beat to the film scenes and to mark_asset", () => {
+    expect(serverInstructions).toContain(
+      "For a film cut to the beat, use the film scenes footage, wall, shapes, lines, look-swap, command, and counts",
+    );
+    expect(serverInstructions).toContain("mark_asset");
+  });
+
   it("check the whole video with one contact sheet, and give times in beats with music", () => {
     expect(serverInstructions).toContain(
       "8. Check the whole video with one call of contact_sheet after each build of a timeline.",

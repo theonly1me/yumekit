@@ -179,6 +179,57 @@ These facts and choices came from the build of WP59 on 2026-11-24.
 13. The tests of the editor and the engine that need a project with no music service turn off `local-music`, as they turn off `local-voice`.
 14. The samples for the owner are in the folder `wp59-music` next to the worktrees, with a `README.txt` that gives the length, the loudness, the peak, and the kick times of each file. The builder could not hear them.
 
+## Details of WP60
+
+These facts and choices came from the build of WP60 on 2026-11-24.
+
+1. The seven film scenes are in `packages/scene-kit/src/scenes/film/`, one folder for each. The parts that they share are in `src/film/`: the layout grid (`useFilmGrid`), the timing on the beat (`useFilmTiming`), the heading, the window, the label, the picture of a region, and the math of a region. Their schemas are in `src/schemas/film/`.
+2. One layout grid for all seven. The margin is 13 units in wide and 8 units in square and tall. The heading starts 10 units from the top in wide, 8 in square, and 14 in tall. Footage starts 29 units from the top in wide, 25 in square, and 34 in tall, or at the top of the heading when there is no heading. The content ends 3 units above the caption area, so an entry that rises never enters it.
+3. One type scale from the look. The pack gets six text roles: `filmHeading` (9.6, 8.4, and 8.8 units in wide, square, and tall), `filmLine` (14, 12, 12), `filmLabel` (2.8, 3.2, 3.4), `filmNumber` (11, 10, 11), `filmWordmark` (20, 17, 17), and `filmCommand` (3.8, 4, 4.2). Each look has the same values. The heading uses the display font of the look.
+4. `footage`, `wall`, `shapes`, `look-swap`, and `counts` take an optional `heading` and `accent`. `accent` is a part of the heading in the accent color. `lines` has `accentLine`, a line number from 1. With no accent prop, a film scene has no accent color. A look with no accent that reads on its background (`paper`) keeps the text color, as rule 2 of the details of WP50 says.
+5. Motion. Each film scene brings its parts in on the beat with one curve: a rise of 2.5 units and a fade over 0.5 seconds on the entry curve of WP49, with no spring and no bounce. With no tempo, a beat is half a second. A calm look gives a fade. Rule 2 of document 08 still holds: a clip that is too short for the entries runs them faster.
+6. A film scene draws a quiet backdrop: the background color of the look, with the grain of `editorial`. The glow of `midnight` and the moving grid of `neon` draw attention to themselves, and they changed at each cut.
+7. Footage in wide. `footage` and `look-swap` put the heading in a column of 54 units at the left and the window beside it, when that window is larger than a window below the heading. A region that is wider than about 2.8 to 1 goes below the heading at the full width. Both scenes keep room for a label under the window, so a cut from `footage` to `look-swap` with the same region keeps the window in the same place and size. In square and tall, the window is always below the heading. `wall` and `shapes` always start below the heading.
+8. A region of `footage` is shown as large as the window allows. The window takes the shape of the region, between 0.5 to 1 and 4 to 1. When the shape of the window differs from the region, the view grows around the region and stays inside the picture. A screen recording of 2880 by 1800 reads at 800 pixels of video width when its region is about 0.6 of its width and its shape is wider than 3 to 1 (it is then shown at 1.2 times its size in a 1920 wide video). A region of the whole recording does not read.
+9. `stops` of `footage`: the view arrives at each stop at its beat or its second, with a move of 0.8 seconds on the draw curve of WP49. A stop with no time spreads evenly over 70 percent of the clip. The window takes the shape of the first stop.
+10. `wall` takes 2 to 16 assets, not 4 to 16, because a film often has three examples. It picks the column count that makes each picture largest, and it prefers full rows when their pictures are at least 75 percent of that size. With no heading, the grid is centered between the top of the heading and the end of the content.
+11. `shapes` places one to three assets at one height, in the order of `assetIds`, in one row or more rows, whichever gives the largest pictures. Each asset keeps its own shape. Each video shows the frame `round(startSeconds × fps) + frame` of its file, so the entry on the beat never moves the time of a video.
+12. `look-swap` takes `assetIds` (2 to 6, an asset may come twice), `labels`, `marks` (one mark name for each asset), `region`, and `beatsEach` (default 1). The first look shows when the window comes in, and each next look comes `beatsEach` beats later. The last look stays to the end of the clip, so a clip of 1 frame shows the last look. Each cut starts its video at the time of its mark, so the same moment of the same content shows in each look.
+13. `command` types its command at 30 characters each second, from beat 1.5 after the wordmark. The command is in a system monospace font (`ui-monospace`, then SF Mono, Menlo, Consolas, DejaVu Sans Mono, Liberation Mono), because no look has a monospace font. The pill keeps the room of the whole command, so the layout does not move while the text types.
+14. `counts` counts each number up over 1 second from its beat, in a row in wide and stacked in square and tall.
+15. Marks. An asset record has `marks?`: each mark has a `name` (1 to 60 characters, one name once on an asset), and a `region`, `seconds`, or both. A region stays inside the picture. Only an image or a video asset has marks. The edit `setAssetMarks` replaces the marks, as one undo step, and no marks removes the field. `import_asset` takes `marks`. `mark_asset` adds a mark, replaces a mark with the same name, or removes one with `remove: true`, and refuses a mark with no region and no time (`mark-is-empty`). `list_assets` gives `marks`.
+16. `SceneAsset` of the scene contract gets `marks`, so a scene finds a mark by name when it draws. A name matches with no regard to case and to spaces at the ends. `put_scene` refuses a `mark` of `footage`, of a stop, or of `look-swap` that its asset does not have, with `mark-not-found` and the list of the marks of the asset. A mark of an asset that does not exist is not checked, as for other asset ids.
+17. The scene form of the editor shows a list of asset ids (`assetIds`) as a list of pickers, "Add a video or image", with a move up, a move down, and Remove for each. The JSON Schema gives the list `assetKinds` and a plain `title`: "Videos and pictures", "Videos", and "Looks".
+18. The harness has 54 tools: `mark_asset` is new. The project has 22 edit kinds: `setAssetMarks` is new. The kit has 26 scenes. Step 3 of the server instructions names the film scenes and `mark_asset`.
+19. The recordings and the example videos of the old explainer are not in commit `bf96bc2`, which has only pictures. They are in `c465dc2^`, the last commit before pull request 87 removed them.
+
+### The film test of WP60
+
+An agent (the builder, who knew the tools and had looked at the recordings) made the 30 second launch film of the brief through the tools of the harness only: tempo 120, nine kit scenes, a cut on each bar or two, no voice, and `minimal` music from `local-music`. No custom scene code.
+
+| Run | What changed before the run                    | Wall time, first call to exported file | Tool calls |
+| --- | ---------------------------------------------- | -------------------------------------- | ---------- |
+| 1   | The first version of the seven scenes          | 2 minutes 45 seconds                   | 37         |
+| 2   | Footage beside the heading, full rows in walls | About 3 minutes 30 seconds             | 34         |
+
+Run 2 includes one stop for a change of the scene code and two corrected marks. A render of the 30 seconds took 42 to 75 seconds. Each `contact_sheet` gave no warnings.
+
+The film next to the free-hand film, shot by shot, after run 2:
+
+1. Opening: weaker. The free-hand film typed a prompt and showed a finished video beside the three lines. The kit film shows only the three lines for 4 seconds.
+2. "Type what you want.": equal after the fix. The region of the prompt now fills the width and reads at 800 pixels. In run 1 the window was half as wide, and its text did not read.
+3. "Your own AI does the work.": weaker. The free-hand film drew the names of the agents and the steps in large text. The recording of the steps reads, but at a smaller size.
+4. Examples: equal. Three examples in one row. In run 1 they were in a grid of two columns with an empty cell.
+5. "One idea. Every platform.": equal.
+6. "Click to change." and the look swap: equal after the fix. The window is now beside the heading and larger, and it stays in the same place across the cut.
+7. "On your computer. No account. Open source.": equal.
+8. End: equal.
+9. Across the film: weaker. The free-hand film has a small mark and a row of beat marks that stay on screen for the whole film, which joins the shots. That is the `frame` of K9, another work package.
+
+The agent cannot watch a video or hear sound. The owner must judge the motion and the music.
+
+Known limits: a wide region in a tall output is a thin strip, because the scene never cuts the region. The first frame of each scene is the background only, because each part enters on its beat.
+
 ## Details of WP62
 
 These facts and choices came from the build of WP62 on 2026-11-24.
@@ -197,7 +248,7 @@ These facts and choices came from the build of WP62 on 2026-11-24.
 12. A helper may call the read tools, the preview tools, and `contact_sheet`, and it may write with `put_scene`, `put_work` (scenes only), and `generate_asset`, each only for the ids of its brief. Each other call fails with `helper-not-permitted`, and its tool list shows only these tools. Its calls are by `ai`, so they join the change entry of the lead, and they are not steps of the lead. The chat shows the one step "A helper works on 1 scene" while it runs, and "A helper made a part of the video" after it.
 13. With no chat request, for example a terminal agent or `yumekit mcp` with no engine, `ask_helper` fails with `no-helper`. A second helper while one runs fails with `helper-busy`. Stop also stops the helper.
 14. Cursor writes its configuration files in `<project>/.yumekit`, next to the working folder, so a helper of Cursor rewrites the files of the lead while the lead runs. The lead has already read them. This is an inference and was not tested with Cursor. Codex has a time limit for one tool call, so a long helper can make the `ask_helper` call of a Codex lead fail. This is also an inference, from the setting `tool_timeout_sec` of Codex, and was not measured.
-15. The harness has 56 tools: `get_work`, `put_work`, and `ask_helper` are new. The project has 22 edit kinds: `setFrame` is new.
+15. The harness has 57 tools: `get_work`, `put_work`, and `ask_helper` are new. The project has 23 edit kinds: `setFrame` is new. `get_work` lists the marks of each asset (WP60) with their name, region, and time.
 16. The real run on 2026-11-24 used Claude Code 2.1.331 with `ANTHROPIC_MODEL=haiku`, no media key, and a temporary configuration and project. "Make a short 8 second launch film for a note taking app called Quill. Three scenes, with music and no voice." took 49 seconds. The AI called `get_work` first, then `set_tempo`, three `put_scene` calls with kit scenes, the music of this computer, `set_timeline` with the cuts on the beat, and one `contact_sheet`. It did not call `put_work`: it wrote three kit scenes and no code. The description of `put_scene` now points to `put_work` for two or more scenes.
 17. "Use this" for the style Night sent the request with its two tool lines. The AI called `generate_asset` and `replace_music` with the exact inputs, and the sheet showed "The video now has Night music."
 18. "Give the second scene to a helper" took 36 seconds. The lead called `ask_helper`, the helper drew the scene as custom code, and the lead checked it with `get_scene` and two `preview_scenes` calls. The change entry had one undo step.

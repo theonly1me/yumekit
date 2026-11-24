@@ -19,6 +19,7 @@ const personSentencesByToolName: Record<string, string> = {
   generate_asset: "You made a new picture or sound.",
   import_asset: "You added a file to the project.",
   remove_asset: "You removed a file from the project.",
+  mark_asset: "You marked a part of a file.",
   align_words: "You matched the captions to the voice.",
   resize_scene_clip: "You changed the length of a scene.",
   move_scene_clip: "You moved a scene.",

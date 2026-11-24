@@ -24,6 +24,7 @@ const sentencesByTool: Record<string, string> = {
   generate_asset: "Making a picture or a sound",
   import_asset: "Adding a file",
   remove_asset: "Removing a file",
+  mark_asset: "Marking a part of a file",
   place_narration: "Placing the voice",
   place_video: "Placing a video clip",
   place_sound: "Placing a sound",

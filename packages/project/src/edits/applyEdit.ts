@@ -1,4 +1,5 @@
 import type { ProjectState } from "../format/state.js";
+import { setAssetMarks } from "./assetMarks.js";
 import { addAsset, removeAsset, setAssetWords } from "./assets.js";
 import { addClip, removeClip, updateClip } from "./clips.js";
 import type { Edit } from "./edit.js";
@@ -56,6 +57,8 @@ export async function applyEdit(options: {
       return addAsset({ state, edit, folder });
     case "setAssetWords":
       return setAssetWords({ state, edit });
+    case "setAssetMarks":
+      return setAssetMarks({ state, edit });
     case "removeAsset":
       return removeAsset({ state, edit });
     case "setTimeline":

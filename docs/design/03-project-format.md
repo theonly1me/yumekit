@@ -145,6 +145,11 @@ type Asset = {
   hasAudio?: boolean;
   hasWords: boolean;
   label?: string;
+  marks?: {
+    name: string;
+    region?: { x: number; y: number; width: number; height: number };
+    seconds?: number;
+  }[];
   source: AssetSource;
 };
 type AssetSource =
@@ -263,6 +268,7 @@ function openProject(options: {
 | `removeScene`        | `sceneId`                       | Removes a scene and its folder                                                                                                    |
 | `addAsset`           | `asset`, `words?`               | Adds a record for a file that is already in `assets/files/`. The caller gives no `contentHash` and no `hasWords`                  |
 | `setAssetWords`      | `assetId`, `words`              | Adds or replaces the word timings of an audio asset                                                                               |
+| `setAssetMarks`      | `assetId`, `marks`              | Replaces the marks of an image or a video asset. No marks removes the field                                                       |
 | `removeAsset`        | `assetId`                       | Removes the record                                                                                                                |
 | `setTimeline`        | `timeline`                      | Replaces the timeline of one output                                                                                               |
 | `addClip`            | `outputId`, `trackId`, `clip`   | Adds one clip                                                                                                                     |

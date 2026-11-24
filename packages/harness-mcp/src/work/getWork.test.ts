@@ -73,4 +73,36 @@ describe("get_work", () => {
     expect(two.text).toContain("words5");
     expect(two.text).not.toContain("words1");
   });
+
+  it("lists the marks of an asset with their region and time", async () => {
+    const harness = await startHarness();
+    await harness.call({
+      name: "generate_asset",
+      arguments: {
+        asset_id: "shot",
+        capability: "image",
+        server: "sample",
+        input: { prompt: "A screen" },
+      },
+    });
+    const marked = await harness.call({
+      name: "mark_asset",
+      arguments: {
+        asset_id: "shot",
+        name: "the preview",
+        region: { x: 0.5, y: 0, width: 0.5, height: 0.5 },
+        seconds: 2,
+      },
+    });
+
+    const work = await harness.call({
+      name: "get_work",
+      arguments: { part: "assets" },
+    });
+
+    expect(marked.isError).toBe(false);
+    expect(work.text).toContain(
+      'Marks: "the preview" (region x 0.5 y 0 width 0.5 height 0.5, at 2 s)',
+    );
+  });
 });

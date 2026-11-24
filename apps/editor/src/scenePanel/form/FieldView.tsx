@@ -1,3 +1,4 @@
+import { AssetListField } from "./AssetListField.js";
 import { AssetField, ChoiceField, SwitchField } from "./ChoiceFields.js";
 import { IssueLine } from "./FieldFrame.js";
 import type { Field } from "./fields.js";
@@ -70,6 +71,8 @@ export function FieldView(props: {
       return <AssetField field={field} path={path} form={form} />;
     case "text-list":
       return <TextListField field={field} path={path} form={form} />;
+    case "asset-list":
+      return <AssetListField field={field} path={path} form={form} />;
     case "group":
       return <GroupField field={field} path={path} form={form} />;
     case "object-list":

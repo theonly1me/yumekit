@@ -34,6 +34,12 @@ export const sharedTextUnits: StylePack["textUnits"] = {
     caption: 5,
     number: 46,
     statement: 24,
+    filmHeading: 9.6,
+    filmLine: 14,
+    filmLabel: 2.8,
+    filmNumber: 11,
+    filmWordmark: 20,
+    filmCommand: 3.8,
   },
   square: {
     title: 13,
@@ -45,6 +51,12 @@ export const sharedTextUnits: StylePack["textUnits"] = {
     caption: 5,
     number: 30,
     statement: 19,
+    filmHeading: 8.4,
+    filmLine: 12,
+    filmLabel: 3.2,
+    filmNumber: 10,
+    filmWordmark: 17,
+    filmCommand: 4,
   },
   tall: {
     title: 14,
@@ -56,6 +68,12 @@ export const sharedTextUnits: StylePack["textUnits"] = {
     caption: 5.5,
     number: 42,
     statement: 20,
+    filmHeading: 8.8,
+    filmLine: 12,
+    filmLabel: 3.4,
+    filmNumber: 11,
+    filmWordmark: 17,
+    filmCommand: 4.2,
   },
 };
 

@@ -20,8 +20,8 @@ function articleOf(noun: string): string {
   return /^[aeiou]/i.test(noun) ? "an" : "a";
 }
 
-function useListEdits(options: {
-  field: Extract<Field, { kind: "text-list" | "object-list" }>;
+export function useListEdits(options: {
+  field: Extract<Field, { kind: "text-list" | "object-list" | "asset-list" }>;
   path: PropPath;
   form: FormBinding;
   listId: string;
@@ -54,7 +54,7 @@ function useListEdits(options: {
         disabled={!canAdd}
         onClick={() => {
           const item =
-            field.kind === "text-list" ? "" : newItemOf(field.fields);
+            field.kind === "object-list" ? newItemOf(field.fields) : "";
           form.change({
             path,
             value: [...list, item],
