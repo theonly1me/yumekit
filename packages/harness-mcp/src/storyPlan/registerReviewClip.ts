@@ -12,6 +12,8 @@ import { runCritic } from "../critic/runCritic.js";
 import { renderFailureOf } from "../output/renderFailures.js";
 import { failureResult } from "../results.js";
 import { endPictureEditOf } from "./endPicture.js";
+import { shotNextStepOf } from "./shotNextStep.js";
+import { storedReviewResult } from "./storedReview.js";
 import { measuresOf, planWithReview } from "./reviewRecord.js";
 import { reviewClipInput, reviewTargetOf } from "./reviewClipInput.js";
 
@@ -58,11 +60,17 @@ async function storeReview(options: {
       },
     },
   ];
-  const faults =
-    review.faults.length === 0 ? "No faults." : review.faults.join("; ");
+  const notes =
+    (review.notes ?? []).length === 0
+      ? ""
+      : ` Notes, which do not refuse it: ${(review.notes ?? []).join("; ")}.`;
+  const faults = `${review.faults.length === 0 ? "No blocking faults." : review.faults.join("; ")}${notes}`;
   const next =
     answer.verdict === "redo"
-      ? "You cannot overrule it. Make the clip again with a prompt that names each fault."
+      ? shotNextStepOf({
+          shotId: job.shot.id,
+          reviews: [...(job.shot.reviews ?? []), review],
+        })
       : answer.verdict === "cut"
         ? `Place only ${String(answer.keep_from_seconds)}s to ${String(answer.keep_to_seconds)}s.`
         : "Place it.";
@@ -73,6 +81,7 @@ async function storeReview(options: {
     data: {
       verdict: review.verdict,
       faults: review.faults,
+      notes: review.notes ?? [],
       missed: review.critic?.missed ?? [],
       ...(review.keepFromSeconds === undefined
         ? {}
@@ -103,6 +112,10 @@ export function registerReviewClip(context: CriticContext): void {
       const target = reviewTargetOf({ snapshot, input });
       if (!target.ok) return failureResult(target.failure);
       const { clip, shot, startPicture } = target.value;
+      const stored = (shot.reviews ?? []).findLast(
+        (review) => review.by === "critic" && review.assetId === clip.id,
+      );
+      if (stored !== undefined) return storedReviewResult(stored);
       const motion = await measureClipMotion({
         file: join(context.store.folder, clip.file),
         ...(startPicture === undefined

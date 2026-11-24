@@ -7,6 +7,9 @@ import { clipAnswerIssuesOf } from "./clip/clipAnswerCheck.js";
 import { clipAnswerInput } from "./clip/clipAnswerInput.js";
 import { clipViewOf } from "./clip/clipViews.js";
 import type { CriticDesk } from "./criticDesk.js";
+import { planAnswerIssuesOf } from "./plan/planAnswerCheck.js";
+import { planAnswerInput } from "./plan/planAnswerInput.js";
+import { registerGiveStartReview } from "./start/giveStartReview.js";
 import {
   sheetAnswerInput,
   sheetAnswerIssuesOf,
@@ -52,6 +55,16 @@ export function registerCriticTools(
     run: async ({ input }) => {
       const job = critics.current();
       if (job === undefined) return failureResult(noJob);
+      if (job.kind === "plan") {
+        return {
+          content: [
+            {
+              type: "text",
+              text: "The plan has no pictures yet. Each shot, fact, and prompt is in the brief.",
+            },
+          ],
+        };
+      }
       const view =
         job.kind === "clip"
           ? await clipViewOf({ context, job, look: input })
@@ -94,4 +107,22 @@ export function registerCriticTools(
       });
     },
   });
+  context.tools.add({
+    name: "give_plan_review",
+    description:
+      "For the critic only: your whole answer about the plan. Answer each item of the list and each finding, rate each shot, judge each cast entry, sort each fault as blocking or a note, name the easiest and the hardest shot, and give the verdict.",
+    inputSchema: planAnswerInput,
+    run: ({ input }) => {
+      const job = critics.current();
+      if (job?.kind !== "plan") return failureResult(noJob);
+      const issues = planAnswerIssuesOf({ job, answer: input });
+      if (issues.length > 0) return answerRefused(issues);
+      job.answer = input;
+      return successResult({
+        line: `Your verdict "${input.verdict}" is recorded. Stop now.`,
+        data: { verdict: input.verdict },
+      });
+    },
+  });
+  registerGiveStartReview({ context, critics, refused: answerRefused, noJob });
 }

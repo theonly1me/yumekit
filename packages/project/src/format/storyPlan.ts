@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { clipReviewSchema } from "./reviews.js";
+import { lessonSchema, planReviewSchema } from "./planReview.js";
+import { clipReviewSchema, startReviewSchema } from "./reviews.js";
 import { shotStateSchema, strikeSchema } from "./shotStates.js";
 import { idSchema } from "./values.js";
 
@@ -52,7 +53,10 @@ export const shotSchema = z.strictObject({
   strikes: z.array(strikeSchema).exactOptional(),
   musicIntensity: musicIntensitySchema.exactOptional(),
   musicHits: z.array(z.number().min(0)).exactOptional(),
+  startPicturePrompt: z.string().exactOptional(),
+  videoPrompt: z.string().exactOptional(),
   reviews: z.array(clipReviewSchema).exactOptional(),
+  startReviews: z.array(startReviewSchema).exactOptional(),
 });
 
 export const musicCheckSchema = z.strictObject({
@@ -70,6 +74,8 @@ export const storyPlanSchema = z.strictObject({
   shots: z.array(shotSchema),
   musicEndIntensity: musicIntensitySchema.exactOptional(),
   musicChecks: z.array(musicCheckSchema).exactOptional(),
+  review: planReviewSchema.exactOptional(),
+  lessons: z.array(lessonSchema).exactOptional(),
 });
 
 export type ShotSize = (typeof shotSizes)[number];

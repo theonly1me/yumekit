@@ -40,6 +40,7 @@ import { registerReviewWork } from "../critic/registerReviewWork.js";
 import type { AskHelper } from "../helpers/helperTypes.js";
 import { registerAskHelper } from "../helpers/registerAskHelper.js";
 import { registerGetStoryGuide } from "../storyGuide/registerGetStoryGuide.js";
+import { registerRecordLesson } from "../storyPlan/registerRecordLesson.js";
 import { registerSetStoryPlan } from "../storyPlan/registerSetStoryPlan.js";
 import { callerStore } from "./callerStore.js";
 import { createToolTable, type HarnessTool } from "./toolTable.js";
@@ -74,6 +75,7 @@ export function harnessToolsOf(
   registerCastTools(context);
   registerGetStoryGuide(context);
   registerSetStoryPlan(context);
+  registerRecordLesson(context);
   registerPlatformTools(context);
   registerSetVideoStyle(context);
   registerSetLook(context);

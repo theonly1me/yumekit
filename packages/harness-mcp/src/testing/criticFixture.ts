@@ -1,11 +1,15 @@
 import type { JsonObject } from "@yumekit/tools";
+import { clipListItems } from "../critic/clip/clipList.js";
 import type { AskCritic } from "../critic/criticTypes.js";
+import { planAnswerOf } from "./planCritic.js";
 
 export type CriticAnswer = JsonObject;
 
 export interface CriticScript {
   clip?: (brief: string) => CriticAnswer;
   sheet?: (brief: string) => CriticAnswer;
+  plan?: (brief: string) => CriticAnswer;
+  start?: (brief: string) => CriticAnswer;
 }
 
 export interface CriticLog {
@@ -41,7 +45,7 @@ export function endEntriesOf(brief: string): string[] {
 
 export function keepAnswerOf(brief: string): CriticAnswer {
   return {
-    checks: Array.from({ length: 10 }, (...[, index]) => ({
+    checks: Array.from({ length: clipListItems.length }, (...[, index]) => ({
       item: index + 1,
       seen: "It holds on each frame.",
     })),
@@ -69,7 +73,7 @@ export function keepAnswerOf(brief: string): CriticAnswer {
 
 export function passSheetAnswerOf(): CriticAnswer {
   return {
-    checks: Array.from({ length: 6 }, (...[, index]) => ({
+    checks: Array.from({ length: 8 }, (...[, index]) => ({
       item: index + 1,
       seen: "It holds.",
     })),
@@ -93,15 +97,18 @@ export function scriptedCritic(options: {
     const { log, script } = options;
     log.briefs.push(request.brief);
     await options.call({ name: "view_for_review", arguments: {} });
-    const isSheet = request.brief.startsWith("Review job: the sheet");
-    const answer = isSheet
-      ? (script.sheet ?? passSheetAnswerOf)(request.brief)
-      : (script.clip ?? keepAnswerOf)(request.brief);
+    const kind =
+      (["sheet", "plan", "start"] as const).find((candidate) =>
+        request.brief.startsWith(`Review job: the ${candidate}`),
+      ) ?? "clip";
+    const answer = {
+      sheet: script.sheet ?? passSheetAnswerOf,
+      plan: script.plan ?? planAnswerOf,
+      start: script.start ?? passSheetAnswerOf,
+      clip: script.clip ?? keepAnswerOf,
+    }[kind](request.brief);
     log.answers.push(
-      await options.call({
-        name: isSheet ? "give_sheet_review" : "give_clip_review",
-        arguments: answer,
-      }),
+      await options.call({ name: `give_${kind}_review`, arguments: answer }),
     );
     return { ok: true, seconds: 1 };
   };

@@ -16,6 +16,9 @@ import { mediaPathInput } from "./mediaPath.js";
 import { mediaFailureOf } from "./mediaFailures.js";
 import { recordedInputOf, referencePathsInput } from "./referencePaths.js";
 import { reuseAsset } from "./reuseAsset.js";
+import { longPromptNoteOf } from "../storyPlan/promptAdditions.js";
+import { strongReasonOf } from "./strongReason.js";
+import { withStrongModel } from "./strongModel.js";
 import { talkingVoiceOf, voicePathInput } from "./talkingVoice.js";
 import { videoInputOf } from "./videoChoices.js";
 import { roundedSeconds, videoLimitFailureOf } from "./videoLimit.js";
@@ -29,9 +32,18 @@ export async function generateAsset(options: {
   const snapshot = context.store.read();
   const storied = withStory({ snapshot, request: options.request });
   if (!storied.ok) return failureResult(storied.failure);
+  const why = strongReasonOf({ snapshot, request: storied.value });
+  const strong =
+    why === undefined
+      ? { request: storied.value, note: undefined }
+      : await withStrongModel({
+          request: storied.value,
+          mediaTools: context.mediaTools,
+          why,
+        });
   const castApplied = await withCast({
     snapshot,
-    request: storied.value,
+    request: strong.request,
     mediaTools: context.mediaTools,
   });
   if (!castApplied.ok) return failureResult(castApplied.failure);
@@ -51,6 +63,8 @@ export async function generateAsset(options: {
     voiceAssetId: request.voice_asset_id,
     voicePart: request.voice_part,
     shotId: request.shot_id,
+    sheetOf: request.sheet_of,
+    simplerForm: request.simpler_form,
   };
   const paths = referencePathsInput({ snapshot, projectFolder, ids });
   if (!paths.ok) return failureResult(paths.failure);
@@ -118,6 +132,9 @@ export async function generateAsset(options: {
     run: ran.value,
     tool,
     input,
+    notes: [strong.note, longPromptNoteOf(request)].filter(
+      (note) => note !== undefined,
+    ),
   });
 }
 

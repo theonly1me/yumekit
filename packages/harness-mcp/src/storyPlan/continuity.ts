@@ -61,6 +61,7 @@ export function continuityFailureOf(options: {
   plan: StoryPlan;
   index: number;
   request: GenerateAssetInput;
+  startsFromPlan: boolean;
 }): HarnessFailure | undefined {
   const shot = options.plan.shots[options.index];
   const before = options.plan.shots[options.index - 1];
@@ -68,16 +69,17 @@ export function continuityFailureOf(options: {
   if (before.placeId !== shot.placeId) return undefined;
   const pictureId = keptReviewOf(before.reviews)?.endPictureAssetId;
   if (pictureId === undefined) {
+    if (options.startsFromPlan) return undefined;
     return {
       kind: "previous-shot-not-kept",
       message: `Shot "${shot.id}" is in the same place as "${before.id}", so it starts where the kept clip of "${before.id}" ends. "${before.id}" has no clip that the critic kept yet.`,
-      hint: `Make the clip of "${before.id}" and review it with review_clip first. Its end picture is then the start of "${shot.id}".`,
+      hint: `Make the clip of "${before.id}" and review it with review_clip first. Its end picture is then the start of "${shot.id}". When the critic refuses it, "${shot.id}" can start from the start state of the plan.`,
     };
   }
   if (usesPicture({ ...options, pictureId })) return undefined;
   return {
     kind: "continuity-picture-missing",
     message: `Shot "${shot.id}" is in the same place as "${before.id}", so it starts where "${before.id}" ended. The call does not use the end picture "${pictureId}".`,
-    hint: `Give first_frame_asset_id "${pictureId}", or put "${pictureId}" in reference_asset_ids, or use a start picture that was made with it as a reference.`,
+    hint: `Give first_frame_asset_id "${pictureId}", or use a start picture that was made with "${pictureId}" in reference_asset_ids and passed review_start.`,
   };
 }

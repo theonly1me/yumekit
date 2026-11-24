@@ -61,6 +61,29 @@ describe("the story view", () => {
     expect(await sheet.locator(".sheet-checks").innerText()).toContain(
       "The critic passed it.",
     );
+    expect(rows[0]).toContain("Difficulty 2 of 5");
+    expect(rows[0]).toContain("The critic passed the start picture.");
+    expect(rows[0]).toContain("Note: 0.3s: the sparks are a little orange");
+    expect(rows[1]).toContain(
+      "Note: Frame the barrel large, so the blade meets the water",
+    );
+    const check = await sheet.locator(".plan-check").innerText();
+    expect(check).toContain("passed it");
+    expect(check).toContain("Right on the first try");
+    expect(check).toContain("1 of 2 shots");
+    expect(check).toContain(
+      "Keep the hammer in her right hand in every prompt",
+    );
+    const sheets = await sheet.locator(".sheet-checks").innerText();
+    expect(sheets).toContain(
+      "Used with a limit: Never show both of her hands close up",
+    );
+    expect(sheets).toContain(
+      "From your brief, kept as is: She swings the hammer with her right hand",
+    );
+    expect(sheets).toContain(
+      "Note: The apron is a shade lighter than the facts",
+    );
     expect(rows[1]).toContain("No clip yet.");
     await expect
       .poll(() =>

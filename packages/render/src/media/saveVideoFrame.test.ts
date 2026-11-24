@@ -47,4 +47,23 @@ describe("saveVideoFrame", () => {
     expect(await brightnessOf(join(folder, "early.png"))).toBeLessThan(30);
     expect(await brightnessOf(join(folder, "last.png"))).toBeGreaterThan(225);
   });
+
+  it("takes the last picture when the time is past the picture but inside the sound", async () => {
+    const folder = await temporaryFolder();
+    const file = join(folder, "sound-runs-longer.mp4");
+    await runFile("ffmpeg", [
+      ...["-v", "error", "-y", "-f", "lavfi", "-i", "color=white:s=64x36:d=3"],
+      ...["-f", "lavfi", "-i", "sine=frequency=440:duration=3.2"],
+      ...["-r", "30", "-pix_fmt", "yuv420p", "-c:a", "aac", file],
+    ]);
+
+    const end = await saveVideoFrame({
+      file,
+      seconds: 3.15,
+      target: join(folder, "end.png"),
+    });
+
+    expect(end.ok).toBe(true);
+    expect(await brightnessOf(join(folder, "end.png"))).toBeGreaterThan(225);
+  });
 });

@@ -3,6 +3,7 @@ import { keepAnswerOf, type CriticScript } from "../testing/criticFixture.js";
 import type { Harness } from "../testing/harnessFixture.js";
 import {
   makeForgeSheets,
+  passPlan,
   setPlan,
   shotCall,
   startStoryHarness,
@@ -25,18 +26,12 @@ async function storyWithClip(critic?: CriticScript): Promise<Harness> {
       },
     ],
   });
-  await shotCall({
-    harness,
-    assetId: "start",
-    capability: "image",
-    shotId: "strike",
-  });
+  await passPlan(harness);
   await shotCall({
     harness,
     assetId: "strike-clip",
     capability: "video",
     shotId: "strike",
-    firstFrameAssetId: "start",
   });
   return harness;
 }
@@ -85,8 +80,8 @@ describe("review_clip with the critic", () => {
     expect(brief).toContain(
       "The door is on the right wall, hinges on its left edge",
     );
-    expect(brief).toContain("7. One camera:");
-    expect(brief).not.toContain("She strikes\n");
+    expect(brief).toContain("8. One camera:");
+    expect(brief).not.toContain("strike clip");
   });
 
   it("stores the keep of the critic, saves the end picture, and lets the clip be placed", async () => {
@@ -148,7 +143,7 @@ describe("review_clip with the critic", () => {
     ).toBeUndefined();
   });
 
-  it("fails closed with no-critic, so a sheet stays unchecked and no shot can use it", async () => {
+  it("fails closed with no-critic, so the plan and a sheet stay unchecked and no shot runs", async () => {
     const harness = await startStoryHarness({
       videoStyle: "ai-video",
       critic: "none",
@@ -156,6 +151,7 @@ describe("review_clip with the critic", () => {
     await makeForgeSheets(harness);
     await setPlan({ harness, shots: [{ shot_id: "strike" }] });
 
+    const plan = await passPlan(harness);
     const sheet = await harness.call({
       name: "review_sheet",
       arguments: { cast_id: "smith" },
@@ -171,8 +167,9 @@ describe("review_clip with the critic", () => {
       arguments: keepAnswerOf("- End entries to judge: smith"),
     });
 
+    expect(plan.data).toMatchObject({ kind: "no-critic" });
     expect(sheet.data).toMatchObject({ kind: "no-critic" });
-    expect(shot.data).toMatchObject({ kind: "sheet-not-reviewed" });
+    expect(shot.data).toMatchObject({ kind: "plan-not-reviewed" });
     expect(answer.isError).toBe(true);
   });
 });

@@ -8,12 +8,15 @@ export const barSection = [
 export const orderSection = [
   "## The order of work",
   "",
-  "1. The story first, with no paid call: set_story_plan with the logline, what the main character wants, what stands against it, what changes, and the shots with their states, strikes, camera, and music map. Correct each warning.",
-  "2. The sheets: for each person, place, and prop of the plan, make one sheet picture (generate_asset, no shot_id), save it with its facts (put_cast_member), and call review_sheet. A person who holds a prop also gets a picture of the hands with the prop. Make a failed sheet again.",
+  "1. The story first, with no paid call: set_story_plan with the logline, what the main character wants, what stands against it, what changes, and the shots with their states, strikes, camera, music map, and the prompts of each start picture and clip. Correct each warning.",
+  "2. The cast: put_cast_member for each person, place, and prop of the plan, with its facts and sheet_prompts (a person who holds a prop: a second prompt for the hands with the prop).",
   "3. The art direction: set_bible style holds the medium, the line, the color, the light, the lens, and what never appears. The harness adds it to each picture and clip prompt.",
-  "4. Shot by shot, in order: the start picture with shot_id, the clip with shot_id and first_frame_asset_id, then review_clip. The next shot in the same place can start only after the critic kept this one, from its end picture.",
-  "5. An independent critic gives the verdict. Place only a kept clip, or the clean part of a cut clip, with place_video. Make a redo again with a prompt that names each fault.",
-  "6. The music: write its prompt from the music map, make two or three candidates when they are cheap, check_music each, and place the best fit with replace_music and its start_seconds.",
+  "4. review_plan: the critic checks the whole first cut. Correct each blocking fault and call it again. No paid picture or clip runs before a pass.",
+  "5. The sheets: generate_asset with sheet_of and no prompt (the reviewed prompt), put_cast_member with the pictures, and review_sheet.",
+  "6. Calibrate: the easiest and the hardest shot of the plan check first: the start picture with shot_id, the clip with shot_id and first_frame_asset_id, then review_clip. Record each refusal with record_lesson.",
+  "7. The rest in film order. The next shot in the same place starts from the end picture of the kept clip before it, or from the start state of the plan when that clip was refused.",
+  "8. Place only a kept clip, or the clean part of a cut clip, with place_video.",
+  "9. The music: write its prompt from the music map, make two or three candidates when they are cheap, check_music each, and place the best fit with replace_music and its start_seconds.",
   "",
 ].join("\n");
 
@@ -72,6 +75,6 @@ export const reviewSection = [
   "",
   "- review_clip and review_sheet start an independent critic: a fresh agent that sees only the frames, the measures, the plan, the sheets, and a fixed list. You cannot give or overrule its verdict.",
   "- The critic answers each measured warning, counts what the facts count, and says if the action and each end entry happened. A keep is refused while a warning, a count, or a planned end is not right.",
-  "- Read its faults and missed ends. A redo needs a new prompt that names each fault and how to avoid it. Say to the person in one sentence what you made again and why.",
+  "- Read its blocking faults, its notes, and its missed ends. Notes do not refuse. A redo follows the rule of tries: the second try starts from the refused version and changes only the named faults. Say to the person in one sentence what you made again and why.",
   "",
 ].join("\n");

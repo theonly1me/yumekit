@@ -19,7 +19,12 @@ export const countInput = z.strictObject({
     .trim()
     .min(1)
     .describe("What you counted, for example 'swords', 'masks', 'bodies'."),
-  expected: z.int().min(0).describe("How many the facts and the plan give."),
+  expected: z
+    .int()
+    .min(0)
+    .describe(
+      "How many the facts and the plan give inside the frame. A hand that the camera does not show is not expected.",
+    ),
   seen: z.int().min(0).describe("The most you saw at one time on the frames."),
   seconds: secondsInput.describe(
     "When the count differs. Needed when seen is not expected.",
@@ -99,7 +104,15 @@ export const clipAnswerInput = {
     .describe("With cut: where the clean part ends."),
   faults: z
     .array(z.string().trim().min(1))
-    .describe("Each fault in plain words with its time. Empty only for keep."),
+    .describe(
+      "Each BLOCKING fault in plain words with its time: the film cannot use this part. Empty only for keep.",
+    ),
+  notes: z
+    .array(z.string().trim().min(1))
+    .default([])
+    .describe(
+      "Each difference that a viewer would not see, with its time. Notes do not refuse the clip.",
+    ),
 };
 
 export type ClipAnswer = z.output<z.ZodObject<typeof clipAnswerInput>>;

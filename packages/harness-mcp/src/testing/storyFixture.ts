@@ -25,6 +25,7 @@ export interface ShotDraft {
   camera_angle?: string;
   strikes?: object[];
   music_intensity?: number;
+  video_prompt?: string;
 }
 
 export function entryOf(draft: EntryDraft) {
@@ -58,6 +59,8 @@ export function shotOf(draft: ShotDraft) {
     inherits: draft.inherits ?? "The bent blade.",
     shot_id: draft.shot_id,
     music_intensity: draft.music_intensity ?? 2,
+    start_picture_prompt: `${draft.shot_id} start`,
+    video_prompt: draft.video_prompt ?? `${draft.shot_id} clip`,
     ...(draft.camera_move === undefined
       ? {}
       : { camera_move: draft.camera_move }),
@@ -79,6 +82,10 @@ export function setPlan(options: {
       shots: options.shots.map(shotOf),
     },
   });
+}
+
+export async function passPlan(harness: Harness): Promise<ToolCall> {
+  return harness.call({ name: "review_plan" });
 }
 
 export async function startStoryHarness(options?: {
@@ -121,6 +128,7 @@ export async function makeSheet(options: {
       description: `The ${castId}`,
       facts: options.facts,
       reference_asset_ids: [`${castId}-sheet`],
+      sheet_prompts: [`${castId} sheet`],
     },
   });
   if (options.facts.length > 0) {
@@ -152,20 +160,27 @@ export function shotCall(options: {
   capability: "image" | "video";
   shotId?: string;
   firstFrameAssetId?: string;
+  prompt?: string;
+  extra?: Record<string, unknown>;
 }): Promise<ToolCall> {
   const isVideo = options.capability === "video";
+  const prompt =
+    options.prompt ??
+    (options.shotId === undefined ? "She strikes" : undefined);
+  const promptPart = prompt === undefined ? {} : { prompt };
   return options.harness.call({
     name: "generate_asset",
     arguments: {
       asset_id: options.assetId,
       capability: options.capability,
       input: isVideo
-        ? { prompt: "She strikes", duration_seconds: 1 }
-        : { prompt: "She strikes", width_pixels: 32, height_pixels: 18 },
+        ? { ...promptPart, duration_seconds: 1 }
+        : { ...promptPart, width_pixels: 32, height_pixels: 18 },
       ...(options.shotId === undefined ? {} : { shot_id: options.shotId }),
       ...(options.firstFrameAssetId === undefined
         ? {}
         : { first_frame_asset_id: options.firstFrameAssetId }),
+      ...options.extra,
     },
   });
 }

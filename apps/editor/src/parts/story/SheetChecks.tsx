@@ -3,13 +3,26 @@ import type { Snapshot } from "../../engine/snapshot.js";
 function checkTextOf(options: {
   verdict: "pass" | "fail" | undefined;
   isCurrent: boolean;
+  isRestricted: boolean;
 }): string {
   if (options.verdict === undefined) return "Not checked by the critic yet.";
   if (!options.isCurrent)
     return "The pictures changed. The critic checks again.";
-  return options.verdict === "pass"
-    ? "The critic passed it."
+  if (options.verdict === "pass") return "The critic passed it.";
+  return options.isRestricted
+    ? "The critic failed it. The film uses it with a limit."
     : "The critic failed it.";
+}
+
+function SheetLines(props: { label: string; lines: string[] }) {
+  if (props.lines.length === 0) return null;
+  return (
+    <ul className="shot-faults" aria-label={props.label}>
+      {props.lines.map((line) => (
+        <li key={line}>{line}</li>
+      ))}
+    </ul>
+  );
 }
 
 export function SheetChecks(props: { snapshot: Snapshot }) {
@@ -44,17 +57,29 @@ export function SheetChecks(props: { snapshot: Snapshot }) {
                       : "redo"
                 }
               >
-                {checkTextOf({ verdict: review?.verdict, isCurrent })}
+                {checkTextOf({
+                  verdict: review?.verdict,
+                  isCurrent,
+                  isRestricted: (member.restrictions ?? []).length > 0,
+                })}
               </span>
-              {review === undefined || review.faults.length === 0 ? null : (
-                <ul
-                  className="shot-faults"
-                  aria-label={`What the critic found in the sheet of ${member.name}`}
-                >
-                  {review.faults.map((fault) => (
-                    <li key={fault}>{fault}</li>
-                  ))}
-                </ul>
+              <SheetLines
+                label={`What the critic found in the sheet of ${member.name}`}
+                lines={[
+                  ...(review?.faults ?? []),
+                  ...(review?.notes ?? []).map((note) => `Note: ${note}`),
+                  ...(member.restrictions ?? []).map(
+                    (restriction) => `Used with a limit: ${restriction}`,
+                  ),
+                  ...(member.briefFacts ?? []).map(
+                    (fact) => `From your brief, kept as is: ${fact}`,
+                  ),
+                ]}
+              />
+              {(member.sheetTries ?? []).length < 2 ? null : (
+                <span className="fact">
+                  {String((member.sheetTries ?? []).length)} tries
+                </span>
               )}
             </li>
           );

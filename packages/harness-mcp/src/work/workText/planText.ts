@@ -1,5 +1,6 @@
-import type { Shot, StoryPlan } from "@yumekit/project";
+import type { ProjectSnapshot, Shot } from "@yumekit/project";
 import { stateText, strikeText } from "../../storyPlan/stateText.js";
+import { firstCutLines } from "./firstCutText.js";
 
 function reviewText(shot: Shot): string {
   const reviews = shot.reviews ?? [];
@@ -15,6 +16,10 @@ function reviewText(shot: Shot): string {
         review.faults.length === 0
           ? ""
           : ` Faults: ${review.faults.join("; ")}.`;
+      const notes =
+        (review.notes ?? []).length === 0
+          ? ""
+          : ` Notes: ${(review.notes ?? []).join("; ")}.`;
       const end =
         review.endPictureAssetId === undefined
           ? ""
@@ -25,7 +30,7 @@ function reviewText(shot: Shot): string {
         (review.critic?.missed ?? []).length === 0
           ? ""
           : ` Did not happen: ${(review.critic?.missed ?? []).join("; ")}.`;
-      return `Clip ${review.assetId}: ${review.verdict} by ${by}${part}.${faults}${missed}${end}`;
+      return `Clip ${review.assetId}: ${review.verdict} by ${by}${part}.${faults}${notes}${missed}${end}`;
     })
     .join(" ");
 }
@@ -49,11 +54,14 @@ function shotLines(options: { shot: Shot; number: number }): string[] {
     ...(shot.strikes ?? []).map((strike) => `   Strike: ${strikeText(strike)}`),
     `   Music: intensity ${String(shot.musicIntensity ?? "not set")}${(shot.musicHits ?? []).length === 0 ? "" : `, hits at ${(shot.musicHits ?? []).map((hit) => `${String(hit)}s`).join(", ")}`}`,
     `   Next shot inherits: ${shot.inherits === "" ? "nothing" : shot.inherits}`,
+    `   Start picture prompt: ${shot.startPicturePrompt ?? "none"}`,
+    `   Video prompt: ${shot.videoPrompt ?? "none"}`,
     `   ${reviewText(shot)}`,
   ];
 }
 
-export function planLines(plan: StoryPlan | undefined): string[] {
+export function planLines(snapshot: ProjectSnapshot): string[] {
+  const plan = snapshot.bible.storyPlan;
   if (plan === undefined) {
     return ["### Story plan", "(no story plan: set_story_plan writes one)"];
   }
@@ -61,6 +69,7 @@ export function planLines(plan: StoryPlan | undefined): string[] {
     "### Story plan",
     `Logline: ${plan.logline}`,
     `Wants: ${plan.want}. Against it: ${plan.obstacle}. Changes: ${plan.change}`,
+    ...firstCutLines({ snapshot, plan }),
     ...plan.shots.flatMap((...[shot, index]) =>
       shotLines({ shot, number: index + 1 }),
     ),

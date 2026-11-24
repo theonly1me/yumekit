@@ -1,5 +1,6 @@
 import type { CastMember, Shot, StoryPlan } from "@yumekit/project";
 import { directionWarningsOf } from "./directionWarnings.js";
+import { videoPromptLimit } from "./promptAdditions.js";
 import { isSameState, spaceWarningsOf } from "./spaceWarnings.js";
 
 export const largestPlaceCount = 2;
@@ -69,6 +70,16 @@ function castWarnings(options: {
   ];
 }
 
+function promptWarnings(shots: Shot[]): string[] {
+  return shots.flatMap((shot) =>
+    (shot.videoPrompt ?? "").length > videoPromptLimit
+      ? [
+          `The video prompt of shot "${shot.id}" has ${String((shot.videoPrompt ?? "").length)} characters. Keep it under ${String(videoPromptLimit)} and about motion: the start picture carries the look.`,
+        ]
+      : [],
+  );
+}
+
 export function planWarningsOf(options: {
   plan: StoryPlan;
   cast: CastMember[];
@@ -80,6 +91,7 @@ export function planWarningsOf(options: {
     ...changeWarnings(shots),
     ...inheritWarnings(shots),
     ...placeWarnings(shots),
+    ...promptWarnings(shots),
     ...castWarnings({ shots, cast: options.cast }),
   ];
 }

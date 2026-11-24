@@ -14,11 +14,12 @@ const model = (options: {
   capability: string;
   prices: object[];
   settings?: object[];
+  isDefault?: boolean;
 }) => ({
   id: options.id,
   label: options.id,
   capability: options.capability,
-  is_default: true,
+  is_default: options.isDefault ?? true,
   settings: options.settings ?? [],
   prices: options.prices,
   read_on: "2026-11-24",
@@ -51,6 +52,16 @@ const description = {
       prices: [
         { usd: 0.4, unit: "image", when: { resolution: "1K" } },
         { usd: 0.6, unit: "image", when: { resolution: "2K" } },
+      ],
+    }),
+    model({
+      id: "priced-image-pro",
+      capability: "image",
+      isDefault: false,
+      settings: [resolution],
+      prices: [
+        { usd: 1.2, unit: "image", when: { resolution: "1K" } },
+        { usd: 1.2, unit: "image", when: { resolution: "2K" } },
       ],
     }),
     model({ id: "unpriced-music", capability: "music", prices: [] }),

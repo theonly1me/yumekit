@@ -120,7 +120,7 @@ export function createCriticDesk(): CriticDesk {
         refusalOf: ({ tool }) =>
           isCriticTool(tool)
             ? undefined
-            : `A critic may only look with view_for_review and answer with give_clip_review or give_sheet_review, not call ${tool}.`,
+            : `A critic may only look with view_for_review and answer with give_clip_review, give_sheet_review, give_plan_review, or give_start_review, not call ${tool}.`,
       };
     },
     stop: () => {

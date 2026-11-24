@@ -88,6 +88,7 @@ const assetSchema = z.object({
       model: z.string().optional(),
       tool: z.string(),
       input: z.record(z.string(), z.json()),
+      costUsd: z.number().optional(),
     }),
   ]),
 });

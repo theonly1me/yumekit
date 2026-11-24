@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
+import { reviewedStart } from "../testing/firstCutFixture.js";
 import {
   makeForgeSheets,
   makeSheet,
+  passPlan,
   setPlan,
   shotCall,
   startStoryHarness,
@@ -49,7 +51,7 @@ describe("generate_asset with the story plan", () => {
     expect(result.isError).toBe(false);
   });
 
-  it("refuses a shot whose place has no fixed facts", async () => {
+  it("cannot check a plan whose place has no fixed facts, so no shot runs", async () => {
     const harness = await startStoryHarness({ videoStyle: "mix" });
     await makeSheet({
       harness,
@@ -59,7 +61,9 @@ describe("generate_asset with the story plan", () => {
     });
     await makeSheet({ harness, castId: "forge", kind: "place", facts: [] });
     await setPlan({ harness, shots: [{ shot_id: "strike" }] });
+    const before = harness.runRequests.length;
 
+    const review = await passPlan(harness);
     const result = await shotCall({
       harness,
       assetId: "start",
@@ -67,8 +71,10 @@ describe("generate_asset with the story plan", () => {
       shotId: "strike",
     });
 
-    expect(result.data).toMatchObject({ kind: "cast-sheet-missing" });
-    expect(result.data["message"]).toContain('"forge" has no fixed facts');
+    expect(review.data).toMatchObject({ kind: "plan-incomplete" });
+    expect(review.data["message"]).toContain('"forge" has no fixed facts');
+    expect(result.data).toMatchObject({ kind: "plan-not-reviewed" });
+    expect(harness.runRequests.length).toBe(before);
   });
 
   it("sends the art direction, the facts of the place and the cast, and the camera of the shot", async () => {
@@ -82,13 +88,9 @@ describe("generate_asset with the story plan", () => {
       harness,
       shots: [{ shot_id: "strike", camera_move: "push-in" }],
     });
+    await passPlan(harness);
 
-    await shotCall({
-      harness,
-      assetId: "start",
-      capability: "image",
-      shotId: "strike",
-    });
+    await reviewedStart({ harness, assetId: "start", shotId: "strike" });
     const picture = harness.runRequests.at(-1);
     await shotCall({
       harness,
@@ -100,7 +102,7 @@ describe("generate_asset with the story plan", () => {
     const clip = harness.store.read().assets.at(-1);
 
     expect(picture?.input["prompt"]).toBe(
-      "She strikes\n\nArt direction: Hand-painted 2D animation.\n\nFORGE: The forge. Fixed: The door is on the right wall, hinges on its left edge. SMITH: The smith. Fixed: The hammer is in her right hand.",
+      "strike start\n\nArt direction: Hand-painted 2D animation.\n\nFORGE: The forge. Fixed: The door is on the right wall, hinges on its left edge. SMITH: The smith. Fixed: The hammer is in her right hand.",
     );
     expect(clip?.source).toMatchObject({
       input: { shot_id: "strike", camera_move: "push-in" },

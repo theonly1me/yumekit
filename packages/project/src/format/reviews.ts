@@ -47,6 +47,7 @@ export const clipReviewSchema = z.strictObject({
   endPictureAssetId: idSchema.exactOptional(),
   measures: motionMeasuresSchema,
   critic: criticRecordSchema.exactOptional(),
+  notes: z.array(z.string()).exactOptional(),
 });
 
 export const sheetReviewSchema = z.strictObject({
@@ -55,6 +56,21 @@ export const sheetReviewSchema = z.strictObject({
   assetIds: z.array(idSchema),
   counts: z.array(objectCountSchema),
   answers: z.array(z.strictObject({ item: z.int().min(1), seen: z.string() })),
+  notes: z.array(z.string()).exactOptional(),
+});
+
+export const sheetTrySchema = z.strictObject({
+  assetIds: z.array(idSchema),
+  verdict: z.enum(sheetVerdicts),
+  faults: z.array(z.string()),
+  notes: z.array(z.string()),
+});
+
+export const startReviewSchema = z.strictObject({
+  assetId: idSchema,
+  verdict: z.enum(sheetVerdicts),
+  faults: z.array(z.string()),
+  notes: z.array(z.string()),
 });
 
 export type ReviewVerdict = (typeof reviewVerdicts)[number];
@@ -65,3 +81,5 @@ export type WarningAnswer = z.infer<typeof warningAnswerSchema>;
 export type CriticRecord = z.infer<typeof criticRecordSchema>;
 export type ClipReview = z.infer<typeof clipReviewSchema>;
 export type SheetReview = z.infer<typeof sheetReviewSchema>;
+export type SheetTry = z.infer<typeof sheetTrySchema>;
+export type StartReview = z.infer<typeof startReviewSchema>;

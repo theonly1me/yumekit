@@ -2,6 +2,7 @@ import type { CastMember, ProjectSnapshot } from "@yumekit/project";
 import type { MediaModel, MediaTools } from "@yumekit/tools";
 import type { GenerateAssetInput } from "../media/generateAssetInput.js";
 import type { HarnessFailure, Outcome } from "../results.js";
+import { startsOnPicture } from "../storyPlan/promptAdditions.js";
 import { findCastMembers } from "./castMembers.js";
 
 const sentenceEnd = /[.!?]$/;
@@ -64,6 +65,7 @@ export async function withCast(options: {
   }
   const found = findCastMembers({ snapshot: options.snapshot, castIds });
   if (!found.ok) return found;
+  if (startsOnPicture(request)) return { ok: true, value: request };
   const members = found.value;
   const maximum = referenceMaximumOf(
     await options.mediaTools.chosenModel({

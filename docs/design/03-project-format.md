@@ -92,6 +92,10 @@ type CastMember = {
   description: string;
   facts?: string[];
   sheetReview?: SheetReview;
+  sheetTries?: SheetTry[];
+  sheetPrompts?: string[];
+  restrictions?: string[];
+  briefFacts?: string[];
   referenceAssetIds: string[];
 };
 
@@ -181,7 +185,7 @@ type WordTimings = {
 };
 ```
 
-Document 20 defines `StoryPlan`, the kind `prop`, the fixed `facts` of a cast member, and its `sheetReview` (WP66). A plan of WP66 holds the start and end states of a shot as a list of entries; a plan of WP65 with states in words still loads.
+Document 20 defines `StoryPlan`, the kind `prop`, the fixed `facts` of a cast member, and its `sheetReview` (WP66). WP68 adds to a cast member `sheetTries`, `sheetPrompts`, `restrictions`, and `briefFacts`; to a shot `startPicturePrompt`, `videoPrompt`, and `startReviews`; to a clip review and a sheet review `notes`; and to the plan `review` (the plan check) and `lessons`. Each is optional, so a project of WP66 loads as before. A plan of WP66 holds the start and end states of a shot as a list of entries; a plan of WP65 with states in words still loads.
 
 ## Rules that the store enforces
 

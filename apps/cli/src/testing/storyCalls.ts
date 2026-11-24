@@ -43,14 +43,22 @@ export const storyCalls: ScriptedCall[] = [
           end_state: [],
           music_intensity: 2,
           inherits: "",
+          start_picture_prompt: "A fox at the edge of the ice",
+          video_prompt: "The fox taps the ice and it cracks",
         },
       ],
     },
+  },
+  {
+    name: "record_lesson",
+    input: { lesson: "Keep the paw large", cause: "The paw missed" },
   },
 ];
 
 export const reviewCalls: ScriptedCall[] = [
   { name: "review_clip", input: { asset_id: "clip", shot_id: "dawn" } },
   { name: "review_sheet", input: { cast_id: "lake" } },
+  { name: "review_plan", input: {} },
+  { name: "review_start", input: { asset_id: "still", shot_id: "dawn" } },
   { name: "check_music", input: { asset_id: "still" } },
 ];

@@ -11,15 +11,27 @@ describe("the instructions for a film with AI video", () => {
     );
   });
 
-  it("send the work through the plan, the sheets, the shots, and the review in order", () => {
+  it("send the work through the plan, its check, the sheets, the calibration shots, the shots, and the review in order", () => {
     expect(brainInstructions).toContain(
-      "read get_story_guide, then work in this order: the story plan with set_story_plan, a sheet for each person, place, and prop with review_sheet for each, then for each shot in order its start picture and its clip with shot_id, and review_clip for the clip. An independent critic gives the verdict of review_clip and review_sheet. You cannot give or overrule it.",
+      "read get_story_guide, then work in this order: the story plan with set_story_plan, with the prompt of each start picture and clip; each person, place, and prop with its facts and sheet_prompts; review_plan until the critic passes the plan; a sheet for each entry with review_sheet; the easiest and the hardest shot of the plan check; then for each shot in order its start picture and its clip with shot_id, and review_clip for the clip.",
     );
   });
 
-  it("make the final answer count the clips and name each fault that stays, never every shot passes", () => {
+  it("make the final answer give the measure: first tries, the tries of each sheet and shot, and the money on refusals", () => {
     expect(brainInstructions).toContain(
-      "36. Your final answer about a story video gives the count of clips kept, cut, and made again, each fault that the critic recorded and that stays in the film, and each planned thing that did not happen. Never say that every shot passes, or that a check found no problems, when a fault stays.",
+      "36. Your final answer about a story video gives the shots accepted on the first try out of all shots, the tries of each sheet and shot, the money spent on refused pictures and clips (get_work gives these three),",
+    );
+    expect(brainInstructions).toContain(
+      "Never say that every shot passes, or that a check found no problems, when a fault stays.",
+    );
+  });
+
+  it("limit the tries and ask for facts that a picture can show", () => {
+    expect(brainInstructions).toContain(
+      "38. Each fact of a sheet is something a picture can show, never a bare number.",
+    );
+    expect(brainInstructions).toContain(
+      "After two refusals, make one simplified try with a form from the known limits.",
     );
   });
 

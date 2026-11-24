@@ -117,6 +117,9 @@ function checkSettings(input: VideoInput): string | undefined {
   if (references.length > videoModel.maximumReferenceImages) {
     return `reference_image_paths accepts up to ${String(videoModel.maximumReferenceImages)} images. It had ${String(references.length)}.`;
   }
+  if (references.length > 0 && input.first_frame_path !== undefined) {
+    return "reference_image_paths cannot go with first_frame_path: a first frame is the only picture of an image to video clip, so the model cannot take a reference picture as the start of the shot. Leave out reference_image_paths.";
+  }
   return checkFrames(input);
 }
 

@@ -1,4 +1,7 @@
 import type { StepViewProps } from "../frame/stepViewProps.js";
+import type { Snapshot } from "../../engine/snapshot.js";
+import { shotChecksOf } from "./firstCutFacts.js";
+import { PlanCheck } from "./PlanCheck.js";
 import { ShotPictures } from "./ShotPictures.js";
 import { SheetChecks } from "./SheetChecks.js";
 import { intensityText, stateLinesOf } from "./shotWords.js";
@@ -20,13 +23,26 @@ function StateList(props: { lines: string[] }) {
   );
 }
 
+function TextList(props: { label: string; lines: string[] }) {
+  if (props.lines.length === 0) return null;
+  return (
+    <ul className="shot-faults" aria-label={props.label}>
+      {props.lines.map((line) => (
+        <li key={line}>{line}</li>
+      ))}
+    </ul>
+  );
+}
+
 function ShotRow(props: {
   client: StepViewProps["client"];
   facts: ShotFacts;
+  snapshot: Snapshot;
   nameOf: (castId: string) => string;
 }) {
   const { facts, nameOf } = props;
   const { shot } = facts;
+  const checks = shotChecksOf({ snapshot: props.snapshot, shot });
   return (
     <li className="shot-row">
       <ShotPictures
@@ -46,6 +62,8 @@ function ShotRow(props: {
             facts.cameraText,
             facts.lengthText,
             intensityText(shot.musicIntensity),
+            checks.difficultyText,
+            checks.triesText,
           ]
             .filter((part) => part !== undefined)
             .join(" · ")}
@@ -57,6 +75,13 @@ function ShotRow(props: {
           <dt>Ends</dt>
           <StateList lines={stateLinesOf({ state: shot.endState, nameOf })} />
         </dl>
+        {checks.startText === undefined ? null : (
+          <span className="fact">{checks.startText}</span>
+        )}
+        <TextList
+          label={`What the critic found in the start picture of shot ${String(facts.number)}`}
+          lines={checks.startFaults}
+        />
         <span className="shot-verdict" data-verdict={facts.verdict}>
           {facts.verdictText}
         </span>
@@ -83,6 +108,10 @@ function ShotRow(props: {
         {facts.warnings.length === 0 ? undefined : (
           <span className="fact">Measured: {facts.warnings.join(". ")}.</span>
         )}
+        <TextList
+          label={`Small things the critic noted in shot ${String(facts.number)}, which do not fail it`}
+          lines={checks.notes.map((note) => `Note: ${note}`)}
+        />
       </div>
     </li>
   );
@@ -112,6 +141,7 @@ export function StoryView(props: StepViewProps) {
         <dt>By the end</dt>
         <dd>{plan.change}</dd>
       </dl>
+      <PlanCheck snapshot={props.snapshot} />
       <section className="part-group" aria-labelledby="story-shots">
         <h4 id="story-shots">
           Shots<span className="fact">{String(shots.length)}</span>
@@ -122,6 +152,7 @@ export function StoryView(props: StepViewProps) {
               key={facts.shot.id}
               client={props.client}
               facts={facts}
+              snapshot={props.snapshot}
               nameOf={nameOf}
             />
           ))}
