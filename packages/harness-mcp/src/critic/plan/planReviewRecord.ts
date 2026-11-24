@@ -3,7 +3,7 @@ import type { PlanAnswer } from "./planAnswerInput.js";
 import type { PlanJob } from "./planJob.js";
 
 export function briefFaultText(fault: PlanBriefFault): string {
-  return `The brief fact of "${fault.castId}"${fault.shotId === undefined ? "" : ` in shot "${fault.shotId}"`}: "${fault.briefFact}". ${fault.seen} Restore: "${fault.restore}".`;
+  return `The brief fact of "${fault.castId}"${fault.shotId === undefined ? "" : ` in shot "${fault.shotId}"`}: "${fault.briefFact}". ${fault.seen} Restore this text: "${fault.restore}"`;
 }
 
 function briefFaultsOf(answer: PlanAnswer): PlanBriefFault[] {

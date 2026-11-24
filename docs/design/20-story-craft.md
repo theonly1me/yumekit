@@ -631,3 +631,106 @@ These facts and choices came from the build of WP68 on 2026-11-24.
 35. One paid check of a Gemini clip with only its start picture and `task: image_to_video`, to confirm that the clip now starts on it. The fault of the third film is an inference until then.
 36. A model with a first and a last frame could take a reviewed end picture made from the end state of the plan (C31). Not in this package.
 37. A second turn of the critic for a borderline sheet, when one turn passes it with notes about a core trait (item 32).
+
+## What went wrong in the fourth run
+
+On 2026-11-24 the lead agent started a 30 second anime trailer on `main` at `024bb12`, with the plan check of WP68. The plan check took the first 30 minutes and made no picture, also no free one: `review_plan` failed 5 times, with 14, 14, 5, 7, and 4 blocking faults. A sheet waited for the plan check, so even the pictures that the check does not change waited. The owner saw nothing for 30 minutes. The 14 shots summed to 31 seconds, the video limit of the project was 30 seconds, and nothing warned about it before the money.
+
+"Details of WP70" sorts each fault of the 5 checks. In short: 14 of the 44 stored faults were the same fault twice (once in free text for the whole plan, once with its shot id), 11 were fine points that the film does not need, and only 5 named a fact of the brief.
+
+## Decisions of WP70
+
+| Id  | Decision                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Why                                                                                                     |
+| --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| C33 | The plan check has a limit, like sheets and shots. After the second failed `review_plan`, the gate opens: the open blocking faults are stored on their shot or cast entry as `planNotes`, the critic of each start picture and clip of the shot gets them, and the lead is told which shots carry them. A third check fails with `plan-checks-used-up` unless the person asked. A fault that changes or drops a protected brief fact still blocks, and the answer names the exact fact and the exact text to restore | Five checks spent 30 minutes and made nothing. Each later check found new fine points, not fewer faults |
+| C34 | A sheet picture does not wait for the plan check. It can start when its cast entry has facts and `sheet_prompts`. Only start pictures and clips of shots wait. The plan check still reviews the sheet prompts when it runs, and a sheet made before keeps its tries                                                                                                                                                                                                                                                  | The person sees the first picture in minutes, and the sheets are the slowest part of a film             |
+| C35 | A blocking fault of the plan check is only (a) a contradiction with a brief fact, (b) a prompt that contradicts itself, (c) a known limit with no working form used, or (d) a strike or effect with no contact or source. Everything else is a note. At most 3 blocking faults for one shot                                                                                                                                                                                                                          | The critic refused fine points that the film does not need                                              |
+| C36 | `set_story_plan` and `review_plan` warn before the money when the planned seconds with one retry of the two longest shots pass the video limit, or the cost estimate passes the spending limit. Only the person can raise a limit, in Settings. The Story view shows the same line in "Before the money"                                                                                                                                                                                                             | The plan of the fourth run could not fit the limit, and nobody knew                                     |
+| C37 | The person can set the Codex chat model and the reasoning effort of the picture turn: `YUMEKIT_CODEX_MODEL` and `YUMEKIT_CODEX_EFFORT` of the `codex` server, passed as `-m` and `-c model_reasoning_effort`. With no value, Codex uses its own default. A refused value is a failure that names the setting                                                                                                                                                                                                         | The person picks the model of their own plan                                                            |
+
+## The limit of the plan check (C33)
+
+- `storyPlan.failedPlanChecks` counts each failed `review_plan`. A pass does not count. `set_story_plan` keeps the count.
+- After the second fail, the gate of start pictures and clips is open, also when the plan changes later. The stored review stays as it was, and no new review is needed.
+- The open faults go where they belong: the blocking faults of a shot to `planNotes` of the shot, of a cast entry (and each finding of the word test that the critic called a fault) to `planNotes` of the entry, and the faults of the whole plan to `planNotes` of the plan. `review_start` and `review_clip` add them to the brief: "Faults that the plan check left open. Look for each one: a fault that shows in the frame is judged by the usual rules, and one that does not show is fine."
+- The answer of `review_plan` names each shot with open faults and their count (`shots_with_open_plan_faults`), and `get_work` and the Story view say the same.
+- `review_plan` fails with `plan-checks-used-up` after two fails, unless `person_asked_for_another_check` is true. A third check that passes clears the notes; a third check that fails replaces them.
+- The critic gives a break of a brief fact in `brief_faults`: the cast entry, the shot when a prompt breaks it, the exact brief fact, the exact text to restore, and what breaks it. After the gate opens, such a fault still blocks each shot that it touches (`plan-breaks-brief`) until the restore text is in the facts of the entry, or in a prompt of the shot.
+
+## Sheets do not wait (C34)
+
+- A picture call with `sheet_of`, with no `shot_id`, for a cast entry with facts and `sheet_prompts`, skips the plan gate. Each other picture and each clip of a project with a story plan waits, as in C22.
+- The first try still sends a prompt of `sheet_prompts`, and the rule of tries (C25) counts from the reviews, so a sheet made before the plan check keeps its tries.
+
+## A strict plan check (C35)
+
+- Rule 9 of the critic instructions and the brief of the plan check give the four kinds. The plan list now says, for each item, what is blocking and what is a note.
+- `give_plan_review` refuses an answer with more than 3 blocking faults for one shot, a brief fault whose fact is not a fact of the brief of the entry, and a fault of the whole plan that names a shot with no fault of its own. It removes a fault of the whole plan that names a shot whose entry already has a blocking fault, and a fault that repeats word for word, before it checks the answer.
+
+## Before the money (C36)
+
+- The allowance is one retry of the two longest shots. The cost estimate is each sheet prompt of the cast of the plan and one start picture for each shot, at the strongest picture model (C27), plus each planned second and the retry at the video model that applies. A model with no known price counts at the cautious price of WP64.
+- `set_story_plan` and `review_plan` store the estimate in `storyPlan.costEstimateUsd`. `@yumekit/project/plan-budget` writes the line from the plan and the limits, so the harness and the Story view say the same words with the limits of now.
+
+## The Codex chat model (C37)
+
+- The two variables are optional settings of the server, not secrets, and follow `YUMEKIT_CODEX_PATH`: the environment, or `yumekit keys set`. The server passes `-m <model>` and `-c model_reasoning_effort="<effort>"` after its own settings and before the prompt. An empty value is no value.
+- The product names no model as a default. With no value, the turn is as before.
+
+## Work package WP70
+
+| Id   | Scope                                                                                                                                          | Needs      |
+| ---- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| WP70 | The limit of the plan check, sheets before the check, the strict plan check, the warning before the money, and the Codex chat model and effort | WP68, WP67 |
+
+## Details of WP70
+
+These facts and choices came from the build of WP70 on 2026-11-24.
+
+### The faults of the fourth run
+
+1. The 5 stored reviews of the run (`review-1.json` to `review-5.json`), sorted by the builder. A repeat is the same fault twice in one review: once as a fault of the whole plan in free text, once with its shot id. The kinds (a) to (d) are those of C35.
+
+   | Check | Stored | Repeats | (a) Brief fact | (c) Known limit | (b) Contradicts itself | (d) No contact or source | Fine point |
+   | ----- | ------ | ------- | -------------- | --------------- | ---------------------- | ------------------------ | ---------- |
+   | 1     | 14     | 2       | 4              | 3               | 2                      | 1                        | 2          |
+   | 2     | 14     | 6       | 1              | 3               | 1                      | 0                        | 3          |
+   | 3     | 5      | 2       | 0              | 0               | 0                      | 1                        | 2          |
+   | 4     | 7      | 3       | 0              | 0               | 1                      | 0                        | 3          |
+   | 5     | 4      | 2       | 0              | 0               | 1                      | 0                        | 1          |
+
+2. The brief facts: lightning outside the blade (on the scabbard, in the air, on the ground), the calm face before the draw, both puddles in every shot, and the lightning that travels along the cut. The known limits: two hands on one prop close up, a clawed hand pressed to the body, a small contact target in a wide shot. The fine points: the scale of the crawler on its sheet, a heap of stone not named in a prompt, a likeness of the castle hall, of the quick draw, and of the drop into the castle, three actions in 2.5 seconds, a cut that a side view cannot show, a start that does not follow from the shot before, and a hero who hides the far lord.
+3. With C35 the blocking faults of the checks would have been 10, 5, 1, 1, and 1 (an inference: the same critic does not answer the same way twice). With C33 the second check opens the gate in any case, about 13 minutes after the first.
+
+### The parts
+
+4. No tool is new, so the tool counts do not change. `review_plan` takes `person_asked_for_another_check`. `give_plan_review` takes `brief_faults`. The project has no new edit kind: the count, the notes, and the estimate go through `setBible`.
+5. New fields: `storyPlan.failedPlanChecks`, `storyPlan.planNotes`, `storyPlan.costEstimateUsd`, `planNotes` of a shot and of a cast entry, and `review.briefFaults` (`castId`, `shotId`, `briefFact`, `restore`, `seen`). None of them is in the key of the plan check, so a note or an estimate does not ask for a new check. `set_story_plan` keeps the count and the notes of each shot id that stays, and `put_cast_member` keeps the notes of the entry.
+6. A brief fault counts as restored when its `restore` text is in the facts of the entry, or, for a fault with a shot, in its start picture prompt or video prompt. The test ignores case, extra spaces, and a final period. A brief fault with no shot blocks each shot whose place or cast is the entry. A picture with no shot is not blocked by it.
+7. A brief fault in the answer must copy a fact of the brief of the entry (the same test of words), name a cast entry of the plan, and name a shot of the plan when it names one. It counts as blocking and toward the 3 of its shot.
+8. The cost estimate uses the strongest picture model of the service in use (C27), or the picked one, and the video model that applies. With no service, the sample server, or Codex, the estimate is 0. A model with no price for its unit counts at the cautious price of WP64.
+9. The Story view reads the limits from `/api/media-servers` and writes the line with `planBudgetOf` of `@yumekit/project/plan-budget`, a new entry point that the editor may import (document 01). It shows each shot's open plan faults ("Plan check: ..."), and a plan check that is used up in plain words.
+10. A restriction of a sheet counts as kind (c): it is a known limit of that sheet. So C26 still holds: the plan check refuses a shot that breaks a restriction.
+11. A likeness to a known work is a note of the plan check, and stays blocking in the sheet review (C29). The sheet review judges the picture, and the plan check only the words.
+
+### The real plan check on the plan of the fourth run
+
+12. The run: a copy of `bible.json` of the fourth run as it was at its fifth check (14 shots, 31.5 seconds, 7 cast entries), with the stored review removed, the engine of this branch, a temporary configuration folder, no media key, Claude Code with `ANTHROPIC_MODEL=opus` (as in the fourth run), and `review_plan` called as the person three times.
+13. Check 1: `fail` in 218 seconds (0.89 US dollars reported by Claude Code), with 3 blocking faults and 32 notes: two brief faults ("an Edo period town" dropped from the street, "slow, heavy blows" dropped from the wall) and one known limit (the small contact target of `through`, kind c). The fifth check of the fourth run, on the same plan with the old rule, had 4 blocking faults, of which 2 were repeats and 1 a fine point. The first check of the fourth run had 14.
+14. Check 2: `fail` in 227 seconds (0.71 US dollars), with 3 blocking faults, all brief faults ("slow, heavy blows" of the wall, "fast, attacks from above" of the crawler, "the room moves for him" of the lord), and 29 notes. The gate opened: `failed_plan_checks` 2, no shot with open plan faults, because each blocking fault was a brief fault. Check 3 failed at once with `plan-checks-used-up`, with no critic turn.
+15. After the gate opened, a start picture of `lord-eyes` failed with `plan-breaks-brief`, named the fact, and gave the text to restore in the facts of `lord`. After `put_cast_member` with that text, the same call passed the plan gate and stopped at the sheets (`cast-sheet-missing`). A start picture of `through` stayed blocked by the brief fact of the wall. A start picture of `walk` passed the plan gate and stopped at `calibrate-first`.
+16. A sheet picture of the hero (`sheet_of` `hero`) ran at once after the second check, with the free Codex service. With C34 it could have run before the first check.
+17. The two checks named different brief faults: the street in check 1 only, the crawler and the lord in check 2 only. One turn of the critic is not a stable judge of the brief either. C33 stops the loop that this caused; the brief faults that the critic did not name in the stored check do not block.
+
+### The Codex chat model
+
+18. Read on 2026-11-24: `codex exec --help` of Codex CLI 0.163.0 gives `-m, --model <MODEL>` ("Model the agent should use") and `-c, --config <key=value>` (a value parsed as TOML). The configuration reference (https://learn.chatgpt.com/docs/config-file/config-reference, no date) gives `model_reasoning_effort`: "Reasoning effort advertised by the selected model, such as `low`, `medium`, `high`, `xhigh`, `max`, or `ultra`. Available levels depend on the model and client." So yumekit checks no list of efforts and lets Codex judge.
+19. A refused model ends the turn with `turn.failed` and the message "The '<model>' model is not supported when using Codex with a ChatGPT account." (code `model_not_found`). A refused effort ends it with "Invalid value: '<effort>'. Supported values are: 'none', 'minimal', 'low', 'medium', 'high', 'xhigh', and 'max'." The server turns each into a failure that names the setting. The fake Codex of the tests prints both texts as the real program did.
+20. The real check, through the built server: with `YUMEKIT_CODEX_MODEL=gpt-6.1-sol` and effort `high`, one picture of 1536 by 1024 pixels in 31 seconds. With `gpt-6.2-sol` and effort `high`, Codex refused the model for this ChatGPT account in 5 seconds, and the server answered with the failure that names `YUMEKIT_CODEX_MODEL`. A direct `codex exec -m gpt-6.2-sol` gave the same refusal, so the refusal comes from the service, not from yumekit.
+21. Settings has no place for options of a server that are not keys: the key guide shows only the `keys` of a description, and the Codex server has none. The two variables are in the README of the server and in document 06. A place for such options in Settings is a follow-up.
+
+### Follow-ups
+
+22. A place in Settings for the options of a server that are not secrets (item 21).
+23. A second turn of the critic, or a vote, for brief faults, because one turn names different ones (item 17).
+24. The Story view could mark a brief fault that is restored. The harness knows it; the view shows each one that the stored check named.
