@@ -57,6 +57,7 @@ export const shotSchema = z.strictObject({
   videoPrompt: z.string().exactOptional(),
   reviews: z.array(clipReviewSchema).exactOptional(),
   startReviews: z.array(startReviewSchema).exactOptional(),
+  planNotes: z.array(z.string()).exactOptional(),
 });
 
 export const musicCheckSchema = z.strictObject({
@@ -76,6 +77,9 @@ export const storyPlanSchema = z.strictObject({
   musicChecks: z.array(musicCheckSchema).exactOptional(),
   review: planReviewSchema.exactOptional(),
   lessons: z.array(lessonSchema).exactOptional(),
+  failedPlanChecks: z.int().min(0).exactOptional(),
+  planNotes: z.array(z.string()).exactOptional(),
+  costEstimateUsd: z.number().min(0).exactOptional(),
 });
 
 export type ShotSize = (typeof shotSizes)[number];

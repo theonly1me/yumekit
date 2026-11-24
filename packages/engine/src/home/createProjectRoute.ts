@@ -28,7 +28,7 @@ import {
 import { readProjectsFolder } from "./projectsFolder.js";
 import { recordRecentProject } from "./recentProjects.js";
 
-export const longestRequestCharacters = 4_000;
+export const longestRequestCharacters = 20_000;
 
 const createBodySchema = z.strictObject({
   request: z.string().trim().min(1).max(longestRequestCharacters),

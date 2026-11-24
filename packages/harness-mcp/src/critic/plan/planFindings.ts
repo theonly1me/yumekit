@@ -19,6 +19,7 @@ const partWords: { part: string; words: RegExp }[] = [
 ];
 
 export interface PlanFinding {
+  castId: string;
   text: string;
 }
 
@@ -27,6 +28,7 @@ function numberFindings(members: CastMember[]): PlanFinding[] {
     [member.description, ...(member.facts ?? [])]
       .filter((sentence) => bareNumber.test(sentence))
       .map((sentence) => ({
+        castId: member.id,
         text: `"${member.id}" gives a size as a number or a ratio, which no picture can match: "${sentence}". A fact is a visual statement, for example "side by side, the top of the hero's head reaches its chest".`,
       })),
   );
@@ -44,6 +46,7 @@ function thinFindings(members: CastMember[]): PlanFinding[] {
         ? []
         : [
             {
+              castId: member.id,
               text: `"${member.id}" does not name ${missing.join(", ")}. A thin description lets the model borrow a known design.`,
             },
           ];

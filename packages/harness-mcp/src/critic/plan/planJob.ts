@@ -15,15 +15,18 @@ export interface PlanJob {
 }
 
 export const planListItems = [
-  "Story: each shot has ONE action with a result, and each shot follows from the one before.",
-  "Facts: each fact is something a picture can show. A bare number or a ratio ('twice his width', 'a little taller') is a fault: ask for a visual comparison. A fact that drops or changes the meaning of a fact from the person's brief is blocking.",
-  "Design: each person names each garment with its color and cut, the hair, the face, and what the design must NOT resemble. A design thin enough that the model will borrow a known character, uniform, or costume of an existing work is a fault.",
-  "Known limits: a pose, a shot, or a sheet on the list of known limits, written without the form that works, is a fault.",
-  "One action, a clear frame: a shot with more than one action, or too much in the frame for its length and size, is a fault.",
-  "Prompts: each prompt describes every part that will be visible (each garment, each hand, the ground, what moves in the background), agrees with its shot, its start state, its camera, and the facts, and has no simile that the model could draw ('a head like a stone lantern').",
-  "Places: no fact of a place that a later shot contradicts, and each shot in a place fits its floor plan.",
-  "Restrictions: no shot breaks a restriction of a sheet.",
+  "Story: each shot has ONE action with a result, and each shot follows from the one before. A shot with more than one action, or too much in the frame, is a note.",
+  "Brief: no fact and no prompt changes or drops a fact of the person's brief. Each one that does goes in brief_faults, with the exact brief fact and the exact text to restore. This is blocking (kind a).",
+  "Design: each person names each garment with its color and cut, the hair, the face, and what the design must NOT resemble. A thin design or a likeness to a known work is a note; the sheet review judges the picture.",
+  "Known limits: a pose, a shot, or a sheet on the list of known limits, or a fact given as a bare number or a ratio (the limit of exact scale), written with no form that works, is blocking (kind c). The same limit written in its working form is fine.",
+  "Strikes and effects: each strike shows its contact on screen, and each effect has a named source on screen. A strike with no contact or an effect with no source is blocking (kind d).",
+  "Prompts: a prompt that contradicts itself is blocking (kind b). A prompt that leaves a visible part undescribed, or that differs a little from its shot or the facts, is a note, unless it is a known limit.",
+  "Places: a place fact that a later shot contradicts is a note, unless the fact comes from the person's brief.",
+  "Restrictions: a shot that breaks a restriction of a sheet is blocking (kind c), because a restriction is a known limit of that sheet.",
 ] as const;
+
+export const planStrictnessRule =
+  "Strictness: a blocking fault is only (a) a contradiction with a fact of the person's brief, (b) a prompt that contradicts itself, (c) a known limit (or a restriction of a sheet) with no working form used, or (d) a strike or an effect with no contact or source. Everything else is a note. At most 3 blocking faults for one shot: keep the 3 most likely to fail and put the rest in notes. A finding of the word test is a fault only when it is one of these four kinds.";
 
 function memberLines(member: CastMember): string[] {
   return [
@@ -99,6 +102,8 @@ export function planBriefOf(job: PlanJob): string {
     "The list (answer each item by its number):",
     ...planListItems.map((...[item, index]) => `${String(index + 1)}. ${item}`),
     "",
-    "Steps: 1. Read the whole plan. 2. For each shot, give its difficulty from 1 (easy for the models) to 5 (likely to fail), the ids of the known limits it touches, its blocking faults, and its notes. 3. For each cast entry, its blocking faults and its notes. 4. Name the easiest and the hardest shot. 5. Call give_plan_review once with your whole answer. If it refuses, correct it and call again.",
+    planStrictnessRule,
+    "",
+    "Steps: 1. Read the whole plan. 2. For each shot, give its difficulty from 1 (easy for the models) to 5 (likely to fail), the ids of the known limits it touches, at most 3 blocking faults, and its notes. 3. For each cast entry, its blocking faults and its notes. 4. Put each break of a brief fact in brief_faults. 5. Name the easiest and the hardest shot. 6. Call give_plan_review once with your whole answer. If it refuses, correct it and call again.",
   ].join("\n");
 }

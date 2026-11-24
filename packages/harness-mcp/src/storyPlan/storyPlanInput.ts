@@ -96,6 +96,9 @@ function shotOf(options: {
     startPicturePrompt: input.start_picture_prompt,
     videoPrompt: input.video_prompt,
     ...(earlier?.reviews === undefined ? {} : { reviews: earlier.reviews }),
+    ...(earlier?.planNotes === undefined
+      ? {}
+      : { planNotes: earlier.planNotes }),
   };
 }
 
@@ -125,6 +128,12 @@ export function storyPlanOf(options: {
       : { musicChecks: earlier.musicChecks }),
     ...(earlier?.review === undefined ? {} : { review: earlier.review }),
     ...(earlier?.lessons === undefined ? {} : { lessons: earlier.lessons }),
+    ...(earlier?.failedPlanChecks === undefined
+      ? {}
+      : { failedPlanChecks: earlier.failedPlanChecks }),
+    ...(earlier?.planNotes === undefined
+      ? {}
+      : { planNotes: earlier.planNotes }),
   };
 }
 

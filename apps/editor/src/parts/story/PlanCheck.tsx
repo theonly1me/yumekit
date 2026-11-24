@@ -1,10 +1,18 @@
+import type { EngineClient } from "../../engine/engineClient.js";
 import type { Snapshot } from "../../engine/snapshot.js";
+import { BudgetLines } from "./BudgetLines.js";
 import { measureOf, moneyText } from "./firstCutFacts.js";
 
+const usedUpAfter = 2;
+
 function verdictTextOf(snapshot: Snapshot): string {
-  const review = snapshot.bible.storyPlan?.review;
+  const plan = snapshot.bible.storyPlan;
+  const review = plan?.review;
   if (review === undefined) {
-    return "The critic has not checked the plan yet. No picture or clip is made before it does.";
+    return "The critic has not checked the plan yet. Sheet pictures can start, but no shot picture or clip is made before it does.";
+  }
+  if ((plan?.failedPlanChecks ?? 0) >= usedUpAfter) {
+    return `The critic failed the plan ${String(plan?.failedPlanChecks ?? 0)} times, so the plan check is used up. The AI makes the film, and the critic looks for each open fault in the start picture and the clip of its shot.`;
   }
   return review.verdict === "pass"
     ? "The critic checked the plan and every prompt before any money was spent, and passed it."
@@ -18,7 +26,7 @@ function numberOf(options: { snapshot: Snapshot; shotId: string }): string {
   return index < 0 ? options.shotId : String(index + 1);
 }
 
-export function PlanCheck(props: { snapshot: Snapshot }) {
+export function PlanCheck(props: { client: EngineClient; snapshot: Snapshot }) {
   const { snapshot } = props;
   const plan = snapshot.bible.storyPlan;
   const review = plan?.review;
@@ -62,6 +70,7 @@ export function PlanCheck(props: { snapshot: Snapshot }) {
       >
         {verdictTextOf(snapshot)}
       </span>
+      <BudgetLines client={props.client} snapshot={snapshot} />
       {review === undefined || review.faults.length === 0 ? null : (
         <ul
           className="shot-faults"

@@ -158,13 +158,13 @@ For a video, `generate_asset` reads `hasAudio` with `probeMedia`. It uses the si
 
 ### Reviews by the critic
 
-| Tool           | Input                 | Result                                                                                                                               |
-| -------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `review_clip`  | `asset_id`, `shot_id` | The verdict of an independent critic (keep, cut, or redo), its faults, and what did not happen; stored in the shot (document 20, C9) |
-| `review_sheet` | `cast_id`             | The verdict of the critic on the sheet pictures of a cast entry, stored on the entry with its tries (document 20, C12, C24, C25)     |
-| `review_plan`  | none                  | The verdict of the critic on the whole plan before any paid picture or clip, with a difficulty for each shot (document 20, C22)      |
-| `review_start` | `asset_id`, `shot_id` | The verdict of the critic on a start picture before its clip, stored in the shot (document 20, C31)                                  |
-| `check_music`  | `asset_id`            | The fit of a music track to the music map of the plan, its best start, and warnings, stored in the plan (document 20, C19)           |
+| Tool           | Input                            | Result                                                                                                                                                              |
+| -------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `review_clip`  | `asset_id`, `shot_id`            | The verdict of an independent critic (keep, cut, or redo), its faults, and what did not happen; stored in the shot (document 20, C9)                                |
+| `review_sheet` | `cast_id`                        | The verdict of the critic on the sheet pictures of a cast entry, stored on the entry with its tries (document 20, C12, C24, C25)                                    |
+| `review_plan`  | `person_asked_for_another_check` | The verdict of the critic on the whole plan before any start picture or clip, with a difficulty for each shot; at most two failed checks (document 20, C22 and C33) |
+| `review_start` | `asset_id`, `shot_id`            | The verdict of the critic on a start picture before its clip, stored in the shot (document 20, C31)                                                                 |
+| `check_music`  | `asset_id`                       | The fit of a music track to the music map of the plan, its best start, and warnings, stored in the plan (document 20, C19)                                          |
 
 The critic is a turn of the agent program of the person, started by the engine with a critic token. It has five tools that no other session sees: `view_for_review` (the frames and pictures of the open review, and closer looks), `give_clip_review`, `give_sheet_review`, `give_plan_review`, and `give_start_review`. The engine lists them only to the critic and refuses them to each other caller with `critic-only`. The critic may call nothing else (`critic-not-permitted`). A standalone `yumekit mcp` with no engine has no critic: the reviews fail with `no-critic`, and the five critic tools are not listed. The harness of the engine has 71 tools, and the lead sees 66. `record_lesson` (document 20, C28) is with `set_story_plan`.
 

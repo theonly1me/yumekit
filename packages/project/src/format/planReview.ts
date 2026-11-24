@@ -21,6 +21,14 @@ const castCheckSchema = z.strictObject({
   notes: z.array(z.string()),
 });
 
+const briefFaultSchema = z.strictObject({
+  castId: idSchema,
+  shotId: idSchema.exactOptional(),
+  briefFact: z.string(),
+  restore: z.string(),
+  seen: z.string(),
+});
+
 export const planReviewSchema = z.strictObject({
   verdict: z.enum(sheetVerdicts),
   planKey: z.string(),
@@ -28,6 +36,7 @@ export const planReviewSchema = z.strictObject({
   notes: z.array(z.string()),
   shots: z.array(shotCheckSchema),
   cast: z.array(castCheckSchema),
+  briefFaults: z.array(briefFaultSchema).exactOptional(),
   easiestShotId: idSchema,
   hardestShotId: idSchema,
   seconds: z.number().min(0),
@@ -44,4 +53,5 @@ export const lessonSchema = z.strictObject({
 export type PlanReview = z.infer<typeof planReviewSchema>;
 export type PlanShotCheck = z.infer<typeof shotCheckSchema>;
 export type PlanCastCheck = z.infer<typeof castCheckSchema>;
+export type PlanBriefFault = z.infer<typeof briefFaultSchema>;
 export type Lesson = z.infer<typeof lessonSchema>;

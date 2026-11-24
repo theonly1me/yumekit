@@ -1,5 +1,6 @@
 import type { CastMember, ProjectSnapshot, Shot } from "@yumekit/project";
 import { heldPropsOf } from "../critic/sheet/registerReviewSheet.js";
+import type { GenerateAssetInput } from "../media/generateAssetInput.js";
 import type { HarnessFailure } from "../results.js";
 
 function lackOf(options: {
@@ -77,5 +78,21 @@ export function sheetFailureOf(options: {
   }
   return reviewFailureOf(
     snapshot.bible.cast.filter((member) => ids.includes(member.id)),
+  );
+}
+
+export function isFreeSheet(options: {
+  snapshot: ProjectSnapshot;
+  request: GenerateAssetInput;
+}): boolean {
+  const { request } = options;
+  if (request.sheet_of === undefined || request.shot_id !== undefined) {
+    return false;
+  }
+  const member = options.snapshot.bible.cast.find(
+    (candidate) => candidate.id === request.sheet_of,
+  );
+  return (
+    (member?.facts ?? []).length > 0 && (member?.sheetPrompts ?? []).length > 0
   );
 }

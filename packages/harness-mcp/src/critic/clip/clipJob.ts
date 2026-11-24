@@ -6,6 +6,7 @@ import {
   strikeText,
 } from "../../storyPlan/stateText.js";
 import type { ClipAnswer } from "./clipAnswerInput.js";
+import { planNoteSectionOf } from "../plan/planNoteLines.js";
 import { clipListText } from "./clipList.js";
 
 export interface ClipJob {
@@ -18,6 +19,7 @@ export interface ClipJob {
   startPicture: Asset | undefined;
   previousEnd: Asset | undefined;
   warnings: MotionWarning[];
+  openPlanFaults: string[];
   answer: ClipAnswer | undefined;
 }
 
@@ -60,6 +62,7 @@ export function clipBriefOf(job: ClipJob): string {
     "",
     "The cast in the shot and their fixed facts:",
     factLines(job.members),
+    ...planNoteSectionOf(job.openPlanFaults),
     "",
     "The measured warnings (answer each one by its number):",
     warningLinesOf(job.warnings),

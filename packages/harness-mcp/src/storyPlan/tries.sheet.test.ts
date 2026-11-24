@@ -121,7 +121,7 @@ describe("the tries of a sheet", () => {
     ).toEqual(["smith-1"]);
   });
 
-  it("uses a failed sheet with a recorded restriction after the plan check sees the restriction", async () => {
+  it("uses a failed sheet with a recorded restriction with no new plan check, and a later plan check sees the restriction", async () => {
     const harness = await plannedFilm({ critic: failingSheets });
     await sheetTry({ harness, castId: "forge", assetId: "forge-1" });
     await useSheet({ harness, castId: "forge", assetIds: ["forge-1"] });
@@ -146,25 +146,18 @@ describe("the tries of a sheet", () => {
         },
       });
     }
-    const stale = await shotCall({
-      harness,
-      assetId: "start",
-      capability: "image",
-      shotId: "strike",
-    });
-    await passPlan(harness);
     const restricted = await shotCall({
       harness,
       assetId: "start",
       capability: "image",
       shotId: "strike",
     });
+    await passPlan(harness);
 
     expect(failed.data).toMatchObject({ kind: "sheet-failed-review" });
-    expect(stale.data).toMatchObject({ kind: "plan-not-reviewed" });
+    expect(restricted.isError).toBe(false);
     expect(harness.criticLog.briefs.at(-1)).toContain(
       "Restrictions: Never show both hands close up",
     );
-    expect(restricted.isError).toBe(false);
   });
 });

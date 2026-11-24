@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { applyEditsResult } from "../../applyEditsResult.js";
 import type { HarnessContext } from "../../context.js";
 import { failureResult } from "../../results.js";
@@ -9,6 +10,14 @@ import {
 import type { CriticDesk } from "../criticDesk.js";
 import type { AskCritic } from "../criticTypes.js";
 import { runCritic } from "../runCritic.js";
+import { planBudgetWith } from "../../storyPlan/planCost.js";
+import {
+  bibleAfterPlanCheck,
+  isPlanCheckUsedUp,
+  openPlanFaultsOf,
+  planCheckLimit,
+} from "./openPlanFaults.js";
+import { planCheckAnswerOf, planChecksUsedUp } from "./planCheckAnswer.js";
 import { planFindingsOf } from "./planFindings.js";
 import { planBriefOf, type PlanJob } from "./planJob.js";
 import { planReviewOf } from "./planReviewRecord.js";
@@ -22,9 +31,16 @@ export function registerReviewPlan(
   context.tools.add({
     name: "review_plan",
     description:
-      "Have the independent critic check the whole plan before the first paid picture or clip: the story, the facts of each sheet, and the text of each sheet, start picture, and video prompt that you will send. It refuses what is likely to fail: a fact that no picture can show or that is a bare number, a shot on the list of known limits, a shot with more than one action, a prompt that leaves a visible part undescribed, a thin design that the model will copy from a known work, a place fact that a later shot breaks, a shot that breaks a restriction. It rates each shot from 1 (easy) to 5 and names the easiest and the hardest shot: make those two first. Paid pictures and clips wait for a pass. It costs no media money.",
-    inputSchema: {},
-    run: async ({ onProgress }) => {
+      "Have the independent critic check the whole plan before the first paid picture or clip: the story, the facts of each sheet, and the text of each sheet, start picture, and video prompt that you will send. It blocks only what is likely to fail: a break of a fact of the person's brief, a prompt that contradicts itself, a known limit or a restriction with no working form, and a strike or effect with no contact or source, at most 3 for one shot. Everything else is a note. It rates each shot from 1 (easy) to 5 and names the easiest and the hardest shot: make those two first. Start pictures and clips wait for a pass; sheet pictures do not. The check has a limit: after the second fail, it is used up, the paid work starts, and each open fault goes to the critic of its shot as a note. A fault that breaks a fact of the person's brief still blocks until its exact text is restored. It warns when the planned seconds or money pass a limit. It costs no media money.",
+    inputSchema: {
+      person_asked_for_another_check: z
+        .boolean()
+        .optional()
+        .describe(
+          "True only when the person asked for another plan check in this request, after the check is used up.",
+        ),
+    },
+    run: async ({ input, onProgress }) => {
       const { bible } = context.store.read();
       const plan = bible.storyPlan;
       if (plan === undefined) {
@@ -33,6 +49,12 @@ export function registerReviewPlan(
           message: "This project has no story plan to check.",
           hint: "Read get_story_guide and write the plan with set_story_plan first.",
         });
+      }
+      if (
+        isPlanCheckUsedUp(plan) &&
+        input.person_asked_for_another_check !== true
+      ) {
+        return failureResult(planChecksUsedUp);
       }
       const gaps = planGapsOf({ bible, plan });
       if (gaps.length > 0) {
@@ -66,38 +88,33 @@ export function registerReviewPlan(
       const review = planReviewOf({ job, answer, seconds: turn.value.seconds });
       const latest = context.store.read().bible;
       const latestPlan = latest.storyPlan ?? plan;
-      const next =
-        review.verdict === "pass"
-          ? `Make the sheets, then the easiest shot "${review.easiestShotId}" and the hardest shot "${review.hardestShotId}" first.`
-          : "Correct each fault in the plan, the facts, or the prompts, and call review_plan again. No paid picture or clip runs before a pass.";
+      const usedUp =
+        review.verdict === "fail" &&
+        (latestPlan.failedPlanChecks ?? 0) + 1 >= planCheckLimit;
+      const budget = await planBudgetWith({
+        mediaTools: context.mediaTools,
+        bible: latest,
+        plan: latestPlan,
+      });
+      const next = bibleAfterPlanCheck({
+        bible: latest,
+        plan: latestPlan,
+        review,
+        open: usedUp ? openPlanFaultsOf({ job, answer }) : undefined,
+        costEstimateUsd: budget.estimateUsd ?? 0,
+      });
+      const answerText = planCheckAnswerOf({
+        bible: next,
+        plan: next.storyPlan ?? latestPlan,
+        review,
+        budget,
+        criticCostUsd: turn.value.costUsd,
+      });
       return applyEditsResult({
         store: context.store,
-        edits: [
-          {
-            kind: "setBible",
-            bible: { ...latest, storyPlan: { ...latestPlan, review } },
-          },
-        ],
-        line: `The critic says ${review.verdict} for the plan${review.faults.length === 0 ? "." : `: ${review.faults.join("; ")}.`} ${next}`,
-        data: {
-          verdict: review.verdict,
-          faults: review.faults,
-          notes: [
-            ...review.notes,
-            ...review.shots.flatMap((entry) =>
-              entry.notes.map((note) => `Shot "${entry.shotId}": ${note}`),
-            ),
-          ],
-          difficulty: Object.fromEntries(
-            review.shots.map((entry) => [entry.shotId, entry.difficulty]),
-          ),
-          easiest_shot_id: review.easiestShotId,
-          hardest_shot_id: review.hardestShotId,
-          critic_seconds: review.seconds,
-          ...(turn.value.costUsd === undefined
-            ? {}
-            : { critic_cost_usd: turn.value.costUsd }),
-        },
+        edits: [{ kind: "setBible", bible: next }],
+        line: answerText.line,
+        data: answerText.data,
       });
     },
   });

@@ -22,7 +22,14 @@ import { createCodexImagesServer } from "../createCodexImagesServer.ts";
 export interface FakeCodexScenario {
   signIn: "chatgpt" | "api-key" | "none";
   hasFeature: boolean;
-  turn: "picture" | "no-file" | "not-a-picture" | "usage-limit" | "hang";
+  turn:
+    | "picture"
+    | "no-file"
+    | "not-a-picture"
+    | "usage-limit"
+    | "model-refused"
+    | "effort-refused"
+    | "hang";
   width: number;
   height: number;
   waitMilliseconds: number;
@@ -41,6 +48,7 @@ export async function connectCodexImages(options: {
   scenario?: Partial<FakeCodexScenario>;
   installed?: boolean;
   turnLimitSeconds?: number;
+  environment?: Record<string, string>;
 }) {
   const root = await mkdtemp(join(tmpdir(), "yumekit-fake-codex-"));
   onTestFinished(() => rm(root, { recursive: true, force: true }));
@@ -73,6 +81,7 @@ export async function connectCodexImages(options: {
       ...process.env,
       CODEX_HOME: codexHome,
       YUMEKIT_FAKE_CODEX_SCENARIO: scenarioFile,
+      ...options.environment,
     },
     codexHome,
     turnLimitSeconds: options.turnLimitSeconds ?? 20,

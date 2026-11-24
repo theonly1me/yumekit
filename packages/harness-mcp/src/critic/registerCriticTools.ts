@@ -9,6 +9,7 @@ import { clipViewOf } from "./clip/clipViews.js";
 import type { CriticDesk } from "./criticDesk.js";
 import { planAnswerIssuesOf } from "./plan/planAnswerCheck.js";
 import { planAnswerInput } from "./plan/planAnswerInput.js";
+import { withoutRepeatedFaults } from "./plan/repeatedFaults.js";
 import { registerGiveStartReview } from "./start/giveStartReview.js";
 import {
   sheetAnswerInput,
@@ -110,14 +111,15 @@ export function registerCriticTools(
   context.tools.add({
     name: "give_plan_review",
     description:
-      "For the critic only: your whole answer about the plan. Answer each item of the list and each finding, rate each shot, judge each cast entry, sort each fault as blocking or a note, name the easiest and the hardest shot, and give the verdict.",
+      "For the critic only: your whole answer about the plan. Answer each item of the list and each finding, rate each shot, judge each cast entry, sort each fault as blocking or a note (at most 3 blocking for one shot; a fault of one shot goes in its entry, once), put each break of a brief fact in brief_faults, name the easiest and the hardest shot, and give the verdict.",
     inputSchema: planAnswerInput,
     run: ({ input }) => {
       const job = critics.current();
       if (job?.kind !== "plan") return failureResult(noJob);
-      const issues = planAnswerIssuesOf({ job, answer: input });
+      const answer = withoutRepeatedFaults({ plan: job.plan, answer: input });
+      const issues = planAnswerIssuesOf({ job, answer });
       if (issues.length > 0) return answerRefused(issues);
-      job.answer = input;
+      job.answer = answer;
       return successResult({
         line: `Your verdict "${input.verdict}" is recorded. Stop now.`,
         data: { verdict: input.verdict },

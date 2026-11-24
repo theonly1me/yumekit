@@ -3,7 +3,12 @@ import type { EngineClient } from "../engine/engineClient.js";
 import { projectLengths } from "./homeApi.js";
 import { PlatformChoices } from "./PlatformChoices.js";
 import { RecentProjects } from "./RecentProjects.js";
-import { agentLineOf, lengthLabelOf } from "./startTexts.js";
+import {
+  agentLineOf,
+  lengthLabelOf,
+  longestRequestCharacters,
+  requestLimitLineOf,
+} from "./startTexts.js";
 import { useStartChoices } from "./useStartChoices.js";
 import { VideoStyleChoices } from "../videoStyle/VideoStyleChoices.js";
 import { aiVideoLimitLineOf, usesAiVideo } from "../videoStyle/videoStyles.js";
@@ -48,13 +53,18 @@ export function StartScreen(props: { client: EngineClient }) {
           <textarea
             id="start-prompt"
             rows={3}
-            maxLength={4_000}
+            maxLength={longestRequestCharacters}
             placeholder={examplePrompt}
             value={start.request}
             onChange={(event) => {
               start.setRequest(event.target.value);
             }}
           />
+          {requestLimitLineOf(start.request.length) === undefined ? null : (
+            <p className="fact" role="status">
+              {requestLimitLineOf(start.request.length)}
+            </p>
+          )}
           <div className="start-group">
             <h2>What kind of video?</h2>
             <StartFormatChoices

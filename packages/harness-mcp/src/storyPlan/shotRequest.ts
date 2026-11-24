@@ -14,7 +14,7 @@ import {
 } from "./planGate.js";
 import { firstFrameFailureOf, withPromptAdditions } from "./promptAdditions.js";
 import { withSheetTry } from "./sheetTryGate.js";
-import { sheetFailureOf } from "./sheets.js";
+import { isFreeSheet, sheetFailureOf } from "./sheets.js";
 import { refusalsOf } from "./shotRefusals.js";
 import { startGateFailureOf, withShotTry } from "./shotTryGate.js";
 
@@ -154,8 +154,12 @@ function storyRequestOf(options: {
   if (found !== undefined && !found.ok) return found;
   const isPictureOrClip =
     request.capability === "image" || request.capability === "video";
-  if (plan !== undefined && isPictureOrClip) {
-    const gate = planGateFailureOf({ bible: snapshot.bible, plan });
+  if (plan !== undefined && isPictureOrClip && !isFreeSheet(options)) {
+    const gate = planGateFailureOf({
+      bible: snapshot.bible,
+      plan,
+      shot: found?.value.shot,
+    });
     if (gate !== undefined) return failed(gate);
   }
   if (found === undefined || plan === undefined) return withSheetTry(options);

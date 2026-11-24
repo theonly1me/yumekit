@@ -243,6 +243,7 @@ The server makes a picture with the Codex program of the person and their ChatGP
 - `reference_image_paths` takes up to 5 absolute paths. Codex gets them with `--image`.
 - `check_key` is the free check of readiness: the program is there, `codex login status` says ChatGPT, and `codex features list` has `image_generation`. It makes no picture.
 - The server finds the program in `YUMEKIT_CODEX_PATH`, or else as the first `codex` on the `PATH`. It reads `CODEX_HOME`, or else uses `~/.codex`.
+- `YUMEKIT_CODEX_MODEL` and `YUMEKIT_CODEX_EFFORT` set the chat model (`-m`) and the reasoning effort (`-c model_reasoning_effort`) of the picture turn. They are optional and are not secrets. Document 20 ("Details of WP70") has the rules.
 - A turn that reports the usage limit of the plan returns `isError` with `_meta: { "yumekit/failure": "usage-limit-reached" }`. The client gives the failure `media-usage-limit-reached`.
 
 ## Tests

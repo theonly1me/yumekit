@@ -1,5 +1,7 @@
 import type { Bible, Shot, StoryPlan } from "@yumekit/project";
+import { isPlanCheckUsedUp } from "../critic/plan/openPlanFaults.js";
 import type { HarnessFailure } from "../results.js";
+import { briefFaultFailureOf } from "./briefFaultGate.js";
 import { planKeyOf } from "./planKey.js";
 import { criticReviewsOf, refusalsOf } from "./shotRefusals.js";
 
@@ -13,15 +15,19 @@ export function isPlanReviewCurrent(options: {
 export function planGateFailureOf(options: {
   bible: Bible;
   plan: StoryPlan;
+  shot: Shot | undefined;
 }): HarnessFailure | undefined {
   const { plan } = options;
   const { review } = plan;
+  if (review !== undefined && isPlanCheckUsedUp(plan)) {
+    return briefFaultFailureOf(options);
+  }
   if (review === undefined || !isPlanReviewCurrent(options)) {
     return {
       kind: "plan-not-reviewed",
       message:
         review === undefined
-          ? "The critic has not checked the plan yet. No paid picture or clip of a story film runs before the plan check."
+          ? "The critic has not checked the plan yet. No start picture or clip of a story film runs before the plan check. A sheet picture can start once its cast entry has facts and sheet_prompts."
           : "The plan, the art direction, or a cast entry changed after the critic checked it.",
       hint: "Give each shot start_picture_prompt and video_prompt, give each cast entry its facts and sheet_prompts, then call review_plan.",
     };
@@ -30,7 +36,7 @@ export function planGateFailureOf(options: {
   return {
     kind: "plan-failed-review",
     message: `The critic failed the plan: ${review.faults.join("; ")}.`,
-    hint: "Correct each fault in the plan, the facts, or the prompts, and call review_plan again.",
+    hint: "Correct each fault in the plan, the facts, or the prompts, and call review_plan again. After a second fail, the plan check is used up and the paid work starts with the open faults as notes for the critic.",
   };
 }
 

@@ -33,6 +33,7 @@ export const castMemberSchema = z.strictObject({
     .array(z.string().max(castFactLimits.characters))
     .max(castFactLimits.count)
     .exactOptional(),
+  planNotes: z.array(z.string()).exactOptional(),
 });
 
 export const bibleSchema = z.strictObject({

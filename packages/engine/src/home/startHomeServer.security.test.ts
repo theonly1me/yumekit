@@ -88,7 +88,7 @@ describe("the request checks of the home server", () => {
       { ...createBody, platform_ids: ["myspace"] },
       { ...createBody, platform_ids: [] },
       { ...createBody, length: 45 },
-      { ...createBody, request: "tea ".repeat(1_001) },
+      { ...createBody, request: "tea ".repeat(5_001) },
       { ...createBody, request: "   " },
     ];
 

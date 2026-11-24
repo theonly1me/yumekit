@@ -11,7 +11,15 @@ import { z } from "zod";
 const scenarioSchema = z.object({
   signIn: z.enum(["chatgpt", "api-key", "none"]),
   hasFeature: z.boolean(),
-  turn: z.enum(["picture", "no-file", "not-a-picture", "usage-limit", "hang"]),
+  turn: z.enum([
+    "picture",
+    "no-file",
+    "not-a-picture",
+    "usage-limit",
+    "model-refused",
+    "effort-refused",
+    "hang",
+  ]),
   width: z.number(),
   height: z.number(),
   waitMilliseconds: z.number(),
@@ -39,6 +47,27 @@ function pngBytes(): Buffer {
   return header;
 }
 
+const refusals = {
+  "model-refused": JSON.stringify({
+    type: "error",
+    status: 400,
+    error: {
+      type: "invalid_request_error",
+      message: `The '${programArguments[programArguments.indexOf("-m") + 1] ?? ""}' model is not supported when using Codex with a ChatGPT account.`,
+      code: "model_not_found",
+    },
+  }),
+  "effort-refused": JSON.stringify({
+    type: "error",
+    error: {
+      type: "invalid_request_error",
+      message:
+        "[ReasoningEffortParam] [reasoning.effort] [invalid_enum_value] Invalid value: 'bogus'. Supported values are: 'none', 'minimal', 'low', 'medium', 'high', 'xhigh', and 'max'.",
+    },
+    status: 400,
+  }),
+};
+
 function makeTurn(threadId: string): void {
   const folder = join(codexHome, "generated_images", threadId);
   if (scenario.turn === "picture" || scenario.turn === "not-a-picture") {
@@ -47,6 +76,12 @@ function makeTurn(threadId: string): void {
       join(folder, `exec-${randomUUID()}.png`),
       scenario.turn === "picture" ? pngBytes() : "not a picture",
     );
+  }
+  if (scenario.turn === "model-refused" || scenario.turn === "effort-refused") {
+    const message = refusals[scenario.turn];
+    printLine({ type: "error", message });
+    printLine({ type: "turn.failed", error: { message } });
+    return;
   }
   if (scenario.turn === "usage-limit") {
     printLine({
