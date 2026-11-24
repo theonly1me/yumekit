@@ -1,7 +1,7 @@
 import type { Asset, ProjectSnapshot } from "@yumekit/project";
 import type { HarnessFailure } from "../results.js";
 
-function shotIdOf(asset: Asset): string | undefined {
+export function shotIdOf(asset: Asset): string | undefined {
   if (asset.source.kind !== "tool") return undefined;
   const shotId = asset.source.input["shot_id"];
   return typeof shotId === "string" ? shotId : undefined;
@@ -28,10 +28,12 @@ export function reviewGateFailureOf(options: {
       hint: `Call review_clip with asset_id "${asset.id}" and shot_id "${shotId}". The critic looks at the frames and gives the verdict. Then place it.`,
     };
   }
-  if (review.verdict !== "redo") return undefined;
+  if (review.verdict !== "redo" || review.personKept !== undefined) {
+    return undefined;
+  }
   return {
     kind: "clip-failed-review",
     message: `The critic said redo for "${asset.id}": ${review.faults.join("; ")}.`,
-    hint: "You cannot overrule the critic. Make the clip again with a prompt that names each fault, review it, and place the new clip.",
+    hint: "You cannot overrule the critic. Make the clip again with a prompt that names each fault, review it, and place the new clip. Only when the person chose this clip, give their words in person_chose_this_clip.",
   };
 }

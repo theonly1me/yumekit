@@ -1,6 +1,8 @@
 import { z } from "zod";
 import type { ChatFailure } from "../chat/chatTypes.js";
 import { anySegment, type Exchange, type Route } from "./exchange.js";
+import { helperTokenOf } from "./helperCalls.js";
+import { agentClient, clientHeader } from "./projectRoutes.js";
 import { readJsonBody } from "./readJsonBody.js";
 import { sendJson, type Failure } from "./responses.js";
 
@@ -25,7 +27,21 @@ async function readChat(exchange: Exchange) {
   return undefined;
 }
 
+function isAgentCall(exchange: Exchange): boolean {
+  return (
+    exchange.request.headers[clientHeader] === agentClient ||
+    helperTokenOf(exchange) !== undefined
+  );
+}
+
 async function startRequest(exchange: Exchange) {
+  if (isAgentCall(exchange)) {
+    return {
+      status: 403,
+      kind: "message-not-for-the-ai",
+      message: "Only the person can send a message to the chat.",
+    };
+  }
   const body = await readJsonBody({
     request: exchange.request,
     schema: requestBodySchema,

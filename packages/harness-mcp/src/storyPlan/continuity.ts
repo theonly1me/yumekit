@@ -11,7 +11,7 @@ export function keptReviewOf(reviews: ClipReview[] | undefined) {
   return (reviews ?? []).findLast(
     (review) =>
       review.by === "critic" &&
-      (review.verdict === "keep" || review.verdict === "cut"),
+      (review.verdict !== "redo" || review.personKept !== undefined),
   );
 }
 
@@ -67,9 +67,12 @@ export function continuityFailureOf(options: {
   const before = options.plan.shots[options.index - 1];
   if (shot === undefined || before === undefined) return undefined;
   if (before.placeId !== shot.placeId) return undefined;
-  const pictureId = keptReviewOf(before.reviews)?.endPictureAssetId;
+  const kept = keptReviewOf(before.reviews);
+  const pictureId = kept?.endPictureAssetId;
   if (pictureId === undefined) {
-    if (options.startsFromPlan) return undefined;
+    if (options.startsFromPlan || kept?.personKept !== undefined) {
+      return undefined;
+    }
     return {
       kind: "previous-shot-not-kept",
       message: `Shot "${shot.id}" is in the same place as "${before.id}", so it starts where the kept clip of "${before.id}" ends. "${before.id}" has no clip that the critic kept yet.`,

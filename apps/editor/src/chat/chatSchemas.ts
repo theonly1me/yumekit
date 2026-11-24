@@ -45,6 +45,15 @@ export const chatEntrySchema = z.discriminatedUnion("kind", [
     undone: z.boolean(),
   }),
   z.object({ kind: z.literal("notice"), id: z.string(), text: z.string() }),
+  z.object({
+    kind: z.literal("steering"),
+    id: z.string(),
+    text: z.string(),
+    details: z.string().optional(),
+    about: aboutSchema.nullable(),
+    sentAt: z.string(),
+    state: z.enum(["waiting", "read"]),
+  }),
 ]);
 
 export const chatAgentSchema = z.object({
@@ -65,4 +74,5 @@ export type ChatView = z.infer<typeof chatViewSchema>;
 export type RequestEntry = Extract<ChatEntry, { kind: "request" }>;
 export type AnswerEntry = Extract<ChatEntry, { kind: "answer" }>;
 export type ChangeEntry = Extract<ChatEntry, { kind: "change" }>;
+export type SteeringEntry = Extract<ChatEntry, { kind: "steering" }>;
 export type AnswerStep = AnswerEntry["steps"][number];

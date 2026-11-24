@@ -30,7 +30,11 @@ function reviewText(shot: Shot): string {
         (review.critic?.missed ?? []).length === 0
           ? ""
           : ` Did not happen: ${(review.critic?.missed ?? []).join("; ")}.`;
-      return `Clip ${review.assetId}: ${review.verdict} by ${by}${part}.${faults}${notes}${missed}${end}`;
+      const person =
+        review.personKept === undefined
+          ? ""
+          : ` The person chose to keep it: "${review.personKept.words}".`;
+      return `Clip ${review.assetId}: ${review.verdict} by ${by}${part}.${faults}${notes}${missed}${end}${person}`;
     })
     .join(" ");
 }

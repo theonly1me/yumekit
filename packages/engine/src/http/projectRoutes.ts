@@ -58,31 +58,35 @@ async function callTool(exchange: Exchange) {
   }
   const isLead = isAgent && helper.kind === "lead";
   const note = isLead ? context.chat.noteAiCall(name) : noCallNote;
-  const result = await context.chat.runToolCall({
-    caller: isAgent
-      ? { by: "ai", tool: name }
-      : {
-          by: "person",
-          tool: name,
-          summary: personSummaryOf({
+  const run = () =>
+    context.chat.runToolCall({
+      caller: isAgent
+        ? { by: "ai", tool: name }
+        : {
+            by: "person",
             tool: name,
-            input,
-            snapshot: context.store.read(),
-          }),
-          ...(actId === undefined ? {} : { actId }),
-        },
-    call: () =>
-      context.harness.call({
-        name,
-        input,
-        by: isAgent ? "ai" : "person",
-        onProgress: (progress) => {
-          note.onProgress(progress);
-          if (callId === undefined) return;
-          context.events.send({ type: "call-progress", callId, ...progress });
-        },
-      }),
-  });
+            summary: personSummaryOf({
+              tool: name,
+              input,
+              snapshot: context.store.read(),
+            }),
+            ...(actId === undefined ? {} : { actId }),
+          },
+      call: () =>
+        context.harness.call({
+          name,
+          input,
+          by: isAgent ? "ai" : "person",
+          onProgress: (progress) => {
+            note.onProgress(progress);
+            if (callId === undefined) return;
+            context.events.send({ type: "call-progress", callId, ...progress });
+          },
+        }),
+    });
+  const result = isLead
+    ? await context.chat.leadCall({ tool: name, call: run })
+    : await run();
   note.finish(personReasonOf(result));
   if (helper.kind === "helper" && !result.isError) {
     helper.record({ tool: name, input });

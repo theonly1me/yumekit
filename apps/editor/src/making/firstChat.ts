@@ -33,6 +33,7 @@ const entrySchema = z.discriminatedUnion("kind", [
   }),
   z.object({ kind: z.literal("change"), id: z.string() }),
   z.object({ kind: z.literal("notice"), id: z.string(), text: z.string() }),
+  z.object({ kind: z.literal("steering"), id: z.string() }),
 ]);
 
 const chatSchema = z.object({ entries: z.array(entrySchema) });

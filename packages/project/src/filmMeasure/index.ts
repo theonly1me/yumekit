@@ -2,6 +2,7 @@ export interface MeasureReview {
   assetId: string;
   verdict: "keep" | "cut" | "redo";
   by?: "maker" | "critic" | undefined;
+  personKept?: { words: string } | undefined;
 }
 
 export interface MeasureShot {
@@ -57,7 +58,7 @@ export interface FilmMeasure {
 }
 
 function isAccepted(review: MeasureReview): boolean {
-  return review.verdict === "keep" || review.verdict === "cut";
+  return review.verdict !== "redo" || review.personKept !== undefined;
 }
 
 function criticReviewsOf(shot: MeasureShot): MeasureReview[] {

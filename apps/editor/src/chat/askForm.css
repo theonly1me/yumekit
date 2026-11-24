@@ -91,3 +91,9 @@ button.agent-line {
 button.agent-line:hover {
   color: var(--muted);
 }
+
+.ask-buttons {
+  display: flex;
+  flex-shrink: 0;
+  gap: 8px;
+}

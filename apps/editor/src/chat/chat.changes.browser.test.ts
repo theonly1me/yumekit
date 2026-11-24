@@ -168,7 +168,7 @@ describe("the changes in the chat", () => {
     await editor.page.goto(runningEngine().url);
 
     await chat.ask("Make scene 2 longer.");
-    await expect.poll(() => chat.sendButton.count()).toBe(1);
+    await expect.poll(() => chat.stopButton.count()).toBe(0);
     await expect
       .poll(() => loads.started > 0 && loads.answered === loads.started)
       .toBe(true);

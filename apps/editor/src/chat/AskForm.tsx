@@ -40,7 +40,7 @@ export function AskForm(props: {
   }, [box.focusRequest]);
 
   const send = () => {
-    if (props.isRunning || box.draft.trim() === "") return;
+    if (box.draft.trim() === "") return;
     props.onSend(box.draft.trim());
   };
   return (
@@ -72,7 +72,11 @@ export function AskForm(props: {
         id={askBoxId}
         ref={textArea}
         rows={2}
-        placeholder="Ask for a change"
+        placeholder={
+          props.isRunning
+            ? "Tell the AI something while it works"
+            : "Ask for a change"
+        }
         value={box.draft}
         onChange={(event) => {
           box.setDraft(event.currentTarget.value);
@@ -92,15 +96,20 @@ export function AskForm(props: {
         >
           {agentLineOf(props.agent)}
         </button>
-        {props.isRunning ? (
-          <button type="button" onClick={props.onStop}>
-            Stop
-          </button>
-        ) : (
-          <button type="submit" className="primary">
-            Send
-          </button>
-        )}
+        <span className="ask-buttons">
+          {props.isRunning ? (
+            <>
+              <button type="submit">Send</button>
+              <button type="button" onClick={props.onStop}>
+                Stop
+              </button>
+            </>
+          ) : (
+            <button type="submit" className="primary">
+              Send
+            </button>
+          )}
+        </span>
       </div>
     </form>
   );

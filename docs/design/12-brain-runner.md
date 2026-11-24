@@ -6,16 +6,16 @@ A probe on 2026-11-22 measured Claude Code 2.1.330 and Codex CLI 0.163.0 on the 
 
 ## Decisions
 
-| Id  | Decision                                                                                                                                                                                                      | Why                                                                              |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| B1  | The engine starts the installed agent program as a child process, one process for a request                                                                                                                   | The person already has the program and its sign-in. yumekit holds no sign-in     |
-| B2  | yumekit does not use an agent SDK                                                                                                                                                                             | The command gives the same events, and an SDK pins its own program version       |
-| B3  | One adapter for each program, behind one interface, in `@yumekit/brain`                                                                                                                                       | The programs differ in flags, events, and how a request ends                     |
-| B4  | The agent gets the yumekit MCP server and nothing more: no shell, no file tool, no web                                                                                                                        | A request from a chat box must not run a command on the computer                 |
-| B5  | The agent uses the `yumekit mcp` bridge to the engine that runs                                                                                                                                               | The same tools, events, and undo history as a change by the person               |
-| B6  | One request runs at a time for a project. A helper that the lead starts with `ask_helper`, and a critic that `review_clip` or `review_sheet` starts, run inside the request of the lead (documents 19 and 20) | Two agents that change one project at once give a result that nobody can explain |
-| B7  | The settings, hooks, plugins, and other MCP servers of the person do not load                                                                                                                                 | They cost tokens, and they can reach mail and files                              |
-| B8  | The chat history is a file in the project, in `.yumekit/chat/`                                                                                                                                                | A reload and a restart keep the conversation                                     |
+| Id  | Decision                                                                                                                                                                                                                                                              | Why                                                                              |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| B1  | The engine starts the installed agent program as a child process, one process for a request                                                                                                                                                                           | The person already has the program and its sign-in. yumekit holds no sign-in     |
+| B2  | yumekit does not use an agent SDK                                                                                                                                                                                                                                     | The command gives the same events, and an SDK pins its own program version       |
+| B3  | One adapter for each program, behind one interface, in `@yumekit/brain`                                                                                                                                                                                               | The programs differ in flags, events, and how a request ends                     |
+| B4  | The agent gets the yumekit MCP server and nothing more: no shell, no file tool, no web                                                                                                                                                                                | A request from a chat box must not run a command on the computer                 |
+| B5  | The agent uses the `yumekit mcp` bridge to the engine that runs                                                                                                                                                                                                       | The same tools, events, and undo history as a change by the person               |
+| B6  | One request runs at a time for a project. A message of the person while it runs steers it (WP71). A helper that the lead starts with `ask_helper`, and a critic that `review_clip` or `review_sheet` starts, run inside the request of the lead (documents 19 and 20) | Two agents that change one project at once give a result that nobody can explain |
+| B7  | The settings, hooks, plugins, and other MCP servers of the person do not load                                                                                                                                                                                         | They cost tokens, and they can reach mail and files                              |
+| B8  | The chat history is a file in the project, in `.yumekit/chat/`                                                                                                                                                                                                        | A reload and a restart keep the conversation                                     |
 
 ### The sign-in of the person
 
@@ -248,26 +248,27 @@ The `CURSOR_CONFIG_DIR` of the run keeps the permissions and the approval mode o
 
 The engine holds the chat of a project: the entries, the session id, and the request that runs.
 
-| Entry kind | Fields                                       | Meaning                                                                  |
-| ---------- | -------------------------------------------- | ------------------------------------------------------------------------ |
-| `request`  | `id`, `text`, `about`                        | What the person asked. `about` names the picked scene                    |
-| `answer`   | `id`, `text`, `state`, `steps`               | The text of the AI. `state` is `running`, `done`, `stopped`, or `failed` |
-| `change`   | `id`, `by`, `summary`, `undoSteps`, `undone` | One change to the project, by `ai` or by `person`                        |
-| `notice`   | `id`, `text`                                 | A failure or a fact for the person, in plain words                       |
+| Entry kind | Fields                                       | Meaning                                                                             |
+| ---------- | -------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `request`  | `id`, `text`, `about`                        | What the person asked. `about` names the picked scene                               |
+| `answer`   | `id`, `text`, `state`, `steps`               | The text of the AI. `state` is `running`, `done`, `stopped`, or `failed`            |
+| `change`   | `id`, `by`, `summary`, `undoSteps`, `undone` | One change to the project, by `ai` or by `person`                                   |
+| `notice`   | `id`, `text`                                 | A failure or a fact for the person, in plain words                                  |
+| `steering` | `id`, `text`, `about`, `sentAt`, `state`     | A message of the person while a request runs (WP71). `state` is `waiting` or `read` |
 
 - `steps` of an answer is the list of tool calls of the request, each with the tool name and `running`, `done`, or `failed`. The Making screen and the chat read it.
 - A request by the AI gives one `change` entry for the whole request, when it changed the project. `undoSteps` is the count of undo steps that it made. `summary` is the first sentence of the answer, cut at 140 characters. An empty answer gives "The AI changed the project."
 - A tool call by the person through `/api/tools/<name>` gives one `change` entry with one undo step. `@yumekit/brain` has a table with a plain sentence for each tool, for example "You changed the text of a scene." for `put_scene`.
 - An `undo` call, by anyone, lowers the count of the last change that is not undone. At zero, the entry is `undone`. A `redo` call does the reverse.
 
-| Request                            | Result                                                                                              |
-| ---------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `GET /api/chat`                    | `{ agent, state, entries }`. `agent` has `id`, `name`, and `signIn`. `state` is `idle` or `running` |
-| `POST /api/chat/requests`          | Takes `{ text, about_clip_id }`. Status 202 with the `request` entry                                |
-| `POST /api/chat/stop`              | Stops the request that runs                                                                         |
-| `POST /api/chat/changes/<id>/undo` | Undoes that change and each later change that is not undone                                         |
+| Request                            | Result                                                                                                                       |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `GET /api/chat`                    | `{ agent, state, entries }`. `agent` has `id`, `name`, and `signIn`. `state` is `idle` or `running`                          |
+| `POST /api/chat/requests`          | Takes `{ text, about_clip_id }`. Status 202 with the `request` entry, or with a `steering` entry while a request runs (WP71) |
+| `POST /api/chat/stop`              | Stops the request that runs                                                                                                  |
+| `POST /api/chat/changes/<id>/undo` | Undoes that change and each later change that is not undone                                                                  |
 
-- Failure kinds of a new request: `chat-busy` (409), `no-agent` (409, no agent program is installed), and `agent-signed-out` (409). The message of `agent-signed-out` tells the person to open a terminal, start the program once, and sign in.
+- Failure kinds of a new request: `no-agent` (409, no agent program is installed), `agent-signed-out` (409), and `message-not-for-the-ai` (403, WP71). The message of `agent-signed-out` tells the person to open a terminal, start the program once, and sign in.
 - With `about_clip_id`, the text for the agent starts with one line that names the scene, its id, and its clip id.
 - The event `chat-changed` carries one entry, new or changed. The event `chat-text` carries `{ id, text }` for an answer in progress, at most 10 times in a second.
 - The first request has no session id. The engine saves the session id of the `session` event, and each later request resumes it. If a resume fails, the engine starts a new session and adds the notice "The AI started a new conversation."
@@ -315,12 +316,32 @@ These rules came from the build of WP35.
 30. In the real check, "Set the script to the single word ready." called `get_project` and `set_script`, set the script, and gave one change with one undo step. The answer had no repeated text, so the whole text at the end of a turn holds only the text after the last tool call. The request to run `touch made.txt` and to read `/etc/hosts` made no file and called no yumekit tool. The answer said that the AI cannot run a command or read a file. That request resumed the session of the first request: the session id stayed the same, the engine added no notice, and the configuration folder held one conversation.
 31. `cursor-agent` starts a `worker-server` process that does not end with the turn. Its parent is process 1, and it has the `CURSOR_CONFIG_DIR` of the run. It still ran after the engine stopped, and the real check stopped it by hand. The adapter does not stop it in this version. The owner decides if the engine stops it when it closes.
 
+## Details of WP71
+
+The owner, after a film run of 4 hours: "yumekit takes no message while it works. That's a big flaw, we should be able to steer it while it works". In that run, the person chose a clip and the music, and gave a new direction for two shots. `POST /api/chat/requests` answered `chat-busy`, and the only way in was Stop. These decisions came from the architect (D1 to D7) and the build of WP71 on 2026-11-25.
+
+1. (D1) A person can send a message while a request runs. It is a steering message. The engine stores it as a `steering` entry of the chat, in order, in `chat.json`, so a restart keeps it. `sentAt` is an ISO time in UTC.
+2. (D2) Each action of the lead is a call through `/api/tools/<name>`. When a call of the lead ends, the engine takes each waiting message, marks it `read`, and adds one text block in front of the content of the answer: the title `A MESSAGE FROM THE PERSON`, the rule, and each message with its exact text, its time, and the picked scene. `structuredContent` gets `person_messages` with the rule and the messages, as its first field, because some programs show only `structuredContent` to the model. A failed call gets the block too. A message reaches the lead once.
+3. The block goes first, as its own text item. The 60,000 character limit of `get_work` applies inside the harness, before the engine adds the block, so the block is never cut there. An answer with pictures (`preview_*`, `contact_sheet`, `view_for_review`) keeps its pictures after the block. When a program cuts a long result, it cuts the end. The block at the start stays. This last point is an inference from the documents of Claude Code, and was not measured.
+4. (D3) While a message waits, a call of the lead to a tool that can spend money does not run. It fails with `person-message-waiting`, and the answer carries the message as in item 2. The tools are `generate_asset`, `replace_narration`, `replace_music`, and `make_sharper_copy`. The engine does not know the price of a call before the media tools choose a server, so a free call of these tools also waits for the message. It costs one more call of the lead and no money.
+5. (D4) When a request ends with a message that waits (the lead made no more tool calls), the engine starts the waiting messages as the next request, in order. One message is the request text as it is. Two or more are one request with each message numbered. The engine adds no `request` entry for it: the `steering` entries are the request, and they become `read`. This also happens after Stop: a person who stops the AI after a message most likely wants the AI to act on it. The person can press Stop again.
+6. When the engine starts and `chat.json` has waiting messages, it starts them as a request, as item 5 says. When the engine closes, it starts no request. If the start fails (no agent, or signed out), the engine adds a notice with the failure, and the messages keep waiting.
+7. A message that comes while a request starts (between the check of the agent and the first answer) waits for that start, so it comes after the `request` entry in the chat. If the start fails, the message starts a request of its own.
+8. When a message is read, the engine ends the answer entry of the lead as `done` and starts a new `running` answer entry after the `steering` entries. So the chat shows the reply of the AI below the message. A step that still runs moves to the new answer. The request keeps one `change` entry. Its summary is the first sentence of the last whole text of the request.
+9. (D5) Rule 39 of the instructions, and a paragraph of the server instructions of document 05, say: a message from the person is the person speaking now; act on it first; it wins over the plan; a choice of the person of a clip, a picture, or music overrides a verdict of the critic. The existing fields for a request of the person are `person_asked_for_another_try` of `generate_asset` (document 20), `person_asked_to_change_brief` of `put_cast_member`, and `remove_person_work`. The new field is `person_chose_this_clip` of `place_video`, with the words of the person. Document 05 has the details.
+10. (D6) The box of the chat stays open while the AI works. Its placeholder says "Tell the AI something while it works". Send stands next to Stop, and Stop keeps its place at the right end. A sent message shows at once as the person's message with the state "Waiting for the AI's next step", then "Read by the AI".
+11. `chat-busy` is removed from `POST /api/chat/requests`: no test and no tool needed the old behavior. Undo of a change while a request runs still gives `chat-busy`. The buttons of the step sheets (document 19, "Details of WP62", item 9) stay off while the AI works.
+12. The AI cannot send a message. `POST /api/chat/requests` with `x-yumekit-client: agent` or with `x-yumekit-helper` fails with `message-not-for-the-ai` (403), as `PUT /api/media-limits` does for the AI.
+13. (D7) A helper and the critic never get a message: the engine adds the block only to a call of the lead (`helperCallOf` gives `lead`) while a chat request runs.
+14. The Making screen has no box. A person opens the editor to send a message. This is a follow-up.
+
 ## Work package
 
-| Id   | Scope                                                                                                                                   | Needs |
-| ---- | --------------------------------------------------------------------------------------------------------------------------------------- | ----- |
-| WP26 | `@yumekit/brain` with the interface, the two adapters, and the instructions. The chat of the engine with its requests, events, and file | WP25  |
-| WP35 | The Cursor adapter. `cursor` is an agent id of the chat, in the engine, in the settings, and in the editor                              | WP26  |
+| Id   | Scope                                                                                                                                                                                                                  | Needs |
+| ---- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| WP26 | `@yumekit/brain` with the interface, the two adapters, and the instructions. The chat of the engine with its requests, events, and file                                                                                | WP25  |
+| WP71 | Steering messages: the queue in `chat.json`, the block in the answer of the next call of the lead, the guard of paid calls, the next request, the choice of the person over the critic, and the open box of the editor | WP26  |
+| WP35 | The Cursor adapter. `cursor` is an agent id of the chat, in the engine, in the settings, and in the editor                                                                                                             | WP26  |
 
 ### WP35 checks
 
