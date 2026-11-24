@@ -13,7 +13,7 @@ function runningEngine(): RunningEngine {
 }
 
 beforeAll(async () => {
-  engine = await runEngine({ fakeAgent: true });
+  engine = await runEngine({ fakeAgent: true, withChromium: true });
 });
 
 afterAll(async () => {
