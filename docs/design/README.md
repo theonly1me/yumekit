@@ -4,28 +4,29 @@ These documents are the design of yumekit. Code follows them. If code and a docu
 
 ## Read in this order
 
-| Document                                                           | Answers                                                                                                    |
-| ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
-| [01-architecture.md](01-architecture.md)                           | Which processes and packages exist, and which package may use which                                        |
-| [02-scene-contract.md](02-scene-contract.md)                       | How a scene draws one frame, and the rules that keep a render repeatable                                   |
-| [03-project-format.md](03-project-format.md)                       | Which files a project has, and the edit commands that change them                                          |
-| [04-renderer.md](04-renderer.md)                                   | How frames become a video file with sound                                                                  |
-| [05-harness-mcp.md](05-harness-mcp.md)                             | Which MCP tools an agent uses to build content                                                             |
-| [06-media-tools.md](06-media-tools.md)                             | How an image, voice, music, or video tool connects                                                         |
-| [07-build-plan-m1.md](07-build-plan-m1.md)                         | The work packages of milestone 1, with the checks that accept each one                                     |
-| [08-scene-kit.md](08-scene-kit.md)                                 | Which ready scenes exist, how captions follow narration, and the default look                              |
-| [09-generated-video.md](09-generated-video.md)                     | How a clip from a video model gets into a scene, and the limit on its cost                                 |
-| [10-providers-models-and-keys.md](10-providers-models-and-keys.md) | How a server describes its models, and where an API key lives                                              |
-| [11-editor-m2.md](11-editor-m2.md)                                 | How the engine serves the editor, and the screens of the first version                                     |
-| [12-brain-runner.md](12-brain-runner.md)                           | How the editor starts the agent program of the person, and how the chat works                              |
-| [13-editor-prompt-first.md](13-editor-prompt-first.md)             | The second version of the editor: the prompt, platforms, scene cards, and the start screen                 |
-| [14-install-and-release.md](14-install-and-release.md)             | How a person installs yumekit from npm, and how the owner makes a release                                  |
-| [15-open-steps-and-choices.md](15-open-steps-and-choices.md)       | The step views, files of the person, the choice of services and models, and the video style                |
-| [16-creator-capabilities.md](16-creator-capabilities.md)           | More models, camera moves, the cast, start formats, the Files view, and new kinds of media                 |
-| [17-looks-and-motion.md](17-looks-and-motion.md)                   | Five looks, the motion functions, backdrops, twelve new kit scenes, and transitions                        |
-| [18-first-full-run.md](18-first-full-run.md)                       | Corrections from the first full run: a local voice, step reasons, captions, names, the phone layout        |
-| [19-film-kit.md](19-film-kit.md)                                   | Tempo and beats, music with no key, scene types for footage and launch films, the contact sheet            |
-| [20-story-craft.md](20-story-craft.md)                             | The story, the story plan, the sheets of the cast, the art direction, continuity, and the review of a clip |
+| Document                                                           | Answers                                                                                                          |
+| ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| [01-architecture.md](01-architecture.md)                           | Which processes and packages exist, and which package may use which                                              |
+| [02-scene-contract.md](02-scene-contract.md)                       | How a scene draws one frame, and the rules that keep a render repeatable                                         |
+| [03-project-format.md](03-project-format.md)                       | Which files a project has, and the edit commands that change them                                                |
+| [04-renderer.md](04-renderer.md)                                   | How frames become a video file with sound                                                                        |
+| [05-harness-mcp.md](05-harness-mcp.md)                             | Which MCP tools an agent uses to build content                                                                   |
+| [06-media-tools.md](06-media-tools.md)                             | How an image, voice, music, or video tool connects                                                               |
+| [07-build-plan-m1.md](07-build-plan-m1.md)                         | The work packages of milestone 1, with the checks that accept each one                                           |
+| [08-scene-kit.md](08-scene-kit.md)                                 | Which ready scenes exist, how captions follow narration, and the default look                                    |
+| [09-generated-video.md](09-generated-video.md)                     | How a clip from a video model gets into a scene, and the limit on its cost                                       |
+| [10-providers-models-and-keys.md](10-providers-models-and-keys.md) | How a server describes its models, and where an API key lives                                                    |
+| [11-editor-m2.md](11-editor-m2.md)                                 | How the engine serves the editor, and the screens of the first version                                           |
+| [12-brain-runner.md](12-brain-runner.md)                           | How the editor starts the agent program of the person, and how the chat works                                    |
+| [13-editor-prompt-first.md](13-editor-prompt-first.md)             | The second version of the editor: the prompt, platforms, scene cards, and the start screen                       |
+| [14-install-and-release.md](14-install-and-release.md)             | How a person installs yumekit from npm, and how the owner makes a release                                        |
+| [15-open-steps-and-choices.md](15-open-steps-and-choices.md)       | The step views, files of the person, the choice of services and models, and the video style                      |
+| [16-creator-capabilities.md](16-creator-capabilities.md)           | More models, camera moves, the cast, start formats, the Files view, and new kinds of media                       |
+| [17-looks-and-motion.md](17-looks-and-motion.md)                   | Five looks, the motion functions, backdrops, twelve new kit scenes, and transitions                              |
+| [18-first-full-run.md](18-first-full-run.md)                       | Corrections from the first full run: a local voice, step reasons, captions, names, the phone layout              |
+| [19-film-kit.md](19-film-kit.md)                                   | Tempo and beats, music with no key, scene types for footage and launch films, the contact sheet                  |
+| [20-story-craft.md](20-story-craft.md)                             | The story, the story plan, the sheets of the cast, the art direction, continuity, and the review of a clip       |
+| [21-simple-studio-and-takes.md](21-simple-studio-and-takes.md)     | The simple project screen, questions in rounds, files in the chat, chapters, takes, and limits for every project |
 
 The visual reference for the editor is the prototype in [apps/prototype](../../apps/prototype).
 
