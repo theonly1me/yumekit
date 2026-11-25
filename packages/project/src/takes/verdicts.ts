@@ -36,23 +36,50 @@ function isNoteOnAsset(options: { take: Take; itemId: string }): boolean {
   return options.itemId !== storyItemId && options.itemId !== cutItemId;
 }
 
-export function assetVerdictsOf(
+export interface AssetDecision {
+  verdict: AssetVerdict;
+  take: Take;
+}
+
+export function assetDecisionsOf(
   takes: readonly Take[],
-): Map<string, AssetVerdict> {
-  const verdicts = new Map<string, AssetVerdict>();
+): Map<string, AssetDecision> {
+  const decisions = new Map<string, AssetDecision>();
   for (const take of sentTakesOf(takes)) {
     for (const item of take.items) {
       if (item.kind === "asset" && item.approved === true) {
-        verdicts.set(item.id, "approved");
+        decisions.set(item.id, { verdict: "approved", take });
       }
     }
     for (const note of take.notes) {
       if (isNoteOnAsset({ take, itemId: note.itemId })) {
-        verdicts.set(note.itemId, note.dropped === true ? "dropped" : "change");
+        decisions.set(note.itemId, {
+          verdict: note.dropped === true ? "dropped" : "change",
+          take,
+        });
       }
     }
   }
-  return verdicts;
+  return decisions;
+}
+
+export function assetVerdictsOf(
+  takes: readonly Take[],
+): Map<string, AssetVerdict> {
+  return new Map(
+    [...assetDecisionsOf(takes)].map(([assetId, decision]) => [
+      assetId,
+      decision.verdict,
+    ]),
+  );
+}
+
+export function isRefusedByPerson(options: {
+  takes: readonly Take[];
+  assetId: string;
+}): boolean {
+  const verdict = assetVerdictsOf(options.takes).get(options.assetId);
+  return verdict === "change" || verdict === "dropped";
 }
 
 export function isAssetApproved(options: {

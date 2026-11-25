@@ -1,9 +1,10 @@
-import type {
-  Asset,
-  DesignCheck,
-  Edit,
-  ProjectSnapshot,
-  Shot,
+import {
+  isRefusedByPerson,
+  type Asset,
+  type DesignCheck,
+  type Edit,
+  type ProjectSnapshot,
+  type Shot,
 } from "@yumekit/project";
 import { designCheckOf } from "../critic/design/designRecord.js";
 import type { GenerateAssetInput } from "../media/generateAssetInput.js";
@@ -81,7 +82,9 @@ export function withChosenPictures(options: {
   return withPersonChoice({
     snapshot,
     shotId: request.shot_id,
-    assetIds: keyPictureIdsOf(request),
+    assetIds: keyPictureIdsOf(request).filter(
+      (assetId) => !isRefusedByPerson({ takes: snapshot.takes, assetId }),
+    ),
     words,
   });
 }
@@ -93,7 +96,11 @@ export function withChosenClip(options: {
 }): Chosen {
   const { snapshot, asset, words } = options;
   const shotId = shotIdOf(asset);
-  if (words === undefined || shotId === undefined) {
+  const isRefused = isRefusedByPerson({
+    takes: snapshot.takes,
+    assetId: asset.id,
+  });
+  if (words === undefined || shotId === undefined || isRefused) {
     return { snapshot, edits: [] };
   }
   return withPersonChoice({ snapshot, shotId, assetIds: [asset.id], words });

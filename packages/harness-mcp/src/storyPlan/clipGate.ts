@@ -1,11 +1,15 @@
-import type { Asset, ProjectSnapshot } from "@yumekit/project";
-import { designCheckOf } from "../critic/design/designRecord.js";
+import {
+  isRefusedByPerson,
+  type Asset,
+  type ProjectSnapshot,
+} from "@yumekit/project";
 import type { HarnessFailure } from "../results.js";
 import {
   designNotChecked,
   isOpen,
   shortestCleanSeconds,
   shotNeedsDesign,
+  standingCheckOf,
 } from "./designGate.js";
 import { shotOfAsset } from "./shotOfAsset.js";
 
@@ -24,10 +28,17 @@ export function shownClipFailureOf(options: {
   if (shot === undefined || !shotNeedsDesign({ snapshot, shot })) {
     return undefined;
   }
-  const keptWhole = (shot.reviews ?? []).some(
-    (review) => review.assetId === asset.id && review.personKept !== undefined,
-  );
-  const check = designCheckOf({ shot, assetId: asset.id });
+  const isRefused = isRefusedByPerson({
+    takes: snapshot.takes,
+    assetId: asset.id,
+  });
+  const keptWhole =
+    !isRefused &&
+    (shot.reviews ?? []).some(
+      (review) =>
+        review.assetId === asset.id && review.personKept !== undefined,
+    );
+  const check = standingCheckOf({ snapshot, shot, assetId: asset.id });
   if (keptWhole) return undefined;
   if (check === undefined) {
     return designNotChecked({

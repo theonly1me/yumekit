@@ -1,4 +1,9 @@
-import type { DesignCheck, ProjectSnapshot, Shot } from "@yumekit/project";
+import {
+  isRefusedByPerson,
+  type DesignCheck,
+  type ProjectSnapshot,
+  type Shot,
+} from "@yumekit/project";
 import { personWordsInput } from "../cast/lookInput.js";
 import { shotDesignJobOf } from "../critic/design/designJob.js";
 import { designCheckOf } from "../critic/design/designRecord.js";
@@ -49,6 +54,21 @@ export function isSavedClipEnd(options: {
   return asset?.source.kind === "tool" && asset.source.tool === endPictureTool;
 }
 
+export function standingCheckOf(options: {
+  snapshot: ProjectSnapshot;
+  shot: Shot;
+  assetId: string;
+}): DesignCheck | undefined {
+  const { snapshot, assetId } = options;
+  const check = designCheckOf({ shot: options.shot, assetId });
+  if (check === undefined) return undefined;
+  if (!isRefusedByPerson({ takes: snapshot.takes, assetId })) return check;
+  if (check.by === "person") return undefined;
+  const lead = { ...check };
+  delete lead.personKept;
+  return lead;
+}
+
 export function designNotChecked(options: {
   shotId: string;
   assetIds: string[];
@@ -83,7 +103,7 @@ export function keyPictureFailureOf(options: {
     return undefined;
   }
   const unchecked = ids.filter(
-    (assetId) => designCheckOf({ shot, assetId }) === undefined,
+    (assetId) => standingCheckOf({ snapshot, shot, assetId }) === undefined,
   );
   if (unchecked.length > 0) {
     return designNotChecked({
@@ -93,7 +113,7 @@ export function keyPictureFailureOf(options: {
     });
   }
   const broken = ids.flatMap((assetId) => {
-    const check = designCheckOf({ shot, assetId });
+    const check = standingCheckOf({ snapshot, shot, assetId });
     return check === undefined || isOpen(check) ? [] : [check];
   });
   if (broken.length === 0) return undefined;

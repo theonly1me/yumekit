@@ -234,6 +234,7 @@ These facts and choices came from the build of WP80 on 2026-11-26.
 18. `get_work` has "### Chapters and takes": the chapters, the setting of T10, the take that is open or ready, and the last take that the person sent with its notes and its approvals. Its next batch says that a shot waits for the person to approve its start picture. `get_project` gives `approve_pictures_first`.
 19. `@yumekit/project/takes` exports the chapters, the verdicts of the assets, and the time of a chapter, with no Node code, for the editor of WP83 and WP84.
 20. The tests of other parts of a clip turn "Approve pictures before clips" off (`approvePicturesFirst: false` in the test fixtures), so they keep testing what they tested before.
+21. A verdict of the person in a take wins over words in a call. When the newest sent take asks for a change of a picture or a clip, or drops it, `person_chose_this_picture` and `person_chose_this_clip` open neither `picture-not-approved` nor the design gate, and store no check. The refusal names the take and the verdict, for example "The person dropped "x" in take 2". With no verdict in a take, the words work as before.
 
 ### The run
 

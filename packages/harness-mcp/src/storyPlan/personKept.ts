@@ -1,4 +1,9 @@
-import type { Asset, Edit, ProjectSnapshot } from "@yumekit/project";
+import {
+  isRefusedByPerson,
+  type Asset,
+  type Edit,
+  type ProjectSnapshot,
+} from "@yumekit/project";
 import { z } from "zod";
 import { shotIdOf } from "./shotOfAsset.js";
 
@@ -22,6 +27,9 @@ export function withPersonKept(options: {
   const plan = snapshot.bible.storyPlan;
   const shotId = shotIdOf(asset);
   if (words === undefined || plan === undefined || shotId === undefined) {
+    return unchanged;
+  }
+  if (isRefusedByPerson({ takes: snapshot.takes, assetId: asset.id })) {
     return unchanged;
   }
   const shot = plan.shots.find((candidate) => candidate.id === shotId);

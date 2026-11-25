@@ -27,12 +27,15 @@ export {
   type ChapterWork,
 } from "./chapterTimes.js";
 export {
+  assetDecisionsOf,
   assetVerdictsOf,
   isAssetApproved,
+  isRefusedByPerson,
   lastSentTakeOf,
   nextTakeNumberOf,
   openTakeOf,
   sentTakesOf,
+  type AssetDecision,
   type AssetVerdict,
 } from "./verdicts.js";
 
