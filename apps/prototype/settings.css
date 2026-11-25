@@ -78,3 +78,107 @@ button.tool-head {
   font-size: var(--step-0);
   padding-top: 6px;
 }
+
+label.setting-check {
+  align-items: flex-start;
+}
+
+label.setting-check input {
+  margin-top: 3px;
+}
+
+.setting-check > span {
+  color: var(--text);
+}
+
+.setting-check em {
+  display: block;
+  font-style: normal;
+  color: var(--muted);
+}
+
+.spend-line {
+  font-size: var(--step--1);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.own-limits {
+  padding-left: 24px;
+  border-left: 2px solid var(--accent);
+}
+
+.size-choice {
+  flex-basis: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.size-choice .fact {
+  font-variant-numeric: tabular-nums;
+}
+
+label.own-size {
+  font-size: var(--step--1);
+  color: var(--muted);
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.own-size input {
+  width: 56px;
+  text-align: right;
+}
+
+.size-warning {
+  flex-basis: 100%;
+  font-size: var(--step--1);
+  color: var(--accent);
+}
+
+.export-done {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.real-size {
+  font-size: var(--step--1);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+details.more {
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+}
+
+details.more > summary {
+  cursor: pointer;
+  font-size: var(--step-0);
+  font-weight: 500;
+  color: var(--muted);
+}
+
+details.more[open] > summary {
+  margin-bottom: 24px;
+  color: var(--text);
+}
+
+details.more > .setting-group + .setting-group,
+.more-body {
+  display: grid;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.more-body {
+  margin-top: 0;
+}
+
+.more-body h3 {
+  font-size: var(--step-0);
+}

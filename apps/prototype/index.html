@@ -4,12 +4,14 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex, nofollow" />
-    <title>yumekit editor design, fifth pass</title>
+    <title>yumekit editor design, sixth pass</title>
     <link rel="stylesheet" href="fonts.css" />
     <link rel="stylesheet" href="tokens.css" />
     <link rel="stylesheet" href="shell.css" />
     <link rel="stylesheet" href="start.css" />
-    <link rel="stylesheet" href="making.css" />
+    <link rel="stylesheet" href="project.css" />
+    <link rel="stylesheet" href="slate.css" />
+    <link rel="stylesheet" href="chatCard.css" />
     <link rel="stylesheet" href="parts.css" />
     <link rel="stylesheet" href="pictures.css" />
     <link rel="stylesheet" href="sound.css" />
@@ -23,29 +25,31 @@
     <link rel="stylesheet" href="sheets.css" />
     <link rel="stylesheet" href="settings.css" />
     <link rel="stylesheet" href="notes.css" />
+    <link rel="stylesheet" href="files.css" />
+    <link rel="stylesheet" href="questions.css" />
+    <link rel="stylesheet" href="chapters.css" />
+    <link rel="stylesheet" href="story.css" />
+    <link rel="stylesheet" href="takes.css" />
+    <link rel="stylesheet" href="takeCard.css" />
+    <link rel="stylesheet" href="takeActions.css" />
+    <link rel="stylesheet" href="takeMarks.css" />
+    <link rel="stylesheet" href="takeLarge.css" />
   </head>
   <body>
     <header class="review-bar">
-      <p>Editor design, fifth pass</p>
+      <p>Editor design, sixth pass, simple by default</p>
       <nav class="review-nav" aria-label="Screens to review">
         <button type="button" class="tab" data-go="start">Start</button>
-        <button type="button" class="tab" data-go="making">Making</button>
-        <button type="button" class="tab" data-go="editor">Editor</button>
-        <button type="button" class="tab" data-go="editor:script">
-          Script
+        <button type="button" class="tab" data-go="new-project">
+          A new project
         </button>
-        <button type="button" class="tab" data-go="editor:pictures">
-          Pictures
-        </button>
-        <button type="button" class="tab" data-go="editor:music">Music</button>
-        <button type="button" class="tab" data-go="editor:clip">
-          Make a real video clip
-        </button>
-        <button type="button" class="tab" data-go="editor:export">
-          Export
-        </button>
-        <button type="button" class="tab" data-go="editor:settings">
+        <button type="button" class="tab" data-go="project">The project</button>
+        <button type="button" class="tab" data-go="editor">Edit by hand</button>
+        <button type="button" class="tab" data-go="project:settings">
           Settings
+        </button>
+        <button type="button" class="tab" data-go="project:export">
+          Export
         </button>
         <a class="tab-link" href="#notes">Notes and questions</a>
       </nav>
@@ -57,9 +61,9 @@
     <main id="app" data-screen="start">
       <section class="screen" id="start" aria-label="Start"></section>
       <section
-        class="screen"
-        id="making"
-        aria-label="Making the video"
+        class="screen project"
+        id="project"
+        aria-label="Project"
       ></section>
       <section class="screen editor" id="editor" aria-label="Editor">
         <div class="editor-bar">
@@ -72,11 +76,17 @@
             >
               yumekit
             </button>
-            <p class="project-name" id="project-name"></p>
+            <p class="project-name" id="project-name">The Ninth Bell</p>
+            <p class="work-line" id="work-line" aria-live="polite"></p>
           </div>
           <div class="bar-actions">
-            <button type="button" data-open-sheet="script">Script</button>
-            <button type="button" data-open-sheet="pictures">Pictures</button>
+            <button type="button" id="back-to-project">
+              Back to the project
+            </button>
+            <button type="button" data-open-sheet="story">Story</button>
+            <button type="button" class="takes-button" data-open-sheet="takes">
+              Takes<span class="count" id="takes-count"></span>
+            </button>
             <button type="button" data-open-sheet="settings">Settings</button>
             <button type="button" class="primary" data-open-sheet="export">
               Export

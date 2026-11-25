@@ -28,6 +28,20 @@
   color: #f6f3ec;
 }
 
+.frame-art {
+  position: absolute;
+  inset: 0;
+}
+
+.frame-text {
+  position: relative;
+}
+
+.frame-text,
+.frame-caption {
+  text-shadow: 0 1px 12px rgb(0 0 0 / 0.55);
+}
+
 .frame-text {
   font-size: clamp(1rem, 2.6vw, 2.1rem);
   font-weight: 500;

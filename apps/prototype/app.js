@@ -1,7 +1,10 @@
+import { restoreChatWidth } from "./chatResize.js";
 import { renderClipSheet } from "./clipSheet.js";
 import { renderExportSheet } from "./exportSheet.js";
 import { renderLowerRows } from "./lowerRows.js";
-import { renderMaking, stopMaking } from "./making.js";
+import { chapterNumber, progressText } from "./leadWork.js";
+import { renderProject } from "./project.js";
+import { showSampleProject, startProject } from "./projectFlow.js";
 import { renderNotes } from "./notes.js";
 import { renderPartSheet } from "./parts.js";
 import { renderPreview } from "./preview.js";
@@ -10,12 +13,20 @@ import { renderSettings } from "./settings.js";
 import { renderSide } from "./side.js";
 import { renderStart } from "./start.js";
 import { change, onChange, state } from "./state.js";
+import { renderStartOptions } from "./startOptions.js";
+import { renderStorySheet } from "./storySheet.js";
+import { renderTakesSheet } from "./takes.js";
+import { seedAdvanced } from "./takesSeed.js";
+import { makingTake, waitingForPerson } from "./takesStore.js";
 
 const element = (id) => document.getElementById(id);
 const sheets = {
   clip: renderClipSheet,
   export: renderExportSheet,
   settings: renderSettings,
+  takes: renderTakesSheet,
+  "start-options": renderStartOptions,
+  story: renderStorySheet,
   script: renderPartSheet("script"),
   pictures: renderPartSheet("pictures"),
   voice: renderPartSheet("voice"),
@@ -54,6 +65,19 @@ function renderSheet() {
   }
 }
 
+function renderWorkLine() {
+  const take = makingTake();
+  const waiting = waitingForPerson();
+  element("takes-count").textContent = waiting === 0 ? "" : String(waiting);
+  element("work-line").textContent =
+    take === undefined
+      ? waiting === 0
+        ? "Nothing waits for you"
+        : `${waiting} wait for you in Takes`
+      : `Chapter ${chapterNumber(take.chapterId)}: ${progressText(take).replace("The lead is making", "making")}`;
+  element("work-line").dataset.working = String(take !== undefined);
+}
+
 function render() {
   const main = element("app");
   const entered = shown.screen !== state.screen;
@@ -65,14 +89,11 @@ function render() {
   if (state.screen === "start") {
     renderStart({ element: element("start") });
   }
-  if (state.screen === "making" && entered) {
-    renderMaking({ element: element("making") });
-  }
-  if (state.screen !== "making") {
-    stopMaking();
+  if (state.screen === "project") {
+    renderProject({ element: element("project") });
   }
   if (state.screen === "editor") {
-    element("project-name").textContent = "What is yumekit";
+    renderWorkLine();
     renderPreview({ element: element("preview") });
     renderScenesRow({ element: element("scenes-row") });
     renderLowerRows({ element: element("lower-rows") });
@@ -91,6 +112,21 @@ function render() {
 document.querySelectorAll("[data-go]").forEach((button) => {
   button.addEventListener("click", () => {
     const [screen, sheet] = button.dataset.go.split(":");
+    if (screen === "new-project") {
+      startProject();
+      return;
+    }
+    if (screen === "project" && sheet === undefined) {
+      showSampleProject();
+      return;
+    }
+    if (sheet === "chapters") {
+      change({ screen, sheet: undefined, timelineOpen: true, playing: false });
+      document
+        .querySelector(".chapter-row")
+        ?.scrollIntoView({ block: "start" });
+      return;
+    }
     change({ screen, sheet, playing: false });
     window.scrollTo({ top: 0 });
   });
@@ -108,10 +144,13 @@ element("sheet-close").addEventListener("click", () =>
 element("home").addEventListener("click", () =>
   change({ screen: "start", sheet: undefined, playing: false }),
 );
+element("back-to-project").addEventListener("click", () =>
+  change({ screen: "project", sheet: undefined, playing: false }),
+);
 element("ask-jump").addEventListener("click", () => {
   change({ sideTab: "chat" });
   element("side").scrollIntoView({ block: "end" });
-  element("ask-box").focus();
+  element("editor-ask-box").focus();
 });
 element("theme").addEventListener("click", () =>
   setTheme(
@@ -126,6 +165,8 @@ document.addEventListener("keydown", (event) => {
 });
 
 setTheme(storedTheme());
+restoreChatWidth();
+seedAdvanced();
 renderNotes({ element: element("notes") });
 onChange(render);
 render();

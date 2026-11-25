@@ -1,0 +1,196 @@
+.take-slate-head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: end;
+  gap: 8px 32px;
+  padding-bottom: 22px;
+  margin-bottom: 26px;
+  border-bottom: 1px solid var(--line);
+}
+
+.slate {
+  display: grid;
+  line-height: 1;
+}
+
+.slate span {
+  font-size: var(--step--1);
+  color: var(--muted);
+}
+
+.slate strong {
+  font-size: clamp(5.5rem, 11vw, 9rem);
+  font-weight: 500;
+  letter-spacing: -0.07em;
+  line-height: 0.82;
+  font-variant-numeric: tabular-nums;
+  margin-left: -0.06em;
+}
+
+.slate-facts {
+  display: grid;
+  gap: 6px;
+  padding-bottom: 6px;
+}
+
+.slate-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 18px;
+  margin-top: 6px;
+}
+
+.contact {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.contact h3 {
+  font-size: var(--step-0);
+  color: var(--muted);
+}
+
+.contact-sheet {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(190px, 100%), 1fr));
+  gap: 20px 14px;
+}
+
+button.tile-open {
+  width: 100%;
+  display: grid;
+  gap: 7px;
+  padding: 0;
+  border: 0;
+  border-radius: 3px;
+  text-align: left;
+  white-space: normal;
+  font-weight: 400;
+}
+
+.tile-picture {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 3px;
+  background: var(--well);
+}
+
+.tile-picture .art {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transition: transform 200ms ease;
+}
+
+button.tile-open:hover .art {
+  transform: scale(1.03);
+}
+
+.tile[data-marked="true"] .tile-picture {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.tile[data-out="true"] .art {
+  filter: grayscale(0.8) brightness(0.65);
+}
+
+.tile-new,
+.tile-notes {
+  position: absolute;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: var(--step--2);
+}
+
+.tile-new {
+  top: 6px;
+  left: 6px;
+  background: rgb(10 10 10 / 0.62);
+  color: #f2efe8;
+}
+
+.tile-notes {
+  bottom: 6px;
+  left: 6px;
+  background: var(--accent);
+  color: var(--ground);
+  font-weight: 500;
+}
+
+.tile-wave {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  padding: 10px;
+  text-align: center;
+  font-size: var(--step--1);
+  color: var(--accent);
+  background: repeating-linear-gradient(
+    90deg,
+    transparent 0 5px,
+    rgb(217 201 168 / 0.12) 5px 7px
+  );
+}
+
+.tile-caption {
+  font-size: var(--step--1);
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.tile-fault {
+  font-size: var(--step--2);
+  color: var(--decline);
+}
+
+.simple-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+}
+
+.simple-actions [aria-pressed="true"] {
+  border-color: var(--decline);
+  color: var(--decline);
+}
+
+.simple-actions [data-kind="music"][aria-pressed="true"] {
+  border-color: var(--approve);
+  color: var(--approve);
+}
+
+.film {
+  display: grid;
+  gap: 14px;
+  max-width: 980px;
+}
+
+.film-title {
+  font-size: var(--step-1);
+  font-weight: 500;
+}
+
+@media (max-width: 560px) {
+  .take-slate-head {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .contact-sheet {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tile-picture .art {
+    transition: none;
+  }
+}

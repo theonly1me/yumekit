@@ -1,8 +1,9 @@
 import { agents, mediaTools } from "./aiTools.js";
 import { bindKeyGuide, keyGuideMarkup } from "./keyGuide.js";
+import { bindLimits, leadWorkMarkup, limitsMarkup } from "./settingsLimits.js";
 import { change, notify, state } from "./state.js";
 
-const view = { openToolId: undefined };
+const view = { openToolId: undefined, more: false };
 
 function agentMarkup(agent) {
   const inUse = agent.id === state.agentId;
@@ -48,27 +49,21 @@ export function renderSettings({ element }) {
     <div class="sheet-body">
       <h2>Settings</h2>
       <section class="setting-group">
-        <h3>AI</h3>
-        <p class="fact">The AI writes the script and builds the video. yumekit uses an AI app that is already on this computer.</p>
+        <h3>Who makes the film</h3>
+        <p class="fact">The lead is an AI app on this computer. It uses the plan you already pay for.</p>
         <ul class="setting-rows">${agents.map(agentMarkup).join("")}</ul>
+        <div class="setting-row"><span>Model of the lead<em>The default model is the most careful. A faster one costs less time.</em></span><span class="segments" role="group" aria-label="Model of the lead">${["Default", "Faster"].map((name) => `<button type="button" data-model="${name}" aria-pressed="${state.model === name}">${name}</button>`).join("")}</span></div>
       </section>
-      <section class="setting-group">
-        <h3>Media tools and keys</h3>
-        <p class="fact">Each tool makes pictures, voice, music, or video with your own account. yumekit asks for a key only when you first use a tool.</p>
-        <ul class="setting-rows">${mediaTools.map(toolMarkup).join("")}</ul>
-      </section>
-      <section class="setting-group">
-        <h3>Limits</h3>
-        <div class="setting-row">
-          <span>Real video in each project<em>The AI stops and asks when a project reaches this limit.</em></span>
-          <span class="stepper">
-            <button type="button" data-limit-step="-10" aria-label="10 seconds less">-</button>
-            <span>${state.limitSeconds} seconds</span>
-            <button type="button" data-limit-step="10" aria-label="10 seconds more">+</button>
-          </span>
-        </div>
-        <label class="switch setting-check"><input type="checkbox" checked /> Ask me before each step that costs money</label>
-      </section>
+      ${limitsMarkup()}
+      <details class="more" ${view.more ? "open" : ""}>
+        <summary>More settings</summary>
+        <section class="setting-group">
+          <h3>Media services and keys</h3>
+          <p class="fact">Each service makes pictures, voice, music, or video with your own account. yumekit asks for a key only when you first use one.</p>
+          <ul class="setting-rows">${mediaTools.map(toolMarkup).join("")}</ul>
+        </section>
+        ${leadWorkMarkup()}
+      </details>
     </div>`;
   element.querySelectorAll("[data-use-agent]").forEach((button) => {
     button.addEventListener("click", () =>
@@ -90,14 +85,13 @@ export function renderSettings({ element }) {
       notify();
     });
   });
-  element.querySelectorAll("[data-limit-step]").forEach((button) => {
+  bindLimits(element);
+  element.querySelector(".more").addEventListener("toggle", (event) => {
+    view.more = event.target.open;
+  });
+  element.querySelectorAll("[data-model]").forEach((button) => {
     button.addEventListener("click", () =>
-      change({
-        limitSeconds: Math.max(
-          10,
-          state.limitSeconds + Number(button.dataset.limitStep),
-        ),
-      }),
+      change({ model: button.dataset.model }),
     );
   });
   bindKeyGuide({ element });

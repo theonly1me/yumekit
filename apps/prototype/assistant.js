@@ -35,8 +35,14 @@ function reword(scene) {
   });
 }
 
-function answer({ text, scene }) {
+function answer({ text, scene, files }) {
   const words = text.toLowerCase();
+  if (files.length > 0) {
+    return say({
+      kind: "ai",
+      text: `I added ${files.length} file${files.length === 1 ? "" : "s"} to the project. I use them as references in the next take, and I show them in Takes as yours.`,
+    });
+  }
   if (words.includes("short")) {
     return shorter();
   }
@@ -72,11 +78,12 @@ function answer({ text, scene }) {
   return reword(scene);
 }
 
-export function ask({ text, scene }) {
+export function ask({ text, scene, files }) {
   state.draft = "";
   state.chat.push({
     kind: "you",
     text,
+    files,
     about:
       scene === undefined
         ? undefined
@@ -86,6 +93,6 @@ export function ask({ text, scene }) {
   notify();
   setTimeout(() => {
     state.thinking = false;
-    answer({ text, scene });
+    answer({ text, scene, files });
   }, replyMilliseconds);
 }

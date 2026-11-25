@@ -44,6 +44,8 @@ export const lengths = [
   "15 seconds",
   "30 seconds",
   "60 seconds",
+  "3 minutes",
+  "8 minutes",
   "Let the AI decide",
 ];
 
@@ -120,16 +122,20 @@ export const musicChoices = [
 export const captionStyles = ["Word by word", "Full line", "Large and bold"];
 
 export const suggestions = [
-  "Make it shorter",
-  "Change the voice",
-  "Add a scene about price",
-  "Make the opening stronger",
+  "Make the fog thicker",
+  "Give Pell a red scarf",
+  "Make chapter 2 shorter",
+  "Change the music",
 ];
 
 export const recentProjects = [
   {
+    name: "The Ninth Bell",
+    facts: "YouTube, 8 minutes in 4 chapters, changed today",
+  },
+  {
     name: "What is yumekit",
-    facts: "YouTube and TikTok, 18 seconds, changed today",
+    facts: "YouTube and TikTok, 18 seconds, changed 2 days ago",
   },
   {
     name: "Street basketball teaser",
@@ -146,5 +152,5 @@ export function platformOf(platformId) {
 }
 
 export function fileNameOf(platformId) {
-  return `what-is-yumekit-${platformId}.mp4`;
+  return `the-ninth-bell-${platformId}.mp4`;
 }

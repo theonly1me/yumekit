@@ -1,4 +1,5 @@
-import { platformOf, platforms, tones } from "./data.js";
+import { artMarkup } from "./art.js";
+import { platformOf, platforms } from "./data.js";
 import {
   change,
   escapeText,
@@ -36,16 +37,18 @@ function addMarkup() {
 }
 
 function clock(seconds) {
-  return `0:${String(Math.floor(seconds)).padStart(2, "0")}`;
+  const whole = Math.floor(seconds);
+  return `${Math.floor(whole / 60)}:${String(whole % 60).padStart(2, "0")}`;
 }
 
 function frameMarkup({ scene, platform }) {
-  const dark = scene.tone !== "paper";
+  const picture = scene.picture ?? { kind: "scene", art: scene.art };
   const caption = state.captions.on
     ? `<p class="frame-caption" data-style="${state.captions.choice}">${escapeText(scene.text)}</p>`
     : "";
   return `
-    <div class="frame" data-dark="${dark}" style="--frame-width:${platform.width};--frame-height:${platform.height};aspect-ratio:${platform.width} / ${platform.height};background:${tones[scene.tone]}">
+    <div class="frame" data-dark="true" style="--frame-width:${platform.width};--frame-height:${platform.height};aspect-ratio:${platform.width} / ${platform.height}">
+      <div class="frame-art">${artMarkup(picture)}</div>
       ${scene.isVideo ? `<span class="frame-badge">Video clip</span>` : ""}
       <p class="frame-text" contenteditable="true" spellcheck="false" role="textbox" aria-label="Text of scene ${numberOf(scene.id)}. Click to change it" data-frame-text>${escapeText(scene.text)}</p>
       ${caption}
@@ -90,7 +93,6 @@ export function renderPreview({ element }) {
   element.innerHTML = `
     <div class="platform-tabs">${state.platformIds.map(tabMarkup).join("")}${addMarkup()}</div>
     <div class="frame-area" data-tall="${tall}">${frameMarkup({ scene, platform })}</div>
-    <p class="frame-hint">Click the text in the video to change it. ${platform.name}, ${platform.width} x ${platform.height}.</p>
     <div class="transport">
       <button type="button" data-play>${state.playing ? "Pause" : "Play"}</button>
       <div class="progress" aria-hidden="true"><i data-progress style="width:${(state.playheadSeconds / totalSeconds()) * 100}%"></i></div>
