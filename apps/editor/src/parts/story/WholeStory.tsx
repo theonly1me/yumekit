@@ -1,6 +1,9 @@
 import { Fragment } from "react";
 import type { Snapshot } from "../../engine/snapshot.js";
-import type { WholeStory as Story } from "./wholeStorySchema.js";
+import {
+  filmFormLabelOf,
+  type WholeStory as Story,
+} from "./wholeStorySchema.js";
 import "./wholeStory.css";
 
 const approvalTexts = {
@@ -42,8 +45,12 @@ function Person(props: {
   );
 }
 
-export function WholeStory(props: { story: Story; snapshot: Snapshot }) {
-  const { story } = props;
+export function WholeStory(props: {
+  story: Story;
+  form: string | undefined;
+  snapshot: Snapshot;
+}) {
+  const { story, form } = props;
   const sheetNameOf = (characterId: string) =>
     props.snapshot.bible.cast.find(
       (member) => member.storyCharacterId === characterId,
@@ -52,6 +59,9 @@ export function WholeStory(props: { story: Story; snapshot: Snapshot }) {
   return (
     <section className="whole-story" aria-labelledby="whole-story-title">
       <h4 id="whole-story-title">The whole story</h4>
+      {form === undefined ? null : (
+        <p className="story-form">{filmFormLabelOf(form)}</p>
+      )}
       <p className="story-premise">{story.premise}</p>
       <p className="story-approval" data-approval={story.approval ?? "waiting"}>
         {approvalTexts[story.approval ?? "waiting"]}

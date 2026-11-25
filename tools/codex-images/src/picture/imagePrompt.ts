@@ -26,7 +26,7 @@ export function imagePromptOf(options: {
       : []),
     ...(options.referenceCount > 0
       ? [
-          `The ${String(options.referenceCount)} attached picture(s) are references. Use them as the reference images of the image generation tool. Keep the same character, clothes, colors, and style.`,
+          `The ${String(options.referenceCount)} attached picture(s) are references. Use them as the reference images of the image generation tool.`,
         ]
       : []),
     `Picture: ${options.prompt}`,

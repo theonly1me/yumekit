@@ -70,6 +70,7 @@ export {
 } from "./format/bible.js";
 export * from "./castLooks/index.js";
 export {
+  filmFormOf,
   fixedStoryPartIds,
   storyApprovals,
   storyArcRange,

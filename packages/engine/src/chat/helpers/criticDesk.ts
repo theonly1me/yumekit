@@ -9,7 +9,8 @@ import {
   type CriticTurn,
 } from "@yumekit/harness-mcp";
 import type { ServerCommand } from "../../agents/agentTypes.js";
-import { chooseAgent, type AgentPrograms } from "../agentChoice.js";
+import { chooseAgentRun, type AgentPrograms } from "../agentChoice.js";
+import { refusedChoiceTextOf } from "../refusedChoice.js";
 import { helperFlag, type HelperCall, type LeadRun } from "./helperDesk.js";
 
 export const criticSecondsLimit = 360;
@@ -31,11 +32,13 @@ export async function personCriticRun(options: {
 }): Promise<LeadRun | undefined> {
   const { serverCommand } = options;
   if (!options.isPerson || serverCommand === undefined) return undefined;
-  const chosen = await chooseAgent(options.programs);
+  const chosen = await chooseAgentRun(options.programs);
   if (!chosen.ok) return undefined;
-  if ((await chosen.value.signInState()) === "signed-out") return undefined;
+  const { adapter, choices } = chosen.value;
+  if ((await adapter.signInState()) === "signed-out") return undefined;
   return {
-    adapter: chosen.value,
+    adapter,
+    choices,
     serverCommand,
     projectFolder: options.projectFolder,
   };
@@ -57,8 +60,28 @@ interface RunningCritic {
   turn: Turn | undefined;
 }
 
-export function createCriticDesk(): CriticDesk {
+function refusalOf(options: { run: LeadRun; message: string }) {
+  return refusedChoiceTextOf({
+    message: options.message,
+    choice: options.run.choices.critic,
+    role: "critic",
+    programName: options.run.adapter.name,
+  });
+}
+
+export function createCriticDesk(options: {
+  onNotice: (text: string) => void;
+}): CriticDesk {
   const running = new Map<string, RunningCritic>();
+  const noticed = new Set<string>();
+  const failedWith = (failure: { run: LeadRun; message: string }) => {
+    const refusal = refusalOf(failure);
+    if (refusal !== undefined && !noticed.has(refusal)) {
+      noticed.add(refusal);
+      options.onNotice(refusal);
+    }
+    return refusal;
+  };
   const runTurn = async (options: {
     request: CriticRequest;
     run: LeadRun;
@@ -71,6 +94,7 @@ export function createCriticDesk(): CriticDesk {
     const turn = run.adapter.startTurn({
       request: request.brief,
       sessionId: undefined,
+      choice: run.choices.critic,
       instructions: criticInstructionsOf(run.adapter.id),
       serverCommand: {
         command: run.serverCommand.command,
@@ -95,10 +119,14 @@ export function createCriticDesk(): CriticDesk {
         ...(end.costUsd === undefined ? {} : { costUsd: end.costUsd }),
       };
     }
+    if (end.kind === "stopped") {
+      return failed(
+        `The critic of ${request.subject} was stopped, or took more than ${String(criticSecondsLimit)} seconds.`,
+      );
+    }
     return failed(
-      end.kind === "stopped"
-        ? `The critic of ${request.subject} was stopped, or took more than ${String(criticSecondsLimit)} seconds.`
-        : `The critic of ${request.subject} stopped with a problem: ${end.message}`,
+      failedWith({ run, message: end.message }) ??
+        `The critic of ${request.subject} stopped with a problem: ${end.message}`,
     );
   };
   return {

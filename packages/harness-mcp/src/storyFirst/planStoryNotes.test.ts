@@ -5,7 +5,11 @@ import {
   setStoryPlan,
   writeStory,
 } from "../testing/wholeStoryFixture.js";
-import { missingStoryNote, trailerFormNote } from "./planStoryNotes.js";
+import {
+  missingFormNote,
+  missingStoryNote,
+  trailerFormNote,
+} from "./planStoryNotes.js";
 
 describe("the story notes of set_story_plan", () => {
   it("saves a plan of shots with no story behind it, with a note that says what is missing", async () => {
@@ -25,7 +29,7 @@ describe("the story notes of set_story_plan", () => {
     );
   });
 
-  it("notes a plan with no form, and gives the craft of a trailer for a trailer", async () => {
+  it("notes a film with no form, and gives the craft of a trailer for a trailer", async () => {
     const harness = await startHarness();
     await writeStory({
       harness,
@@ -39,9 +43,7 @@ describe("the story notes of set_story_plan", () => {
       shots: [{ shot_id: "a" }],
     });
 
-    expect(notesOf(noForm)).toEqual([
-      "Note: the plan has no form. Give form (trailer, short, explainer, music-video, other): the structure of the film follows it, and get_story_guide gives the craft of each.",
-    ]);
+    expect(notesOf(noForm)).toEqual([missingFormNote]);
     expect(notesOf(trailer)).toEqual([trailerFormNote]);
     expect(harness.store.read().bible.storyPlan?.form).toBe("trailer");
   });

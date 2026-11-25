@@ -11,7 +11,7 @@ export const storyFirstSection = [
   "1. Write the whole story with set_story: the premise in one sentence; the world and its rule; each main character with background, want, fear, and what they do not know; the opposing force and why it acts; the arc in 3 to 6 steps; and what stays unknown at the end. A trailer needs the whole story too, because it shows a part of it.",
   '2. Give the opposing force a reason that is true to it. "He wants to destroy the world" is not a reason. "He believes that he saves the people he takes" is one, and it makes him frightening.',
   "3. End the turn: show the story to the person in plain words and ask for a yes or changes. The question is free, and a wrong story wastes every shot after it. A request to make a film is not a yes to its story. Skip the question only when the request says in words to go ahead without asking.",
-  "4. Choose the form (set_story_plan form) and build the plan from the story: each shot names the part that it shows (story_fact).",
+  "4. Choose the form (set_story form) and build the plan from the story: each shot names the part that it shows (story_fact).",
   "5. Give each person of the cast the character that it plays (story_character_id of put_cast_member).",
   "",
 ].join("\n");

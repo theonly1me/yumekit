@@ -29,6 +29,7 @@ export function createCodexAdapter(options: {
           sessionId: turn.sessionId,
           instructions: turn.instructions,
           serverCommand: turn.serverCommand,
+          choice: turn.choice,
         }),
         workingFolder: turn.workingFolder,
         parser: createCodexStreamParser(),

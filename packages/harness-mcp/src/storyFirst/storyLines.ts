@@ -1,4 +1,4 @@
-import type { ProjectSnapshot, Story } from "@yumekit/project";
+import type { ProjectSnapshot, Story, StoryPlan } from "@yumekit/project";
 import { cardLandingsOf } from "./cardLandings.js";
 import { cardNotesOf, cardScenesOf } from "./trailerCards.js";
 
@@ -35,6 +35,17 @@ function storyPartLines(story: Story): string[] {
   ];
 }
 
+function formLine(options: {
+  story: Story;
+  plan: StoryPlan | undefined;
+}): string {
+  const { story, plan } = options;
+  if (story.form !== undefined) return `Form of the film: ${story.form}`;
+  return plan?.form === undefined
+    ? "Form of the film: not set (give form to set_story)"
+    : `Form of the film: ${plan.form} (from the story plan; give form to set_story)`;
+}
+
 function cardLines(snapshot: ProjectSnapshot): string[] {
   const cards = cardScenesOf(snapshot.scenes);
   if (cards.length === 0) return [];
@@ -62,6 +73,7 @@ export function storyWorkLines(snapshot: ProjectSnapshot): string[] {
   return [
     head,
     approvalLineOf(story),
+    formLine({ story, plan: snapshot.bible.storyPlan }),
     ...storyPartLines(story),
     ...cardLines(snapshot),
   ];

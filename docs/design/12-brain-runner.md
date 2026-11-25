@@ -115,7 +115,7 @@ A later request is `codex exec resume <thread id>` with the same `-c` values. `r
 | `--ignore-user-config` alone still loads the MCP servers of apps and plugins                      | Pass the two `--disable` flags              |
 | There is no flag that removes the file edit tool. The read-only sandbox refuses each write        | Always pass the sandbox                     |
 
-With `--ignore-user-config`, Codex uses its own default model. The adapter passes no `-m`. See "Details of the brain runner", item 2.
+With `--ignore-user-config`, Codex uses its own default model. The adapter passes a model and an effort only when the person chose them in Settings (document 20, C57). See "Details of the brain runner", item 2.
 
 ### Cursor
 

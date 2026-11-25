@@ -61,7 +61,11 @@ export async function createChat(options: {
   };
   let starting: Promise<unknown> = Promise.resolve();
   const helpers = createHelperDesk();
-  const critics = createCriticDesk();
+  const critics = createCriticDesk({
+    onNotice: (text) => {
+      log.put({ kind: "notice", id: randomUUID(), text });
+    },
+  });
   const startWaitingMessages = async () => {
     if (state.isClosing || state.phase !== "idle") return;
     if (steering.waiting().length === 0) return;

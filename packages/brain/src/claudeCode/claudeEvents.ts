@@ -4,6 +4,7 @@ const initSchema = z.looseObject({
   type: z.literal("system"),
   subtype: z.literal("init"),
   session_id: z.string().min(1),
+  model: z.string().min(1).optional().catch(undefined),
   mcp_servers: z
     .array(z.looseObject({ name: z.string(), status: z.string() }))
     .default([]),

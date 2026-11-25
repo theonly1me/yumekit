@@ -100,6 +100,12 @@ export function createAnswerTracker(options: {
       switch (event.type) {
         case "session":
           log.setSessionId(event.sessionId);
+          if (event.model !== undefined && answer.madeWith !== undefined) {
+            put({
+              ...answer,
+              madeWith: { ...answer.madeWith, model: event.model },
+            });
+          }
           return;
         case "text":
           if (event.isPart) {
@@ -167,6 +173,7 @@ export function createAnswerTracker(options: {
         text: "",
         state: "running",
         steps: steps.filter(isRunning),
+        ...(answer.madeWith === undefined ? {} : { madeWith: answer.madeWith }),
       });
     },
   };

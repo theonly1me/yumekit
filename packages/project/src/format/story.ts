@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { filmForms, type FilmForm, type StoryPlan } from "./storyPlan.js";
 import { idSchema } from "./values.js";
 
 export const storyApprovals = [
@@ -39,6 +40,7 @@ export const storySchema = z.strictObject({
   opposingForce: opposingForceSchema,
   arc: z.array(arcStepSchema),
   unknownAtEnd: z.string(),
+  form: z.enum(filmForms).exactOptional(),
   approval: z.enum(storyApprovals).exactOptional(),
 });
 
@@ -57,4 +59,11 @@ export function storyPartIdsOf(story: Story): string[] {
     ...story.arc.map((step) => step.id),
     "unknown",
   ];
+}
+
+export function filmFormOf(options: {
+  story: Story | undefined;
+  plan: StoryPlan | undefined;
+}): FilmForm | undefined {
+  return options.story?.form ?? options.plan?.form;
 }

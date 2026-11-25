@@ -6,12 +6,17 @@ import {
   findProgram,
   type AgentAdapter,
   type AgentId as BrainAgentId,
+  type ModelChoice,
 } from "@yumekit/brain";
 import { agentCatalog } from "../agents/agentCatalog.js";
 import type { AgentId } from "../agents/agentTypes.js";
 import type { Outcome } from "../engineTypes.js";
 import type { ChatFailure } from "./chatTypes.js";
-import { readChatSettings } from "./settings.js";
+import {
+  readChatSettings,
+  type AiRole,
+  type ChatSettings,
+} from "./settings.js";
 
 export type AgentPrograms = Partial<Record<BrainAgentId, string>>;
 
@@ -48,9 +53,24 @@ const noAgentInstalled: ChatFailure = {
     "No AI program is on this computer. Install Claude Code, Codex, or Cursor, start it once in a terminal, and sign in.",
 };
 
-export async function chooseAgent(
+export type RoleChoices = Record<AiRole, ModelChoice>;
+
+export interface ChosenAgent {
+  adapter: AgentAdapter;
+  choices: RoleChoices;
+}
+
+function choicesOf(options: {
+  settings: ChatSettings;
+  agentId: AgentId;
+}): RoleChoices {
+  const chosen = options.settings.models?.[options.agentId];
+  return { lead: chosen?.lead ?? {}, critic: chosen?.critic ?? {} };
+}
+
+export async function chooseAgentRun(
   programs: AgentPrograms,
-): Promise<Outcome<AgentAdapter, ChatFailure>> {
+): Promise<Outcome<ChosenAgent, ChatFailure>> {
   const settings = await readChatSettings();
   if (!settings.ok) {
     return {
@@ -65,8 +85,22 @@ export async function chooseAgent(
   const candidates = agent === undefined ? brainAgentIds : [agent];
   for (const agentId of candidates) {
     const programPath = agentPrograms?.[agentId] ?? programs[agentId];
-    if (programPath !== undefined)
-      return { ok: true, value: adapterOf({ agentId, programPath }) };
+    if (programPath !== undefined) {
+      return {
+        ok: true,
+        value: {
+          adapter: adapterOf({ agentId, programPath }),
+          choices: choicesOf({ settings: settings.value, agentId }),
+        },
+      };
+    }
   }
   return { ok: false, failure: noAgentInstalled };
+}
+
+export async function chooseAgent(
+  programs: AgentPrograms,
+): Promise<Outcome<AgentAdapter, ChatFailure>> {
+  const chosen = await chooseAgentRun(programs);
+  return chosen.ok ? { ok: true, value: chosen.value.adapter } : chosen;
 }

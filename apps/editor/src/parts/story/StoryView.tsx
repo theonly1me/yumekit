@@ -8,7 +8,7 @@ import { SheetChecks } from "./SheetChecks.js";
 import { intensityText, stateLinesOf } from "./shotWords.js";
 import { shotFactsOf, type ShotFacts } from "./storyFacts.js";
 import { WholeStory } from "./WholeStory.js";
-import { filmFormLabels, storyPartNameOf } from "./wholeStorySchema.js";
+import { filmFormLabelOf, storyPartNameOf } from "./wholeStorySchema.js";
 import { noPlanText, shotsNextText } from "./storyViewTexts.js";
 import "./story.css";
 
@@ -141,7 +141,11 @@ export function StoryView(props: StepViewProps) {
   const { story, storyPlan: plan } = props.snapshot.bible;
   const wholeStory =
     story === undefined ? null : (
-      <WholeStory story={story} snapshot={props.snapshot} />
+      <WholeStory
+        story={story}
+        form={story.form ?? plan?.form}
+        snapshot={props.snapshot}
+      />
     );
   if (plan === undefined) {
     return (
@@ -160,10 +164,8 @@ export function StoryView(props: StepViewProps) {
   return (
     <div className="files-part story-part">
       {wholeStory}
-      {plan.form === undefined ? null : (
-        <p className="story-form">
-          {filmFormLabels[plan.form] ?? filmFormLabels["other"]}
-        </p>
+      {story !== undefined || plan.form === undefined ? null : (
+        <p className="story-form">{filmFormLabelOf(plan.form)}</p>
       )}
       <p className="story-logline">{plan.logline}</p>
       <dl className="story-arc">

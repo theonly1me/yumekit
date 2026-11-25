@@ -47,6 +47,7 @@ function startCursorTurn(options: {
             request: turn.request,
             sessionId: turn.sessionId,
             agentFolder: folders.agentFolder,
+            model: turn.choice?.model,
           }),
           workingFolder: folders.agentFolder,
           environment: {

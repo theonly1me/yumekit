@@ -4,6 +4,7 @@ import { join } from "node:path";
 import {
   helperInstructionsOf,
   type AgentAdapter,
+  type ModelChoice,
   type ServerCommand,
   type Turn,
 } from "@yumekit/brain";
@@ -24,6 +25,7 @@ export const noChatHelper: Promise<HelperOutcome> = Promise.resolve({
 
 export interface LeadRun {
   adapter: AgentAdapter;
+  choices: { lead: ModelChoice; critic: ModelChoice };
   serverCommand: ServerCommand;
   projectFolder: string;
 }
@@ -97,6 +99,7 @@ export function createHelperDesk(): HelperDesk {
     const turn = lead.adapter.startTurn({
       request: requestTextOf(helper.request),
       sessionId: undefined,
+      choice: lead.choices.lead,
       instructions: helperInstructionsOf(lead.adapter.id),
       serverCommand: {
         command: lead.serverCommand.command,

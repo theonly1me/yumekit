@@ -5,7 +5,11 @@ import type { AgentAdapter, Turn } from "@yumekit/brain";
 import type { ProjectStore } from "@yumekit/project";
 import type { ServerCommand } from "../agents/agentTypes.js";
 import type { Outcome } from "../engineTypes.js";
-import { chooseAgent, type AgentPrograms } from "./agentChoice.js";
+import {
+  chooseAgentRun,
+  type AgentPrograms,
+  type RoleChoices,
+} from "./agentChoice.js";
 import { aboutOf, requestTextOf } from "./aboutClip.js";
 import { createAnswerTracker, type AnswerTracker } from "./answerTracker.js";
 import type { ChangeLedger } from "./changeLedger.js";
@@ -41,6 +45,7 @@ export interface ChatParts {
 
 interface ReadyLead {
   adapter: AgentAdapter;
+  choices: RoleChoices;
   serverCommand: ServerCommand;
   workingFolder: string;
 }
@@ -50,9 +55,9 @@ async function readyLeadOf(
 ): Promise<Outcome<ReadyLead, ChatFailure>> {
   const { serverCommand } = parts;
   if (serverCommand === undefined) return failed(noServerCommand);
-  const chosen = await chooseAgent(parts.programs);
+  const chosen = await chooseAgentRun(parts.programs);
   if (!chosen.ok) return chosen;
-  const adapter = chosen.value;
+  const { adapter, choices } = chosen.value;
   if ((await adapter.signInState()) === "signed-out") {
     return failed({
       kind: "agent-signed-out",
@@ -61,7 +66,19 @@ async function readyLeadOf(
   }
   const workingFolder = join(parts.projectFolder, ".yumekit", "agent");
   await mkdir(workingFolder, { recursive: true });
-  return { ok: true, value: { adapter, serverCommand, workingFolder } };
+  return {
+    ok: true,
+    value: { adapter, choices, serverCommand, workingFolder },
+  };
+}
+
+function madeWithOf(ready: ReadyLead): AnswerEntry["madeWith"] {
+  const { model, effort } = ready.choices.lead;
+  return {
+    program: ready.adapter.name,
+    ...(model === undefined ? {} : { model }),
+    ...(effort === undefined ? {} : { effort }),
+  };
 }
 
 function launch(options: {
@@ -77,12 +94,14 @@ function launch(options: {
     text: "",
     state: "running",
     steps: [],
+    madeWith: madeWithOf(ready),
   };
   log.put(answer);
   const tracker = createAnswerTracker({ log, answer });
   state.tracker = tracker;
   state.lead = {
     adapter: ready.adapter,
+    choices: ready.choices,
     serverCommand: ready.serverCommand,
     projectFolder: parts.projectFolder,
   };
@@ -90,6 +109,7 @@ function launch(options: {
   state.isStopRequested = false;
   state.running = runRequest({
     ...ready,
+    choice: ready.choices.lead,
     log,
     ledger: parts.ledger,
     requestText: options.requestText,

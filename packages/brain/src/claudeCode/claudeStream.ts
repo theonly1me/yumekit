@@ -61,7 +61,11 @@ function toolResultEventsOf(content: unknown[]): BrainEvent[] {
 }
 
 function initStep(line: Extract<ClaudeLine, { type: "system" }>): StreamStep {
-  const session: BrainEvent = { type: "session", sessionId: line.session_id };
+  const session: BrainEvent = {
+    type: "session",
+    sessionId: line.session_id,
+    ...(line.model === undefined ? {} : { model: line.model }),
+  };
   const server = line.mcp_servers.find((entry) => entry.name === serverName);
   if (server?.status === "connected") return { events: [session] };
   return {

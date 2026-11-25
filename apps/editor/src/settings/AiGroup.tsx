@@ -3,6 +3,7 @@ import type { Chat } from "../chat/useChat.js";
 import type { EngineClient } from "../engine/engineClient.js";
 import type { Agent } from "../side/agent/agentRequests.js";
 import { useAgents } from "../side/agent/useAgents.js";
+import { AiModels } from "./aiModels/AiModels.js";
 
 const planText = "Uses the plan you already pay for.";
 
@@ -83,6 +84,7 @@ export function AiGroup(props: { client: EngineClient; chat: Chat }) {
           {failure}
         </p>
       )}
+      <AiModels client={props.client} agentId={props.chat.agent?.id} />
     </section>
   );
 }

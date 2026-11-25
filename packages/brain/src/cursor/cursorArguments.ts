@@ -2,6 +2,7 @@ export function cursorArgumentsOf(options: {
   request: string;
   sessionId: string | undefined;
   agentFolder: string;
+  model: string | undefined;
 }): string[] {
   return [
     "-p",
@@ -10,6 +11,7 @@ export function cursorArgumentsOf(options: {
     "--approve-mcps",
     "--trust",
     ...["--workspace", options.agentFolder],
+    ...(options.model === undefined ? [] : ["--model", options.model]),
     ...(options.sessionId === undefined ? [] : ["--resume", options.sessionId]),
     "--",
     options.request,

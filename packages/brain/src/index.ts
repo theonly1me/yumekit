@@ -3,6 +3,7 @@ export {
   type AgentAdapter,
   type AgentId,
   type BrainEvent,
+  type ModelChoice,
   type ServerCommand,
   type SignInState,
   type Turn,
@@ -13,6 +14,7 @@ export {
 export { createClaudeCodeAdapter } from "./claudeCode/claudeCodeAdapter.js";
 export { createCodexAdapter } from "./codex/codexAdapter.js";
 export { createCursorAdapter } from "./cursor/cursorAdapter.js";
+export { agentModelOptions, type ModelOptions } from "./modelOptions.js";
 export { findProgram } from "./program/findProgram.js";
 export { stopWaitMilliseconds } from "./program/runTurn.js";
 export { brainInstructions, instructionsOf } from "./instructions.js";

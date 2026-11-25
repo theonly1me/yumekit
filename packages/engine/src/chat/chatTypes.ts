@@ -35,6 +35,13 @@ export const chatEntrySchema = z.discriminatedUnion("kind", [
     text: z.string(),
     state: z.enum(["running", "done", "stopped", "failed"]),
     steps: z.array(stepSchema),
+    madeWith: z
+      .object({
+        program: z.string(),
+        model: z.string().optional(),
+        effort: z.string().optional(),
+      })
+      .optional(),
   }),
   z.object({
     kind: z.literal("change"),

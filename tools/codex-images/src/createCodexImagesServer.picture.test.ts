@@ -62,6 +62,19 @@ describe("a picture from Codex", () => {
     expect(flags.at(-1)).toContain("Picture: a red mug");
   });
 
+  it("tells Codex how to use the references and adds nothing about what to draw", async () => {
+    const codex = await connectCodexImages({});
+
+    await codex.makePicture({ reference_image_paths: ["/tmp/hero.png"] });
+
+    const [run] = await codex.runs();
+    const prompt = run?.arguments.at(-1) ?? "";
+    expect(prompt).toContain(
+      "The 1 attached picture(s) are references. Use them as the reference images of the image generation tool.",
+    );
+    expect(prompt).not.toMatch(/keep the same|character|clothes|colors|style/i);
+  });
+
   it("fails when the turn ends with no picture file", async () => {
     const codex = await connectCodexImages({ scenario: { turn: "no-file" } });
 
