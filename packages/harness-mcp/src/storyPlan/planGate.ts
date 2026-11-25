@@ -82,6 +82,6 @@ export function calibrationFailureOf(options: {
   return {
     kind: "lessons-missing",
     message: `The critic refused ${unlearned.map((id) => `"${id}"`).join(" and ")}, and no lesson says what the other shots must do differently.`,
-    hint: `Call record_lesson with the cause and the form that works, and shot_id ${unlearned.map((id) => `"${id}"`).join(" or ")}. The harness adds each lesson to every later prompt.`,
+    hint: `Call record_lesson with the cause and the form that works, and shot_id ${unlearned.map((id) => `"${id}"`).join(" or ")}. yumekit sends no lesson to a model: write what applies into the prompts of the next shots.`,
   };
 }

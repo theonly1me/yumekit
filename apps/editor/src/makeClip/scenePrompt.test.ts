@@ -1,4 +1,6 @@
+import { findCameraMove } from "@yumekit/project/camera-moves";
 import { describe, expect, it } from "vitest";
+import { promptWithCameraMove } from "./cameraSentence.js";
 import { promptOfScene } from "./scenePrompt.js";
 
 function sceneWith(options: { title: string; props: Record<string, string> }) {
@@ -39,5 +41,28 @@ describe("the prompt that the clip sheet writes from a scene", () => {
     expect(promptOfScene({ scene, assets: [] })).toBe(
       "No jitters. Calm focus all day. Natural light.",
     );
+  });
+
+  it("shows the prompt of the earlier clip without the sentence of its camera move, which the sheet adds again", () => {
+    const sent = promptWithCameraMove({
+      prompt: "A fox runs.",
+      cameraMoveId: "orbit",
+    });
+    const scene = sceneWith({ title: "Fox", props: { assetId: "clip" } });
+    const clip = {
+      id: "clip",
+      kind: "video" as const,
+      hasWords: false,
+      source: {
+        kind: "tool" as const,
+        tool: "generate_video",
+        input: { prompt: sent, camera_move: "orbit" },
+      },
+    };
+
+    expect(sent).toBe(
+      `A fox runs.\n\n${findCameraMove("orbit")?.sentence ?? ""}`,
+    );
+    expect(promptOfScene({ scene, assets: [clip] })).toBe("A fox runs.");
   });
 });

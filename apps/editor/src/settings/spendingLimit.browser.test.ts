@@ -8,7 +8,7 @@ import { withoutOtherBundled } from "../testing/mediaTestTools.js";
 import { runEngine, type RunningEngine } from "../testing/runEngine.js";
 
 const started: RunningEngine[] = [];
-const userFileSchema = z.looseObject({
+const projectFileSchema = z.looseObject({
   limits: z.object({ spendingUsd: z.number() }),
 });
 
@@ -17,14 +17,16 @@ afterAll(async () => {
   await Promise.all(started.map((running) => running.remove()));
 });
 
-async function userSpendingLimitOf(engine: RunningEngine): Promise<number> {
-  const folder = engine.environment["YUMEKIT_CONFIG_DIRECTORY"] ?? "";
-  const text = await readFile(join(folder, "media-tools.json"), "utf8");
-  return userFileSchema.parse(JSON.parse(text)).limits.spendingUsd;
+async function projectSpendingLimitOf(engine: RunningEngine): Promise<number> {
+  const text = await readFile(
+    join(engine.projectFolder, "media-tools.json"),
+    "utf8",
+  );
+  return projectFileSchema.parse(JSON.parse(text)).limits.spendingUsd;
 }
 
 describe("the spending limit in Settings", () => {
-  it("shows the money spent and the limit, and saves a new limit in the user file", async () => {
+  it("shows the money spent and the limit, and saves a new limit in the project file", async () => {
     const engine = await runEngine({
       mediaTools: { mcpServers: { sample: {}, ...withoutOtherBundled } },
     });
@@ -36,7 +38,7 @@ describe("the spending limit in Settings", () => {
       .click();
     const settings = editor.page.getByRole("dialog", { name: "Settings" });
     const field = settings.getByRole("spinbutton", {
-      name: /^Money for paid services in each project/,
+      name: /^Money for paid services in this project/,
     });
 
     await expect.poll(() => field.inputValue()).toBe("5");
@@ -53,7 +55,7 @@ describe("the spending limit in Settings", () => {
     await settings.getByRole("button", { name: "Save" }).click();
 
     await expect
-      .poll(() => userSpendingLimitOf(engine).catch(() => 0))
+      .poll(() => projectSpendingLimitOf(engine).catch(() => 0))
       .toBe(1.5);
     await expect
       .poll(() =>

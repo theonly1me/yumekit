@@ -84,7 +84,7 @@ export function SpendingLimitRow(props: {
   return (
     <div className="setting-row">
       <label className="setting-name" htmlFor={fieldId}>
-        Money for paid services in each project
+        Money for paid services in this project
         <em>
           yumekit checks the price of each paid picture, voice, music, and video
           before it asks the service. A call that would pass this limit does not

@@ -8,7 +8,7 @@ import { withoutOtherBundled } from "../testing/mediaTestTools.js";
 import { runEngine, type RunningEngine } from "../testing/runEngine.js";
 
 const started: RunningEngine[] = [];
-const userFileSchema = z.looseObject({
+const projectFileSchema = z.looseObject({
   limits: z.object({ generatedVideoSeconds: z.number() }),
 });
 
@@ -17,14 +17,16 @@ afterAll(async () => {
   await Promise.all(started.map((running) => running.remove()));
 });
 
-async function userLimitOf(engine: RunningEngine): Promise<number> {
-  const folder = engine.environment["YUMEKIT_CONFIG_DIRECTORY"] ?? "";
-  const text = await readFile(join(folder, "media-tools.json"), "utf8");
-  return userFileSchema.parse(JSON.parse(text)).limits.generatedVideoSeconds;
+async function projectLimitOf(engine: RunningEngine): Promise<number> {
+  const text = await readFile(
+    join(engine.projectFolder, "media-tools.json"),
+    "utf8",
+  );
+  return projectFileSchema.parse(JSON.parse(text)).limits.generatedVideoSeconds;
 }
 
 describe("the limit of real video in Settings", () => {
-  it("shows the limit and the used seconds, and saves a new limit in the user file with no restart", async () => {
+  it("shows the limit and the used seconds, and saves a new limit in the project file with no restart", async () => {
     const engine = await runEngine({
       mediaTools: { mcpServers: { sample: {}, ...withoutOtherBundled } },
     });
@@ -36,7 +38,7 @@ describe("the limit of real video in Settings", () => {
       .click();
     const settings = editor.page.getByRole("dialog", { name: "Settings" });
     const field = settings.getByRole("spinbutton", {
-      name: /^AI video in each project/,
+      name: /^AI video in this project/,
     });
 
     await expect.poll(() => field.inputValue()).toBe("30");
@@ -50,7 +52,7 @@ describe("the limit of real video in Settings", () => {
     await field.fill("45");
     await settings.getByRole("button", { name: "Save" }).click();
 
-    await expect.poll(() => userLimitOf(engine).catch(() => 0)).toBe(45);
+    await expect.poll(() => projectLimitOf(engine).catch(() => 0)).toBe(45);
     await expect
       .poll(() =>
         settings.getByText("0 of 45 seconds used in this project.").count(),

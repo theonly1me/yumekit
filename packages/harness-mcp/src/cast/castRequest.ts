@@ -2,25 +2,8 @@ import type { CastMember, ProjectSnapshot } from "@yumekit/project";
 import type { MediaModel, MediaTools } from "@yumekit/tools";
 import type { GenerateAssetInput } from "../media/generateAssetInput.js";
 import type { HarnessFailure, Outcome } from "../results.js";
-import { startsOnPicture } from "../storyPlan/promptAdditions.js";
+import { startsOnPicture } from "../storyPlan/firstFrameRule.js";
 import { findCastMembers } from "./castMembers.js";
-
-const sentenceEnd = /[.!?]$/;
-
-function factsOf(member: CastMember): string {
-  const facts = (member.facts ?? [])
-    .map((fact) => fact.trim().replace(/[.;]+$/, ""))
-    .filter((fact) => fact !== "");
-  return facts.length === 0 ? "" : ` Fixed: ${facts.join("; ")}.`;
-}
-
-function sentenceOf(member: CastMember): string {
-  const description = member.description.trim();
-  const sentence =
-    description === "" ? member.name : `${member.name}: ${description}`;
-  const ended = sentenceEnd.test(sentence) ? sentence : `${sentence}.`;
-  return `${ended}${factsOf(member)}`;
-}
 
 function referenceMaximumOf(model: MediaModel | undefined): number {
   const setting = model?.settings.find(
@@ -74,17 +57,11 @@ export async function withCast(options: {
       ...(request.model === undefined ? {} : { model: request.model }),
     }),
   );
-  const prompt = request.input["prompt"];
-  const castSentences = members.map(sentenceOf).join(" ");
   const referenceIds = referenceIdsOf({ request, members, maximum });
   return {
     ok: true,
     value: {
       ...request,
-      input:
-        typeof prompt === "string"
-          ? { ...request.input, prompt: `${prompt}\n\n${castSentences}` }
-          : request.input,
       ...(referenceIds === undefined
         ? {}
         : { reference_asset_ids: referenceIds }),

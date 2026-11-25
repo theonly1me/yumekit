@@ -1,3 +1,4 @@
+import { findCameraMove } from "@yumekit/project/camera-moves";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { z } from "zod";
 import { requestTextsSent, setScenario } from "../testing/chatTesting.js";
@@ -114,7 +115,7 @@ describe("camera moves and the last picture in Make a clip", () => {
       .poll(() => page.getByText("The clip is in the scene").count())
       .toBe(1);
     expect(await inputOfAsset("clip-first")).toMatchObject({
-      prompt: "First counter. Natural light.",
+      prompt: `First counter. Natural light.\n\n${findCameraMove("orbit")?.sentence ?? ""}`,
       camera_move: "orbit",
       first_frame_asset_id: "first-still",
       last_frame_asset_id: "first-still",

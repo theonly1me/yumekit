@@ -4,7 +4,11 @@ export default defineProject({
   test: {
     name: "editor-browser",
     include: ["src/**/*.browser.test.ts"],
-    globalSetup: ["src/testing/buildEditor.ts"],
+    globalSetup: [
+      "../../packages/tools/src/testing/guard/globalSetup.ts",
+      "src/testing/buildEditor.ts",
+    ],
+    setupFiles: ["../../packages/tools/src/testing/guard/nodeTestGuard.ts"],
     testTimeout: 60_000,
     env: { YUMEKIT_CODEX_PATH: "/tests-start-no-real-codex" },
     hookTimeout: 120_000,

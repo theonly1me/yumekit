@@ -32,7 +32,7 @@ yumekit reads two files with the same shape. The project file wins for a server 
 - `passEnvironment` lists the names of environment variables that the server gets. The file never holds a secret value. Document 10 says where a key lives and how a server describes its models.
 - The user file is in the configuration folder: `~/.config/yumekit`, or the folder in the environment variable `YUMEKIT_CONFIG_DIRECTORY` (document 10).
 - `defaults` names the server for each capability when a tool call gives no server. An entry is a server name, or `{ "server": "...", "model": "..." }` (document 10).
-- `limits` is optional. `generatedVideoSeconds` is the limit of document 09, a number of 0 or more, and 30 by default. `spendingUsd` is the spending limit of document 15 ("Details of WP64"), in US dollars, and 5 by default. `callsAtOnce` is a whole number of 1 or more that lowers the calls that run at the same time on each server (document 20, "Details of WP72"). The project file wins over the user file. `MediaTools.limits()` gives the merged value of the first two.
+- `limits` is optional. `generatedVideoSeconds` is the limit of document 09, a number of 0 or more, and 30 by default. `spendingUsd` is the spending limit of document 15 ("Details of WP64"), in US dollars, and 5 by default. `callsAtOnce` is a whole number of 1 or more that lowers the calls that run at the same time on each server (document 20, "Details of WP72"). The project file wins over the user file. `MediaTools.limits()` gives the merged value of the first two. `MediaTools.setLimits` writes `limits` of the project file (document 20, C42).
 - The `yumekit` command passes the commands of the bundled servers as `bundledServers`. A file can use a bundled server by its name with no `command`.
 - With no file (user or project), yumekit connects each bundled server, in the order `sample`, `openai`, `gemini`, `fal`, `local-voice`, `local-music`, `codex`. A bundled server with a missing key starts, and the editor shows that it needs a key.
 - With a file, yumekit connects the servers of the file first. Then it connects each bundled server that the file does not name.
@@ -135,6 +135,11 @@ type MediaTools = {
   ) => Promise<Outcome<MediaLimits, UserFileFailure>>;
   checkKeys: () => Promise<void>;
   spending: () => Promise<Outcome<SpendingSummary, SpendingRecordNotValid>>;
+  requests: () => Promise<Outcome<MediaRequestRecord[], RequestLogNotValid>>;
+  recordRefusal: (refusal: {
+    request: MediaToolRequest;
+    failure: { kind: string; message: string };
+  }) => Promise<void>;
   choices: () => Promise<MediaChoices>;
   pick: (pick: {
     capability: Exclude<Capability, "align">;
@@ -178,6 +183,8 @@ A configuration file that is not valid is the failure `invalid-configuration-fil
 `toolTimeoutSeconds` is the limit for one tool call. The default is 600. A call that passes the limit is the failure `media-tool-timeout`.
 
 `run` returns the name of the server that it used, so a caller can record the source of an asset.
+
+`run` records each call in `<project>/.yumekit/requests.json`, also a failed one, and `requests` gives the records, the newest first. A request can give `about: { shotId }` for the record. `recordRefusal` records a call that the caller refused before `run`, such as the video seconds limit of the harness. Document 20 ("Details of WP73") has the format.
 
 How `run` selects a server:
 

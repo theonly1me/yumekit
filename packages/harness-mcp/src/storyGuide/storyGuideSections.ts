@@ -1,3 +1,5 @@
+import { videoPromptLimit } from "../storyPlan/firstFrameRule.js";
+
 export const barSection = [
   "# The story guide",
   "",
@@ -10,10 +12,10 @@ export const orderSection = [
   "",
   "1. The story first, with no paid call: set_story_plan with the logline, what the main character wants, what stands against it, what changes, and the shots with their states, strikes, camera, music map, and the prompts of each start picture and clip. Correct each warning.",
   "2. The cast: put_cast_member for each person, place, and prop of the plan, with its facts and sheet_prompts (a person who holds a prop: a second prompt for the hands with the prop).",
-  "3. The art direction: set_bible style holds the medium, the line, the color, the light, the lens, and what never appears. The harness adds it to each picture and clip prompt.",
+  "3. The art direction: set_bible style holds the medium, the line, the color, the light, the lens, and what never appears. yumekit adds nothing to a prompt: write the art direction into each picture prompt in your own words. get_shot_brief gives it with the facts of each shot.",
   "4. review_plan: the critic checks the whole first cut. Correct each blocking fault and call it again. No start picture or clip runs before a pass. A sheet picture can start as soon as its cast entry has facts and sheet_prompts. After two fails the check is used up: the work goes on, and each open fault goes to the critic of its shot as a note. A fault that breaks a fact of the brief still blocks until you restore its exact text.",
   "5. The sheets: generate_asset with sheet_of and no prompt (the reviewed prompt), put_cast_member with the pictures, and review_sheet.",
-  "6. Calibrate: the easiest and the hardest shot of the plan check first: the start picture with shot_id, the clip with shot_id and first_frame_asset_id, then review_clip. Record each refusal with record_lesson.",
+  "6. Calibrate: the easiest and the hardest shot of the plan check first: the start picture with shot_id, the clip with shot_id and first_frame_asset_id, then review_clip. Record each refusal with record_lesson. A lesson is for you: yumekit sends it to no model, so write what applies into the prompts of the next shots.",
   "7. The rest at the same time, in four steps: the start pictures of all free shots in one generate_assets call, their reviews in one review_several call, their clips in one generate_assets call, and their reviews in one review_several call. A shot is free when it waits for nothing: get_work names the free shots, and for each other shot the shot it waits for. A cut to a new camera position starts on its own start picture and waits for nothing. Only a shot with continues_shot waits: it starts on the end picture of the kept clip of the shot that it continues, or from the start state of the plan when that clip was refused.",
   "8. Place only a kept clip, or the clean part of a cut clip, with place_video.",
   "9. The music: write its prompt from the music map, make two or three candidates when they are cheap, check_music each, and place the best fit with replace_music and its start_seconds.",
@@ -40,7 +42,7 @@ export const sheetSection = [
   "- A place: a wide establishing picture, and a floor plan in words: where the door is, the side of its hinges and its knob, which way it opens, where the window and the light are, what is on each wall, what is outside the door.",
   "- A person also has its height against the hero and its feet as facts. Each opponent is its own entry with its own design and personality: build, face, clothes, weapon, the way it moves and fights. Copies of one design only for a uniform group.",
   "- A prop: ONE object, from two sides, with its size, material, colors, and how a hand holds it. Never draw two of it on one sheet: a sheathed and a bare sword become two swords in the film. Two states are two entries, or one picture that the facts name as two views of one object, with a rule for where the scabbard is when the blade is out.",
-  "- Repeat the fixed facts in words in each prompt: the harness adds them from the cast. Give each reference picture one job, and say what not to copy from it.",
+  "- Write the fixed facts of each person, place, and prop of the shot into the prompt in your own words: yumekit adds nothing, and get_shot_brief gives them. yumekit sends the sheet pictures of cast_ids as references. Give each reference picture one job, and say what not to copy from it.",
   "",
 ].join("\n");
 
@@ -64,10 +66,18 @@ export const videoSection = [
   "5. PHYSICS: what must hold. The thing that is touched reacts. Cloth and hair follow the move. Name the direction of a force and the state it leaves behind.",
   '6. KEEP: the things that must not change, by name and side: "the door stays on the right wall, hinges on its left edge, the brass knob on its right edge"; "the lantern stays in her right hand".',
   "7. ALIVE: what moves in the background and why: wind in the leaves, rain on the window, sparks, dust in the light, a curtain, hair. A still background reads as a picture.",
-  "8. CAMERA: give camera_move (the harness adds a tested sentence), or one move with its start, path, and end view. Never a locked camera and an orbit in one shot.",
+  '8. CAMERA: in words, one move with its start, path, and end view, or "The camera stays still." camera_move is only a label and adds no text. Never a locked camera and an orbit in one shot.',
   "9. WRITING: none, unless the plan gives the exact text in quotes.",
   "",
   "Lengths: 3 to 6 seconds for one action. A start picture plus a short clip is cheaper and safer than one long clip.",
+  "",
+  "",
+  "## A complete prompt",
+  "",
+  "yumekit sends your prompt to the model byte for byte and adds nothing. The model knows nothing but your prompt and the pictures it gets: it never read the plan, the sheets, the lessons, or the chat.",
+  "- Before the start picture and the clip of a shot, read get_shot_brief: the art direction, the facts and restrictions of each person, place, and prop of the shot, the sheets to pass as references, the plan notes, the lessons, the known limits of this kind of shot, and the limits of the model.",
+  "- Write each prompt complete and self-contained. State the look of every character and of the place in your own words when the picture does not already carry it: a start picture needs all of it; a clip that starts on its picture needs the motion, the camera, and what must not change.",
+  `- Keep a video prompt short and about this shot only: under ${String(videoPromptLimit)} characters, with no other character, no other action, and no lesson that does not concern this shot.`,
   "",
 ].join("\n");
 

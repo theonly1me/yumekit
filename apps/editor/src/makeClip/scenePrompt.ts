@@ -3,6 +3,7 @@ import {
   type CameraMoveId,
 } from "@yumekit/project/camera-moves";
 import type { Asset, Scene } from "../engine/snapshot.js";
+import { promptWithoutCameraMove } from "./cameraSentence.js";
 import { distinctParts } from "./promptParts.js";
 
 const lightWords = "Natural light.";
@@ -50,9 +51,10 @@ function earlierPromptOf(options: {
   scene: Scene;
   assets: Asset[];
 }): string | undefined {
-  const prompt = earlierInputOf(options)?.["prompt"];
+  const input = earlierInputOf(options);
+  const prompt = input?.["prompt"];
   return typeof prompt === "string" && prompt.trim() !== ""
-    ? prompt
+    ? promptWithoutCameraMove({ prompt, cameraMoveId: input?.["camera_move"] })
     : undefined;
 }
 

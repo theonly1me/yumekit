@@ -61,6 +61,7 @@ export const storyCalls: ScriptedCall[] = [
       shot_id: "dawn",
     },
   },
+  { name: "get_shot_brief", input: { shot_id: "dawn" } },
 ];
 
 export const reviewCalls: ScriptedCall[] = [

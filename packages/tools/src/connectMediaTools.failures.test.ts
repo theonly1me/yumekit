@@ -1,5 +1,5 @@
 import { readdir } from "node:fs/promises";
-import { dirname } from "node:path";
+import { dirname, join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   connectFixture,
@@ -113,7 +113,7 @@ describe("connectMediaTools failures", () => {
     });
   });
 
-  it("returns media-tool-failed with the server message and writes nothing outside the output directory", async () => {
+  it("returns media-tool-failed with the server message and writes nothing outside the output directory but the record of requests", async () => {
     const { tools, outputDirectory } = await connectFixture({});
 
     const outcome = await tools.run({
@@ -131,6 +131,9 @@ describe("connectMediaTools failures", () => {
         message: 'file_stem "../escape" must be a plain file name with no path',
       },
     });
-    expect(await readdir(dirname(outputDirectory))).toEqual([]);
+    expect(await readdir(dirname(outputDirectory))).toEqual([".yumekit"]);
+    expect(await readdir(join(dirname(outputDirectory), ".yumekit"))).toEqual([
+      "requests.json",
+    ]);
   });
 });

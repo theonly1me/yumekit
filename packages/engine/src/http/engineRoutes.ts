@@ -6,6 +6,7 @@ import { keyRoutes } from "./keyRoutes.js";
 import { mediaChoiceRoutes } from "./mediaChoiceRoutes.js";
 import { mediaLimitRoutes } from "./mediaLimitRoutes.js";
 import { mediaPrepareRoutes } from "./mediaPrepareRoutes.js";
+import { mediaRequestRoutes } from "./mediaRequestRoutes.js";
 import { projectRoutes } from "./projectRoutes.js";
 import { settingsRoutes } from "./settingsRoutes.js";
 import { uploadRoutes } from "./uploadRoutes.js";
@@ -17,6 +18,7 @@ export const engineRoutes: Route[] = [
   ...mediaChoiceRoutes,
   ...mediaLimitRoutes,
   ...mediaPrepareRoutes,
+  ...mediaRequestRoutes,
   ...fileRoutes,
   ...agentRoutes,
   ...chatRoutes,

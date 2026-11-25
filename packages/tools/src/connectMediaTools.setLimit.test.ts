@@ -1,12 +1,12 @@
-import { readdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { configurationDirectory } from "./configurationDirectory.js";
+import { connectMediaTools } from "./connectMediaTools.js";
 import {
   connectFixture,
   sampleServerCommand,
 } from "./testing/mediaToolsFixture.js";
-import { readUserLimits } from "./userLimits.js";
 
 const userFile = {
   mcpServers: { sample: sampleServerCommand },
@@ -14,11 +14,25 @@ const userFile = {
   limits: { generatedVideoSeconds: 12 },
 };
 
+const projectFile = {
+  mcpServers: { sample: sampleServerCommand },
+  limits: { callsAtOnce: 2 },
+};
+
 const userFilePath = () => join(configurationDirectory(), "media-tools.json");
 
+async function projectFileOf(projectFolder: string): Promise<unknown> {
+  return JSON.parse(
+    await readFile(join(projectFolder, "media-tools.json"), "utf8"),
+  );
+}
+
 describe("connectMediaTools setLimits", () => {
-  it("writes the limit to the user file, keeps each other field, and applies it with no new connection", async () => {
-    const { tools } = await connectFixture({ userFile });
+  it("writes the limit to the project file, keeps its other fields and the user file, and applies it with no new connection", async () => {
+    const { tools, projectFolder } = await connectFixture({
+      userFile,
+      projectFile,
+    });
 
     const changed = await tools.setLimits({ generatedVideoSeconds: 45 });
 
@@ -30,36 +44,39 @@ describe("connectMediaTools setLimits", () => {
       generatedVideoSeconds: 45,
       spendingUsd: 5,
     });
-    expect(JSON.parse(await readFile(userFilePath(), "utf8"))).toEqual({
-      ...userFile,
-      limits: { generatedVideoSeconds: 45 },
+    expect(await projectFileOf(projectFolder)).toEqual({
+      ...projectFile,
+      limits: { callsAtOnce: 2, generatedVideoSeconds: 45 },
     });
-    expect(await readUserLimits()).toEqual({
-      ok: true,
-      value: { generatedVideoSeconds: 45, spendingUsd: 5 },
-    });
-    expect(await readdir(configurationDirectory())).not.toContainEqual(
+    expect(JSON.parse(await readFile(userFilePath(), "utf8"))).toEqual(
+      userFile,
+    );
+    expect(await readdir(projectFolder)).not.toContainEqual(
       expect.stringMatching(/\.tmp$/),
     );
   });
 
-  it("keeps the limit of a project file, which wins over the user file", async () => {
-    const { tools } = await connectFixture({
-      userFile,
-      projectFile: { limits: { generatedVideoSeconds: 5 } },
-    });
+  it("keeps the limit of the project when the configuration folder changes", async () => {
+    const { tools, projectFolder } = await connectFixture({ userFile });
+    await tools.setLimits({ spendingUsd: 1.5, generatedVideoSeconds: 8 });
+    const otherFolder = join(projectFolder, "..", "other-config");
+    await mkdir(otherFolder);
+    vi.stubEnv("YUMEKIT_CONFIG_DIRECTORY", otherFolder);
 
-    const changed = await tools.setLimits({ generatedVideoSeconds: 60 });
-
-    expect(changed).toEqual({
-      ok: true,
-      value: { generatedVideoSeconds: 5, spendingUsd: 5 },
+    const again = await connectMediaTools({
+      projectFolder,
+      bundledServers: { sample: sampleServerCommand },
     });
+    if (!again.ok) throw new Error(again.failure.message);
+    const limits = again.value.limits();
+    await again.value.close();
+
+    expect(limits).toEqual({ generatedVideoSeconds: 8, spendingUsd: 1.5 });
   });
 
-  it("changes nothing and fails when the user file is not valid", async () => {
-    const { tools } = await connectFixture({ userFile });
-    await writeFile(userFilePath(), "{ not json");
+  it("changes nothing and fails when the project file is not valid", async () => {
+    const { tools, projectFolder } = await connectFixture({ userFile });
+    await writeFile(join(projectFolder, "media-tools.json"), "{ not json");
 
     const changed = await tools.setLimits({ generatedVideoSeconds: 60 });
 
@@ -70,21 +87,8 @@ describe("connectMediaTools setLimits", () => {
       generatedVideoSeconds: 12,
       spendingUsd: 5,
     });
-    expect(await readFile(userFilePath(), "utf8")).toBe("{ not json");
-  });
-
-  it("writes a spending limit in US dollars next to the video limit", async () => {
-    const { tools } = await connectFixture({ userFile });
-
-    const changed = await tools.setLimits({ spendingUsd: 1.5 });
-
-    expect(changed).toEqual({
-      ok: true,
-      value: { generatedVideoSeconds: 12, spendingUsd: 1.5 },
-    });
-    expect(JSON.parse(await readFile(userFilePath(), "utf8"))).toEqual({
-      ...userFile,
-      limits: { generatedVideoSeconds: 12, spendingUsd: 1.5 },
-    });
+    expect(
+      await readFile(join(projectFolder, "media-tools.json"), "utf8"),
+    ).toBe("{ not json");
   });
 });

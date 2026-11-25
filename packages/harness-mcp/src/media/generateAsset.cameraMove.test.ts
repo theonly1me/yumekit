@@ -44,16 +44,14 @@ function makeClip(options: {
 }
 
 describe("generate_asset with camera_move", () => {
-  it("sends the sentence of the move at the end of the prompt, and records the id", async () => {
+  it("records the id of the move and sends the prompt byte for byte, with no sentence of the move", async () => {
     const harness = await startHarness();
 
     const result = await makeClip({ harness, extra: { camera_move: "orbit" } });
 
     expect(result.isError).toBe(false);
     expect(findCameraMove("orbit")?.sentence).toBe(orbitSentence);
-    expect(harness.runRequests.at(-1)?.input["prompt"]).toBe(
-      `A fox runs\n\n${orbitSentence}`,
-    );
+    expect(harness.runRequests.at(-1)?.input["prompt"]).toBe("A fox runs");
     expect(harness.store.read().assets[0]?.source).toMatchObject({
       input: { prompt: "A fox runs", camera_move: "orbit" },
     });

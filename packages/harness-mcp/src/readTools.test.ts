@@ -29,7 +29,7 @@ describe("read tools", () => {
       "1. Call get_work (the whole video in one text: story, shared code, scenes with their code, timelines in beats, and assets), list_kit_scenes, and list_media_tools.",
     );
     expect(instructions).toContain(
-      '6. For a shot that code cannot draw, make a still image first. Check it with the person or with preview_frame. Then call generate_asset with the capability "video", first_frame_asset_id, and a camera_move, and add the clip with place_video.',
+      '6. For a shot that code cannot draw, make a still image first. Check it with the person or with preview_frame. Then call generate_asset with the capability "video", first_frame_asset_id, and the camera in words in the prompt, and add the clip with place_video.',
     );
     expect(instructions).toContain("9. Call render_video for each output.");
     expect(instructions).toContain(
