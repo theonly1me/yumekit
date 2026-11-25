@@ -1368,7 +1368,23 @@ These facts and choices came from the build of WP76 on 2026-11-25.
 
 ### The real run
 
-RUN_RESULTS
+Claude Code was the lead, with its default model, in a new project with the style AI video. The only media server was the free sample server, so no call cost money. The request was "Make a 15 second trailer for an original story."
+
+1. In the first run, the lead wrote the story and asked for a yes. After "Yes, make it.", it drew the shots as graphics, because the sample server makes no real footage. It made no plan, no sheet, and no clip. The clock had the story (26 s) and the edit (14 s).
+2. In the second run, the answer to the story was: "Yes, make it. Make it as a real AI video film with the test picture and video service anyway." The lead made the plan of 3 shots, 7 sheets, the start pictures, and the clips, each batch in one `generate_assets` call. It checked the design with 23 `check_design` calls, and it called the critic 0 times. No call was refused.
+
+| Stage                           | Time of the stage                  |
+| ------------------------------- | ---------------------------------- |
+| Story                           | 16 s                               |
+| Plan                            | 51 s                               |
+| Sheets                          | 19 s                               |
+| Start pictures                  | 28 s                               |
+| Clips                           | 53 s                               |
+| Music                           | 0 s                                |
+| Edit                            | 5 s                                |
+| From the first call to the last | 4 min 22 s of the 10 minute target |
+
+The time between the stages is the time the lead thinks and reads. The wait for the yes of the person is between the story and the plan. The sample server answers at once, so a real picture and video server adds the time of its calls; the batches run them at the same time (P1). The final answer of the lead gave the time and the time left: "about 4.5 minutes of the 10-minute target".
 
 ### Follow-ups
 
