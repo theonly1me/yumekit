@@ -2,6 +2,8 @@
 
 The owner used the first version of the editor (document 11) on 2026-11-21 and rejected its use. The person could not type a request, could not change anything in the timeline, could not find "Make a clip", and had only the outputs Wide and Tall. The owner approved a new direction on 2026-11-22. The package `apps/prototype` shows it, and the editor follows that prototype for the layout, the words, and the look.
 
+Document 21 replaces P8: a clip waits for an approved start picture while "Approve pictures before clips" is on.
+
 This document replaces the section "Screens of the first version" of document 11. The engine, the preview, the token, and the events of document 11 stay.
 
 ## Decisions

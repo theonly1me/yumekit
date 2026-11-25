@@ -2,6 +2,8 @@
 
 The owner used the Making screen with a real project. The person could only watch. The script, the pictures, the voice, and the music were not visible, and the person could not change them. The person could not pick the service that makes a picture or a voice. The person could not say if the video is drawn by code, made by a video model, or both.
 
+Document 21 replaces the Making screen with the project screen. The step views stay in "Edit by hand".
+
 This document gives the person that control. The prototype in `apps/prototype` is the visual reference for the step views: the screens "Making", "Script", "Pictures", and "Music".
 
 ## Decisions
