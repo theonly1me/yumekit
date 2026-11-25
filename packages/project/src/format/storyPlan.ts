@@ -81,6 +81,12 @@ export const musicCheckSchema = z.strictObject({
   hits: z.array(z.number().min(0)).exactOptional(),
 });
 
+export const chapterSchema = z.strictObject({
+  id: idSchema,
+  title: z.string().trim().min(1).max(80),
+  shotIds: z.array(idSchema).min(1),
+});
+
 export const storyPlanSchema = z.strictObject({
   form: z.enum(filmForms).exactOptional(),
   logline: z.string(),
@@ -95,6 +101,7 @@ export const storyPlanSchema = z.strictObject({
   failedPlanChecks: z.int().min(0).exactOptional(),
   planNotes: z.array(z.string()).exactOptional(),
   costEstimateUsd: z.number().min(0).exactOptional(),
+  chapters: z.array(chapterSchema).min(1).exactOptional(),
 });
 
 export type ShotSize = (typeof shotSizes)[number];
@@ -104,3 +111,4 @@ export type FilmForm = (typeof filmForms)[number];
 export type Shot = z.infer<typeof shotSchema>;
 export type MusicCheck = z.infer<typeof musicCheckSchema>;
 export type StoryPlan = z.infer<typeof storyPlanSchema>;
+export type Chapter = z.infer<typeof chapterSchema>;

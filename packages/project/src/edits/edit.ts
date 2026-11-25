@@ -12,6 +12,7 @@ import {
 import { projectFontSchema, sharedCodeNameSchema } from "../format/fonts.js";
 import { lookColorsSchema, lookSchema } from "../format/look.js";
 import { sceneSchema } from "../format/scene.js";
+import { takeEditSchemas } from "./takeEdits.js";
 import {
   audioClipSchema,
   sceneClipSchema,
@@ -130,6 +131,7 @@ export const editSchema = z.discriminatedUnion("kind", [
     fromOutputId: idSchema,
     toOutputId: idSchema,
   }),
+  ...takeEditSchemas,
 ]);
 
 export type Edit = z.infer<typeof editSchema>;

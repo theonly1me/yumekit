@@ -1,5 +1,6 @@
 import { wordsFileOfAsset } from "../format/asset.js";
 import type { ProjectState } from "../format/state.js";
+import { takesFile } from "../format/takes.js";
 import { sceneCodeFile, timelineFile } from "../rules/ruleFailure.js";
 import { stableJson } from "./stableJson.js";
 
@@ -27,6 +28,9 @@ export function projectFilesOf(state: ProjectState): ProjectFiles {
     ["bible.json", stableJson(state.bible)],
     ["assets/index.json", stableJson({ assets: state.assets })],
   ]);
+  if (state.takes.length > 0) {
+    files.set(takesFile, stableJson({ takes: state.takes }));
+  }
   for (const scene of state.scenes) {
     files.set(sceneFile(scene.id), stableJson(scene));
   }

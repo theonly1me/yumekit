@@ -8,6 +8,7 @@ import { checkRules } from "../rules/index.js";
 import {
   readScenes,
   readSharedCode,
+  readTakes,
   readTimelines,
   readWords,
 } from "./readParts.js";
@@ -101,6 +102,10 @@ export async function readState(
   if (!words.ok) {
     return words;
   }
+  const takes = await readTakes(source);
+  if (!takes.ok) {
+    return takes;
+  }
   const state: ProjectState = {
     project: project.value,
     script: script.value,
@@ -110,6 +115,7 @@ export async function readState(
     sharedCode: sharedCode.value,
     timelines: timelines.value,
     assets: assetIndex.value.assets,
+    takes: takes.value,
     words: words.value,
   };
   const ruleFailure = checkRules(state);

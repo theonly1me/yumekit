@@ -49,6 +49,10 @@
     "./plan-budget": {
       "types": "./dist/planBudget/index.d.ts",
       "default": "./dist/planBudget/index.js"
+    },
+    "./takes": {
+      "types": "./dist/takes/index.d.ts",
+      "default": "./dist/takes/index.js"
     }
   },
   "files": [

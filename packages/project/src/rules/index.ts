@@ -1,5 +1,6 @@
 import type { ProjectState } from "../format/state.js";
 import { checkAssetDurations } from "./assetDurations.js";
+import { checkChapters } from "./chapters.js";
 import { checkClips } from "./clips.js";
 import { checkPlatforms } from "./platforms.js";
 import { checkReferences } from "./references.js";
@@ -14,6 +15,7 @@ export function checkRules(state: ProjectState): RuleFailure | undefined {
     checkReferences(state) ??
     checkAssetDurations(state) ??
     checkClips(state) ??
-    checkPlatforms(state)
+    checkPlatforms(state) ??
+    checkChapters(state)
   );
 }

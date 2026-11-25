@@ -26,6 +26,7 @@ export function snapshotOf(options: {
     sharedCode: state.sharedCode,
     timelines: state.timelines,
     assets: state.assets,
+    takes: state.takes,
   };
   deepFreeze(snapshot);
   deepFreeze(state);

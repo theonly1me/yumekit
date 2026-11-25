@@ -30,6 +30,7 @@ describe("createProject", () => {
       sharedCode: {},
       timelines: [{ outputId: "wide", tracks: [] }],
       assets: [],
+      takes: [],
     });
   });
 
