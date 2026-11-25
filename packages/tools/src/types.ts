@@ -7,6 +7,10 @@ import type {
 } from "./choiceTypes.js";
 import type { MediaModel, MediaServerDescription } from "./description.js";
 import type { PrepareFailure } from "./modelDownloads.js";
+import type {
+  MediaRequestRecord,
+  RequestLogNotValid,
+} from "./requests/requestFile.js";
 import type { CostBasis, SpendingRecordNotValid } from "./spending/ledger.js";
 import type {
   SpendingLimitReached,
@@ -102,6 +106,10 @@ export interface MediaToolProgress {
   message?: string;
 }
 
+export interface MediaCallAbout {
+  shotId?: string;
+}
+
 export interface MediaToolRequest {
   capability: Capability;
   server?: string;
@@ -114,6 +122,7 @@ export interface MediaToolRequest {
   onState?: (state: MediaCallState) => void;
   skipServers?: () => ReadonlySet<string>;
   onServiceQuota?: (server: string) => void;
+  about?: MediaCallAbout;
 }
 
 export interface MediaCallState {
@@ -156,6 +165,11 @@ export interface MediaTools {
   checkKey: (server: string) => Promise<Outcome<KeyCheck, CheckKeyFailure>>;
   checkKeys: () => Promise<void>;
   spending: () => Promise<Outcome<SpendingSummary, SpendingRecordNotValid>>;
+  requests: () => Promise<Outcome<MediaRequestRecord[], RequestLogNotValid>>;
+  recordRefusal: (refusal: {
+    request: MediaToolRequest;
+    failure: { kind: string; message: string };
+  }) => Promise<void>;
   failedServers: () => { server: string; message: string }[];
   limits: () => MediaLimits;
   setLimits: (

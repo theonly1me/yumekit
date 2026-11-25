@@ -1,4 +1,5 @@
 import { cameraMoveCatalog } from "@yumekit/project/camera-moves";
+import { promptWithCameraMove } from "./cameraSentence.js";
 import type { Asset, Output, SceneClip, Snapshot } from "../engine/snapshot.js";
 import {
   stillRequest,
@@ -122,7 +123,10 @@ export function clipRequestOf(options: {
       server: choice.server.server,
       model: choice.model.id,
       input: {
-        prompt: options.prompt,
+        prompt: promptWithCameraMove({
+          prompt: options.prompt,
+          cameraMoveId: options.cameraMoveId,
+        }),
         ...options.values,
         ...sizeInput({ choice, output }),
       },

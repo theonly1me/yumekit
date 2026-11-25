@@ -5,6 +5,7 @@ export default defineProject({
   test: {
     name: "render-page-browser",
     include: ["src/page/**/*.browser.test.ts"],
+    setupFiles: ["../tools/src/testing/guard/browserTestGuard.ts"],
     browser: {
       enabled: true,
       headless: true,

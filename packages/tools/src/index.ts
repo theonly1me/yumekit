@@ -36,6 +36,12 @@ export {
 } from "./keys/index.js";
 export { keyFilePath } from "./keys/keyFile.js";
 export { listServerKeys, type ServerKeys } from "./listServerKeys.js";
+export { mediaFailureText } from "./failureText.js";
+export {
+  mostRequestsKept,
+  type MediaRequestRecord,
+  type RequestLogNotValid,
+} from "./requests/requestFile.js";
 export { readUserLimits } from "./userLimits.js";
 export { defaultSpendingUsd } from "./configuration.js";
 export { cautiousPrices } from "./spending/cautiousPrice.js";
@@ -57,6 +63,7 @@ export type {
   MediaToolFailure,
   MediaToolProgress,
   MediaToolRequest,
+  MediaCallAbout,
   MediaCallState,
   MediaToolRun,
   MediaTools,

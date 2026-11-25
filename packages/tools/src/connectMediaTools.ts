@@ -12,10 +12,12 @@ import { mediaChoicesOf } from "./mediaChoices.js";
 import { checkKeys } from "./keyHealth/checkKeys.js";
 import { createKeyHealth, type KeyHealth } from "./keyHealth/keyHealth.js";
 import { prepareModel } from "./modelDownloads.js";
+import { keyValuesOfServers } from "./requests/keyValues.js";
+import { createRequestLog, requestMethodsOf } from "./requests/requestLog.js";
 import { runMediaRequest } from "./runMediaRequest.js";
 import { createSpendingBook } from "./spending/spendingBook.js";
 import { saveUserDefault } from "./saveUserDefault.js";
-import { saveUserLimits } from "./saveUserLimit.js";
+import { saveProjectLimits } from "./saveProjectLimits.js";
 import {
   describedDefaultModel,
   isStarted,
@@ -86,8 +88,13 @@ export async function connectMediaTools(options: {
     projectFolder: options.projectFolder,
     limitUsd: () => limits.spendingUsd,
   });
+  const requestLog = createRequestLog({
+    projectFolder: options.projectFolder,
+    keyValues: () => keyValuesOfServers(pool.connections()),
+  });
   const runContext = {
     pool,
+    requestLog,
     defaults: () => defaults,
     keyHealth,
     spendingBook,
@@ -113,7 +120,10 @@ export async function connectMediaTools(options: {
         })),
     limits: () => ({ ...limits }),
     setLimits: async (change) => {
-      const saved = await saveUserLimits(change);
+      const saved = await saveProjectLimits({
+        projectFolder: options.projectFolder,
+        change,
+      });
       if (!saved.ok) return saved;
       const reread = await readMediaToolsConfiguration(options);
       if (!reread.ok) return reread;
@@ -160,6 +170,7 @@ export async function connectMediaTools(options: {
     run: (request) => runMediaRequest({ context: runContext, request }),
     checkKeys: () => checkKeys({ pool, keyHealth, toolTimeoutSeconds }),
     spending: () => spendingBook.summary(),
+    ...requestMethodsOf(requestLog),
     checkKey: (server) => checkServerKey({ pool, server, toolTimeoutSeconds }),
     prepare: async (request) => {
       const prepared = await prepareModel({

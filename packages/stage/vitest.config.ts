@@ -5,6 +5,7 @@ export default defineProject({
   test: {
     name: "stage-browser",
     include: ["src/**/*.browser.test.ts"],
+    setupFiles: ["../tools/src/testing/guard/browserTestGuard.ts"],
     browser: {
       enabled: true,
       headless: true,

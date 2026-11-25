@@ -45,6 +45,16 @@ yumekit makes short videos on the computer of the person. It has no server and n
 5. To let the person watch and change the video, run `yumekit open <folder>`.
 6. Export only on request: the person clicks "Export" in the editor, or you call `render_video`.
 
+## Prompts for a picture, video, or music model
+
+yumekit sends each prompt exactly as you write it, and adds nothing. The model knows nothing but your prompt and the pictures it gets.
+
+- Write each prompt complete and self-contained.
+- State the look of every character and of the place in your own words when the picture does not already carry it.
+- Keep a video prompt short (under 900 characters) and about this shot only.
+- For a shot of a story plan, read `get_shot_brief` first. It gives the art direction, the facts of the cast and the place, the sheets to pass as references, the plan notes, the lessons, the known limits, and the limits of the model.
+- Each answer of `generate_asset` gives the prompt as sent. `list_media_requests` lists every request, also the failed ones.
+
 ## Keys
 
 - The AI needs no key. yumekit uses the sign-in of the agent program.

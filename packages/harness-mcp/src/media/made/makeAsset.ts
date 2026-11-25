@@ -1,10 +1,10 @@
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { JsonObject, ProjectSnapshot } from "@yumekit/project";
+import type { MediaToolRequest } from "@yumekit/tools";
 import type { HarnessContext } from "../../context.js";
 import type { ProgressListener } from "../../harness/toolTable.js";
 import { failureResult } from "../../results.js";
 import type { WorkTicket } from "../../work/board/workBoard.js";
-import { assetFilesFolder } from "../assetFiles.js";
 import type { GenerateAssetInput } from "../generateAssetInput.js";
 import { mediaFailureOf } from "../mediaFailures.js";
 import { voicePathInput, type TalkingVoice } from "../talkingVoice.js";
@@ -14,7 +14,7 @@ export async function makeAsset(options: {
   context: HarnessContext;
   request: GenerateAssetInput;
   snapshot: ProjectSnapshot;
-  sent: JsonObject;
+  mediaRequest: MediaToolRequest;
   voice: TalkingVoice | undefined;
   tool: string;
   input: JsonObject;
@@ -31,14 +31,11 @@ export async function makeAsset(options: {
     assetId: request.asset_id,
   });
   if (!voicePath.ok) return failureResult(voicePath.failure);
+  const { mediaRequest } = options;
   const ran = await context.mediaTools.run({
-    capability: request.capability,
-    ...(request.server === undefined ? {} : { server: request.server }),
-    ...(request.model === undefined ? {} : { model: request.model }),
-    input: { ...options.sent, ...voicePath.value },
+    ...mediaRequest,
+    input: { ...mediaRequest.input, ...voicePath.value },
     ...(voice === undefined ? {} : { expectedSeconds: voice.seconds }),
-    outputDirectory: assetFilesFolder(projectFolder),
-    fileStem: request.asset_id,
     onState: (state) => {
       options.ticket.update(state);
     },

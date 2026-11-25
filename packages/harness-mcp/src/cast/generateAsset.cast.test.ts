@@ -56,7 +56,7 @@ function castPicture(options: {
 }
 
 describe("generate_asset with cast_ids", () => {
-  it("sends the reference pictures of the entry and its sentence to a model that accepts reference pictures", async () => {
+  it("sends the reference pictures of the entry, and the prompt byte for byte, to a model that accepts reference pictures", async () => {
     const harness = await castHarness();
 
     const result = await castPicture({
@@ -67,7 +67,7 @@ describe("generate_asset with cast_ids", () => {
 
     expect(result.isError).toBe(false);
     expect(harness.runRequests.at(-1)?.input).toMatchObject({
-      prompt: "A kitchen\n\nMIA: A woman with short black hair.",
+      prompt: "A kitchen",
       reference_image_paths: [
         picturePath({ harness, assetId: "mia-1" }),
         picturePath({ harness, assetId: "mia-2" }),
@@ -88,8 +88,7 @@ describe("generate_asset with cast_ids", () => {
     });
 
     expect(harness.runRequests.at(-1)?.input).toMatchObject({
-      prompt:
-        "A kitchen\n\nMIA: A woman with short black hair. MUG: A blue mug.",
+      prompt: "A kitchen",
       reference_image_paths: [
         picturePath({ harness, assetId: "mia-1" }),
         picturePath({ harness, assetId: "mia-2" }),
@@ -98,13 +97,13 @@ describe("generate_asset with cast_ids", () => {
     });
   });
 
-  it("sends only the sentences to a model that takes no reference pictures", async () => {
+  it("sends only the prompt as written to a model that takes no reference pictures", async () => {
     const harness = await castHarness();
 
     await castPicture({ harness, model: "keyed-image", castIds: ["mug"] });
 
     const input = harness.runRequests.at(-1)?.input;
-    expect(input?.["prompt"]).toBe("A kitchen\n\nMUG: A blue mug.");
+    expect(input?.["prompt"]).toBe("A kitchen");
     expect(input).not.toHaveProperty("reference_image_paths");
   });
 
