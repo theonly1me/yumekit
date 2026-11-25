@@ -41,9 +41,9 @@ describe("the limit of real video in Settings", () => {
       name: /^AI video in this project/,
     });
 
-    await expect.poll(() => field.inputValue()).toBe("30");
+    await expect.poll(() => field.inputValue()).toBe("60");
     expect(
-      await settings.getByText("0 of 30 seconds used in this project.").count(),
+      await settings.getByText("0 of 60 seconds used in this project.").count(),
     ).toBe(1);
     await field.fill("2.5");
     expect(await settings.getByRole("alert").textContent()).toBe(

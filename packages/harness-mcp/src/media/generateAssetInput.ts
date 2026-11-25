@@ -115,27 +115,13 @@ export const generateAssetInput = {
     .string()
     .optional()
     .describe(
-      "The cast entry whose sheet picture this call makes. The first try sends a reviewed prompt of its sheet_prompts (leave out input.prompt to use it). The rule of tries applies: the second try gives a refused picture in reference_asset_ids, the third gives simpler_form, and then the tries are used up. A sheet picture uses the strongest picture model of the service unless the person picked one.",
-    ),
-  simpler_form: z
-    .string()
-    .trim()
-    .min(1)
-    .optional()
-    .describe(
-      "For the third try of a sheet or a shot, after two refusals: what is simpler now, from the known limits of get_story_guide.",
-    ),
-  person_asked_for_another_try: z
-    .boolean()
-    .optional()
-    .describe(
-      "true permits one more try of a sheet or a shot whose tries are used up. Give it only when the person asked for another try in this request.",
+      "The cast entry whose sheet picture this call makes. Leave out input.prompt to send the next prompt of its sheet_prompts. To correct a sheet, give the picture to correct in reference_asset_ids. A sheet picture uses the strongest picture model of the service unless the person picked one.",
     ),
   key_picture: z
     .enum(["start", "end"])
     .optional()
     .describe(
-      "With shot_id and the capability image: which key picture of the shot this is. end is the picture that the clip ends on (last_frame_asset_id), for a move with a clear end pose; review_start checks it with end_picture_asset_id. Default start.",
+      "With shot_id and the capability image: which key picture of the shot this is. end is the picture that the clip ends on (last_frame_asset_id), for a move with a clear end pose; check_design checks it like the start picture. Default start.",
     ),
   person_chose_this_picture: personChoseThisPictureInput,
   ...kitSheetInput,
@@ -152,4 +138,4 @@ export type GenerateAssetInput = z.infer<
 >;
 
 export const generateAssetDescription =
-  "Make an image, speech, music, video, or sound effect file, a talking clip of a person, or a sharper copy of a picture or a video clip, with a media tool and add it as an asset. Speech gets word timings when the tool gives them; read them with get_asset_words. Speech has no length input: the length comes from the text, as a rough guide about 2.5 words for one second. The same capability, server, and input reuse the earlier file and do not call the tool again. The result gives duration_frames for audio and video, and has_audio for video. Video: width_pixels and height_pixels select a wide or tall shape, and the server picks the nearest size it supports; the result gives the real size and length. Each call costs money for each second of video. The project has a limit in seconds of generated video (limits.generatedVideoSeconds in media-tools.json, 30 by default), and a call past it returns generated-video-limit-reached. Make a still image first, check it with the person or with preview_frame, then make the video with first_frame_asset_id set to that image. Write the camera of each clip in its prompt. A film with AI video starts with set_story_plan and review_plan: no start picture or clip runs before the critic passes the plan or the check is used up, and a sheet picture needs only its cast entry with facts and sheet_prompts; each clip names its shot_id, and review_clip checks it before place_video. The first try of a sheet or a shot sends the reviewed prompt of the plan. yumekit sends the prompt as you wrote it and adds nothing: write each prompt complete, with the art direction, the look of each person and place, and the camera. Read get_shot_brief before a start picture or a clip of a shot. A picture with shot_id or cast_ids gets the sheet pictures of that cast as references. The answer gives prompt_from_you and prompt_characters. Add the video to an output with place_video. Add a sound effect to an output with place_sound. A talking clip is a video: add it with place_video, sound_gain_decibels at the level of the voice, and quiet_voice true, so the voice does not play twice.";
+  "Make an image, speech, music, video, or sound effect file, a talking clip of a person, or a sharper copy of a picture or a video clip, with a media tool and add it as an asset. Speech gets word timings when the tool gives them; read them with get_asset_words. Speech has no length input: the length comes from the text, as a rough guide about 2.5 words for one second. The same capability, server, and input reuse the earlier file and do not call the tool again. The result gives duration_frames for audio and video, and has_audio for video. Video: width_pixels and height_pixels select a wide or tall shape, and the server picks the nearest size it supports; the result gives the real size and length. Each call costs money for each second of video. The project has a limit in seconds of generated video (limits.generatedVideoSeconds in media-tools.json, 60 by default), and a call past it returns generated-video-limit-reached. Make a still image first, check it with the person or with preview_frame, then make the video with first_frame_asset_id set to that image. Write the camera of each clip in its prompt. A film with AI video starts with set_story and set_story_plan, and each clip names its shot_id. When the people of a shot have a look, its start and end pictures need a design check before a clip starts from them, and its clip needs one before place_video (check_design, or the critic in review_start and review_clip); only a break of the design blocks. With no input.prompt, a sheet or a shot sends the next prompt of the plan. yumekit sends the prompt as you wrote it and adds nothing: write each prompt complete, with the art direction, the look of each person and place, and the camera. Read get_shot_brief before a start picture or a clip of a shot. A picture with shot_id or cast_ids gets the sheet pictures of that cast as references. The answer gives prompt_from_you and prompt_characters. Add the video to an output with place_video. Add a sound effect to an output with place_sound. A talking clip is a video: add it with place_video, sound_gain_decibels at the level of the voice, and quiet_voice true, so the voice does not play twice.";

@@ -8,16 +8,10 @@ import type {
 import type { PlanAnswer } from "./planAnswerInput.js";
 import type { PlanJob } from "./planJob.js";
 
-export const planCheckLimit = 2;
-
 export interface OpenPlanFaults {
   shots: Map<string, string[]>;
   cast: Map<string, string[]>;
   plan: string[];
-}
-
-export function isPlanCheckUsedUp(plan: StoryPlan): boolean {
-  return (plan.failedPlanChecks ?? 0) >= planCheckLimit;
 }
 
 export function openPlanFaultsOf(options: {

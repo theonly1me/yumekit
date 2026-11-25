@@ -88,6 +88,7 @@ export function everyToolCall(importSourcePath: string): ScriptedCall[] {
     { name: "set_track_off", input: { track_id: "main", off: true } },
     { name: "set_track_off", input: { track_id: "main", off: false } },
     { name: "set_video_style", input: { video_style: "mix" } },
+    { name: "set_checks", input: { checks: "critic" } },
     { name: "set_transitions", input: { kind: "fade" } },
     { name: "get_timeline", input: { output_id: "wide" } },
     { name: "remove_clip", input: { output_id: "wide", clip_id: "b" } },

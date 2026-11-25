@@ -85,3 +85,10 @@ export function planGapsOf(options: {
   });
   return [...shotGaps, ...castGaps];
 }
+
+export function isPlanReviewCurrent(options: {
+  bible: Bible;
+  plan: StoryPlan;
+}): boolean {
+  return options.plan.review?.planKey === planKeyOf(options);
+}

@@ -99,7 +99,7 @@ describe("the video style of a new project from the home server", () => {
     expect(answer.status).toBe(400);
   });
 
-  it("gives the limit of AI video of the user file, and 30 seconds with no file", async () => {
+  it("gives the limit of AI video of the user file, and 60 seconds with no file", async () => {
     const test = await startTestHome({ agent: "none" });
     const homeSchema = z.object({
       generated_video_limit_seconds: z.number().nullable(),
@@ -116,7 +116,7 @@ describe("the video style of a new project from the home server", () => {
       JSON.parse((await test.send({ path: "/api/home" })).body),
     );
 
-    expect(before.generated_video_limit_seconds).toBe(30);
+    expect(before.generated_video_limit_seconds).toBe(60);
     expect(after.generated_video_limit_seconds).toBe(12);
   });
 });

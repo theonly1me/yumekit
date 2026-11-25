@@ -5,11 +5,11 @@ import {
 } from "./testing/mediaToolsFixture.js";
 
 describe("connectMediaTools limits", () => {
-  it("gives 30 generated video seconds and 5 US dollars when no file sets a limit", async () => {
+  it("gives 60 generated video seconds and 5 US dollars when no file sets a limit", async () => {
     const { tools } = await connectFixture({});
 
     expect(tools.limits()).toEqual({
-      generatedVideoSeconds: 30,
+      generatedVideoSeconds: 60,
       spendingUsd: 5,
     });
   });

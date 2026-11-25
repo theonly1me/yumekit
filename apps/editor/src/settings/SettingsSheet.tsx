@@ -7,6 +7,7 @@ import { ToolsPane } from "../tools/ToolsPane.js";
 import { AiGroup } from "./AiGroup.js";
 import type { VideoStyleId } from "../videoStyle/videoStyles.js";
 import { CalmRow } from "./CalmRow.js";
+import { ChecksRow } from "./ChecksRow.js";
 import { LimitsGroup } from "./LimitsGroup.js";
 import { LookRow } from "./LookRow.js";
 import { ServicesGroup } from "./services/index.js";
@@ -36,6 +37,10 @@ export function SettingsSheet(props: {
             calm={props.snapshot.project.calm === true}
           />
           <BetweenScenesRow client={props.client} snapshot={props.snapshot} />
+          <ChecksRow
+            client={props.client}
+            checks={props.snapshot.project.checks}
+          />
         </VideoStyleGroup>
         <AiGroup client={props.client} chat={props.chat} />
         <ServicesGroup client={props.client} />

@@ -13,7 +13,7 @@ import type {
 } from "./types.js";
 
 export const configurationFileName = "media-tools.json";
-const defaultGeneratedVideoSeconds = 30;
+const defaultGeneratedVideoSeconds = 60;
 export const defaultSpendingUsd = 5;
 
 const serverEntrySchema = z.object({

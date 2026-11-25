@@ -1,8 +1,11 @@
 export type { Outcome } from "./outcome.js";
 export type { JsonObject } from "./format/values.js";
 export {
+  checkModeOf,
+  checkModes,
   videoStyleOf,
   videoStyles,
+  type CheckMode,
   type Output,
   type Project,
   type VideoStyle,

@@ -1,6 +1,6 @@
 import type { Asset, Edit, ProjectSnapshot } from "@yumekit/project";
 import { z } from "zod";
-import { shotIdOf } from "./reviewGate.js";
+import { shotIdOf } from "./shotOfAsset.js";
 
 export const personChoseThisClipInput = z
   .string()
@@ -9,7 +9,7 @@ export const personChoseThisClipInput = z
   .max(1000)
   .optional()
   .describe(
-    "The words of the person that choose this clip, as the person wrote them, for example 'Use the second bridge clip'. Give it only when the person chose this clip, in a request or in a message while you work. The choice of the person overrides a redo verdict of the critic: the clip is stored as kept by the person, with the faults of the critic, and it is placed. A clip with no review still needs review_clip first.",
+    "The words of the person that choose this clip, as the person wrote them, for example 'Use the second bridge clip'. Give it only when the person chose this clip, in a request or in a message while you work. The choice of the person passes the design check of the clip and overrides a redo verdict of the critic: the clip is stored as kept by the person, with the faults of the critic, and it is placed.",
   );
 
 export function withPersonKept(options: {

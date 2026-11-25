@@ -4,7 +4,7 @@ export const clipListItems = [
   "Bodies: count bodies, heads, arms, hands. Do two bodies fuse, even for a few frames? Does each figure keep its height against the hero and its feet for the whole clip?",
   "Anatomy: each arm joins its own shoulder and ends in the hand of that side, elbows and wrists bend the way a body bends, and no limb passes through another limb or the body.",
   "Hands and grip: five fingers with a natural shape. Does the grip stay in the planned hand? Does a hand pass through the prop?",
-  "Motion: do joints bend as a body bends, feet touch the ground, weight and balance hold, cloth and hair follow? Does each motion that the plan asks for happen (a group that rushes must move)?",
+  "Motion: do joints bend as a body bends, feet touch the ground, weight and balance hold, cloth and hair follow? Does each motion that the plan asks for happen (a group that rushes must move)? Stiffness is a fault: a body where only one limb moves while the rest stays frozen.",
   "Contact and cause: does each strike reach its target at the planned point, and does that target react? Does each effect start at its source (the blade, the hand) and travel to the target? An effect on the ground or at a random place is a fault. Does anything fall that nothing touched?",
   "One camera: do the viewpoint, the place, and the background stay one shot? An overhead view that turns into an eye level view with no cut is a fault, not a camera swoop.",
   "The cut: does the first frame match the start picture (the framing, each figure and its size, each object)? Do the screen side and facing of each character match the end of the shot before?",

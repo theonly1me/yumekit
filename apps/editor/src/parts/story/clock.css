@@ -1,0 +1,88 @@
+.film-clock {
+  gap: 8px;
+}
+
+.film-clock h4 {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.clock-meter {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--well);
+  overflow: hidden;
+}
+
+.clock-meter > span {
+  display: block;
+  height: 100%;
+  background: var(--solid);
+}
+
+.clock-meter[data-over="true"] > span {
+  background: var(--accent);
+}
+
+.clock-left {
+  margin: 0;
+}
+
+.clock-left[data-over="true"] {
+  color: var(--accent);
+}
+
+.clock-stages {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.clock-stages > li {
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+  padding: 4px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: var(--step--1);
+  color: var(--text);
+}
+
+.clock-stage-time {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.second-look {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.second-look button {
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  padding: 6px 14px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: var(--step--1);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.second-look button:hover {
+  border-color: var(--text);
+}
+
+.second-look button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}

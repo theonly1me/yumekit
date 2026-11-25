@@ -45,7 +45,7 @@ describe("list_media_tools generated video", () => {
     const listed = await harness.call({ name: "list_media_tools" });
 
     expect(listed.data["generated_video"]).toEqual({
-      limit_seconds: 30,
+      limit_seconds: 60,
       used_seconds: 0,
     });
   });

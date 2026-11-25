@@ -1,6 +1,7 @@
 import type { ProjectSnapshot, Shot } from "@yumekit/project";
 import { stateText, strikeText } from "../../storyPlan/stateText.js";
-import { freeShotLines } from "../../storyPlan/freeShots.js";
+import { nextBatchLines } from "../../storyPlan/nextBatch.js";
+import { checksLine } from "./checksText.js";
 import { firstCutLines } from "./firstCutText.js";
 import { poseSheetLines, shotDesignLines } from "./lookText.js";
 
@@ -82,7 +83,8 @@ export function planLines(snapshot: ProjectSnapshot): string[] {
     `Logline: ${plan.logline}`,
     `Wants: ${plan.want}. Against it: ${plan.obstacle}. Changes: ${plan.change}`,
     ...firstCutLines({ snapshot, plan }),
-    ...freeShotLines({ snapshot, plan }),
+    checksLine(snapshot),
+    ...nextBatchLines({ snapshot, plan }),
     ...poseSheetLines(snapshot),
     ...plan.shots.flatMap((...[shot, index]) =>
       shotLines({ shot, number: index + 1 }),

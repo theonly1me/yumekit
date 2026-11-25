@@ -51,7 +51,7 @@ describe("generate_asset with the story plan", () => {
     expect(result.isError).toBe(false);
   });
 
-  it("cannot check a plan whose place has no fixed facts, so no shot runs", async () => {
+  it("cannot check a plan whose place has no fixed facts, and its shot needs the facts first", async () => {
     const harness = await startStoryHarness({ videoStyle: "mix" });
     await makeSheet({
       harness,
@@ -73,7 +73,7 @@ describe("generate_asset with the story plan", () => {
 
     expect(review.data).toMatchObject({ kind: "plan-incomplete" });
     expect(review.data["message"]).toContain('"forge" has no fixed facts');
-    expect(result.data).toMatchObject({ kind: "plan-not-reviewed" });
+    expect(result.data).toMatchObject({ kind: "cast-sheet-missing" });
     expect(harness.runRequests.length).toBe(before);
   });
 

@@ -91,22 +91,28 @@ export const clipAnswerInput = {
   verdict: z
     .enum(reviewVerdicts)
     .describe(
-      "keep (the whole clip passes), cut (only a clean part passes), or redo.",
+      "keep (the whole clip passes), cut (the longest part with no fault passes, and it holds the action), or redo. A short fault at the start or the end is a cut.",
     ),
-  keep_from_seconds: z
-    .number()
-    .min(0)
-    .optional()
-    .describe("With cut: where the clean part starts."),
-  keep_to_seconds: z
-    .number()
-    .positive()
-    .optional()
-    .describe("With cut: where the clean part ends."),
   faults: z
-    .array(z.string().trim().min(1))
+    .array(
+      z.strictObject({
+        fault: z
+          .string()
+          .trim()
+          .min(1)
+          .describe("The BLOCKING fault in plain words."),
+        from_seconds: z
+          .number()
+          .min(0)
+          .describe("When the fault starts to show, in seconds."),
+        to_seconds: z
+          .number()
+          .min(0)
+          .describe("When it stops showing, or the end of the clip."),
+      }),
+    )
     .describe(
-      "Each BLOCKING fault in plain words with its time: the film cannot use this part. Empty only for keep.",
+      "Each BLOCKING fault with how long it shows: the film cannot use this part. The longest part with no fault is the clean part of a cut. Empty only for keep.",
     ),
   notes: z
     .array(z.string().trim().min(1))

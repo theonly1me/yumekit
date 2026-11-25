@@ -24,7 +24,7 @@ export function registerReviewStart(
   context.tools.add({
     name: "review_start",
     description:
-      "Have the independent critic check a start picture before its clip, and with end_picture_asset_id also the end picture that the clip ends on. A picture becomes an exact frame of the clip, so the critic checks the state of the plan, the framing of the shot, each sheet, anatomy and hands, the known limits, every visible part, and the design check: each person against the turnaround of the look of the shot, question by question. A clip with first_frame_asset_id needs a pass, and with last_frame_asset_id a pass of the same review with that end picture. A picture with a break of the design cannot start or end a clip unless the person chooses it. A refused start picture is a refused try of the shot.",
+      "Have the independent critic check a start picture before its clip, and with end_picture_asset_id also the end picture that the clip ends on. A picture becomes an exact frame of the clip, so the critic checks the state of the plan, the framing of the shot, each sheet, anatomy and hands, the known limits, every visible part, and the design check: each person against the turnaround of the look of the shot, question by question. The design check counts as the check of both pictures for the clip. A picture with a break of the design cannot start or end a clip unless the person chooses it. Every other fault is a note.",
     inputSchema: reviewStartInput,
     run: ({ input, onProgress }) =>
       inReviewSlot({
@@ -88,22 +88,11 @@ export function registerReviewStart(
           return context.writeLatest(async () => {
             const latest = context.store.read().bible;
             const latestPlan = latest.storyPlan ?? plan;
-            const reviewedShot =
-              withStartReview({
-                shots: [shot],
-                shotId: shot.id,
-                review,
-                checks,
-              })[0] ?? shot;
             const next = checks.some((check) => check.breaks.length > 0)
               ? "A picture that breaks the design cannot start or end a clip unless the person chooses it: make a new picture that matches the turnaround of the look, or ask the person."
               : review.verdict === "pass"
                 ? `Make the clip with first_frame_asset_id "${picture.id}"${job.endPicture === undefined ? "" : ` and last_frame_asset_id "${job.endPicture.id}"`}.`
-                : shotNextStepOf({
-                    shotId: shot.id,
-                    reviews: reviewedShot.reviews ?? [],
-                    startReviews: reviewedShot.startReviews ?? [],
-                  });
+                : shotNextStepOf(shot.id);
             return applyEditsResult({
               store: context.store,
               edits: [

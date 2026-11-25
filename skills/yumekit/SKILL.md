@@ -58,6 +58,15 @@ For a story film (a trailer, a short, an anime), write the story before any shot
 
 An example. The story: in a village where a bell under the frozen lake rings once before each death, a girl who hears it ring for her grandfather goes under the ice to silence it; the keeper of the bell rings it so that nobody dies without a goodbye. The trailer: the girl and her grandfather pull a net from the ice (the world as it was); the card "Every winter, the lake keeps one sound"; frost spreads from under her boot (the break); the card "Tonight it rang for him"; she takes the ice saw from the wall (the stakes); three short moments under the ice (the rise); the title on the biggest hit. It never shows the face of the keeper or how the story ends.
 
+## A film in four batches
+
+A 30 second film should take about 10 minutes, not hours. Make it in four batches, each in one `generate_assets` call: all sheets, all start (and end) pictures, all clips, then the music. `get_work` names the next batch, what is ready for it, and the time of each stage against the target.
+
+1. The checks of the project decide who checks a batch. In `draft` (the default), check the design of all pictures, then of all clips, with one `check_design` call each. In `critic`, the critic checks each batch with `review_several`.
+2. Only a break of the design blocks: a picture with a break cannot start a clip, and a clip shows only its clean part. Every other fault is a note, and you decide.
+3. In `draft`, call the critic (`review_plan`, `review_start`, `review_clip`) only when the person asks for a second look.
+4. The final answer gives the time of each stage.
+
 ## Prompts for a picture, video, or music model
 
 yumekit sends each prompt exactly as you write it, and adds nothing. The model knows nothing but your prompt and the pictures it gets.
@@ -77,7 +86,7 @@ The only character that a film animates is the one that you designed: the same f
 3. A new look of a person who exists is the decision of the person. If the request does not describe it, propose it and ask. Give the words of the person in `person_asked_for_it`.
 4. Name the look of each person in each shot with `cast_looks` of `set_story_plan`. A look never changes inside a shot.
 5. Make the kit of each look: the turnaround, then the poses that the shots need (`get_work` proposes them), the faces, and the hands with the props. A shot can still start with only the turnaround.
-6. For a move with a clear end pose, make an end picture with `key_picture` `end`, check it with the start picture in `review_start` `end_picture_asset_id`, and give it as `last_frame_asset_id`.
+6. For a move with a clear end pose, make an end picture with `key_picture` `end`, check it with the start pictures of the batch, and give it as `last_frame_asset_id`.
 7. Keep hands small or out of the frame unless the shot is about them.
 
 The design check compares each picture and clip with the turnaround of its look. A picture that breaks the design cannot start or end a clip, and only the clean part of a clip can be placed (`clean_until_seconds`), unless the person chooses it.

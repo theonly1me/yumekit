@@ -19,7 +19,7 @@ export function registerReviewClip(context: CriticContext): void {
   context.tools.add({
     name: "review_clip",
     description:
-      "Have an independent critic review a video clip of a shot before you place it. The critic is a fresh agent that sees only the frames (8 each second), the measures of motion, the shot of the plan, the sheets, and a fixed list. It never sees your prompt. It answers each warning, counts the objects that the facts count, says if the action and each end entry happened, and gives the verdict: keep, cut (with the clean part), or redo. You cannot give or overrule the verdict. A keep or cut saves the end picture for the next shot in the same place. place_video refuses a clip with no keep or cut of the critic. A review takes one to a few minutes.",
+      "Have an independent critic review a video clip of a shot before you place it. The critic is a fresh agent that sees only the frames (8 each second), the measures of motion, the shot of the plan, the sheets, and a fixed list. It never sees your prompt. It answers each warning, counts the objects that the facts count, says if the action and each end entry happened, and gives each fault with how long it shows, and the verdict: keep, cut (the longest part with no fault), or redo. Its design check counts as the check of the clip, and a break limits place_video to the clean part. Every other fault is a note: you decide. The review saves the end picture for a shot that continues it. A review takes one to a few minutes. Call it in critic mode, or when the person asks for a second look.",
     inputSchema: reviewClipInput,
     run: ({ input, onProgress }) =>
       inReviewSlot({

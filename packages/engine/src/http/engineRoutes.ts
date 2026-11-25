@@ -1,5 +1,6 @@
 import { agentRoutes } from "./agentRoutes.js";
 import { chatRoutes } from "./chatRoutes.js";
+import { clockRoutes } from "./clockRoutes.js";
 import type { Route } from "./exchange.js";
 import { fileRoutes } from "./fileRoutes.js";
 import { keyRoutes } from "./keyRoutes.js";
@@ -25,4 +26,5 @@ export const engineRoutes: Route[] = [
   ...settingsRoutes,
   ...uploadRoutes,
   ...workRoutes,
+  ...clockRoutes,
 ];

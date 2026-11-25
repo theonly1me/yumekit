@@ -11,6 +11,7 @@ interface StoryEdit<
     | "setScript"
     | "setBible"
     | "setVideoStyle"
+    | "setChecks"
   >["kind"],
 > {
   state: ProjectState;
@@ -77,5 +78,13 @@ export function setVideoStyle(options: StoryEdit<"setVideoStyle">): EditResult {
   return succeed({
     ...state,
     project: { ...state.project, videoStyle: edit.videoStyle },
+  });
+}
+
+export function setChecks(options: StoryEdit<"setChecks">): EditResult {
+  const { state, edit } = options;
+  return succeed({
+    ...state,
+    project: { ...state.project, checks: edit.checks },
   });
 }

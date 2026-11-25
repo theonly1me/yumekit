@@ -20,6 +20,7 @@ async function calibratedForge(options: { quenchContinues: boolean }) {
       clip: keepAnswerOf,
     },
   });
+  await harness.call({ name: "set_checks", arguments: { checks: "critic" } });
   await makeForgeSheets(harness);
   await makeSheet({
     harness,
@@ -63,7 +64,7 @@ async function keptClip(options: { harness: Harness; shotId: string }) {
 }
 
 describe("a shot that continues another shot, and a cut", () => {
-  it("makes a shot with continues_shot wait for the kept clip of that shot, names it, then starts from its end", async () => {
+  it("makes a shot with continues_shot wait for the checked clip of that shot, names it, then starts from its end", async () => {
     const harness = await calibratedForge({ quenchContinues: true });
 
     const early = await shotCall({
@@ -97,14 +98,16 @@ describe("a shot that continues another shot, and a cut", () => {
     expect(linked.isError).toBe(false);
   });
 
-  it("names the free shots in get_work, and the shot that each other shot waits for", async () => {
+  it("names the next batch in get_work, and the shot that each other shot waits for", async () => {
     const harness = await calibratedForge({ quenchContinues: true });
 
     const work = await harness.call({ name: "get_work" });
 
-    expect(work.text).toContain('Free shots now: "strike".');
     expect(work.text).toContain(
-      'Waiting: "quench" waits for shot "strike" (continues_shot).',
+      'Next batch: the start pictures. Ready: "strike".',
+    );
+    expect(work.text).toContain(
+      'Waiting: "quench" waits for the checked clip of "strike" (continues_shot).',
     );
   });
 

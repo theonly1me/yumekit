@@ -25,12 +25,17 @@ export const videoStyles = ["graphics", "ai-video", "mix"] as const;
 
 export const videoStyleSchema = z.enum(videoStyles);
 
+export const checkModes = ["draft", "critic"] as const;
+
+export const checkModeSchema = z.enum(checkModes);
+
 export const projectSchema = z.strictObject({
   formatVersion: z.literal(1),
   name: z.string(),
   framesPerSecond: z.literal([24, 25, 30, 50, 60]),
   outputs: z.array(outputSchema),
   videoStyle: videoStyleSchema.exactOptional(),
+  checks: checkModeSchema.exactOptional(),
   look: lookSchema.exactOptional(),
   calm: z.boolean().exactOptional(),
   tempo: z.number().min(lowestTempo).max(highestTempo).exactOptional(),
@@ -43,7 +48,12 @@ export const projectSchema = z.strictObject({
 export type Output = z.infer<typeof outputSchema>;
 export type Project = z.infer<typeof projectSchema>;
 export type VideoStyle = z.infer<typeof videoStyleSchema>;
+export type CheckMode = z.infer<typeof checkModeSchema>;
 
 export function videoStyleOf(project: Project): VideoStyle {
   return project.videoStyle ?? "graphics";
+}
+
+export function checkModeOf(project: Project): CheckMode {
+  return project.checks ?? "draft";
 }

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { clockLines } from "../clock/clockText.js";
 import type { HarnessContext } from "../context.js";
 import { idInput } from "../inputs.js";
 import { spendingLineOf, spendingOf } from "../spending/spendingOf.js";
@@ -26,6 +27,8 @@ export function registerGetWork(context: HarnessContext): void {
       const snapshot = context.store.read();
       const part = input.part ?? "all";
       const work = workTextOf({ snapshot, part, sceneIds: input.scene_ids });
+      const clock = await context.clock.read();
+      const withClock = part === "all" || part === "story";
       return {
         content: [
           {
@@ -33,6 +36,9 @@ export function registerGetWork(context: HarnessContext): void {
             text: `The work at revision ${String(snapshot.revision)}, part "${part}", ${String(work.text.length)} characters. ${spendingLineOf(spending)}`,
           },
           { type: "text", text: work.text },
+          ...(withClock
+            ? [{ type: "text" as const, text: clockLines(clock).join("\n") }]
+            : []),
         ],
         structuredContent: {
           revision: snapshot.revision,
@@ -40,6 +46,7 @@ export function registerGetWork(context: HarnessContext): void {
           characters: work.text.length,
           left_out: work.leftOut,
           spending,
+          clock,
         },
       };
     },

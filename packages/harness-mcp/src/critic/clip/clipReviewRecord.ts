@@ -1,6 +1,8 @@
 import type { ClipReview, CriticRecord } from "@yumekit/project";
+import { faultTextOf } from "./cleanRange.js";
 import type { ClipAnswer } from "./clipAnswerInput.js";
 import type { ClipJob } from "./clipJob.js";
+import { cleanRangeOfAnswer } from "./clipRangeCheck.js";
 
 function at(seconds: number | undefined): string {
   return seconds === undefined
@@ -71,18 +73,16 @@ export function reviewOfAnswer(options: {
           `${String(count.seen)} ${count.object}, not ${String(count.expected)}${at(count.seconds)}`,
         ],
   );
-  const isCut = answer.verdict === "cut";
+  const range =
+    answer.verdict === "cut" ? cleanRangeOfAnswer(options) : undefined;
   return {
     assetId: options.job.clip.id,
     verdict: answer.verdict,
     by: "critic",
-    faults: [...new Set([...answer.faults, ...countFaults])],
-    ...(isCut && answer.keep_from_seconds !== undefined
-      ? { keepFromSeconds: answer.keep_from_seconds }
-      : {}),
-    ...(isCut && answer.keep_to_seconds !== undefined
-      ? { keepToSeconds: answer.keep_to_seconds }
-      : {}),
+    faults: [...new Set([...answer.faults.map(faultTextOf), ...countFaults])],
+    ...(range === undefined
+      ? {}
+      : { keepFromSeconds: range.from, keepToSeconds: range.to }),
     ...(options.endPictureAssetId === undefined
       ? {}
       : { endPictureAssetId: options.endPictureAssetId }),

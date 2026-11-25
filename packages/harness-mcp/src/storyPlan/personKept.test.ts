@@ -10,7 +10,11 @@ import {
   startStoryHarness,
 } from "../testing/storyFixture.js";
 
-const hammerFault = "A second hammer appears in her left hand at 0.4 seconds";
+const hammerFault = {
+  fault: "A second hammer appears in her left hand",
+  from_seconds: 0.4,
+  to_seconds: 1,
+};
 const personWords = "Keep the strike clip, I like it.";
 
 async function refusedClip(): Promise<Harness> {
@@ -58,12 +62,10 @@ describe("a clip that the person keeps after the critic refused it", () => {
   it("is placed, and the choice of the person is stored next to the faults of the critic", async () => {
     const harness = await refusedClip();
 
-    const refused = await place({ harness });
     const placed = await place({ harness, words: personWords });
     const snapshot = harness.store.read();
     const [review] = snapshot.bible.storyPlan?.shots[0]?.reviews ?? [];
 
-    expect(refused.data).toMatchObject({ kind: "clip-failed-review" });
     expect(placed.isError).toBe(false);
     expect(review).toMatchObject({
       verdict: "redo",
@@ -89,8 +91,11 @@ describe("a clip that the person keeps after the critic refused it", () => {
       harness.store.read().bible.storyPlan?.shots[0]?.reviews ?? [];
 
     expect(review?.personKept).toBeUndefined();
-    expect((await place({ harness })).data).toMatchObject({
-      kind: "clip-failed-review",
-    });
+    expect(
+      harness.store
+        .read()
+        .timelines.flatMap((timeline) => timeline.tracks)
+        .reduce((...[count, track]) => count + track.clips.length, 0),
+    ).toBe(0);
   });
 });

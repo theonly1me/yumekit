@@ -11,27 +11,30 @@ describe("the instructions for a film with AI video", () => {
     );
   });
 
-  it("send the work through the plan, its check, the sheets, the calibration shots, the shots, and the review in order", () => {
+  it("send the work through the story, the plan, and four batches, with one hard check: the design", () => {
     expect(brainInstructions).toContain(
-      "read get_story_guide, then work in this order: the story plan with set_story_plan, with the prompt of each start picture and clip; each person, place, and prop with its facts and sheet_prompts; review_plan until the critic passes the plan, at most twice (after two fails the check is used up, and the work goes on with the open faults as notes for the critic; only a broken fact of the brief still blocks); a sheet for each entry with review_sheet, which can start before the plan check; the easiest and the hardest shot of the plan check; then the other shots at the same time (rule 40), each with its start picture and its clip with shot_id, and review_clip for the clip.",
+      "then four batches (rule 40). The checks of get_work decide who checks: in draft (the default), you check the design of each batch with check_design; in critic, the critic checks each batch with review_several. Only a break of the design blocks a picture or a clip.",
+    );
+    expect(brainInstructions).toContain(
+      "In draft, call the critic only when the person asks for a second look.",
     );
   });
 
-  it("make the final answer give the measure: first tries, the tries of each sheet and shot, and the money on refusals", () => {
+  it("make the final answer give the time of each stage, and never claim that a check found no problems", () => {
     expect(brainInstructions).toContain(
-      "36. Your final answer about a story video gives the shots accepted on the first try out of all shots, the tries of each sheet and shot, the money spent on refused pictures and clips (get_work gives these three),",
+      "36. Your final answer about a story video gives the time of each stage and the time left of the target (get_work gives them),",
     );
     expect(brainInstructions).toContain(
       "Never say that every shot passes, or that a check found no problems, when a fault stays.",
     );
   });
 
-  it("limit the tries and ask for facts that a picture can show", () => {
+  it("ask for facts that a picture can show, and correct a picture from itself", () => {
     expect(brainInstructions).toContain(
       "38. Each fact of a sheet is something a picture can show, never a bare number.",
     );
     expect(brainInstructions).toContain(
-      "After two refusals, make one simplified try with a form from the known limits.",
+      "To correct a picture, start from it (in reference_asset_ids) and change only what is wrong.",
     );
   });
 
@@ -41,9 +44,9 @@ describe("the instructions for a film with AI video", () => {
     );
   });
 
-  it("make the shots of a film at the same time, each waiting only for what it needs", () => {
+  it("make a film in four batches, each shot waiting only for what it needs", () => {
     expect(brainInstructions).toContain(
-      "Make the start pictures of all free shots in one generate_assets call, review them in one review_several call, make their clips in one generate_assets call, and review them in one review_several call.",
+      "40. Make a film in four batches, each in one generate_assets call: all sheets, all start (and end) pictures, all clips, then the music. Check each batch of pictures or clips in one call.",
     );
   });
 

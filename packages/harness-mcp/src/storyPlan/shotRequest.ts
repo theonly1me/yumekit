@@ -6,18 +6,14 @@ import {
 } from "@yumekit/project";
 import type { GenerateAssetInput } from "../media/generateAssetInput.js";
 import type { HarnessFailure, Outcome } from "../results.js";
-import { continuedShotOf, continuityFailureOf } from "./continuity.js";
-import {
-  calibrationFailureOf,
-  calibrationShotIdsOf,
-  planGateFailureOf,
-} from "./planGate.js";
+import { briefFaultFailureOf } from "./briefFaultGate.js";
+import { continuityFailureOf } from "./continuity.js";
 import { keyPictureFailureOf } from "./designGate.js";
 import { firstFrameFailureOf } from "./firstFrameRule.js";
-import { withSheetTry } from "./sheetTryGate.js";
-import { isFreeSheet, sheetFailureOf } from "./sheets.js";
-import { refusalsOf } from "./shotRefusals.js";
-import { startGateFailureOf, withShotTry } from "./shotTryGate.js";
+import { withPlannedPrompt } from "./promptPlan.js";
+import { withSheetRequest } from "./sheetRequest.js";
+import { sheetFailureOf } from "./sheets.js";
+import { sourceTextOf } from "./tryRules.js";
 
 type RequestOutcome = Outcome<GenerateAssetInput, HarnessFailure>;
 
@@ -51,12 +47,11 @@ function planMissing(): HarnessFailure {
 function shotOf(options: {
   plan: StoryPlan;
   shotId: string;
-}): Outcome<{ shot: Shot; index: number }, HarnessFailure> {
-  const index = options.plan.shots.findIndex(
+}): Outcome<Shot, HarnessFailure> {
+  const shot = options.plan.shots.find(
     (candidate) => candidate.id === options.shotId,
   );
-  const shot = options.plan.shots[index];
-  if (shot !== undefined) return { ok: true, value: { shot, index } };
+  if (shot !== undefined) return { ok: true, value: shot };
   return {
     ok: false,
     failure: {
@@ -67,28 +62,33 @@ function shotOf(options: {
   };
 }
 
-function shotRequestOf(options: {
+function plannedShotRequest(options: {
+  snapshot: ProjectSnapshot;
   request: GenerateAssetInput;
   shot: Shot;
 }): GenerateAssetInput {
-  const { request, shot } = options;
-  const castIds = [
-    ...new Set([shot.placeId, ...shot.castIds, ...(request.cast_ids ?? [])]),
-  ];
+  const { snapshot, request, shot } = options;
+  const kind = request.capability === "video" ? "video" : "image";
+  const planned = kind === "video" ? shot.videoPrompt : shot.startPicturePrompt;
+  const isEndPicture = kind === "image" && request.key_picture === "end";
+  const prompted =
+    planned === undefined || isEndPicture
+      ? request
+      : withPlannedPrompt({
+          request,
+          planned: [planned],
+          made: snapshot.assets.filter(
+            (asset) =>
+              sourceTextOf({ asset, field: "shot_id" }) === shot.id &&
+              asset.kind === kind,
+          ),
+        });
   return {
-    ...request,
-    cast_ids: castIds,
+    ...prompted,
+    cast_ids: [
+      ...new Set([shot.placeId, ...shot.castIds, ...(request.cast_ids ?? [])]),
+    ],
   };
-}
-
-function startsFromPlan(options: { plan: StoryPlan; shot: Shot }): boolean {
-  const { plan, shot } = options;
-  const before = continuedShotOf(options);
-  if (before === undefined) return false;
-  return (
-    calibrationShotIdsOf(plan).includes(shot.id) ||
-    refusalsOf({ shot: before }).length > 0
-  );
 }
 
 function withShot(options: {
@@ -106,21 +106,12 @@ function withShot(options: {
     });
   }
   const blocked =
-    calibrationFailureOf({ plan, shot }) ??
+    briefFaultFailureOf({ bible: snapshot.bible, plan, shot }) ??
     sheetFailureOf({ snapshot, shot }) ??
-    continuityFailureOf({
-      snapshot,
-      plan,
-      shot,
-      request,
-      startsFromPlan: startsFromPlan({ plan, shot }),
-    }) ??
-    startGateFailureOf({ snapshot, shot, request }) ??
-    keyPictureFailureOf({ shot, request });
+    continuityFailureOf({ snapshot, plan, shot, request }) ??
+    keyPictureFailureOf({ snapshot, shot, request });
   if (blocked !== undefined) return failed(blocked);
-  const tried = withShotTry({ snapshot, shot, request });
-  if (!tried.ok) return tried;
-  return { ok: true, value: shotRequestOf({ request: tried.value, shot }) };
+  return { ok: true, value: plannedShotRequest({ snapshot, request, shot }) };
 }
 
 export function withStory(options: {
@@ -141,22 +132,9 @@ export function withStory(options: {
       hint: `Give shot_id, one of: ${plan.shots.map((shot) => shot.id).join(", ") || "none"}. Add a shot with set_story_plan when the clip shows a new one.`,
     });
   }
-  if (shotId !== undefined && plan === undefined) return failed(planMissing());
-  const found =
-    shotId === undefined || plan === undefined
-      ? undefined
-      : shotOf({ plan, shotId });
-  if (found !== undefined && !found.ok) return found;
-  const isPictureOrClip =
-    request.capability === "image" || request.capability === "video";
-  if (plan !== undefined && isPictureOrClip && !isFreeSheet(options)) {
-    const gate = planGateFailureOf({
-      bible: snapshot.bible,
-      plan,
-      shot: found?.value.shot,
-    });
-    if (gate !== undefined) return failed(gate);
-  }
-  if (found === undefined || plan === undefined) return withSheetTry(options);
-  return withShot({ snapshot, plan, request, ...found.value });
+  if (shotId === undefined) return withSheetRequest(options);
+  if (plan === undefined) return failed(planMissing());
+  const found = shotOf({ plan, shotId });
+  if (!found.ok) return found;
+  return withShot({ snapshot, plan, request, shot: found.value });
 }

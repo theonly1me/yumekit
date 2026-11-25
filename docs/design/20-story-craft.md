@@ -1258,3 +1258,120 @@ These facts and choices came from the build of WP78 on 2026-11-25.
 ### The real check
 
 15. The engine of the worktree build, with a temporary configuration folder, an empty project, and Claude Code 2.1.332 as the lead with the choice `sonnet` and `low`. The request "Set the script to the single word ready." set the script in one turn. The answer of the chat names "Claude Code with the model claude-sonnet-5-5 and low effort": the model came from the first event of Claude Code, so the turn ran with the chosen model.
+
+## A film in hours, not minutes
+
+The last film took 13 hours for 35 seconds. The owner's words: "to produce a 30 second video, yumekit shouldn't take 10 hours, it should take 10 minutes tops". A mediocre result in 10 to 20 minutes would have been tolerable.
+
+Three things cost the time:
+
+1. Gates, each added after one fault, stopped the run for hours: the plan gate, the plan check after each sheet try, the limits of tries, continuity, and review-first. PR 100 and PR 102 removed two of them.
+2. The critic ran on each picture and clip. The eye of the owner was faster and better: the owner looks at a picture or a clip, and says keep or what is wrong.
+3. Shots were made one after the other.
+
+The rule of the owner: "Trust the lead." No blanket rule, and no text added to a prompt. Character consistency is absolute. A gate is right only where no person would want the result, such as a changed character. Everything else is a note.
+
+## Decisions of WP76
+
+| Id  | Decision                                                                                                                                                                                                                                 | Why                                                                                        |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| C60 | A project setting `checks`: `draft` (the default) or `critic`. In `draft`, no tool waits for the critic, and the lead checks the design with `check_design`. In `critic`, the critic checks each batch, and only its design check counts | The critic on each result took most of the time. The person asks for a second look instead |
+| C61 | The design check (C54) with the override of the person (C55) is the only check that blocks a result, in both modes. Every other refusal of a check is removed, and its record and note stay                                              | A gate is right only where no person wants the result                                      |
+| C62 | A film runs in four batches: all sheets, all start (and end) pictures, all clips, then the music. `check_design` checks a whole batch in one call. `get_work` names the next batch                                                       | Calls of different shots run at the same time (P1). A batch makes that the normal path     |
+| C63 | The clock: a time target of 10 minutes, and the start and end time of each stage. `get_work`, the Story view, and the final answer give it. Nothing stops when the time passes                                                           | What is measured improves, and the person sees where the time goes                         |
+| C64 | Each fault of a clip review has `from_seconds` and `to_seconds`. The longest part with no fault is the clean part, and a short fault at the start or the end makes a cut. The critic names stiffness                                     | The critic refused whole clips for one short fault, and missed a stiff body                |
+| C65 | The default of `generatedVideoSeconds` is 60 seconds, not 30. The spending limit of 5 US dollars stays the guard of the money                                                                                                            | A 30 second film of 3 second clips needs 30 seconds and leaves no room for one new try     |
+
+## Two ways to check the work (C60)
+
+- `project.json` gets `checks`: `draft` or `critic`. With no value, it is `draft`. The edit `setChecks` and the tool `set_checks` change it. The person picks it in the editor Settings, under "This video": "Fast draft" or "Careful".
+- `get_work` names the mode and what it means for the next batch.
+- In `draft`, no tool waits for the critic. The lead checks the design of each batch with `check_design`.
+- The critic tools stay. In `draft`, the lead calls them when the person asks for a second look. Each shot of the Story view has "Ask for a second look". It sends a message to the lead through the chat. While the lead works, the message steers it (WP71). The view never calls the critic: every other agent is a tool call of the lead.
+- In `critic`, `review_start` and `review_clip` check each batch with `review_several`. They run the design check as in C54. The rest of the verdict is a note.
+
+## One hard gate (C61)
+
+| Refusal                                                                    | After WP76                                                                                                                                               |
+| -------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `plan-not-reviewed`, `plan-failed-review`                                  | Removed. `review_plan` is advice. Each fault of a failed check is a note on its shot or cast entry, which `get_work` and `get_shot_brief` give           |
+| `calibrate-first`, `lessons-missing`                                       | Removed                                                                                                                                                  |
+| `start-from-refused` (shots and sheets), `simplify-first`, `tries-used-up` | Removed. Tries stay recorded and shown                                                                                                                   |
+| `start-not-reviewed`, `end-not-reviewed`                                   | Become `design-not-checked`: a clip needs a design check of its start picture and its end picture, by the lead or the critic, or the words of the person |
+| `start-failed-review`                                                      | Only a design break blocks (`design-break`). Other faults are notes                                                                                      |
+| `clip-not-reviewed`                                                        | Becomes `design-not-checked`: a clip on a timeline needs a design check, or the words of the person                                                      |
+| `clip-failed-review`                                                       | Only `clean_until_seconds` limits a placement (`design-break-in-range`, C54). Other faults are notes                                                     |
+| `plan-breaks-brief`                                                        | Stays. It applies after any plan check with a broken brief fact                                                                                          |
+| `first-frame-only`, `continuity-picture-missing`, `waits-for-shot`         | Stay. They protect the start picture and an explicit `continues_shot`                                                                                    |
+| Money limits                                                               | Stay                                                                                                                                                     |
+
+- The design gate applies to each way a clip of a shot reaches a timeline: `place_video`, `set_timeline`, and `put_work`. Each refuses a clip with no design check (`design-not-checked`) and a placement past `clean_until_seconds` (`design-break-in-range`).
+- A design check is needed only when a person of the shot has a look with facts (C50). A place, a prop, and a person with no look need none.
+- `person_chose_this_picture` and `person_chose_this_clip` open the gate. With no design check, the words of the person are stored as a design check `by` `person`.
+
+## Batches (C62)
+
+- A film in `draft` runs in four batches, each in one `generate_assets` call: all sheets, all start (and end) pictures, all clips, then the music.
+- `check_design` takes `assets`: up to 12 pictures or clips, each with its shot. One call gives the brief of all of them. One call with `design` stores one check for each. Each answer names its `asset_id`.
+- `get_work` names the next batch, what is ready for it, how to make it, and each shot that waits.
+- Rule 40 of the AI instructions and step 6 of the server instructions describe the batches in short.
+
+## The clock (C63)
+
+- The clock of a project is `.yumekit/clock.json`: the time target in minutes (10 by default) and the start and end time of each stage. The stages are the story, the plan, the sheets, the start pictures, the clips, the music, the edit, and the render.
+- A stage starts at its first tool call of the AI and ends at its last. The harness marks the time before and after each call. A change of the person in the editor does not move the clock.
+- `get_work` gives "### The clock": the target, the time from the first call to the last, the time left, and the time of each stage. The final answer of the lead gives the same times (rule 36).
+- The Story view shows "Time": the time used of the target, the time left, and the time of each stage. The engine serves it at `GET /api/clock`.
+- The clock is information. Nothing stops when the time passes.
+
+## The critic rates a fault by how long it shows (C64)
+
+- Each fault of `give_clip_review` is `fault`, `from_seconds`, and `to_seconds`. The answer has no `keep_from_seconds` and `keep_to_seconds`.
+- The harness finds the clean part: the longest part of the clip with no fault. A cut keeps it when it is at least 1.2 seconds (C54) and the action and each end entry happen inside it. A redo whose faults leave such a part is refused: it is a cut.
+- The stored review keeps each fault with its seconds, for example "A second hammer appears in her left hand (3s to 4s)".
+- The clip list names stiffness as a fault: a body where only one limb moves while the rest stays frozen.
+
+## The default video limit fits a film (C65)
+
+- The default of `generatedVideoSeconds` (`packages/tools/src/configuration.ts`) is 60 seconds. 60 seconds of the current video model cost about 4.20 US dollars, under the spending limit of 5 US dollars.
+- Only the person raises a limit. The change applies to a project with no limit of its own. A limit that a person set stays.
+
+## Work package WP76
+
+| Id   | Scope                                                                                                                                    | Needs      |
+| ---- | ---------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| WP76 | The two modes of checks, one hard gate, batches and a batch design check, the clock, the seconds of a fault, and the default video limit | WP75, WP72 |
+
+### Checks of WP76
+
+1. Through the harness with the fake critic and the sample media server: a film in `draft` with no plan check, start pictures, clips, and placements runs with no critic call; a clip of a start picture with no design check fails with `design-not-checked`, and the words of the person open it; a design break blocks a clip and limits a placement in `place_video`, `set_timeline`, and `put_work`; `check_design` stores one check for each picture of a batch; a redo of the critic with no design break does not block `place_video`; the clock records each stage, and `get_work` shows it; a fault with seconds gives a clean part.
+2. A browser test of the checks in Settings, the clock in the Story view, and "Ask for a second look".
+3. One real run with Claude Code as the lead and the sample media server only.
+
+## Details of WP76
+
+These facts and choices came from the build of WP76 on 2026-11-25.
+
+### The parts
+
+1. `checks` is a field of `project.json`, like `videoStyle`. The new edit is `setChecks` and the new tool is `set_checks`. The harness of the engine has 78 tools, and the lead sees 73.
+2. The rule of C61 removes more refusals than its table names, because each one waited for the critic or limited the tries: `review-first`, `prompt-not-reviewed`, `sheet-not-reviewed`, `sheet-failed-review`, and `plan-checks-used-up`. The inputs that existed only for them are gone: `simpler_form`, `person_asked_for_another_try`, and `person_asked_for_another_check`.
+3. `cast-sheet-missing` stays. It asks for an input of a shot (a sheet picture and facts), not for a check, and the design check needs the turnaround.
+4. With no `input.prompt`, a sheet or a shot still sends the next prompt of the plan. A call with its own prompt sends that prompt.
+5. `review_plan` stores the faults of every failed check as notes, not only after the second fail. `failedPlanChecks` still counts.
+6. `set_timeline` and `put_work` take no words of the person. They honor a choice that `place_video` stored. A clip on a timeline is a video-clip scene whose `assetId` is a clip of a shot. The check counts the frames from the start inside the clip (`sceneStartFrame`) to the end of the placement.
+7. A design check of a clip, by the lead or the critic, saves the picture at the end of its clean part as `<clip>-end`, and the check keeps it as `endPictureAssetId`. A critic review saves it for each verdict, because a redo is a note now. A shot with `continues_shot` starts on the newest of these pictures. In `draft`, a shot that continues a shot with no design check to run (no person with a look) starts from its own start picture.
+8. The next batch of `get_work`: for each shot, the first missing step in this order: its sheets, a checked clip, the clip of the shot that it continues, a start picture, a check of the start picture, a clip, a check of the clip. The next batch is the earliest step that a shot needs. When every shot has a checked clip, the next batch is the music, then the edit.
+9. The Story view shows the first-try measure of C30 only in `critic` mode, because it counts verdicts of the critic.
+10. The clock has no setting for its target yet. The file holds the target, so a later setting writes it there.
+11. The stage of a call comes from its tool and input: `generate_asset` and `generate_assets` by `sheet_of`, the capability, and `shot_id`; `put_cast_member` with pictures is the sheets, and with none the plan; `check_design` by the kind of its first asset; `review_several` by its first review.
+
+### The real run
+
+RUN_RESULTS
+
+### Follow-ups
+
+1. `update_clip` can lengthen a clip on a timeline past `clean_until_seconds`. It does not run the design gate yet.
+2. A setting for the time target of the clock.
+3. A measure of a film in `draft` mode, from the design checks, in place of the first-try measure of the critic.

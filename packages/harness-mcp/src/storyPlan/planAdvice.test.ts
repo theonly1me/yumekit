@@ -52,51 +52,43 @@ function startOf(harness: Harness) {
   });
 }
 
-describe("the limit of the plan check", () => {
-  it("opens the gate after the second failed check and stores each open fault on its shot", async () => {
+describe("the plan check as advice", () => {
+  it("makes a start picture with no plan check, and after a failed check, with each fault as a note on its shot", async () => {
     const harness = await filmWhosePlanFails();
 
-    await passPlan(harness);
-    const afterOne = await startOf(harness);
-    const second = await passPlan(harness);
-    const afterTwo = await startOf(harness);
+    const before = await startOf(harness);
+    const failed = await passPlan(harness);
+    const after = await shotCall({
+      harness,
+      assetId: "quench-start",
+      capability: "image",
+      shotId: "quench",
+    });
 
     const plan = harness.store.read().bible.storyPlan;
-    expect(afterOne.data).toMatchObject({ kind: "plan-failed-review" });
-    expect(second.data).toMatchObject({
+    expect(before.isError).toBe(false);
+    expect(failed.data).toMatchObject({
       verdict: "fail",
-      failed_plan_checks: 2,
       shots_with_open_plan_faults: ["strike"],
     });
-    expect(second.text).toContain("These shots carry open plan faults");
-    expect(afterTwo.isError).toBe(false);
+    expect(failed.text).toContain("nothing waits for it");
+    expect(after.isError).toBe(false);
     expect(plan?.shots[0]?.planNotes).toEqual([strikeFault]);
     expect(plan?.shots[1]?.planNotes).toBeUndefined();
   });
 
-  it("refuses a third check unless the person asked for it", async () => {
+  it("runs a third plan check with no limit", async () => {
     const harness = await filmWhosePlanFails();
     await passPlan(harness);
     await passPlan(harness);
 
     const third = await passPlan(harness);
-    const asked = await harness.call({
-      name: "review_plan",
-      arguments: { person_asked_for_another_check: true },
-    });
 
-    expect(third.data).toMatchObject({ kind: "plan-checks-used-up" });
-    expect(asked.data).toMatchObject({ failed_plan_checks: 3 });
-    expect(
-      harness.criticLog.briefs.filter((brief) =>
-        brief.startsWith("Review job: the plan"),
-      ),
-    ).toHaveLength(3);
+    expect(third.data).toMatchObject({ failed_plan_checks: 3 });
   });
 
   it("gives the critic of the start picture the faults that the plan check left open", async () => {
     const harness = await filmWhosePlanFails();
-    await passPlan(harness);
     await passPlan(harness);
 
     await reviewedStart({ harness, assetId: "strike-start", shotId: "strike" });
@@ -106,7 +98,7 @@ describe("the limit of the plan check", () => {
     expect(brief).toContain(`- Shot "strike": ${strikeFault}`);
   });
 
-  it("keeps a broken fact of the brief blocking after the gate opens, until its exact text is restored", async () => {
+  it("blocks a shot that breaks a fact of the brief, until its exact text is restored", async () => {
     const harness = await filmWhosePlanFails([
       {
         cast_id: "smith",
@@ -115,7 +107,6 @@ describe("the limit of the plan check", () => {
         seen: "The facts never say her hair is white.",
       },
     ]);
-    await passPlan(harness);
     await passPlan(harness);
 
     const blocked = await startOf(harness);

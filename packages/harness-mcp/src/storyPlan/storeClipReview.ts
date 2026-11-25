@@ -8,6 +8,8 @@ import { applyEditsResult } from "../applyEditsResult.js";
 import type { HarnessContext } from "../context.js";
 import type { ClipAnswer } from "../critic/clip/clipAnswerInput.js";
 import type { ClipJob } from "../critic/clip/clipJob.js";
+import { rangeText } from "../critic/clip/cleanRange.js";
+import { cleanRangeOfAnswer } from "../critic/clip/clipRangeCheck.js";
 import { reviewOfAnswer } from "../critic/clip/clipReviewRecord.js";
 import type { CriticDesk } from "../critic/criticDesk.js";
 import type { AskCritic } from "../critic/criticTypes.js";
@@ -17,6 +19,7 @@ import {
   withDesignChecks,
 } from "../critic/design/designRecord.js";
 import { failureResult } from "../results.js";
+import { shortestCleanSeconds } from "./designGate.js";
 import { endPictureEditOf } from "./endPicture.js";
 import { planWithReview } from "./reviewRecord.js";
 import { shotNextStepOf } from "./shotNextStep.js";
@@ -62,9 +65,11 @@ export async function storeClipReview(options: {
   const cleanUntil = checks.find(
     (check) => check.cleanUntilSeconds !== undefined,
   )?.cleanUntilSeconds;
-  const keepTo = answer.verdict === "cut" ? answer.keep_to_seconds : undefined;
+  const range =
+    answer.verdict === "cut" ? cleanRangeOfAnswer({ job, answer }) : undefined;
+  const keepTo = range?.to;
   const ending =
-    answer.verdict === "redo"
+    (cleanUntil ?? shortestCleanSeconds) < shortestCleanSeconds
       ? undefined
       : await endPictureEditOf({
           snapshot,
@@ -105,13 +110,10 @@ export async function storeClipReview(options: {
       : ` Notes, which do not refuse it: ${(review.notes ?? []).join("; ")}.`;
   const faults = `${review.faults.length === 0 ? "No blocking faults." : review.faults.join("; ")}${notes}`;
   const next =
-    answer.verdict === "redo"
-      ? shotNextStepOf({
-          shotId: job.shot.id,
-          reviews: [...(job.shot.reviews ?? []), review],
-        })
-      : answer.verdict === "cut"
-        ? `Place only ${String(answer.keep_from_seconds)}s to ${String(answer.keep_to_seconds)}s.`
+    range !== undefined
+      ? `Place only the clean part, ${rangeText(range)}.`
+      : answer.verdict === "redo"
+        ? shotNextStepOf(job.shot.id)
         : "Place it.";
   return context.writeLatest(() =>
     applyEditsResult({

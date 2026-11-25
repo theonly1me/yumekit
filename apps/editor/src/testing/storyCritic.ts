@@ -67,7 +67,7 @@ export const criticSteps = [
       name: "give_clip_review",
       input: {
         checks: checks(11),
-        counts: [{ object: "hammers", expected: 1, seen: 2, seconds: 0.8 }],
+        counts: [{ object: "hammers", expected: 1, seen: 2, seconds: 2.5 }],
         action: { happened: true, seconds: 0.3, seen: "The hammer lands." },
         end_entries: [
           { entry: "smith", happened: true, seconds: 0.4, seen: "Bent." },
@@ -79,9 +79,13 @@ export const criticSteps = [
           seen: "A spark.",
         })),
         verdict: "cut",
-        keep_from_seconds: 0,
-        keep_to_seconds: 0.5,
-        faults: ["The hammer changes hands at 0.8 seconds"],
+        faults: [
+          {
+            fault: "The hammer changes hands",
+            from_seconds: 2,
+            to_seconds: 3,
+          },
+        ],
         notes: ["0.3s: the sparks are a little orange"],
       },
     },

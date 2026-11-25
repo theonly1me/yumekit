@@ -3,12 +3,11 @@ import { knownLimitLinesOf } from "./knownLimits.js";
 export const firstCutSection = [
   "## The first cut is the final cut",
   "",
-  "- Write each prompt of the first cut before any money: set_story_plan takes start_picture_prompt and video_prompt for each shot, and put_cast_member takes sheet_prompts for each entry. review_plan then has the critic refuse what is likely to fail. A refusal of the plan costs no media money; a refused picture or clip does.",
-  "- The first try of a sheet or a shot sends the reviewed prompt: leave out input.prompt and the harness uses it.",
-  "- Each fault of the critic is blocking or a note. Only a blocking fault refuses: a doubled object, a wrong side, a wrong count in the frame, a missing planned action, a broken body, merged fingers that a viewer sees, a missed contact, an effect with no source, a likeness to a known design. A note is a difference that a viewer would not see.",
-  "- Tries: after one refusal, the second try starts from the refused version (the refused picture in reference_asset_ids, or the start picture of the refused clip) and changes only the named faults. After two, one simplified try with simpler_form. After three, keep the best sheet with restrictions on its cast entry, restage or drop the shot, or ask the person.",
-  "- After the plan passes, make the sheets, then the easiest and the hardest shot of the plan check. Record the cause of each refusal with record_lesson. yumekit sends no lesson to a model: write what applies into the prompts of the next shots. Then make the rest in film order.",
-  "- A refused shot does not stop the film: the next shot starts from the start state of the plan. Restage or drop the refused one later.",
+  "- Write each prompt of the first cut before any money: set_story_plan takes start_picture_prompt and video_prompt for each shot, and put_cast_member takes sheet_prompts for each entry. When the person asks for a second look, review_plan has the critic read the plan before the money; its faults are notes.",
+  "- With no input.prompt, a sheet or a shot sends the next prompt of the plan.",
+  "- One check blocks a result: the design check. A picture whose design breaks cannot start a clip, and a clip whose design breaks shows only its clean part, unless the person chooses it. Every other fault of a check or a review is a note: you decide what serves the film. A short fault at the start or the end of a clip is a cut.",
+  "- To correct a picture or a clip, start from it (the picture in reference_asset_ids, or the start picture of the clip) and change only what is wrong. Every try stays recorded and shown.",
+  "- Make the film in four batches: all sheets, all start pictures, all clips, then the music, each in one generate_assets call, and check each batch of pictures or clips in one call. Record a cause that will hit other shots with record_lesson. yumekit sends no lesson to a model: write what applies into the prompts of the next shots.",
   "- Sheets and start pictures use the strongest picture model of the service unless the person picked one: every later picture copies them.",
   "",
 ].join("\n");
@@ -30,7 +29,7 @@ export function knownLimitsSection(
   return [
     "## Known limits of the picture and video models",
     "",
-    "Plan around each one with the form that works. review_plan checks the plan against this list.",
+    "Plan around each one with the form that works. review_plan reads the plan against this list when you ask it.",
     "",
     ...knownLimitLinesOf(learned),
     "",
