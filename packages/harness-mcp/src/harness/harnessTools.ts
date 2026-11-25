@@ -42,6 +42,8 @@ import type { AskCritic } from "../critic/criticTypes.js";
 import { registerReviewWork } from "../critic/registerReviewWork.js";
 import type { AskHelper } from "../helpers/helperTypes.js";
 import { registerAskHelper } from "../helpers/registerAskHelper.js";
+import type { AskPerson } from "../questions/questionTypes.js";
+import { registerAskPerson } from "../questions/registerAskPerson.js";
 import { registerGetStoryGuide } from "../storyGuide/registerGetStoryGuide.js";
 import { registerRecordLesson } from "../storyPlan/registerRecordLesson.js";
 import { registerSetStoryPlan } from "../storyPlan/registerSetStoryPlan.js";
@@ -59,6 +61,7 @@ export interface HarnessOptions {
   mediaTools: MediaTools;
   askHelper?: AskHelper;
   askCritic?: AskCritic;
+  askPerson?: AskPerson;
 }
 
 export function harnessToolsOf(
@@ -124,6 +127,7 @@ export function harnessToolsOf(
   registerRenderTools(context);
   registerSharperCopy(context);
   registerAskHelper({ ...context, askHelper: options.askHelper });
+  registerAskPerson({ ...context, askPerson: options.askPerson });
   return context.tools.tools().map((tool) =>
     clockedTool({
       tool,

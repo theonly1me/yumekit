@@ -31,6 +31,12 @@ export type {
 } from "./helpers/helperTypes.js";
 export { noHelperFailure } from "./helpers/registerAskHelper.js";
 export {
+  noPersonFailure,
+  type AskPerson,
+  type AskPersonOutcome,
+  type PersonQuestion,
+} from "./questions/questionTypes.js";
+export {
   criticToolNames,
   isCriticTool,
   noCriticFailure,

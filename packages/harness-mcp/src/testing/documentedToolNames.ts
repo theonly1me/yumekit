@@ -77,4 +77,5 @@ export const documentedToolNames = [
   "give_sheet_review",
   "give_plan_review",
   "give_start_review",
+  "ask_person",
 ] as const;
