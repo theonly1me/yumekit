@@ -161,3 +161,43 @@ WP80, WP81, and WP82 run at the same time. WP83 and WP84 follow. WP77 is last.
 - More than one person in a project.
 - Takes for the voice. A voice is still changed in "Edit by hand".
 - A take of the whole film across chapters. The last chapter's cut and Export cover it.
+
+## Details of WP81
+
+These decisions came from the build of WP81.
+
+### Questions in rounds
+
+1. Each question of `ask_person` has an `id` (lowercase letters, digits, and hyphens), `text` (1 to 240 characters), `options` (2 to 6 labels of 1 to 80 characters), and `multiple`. A repeated id gives `question-id-repeated`, and a repeated option gives `option-repeated`. Neither stores a round.
+2. `ask_person` works only for the lead, inside a request of the chat of the editor, as `ask_helper` does. Each other session gets `no-chat-request` with the hint to ask in the answer text. A helper and the critic cannot call it.
+3. The result has `round_id`, `question_count`, and `next`. Its line tells the lead to end its turn with one short sentence and to ask nothing in its text.
+4. While a round is open in a request that runs, the engine refuses each later call of the lead with `questions-waiting` and runs nothing. So the turn ends also when the lead does not follow the result, and nothing is spent before the person answers.
+5. The chat entry `questions` has `id` (the round id), `questions` (each with `multiple`), `state` (`open` or `closed`), and `answers` (`questionId`, `choices`, `ownWords`). The `request` or `steering` entry that closed a round has its `roundId`. A round stays open after a restart of the engine.
+6. `POST /api/chat/answers` takes `round_id`, `answers` (`question_id`, `choices`, `own_words`), and the optional `text`, `files`, `about_clip_id`, and `details`. It answers 202 with the `request` entry, or a `steering` entry while a request runs. A round id that is not the open round gives `questions-closed` (409). An answer to a question of another round, a choice that is not an option, or two choices for a question with `multiple` false give `answers-not-valid` (400).
+7. The round closes only when its request starts. A start that fails keeps the round open, and the card stays.
+8. The answers go to the lead in `details` of the request: "The person answered your 3 questions:", then each question with "Answer: ..." or "No answer.". Choices are joined with "; ", and own words follow "In their own words:". A round with some answers says how many, and that a question with no answer is still open.
+9. A message in the box while a round is open goes through `POST /api/chat/answers`, with the answers so far. A request of `POST /api/chat/requests`, for example from a button of a step view, closes the open round with no answers, and its text names each question as open. So no round stays open past a new request.
+10. The card turns on "Send my answers" when each question has an answer. On the last question, a line says how to send with some answers: "Answer each question to send them. Or write in the box below: your message goes with the answers you gave."
+11. A question with `multiple` adds ". Pick one or more." to its count line. For a question with one choice, an option replaces the own words, and own words replace the option. Enter in the line of own words goes to the next question. The suggestion chips hide while a round is open.
+12. The folded line says "You answered 5 questions", "You answered 2 of 5 questions", or "You did not answer the questions". It sits on the message of the person that closed the round, and opens to each question and its answer.
+13. The Making screen opens the editor when a round is open, so the person sees the card. WP83 replaces the Making screen.
+14. "Try again" after a failed request that only answered a round sends "Here are my answers again." with the same answers.
+
+### Files in the chat
+
+15. The editor uploads each file with `POST /api/uploads` when the person sends, as one act. So a removed chip leaves nothing in the project. The upload already adds the asset (document 15), so the upload id of this document is the asset id.
+16. The request body gets `files`: `asset_id` and `name` of each file, 20 at most. Before the turn, the engine checks that each id is an asset of the project. An id that is not gives `file-not-found` (404), and no turn starts. A request with files may have no words.
+17. The text for the lead adds "The person added 2 files to this message. Each file is an asset of the project now. Look at each picture and video with preview_assets before you use it.", and one line for each file with its name, its kind (a picture, a sound, a video, or a font), and its asset id. A steering message names its files the same way.
+18. A file that is not a picture, a video, a sound, a font, or a text file shows "yumekit cannot read this kind of file. Add a picture, a video, a sound, a font, or a text file." on its chip. While such a chip stays, Send uploads nothing and sends nothing. A failed upload shows the message of the engine on its chip, and the next Send tries that file again. A file that was added keeps its asset, so a second Send does not add it twice.
+19. A project has no text asset. So the words of a text file (`.txt`, `.md`) go into the box after "From the file <name>:", where the person reads and changes them. A text that makes the box longer than 20,000 characters shows a chip that says the text is too long.
+20. The whole chat pane takes a drop, and the hint "Drop the files for the AI" covers the box. A drop of files in another part of the editor does nothing, so the browser never leaves the editor to show the file.
+21. The chips, "Add files", the drop zone, and the list of files that wait are in `apps/editor/src/chat/files/index.ts`, for the start box of WP83.
+
+### The resizable chat
+
+22. The chat is 320 to 720 pixels wide, and 400 by default. The browser keeps the width in its local storage as `yumekit-chat-width`. The chat is at most half the window, and at most 45% of a window under 1100 pixels.
+23. The edge is a separator with the arrow keys: Left makes the chat 24 pixels wider, and Right makes it narrower. A double click sets 400. The edge is hidden at phone width, where the chat opens over the work as before.
+
+### The real check
+
+24. On 2026-11-26, the engine of the worktree build ran one request with Claude Code 2.1.332 in a new temporary project and configuration folder, with no media key. The request asked for a 30 second film and for a few questions with choices first. The lead called `get_work`, `get_story_guide`, and `ask_person` with 6 questions of 4 options each. It then ended its turn with one sentence: "I've put a few questions about the story and the look on the card above the chat box." The turn took about 10 seconds, and the card showed the round. The lead's guide does not name `ask_person` yet (WP77), so the tool description alone led the lead to it.

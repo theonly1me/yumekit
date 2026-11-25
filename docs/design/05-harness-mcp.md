@@ -159,11 +159,12 @@ For a video, `generate_asset` reads `hasAudio` with `probeMedia`. It uses the si
 
 ### Helpers
 
-| Tool         | Input                               | Result                                                                                              |
-| ------------ | ----------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `ask_helper` | `brief`, `scene_ids?`, `asset_ids?` | The text of a helper agent and the list of the scenes and assets that it changed (document 19, K10) |
+| Tool         | Input                               | Result                                                                                               |
+| ------------ | ----------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `ask_helper` | `brief`, `scene_ids?`, `asset_ids?` | The text of a helper agent and the list of the scenes and assets that it changed (document 19, K10)  |
+| `ask_person` | `questions` (1 to 20)               | A round of multiple-choice questions on a card in the chat. The lead ends its turn (document 21, T4) |
 
-`ask_helper` works only through the engine, inside a chat request of the person. In each other session it fails with `no-helper`.
+`ask_helper` works only through the engine, inside a chat request of the person. In each other session it fails with `no-helper`. `ask_person` works the same way, and fails with `no-chat-request` (document 21, "Details of WP81").
 
 ### Reviews by the critic
 
@@ -177,7 +178,7 @@ For a video, `generate_asset` reads `hasAudio` with `probeMedia`. It uses the si
 | `check_music`    | `asset_id`                                                                              | The fit of a music track to the music map of the plan, its best start, and warnings, stored in the plan (document 20, C19)                                                                        |
 | `check_design`   | `asset_id` and `shot_id`, or `assets`; `cast_id?`, `region?`, `seconds?`, `design?`     | The design check run by the lead: the list, the crops next to the turnaround, and one stored check for each picture or clip of a batch (document 20, C54 and C62)                                 |
 
-The critic is a turn of the agent program of the person, started by the engine with a critic token. It has five tools that no other session sees: `view_for_review` (the frames and pictures of the open review, and closer looks), `give_clip_review`, `give_sheet_review`, `give_plan_review`, and `give_start_review`. The engine lists them only to the critic and refuses them to each other caller with `critic-only`. The critic may call nothing else (`critic-not-permitted`). A standalone `yumekit mcp` with no engine has no critic: the reviews fail with `no-critic`, and the five critic tools are not listed. The harness of the engine has 78 tools, and the lead sees 73 (`set_checks` of WP76 is new). The critic tools find their review by the review job of the call: the engine passes the job of the critic token, and a direct MCP client sends it as `_meta["yumekit/review-job"]`. `record_lesson` (document 20, C28) is with `set_story_plan`.
+The critic is a turn of the agent program of the person, started by the engine with a critic token. It has five tools that no other session sees: `view_for_review` (the frames and pictures of the open review, and closer looks), `give_clip_review`, `give_sheet_review`, `give_plan_review`, and `give_start_review`. The engine lists them only to the critic and refuses them to each other caller with `critic-only`. The critic may call nothing else (`critic-not-permitted`). A standalone `yumekit mcp` with no engine has no critic: the reviews fail with `no-critic`, and the five critic tools are not listed. The harness of the engine has 79 tools, and the lead sees 74 (`ask_person` of WP81 is new). The critic tools find their review by the review job of the call: the engine passes the job of the critic token, and a direct MCP client sends it as `_meta["yumekit/review-job"]`. `record_lesson` (document 20, C28) is with `set_story_plan`.
 
 ### See the result
 
