@@ -1,111 +1,19 @@
 import { join } from "node:path";
-import type { ClipReview, Edit } from "@yumekit/project";
 import { measureClipMotion } from "@yumekit/render";
-import { applyEditsResult } from "../applyEditsResult.js";
-import type { HarnessContext } from "../context.js";
-import type { ClipAnswer } from "../critic/clip/clipAnswerInput.js";
 import { clipBriefOf, type ClipJob } from "../critic/clip/clipJob.js";
 import { planNoteLinesOf } from "../critic/plan/planNoteLines.js";
-import { reviewOfAnswer } from "../critic/clip/clipReviewRecord.js";
-import type { CriticDesk } from "../critic/criticDesk.js";
-import type { AskCritic } from "../critic/criticTypes.js";
 import { runCritic } from "../critic/runCritic.js";
 import { inReviewSlot } from "../critic/reviewSlot.js";
 import { renderFailureOf } from "../output/renderFailures.js";
 import { failureResult } from "../results.js";
-import { endPictureEditOf } from "./endPicture.js";
-import { shotNextStepOf } from "./shotNextStep.js";
 import { storedReviewResult } from "./storedReview.js";
-import { measuresOf, planWithReview } from "./reviewRecord.js";
+import { measuresOf } from "./reviewRecord.js";
+import { storeClipReview, type CriticContext } from "./storeClipReview.js";
+import {
+  requiredSecondsOf,
+  shotDesignJobOf,
+} from "../critic/design/designJob.js";
 import { reviewClipInput, reviewTargetOf } from "./reviewClipInput.js";
-
-type CriticContext = HarnessContext & {
-  critics: CriticDesk;
-  askCritic: AskCritic | undefined;
-};
-
-async function storeReview(options: {
-  context: CriticContext;
-  job: ClipJob;
-  answer: ClipAnswer;
-  measures: ClipReview["measures"];
-  seconds: number;
-  costUsd: number | undefined;
-}) {
-  const { context, job, answer } = options;
-  const snapshot = context.store.read();
-  const ending =
-    answer.verdict === "redo"
-      ? undefined
-      : await endPictureEditOf({
-          snapshot,
-          projectFolder: context.store.folder,
-          clip: job.clip,
-          seconds:
-            answer.verdict === "cut" ? answer.keep_to_seconds : undefined,
-        });
-  if (ending !== undefined && !ending.ok) return failureResult(ending.failure);
-  const review = reviewOfAnswer({
-    ...options,
-    endPictureAssetId: ending?.value.assetId,
-  });
-  const editsOf = (): Edit[] => {
-    const { bible } = context.store.read();
-    const plan = bible.storyPlan;
-    if (plan === undefined) throw new Error("A review target needs a plan.");
-    return [
-      ...(ending === undefined ? [] : [ending.value.edit]),
-      {
-        kind: "setBible",
-        bible: {
-          ...bible,
-          storyPlan: planWithReview({ plan, shotId: job.shot.id, review }),
-        },
-      },
-    ];
-  };
-  const notes =
-    (review.notes ?? []).length === 0
-      ? ""
-      : ` Notes, which do not refuse it: ${(review.notes ?? []).join("; ")}.`;
-  const faults = `${review.faults.length === 0 ? "No blocking faults." : review.faults.join("; ")}${notes}`;
-  const next =
-    answer.verdict === "redo"
-      ? shotNextStepOf({
-          shotId: job.shot.id,
-          reviews: [...(job.shot.reviews ?? []), review],
-        })
-      : answer.verdict === "cut"
-        ? `Place only ${String(answer.keep_from_seconds)}s to ${String(answer.keep_to_seconds)}s.`
-        : "Place it.";
-  return context.writeLatest(() =>
-    applyEditsResult({
-      store: context.store,
-      edits: editsOf(),
-      line: `The critic says ${answer.verdict} for "${job.clip.id}" of shot "${job.shot.id}": ${faults} ${next}`,
-      data: {
-        verdict: review.verdict,
-        faults: review.faults,
-        notes: review.notes ?? [],
-        missed: review.critic?.missed ?? [],
-        ...(review.keepFromSeconds === undefined
-          ? {}
-          : { keep_from_seconds: review.keepFromSeconds }),
-        ...(review.keepToSeconds === undefined
-          ? {}
-          : { keep_to_seconds: review.keepToSeconds }),
-        ...(review.endPictureAssetId === undefined
-          ? {}
-          : { end_picture_asset_id: review.endPictureAssetId }),
-        measures: review.measures,
-        critic_seconds: review.critic?.seconds ?? 0,
-        ...(options.costUsd === undefined
-          ? {}
-          : { critic_cost_usd: options.costUsd }),
-      },
-    }),
-  );
-}
 
 export function registerReviewClip(context: CriticContext): void {
   context.tools.add({
@@ -155,6 +63,20 @@ export function registerReviewClip(context: CriticContext): void {
             }),
             pictures: snapshot.assets,
             warnings: motion.value.warnings,
+            design: shotDesignJobOf({
+              snapshot,
+              castIds: shot.castIds,
+              castLooks: shot.castLooks,
+              target: {
+                kind: "clip",
+                clip,
+                lengthSeconds: target.value.lengthSeconds,
+                seconds: requiredSecondsOf({
+                  lengthSeconds: target.value.lengthSeconds,
+                  flagged: motion.value.warnings,
+                }),
+              },
+            }),
             answer: undefined,
           };
           onProgress?.({ done: 0, message: "The critic looks at the clip" });
@@ -168,7 +90,7 @@ export function registerReviewClip(context: CriticContext): void {
           });
           if (!turn.ok) return failureResult(turn.failure);
           if (job.answer === undefined) throw new Error("runCritic checks it.");
-          return storeReview({
+          return storeClipReview({
             context,
             job,
             answer: job.answer,

@@ -2,6 +2,7 @@ import type { HarnessContext } from "../context.js";
 import { registerCheckMusic } from "../music/registerCheckMusic.js";
 import { registerReviewClip } from "../storyPlan/registerReviewClip.js";
 import { createCriticDesk } from "./criticDesk.js";
+import { registerCheckDesign } from "./design/registerCheckDesign.js";
 import type { AskCritic } from "./criticTypes.js";
 import { registerReviewPlan } from "./plan/registerReviewPlan.js";
 import { registerCriticTools } from "./registerCriticTools.js";
@@ -19,5 +20,6 @@ export function registerReviewWork(
   registerReviewStart(reviewContext);
   registerReviewSeveral(reviewContext);
   registerCheckMusic(context);
+  registerCheckDesign(context);
   if (context.askCritic !== undefined) registerCriticTools(reviewContext);
 }

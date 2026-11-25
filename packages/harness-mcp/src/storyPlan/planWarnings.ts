@@ -1,6 +1,7 @@
 import type { CastMember, Shot, StoryPlan } from "@yumekit/project";
 import { directionWarningsOf } from "./directionWarnings.js";
 import { videoPromptLimit } from "./firstFrameRule.js";
+import { lookWarningsOf } from "./shotLooks.js";
 import { isSameState, spaceWarningsOf } from "./spaceWarnings.js";
 
 export const largestPlaceCount = 2;
@@ -94,5 +95,6 @@ export function planWarningsOf(options: {
     ...placeWarnings(shots),
     ...promptWarnings(shots),
     ...castWarnings({ shots, cast: options.cast }),
+    ...lookWarningsOf({ shots, cast: options.cast }),
   ];
 }

@@ -60,6 +60,7 @@ export const documentedToolNames = [
   "review_sheet",
   "review_plan",
   "review_start",
+  "check_design",
   "check_music",
   "align_words",
   "preview_frame",

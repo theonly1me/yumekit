@@ -83,6 +83,7 @@ export const storyCalls: ScriptedCall[] = [
   },
   { name: "review_plan", input: {} },
   { name: "review_start", input: { asset_id: "still", shot_id: "dawn" } },
+  { name: "check_design", input: { asset_id: "still", shot_id: "dawn" } },
   {
     name: "record_lesson",
     input: {

@@ -6,6 +6,7 @@ import {
 } from "@yumekit/project";
 import { tempoFactsOf } from "../../tempo/beatFacts.js";
 import { storyWorkLines } from "../../storyFirst/storyLines.js";
+import { castLookLines } from "./lookText.js";
 import { planLines } from "./planText.js";
 
 function tempoLine(snapshot: ProjectSnapshot): string {
@@ -46,7 +47,10 @@ function castLines(snapshot: ProjectSnapshot): string[] {
         member.storyCharacterId === undefined
           ? ""
           : ` Story character: ${member.storyCharacterId}.`;
-      return `- ${member.id} (${member.kind}) ${member.name}: ${member.description}${character}${facts}${pictures}${checked}${restrictions}${planned}`;
+      return [
+        `- ${member.id} (${member.kind}) ${member.name}: ${member.description}${character}${facts}${pictures}${checked}${restrictions}${planned}`,
+        ...castLookLines(member),
+      ].join("\n");
     }),
   ];
 }

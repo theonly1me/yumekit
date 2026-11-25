@@ -68,6 +68,20 @@ yumekit sends each prompt exactly as you write it, and adds nothing. The model k
 - For a shot of a story plan, read `get_shot_brief` first. It gives the art direction, the facts of the cast and the place, the sheets to pass as references, the plan notes, the lessons, the known limits, and the limits of the model.
 - Each answer of `generate_asset` gives the prompt as sent. `list_media_requests` lists every request, also the failed ones.
 
+## One design, every frame
+
+The only character that a film animates is the one that you designed: the same face, the same hair, the same costume, and the same props in every picture and clip. In one run a clip kept the hero for 1.5 seconds and then gave him long tied hair, a sleeved kimono with clouds all over it, and a second sword. A start picture gave his sleeveless coat sleeves, and in a third clip a character's hair changed halfway.
+
+1. Give each person base facts in `put_cast_member` `facts`: the face, the eyes, the hair, each mark and its side, the build. No look changes them.
+2. Give each person looks in `put_cast_member` `looks`. The look `default` is the design. A look names each garment with its construction ("a long sleeveless indigo coat worn open over a sleeved kimono") and each prop with its count and side ("exactly one sword, on the left hip").
+3. A new look of a person who exists is the decision of the person. If the request does not describe it, propose it and ask. Give the words of the person in `person_asked_for_it`.
+4. Name the look of each person in each shot with `cast_looks` of `set_story_plan`. A look never changes inside a shot.
+5. Make the kit of each look: the turnaround, then the poses that the shots need (`get_work` proposes them), the faces, and the hands with the props. A shot can still start with only the turnaround.
+6. For a move with a clear end pose, make an end picture with `key_picture` `end`, check it with the start picture in `review_start` `end_picture_asset_id`, and give it as `last_frame_asset_id`.
+7. Keep hands small or out of the frame unless the shot is about them.
+
+The design check compares each picture and clip with the turnaround of its look. A picture that breaks the design cannot start or end a clip, and only the clean part of a clip can be placed (`clean_until_seconds`), unless the person chooses it.
+
 ## Keys
 
 - The AI needs no key. yumekit uses the sign-in of the agent program.

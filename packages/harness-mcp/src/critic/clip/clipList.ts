@@ -12,8 +12,13 @@ export const clipListItems = [
   "A living world (wind, cloth, hair, dust move unless the plan asks for stillness) and no writing that a person cannot read.",
 ] as const;
 
-export function clipListText(): string {
+export function clipListText(sheetsItem?: string): string {
   return clipListItems
+    .map((item) =>
+      sheetsItem !== undefined && item.startsWith("The sheets:")
+        ? sheetsItem
+        : item,
+    )
     .map((...[item, index]) => `${String(index + 1)}. ${item}`)
     .join("\n");
 }

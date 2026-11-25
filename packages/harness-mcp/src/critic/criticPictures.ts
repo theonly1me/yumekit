@@ -23,8 +23,9 @@ export async function pictureOf(options: {
   fromSeconds?: number;
   toSeconds?: number;
   count?: number;
+  beside?: { asset: Asset; label: string } | undefined;
 }): Promise<Outcome<Content, HarnessFailure>> {
-  const { context, asset } = options;
+  const { context, asset, beside } = options;
   const kind = asset.kind === "video" ? "video" : "image";
   const sheet = await context.pictures.renderAssetSheet({
     file: join(context.store.folder, asset.file),
@@ -42,6 +43,16 @@ export async function pictureOf(options: {
       : { toSeconds: options.toSeconds }),
     ...(options.count === undefined ? {} : { count: options.count }),
     ...(kind === "video" && (options.count ?? 2) > 1 ? { columns: 4 } : {}),
+    ...(beside === undefined
+      ? {}
+      : {
+          beside: {
+            file: join(context.store.folder, beside.asset.file),
+            title: beside.label,
+            widthPixels: beside.asset.widthPixels ?? 1,
+            heightPixels: beside.asset.heightPixels ?? 1,
+          },
+        }),
   });
   if (!sheet.ok) return { ok: false, failure: renderFailureOf(sheet.failure) };
   const times =

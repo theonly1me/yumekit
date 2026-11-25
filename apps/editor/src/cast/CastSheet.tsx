@@ -8,6 +8,7 @@ import {
 } from "./castEntries.js";
 import { removeCastEntry } from "./castCalls.js";
 import { CastForm } from "./CastForm.js";
+import { CastLooks } from "./CastLooks.js";
 import { CastPicture } from "./CastPictures.js";
 import "./cast.css";
 
@@ -50,6 +51,7 @@ function CastRow(props: {
         {entry.description === "" ? undefined : (
           <p className="cast-description">{entry.description}</p>
         )}
+        <CastLooks client={props.client} entry={entry} />
       </div>
       <div className="cast-row-actions">
         <button type="button" disabled={props.isBusy} onClick={props.onChange}>

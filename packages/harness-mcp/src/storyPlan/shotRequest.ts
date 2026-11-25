@@ -12,6 +12,7 @@ import {
   calibrationShotIdsOf,
   planGateFailureOf,
 } from "./planGate.js";
+import { keyPictureFailureOf } from "./designGate.js";
 import { firstFrameFailureOf } from "./firstFrameRule.js";
 import { withSheetTry } from "./sheetTryGate.js";
 import { isFreeSheet, sheetFailureOf } from "./sheets.js";
@@ -114,7 +115,8 @@ function withShot(options: {
       request,
       startsFromPlan: startsFromPlan({ plan, shot }),
     }) ??
-    startGateFailureOf({ snapshot, shot, request });
+    startGateFailureOf({ snapshot, shot, request }) ??
+    keyPictureFailureOf({ shot, request });
   if (blocked !== undefined) return failed(blocked);
   const tried = withShotTry({ snapshot, shot, request });
   if (!tried.ok) return tried;

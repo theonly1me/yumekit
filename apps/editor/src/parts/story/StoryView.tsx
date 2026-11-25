@@ -1,6 +1,7 @@
 import type { StepViewProps } from "../frame/stepViewProps.js";
 import type { Snapshot } from "../../engine/snapshot.js";
 import { shotChecksOf } from "./firstCutFacts.js";
+import { ShotDesign } from "./DesignMark.js";
 import { PlanCheck } from "./PlanCheck.js";
 import { ShotPictures } from "./ShotPictures.js";
 import { SheetChecks } from "./SheetChecks.js";
@@ -95,6 +96,11 @@ function ShotRow(props: {
         <TextList
           label={`What the critic found in the start picture of shot ${String(facts.number)}`}
           lines={checks.startFaults}
+        />
+        <ShotDesign
+          shot={shot}
+          snapshot={props.snapshot}
+          number={facts.number}
         />
         <span className="shot-verdict" data-verdict={facts.verdict}>
           {facts.verdictText}

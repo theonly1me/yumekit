@@ -1,4 +1,9 @@
-import type { CastMember, ProjectSnapshot } from "@yumekit/project";
+import {
+  castLooksOf,
+  propText,
+  type CastMember,
+  type ProjectSnapshot,
+} from "@yumekit/project";
 import type { HarnessFailure, Outcome } from "../results.js";
 
 export function wireCastMemberOf(member: CastMember) {
@@ -11,6 +16,24 @@ export function wireCastMemberOf(member: CastMember) {
     reference_asset_ids: member.referenceAssetIds,
     sheet_prompts: member.sheetPrompts ?? [],
     restrictions: member.restrictions ?? [],
+    ...(member.looks === undefined
+      ? {}
+      : {
+          looks: castLooksOf(member).map((look) => ({
+            look_id: look.id,
+            name: look.name,
+            clothes: look.clothes,
+            props: look.props.map(propText),
+            sheets: look.sheets.map((sheet) => ({
+              asset_id: sheet.assetId,
+              kind: sheet.kind,
+              ...(sheet.poses === undefined ? {} : { poses: sheet.poses }),
+            })),
+            ...(look.personAsked === undefined
+              ? {}
+              : { person_asked_for_it: look.personAsked.words }),
+          })),
+        }),
   };
 }
 

@@ -11,6 +11,35 @@ export const castKindLabels: Record<CastKind, string> = {
   prop: "Prop",
 };
 
+const designCheckSchema = z.object({
+  assetId: z.string(),
+  breaks: z.array(z.string()),
+  cleanUntilSeconds: z.number().optional(),
+  personKept: z.object({ words: z.string() }).optional(),
+});
+
+export const castLookSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  clothes: z.array(z.string()),
+  props: z.array(
+    z.object({ name: z.string(), count: z.number(), side: z.string() }),
+  ),
+  sheets: z.array(
+    z.object({
+      assetId: z.string(),
+      kind: z.string(),
+      poses: z.array(z.string()).optional(),
+      check: designCheckSchema.optional(),
+    }),
+  ),
+  personAsked: z.object({ words: z.string() }).optional(),
+});
+
+export type CastLookEntry = z.infer<typeof castLookSchema>;
+
+export { designCheckSchema };
+
 export const castEntrySchema = z.object({
   id: z.string(),
   kind: z.enum(castKinds),
@@ -37,6 +66,7 @@ export const castEntrySchema = z.object({
   restrictions: z.array(z.string()).optional(),
   briefFacts: z.array(z.string()).optional(),
   storyCharacterId: z.string().optional(),
+  looks: z.array(castLookSchema).optional(),
 });
 
 export type CastEntry = z.infer<typeof castEntrySchema>;

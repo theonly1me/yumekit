@@ -13,6 +13,8 @@ export interface ReferenceIds {
   shotId?: string | undefined;
   sheetOf?: string | undefined;
   simplerForm?: string | undefined;
+  kitSheet?: JsonObject | undefined;
+  keyPicture?: "start" | "end" | undefined;
 }
 
 interface VoicePartIds {
@@ -125,5 +127,7 @@ export function recordedInputOf(options: {
     ...(ids.shotId === undefined ? {} : { shot_id: ids.shotId }),
     ...(ids.sheetOf === undefined ? {} : { sheet_of: ids.sheetOf }),
     ...(ids.simplerForm === undefined ? {} : { simpler_form: ids.simplerForm }),
+    ...ids.kitSheet,
+    ...(ids.keyPicture === "end" ? { key_picture: "end" } : {}),
   };
 }

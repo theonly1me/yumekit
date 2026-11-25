@@ -7,6 +7,7 @@ import { sheetTriesOf } from "./sheetTries.js";
 import { castMemberNotFound } from "../cast/castMembers.js";
 import type { GenerateAssetInput } from "../media/generateAssetInput.js";
 import type { HarnessFailure, Outcome } from "../results.js";
+import { isKitSheetCall } from "./kitSheets.js";
 import { withReviewedPrompt } from "./promptPlan.js";
 import {
   reviewFirst,
@@ -86,10 +87,16 @@ export function withSheetTry(options: {
   if (member === undefined) {
     return failed(castMemberNotFound({ snapshot, castId }));
   }
+  if (isKitSheetCall(request)) return { ok: true, value: request };
   const tries = sheetTriesOf(member);
   const reviewed = new Set(tries.flatMap((entry) => entry.assetIds));
   const made = snapshot.assets.filter(
-    (asset) => sourceTextOf({ asset, field: "sheet_of" }) === castId,
+    (asset) =>
+      sourceTextOf({ asset, field: "sheet_of" }) === castId &&
+      !isKitSheetCall({
+        look_id: sourceTextOf({ asset, field: "look_id" }),
+        sheet_kind: sourceTextOf({ asset, field: "sheet_kind" }),
+      }),
   );
   const waiting = made.filter((asset) => !reviewed.has(asset.id));
   const pictureCount = Math.max(1, (member.sheetPrompts ?? []).length);

@@ -6,6 +6,7 @@ import {
   type HarnessFailure,
 } from "../../results.js";
 import type { CriticDesk } from "../criticDesk.js";
+import { designIssuesOf } from "../design/designAnswer.js";
 import { listAnswerIssuesOf, sheetAnswerInput } from "../sheet/sheetJob.js";
 import { startListItems } from "./startJob.js";
 
@@ -24,10 +25,13 @@ export function registerGiveStartReview(options: {
     run: ({ input, reviewJobId }) => {
       const job = critics.jobOf(reviewJobId);
       if (job?.kind !== "start") return failureResult(options.noJob);
-      const issues = listAnswerIssuesOf({
-        itemCount: startListItems.length,
-        answer: input,
-      });
+      const issues = [
+        ...listAnswerIssuesOf({
+          itemCount: startListItems.length,
+          answer: input,
+        }),
+        ...designIssuesOf({ job: job.design, frames: input.design }),
+      ];
       if (issues.length > 0) return options.refused(issues);
       job.answer = input;
       return successResult({

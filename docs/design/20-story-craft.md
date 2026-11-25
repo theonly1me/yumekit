@@ -1062,3 +1062,122 @@ These facts and choices came from the build of WP74 on 2026-11-25.
 22. A field for a spoken line of a shot, with its speaker and its story fact.
 23. A button in the Story view for the yes of the person, so the person does not need the chat.
 24. A tool that places a card on a hit by itself, if real runs show that the lead often misses the hits.
+
+## One design in the sixth run
+
+The builder of WP75 read the record of the run `trailer-v3` and looked at its pictures and clips. Three faults of design reached the clips:
+
+- The clip `clip-attack-miss` shows the hero with his own design until about 1.5 seconds. After the landing, he has long hair tied on top of his head, a navy kimono with sleeves and a cloud pattern all over it instead of the sleeveless indigo coat over the grey kimono, and a second sword. The architect found that its start picture `start-attack-miss-2` already had the wrong costume, and the review of the lead had passed it.
+- The start picture `pic-attack-line` gave the sleeveless indigo coat long sleeves.
+- In another clip, the hair of the crawler changed inside the clip.
+
+The owner's words: "the only character that ever gets animated is what we designed originally, same costume, same hair, same look that is absolutely important"; "the only time a character gets to have a different look is if the design sheet shows them in a different costume or look, as they may change clothes, but each costume and character look is strongly tied to the scene they're in"; "this should be a yumekit feature to ensure character is 100% consistent"; "the character art we're doing also needs to have a lot more styles and postures so that the model has a reference for every animation, if animation still images are solid, the model can animate them relatively easily".
+
+The cause in one sentence: a person had one list of facts in words and one sheet, nothing said which costume a shot wears, and no check compared each picture and frame with the sheet question by question, so "the sheets" item of a review let a changed costume pass.
+
+The product principle of the owner decides each choice: trust the lead, give it full information and good guidance, never add text to its prompts (C40), check the results, and let a rule block only where no person would ever want the outcome.
+
+## Decisions of WP75
+
+| Id  | Decision                                                                                                                                                                                                                                                                                                                                                                        | Why                                                                               |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| C50 | A character has base facts and one or more looks. Base facts belong to the person (face, eyes, hair, marks, build) and no look changes them. A look is a named costume and prop set with its own sheets. Every character has the look `default`. A new look of a character who exists is the decision of the person, and the entry records the words                            | A costume belongs to the scenes where the person wants it. The face never changes |
+| C51 | Each shot names the look of each character (`cast_looks`, default `default`). A look does not change inside a shot. `get_shot_brief` gives the base facts, that look, and its sheets                                                                                                                                                                                            | The lead and the critic know which costume a shot wears                           |
+| C52 | A look can have a kit: `expressions`, `poses` (the action poses that the shots need, named), and `hands-props` sheets. `get_work` proposes the poses, and `get_shot_brief` names the pose nearest to the start of a shot. Each sheet is checked against the turnaround of its look. The kit is a help, not a gate                                                               | Solid still pictures of each pose are easy for a video model to animate           |
+| C53 | A shot can have a start picture and an end picture (`end_picture_asset_id`), both checked against the look. The clip then gets the first and the last frame, when the video model takes a last frame                                                                                                                                                                            | A move with a clear end pose ends on a checked design                             |
+| C54 | The design check is the one hard check on results: an enlarged crop of each character next to the turnaround of its look, and a fixed list made from the facts, answered yes, no, or cannot see for each frame. A no on a key picture blocks its clip. A no in a clip sets `clean_until_seconds`, and `place_video` takes only the part up to it, and nothing under 1.2 seconds | "the lead's own look had passed it"                                               |
+| C55 | The person can always override: `person_kept` on a picture or a clip passes the design gates and is shown as the decision of the person                                                                                                                                                                                                                                         | No rule blocks what the person chose                                              |
+| C56 | The story guide and `skills/yumekit/SKILL.md` get "One design, every frame" with these reasons and the working forms of the run                                                                                                                                                                                                                                                 | The lead writes the design into its own prompts                                   |
+
+## Looks (C50)
+
+- `put_cast_member` takes `looks`: each with `look_id`, `name`, `clothes` (each garment with its construction), `props` (each with `name`, `count`, and `side`), `sheets` (each with `asset_id`, `kind`, and for a poses sheet `poses`), and `person_asked_for_it`. `facts` are then the base facts.
+- A new look other than `default` of an entry fails with `look-needs-person` unless it gives `person_asked_for_it`: the words of the person from the request or from a message. The entry keeps the words as `personAsked`. Nothing refuses a look that the request of the person already describes: the lead gives those words.
+- `get_project`, `get_work`, the Cast view, and the Story view show the looks. A person with no look gets a warning in `put_cast_member` when the project has a plan.
+
+## The look of a shot (C51)
+
+- `set_story_plan` takes `cast_looks` for each shot, for example `{"hero": "rain-cloak"}`. It warns about a person that the shot does not name and about a look that the entry does not have yet. It refuses neither: the sheets come after the plan.
+- A look does not change inside a shot. A change of clothes is a cut to a new shot.
+- A start picture of a shot gets the sheets of the look of the shot as references, not the sheets of the default look. A shot in a look other than `default` needs the turnaround of that look and a passed `review_sheet` with `look_id` (`cast-sheet-missing`, `sheet-not-reviewed`).
+- `get_shot_brief` gives, for each person, the base facts, the look with its clothes, props, and sheets, and the nearest pose.
+
+## The kit of a character (C52)
+
+- `generate_asset` with `sheet_of` takes `look_id`, `sheet_kind`, and `poses`. With `sheet_kind` `poses` and no `poses`, the source record keeps the poses that `get_work` proposes for that look, so the sheet knows what it shows. yumekit adds nothing to the prompt: the lead writes one figure for each pose.
+- `get_work` proposes one pose for each shot of each look: the shot id, the state of the person at the start, the facing, and the prop in a hand.
+- A kit sheet (expressions or poses) waits for no review and has no rule of tries. `review_sheet` with `look_id` checks the turnaround and the hands of the look with a verdict, and each kit sheet against the turnaround with the design check. A kit sheet with a break shows in the brief as "do not pass".
+- `get_shot_brief` names the pose on a poses sheet whose name starts with the shot id, or else the pose with the most words in common with the start of the shot. The lead passes that sheet as a reference of the start picture.
+
+## Key pictures (C53)
+
+- `generate_asset` takes `key_picture` `end` for the end picture of a shot. It waits for no other review and has no rule of tries of its own.
+- `review_start` takes `end_picture_asset_id`. One critic turn checks the start picture against the start state and the end picture against the end state, with the design check of both. The start review keeps `endPictureAssetId`.
+- A clip call with `last_frame_asset_id` and `shot_id` needs a passed start review of its first frame with that end picture (`end-not-reviewed`). The Gemini server sends it as `last_frame_path`. `get_shot_brief` says if the video model takes a last frame.
+- The difference from the picture of the end of a kept clip (`<clip>-end`, C5): the end picture of C53 is a target that the lead makes before the clip, and the clip ends on it. `<clip>-end` is a result that yumekit saves after the review, at the end of the clean part, so that the next shot can continue from it. A clip with a design break saves `<clip>-end` at its last clean moment, so a continued shot never starts on a broken design.
+
+## The design check (C54)
+
+- The list is made from the facts: each base fact, each garment of the look, and each prop with its count and side ("Exactly 1 sword in a black scabbard, tucked through the rust-red sash on his left hip").
+- The frames: each key picture; for a clip, the start, the middle, the end, and each moment that the measure flags.
+- The checker looks at an enlarged crop of each person next to the turnaround of the look, and answers each question with `yes`, `no`, or `cannot-see`, with what it saw.
+- In normal mode the critic runs it in `review_start` and `review_clip`, and it replaces "The sheets" item of the list for each person with a look. With no critic, the lead runs the same list with `check_design`. A later draft mode uses it.
+- A no on a start or end picture marks a break. A clip from it fails with `design-break` unless the person chose the picture.
+- A no in a clip sets `clean_until_seconds`: the last clean frame before the first break. `place_video` refuses a placement that shows the clip past it with `design-break-in-range`, and refuses any placement when the clean part is under 1.2 seconds.
+- The Story view shows a mark for each shot: "Same design all through", "Same design until N seconds", "The design changes", or "Kept by you".
+
+## The person decides (C55)
+
+- `person_chose_this_picture` of `generate_asset` and `person_chose_this_clip` of `place_video` (WP71) take the words of the person. The design check of the picture or the clip keeps them as `personKept`, and the gates of C54 let it pass. `get_work` and the Story view show the words.
+
+## The guide (C56)
+
+- The story guide has the section "One design, every frame", and `skills/yumekit/SKILL.md` has the same section in short. Both give the reasons above and the working forms of the run: name the construction of each garment (a sleeveless coat over a sleeved kimono), give each prop its count and side, and keep hands small unless the shot is about them.
+
+## Work package WP75
+
+| Id   | Scope                                                                                                           | Needs |
+| ---- | --------------------------------------------------------------------------------------------------------------- | ----- |
+| WP75 | Looks and base facts, the look of a shot, the kit of a character, key pictures, the design check, and the guide | WP73  |
+
+### Checks of WP75
+
+1. Through the harness with the fake critic and the sample media server: looks and base facts in the format and in `put_cast_member`; the look of a shot in `get_shot_brief`; the pose proposal of `get_work` and a pose sheet that records it; a clip with a start and an end picture reaches the media server with both; the list of the design check built from the facts; a no on a start picture blocks its clip, and the words of the person open it; `clean_until_seconds` limits `place_video`.
+2. A browser test of the marks of the Story view and the looks of the Cast view.
+3. A real check with the critic on the pictures and the clip of the run.
+
+## Details of WP75
+
+### Why the first design check passed two pictures
+
+The builder ran the critic of the first version of the design check on the pictures and the clip of the run, and read each turn of the critic. The list was built from the facts, and each answer was read back as given. The fault was in the crops:
+
+1. The "enlarged" crop was not enlarged. A crop of one picture kept the pixels of the region: the hero of `start-attack-miss` came out at 242 by 549 pixels, smaller than in the whole picture.
+2. The turnaround came as a separate picture, so the critic never saw the person and the design side by side.
+3. The critic chose any region. For `pic-attack-line` it cropped the head and the waist, and never the shoulders, where a sleeve of the coat would show.
+4. The harness took an answer for a frame of a clip that the critic never cropped. The critic answered the start of `clip-attack-miss` from its crop at 2.88 seconds, and gave `clean_until_seconds` 0.
+
+### The decisions
+
+1. The crop of a person and the turnaround of the look are one picture. They stand side by side at the same height, so a figure of the turnaround has about the size of the person. When side by side would show the crop smaller than its own pixels, they stand one above the other, and the crop gets the most pixels. The picture stays within 1568 pixels on its longest side and 1.15 million pixels, a size that the agent programs read without a cut.
+2. The crop of the design check shows the whole person, from the top of the hair to the feet or to the edge of the frame.
+3. An answer for a person at a frame needs a crop of that person at that frame in the same review: the same picture, or a time of the clip within 0.07 seconds. Otherwise the answer fails with "without its enlarged crop". `check_design` keeps the crops of the lead for each picture or clip while the engine runs.
+4. A break line ends a fact with one period before "Seen".
+
+### The real check
+
+The critic ran through Claude Code on the four files of the run, with the facts of `put_cast_member` from the record of the run (base facts, and the look `default` with each garment and the sword). Two rounds ran, the second on the two start pictures only.
+
+| File                      | Design check, round 1                                                                                  | Round 2     |
+| ------------------------- | ------------------------------------------------------------------------------------------------------ | ----------- |
+| `069-start-attack-miss-2` | Break: the white streak is "on the wrong side". Each garment is yes                                    | The same    |
+| `079-pic-attack-line`     | Same design. The critic failed the picture for the hands of the crawler                                | Same design |
+| `072-pic-thrust`          | Same design                                                                                            | Not run     |
+| `071-clip-attack-miss`    | `clean_until_seconds` 1.5: the hair, kimono, coat, and sash change at 1.63 s, a second sword at 1.88 s | Not run     |
+
+The builder looked at the four files at full size next to `sheet-hero`. In `069` and `079` the builder saw the costume of the turnaround: a sleeveless indigo coat with a wide shoulder over the grey sleeves, the sash, the hat, and one sword. The streak in `069` sits where the side view of the turnaround puts it, so the break comes from the reasoning of the critic about the side, not from the picture. The owner expected a costume break in both pictures. The design check does not find one, and the builder cannot see one.
+
+### Follow-ups
+
+1. A decision of the owner on `069` and `079`. If they break the design, a fact that names the difference (for example the shoulder of the coat) lets the check find it.
+2. The Story view lists each break for each frame. One line for each fact, with its times, would be shorter.

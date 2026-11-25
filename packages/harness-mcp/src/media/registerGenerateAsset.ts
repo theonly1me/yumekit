@@ -13,6 +13,8 @@ import { mediaPathInput } from "./mediaPath.js";
 import { recordedInputOf, referencePathsInput } from "./referencePaths.js";
 import { reuseAsset } from "./reuseAsset.js";
 import { cutNoteOf } from "../storyPlan/cutNote.js";
+import { withChosenPictures } from "../storyPlan/designGate.js";
+import { kitSheetRecordOf } from "../storyPlan/kitSheets.js";
 import { lessonsForYouOf } from "../storyPlan/lessonsForYou.js";
 import { callFactsOf, withCallFacts } from "./callFacts.js";
 import { prepareCall } from "./preparedCall.js";
@@ -29,6 +31,20 @@ export async function generateAsset(options: {
   quotaServers?: Set<string>;
 }): Promise<CallToolResult> {
   const { context, onProgress } = options;
+  const chosen = withChosenPictures({
+    snapshot: context.store.read(),
+    request: options.request,
+  });
+  if (chosen.edits.length > 0) {
+    const stored = await context.store.applyEdits(chosen.edits);
+    if (!stored.ok) {
+      return failureResult({
+        kind: stored.failure.kind,
+        message: stored.failure.message,
+        hint: "The choice of the person was not stored. Call again.",
+      });
+    }
+  }
   const snapshot = context.store.read();
   const prepared = await prepareCall({
     context,
@@ -55,6 +71,8 @@ export async function generateAsset(options: {
     shotId: request.shot_id,
     sheetOf: request.sheet_of,
     simplerForm: request.simpler_form,
+    kitSheet: kitSheetRecordOf({ plan: snapshot.bible.storyPlan, request }),
+    keyPicture: request.key_picture,
   };
   const paths = referencePathsInput({ snapshot, projectFolder, ids });
   if (!paths.ok) return failureResult(paths.failure);

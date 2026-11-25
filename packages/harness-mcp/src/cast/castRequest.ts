@@ -3,6 +3,7 @@ import type { MediaModel, MediaTools } from "@yumekit/tools";
 import type { GenerateAssetInput } from "../media/generateAssetInput.js";
 import type { HarnessFailure, Outcome } from "../results.js";
 import { startsOnPicture } from "../storyPlan/firstFrameRule.js";
+import { shotLookPictureIdsOf } from "../storyPlan/lookSheets.js";
 import { findCastMembers } from "./castMembers.js";
 
 function referenceMaximumOf(model: MediaModel | undefined): number {
@@ -13,6 +14,7 @@ function referenceMaximumOf(model: MediaModel | undefined): number {
 }
 
 function referenceIdsOf(options: {
+  snapshot: ProjectSnapshot;
   request: GenerateAssetInput;
   members: CastMember[];
   maximum: number;
@@ -21,7 +23,15 @@ function referenceIdsOf(options: {
   if (options.maximum === 0) return given;
   const explicit = given ?? [];
   const castIds = [
-    ...new Set(options.members.flatMap((member) => member.referenceAssetIds)),
+    ...new Set(
+      options.members.flatMap((member) =>
+        shotLookPictureIdsOf({
+          snapshot: options.snapshot,
+          shotId: options.request.shot_id,
+          member,
+        }),
+      ),
+    ),
   ].filter((assetId) => !explicit.includes(assetId));
   const room = Math.max(0, options.maximum - explicit.length);
   const merged = [...explicit, ...castIds.slice(0, room)];
@@ -57,7 +67,12 @@ export async function withCast(options: {
       ...(request.model === undefined ? {} : { model: request.model }),
     }),
   );
-  const referenceIds = referenceIdsOf({ request, members, maximum });
+  const referenceIds = referenceIdsOf({
+    snapshot: options.snapshot,
+    request,
+    members,
+    maximum,
+  });
   return {
     ok: true,
     value: {

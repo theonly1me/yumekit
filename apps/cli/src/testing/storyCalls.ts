@@ -91,6 +91,7 @@ export const reviewCalls: ScriptedCall[] = [
   { name: "review_sheet", input: { cast_id: "lake" } },
   { name: "review_plan", input: {} },
   { name: "review_start", input: { asset_id: "still", shot_id: "dawn" } },
+  { name: "check_design", input: { asset_id: "still", shot_id: "dawn" } },
   {
     name: "review_several",
     input: { reviews: [{ tool: "review_sheet", cast_id: "lake" }] },
