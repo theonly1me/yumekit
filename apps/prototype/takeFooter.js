@@ -106,13 +106,13 @@ function askClips(take) {
       yes: "Make the clips",
       run: () => {
         if (roomFor(planned.seconds)) {
-          makeClips(take);
+          makeClips({ take, count: undefined });
           return;
         }
         askToRaise({
           seconds: planned.seconds,
           what: `The clips of chapter ${chapterNumber(take.chapterId)}`,
-          onRaise: () => makeClips(take),
+          onRaise: () => makeClips({ take, count: undefined }),
         });
         change({ sheet: undefined, sideTab: "chat" });
       },

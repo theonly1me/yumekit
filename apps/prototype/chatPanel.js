@@ -1,15 +1,19 @@
 import { ask } from "./assistant.js";
 import { bindEntries, entryMarkup } from "./chatEntries.js";
+import { bindChatEdge, chatEdgeMarkup } from "./chatResize.js";
 import { addFilesMarkup, bindFiles, chipsMarkup } from "./fileChips.js";
+import { bindQuestionCard, questionCardMarkup } from "./questionCard.js";
 import { change, escapeText, pickedScene, state } from "./state.js";
 
 function chatMarkup({ prefix, chip }) {
   return `
+    ${chatEdgeMarkup()}
     <ol class="chat" aria-live="polite">
       ${[...state.chat.entries()].map(entryMarkup).join("")}
       ${state.thinking ? `<li class="entry ai thinking"><span class="who">AI</span><p>Working on it</p></li>` : ""}
     </ol>
     <div class="ask">
+      ${questionCardMarkup()}
       <form class="ask-form" id="${prefix}-ask-form" data-dragging="false">
         ${chip}
         <label for="${prefix}-ask-box" class="hidden-label">Ask the lead</label>
@@ -27,6 +31,7 @@ function chatMarkup({ prefix, chip }) {
 export function renderChat({ element, prefix, chip }) {
   const boxId = `${prefix}-ask-box`;
   const hadFocus = document.activeElement?.id === boxId;
+  const ownFocus = document.activeElement?.id === "own-answer";
   element.innerHTML = chatMarkup({ prefix, chip });
   const scene =
     prefix === "editor" && state.aboutScene ? pickedScene() : undefined;
@@ -53,9 +58,16 @@ export function renderChat({ element, prefix, chip }) {
     .querySelector("[data-remove-chip]")
     ?.addEventListener("click", () => change({ aboutScene: false }));
   bindEntries(element);
+  bindQuestionCard(element);
+  bindChatEdge(element);
   bindFiles({ zone: form, files: state.askFiles });
   const list = element.querySelector(".chat");
   list.scrollTop = list.scrollHeight;
+  if (ownFocus) {
+    const own = element.querySelector("#own-answer");
+    own?.focus();
+    own?.setSelectionRange(own.value.length, own.value.length);
+  }
   if (hadFocus) {
     box.focus();
     box.setSelectionRange(box.value.length, box.value.length);

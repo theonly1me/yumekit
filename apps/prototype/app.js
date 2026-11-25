@@ -1,3 +1,4 @@
+import { restoreChatWidth } from "./chatResize.js";
 import { renderClipSheet } from "./clipSheet.js";
 import { renderExportSheet } from "./exportSheet.js";
 import { renderLowerRows } from "./lowerRows.js";
@@ -164,6 +165,7 @@ document.addEventListener("keydown", (event) => {
 });
 
 setTheme(storedTheme());
+restoreChatWidth();
 seedAdvanced();
 renderNotes({ element: element("notes") });
 onChange(render);

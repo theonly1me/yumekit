@@ -2,8 +2,8 @@ import {
   changes,
   intro,
   limits,
-  proposed,
-  questions,
+  answers,
+  decided,
   screens,
 } from "./notesText.js";
 
@@ -16,23 +16,8 @@ function rowsMarkup(rows) {
     .join("");
 }
 
-function proposedMarkup(rows) {
-  return rows
-    .map(
-      ([title, text]) =>
-        `<div class="note-row"><h3>${title} <b class="proposed">Proposed</b></h3><p>${text}</p></div>`,
-    )
-    .join("");
-}
-
-function questionMarkup(question) {
-  const words = question.words
-    .map(
-      ([word, meaning]) =>
-        `<li><code>${word}</code><span>${meaning}</span></li>`,
-    )
-    .join("");
-  return `<li><p>${question.text}</p><ul class="reply-words">${words}</ul></li>`;
+function answerMarkup([question, word, meaning]) {
+  return `<li><p>${question}</p><ul class="reply-words"><li><code>${word}</code><span>${meaning}</span></li></ul></li>`;
 }
 
 export function renderNotes({ element }) {
@@ -42,14 +27,14 @@ export function renderNotes({ element }) {
       <p>${intro.text}</p>
     </div>
     <div><h2>What moved where, and why</h2>${rowsMarkup(changes)}</div>
-    <div><h2>Proposed by the architect. Keep or drop each one.</h2>${proposedMarkup(proposed)}</div>
+    <div><h2>Decided: the six ideas that you kept</h2>${rowsMarkup(decided)}</div>
     <div>
       <h2>The control count of each screen</h2>${rowsMarkup(screens)}
       <h2 class="notes-gap">Limits of this mock</h2>
       <ul class="plain-list">${limits.map((limit) => `<li>${limit}</li>`).join("")}</ul>
     </div>
     <div class="questions">
-      <h2>Questions for you. Reply with one word for each.</h2>
-      <ol>${questions.map(questionMarkup).join("")}</ol>
+      <h2>Your answers, and what this pass did with them</h2>
+      <ol>${answers.map(answerMarkup).join("")}</ol>
     </div>`;
 }

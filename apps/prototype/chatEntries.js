@@ -1,5 +1,4 @@
 import { answerLimit } from "./limits.js";
-import { answerQuestion } from "./projectFlow.js";
 import { takes } from "./takesStore.js";
 import { openTake } from "./readySignal.js";
 import { change, escapeText, state, undo } from "./state.js";
@@ -11,27 +10,14 @@ function actionMarkup({ entry, index }) {
   return `<button type="button" class="entry-action" data-entry-action="${index}">${escapeText(entry.action.label)}</button>`;
 }
 
-function openQuestionMarkup({ entry, index }) {
-  const options = entry.options
+function answersMarkup(entry) {
+  const rows = entry.pairs
     .map(
-      (option) =>
-        `<button type="button" data-question="${index}" data-option="${escapeText(option)}">${escapeText(option)}</button>`,
+      ([question, answer]) =>
+        `<li><span>${escapeText(question)}</span>${escapeText(answer)}</li>`,
     )
     .join("");
-  return `<li class="entry ai question-entry" data-open="true"><span class="who">AI</span><div><p>${escapeText(entry.text)}</p><div class="answer-buttons" role="group" aria-label="${escapeText(entry.text)}">${options}</div><form class="own-words" data-own-answer="${index}"><input type="text" placeholder="Or in your own words" aria-label="Your own answer" /><button type="submit">Send</button></form></div></li>`;
-}
-
-function questionMarkup(entry) {
-  const options = entry.options
-    .map(
-      (option) =>
-        `<span class="answer-chip" data-chosen="${option === entry.answer}">${escapeText(option)}</span>`,
-    )
-    .join("");
-  const ownWords = entry.options.includes(entry.answer)
-    ? ""
-    : `<span class="answer-chip" data-chosen="true">${escapeText(entry.answer)}</span>`;
-  return `<li class="entry ai question-entry"><span class="who">AI</span><div><p>${escapeText(entry.text)}</p><div class="answer-chips">${options}${ownWords}</div></div></li>`;
+  return `<li class="entry you answers-entry"><span class="who">You</span><details><summary>You answered ${entry.pairs.length} questions</summary><ul class="answer-list">${rows}</ul></details></li>`;
 }
 
 function limitMarkup({ entry, index }) {
@@ -50,10 +36,8 @@ export function entryMarkup([index, entry]) {
         ${entry.undone ? `<span class="fact">Undone</span>` : `<button type="button" class="link" data-undo="${index}">Undo</button>`}
       </li>`;
   }
-  if (entry.kind === "question") {
-    return entry.answer === undefined
-      ? openQuestionMarkup({ entry, index })
-      : questionMarkup(entry);
+  if (entry.kind === "answers") {
+    return answersMarkup(entry);
   }
   if (entry.kind === "limit") {
     return limitMarkup({ entry, index });
@@ -103,26 +87,6 @@ function runAction(action) {
 }
 
 export function bindEntries(element) {
-  element.querySelectorAll("[data-question]").forEach((button) => {
-    button.addEventListener("click", () =>
-      answerQuestion({
-        entry: state.chat[Number(button.dataset.question)],
-        answer: button.dataset.option,
-      }),
-    );
-  });
-  element.querySelectorAll("[data-own-answer]").forEach((form) => {
-    form.addEventListener("submit", (event) => {
-      event.preventDefault();
-      const words = form.querySelector("input").value.trim();
-      if (words !== "") {
-        answerQuestion({
-          entry: state.chat[Number(form.dataset.ownAnswer)],
-          answer: words,
-        });
-      }
-    });
-  });
   element.querySelectorAll("[data-entry-action]").forEach((button) => {
     button.addEventListener("click", () =>
       runAction(state.chat[Number(button.dataset.entryAction)].action),

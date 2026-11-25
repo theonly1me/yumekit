@@ -1,5 +1,11 @@
 import { startChapterPictures } from "./chapterWork.js";
-import { firstChat, firstRequest, storyQuestions } from "./chatSeed.js";
+import {
+  answersEntry,
+  firstChat,
+  firstRequest,
+  questionRounds,
+  roundTalk,
+} from "./chatSeed.js";
 import { stopWork } from "./leadWork.js";
 import { change, notify, state } from "./state.js";
 import { approveStory, resetStory } from "./storySheet.js";
@@ -19,14 +25,11 @@ export function startProject() {
     { kind: "you", text: request, files: [...state.startFiles] },
     {
       kind: "ai",
-      text: "Thanks. Three questions before I write the whole story.",
+      text: "Thanks. A few questions before I write the whole story.",
     },
-    ...storyQuestions.map((question) => ({
-      kind: "question",
-      ...question,
-      answer: undefined,
-    })),
   ];
+  state.questionRound = { round: 0, index: 0, answers: [] };
+  state.costWarning = undefined;
   change({
     screen: "project",
     sheet: undefined,
@@ -35,28 +38,37 @@ export function startProject() {
   });
 }
 
-export function answerQuestion({ entry, answer }) {
-  entry.answer = answer;
-  const open = state.chat.filter(
-    (candidate) =>
-      candidate.kind === "question" && candidate.answer === undefined,
-  );
-  if (open.length > 0) {
-    notify();
-    return;
-  }
+function writeStory() {
   flow.phase = "writing";
   state.chat.push({
     kind: "ai",
-    text: "I write the whole story and the script now.",
+    text: "I have what I need. I write the whole story and the script now.",
   });
-  notify();
   flow.timer = setTimeout(() => {
     flow.phase = "story";
     state.chat.push({
       kind: "ai",
       text: "The whole story is ready on the left. Approve it, or click a paragraph to tell me what to change.",
     });
+    notify();
+  }, thinkMilliseconds);
+}
+
+export function sendAnswers() {
+  const { round, answers } = state.questionRound;
+  state.chat.push(answersEntry({ round, answers }));
+  state.questionRound = undefined;
+  if (round + 1 >= questionRounds.length) {
+    writeStory();
+    notify();
+    return;
+  }
+  state.thinking = true;
+  notify();
+  flow.timer = setTimeout(() => {
+    state.thinking = false;
+    state.chat.push({ kind: "ai", text: roundTalk });
+    state.questionRound = { round: round + 1, index: 0, answers: [] };
     notify();
   }, thinkMilliseconds);
 }
@@ -86,6 +98,8 @@ export function showSampleProject() {
   seedAdvanced();
   approveStory();
   flow.phase = "done";
+  state.questionRound = undefined;
+  state.costWarning = undefined;
   state.chat = firstChat();
   change({ screen: "project", sheet: undefined, projectView: undefined });
 }

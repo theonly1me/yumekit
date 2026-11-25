@@ -20,8 +20,8 @@ function rowsMarkup(scope) {
     <div class="setting-row"><span>Seconds of real video<em>Clips from a video model count. Pictures and drawn scenes do not.</em></span>${stepperMarkup({ scope, field: "seconds", unit: "seconds" })}</div>`;
 }
 
-function switchMarkup({ field, label, note, proposed }) {
-  return `<label class="switch setting-check"><input type="checkbox" data-switch="${field}" ${state.limits[field] ? "checked" : ""} /> <span>${label}${proposed ? ` <b class="proposed">Proposed</b>` : ""}<em>${note}</em></span></label>`;
+function switchMarkup({ field, label, note }) {
+  return `<label class="switch setting-check"><input type="checkbox" data-switch="${field}" ${state.limits[field] ? "checked" : ""} /> <span>${label}<em>${note}</em></span></label>`;
 }
 
 export function limitsMarkup() {
@@ -48,9 +48,9 @@ export function leadWorkMarkup() {
   return `
     <section class="setting-group">
       <h3>How the lead works</h3>
-      ${switchMarkup({ field: "approveFirst", label: "Approve pictures before clips", note: "Clips cost the most. The lead makes them only from pictures that you approved. Turn it off for a quick draft.", proposed: true })}
+      ${switchMarkup({ field: "approveFirst", label: "Approve pictures before clips", note: "Clips cost the most. The lead makes them only from pictures that you approved. Turn it off for a quick draft." })}
       ${checksMarkup()}
-      ${switchMarkup({ field: "readySignal", label: "Ring and show a notice when a take is ready", note: "Your browser asks once if yumekit may show notices.", proposed: true })}
+      ${switchMarkup({ field: "readySignal", label: "Ring and show a notice when a take is ready", note: "Your browser asks once if yumekit may show notices." })}
     </section>`;
 }
 

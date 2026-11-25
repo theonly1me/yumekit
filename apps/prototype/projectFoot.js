@@ -1,6 +1,8 @@
 import { nextChapterOf, picturesPlan } from "./chapterWork.js";
 import { chapterNumber, needsNotes, plannedClips } from "./leadWork.js";
+import { warningMarkup } from "./costGuard.js";
 import { cutOf } from "./projectFilm.js";
+import { state } from "./state.js";
 import {
   storyIsApproved,
   storyIsWriting,
@@ -62,7 +64,7 @@ function takeFoot(take) {
       [
         [
           "clips",
-          `All good. Make the clips, about ${money(planned.seconds * prices.clipSecond)}`,
+          `All good. Make the clips, about ${money(planned.seconds * prices.clipSecond + 3 * prices.music)}`,
         ],
       ],
     ];
@@ -122,6 +124,9 @@ function footOf(view) {
 }
 
 export function footMarkup(view) {
+  if (state.costWarning !== undefined) {
+    return `<footer class="work-foot">${warningMarkup()}</footer>`;
+  }
   const [text, buttons] = footOf(view);
   const take = shownTake();
   const cost =

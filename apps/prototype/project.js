@@ -68,7 +68,7 @@ function waitingMarkup() {
   return `
     <div class="work-wait">
       <p class="work-title">${writing ? "The lead writes the whole story" : "The lead reads your request"}</p>
-      <p class="fact lead">${writing ? "It uses your request and your answers. The story shows here when it is ready." : "It asks you three questions in the chat. Answer them there, then it writes the whole story."}</p>
+      <p class="fact lead">${writing ? "It uses your request and your answers. The story shows here when it is ready." : "It asks you a few questions in the chat, a round at a time. Answer them there, then it writes the whole story."}</p>
       ${writing ? `<div class="progress wide work-progress"><i></i></div>` : ""}
       <blockquote class="work-request">${escapeText(state.prompt)}</blockquote>
     </div>`;

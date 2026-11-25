@@ -5,6 +5,18 @@ export const intro = {
 
 export const changes = [
   [
+    "Questions in rounds, on one card",
+    'The lead asks a few questions, talks about your answers, and may ask more. One round shows as a small card above the ask box: "Question 2 of 3", small answer chips in one row, your own words, Back, Next, and Send my answers. Then the chat keeps one folded line, "You answered 3 questions". The mock has two rounds.',
+  ],
+  [
+    "A wider chat when you need it",
+    "Drag the left edge of the chat to make it wider or narrower, from 320 to 720 pixels. yumekit remembers the width. A double click on the edge resets it. The phone layout does not change.",
+  ],
+  [
+    "A warning before the money runs out",
+    "After you approve a take, the lead starts at once. If the next step costs more than the money left, the button area says so with the numbers, and offers Raise this project, Make fewer clips, and Stop here. The sample project has its own limit of $8 to show it.",
+  ],
+  [
     "Start is one box",
     "Three chips (A trailer, A movie, A video), one prompt box with Add files and Start inside, and one line on how to use the lead. Something else went: an empty prompt is something else. The places and the length moved behind Change. YouTube is the default, and the lead asks about the length.",
   ],
@@ -14,7 +26,7 @@ export const changes = [
   ],
   [
     "Mark only what is wrong",
-    "A take is a contact sheet of pictures with no boxes and no buttons. Click a picture to see it large, pin a note, or say Don't use this one. A picture with no note counts as approved when you press the one button: Send 2 notes to the lead, or All good. Make the clips, about $2.52.",
+    "A take is a contact sheet of pictures with no boxes and no buttons. Click a picture to see it large, pin a note, or say Don't use this one. A picture with no note counts as approved when you press the one button: Send 2 notes to the lead, or All good. Make the clips, about $2.82.",
   ],
   [
     "The take number is the slate",
@@ -34,7 +46,7 @@ export const changes = [
   ],
 ];
 
-export const proposed = [
+export const decided = [
   [
     "Progress and a ready signal",
     'The project screen shows "making 6 of 18 pictures" with a thin line. When a take is ready, a sound, a browser notice, and a line in the corner say so.',
@@ -45,7 +57,7 @@ export const proposed = [
   ],
   [
     "A price on the next action",
-    'The one button says what it costs: "All good. Make the clips, about $2.52".',
+    'The one button says what it costs: "All good. Make the clips, about $2.82".',
   ],
   [
     "The design check",
@@ -74,6 +86,10 @@ export const screens = [
     "A take",
     "In the project: the switch and the earlier takes menu, nothing on each picture.",
   ],
+  [
+    "The question card",
+    "1 primary (Next, or Send my answers on the last question). Other: Back. The chips and your own words are the answer.",
+  ],
   ["The large view", "Don't use this one, a note, Previous, Next, Close."],
   ["Settings", "Who makes the film, Limits, then More settings."],
   ["Export", "The file size and Export, then More."],
@@ -85,39 +101,25 @@ export const limits = [
   "A new project starts at the questions. The project tab opens the same film later, with chapter 2 in review.",
 ];
 
-export const questions = [
-  {
-    text: 'You said "select or decline". Is "mark only what is wrong" right?',
-    words: [
-      ["mark", "A picture with no note counts as approved, as in this mock."],
-      [
-        "each",
-        "You approve or decline each picture, as in the full Takes page.",
-      ],
-    ],
-  },
-  {
-    text: "Where do the lead's questions go?",
-    words: [
-      ["chat", "In the chat, as in this mock."],
-      ["page", "On the left, in place of the work."],
-    ],
-  },
-  {
-    text: "When you approve a take, what happens next?",
-    words: [
-      [
-        "ask",
-        "The button shows the price, and the lead waits for your click, as in this mock.",
-      ],
-      ["go", "The lead starts the next step at once, inside your limits."],
-    ],
-  },
-  {
-    text: "Keep the six proposed ideas?",
-    words: [
-      ["all", "Keep all six."],
-      ["list", "Tell me the ones to drop."],
-    ],
-  },
+export const answers = [
+  [
+    'You said "select or decline". Is "mark only what is wrong" right?',
+    "mark",
+    "Kept. A picture with no note counts as approved when you press the one button.",
+  ],
+  [
+    "Where do the lead's questions go?",
+    "chat",
+    "In the chat, but smaller: one card above the ask box, a round at a time. Back and Next move between the questions, and your answer stays. After Send my answers, the chat keeps one folded line. The chat is wider or narrower by drag on its left edge.",
+  ],
+  [
+    "When you approve a take, what happens next?",
+    "go",
+    "The lead starts the next step at once. When it expects the step to cost more than the money left, it says so first, with Raise this project, Make fewer clips, and Stop here. Nothing is spent until you pick.",
+  ],
+  [
+    "Keep the six proposed ideas?",
+    "all",
+    "Kept all six. They show above as decided.",
+  ],
 ];

@@ -125,8 +125,8 @@ export function plannedClips(take) {
   return { count: shots.length, seconds: shots.length * 4 };
 }
 
-export function makeClips(take) {
-  const shots = shotPictures(take);
+export function makeClips({ take, count }) {
+  const shots = shotPictures(take).slice(0, count);
   startTake({
     chapterId: take.chapterId,
     step: "clips",

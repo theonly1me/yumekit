@@ -104,14 +104,3 @@
 .notes .notes-gap {
   margin-top: 40px;
 }
-
-.proposed {
-  margin-left: 6px;
-  padding: 0 7px;
-  border: 1px solid var(--accent);
-  border-radius: 999px;
-  color: var(--accent);
-  font-size: var(--step--2);
-  font-weight: 500;
-  vertical-align: 2px;
-}

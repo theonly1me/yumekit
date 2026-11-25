@@ -1,5 +1,5 @@
 .project {
-  grid-template-columns: minmax(0, 1fr) 400px;
+  grid-template-columns: minmax(0, 1fr) var(--chat-width, 400px);
   grid-template-rows: var(--bar) minmax(0, 1fr);
   grid-template-areas:
     "bar bar"
@@ -152,7 +152,7 @@ button.rail-step[aria-current="step"] {
 
 @media (max-width: 1100px) {
   .project {
-    grid-template-columns: minmax(0, 1fr) 330px;
+    grid-template-columns: minmax(0, 1fr) min(var(--chat-width, 400px), 45vw);
   }
 }
 

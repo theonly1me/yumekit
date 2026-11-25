@@ -1,4 +1,10 @@
-import { nextChapterOf, startChapterPictures } from "./chapterWork.js";
+import {
+  nextChapterOf,
+  picturesPlan,
+  startChapterPictures,
+} from "./chapterWork.js";
+import { bindWarning, guardCost } from "./costGuard.js";
+import { prices } from "./takeItems.js";
 import {
   chapterNumber,
   makeClips,
@@ -14,16 +20,36 @@ import { change, state } from "./state.js";
 import { sendStoryNotes } from "./storySheet.js";
 import { approveUnmarked, setVerdict, shownTake, takes } from "./takesStore.js";
 
-function makeClipsWithLimit(take) {
-  const planned = plannedClips(take);
-  if (roomFor(planned.seconds)) {
-    makeClips(take);
+function makeClipsWithLimit({ take, count }) {
+  const seconds = (count ?? plannedClips(take).count) * 4;
+  if (roomFor(seconds)) {
+    makeClips({ take, count });
     return;
   }
   askToRaise({
-    seconds: planned.seconds,
+    seconds,
     what: `The clips of chapter ${chapterNumber(take.chapterId)}`,
-    onRaise: () => makeClips(take),
+    onRaise: () => makeClips({ take, count }),
+  });
+}
+
+function clipsWithMoney(take) {
+  const planned = plannedClips(take);
+  const perClip = 4 * prices.clipSecond;
+  const music = 3 * prices.music;
+  guardCost({
+    cost: planned.count * perClip + music,
+    what: "The clips",
+    run: () => makeClipsWithLimit({ take, count: undefined }),
+    fewer: (left) => {
+      const count = Math.floor((left - music) / perClip);
+      return count > 0
+        ? {
+            label: `Make fewer clips (${count})`,
+            run: () => makeClipsWithLimit({ take, count }),
+          }
+        : undefined;
+    },
   });
 }
 
@@ -41,7 +67,7 @@ const actions = {
   },
   clips: (take) => {
     approveUnmarked(take);
-    makeClipsWithLimit(take);
+    clipsWithMoney(take);
   },
   cut: (take) => {
     approveUnmarked(take);
@@ -58,11 +84,18 @@ const actions = {
     });
     change({ projectView: undefined });
   },
-  pictures: () => startChapterPictures(takes.view.chapterId),
+  pictures: () =>
+    guardCost({
+      cost: picturesPlan(takes.view.chapterId).cost,
+      what: "The pictures",
+      run: () => startChapterPictures(takes.view.chapterId),
+      fewer: () => undefined,
+    }),
   "stop-other": (take) => stopTake(take),
 };
 
 export function bindFoot({ element }) {
+  bindWarning(element);
   element.querySelectorAll("[data-foot]").forEach((button) => {
     button.addEventListener("click", () => {
       const take = shownTake();

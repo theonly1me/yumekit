@@ -15,7 +15,11 @@ export function picturesPlan(chapterId) {
     chapter.places.length +
     chapter.props.length +
     scenesOf(chapterId).flatMap((scene) => scene.shots).length;
-  return { count, price: money(count * prices.picture) };
+  return {
+    count,
+    cost: count * prices.picture,
+    price: money(count * prices.picture),
+  };
 }
 
 export function startChapterPictures(chapterId) {
