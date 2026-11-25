@@ -41,7 +41,7 @@ export const sharedTextUnits: StylePack["textUnits"] = {
     filmWordmark: 20,
     filmCommand: 3.8,
     filmItem: 4.6,
-    filmCard: 4.2,
+    filmCard: 5.6,
     filmTitle: 12,
   },
   square: {
@@ -61,7 +61,7 @@ export const sharedTextUnits: StylePack["textUnits"] = {
     filmWordmark: 17,
     filmCommand: 4,
     filmItem: 4.4,
-    filmCard: 5,
+    filmCard: 6,
     filmTitle: 11,
   },
   tall: {
@@ -81,7 +81,7 @@ export const sharedTextUnits: StylePack["textUnits"] = {
     filmWordmark: 17,
     filmCommand: 4.2,
     filmItem: 4.6,
-    filmCard: 5.2,
+    filmCard: 6.2,
     filmTitle: 11,
   },
 };
