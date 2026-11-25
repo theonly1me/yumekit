@@ -8,11 +8,8 @@ import {
   personChoseThisClipInput,
   withPersonKept,
 } from "../storyPlan/personKept.js";
-import { reviewGateFailureOf } from "../storyPlan/reviewGate.js";
-import {
-  designRangeFailureOf,
-  withChosenClip,
-} from "../storyPlan/designGate.js";
+import { shownClipFailureOf } from "../storyPlan/clipGate.js";
+import { withChosenClip } from "../storyPlan/designChoice.js";
 import { voiceLevelEdits } from "./quietVoice.js";
 import { placementFramesOf } from "./videoPlacementFrames.js";
 import { removePersonWorkInput } from "./personWorkInput.js";
@@ -63,7 +60,7 @@ export function registerPlaceVideo(context: HarnessContext): void {
   context.tools.add({
     name: "place_video",
     description:
-      'Show a video asset in an output, with its sound. Makes a video-clip scene "video-<asset_id>" (or uses that scene when it exists, with no change to its props), adds a clip of it on the first scene track that is not a caption track (or on a new scene track "scenes" below the others), and adds the sound of the video on the audio track "video-sound". Each video asset gets its own scene, so to show several clips, call place_video once for each asset. A video without sound gets no sound clip, and the "video-sound" track appears only when a sound clip is added. The clip ids are "video-<asset_id>" and "video-sound-<asset_id>", and a suffix such as "-2" keeps each id unique. With replace_clip_id, the video takes the place of that scene clip: the tool removes the clip, and the sound clip of its video when it shows a video-clip scene, and places the video at its start frame with its length, unless start_frame or duration_frames are given. The result gives scene_id, scene_clip_id, and sound_clip_id. With quiet_voice true, the voice under the sound of the video is turned down. The new clip keeps the transition of the replaced clip. A clip that the person made fails with would-remove-the-work-of-the-person, unless remove_person_work is true. One undo removes all of it and brings back a replaced clip. A clip of a shot of the story plan needs a keep or cut verdict of review_clip first, or it fails with clip-not-reviewed; for a cut, place it with duration_frames of the good part, and move its start into the video with scene_start_frame of update_clip. A clip that the critic said redo is placed only when the person chose it: give the words of the person in person_chose_this_clip.',
+      'Show a video asset in an output, with its sound. Makes a video-clip scene "video-<asset_id>" (or uses that scene when it exists, with no change to its props), adds a clip of it on the first scene track that is not a caption track (or on a new scene track "scenes" below the others), and adds the sound of the video on the audio track "video-sound". Each video asset gets its own scene, so to show several clips, call place_video once for each asset. A video without sound gets no sound clip, and the "video-sound" track appears only when a sound clip is added. The clip ids are "video-<asset_id>" and "video-sound-<asset_id>", and a suffix such as "-2" keeps each id unique. With replace_clip_id, the video takes the place of that scene clip: the tool removes the clip, and the sound clip of its video when it shows a video-clip scene, and places the video at its start frame with its length, unless start_frame or duration_frames are given. The result gives scene_id, scene_clip_id, and sound_clip_id. With quiet_voice true, the voice under the sound of the video is turned down. The new clip keeps the transition of the replaced clip. A clip that the person made fails with would-remove-the-work-of-the-person, unless remove_person_work is true. One undo removes all of it and brings back a replaced clip. A clip of a shot of the story plan whose people have a look needs a design check first (check_design, or review_clip with the critic), or it fails with design-not-checked. A clip whose design breaks shows only its clean part (duration_frames up to clean_until_seconds), or it fails with design-break-in-range. Other faults of a review are notes: for a cut, place the clean part with duration_frames, and move its start into the video with scene_start_frame of update_clip. When the person chose the clip, give their words in person_chose_this_clip: that passes the design check.',
     inputSchema: placeVideoInput,
     run: ({ input: request }) => {
       const snapshot = context.store.read();
@@ -89,11 +86,6 @@ export function registerPlaceVideo(context: HarnessContext): void {
         asset: asset.value,
         words: request.person_chose_this_clip,
       });
-      const reviewFailure = reviewGateFailureOf({
-        snapshot: chosen.snapshot,
-        asset: asset.value,
-      });
-      if (reviewFailure !== undefined) return failureResult(reviewFailure);
       const frames = placementFramesOf({
         snapshot,
         timeline: output.value.timeline,
@@ -104,9 +96,10 @@ export function registerPlaceVideo(context: HarnessContext): void {
       });
       if (!frames.ok) return failureResult(frames.failure);
       const { startFrame, durationFrames } = frames.value;
-      const designFailure = designRangeFailureOf({
+      const designFailure = shownClipFailureOf({
         snapshot: chosen.snapshot,
         asset: asset.value,
+        fromFrame: 0,
         shownFrames: Math.min(durationFrames, assetLength),
       });
       if (designFailure !== undefined) return failureResult(designFailure);

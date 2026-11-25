@@ -2,8 +2,12 @@ import { endEntryNamesOf } from "../../storyPlan/stateText.js";
 import type { ClipAnswer } from "./clipAnswerInput.js";
 import type { ClipJob } from "./clipJob.js";
 import { clipListItems } from "./clipList.js";
-
-type Issue = string | undefined;
+import {
+  cutIssues,
+  faultTimeIssues,
+  redoIssues,
+  type Issue,
+} from "./clipRangeCheck.js";
 
 function wholenessIssues(options: {
   job: ClipJob;
@@ -74,79 +78,31 @@ function keepIssues(answer: ClipAnswer): Issue[] {
   ];
 }
 
-function isInside(options: {
-  seconds?: number | undefined;
-  from: number;
-  to: number;
-}): boolean {
-  const { seconds } = options;
-  return (
-    seconds === undefined || (seconds >= options.from && seconds <= options.to)
-  );
-}
-
-function cutIssues(options: { job: ClipJob; answer: ClipAnswer }): Issue[] {
-  const { job, answer } = options;
-  const from = answer.keep_from_seconds;
-  const to = answer.keep_to_seconds;
-  if (from === undefined || to === undefined || from >= to) {
-    return ["A cut needs keep_from_seconds before keep_to_seconds."];
-  }
-  if (to > job.lengthSeconds + 0.05) {
-    return [`The clip ends at ${String(job.lengthSeconds)} seconds.`];
-  }
-  const range = { from, to };
-  const happenedIssue = (judged: {
-    name: string;
-    happened: boolean;
-    seconds?: number | undefined;
-  }): Issue =>
-    judged.happened && isInside({ ...range, seconds: judged.seconds })
-      ? undefined
-      : `The ${judged.name} must happen inside the cut, or the clip is a redo.`;
-  return [
-    answer.faults.length === 0
-      ? "A cut names the faults outside the clean part."
-      : undefined,
-    happenedIssue({ name: "action", ...answer.action }),
-    ...answer.end_entries.map((entry) =>
-      happenedIssue({ name: `end entry "${entry.entry}"`, ...entry }),
-    ),
-    ...answer.warnings.map((entry) => {
-      const seconds = job.warnings[entry.index - 1]?.seconds;
-      return entry.cause === "fault" && isInside({ ...range, seconds })
-        ? `Warning ${String(entry.index)} is a fault inside the cut.`
-        : undefined;
-    }),
-    ...answer.counts.map((count) =>
-      count.seen !== count.expected && isInside({ ...range, ...count })
-        ? `The count of ${count.object} differs inside the cut.`
-        : undefined,
-    ),
-  ];
-}
-
 export function clipAnswerIssuesOf(options: {
   job: ClipJob;
   answer: ClipAnswer;
 }): string[] {
   const { answer } = options;
+  const isElsewhere =
+    options.job.startPicture !== undefined &&
+    options.job.warnings.some(
+      (warning) => warning.kind === "does-not-start-on-the-start-picture",
+    );
   const verdictIssues =
     answer.verdict === "keep"
       ? keepIssues(answer)
       : answer.verdict === "cut"
         ? cutIssues(options)
-        : [answer.faults.length === 0 ? "A redo names its faults." : undefined];
+        : isElsewhere
+          ? []
+          : redoIssues(options);
   const startsElsewhere =
-    answer.verdict !== "redo" &&
-    options.job.startPicture !== undefined &&
-    options.job.warnings.some(
-      (warning) => warning.kind === "does-not-start-on-the-start-picture",
-    )
+    answer.verdict !== "redo" && isElsewhere
       ? "The measure shows that the first frame is another picture than the start picture, so the clip is a redo."
       : undefined;
   return [
     ...wholenessIssues(options),
+    ...faultTimeIssues(options),
     ...verdictIssues,
     startsElsewhere,
   ].flatMap((issue) => (issue === undefined ? [] : [issue]));

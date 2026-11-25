@@ -69,18 +69,18 @@ describe("the limit on generated video seconds", () => {
     expect(harness.runRequests).toHaveLength(0);
   });
 
-  it("uses 30 seconds when no file sets a limit", async () => {
+  it("uses 60 seconds when no file sets a limit", async () => {
     const harness = await startHarness();
 
     const result = await generateVideo({
       harness,
       assetId: "long",
-      seconds: 31,
+      seconds: 61,
     });
 
     expect(result.data).toMatchObject({
       kind: "generated-video-limit-reached",
-      limit_seconds: 30,
+      limit_seconds: 60,
     });
     expect(harness.runRequests).toHaveLength(0);
   });

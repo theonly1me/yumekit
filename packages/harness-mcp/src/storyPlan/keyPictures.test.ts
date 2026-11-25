@@ -56,7 +56,7 @@ describe("the key pictures of a shot", () => {
     );
   });
 
-  it("an end picture that the critic did not check with its start picture cannot end a clip", async () => {
+  it("an end picture with no design check cannot end a clip", async () => {
     const harness = await startDesignStory({
       start: (brief) => ({
         ...passSheetAnswerOf(),
@@ -78,7 +78,8 @@ describe("the key pictures of a shot", () => {
       extra: { last_frame_asset_id: "strike-end" },
     });
 
-    expect(clip.data).toMatchObject({ kind: "end-not-reviewed" });
+    expect(clip.data).toMatchObject({ kind: "design-not-checked" });
+    expect(clip.data["message"]).toContain(`"strike-end"`);
     expect(harness.runRequests.at(-1)?.capability).toBe("image");
   });
 

@@ -44,7 +44,7 @@ describe("a clip that starts on its start picture", () => {
     expect(sent["prompt"]).toBe("strike clip");
   });
 
-  it("needs a passed review of the start picture before its clip, and warns about a long video prompt in the plan", async () => {
+  it("makes the clip of a shot whose people have no look with no check, and warns about a long video prompt in the plan", async () => {
     const harness = await startStoryHarness({ videoStyle: "ai-video" });
     await makeForgeSheets(harness);
     const plan = await setPlan({
@@ -72,6 +72,6 @@ describe("a clip that starts on its start picture", () => {
     expect(plan.text).toContain(
       'The video prompt of shot "strike" has 1700 characters. Keep it under 900',
     );
-    expect(clip.data).toMatchObject({ kind: "start-not-reviewed" });
+    expect(clip.isError).toBe(false);
   });
 });

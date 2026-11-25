@@ -12,6 +12,7 @@ import {
   addOutput,
   removeOutput,
   setBible,
+  setChecks,
   setProjectName,
   setScript,
   setVideoStyle,
@@ -35,6 +36,8 @@ export async function applyEdit(options: {
       return setOutputPlatforms({ state, edit });
     case "setVideoStyle":
       return setVideoStyle({ state, edit });
+    case "setChecks":
+      return setChecks({ state, edit });
     case "setLook":
       return setLook({ state, edit });
     case "setTempo":

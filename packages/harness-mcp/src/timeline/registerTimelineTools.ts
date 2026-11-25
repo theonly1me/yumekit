@@ -10,24 +10,29 @@ import {
   personWorkSentence,
   removePersonWorkInput,
 } from "./personWorkInput.js";
+import { failureResult } from "../results.js";
+import { shownClipsFailureOf } from "./shownClips.js";
 import { timelineEditOf } from "./timelineEdit.js";
 import { wireTrack } from "./wireTimeline.js";
 
 function registerSetTimeline(context: HarnessContext): void {
   context.tools.add({
     name: "set_timeline",
-    description: `Replace all tracks and clips of one output in one call. Use it only for a new video, or when the person asks to build the video again. To record the voice again or to change it, call replace_narration. To change the music, call replace_music. Scene tracks draw in list order: the first is at the back, so put captions on the last scene track. A scene clip shows a scene; an audio clip plays an audio asset. Clips on one track must not overlap. The video ends at the last clip end. A scene clip can have a transition from the clip before it; set_transitions sets one kind for each scene in one call. A clip with the id of a clip that is there now keeps its transition when the call gives none; give the kind cut to remove it. The result gives kept_transitions. ${personWorkSentence}`,
+    description: `Replace all tracks and clips of one output in one call. Use it only for a new video, or when the person asks to build the video again. To record the voice again or to change it, call replace_narration. To change the music, call replace_music. Scene tracks draw in list order: the first is at the back, so put captions on the last scene track. A scene clip shows a scene; an audio clip plays an audio asset. Clips on one track must not overlap. The video ends at the last clip end. A scene clip can have a transition from the clip before it; set_transitions sets one kind for each scene in one call. A clip with the id of a clip that is there now keeps its transition when the call gives none; give the kind cut to remove it. The result gives kept_transitions. A clip of a shot of the story plan needs a design check and shows only its clean part, as in place_video. ${personWorkSentence}`,
     inputSchema: {
       output_id: idInput("The id of the output."),
       tracks: z.array(wireTrack).describe("All tracks, back to front."),
       remove_person_work: removePersonWorkInput,
     },
     run: ({ input: { output_id, tracks, remove_person_work } }) => {
+      const snapshot = context.store.read();
       const timeline = timelineEditOf({
-        snapshot: context.store.read(),
+        snapshot,
         outputId: output_id,
         tracks,
       });
+      const shown = shownClipsFailureOf({ snapshot, edits: [timeline.edit] });
+      if (shown !== undefined) return failureResult(shown);
       return withCardLines({
         result: applyEditsResult({
           store: context.store,

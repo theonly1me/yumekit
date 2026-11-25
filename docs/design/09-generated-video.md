@@ -29,7 +29,7 @@ The lead agent read these on 2026-11-21. A price is the price on that date.
 | V2  | The renderer makes those pictures on first use and keeps them in a cache folder           | A project stays small, and a second render is fast                                                                  |
 | V3  | An audio clip can read the sound of a video asset                                         | The sound of a generated clip is part of what makes it real                                                         |
 | V4  | yumekit bundles a video server for each provider that it supports. Document 10 lists them | The person chooses the model. `tools/gemini-media` is built first, because it has the lowest confirmed price        |
-| V5  | A project has a limit in seconds of generated video, and the default is 30                | One call costs real money. Seconds need no price table and are the same for each provider                           |
+| V5  | A project has a limit in seconds of generated video, and the default is 60                | One call costs real money. Seconds need no price table and are the same for each provider                           |
 | V6  | The agent makes a still image first, and then makes the clip from that image              | A still costs little. The person sees and corrects the look before the costly step                                  |
 
 ## A video file in a scene
@@ -133,7 +133,7 @@ The server instructions of document 05 get one step after step 5: "For a shot th
 { "limits": { "generatedVideoSeconds": 30 } }
 ```
 
-- The default is 30. The project file wins over the user file. The value 0 turns generated video off.
+- The default is 60 (since WP76, document 20, C65). The project file wins over the user file. The value 0 turns generated video off.
 - Before a call with the capability `video` or `talking-clip` (document 16), the harness adds the length of each video asset with a source of kind `tool` to `duration_seconds` of the request. If the sum is larger than the limit, the harness makes no call and returns the failure `generated-video-limit-reached` with the seconds used, the seconds requested, and the limit.
 - A repeated request that reuses a file does not count again.
 - The message of the failure tells the agent to ask the person, and names the field that the person changes.

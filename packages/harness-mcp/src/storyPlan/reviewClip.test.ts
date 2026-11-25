@@ -55,19 +55,17 @@ const redoCritic: CriticScript = {
     ...keepAnswerOf(brief),
     counts: [{ object: "hammers", expected: 1, seen: 2, seconds: 0.4 }],
     verdict: "redo",
-    faults: ["A second hammer appears in her left hand at 0.4 seconds"],
+    faults: [
+      {
+        fault: "A second hammer appears in her left hand",
+        from_seconds: 0.4,
+        to_seconds: 1,
+      },
+    ],
   }),
 };
 
 describe("review_clip with the critic", () => {
-  it("refuses to place a clip of a shot before its review", async () => {
-    const harness = await storyWithClip();
-
-    const result = await place(harness);
-
-    expect(result.data).toMatchObject({ kind: "clip-not-reviewed" });
-  });
-
   it("gives the critic the shot, the facts, and the list, and never the prompt of the clip", async () => {
     const harness = await storyWithClip();
 
@@ -103,7 +101,7 @@ describe("review_clip with the critic", () => {
     expect(placed.isError).toBe(false);
   });
 
-  it("cannot be given a verdict by the lead: the critic's redo is stored", async () => {
+  it("stores the redo of the critic, and the redo with no break of the design does not block place_video", async () => {
     const harness = await storyWithClip(redoCritic);
 
     const result = await harness.call({
@@ -119,7 +117,10 @@ describe("review_clip with the critic", () => {
 
     expect(result.data).toMatchObject({ verdict: "redo" });
     expect(result.data["faults"]).toContain("2 hammers, not 1 at 0.4s");
-    expect(placed.data).toMatchObject({ kind: "clip-failed-review" });
+    expect(result.data["faults"]).toContain(
+      "A second hammer appears in her left hand (0.4s to 1s)",
+    );
+    expect(placed.isError).toBe(false);
   });
 
   it("refuses a keep from the critic while a count differs or the end did not happen", async () => {
@@ -143,7 +144,7 @@ describe("review_clip with the critic", () => {
     ).toBeUndefined();
   });
 
-  it("fails closed with no-critic, so the plan and a sheet stay unchecked and no shot runs", async () => {
+  it("answers no-critic for each review when no critic runs, and the shots still run", async () => {
     const harness = await startStoryHarness({
       videoStyle: "ai-video",
       critic: "none",
@@ -169,7 +170,7 @@ describe("review_clip with the critic", () => {
 
     expect(plan.data).toMatchObject({ kind: "no-critic" });
     expect(sheet.data).toMatchObject({ kind: "no-critic" });
-    expect(shot.data).toMatchObject({ kind: "plan-not-reviewed" });
+    expect(shot.isError).toBe(false);
     expect(answer.isError).toBe(true);
   });
 });

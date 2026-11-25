@@ -22,6 +22,7 @@ import { registerPlatformTools } from "../story/registerPlatformTools.js";
 import { registerPutScene } from "../story/registerPutScene.js";
 import { registerSetProjectName } from "../story/registerSetProjectName.js";
 import { registerSetVideoStyle } from "../story/registerSetVideoStyle.js";
+import { registerSetChecks } from "../story/registerSetChecks.js";
 import { registerSetLook } from "../story/registerSetLook.js";
 import { registerStoryTools } from "../story/registerStoryTools.js";
 import { registerNarrationAndHistoryTools } from "../timeline/registerNarrationTools.js";
@@ -46,6 +47,8 @@ import { registerRecordLesson } from "../storyPlan/registerRecordLesson.js";
 import { registerSetStoryPlan } from "../storyPlan/registerSetStoryPlan.js";
 import { registerSetStory } from "../storyFirst/registerSetStory.js";
 import { registerGetShotBrief } from "../storyPlan/shotBrief/registerGetShotBrief.js";
+import { clockedTool } from "../clock/clockedTool.js";
+import type { FilmClock } from "../clock/filmClock.js";
 import { createSerialWrites } from "./serialWrites.js";
 import type { WorkBoard } from "../work/board/workBoard.js";
 import { callerStore } from "./callerStore.js";
@@ -63,6 +66,7 @@ export function harnessToolsOf(
     pictures: PictureRenderer;
     callerOf: () => MadeBy | undefined;
     board: WorkBoard;
+    clock: FilmClock;
   },
 ): HarnessTool[] {
   const context = {
@@ -74,6 +78,7 @@ export function harnessToolsOf(
     store: callerStore({ store: options.store, callerOf: options.callerOf }),
     board: options.board,
     writeLatest: createSerialWrites(),
+    clock: options.clock,
   };
   registerGetWork(context);
   registerProjectReadTools(context);
@@ -90,6 +95,7 @@ export function harnessToolsOf(
   registerGetShotBrief(context);
   registerPlatformTools(context);
   registerSetVideoStyle(context);
+  registerSetChecks(context);
   registerSetLook(context);
   registerSetTempo(context);
   registerPutScene(context);
@@ -118,5 +124,12 @@ export function harnessToolsOf(
   registerRenderTools(context);
   registerSharperCopy(context);
   registerAskHelper({ ...context, askHelper: options.askHelper });
-  return context.tools.tools();
+  return context.tools.tools().map((tool) =>
+    clockedTool({
+      tool,
+      clock: options.clock,
+      read: () => options.store.read(),
+      isPerson: () => options.callerOf() === "person",
+    }),
+  );
 }

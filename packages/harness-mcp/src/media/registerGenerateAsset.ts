@@ -13,7 +13,7 @@ import { mediaPathInput } from "./mediaPath.js";
 import { recordedInputOf, referencePathsInput } from "./referencePaths.js";
 import { reuseAsset } from "./reuseAsset.js";
 import { cutNoteOf } from "../storyPlan/cutNote.js";
-import { withChosenPictures } from "../storyPlan/designGate.js";
+import { withChosenPictures } from "../storyPlan/designChoice.js";
 import { kitSheetRecordOf } from "../storyPlan/kitSheets.js";
 import { lessonsForYouOf } from "../storyPlan/lessonsForYou.js";
 import { callFactsOf, withCallFacts } from "./callFacts.js";
@@ -70,7 +70,6 @@ export async function generateAsset(options: {
     voicePart: request.voice_part,
     shotId: request.shot_id,
     sheetOf: request.sheet_of,
-    simplerForm: request.simpler_form,
     kitSheet: kitSheetRecordOf({ plan: snapshot.bible.storyPlan, request }),
     keyPicture: request.key_picture,
   };

@@ -115,7 +115,7 @@ describe("the start screen", () => {
     const home = await startHome("no-agent");
     const { page, close } = await openEditor(home.url);
     const limitLine =
-      "yumekit makes at most 30 seconds of AI video for this project. You can change this in Settings.";
+      "yumekit makes at most 60 seconds of AI video for this project. You can change this in Settings.";
     await page.getByLabel("What do you want to make?").fill("Waves");
     expect(await page.getByText(limitLine).count()).toBe(0);
 

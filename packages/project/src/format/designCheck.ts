@@ -3,7 +3,7 @@ import { idSchema } from "./values.js";
 
 export const designAnswers = ["yes", "no", "cannot-see"] as const;
 
-export const designCheckers = ["critic", "lead"] as const;
+export const designCheckers = ["critic", "lead", "person"] as const;
 
 export const designFrameSchema = z.strictObject({
   castId: idSchema,
@@ -24,6 +24,7 @@ export const designCheckSchema = z.strictObject({
   frames: z.array(designFrameSchema),
   breaks: z.array(z.string()),
   cleanUntilSeconds: z.number().min(0).exactOptional(),
+  endPictureAssetId: idSchema.exactOptional(),
   personKept: z.strictObject({ words: z.string().min(1) }).exactOptional(),
 });
 

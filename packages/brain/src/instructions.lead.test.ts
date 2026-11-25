@@ -32,12 +32,12 @@ describe("the instructions of the lead agent", () => {
     );
   });
 
-  it("act first on a message that the person sends while the AI works, and let a choice of the person override the critic", () => {
+  it("act first on a message that the person sends while the AI works, and let a choice of the person override a check", () => {
     expect(brainInstructions).toContain(
       "39. A message from the person can come in the answer of any tool call, under the title A MESSAGE FROM THE PERSON. It is the person speaking now. Act on it first",
     );
     expect(brainInstructions).toContain(
-      "A choice of the person of a clip, a picture, or music overrides a verdict of the critic.",
+      "A choice of the person of a clip, a picture, or music overrides a check.",
     );
     expect(brainInstructions).toContain("person_chose_this_clip");
   });

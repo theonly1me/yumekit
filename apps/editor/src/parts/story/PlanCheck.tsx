@@ -3,27 +3,14 @@ import type { Snapshot } from "../../engine/snapshot.js";
 import { BudgetLines } from "./BudgetLines.js";
 import { measureOf, moneyText } from "./firstCutFacts.js";
 
-const usedUpAfter = 2;
-
 function verdictTextOf(snapshot: Snapshot): string {
-  const plan = snapshot.bible.storyPlan;
-  const review = plan?.review;
+  const review = snapshot.bible.storyPlan?.review;
   if (review === undefined) {
-    return "The critic has not checked the plan yet. Sheet pictures can start, but no shot picture or clip is made before it does.";
-  }
-  if ((plan?.failedPlanChecks ?? 0) >= usedUpAfter) {
-    return `The critic failed the plan ${String(plan?.failedPlanChecks ?? 0)} times, so the plan check is used up. The AI makes the film, and the critic looks for each open fault in the start picture and the clip of its shot.`;
+    return "Nobody checked the plan, and nothing waits for it. Ask for a second look at the plan in the chat when you want one.";
   }
   return review.verdict === "pass"
-    ? "The critic checked the plan and every prompt before any money was spent, and passed it."
-    : "The critic failed the plan. The AI corrects it before any money is spent.";
-}
-
-function numberOf(options: { snapshot: Snapshot; shotId: string }): string {
-  const index = (options.snapshot.bible.storyPlan?.shots ?? []).findIndex(
-    (shot) => shot.id === options.shotId,
-  );
-  return index < 0 ? options.shotId : String(index + 1);
+    ? "The critic read the plan and every prompt before any money was spent, and found nothing to change."
+    : "The critic read the plan and found faults. They are notes: the AI decides what to change, and nothing waits.";
 }
 
 export function PlanCheck(props: { client: EngineClient; snapshot: Snapshot }) {
@@ -39,7 +26,7 @@ export function PlanCheck(props: { client: EngineClient; snapshot: Snapshot }) {
   return (
     <section className="part-group plan-check" aria-labelledby="story-check">
       <h4 id="story-check">Before the money</h4>
-      {measure === undefined ? null : (
+      {measure === undefined || snapshot.project.checks !== "critic" ? null : (
         <dl className="story-measure">
           <div>
             <dt>Right on the first try</dt>
@@ -80,14 +67,6 @@ export function PlanCheck(props: { client: EngineClient; snapshot: Snapshot }) {
             <li key={fault}>{fault}</li>
           ))}
         </ul>
-      )}
-      {review === undefined ? null : (
-        <span className="fact">
-          First the easiest shot (
-          {numberOf({ snapshot, shotId: review.easiestShotId })}) and the
-          hardest ({numberOf({ snapshot, shotId: review.hardestShotId })}), so
-          their faults teach the rest.
-        </span>
       )}
       {lessons.length === 0 ? null : (
         <ul className="story-lessons" aria-label="What the first shots taught">

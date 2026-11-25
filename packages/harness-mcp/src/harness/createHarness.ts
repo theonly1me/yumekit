@@ -14,6 +14,7 @@ import { harnessToolsOf, type HarnessOptions } from "./harnessTools.js";
 import { mcpInputFailureOf } from "./mcpInputFailure.js";
 import type { HarnessTool, ProgressListener } from "./toolTable.js";
 import { createWorkBoard, type WorkItem } from "../work/board/workBoard.js";
+import { createFilmClock, type ClockRecord } from "../clock/filmClock.js";
 
 export interface HarnessToolListing {
   name: string;
@@ -38,6 +39,7 @@ export interface HarnessWork {
 export interface Harness {
   tools: HarnessToolListing[];
   work: HarnessWork;
+  clock: () => Promise<ClockRecord>;
   call: (request: HarnessCall) => Promise<HarnessResult>;
   close: () => Promise<void>;
 }
@@ -92,10 +94,12 @@ export function createHarness(options: HarnessOptions): Harness {
   const pictures = createPictureRenderer({ folder: options.store.folder });
   const callers = new AsyncLocalStorage<{ by: MadeBy | undefined }>();
   const board = createWorkBoard();
+  const clock = createFilmClock(options.store.folder);
   const harnessTools = harnessToolsOf({
     ...options,
     pictures,
     board,
+    clock,
     callerOf: () => callers.getStore()?.by,
   });
   const toolsByName = new Map(harnessTools.map((tool) => [tool.name, tool]));
@@ -103,6 +107,7 @@ export function createHarness(options: HarnessOptions): Harness {
   let isClosed = false;
   return {
     work: { items: board.items, subscribe: board.subscribe },
+    clock: clock.read,
     tools: harnessTools.map((tool) => ({
       name: tool.name,
       description: tool.description,

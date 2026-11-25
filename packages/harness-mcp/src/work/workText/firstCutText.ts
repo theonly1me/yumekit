@@ -6,9 +6,7 @@ import {
   type StoryPlan,
 } from "@yumekit/project";
 import { lessonsNotSentLine } from "../../storyPlan/lessonsForYou.js";
-import { planMembersOf } from "../../storyPlan/planKey.js";
-import { isPlanCheckUsedUp } from "../../critic/plan/openPlanFaults.js";
-import { isPlanReviewCurrent } from "../../storyPlan/planGate.js";
+import { isPlanReviewCurrent, planMembersOf } from "../../storyPlan/planKey.js";
 import { sheetTriesOf } from "../../storyPlan/sheetTries.js";
 import { sourceTextOf } from "../../storyPlan/tryRules.js";
 
@@ -61,27 +59,29 @@ function reviewLine(options: {
 }): string {
   const { review } = options.plan;
   if (review === undefined) {
-    return "Plan check: not checked by the critic yet. Sheet pictures can start now. A start picture or a clip runs after review_plan passes, or after two failed checks, when the check is used up.";
+    return "Plan check: none. review_plan is advice, for when the person asks for a second look at the plan. Nothing waits for it.";
   }
-  if (isPlanCheckUsedUp(options.plan)) {
-    const open = options.plan.shots.filter(
-      (shot) => (shot.planNotes ?? []).length > 0,
-    );
-    return `Plan check: used up after ${String(options.plan.failedPlanChecks ?? 0)} fails, so the paid work goes on. Shots with open plan faults, which the critic checks on each start picture and clip: ${open.map((shot) => `"${shot.id}"`).join(", ") || "none"}. Easiest "${review.easiestShotId}", hardest "${review.hardestShotId}": make them first.`;
-  }
-  if (
-    !isPlanReviewCurrent({ bible: options.snapshot.bible, plan: options.plan })
-  ) {
-    return `Plan check: ${review.verdict} by the critic, but the plan or a cast entry changed since. Call review_plan again.`;
-  }
+  const changed = isPlanReviewCurrent({
+    bible: options.snapshot.bible,
+    plan: options.plan,
+  })
+    ? ""
+    : " The plan or a cast entry changed since.";
   const difficulty = review.shots
     .map((shot) => `${shot.shotId} ${String(shot.difficulty)}`)
     .join(", ");
-  const verdict =
-    review.verdict === "pass"
-      ? "passed by the critic"
-      : `failed by the critic (${String(options.plan.failedPlanChecks ?? 1)} of 2 checks): ${review.faults.join("; ")}. Correct the plan and call review_plan again; after the second fail, the check is used up and start pictures and clips can run`;
-  return `Plan check: ${verdict}. Difficulty 1 to 5: ${difficulty}. Easiest "${review.easiestShotId}", hardest "${review.hardestShotId}": make them first.${review.notes.length === 0 ? "" : ` Notes: ${review.notes.join("; ")}.`}`;
+  const open = options.plan.shots.filter(
+    (shot) => (shot.planNotes ?? []).length > 0,
+  );
+  const notes = [
+    ...review.notes,
+    ...(open.length === 0
+      ? []
+      : [
+          `the open faults are notes on ${open.map((shot) => `"${shot.id}"`).join(", ")} (get_shot_brief gives them)`,
+        ]),
+  ];
+  return `Plan check (advice): ${review.verdict} by the critic.${changed} Difficulty 1 to 5: ${difficulty}.${notes.length === 0 ? "" : ` Notes: ${notes.join("; ")}.`}`;
 }
 
 export const shotBriefLine =

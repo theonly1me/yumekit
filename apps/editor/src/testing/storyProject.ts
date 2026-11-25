@@ -80,7 +80,12 @@ export async function lengthenStoryPlan(engine: RunningEngine): Promise<void> {
       ...storyArc,
       shots: [
         { ...forgeShot, seconds: 10 },
-        { ...forgeShot, shot_id: "fold", seconds: 10, inherits: "" },
+        ...["fold", "temper", "grind", "polish"].map((shotId) => ({
+          ...forgeShot,
+          shot_id: shotId,
+          seconds: 10,
+          inherits: "",
+        })),
       ],
     },
   });
@@ -148,7 +153,7 @@ export async function buildStoryProject(engine: RunningEngine): Promise<void> {
       asset_id: "strike-clip",
       capability: "video",
       shot_id: "strike",
-      input: { duration_seconds: 1 },
+      input: { duration_seconds: 3 },
     },
   });
   await engine.callTool({

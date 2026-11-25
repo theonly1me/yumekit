@@ -9,7 +9,6 @@ import {
   type ResolvedLook,
   type Shot,
 } from "@yumekit/project";
-import type { HarnessFailure } from "../results.js";
 
 interface DressedMember {
   member: CastMember;
@@ -45,42 +44,6 @@ export function lookLacksOf(options: {
       ? [`"${member.id}" has no turnaround sheet of the look "${lookId}"`]
       : [];
   });
-}
-
-function isReviewedNow(options: {
-  member: CastMember;
-  look: ResolvedLook;
-}): boolean {
-  const review = options.member.looks?.find(
-    (entry) => entry.id === options.look.id,
-  )?.sheetReview;
-  const pictures = lookPictureIdsOf(options.look);
-  const reviewed = review?.assetIds ?? [];
-  const isCurrent =
-    reviewed.length === pictures.length &&
-    pictures.every((id) => reviewed.includes(id));
-  return (
-    isCurrent &&
-    (review?.verdict === "pass" ||
-      (options.member.restrictions ?? []).length > 0)
-  );
-}
-
-export function lookReviewFailureOf(options: {
-  snapshot: ProjectSnapshot;
-  shot: Shot;
-}): HarnessFailure | undefined {
-  const waiting = dressedOf(options).flatMap(({ member, look }) =>
-    look === undefined || isReviewedNow({ member, look })
-      ? []
-      : [{ castId: member.id, lookId: look.id }],
-  );
-  if (waiting.length === 0) return undefined;
-  return {
-    kind: "sheet-not-reviewed",
-    message: `The critic has not passed the sheets of ${waiting.map((entry) => `the look "${entry.lookId}" of "${entry.castId}"`).join(", ")} on their current pictures.`,
-    hint: `Call review_sheet with ${waiting.map((entry) => `cast_id "${entry.castId}" and look_id "${entry.lookId}"`).join(", and ")}.`,
-  };
 }
 
 export function shotLookPictureIdsOf(options: {

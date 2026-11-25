@@ -3,6 +3,7 @@ import { assetSchema, wordTimingsSchema } from "../format/asset.js";
 import { assetMarksSchema } from "../format/assetMarks.js";
 import { bibleSchema } from "../format/bible.js";
 import {
+  checkModeSchema,
   outputSchema,
   platformIdSchema,
   projectSchema,
@@ -53,6 +54,10 @@ export const editSchema = z.discriminatedUnion("kind", [
   z.strictObject({
     kind: z.literal("setVideoStyle"),
     videoStyle: videoStyleSchema,
+  }),
+  z.strictObject({
+    kind: z.literal("setChecks"),
+    checks: checkModeSchema,
   }),
   z.strictObject({
     kind: z.literal("setLook"),

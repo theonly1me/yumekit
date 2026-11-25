@@ -5,6 +5,7 @@ import type { HarnessContext } from "../context.js";
 import { failureResult } from "../results.js";
 import { withCardLines } from "../storyFirst/withCardLines.js";
 import { personWorkSentence } from "../timeline/personWorkInput.js";
+import { shownClipsFailureOf } from "../timeline/shownClips.js";
 import { timelineEditOf } from "../timeline/timelineEdit.js";
 import { checkWork, workFailureOf } from "./checkWork.js";
 import { removalEditsOf, removedAssetInUse } from "./workRemovals.js";
@@ -79,6 +80,8 @@ async function putWork(options: {
   const assetInUse = removedAssetInUse({ input, snapshot });
   if (assetInUse !== undefined) return failureResult(assetInUse);
   const { edits, timelines } = editsOf({ input, snapshot });
+  const shown = shownClipsFailureOf({ snapshot, edits });
+  if (shown !== undefined) return failureResult(shown);
   if (edits.length === 0) {
     return failureResult({
       kind: "work-empty",
@@ -120,7 +123,7 @@ async function putWork(options: {
 export function registerPutWork(context: HarnessContext): void {
   context.tools.add({
     name: "put_work",
-    description: `Write the video as one piece in one call: shared code, scenes, the frame, and the timelines. The harness checks every part together, so a scene can import the shared code of the same call. When one part fails its check, nothing changes, and the failure lists each part. When all pass, the whole call is one change, and one undo removes all of it. Use kit scenes where they fit (they draw in the colors of set_look), write shared code only for what custom scenes share, then the timeline. remove takes away scenes and assets in the same change, for example the scenes that you made only to look at a file. Read the work with get_work before you change a video that exists. ${personWorkSentence}`,
+    description: `Write the video as one piece in one call: shared code, scenes, the frame, and the timelines. The harness checks every part together, so a scene can import the shared code of the same call. When one part fails its check, nothing changes, and the failure lists each part. When all pass, the whole call is one change, and one undo removes all of it. Use kit scenes where they fit (they draw in the colors of set_look), write shared code only for what custom scenes share, then the timeline. remove takes away scenes and assets in the same change, for example the scenes that you made only to look at a file. A clip of a shot of the story plan needs a design check and shows only its clean part, as in place_video. Read the work with get_work before you change a video that exists. ${personWorkSentence}`,
     inputSchema: putWorkInput,
     run: ({ input }) =>
       withCardLines({

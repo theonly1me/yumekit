@@ -1,3 +1,4 @@
+import { createFilmClock } from "./clock/filmClock.js";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { createPictureRenderer } from "@yumekit/render";
 import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
@@ -90,6 +91,7 @@ export function createHarnessServer(options: HarnessOptions): McpServer {
     ...options,
     pictures,
     board: createWorkBoard(),
+    clock: createFilmClock(options.store.folder),
     callerOf: () => "ai",
   });
   for (const tool of tools) {

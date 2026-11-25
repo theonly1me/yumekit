@@ -42,7 +42,7 @@ export function registerRecordLesson(context: HarnessContext): void {
   context.tools.add({
     name: "record_lesson",
     description:
-      "Record what a refused sheet or clip taught: its cause and the form that works. A lesson is for you, not for a model: yumekit never adds it to a prompt. The answer, get_work, and each later picture or clip call of a shot list the lessons, and you write what applies into your own prompt. After the calibration shots, each refused one needs a lesson before another shot. With is_limit true, it is also a known limit of the models for this film.",
+      "Record what a refused sheet or clip taught: its cause and the form that works. A lesson is for you, not for a model: yumekit never adds it to a prompt. The answer, get_work, and each later picture or clip call of a shot list the lessons, and you write what applies into your own prompt. With is_limit true, it is also a known limit of the models for this film.",
     inputSchema: recordLessonInput,
     run: ({ input }) => {
       const { bible } = context.store.read();

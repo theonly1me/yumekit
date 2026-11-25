@@ -146,7 +146,7 @@ export const reviewCalls: ScriptedCall[] = [
       start_match: { matches: false, seen: "another picture" },
       warnings: [],
       verdict: "redo",
-      faults: ["x"],
+      faults: [{ fault: "x", from_seconds: 0, to_seconds: 1 }],
     },
   },
 ];

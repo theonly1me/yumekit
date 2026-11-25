@@ -66,13 +66,13 @@ function verdictTextOf(options: {
 }): string {
   const { clip, review } = options;
   if (clip === undefined) return "No clip yet.";
-  if (review === undefined) return "Made. The critic checks it next.";
+  if (review === undefined) return "Made.";
   if (review.by !== "critic") {
     return "Not checked by the critic. The AI checked its own clip.";
   }
   if (review.verdict === "keep") return "The critic kept it.";
   if (review.verdict === "redo") {
-    return "The critic failed it. The AI makes it again.";
+    return "The critic asked to make it again. Its faults are notes: the AI decides.";
   }
   const from = review.keepFromSeconds ?? 0;
   const to = review.keepToSeconds ?? 0;

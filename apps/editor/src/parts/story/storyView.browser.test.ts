@@ -59,9 +59,9 @@ describe("the story view", () => {
     expect(rows[0]).toContain(
       "Aiko: the straight blade glows on the anvil, at the anvil, in the middle, faces us.",
     );
-    expect(rows[0]).toContain("The critic kept 0 to 0.5 seconds.");
-    expect(rows[0]).toContain("The hammer changes hands at 0.8 seconds");
-    expect(rows[0]).toContain("2 hammers, not 1 at 0.8s");
+    expect(rows[0]).toContain("The critic kept 0 to 2 seconds.");
+    expect(rows[0]).toContain("The hammer changes hands (2s to 3s)");
+    expect(rows[0]).toContain("2 hammers, not 1 at 2.5s");
     expect(await sheet.locator(".sheet-checks").innerText()).toContain(
       "The critic passed it.",
     );
@@ -72,9 +72,8 @@ describe("the story view", () => {
       "Note: Frame the barrel large, so the blade meets the water",
     );
     const check = await sheet.locator(".plan-check").innerText();
-    expect(check).toContain("passed it");
-    expect(check).toContain("Right on the first try");
-    expect(check).toContain("1 of 2 shots");
+    expect(check).toContain("found nothing to change");
+    expect(check).not.toContain("Right on the first try");
     expect(check).toContain(
       "Keep the hammer in her right hand in every prompt",
     );
@@ -111,7 +110,7 @@ describe("the story view", () => {
     await expect
       .poll(() => sheet.locator(".budget-warnings").innerText())
       .toContain(
-        "The 2 shots of the plan have 20 seconds of video. With one retry of the two longest shots (20 seconds more), the film needs about 40 seconds, and the limit of the project is 30 seconds of generated video. Only the person can raise a limit, in Settings. The AI cannot.",
+        "The 5 shots of the plan have 50 seconds of video. With one retry of the two longest shots (20 seconds more), the film needs about 70 seconds, and the limit of the project is 60 seconds of generated video. Only the person can raise a limit, in Settings. The AI cannot.",
       );
     await close();
   });

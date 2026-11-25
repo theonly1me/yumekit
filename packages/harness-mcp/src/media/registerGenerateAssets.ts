@@ -19,7 +19,7 @@ const generateAssetsInput = {
     ),
 };
 
-export const generateAssetsDescription = `Run several generate_asset calls at the same time and wait for all of them, for example the start pictures of all free shots, or their clips. Each call has the fields of generate_asset and keeps all its rules: the plan check, the tries, the reviews first, and the limits. A media service runs at most 3 calls at once (2 for Codex), and the rest wait for a free place. Each call answers on its own: one that fails does not stop the others. After a service-quota failure, the calls that still wait for that service are not sent. One shot or one sheet makes one try at a time. Give each call another shot, sheet, or sound.`;
+export const generateAssetsDescription = `Run several generate_asset calls at the same time and wait for all of them, for example the start pictures of all free shots, or their clips. Each call has the fields of generate_asset and keeps all its rules: the design check of the pictures of a clip, and the limits. Make each batch of a film in one call: all sheets, then all start pictures, then all clips. A media service runs at most 3 calls at once (2 for Codex), and the rest wait for a free place. Each call answers on its own: one that fails does not stop the others. After a service-quota failure, the calls that still wait for that service are not sent. One shot or one sheet makes one try at a time. Give each call another shot, sheet, or sound.`;
 
 export function registerGenerateAssets(context: HarnessContext): void {
   context.tools.add({

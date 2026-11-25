@@ -13,11 +13,11 @@ export const orderSection = [
   "1. The story first, with no paid call: set_story with the whole story and the form of the film, then show it to the person and ask for a yes or changes. Then set_story_plan with the logline, what the main character wants, what stands against it, what changes, and the shots with their states, strikes, camera, music map, story_fact, and the prompts of each start picture and clip. Correct each warning.",
   "2. The cast: put_cast_member for each person, place, and prop of the plan, with its facts and sheet_prompts (a person who holds a prop: a second prompt for the hands with the prop).",
   "3. The art direction: set_bible style holds the medium, the line, the color, the light, the lens, and what never appears. yumekit adds nothing to a prompt: write the art direction into each picture prompt in your own words. get_shot_brief gives it with the facts of each shot.",
-  "4. review_plan: the critic checks the whole first cut. Correct each blocking fault and call it again. No start picture or clip runs before a pass. A sheet picture can start as soon as its cast entry has facts and sheet_prompts. After two fails the check is used up: the work goes on, and each open fault goes to the critic of its shot as a note. A fault that breaks a fact of the brief still blocks until you restore its exact text.",
-  "5. The sheets: generate_asset with sheet_of and no prompt (the reviewed prompt), put_cast_member with the pictures, and review_sheet.",
-  "6. Calibrate: the easiest and the hardest shot of the plan check first: the start picture with shot_id, the clip with shot_id and first_frame_asset_id, then review_clip. Record each refusal with record_lesson. A lesson is for you: yumekit sends it to no model, so write what applies into the prompts of the next shots.",
-  "7. The rest at the same time, in four steps: the start pictures of all free shots in one generate_assets call, their reviews in one review_several call, their clips in one generate_assets call, and their reviews in one review_several call. A shot is free when it waits for nothing: get_work names the free shots, and for each other shot the shot it waits for. A cut to a new camera position starts on its own start picture and waits for nothing. Only a shot with continues_shot waits: it starts on the end picture of the kept clip of the shot that it continues, or from the start state of the plan when that clip was refused.",
-  "8. Place only a kept clip, or the clean part of a cut clip, with place_video.",
+  "4. The sheets: all sheet pictures in one generate_assets call, with sheet_of and no prompt (the prompt of the plan), then put_cast_member with the pictures.",
+  "5. The start pictures of all shots in one generate_assets call (shot_id), then one check of the batch: check_design in draft, review_several with review_start in critic. Only a break of the design blocks; make again only a picture whose design breaks.",
+  "6. The clips of all shots in one generate_assets call (shot_id, first_frame_asset_id), then one check of the batch: check_design in draft, review_several with review_clip in critic. Every fault except a break of the design is a note.",
+  "7. get_work names the next batch, what is ready for it, and the time of each stage against the target of 10 minutes. A cut to a new camera position starts on its own start picture and waits for nothing. Only a shot with continues_shot waits: it starts on the end picture of the checked clip of the shot that it continues.",
+  "8. Place each clip, or only the clean part of a clip whose design breaks, with place_video. In draft, ask the critic (review_plan, review_start, review_clip) only when the person asks for a second look.",
   "9. The music: write its prompt from the music map, make two or three candidates when they are cheap, check_music each, and place the best fit with replace_music and its start_seconds.",
   "",
 ].join("\n");
@@ -84,8 +84,8 @@ export const videoSection = [
 export const reviewSection = [
   "## The review",
   "",
-  "- review_clip and review_sheet start an independent critic: a fresh agent that sees only the frames, the measures, the plan, the sheets, and a fixed list. You cannot give or overrule its verdict.",
+  "- review_clip, review_start, and review_sheet start an independent critic: a fresh agent that sees only the frames, the measures, the plan, the sheets, and a fixed list. In critic mode it checks each batch. In draft mode it gives a second look when the person asks.",
   "- The critic answers each measured warning, counts what the facts count, and says if the action and each end entry happened. A keep is refused while a warning, a count, or a planned end is not right.",
-  "- Read its blocking faults, its notes, and its missed ends. Notes do not refuse. A redo follows the rule of tries: the second try starts from the refused version and changes only the named faults. Say to the person in one sentence what you made again and why.",
+  "- Read its faults, its notes, and its missed ends. Only a break of the design blocks; every other fault is a note, and you decide what serves the film. Say to the person in one sentence what you made again and why.",
   "",
 ].join("\n");
