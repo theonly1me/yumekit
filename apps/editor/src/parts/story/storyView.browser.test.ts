@@ -150,4 +150,23 @@ describe("the story view", () => {
     );
     await close();
   });
+
+  it("shows the form of the story once, with the story, over the form of the plan", async () => {
+    await writeForgeStory(runningEngine());
+    await runningEngine().callTool({
+      name: "set_story",
+      input: { ...forgeStory, form: "short" },
+    });
+    const { page, close } = await openEditor(runningEngine().url);
+    await openStepSheet({ page, name: "Story" });
+    const sheet = page.getByRole("dialog", { name: "The story" });
+
+    await expect
+      .poll(() => sheet.locator(".story-form").allTextContents())
+      .toEqual(["A short film"]);
+    expect(await sheet.locator(".whole-story .story-form").textContent()).toBe(
+      "A short film",
+    );
+    await close();
+  });
 });

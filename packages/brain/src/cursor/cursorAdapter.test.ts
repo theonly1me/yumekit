@@ -43,7 +43,7 @@ describe("the Cursor adapter", () => {
     });
 
     expect(events).toEqual([
-      { type: "session", sessionId: cursorMadeUpSessionId },
+      { type: "session", sessionId: cursorMadeUpSessionId, model: "Auto" },
       { type: "text", text: "I will", isPart: true },
       { type: "text", text: " set it.", isPart: true },
       { type: "text", text: "I will set it.", isPart: false },

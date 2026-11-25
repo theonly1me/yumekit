@@ -1,4 +1,8 @@
-import { serverName, type ServerCommand } from "../brainTypes.js";
+import {
+  serverName,
+  type ModelChoice,
+  type ServerCommand,
+} from "../brainTypes.js";
 
 function setting(options: { key: string; value: unknown }): string[] {
   return ["-c", `${options.key}=${JSON.stringify(options.value)}`];
@@ -16,7 +20,9 @@ export function codexArgumentsOf(options: {
   sessionId: string | undefined;
   instructions: string;
   serverCommand: ServerCommand;
+  choice: ModelChoice | undefined;
 }): string[] {
+  const { model, effort } = options.choice ?? {};
   const isResume = options.sessionId !== undefined;
   return [
     "exec",
@@ -38,6 +44,10 @@ export function codexArgumentsOf(options: {
     ...serverSetting({ key: "required", value: true }),
     ...serverSetting({ key: "supports_parallel_tool_calls", value: true }),
     ...setting({ key: "developer_instructions", value: options.instructions }),
+    ...(model === undefined ? [] : setting({ key: "model", value: model })),
+    ...(effort === undefined
+      ? []
+      : setting({ key: "model_reasoning_effort", value: effort })),
     "--",
     ...(options.sessionId === undefined ? [] : [options.sessionId]),
     options.request,

@@ -22,18 +22,23 @@ export const wholeStorySchema = z.object({
   }),
   arc: z.array(z.object({ id: z.string(), text: z.string() })),
   unknownAtEnd: z.string(),
+  form: z.string().optional(),
   approval: z.enum(["person-said-yes", "request-said-go-ahead"]).optional(),
 });
 
 export type WholeStory = z.infer<typeof wholeStorySchema>;
 
-export const filmFormLabels: Record<string, string> = {
+const filmFormLabels: Record<string, string> = {
   trailer: "A trailer",
   short: "A short film",
   explainer: "An explainer",
   "music-video": "A music video",
   other: "A film",
 };
+
+export function filmFormLabelOf(form: string): string {
+  return filmFormLabels[form] ?? "A film";
+}
 
 export function storyPartNameOf(options: {
   story: WholeStory | undefined;

@@ -1181,3 +1181,80 @@ The builder looked at the four files at full size next to `sheet-hero`. In `069`
 
 1. A decision of the owner on `069` and `079`. If they break the design, a fact that names the difference (for example the shoulder of the coat) lets the check find it.
 2. The Story view lists each break for each frame. One line for each fact, with its times, would be shorter.
+
+## Decisions of WP78
+
+| Id  | Decision                                                                                                                                                                                                                                                                                                        | Why                                                                                             |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| C57 | `settings.json` holds the model and the effort of each role (`lead`, `critic`) for each agent program, as `models`. The adapters pass a choice to the program. No choice gives no flag. The Settings view shows the two choices of the chosen program, and the chat shows the model and the effort of each turn | The last run set the model with a variable outside yumekit. The owner wants a choice in yumekit |
+| C58 | The Codex picture tool adds nothing about what to draw. It keeps only the words that say how to use a file                                                                                                                                                                                                      | "i want lead to do so rather than us hardcoding"                                                |
+| C59 | `set_story` takes `form`, and the story keeps it. The form of the film is the form of the story, else the form of the plan                                                                                                                                                                                      | A film with no AI video has no story plan, so it had no form (WP74, item 19)                    |
+
+## The model and the effort (C57)
+
+- `settings.json` gets `models`: for each agent id, `lead` and `critic`, each with `model?` and `effort?`. A model name of one program means nothing to another program, so the choice is kept for each program.
+- `TurnOptions` of `@yumekit/brain` gets `choice?: { model?, effort? }`. Claude Code gets `--model` and `--effort`. Codex gets `-c model="..."` and `-c model_reasoning_effort="..."`, also on a resume. Cursor gets `--model`. Cursor has no effort flag, so the adapter passes no effort and Settings offers none.
+- The lead and a helper run with the choice of `lead`. The critic runs with the choice of `critic`.
+- A refusal of a chosen model or effort reaches the chat in plain words: the program, the refused value, the role in the words of Settings, the words of the program, and what to change. A refusal of the critic also goes to the lead in the failure of the review.
+- `GET /api/settings/ai-models` lists each program with its suggested models, its efforts, and the two choices. `PUT /api/settings/ai-models` takes `{ agent, role, model, effort }`. An empty or `null` value removes the choice. An effort that the program does not take gives `effort-not-known` (400).
+- The Settings view shows "How <program> thinks" under the AI apps, for the program in use: "The AI that makes the film" and "The AI that checks the work", each with a model field and an effort list.
+- `session` of `BrainEvent` gets `model?`: the model that the program names in its first event. An answer entry gets `madeWith`: the program, the model, and the effort. The chat shows it under each answer.
+
+## The Codex picture prompt (C58)
+
+- The order around the prompt keeps: make one picture and stop, run no other tool, the shape, a transparent background when the call asks for one, and "The N attached picture(s) are references. Use them as the reference images of the image generation tool." It no longer says "Keep the same character, clothes, colors, and style." The lead writes the look of each character into its prompt (rule 41, `get_shot_brief`).
+
+## The form on the story (C59)
+
+- `story` gets `form?` with the values of the plan: `trailer`, `short`, `explainer`, `music-video`, or `other`. `set_story` takes `form`. A changed form is a changed story, so the yes of the person is asked again.
+- `filmFormOf({ story, plan })` of `@yumekit/project` gives the form of the story, else the form of the plan. `set_story_plan` still takes `form`, and a project of WP74 loads as before.
+- `set_story` notes a story with no form. `set_story_plan` notes a film with no form, asks for it in `set_story`, and notes a plan form that differs from the form of the story. The note of a trailer follows the form of the film.
+- `get_work` gives "Form of the film" in the story part. The Story view shows the form at the top of the whole story, and shows the form of the plan only when the project has no story.
+
+## Work package WP78
+
+| Id   | Scope                                                                                                                          | Needs      |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------ | ---------- |
+| WP78 | The model and the effort of the lead and the critic, the Codex picture prompt with no drawing words, and the form on the story | WP74, WP70 |
+
+### Checks of WP78
+
+1. With the fake agent, each program gets the flags of the choice of each role, and no flag when there is no choice. A refusal of the program reaches the chat in plain words.
+2. The Codex picture prompt with references has no sentence about what to draw.
+3. `set_story` keeps `form`; a plan with no form takes the form of the story; a different form gives a note; a project of WP74 loads.
+4. A browser test of the choices in Settings.
+5. One real chat turn with Claude Code as the lead, with `sonnet` and `low`.
+
+## Details of WP78
+
+These facts and choices came from the build of WP78 on 2026-11-25.
+
+### The flags
+
+1. Read on 2026-11-25 in `claude --help` of Claude Code 2.1.332: `--model <model>` ("Use an alias for the latest model (e.g. 'fable', 'opus', or 'sonnet') or a model's full name") and `--effort <level>` ("low, medium, high, xhigh, max"). Settings suggests these three aliases and offers these five efforts.
+2. Read in `codex exec --help` and `codex exec resume --help` of Codex CLI 0.163.0: both take `-c, --config <key=value>` and `-m, --model`. The adapter uses `-c model=` for both forms of the command. The efforts of Codex are those of its refusal text (WP70, item 23): `none`, `minimal`, `low`, `medium`, `high`, `xhigh`, and `max`. Settings suggests no Codex model, because the models depend on the plan of the account (WP70, item 22).
+3. Read in `cursor-agent --help` of version 2026.11.22-e9042b2: `--model <model>`, and no effort flag. A model with parameters can carry an effort in its name, for example `claude-opus-4-8[context=1m,effort=high,fast=false]`. The person can write such a name in the model field.
+
+### Refusals, measured with no paid call
+
+4. Claude Code with `--model not-a-real-model` exits with 1 after an `assistant` event with `error: "model_not_found"` and a `result` with `is_error: true` and the text "There's an issue with the selected model (not-a-real-model). It may not exist or you may not have access to it. Run --model to pick a different model." The init event names the refused model.
+5. Claude Code with `--effort bogus` does not refuse: it runs the turn with its default effort. So Settings offers only the five efforts of the help, and the engine refuses another effort with `effort-not-known`.
+6. Cursor with `--model not-a-real-model` exits with 1 and prints to standard error "Cannot use this model: not-a-real-model. Available models: ...", with a list of more than 300 names. The engine shows the first 300 characters of the words of the program.
+7. A refusal is a failure of the program that contains the chosen model and the word "model", or the chosen effort and words such as "effort" or "supported values". These are the texts of the three programs above and of Codex in WP70.
+
+### The parts
+
+8. The helper of `ask_helper` uses the choice of the lead, because it does the work of the lead.
+9. The chat shows the model that the program names in its first event. Claude Code and Cursor name one. Codex names none in `codex exec --json`, so the chat shows the chosen model, or "its own model".
+10. A refusal of the critic adds one notice to the chat for each refused value, also when `review_several` starts many critics.
+11. The Settings view shows the choices of the program in use only. A choice of another program stays in `settings.json` and applies when the person picks that program again.
+
+### Other text that yumekit adds to a media prompt
+
+12. The Codex picture tool: "Make exactly one picture with your image generation tool, then stop.", "Run no other tool. Write no file yourself. Answer with one short sentence.", the shape from the size of the call, "Give the picture a transparent background." when the call asks for it, the use of the attached pictures, and "Picture: <prompt>". Each says how to run the tool or use a file. They stay.
+13. The Gemini music tool: "Make it N seconds long." for a model that takes the length only in the prompt, and "Instrumental only, no vocals." unless the call sets `instrumental: false`. Each comes from a setting of the call, not from yumekit. They stay.
+14. No other server in `tools/` adds words to a prompt. The sample server writes the prompt on its test picture, which is not a prompt.
+
+### The real check
+
+15. The engine of the worktree build, with a temporary configuration folder, an empty project, and Claude Code 2.1.332 as the lead with the choice `sonnet` and `low`. The request "Set the script to the single word ready." set the script in one turn. The answer of the chat names "Claude Code with the model claude-sonnet-5-5 and low effort": the model came from the first event of Claude Code, so the turn ran with the chosen model.

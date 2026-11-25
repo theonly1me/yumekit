@@ -19,7 +19,7 @@ export const setStoryPlanInput = {
     .enum(filmForms)
     .optional()
     .describe(
-      "The form of the film, which decides its structure: trailer (moments of a longer story, raises a question and never answers it), short (one complete small story with an end), explainer, music-video, or other. get_story_guide gives the craft of each.",
+      "The form of the film. Give it to set_story instead: the form of the story wins. Use this only for a plan with no story.",
     ),
   logline: z
     .string()

@@ -5,10 +5,25 @@ import { readOptionalFile } from "../agents/agentFiles.js";
 import { agentIds } from "../agents/agentTypes.js";
 import type { Outcome } from "../engineTypes.js";
 
+export const aiRoles = ["lead", "critic"] as const;
+
+export type AiRole = (typeof aiRoles)[number];
+
+const modelChoiceSchema = z.strictObject({
+  model: z.string().min(1).optional(),
+  effort: z.string().min(1).optional(),
+});
+
 const settingsSchema = z.looseObject({
   agent: z.enum(agentIds).optional(),
   agentPrograms: z
     .partialRecord(z.enum(agentIds), z.string().min(1))
+    .optional(),
+  models: z
+    .partialRecord(
+      z.enum(agentIds),
+      z.partialRecord(z.enum(aiRoles), modelChoiceSchema),
+    )
     .optional(),
 });
 

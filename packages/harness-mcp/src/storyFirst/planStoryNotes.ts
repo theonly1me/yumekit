@@ -1,6 +1,8 @@
 import {
+  filmFormOf,
   filmForms,
   storyPartIdsOf,
+  type FilmForm,
   type Shot,
   type Story,
   type StoryPlan,
@@ -15,13 +17,31 @@ export const missingStoryNote =
 export const trailerFormNote =
   "Note: a trailer shows moments from different times and places of the longer story. It raises the question and does not answer it: no shot shows how a conflict ends. Put a trailer-card between the moments, on the hits of the music, and end on the title card. get_story_guide has the parts of a trailer.";
 
-function formNotes(plan: StoryPlan): string[] {
-  if (plan.form === undefined) {
-    return [
-      `Note: the plan has no form. Give form (${filmForms.join(", ")}): the structure of the film follows it, and get_story_guide gives the craft of each.`,
-    ];
-  }
-  return plan.form === "trailer" ? [trailerFormNote] : [];
+export const missingFormNote = `Note: the film has no form. Give form (${filmForms.join(", ")}) to set_story: the structure of the film follows it, and get_story_guide gives the craft of each.`;
+
+function differentFormNotes(options: {
+  planForm: FilmForm | undefined;
+  storyForm: FilmForm | undefined;
+}): string[] {
+  const { planForm, storyForm } = options;
+  if (planForm === undefined || storyForm === undefined) return [];
+  if (planForm === storyForm) return [];
+  return [
+    `Note: the plan gives the form ${planForm}, and the story gives ${storyForm}. The film follows the story: ${storyForm}. Leave form out of set_story_plan, or change it with set_story.`,
+  ];
+}
+
+function formNotes(options: {
+  plan: StoryPlan;
+  story: Story | undefined;
+}): string[] {
+  const { plan, story } = options;
+  const form = filmFormOf({ story, plan });
+  if (form === undefined) return [missingFormNote];
+  return [
+    ...differentFormNotes({ planForm: plan.form, storyForm: story?.form }),
+    ...(form === "trailer" ? [trailerFormNote] : []),
+  ];
 }
 
 function hasQuotedWords(shot: Shot): boolean {
@@ -53,12 +73,18 @@ export function planStoryNotesOf(options: {
   story: Story | undefined;
 }): string[] {
   const { plan, story } = options;
-  if (story === undefined) return [missingStoryNote, ...formNotes(plan)];
+  if (story === undefined) {
+    return [missingStoryNote, ...formNotes({ plan, story })];
+  }
   const approval =
     story.approval === undefined
       ? [
           "Note: the person has not said yes to the story yet. Show it in plain words and ask, and make nothing else until the answer, unless the request says in words to go ahead without asking.",
         ]
       : [];
-  return [...approval, ...formNotes(plan), ...shotNotes({ plan, story })];
+  return [
+    ...approval,
+    ...formNotes({ plan, story }),
+    ...shotNotes({ plan, story }),
+  ];
 }

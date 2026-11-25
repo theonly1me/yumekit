@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import {
   instructionsOf,
   type AgentAdapter,
+  type ModelChoice,
   type ServerCommand,
   type Turn,
   type TurnEnd,
@@ -11,6 +12,7 @@ import type { AnswerTracker } from "./answerTracker.js";
 import type { ChangeLedger } from "./changeLedger.js";
 import type { ChatLog } from "./chatLog.js";
 import type { AnswerEntry } from "./chatTypes.js";
+import { refusedChoiceTextOf } from "./refusedChoice.js";
 
 export const newConversationNotice = "The AI started a new conversation.";
 
@@ -26,6 +28,7 @@ export function signInMessageOf(adapter: AgentAdapter): string {
 function noticeOf(options: {
   end: Extract<TurnEnd, { kind: "failed" }>;
   adapter: AgentAdapter;
+  choice: ModelChoice;
 }): string {
   switch (options.end.reason) {
     case "signed-out":
@@ -33,7 +36,14 @@ function noticeOf(options: {
     case "tools":
       return "The AI could not open this project. Close the editor, open it again, and try again.";
     case "program":
-      return `The AI stopped with a problem: ${options.end.message}`;
+      return (
+        refusedChoiceTextOf({
+          message: options.end.message,
+          choice: options.choice,
+          role: "lead",
+          programName: options.adapter.name,
+        }) ?? `The AI stopped with a problem: ${options.end.message}`
+      );
   }
 }
 
@@ -43,6 +53,7 @@ function answerStateOf(end: TurnEnd): AnswerEntry["state"] {
 
 export interface RequestRun {
   adapter: AgentAdapter;
+  choice: ModelChoice;
   log: ChatLog;
   ledger: ChangeLedger;
   requestText: string;
@@ -62,6 +73,7 @@ async function runAttempt(options: {
   const turn = run.adapter.startTurn({
     request: run.requestText,
     sessionId: run.log.sessionId(),
+    choice: run.choice,
     instructions: instructionsOf(run.adapter.id),
     serverCommand: run.serverCommand,
     workingFolder: run.workingFolder,
@@ -97,7 +109,7 @@ export async function runRequest(run: RequestRun): Promise<void> {
     log.put({
       kind: "notice",
       id: randomUUID(),
-      text: noticeOf({ end, adapter: run.adapter }),
+      text: noticeOf({ end, adapter: run.adapter, choice: run.choice }),
     });
   }
   ledger.endRequest(tracker.changeSummary());

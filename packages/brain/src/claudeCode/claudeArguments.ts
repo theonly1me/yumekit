@@ -1,4 +1,8 @@
-import { serverName, type ServerCommand } from "../brainTypes.js";
+import {
+  serverName,
+  type ModelChoice,
+  type ServerCommand,
+} from "../brainTypes.js";
 
 export const claudeServerToolPrefix = `mcp__${serverName}__`;
 
@@ -7,7 +11,9 @@ export function claudeArgumentsOf(options: {
   sessionId: string | undefined;
   instructionsFile: string;
   serverCommand: ServerCommand;
+  choice: ModelChoice | undefined;
 }): string[] {
+  const { model, effort } = options.choice ?? {};
   const serverConfiguration = {
     mcpServers: {
       [serverName]: {
@@ -29,6 +35,8 @@ export function claudeArgumentsOf(options: {
     ...["--permission-mode", "dontAsk"],
     ...["--setting-sources", ""],
     ...["--append-system-prompt-file", options.instructionsFile],
+    ...(model === undefined ? [] : ["--model", model]),
+    ...(effort === undefined ? [] : ["--effort", effort]),
     ...(options.sessionId === undefined ? [] : ["--resume", options.sessionId]),
     "--",
     options.request,

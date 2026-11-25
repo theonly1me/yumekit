@@ -50,7 +50,11 @@ describe("the Claude Code adapter", () => {
     });
 
     expect(events).toEqual([
-      { type: "session", sessionId: claudeMadeUpSessionId },
+      {
+        type: "session",
+        sessionId: claudeMadeUpSessionId,
+        model: "made-up-model",
+      },
       { type: "text", text: "I will set ", isPart: true },
       { type: "text", text: "the script.", isPart: true },
       { type: "text", text: "I will set the script.", isPart: false },

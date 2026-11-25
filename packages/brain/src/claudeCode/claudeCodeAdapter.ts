@@ -46,6 +46,7 @@ function startClaudeTurn(options: {
             sessionId: turn.sessionId,
             instructionsFile,
             serverCommand: turn.serverCommand,
+            choice: turn.choice,
           }),
           workingFolder: turn.workingFolder,
           parser: createClaudeStreamParser(),

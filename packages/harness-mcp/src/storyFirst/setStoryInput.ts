@@ -1,4 +1,5 @@
 import {
+  filmForms,
   fixedStoryPartIds,
   storyApprovals,
   storyArcRange,
@@ -69,6 +70,12 @@ export const setStoryInput = {
   unknown_at_end: words.describe(
     "What stays unknown at the end. For a trailer: the question that it raises and never answers.",
   ),
+  form: z
+    .enum(filmForms)
+    .optional()
+    .describe(
+      "The form of the film, which decides its structure: trailer (moments of a longer story, raises a question and never answers it), short (one complete small story with an end), explainer, music-video, or other. get_story_guide gives the craft of each.",
+    ),
   approval: z
     .enum(storyApprovals)
     .optional()
@@ -110,6 +117,7 @@ export function storyOf(options: {
     },
     arc: input.arc.map((step) => ({ id: step.step_id, text: step.step })),
     unknownAtEnd: input.unknown_at_end,
+    ...(input.form === undefined ? {} : { form: input.form }),
   };
   const kept =
     earlier?.approval !== undefined &&

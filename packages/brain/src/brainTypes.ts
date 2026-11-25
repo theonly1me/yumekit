@@ -10,7 +10,7 @@ export interface ServerCommand {
 }
 
 export type BrainEvent =
-  | { type: "session"; sessionId: string }
+  | { type: "session"; sessionId: string; model?: string }
   | { type: "text"; text: string; isPart: boolean }
   | { type: "tool-started"; callId: string; tool: string; input: unknown }
   | { type: "tool-finished"; callId: string; ok: boolean };
@@ -22,8 +22,14 @@ export type TurnEnd =
   | { kind: "stopped" }
   | { kind: "failed"; reason: TurnFailureReason; message: string };
 
+export interface ModelChoice {
+  model?: string | undefined;
+  effort?: string | undefined;
+}
+
 export interface TurnOptions {
   request: string;
+  choice?: ModelChoice | undefined;
   sessionId: string | undefined;
   instructions: string;
   serverCommand: ServerCommand;

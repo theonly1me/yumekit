@@ -69,7 +69,15 @@ export function createCursorStreamParser(): StreamParser {
       const line = parsed.data;
       switch (line.type) {
         case "system":
-          return { events: [{ type: "session", sessionId: line.session_id }] };
+          return {
+            events: [
+              {
+                type: "session",
+                sessionId: line.session_id,
+                ...(line.model === undefined ? {} : { model: line.model }),
+              },
+            ],
+          };
         case "assistant":
           return { events: assistantEventsOf(line) };
         case "tool_call":

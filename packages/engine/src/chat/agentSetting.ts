@@ -26,17 +26,21 @@ function fieldsOf(text: string): Record<string, unknown> | undefined {
   }
 }
 
-export async function saveAgentSetting(
-  agent: BrainAgentId,
-): Promise<Outcome<{ agent: BrainAgentId }, AgentSettingFailure>> {
+export async function changeSettingsFile<Value>(options: {
+  change: (fields: Record<string, unknown>) => {
+    fields: Record<string, unknown>;
+    value: Value;
+  };
+}): Promise<Outcome<Value, AgentSettingFailure>> {
   const file = settingsFilePath();
   const read = await readOptionalFile(file);
   if (!read.ok) return { ok: false, failure: notValid(file) };
   const fields = read.value === undefined ? {} : fieldsOf(read.value);
   if (fields === undefined) return { ok: false, failure: notValid(file) };
+  const changed = options.change(fields);
   const written = await writeFileAtomic({
     file,
-    content: `${JSON.stringify({ ...fields, agent }, undefined, 2)}\n`,
+    content: `${JSON.stringify(changed.fields, undefined, 2)}\n`,
   });
   if (!written.ok) {
     return {
@@ -47,5 +51,13 @@ export async function saveAgentSetting(
       },
     };
   }
-  return { ok: true, value: { agent } };
+  return { ok: true, value: changed.value };
+}
+
+export function saveAgentSetting(
+  agent: BrainAgentId,
+): Promise<Outcome<{ agent: BrainAgentId }, AgentSettingFailure>> {
+  return changeSettingsFile({
+    change: (fields) => ({ fields: { ...fields, agent }, value: { agent } }),
+  });
 }
