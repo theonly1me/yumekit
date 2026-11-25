@@ -10,6 +10,7 @@ import {
   shotSizes,
 } from "@yumekit/project";
 import { z } from "zod";
+import { videoPromptLimit } from "./firstFrameRule.js";
 import { idInput } from "../inputs.js";
 
 const words = z.string().trim().min(1);
@@ -109,10 +110,10 @@ export const shotInput = z.strictObject({
     .optional()
     .describe("Each strike of the shot, with its one target."),
   start_picture_prompt: words.describe(
-    "The prompt of the start picture that you will send, before the harness adds the art direction, the cast, and the lessons. Describe every visible part: each garment, each hand, the ground, the light. review_plan checks it, and the first try sends it.",
+    "The prompt of the start picture that you will send. yumekit adds nothing, so write it complete: the art direction, and the look of each person, place, and prop of the shot. Describe every visible part: each garment, each hand, the ground, the light. review_plan checks it, and the first try sends it.",
   ),
   video_prompt: words.describe(
-    "The prompt of the clip that you will send: the format, the start, the action in beats with seconds, the body, the physics, what must not change, what moves in the background, and no writing. review_plan checks it, and the first try sends it.",
+    `The prompt of the clip that you will send: the format, the start, the action in beats with seconds, the body, the physics, what must not change, what moves in the background, the camera in words, and no writing. yumekit adds nothing, so keep it under ${String(videoPromptLimit)} characters and about this shot only. review_plan checks it, and the first try sends it.`,
   ),
   music_intensity: z
     .int()

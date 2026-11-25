@@ -10,7 +10,7 @@ function SpendingRow(props: { client: EngineClient; servers: MediaServers }) {
   if ("record_not_valid" in spending) {
     return (
       <div className="setting-row">
-        <span>Money for paid services in each project</span>
+        <span>Money for paid services in this project</span>
         <p className="change-failure" role="alert">
           The spending record of this project is damaged, so paid services stop.{" "}
           {spending.record_not_valid}
@@ -46,7 +46,7 @@ export function LimitsGroup(props: { client: EngineClient }) {
         </>
       ) : (
         <div className="setting-row">
-          <span>Money and AI video in each project</span>
+          <span>Money and AI video in this project</span>
           <span className="limit-value">
             {state.kind === "failed" ? state.message : "Reading the limits"}
           </span>

@@ -12,7 +12,7 @@ import {
   calibrationShotIdsOf,
   planGateFailureOf,
 } from "./planGate.js";
-import { firstFrameFailureOf, withPromptAdditions } from "./promptAdditions.js";
+import { firstFrameFailureOf } from "./firstFrameRule.js";
 import { withSheetTry } from "./sheetTryGate.js";
 import { isFreeSheet, sheetFailureOf } from "./sheets.js";
 import { refusalsOf } from "./shotRefusals.js";
@@ -74,14 +74,9 @@ function shotRequestOf(options: {
   const castIds = [
     ...new Set([shot.placeId, ...shot.castIds, ...(request.cast_ids ?? [])]),
   ];
-  const cameraMove =
-    request.capability === "video"
-      ? (request.camera_move ?? shot.camera.move)
-      : request.camera_move;
   return {
     ...request,
     cast_ids: castIds,
-    ...(cameraMove === undefined ? {} : { camera_move: cameraMove }),
   };
 }
 
@@ -126,7 +121,7 @@ function withShot(options: {
   return { ok: true, value: shotRequestOf({ request: tried.value, shot }) };
 }
 
-function storyRequestOf(options: {
+export function withStory(options: {
   snapshot: ProjectSnapshot;
   request: GenerateAssetInput;
 }): RequestOutcome {
@@ -162,19 +157,4 @@ function storyRequestOf(options: {
   }
   if (found === undefined || plan === undefined) return withSheetTry(options);
   return withShot({ snapshot, plan, request, ...found.value });
-}
-
-export function withStory(options: {
-  snapshot: ProjectSnapshot;
-  request: GenerateAssetInput;
-}): RequestOutcome {
-  const storied = storyRequestOf(options);
-  if (!storied.ok) return storied;
-  return {
-    ok: true,
-    value: withPromptAdditions({
-      snapshot: options.snapshot,
-      request: storied.value,
-    }),
-  };
 }

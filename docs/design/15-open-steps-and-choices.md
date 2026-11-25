@@ -257,8 +257,8 @@ The first film with paid media found these defects: no limit in money, no record
 
    A length that is not known counts as 10 seconds.
 
-8. `PUT /api/media/limits` takes `generated_video_seconds`, `spending_usd`, or both, and answers with both values that apply. `spending_usd` is from 0 to 10,000 and keeps cents. A request with the header `x-yumekit-client: agent` fails with `limit-not-for-the-ai` (403) and changes no file. No harness tool changes a limit. So the AI can read the limits, and only the person can change them.
-9. Settings, group "Limits", shows "Money for paid services in each project" above the video seconds: a field in US dollars, a bar of the money spent, and the line "About $0.84 of $5.00 spent in this project. $4.16 left."
+8. `PUT /api/media/limits` takes `generated_video_seconds`, `spending_usd`, or both, and answers with both values that apply. Since WP73 (document 20, C42), it writes them to the `media-tools.json` of the open project. `spending_usd` is from 0 to 10,000 and keeps cents. A request with the header `x-yumekit-client: agent` fails with `limit-not-for-the-ai` (403) and changes no file. No harness tool changes a limit. So the AI can read the limits, and only the person can change them.
+9. Settings, group "Limits", shows "Money for paid services in this project" above the video seconds: a field in US dollars, a bar of the money spent, and the line "About $0.84 of $5.00 spent in this project. $4.16 left."
 
 ### The record of paid calls
 

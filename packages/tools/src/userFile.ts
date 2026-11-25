@@ -55,17 +55,27 @@ function notValid(options: {
   };
 }
 
-export async function changeUserFile(
+export function changeUserFile(
   change: (file: FileObject) => FileObject,
 ): Promise<Outcome<{ file: string }, UserFileFailure>> {
-  const folder = configurationDirectory();
+  return changeConfigurationFile({
+    folder: configurationDirectory(),
+    change,
+  });
+}
+
+export async function changeConfigurationFile(options: {
+  folder: string;
+  change: (file: FileObject) => FileObject;
+}): Promise<Outcome<{ file: string }, UserFileFailure>> {
+  const { folder } = options;
   const file = join(folder, configurationFileName);
   const read = await readUserObject(file);
   if (!read.ok) return read;
   const temporaryFile = `${file}.${randomBytes(6).toString("hex")}.tmp`;
   try {
     await mkdir(folder, { recursive: true, mode: 0o700 });
-    const text = JSON.stringify(change(read.value), null, 2);
+    const text = JSON.stringify(options.change(read.value), null, 2);
     await writeFile(temporaryFile, `${text}\n`);
     await rename(temporaryFile, file);
   } catch (error) {

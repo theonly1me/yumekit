@@ -77,7 +77,7 @@ describe("generate_asset with the story plan", () => {
     expect(harness.runRequests.length).toBe(before);
   });
 
-  it("sends the art direction, the facts of the place and the cast, and the camera of the shot", async () => {
+  it("sends the prompts of a shot byte for byte, with no art direction, facts, lessons, or camera sentence", async () => {
     const harness = await startStoryHarness({ videoStyle: "ai-video" });
     await harness.call({
       name: "set_bible",
@@ -101,11 +101,11 @@ describe("generate_asset with the story plan", () => {
     });
     const clip = harness.store.read().assets.at(-1);
 
-    expect(picture?.input["prompt"]).toBe(
-      "strike start\n\nArt direction: Hand-painted 2D animation.\n\nFORGE: The forge. Fixed: The door is on the right wall, hinges on its left edge. SMITH: The smith. Fixed: The hammer is in her right hand.",
-    );
-    expect(clip?.source).toMatchObject({
-      input: { shot_id: "strike", camera_move: "push-in" },
-    });
+    expect(picture?.input["prompt"]).toBe("strike start");
+    expect(harness.runRequests.at(-1)?.input["prompt"]).toBe("strike clip");
+    expect(clip?.source).toMatchObject({ input: { shot_id: "strike" } });
+    expect(
+      clip?.source.kind === "tool" ? clip.source.input : {},
+    ).not.toHaveProperty("camera_move");
   });
 });

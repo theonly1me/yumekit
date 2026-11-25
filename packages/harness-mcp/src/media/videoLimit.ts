@@ -7,6 +7,8 @@ export type VideoLimitFailure = HarnessFailure & {
   limit_seconds: number;
 };
 
+export const videoLimitKind = "generated-video-limit-reached";
+
 export function roundedSeconds(seconds: number): number {
   return Math.round(seconds * 100) / 100;
 }
@@ -43,7 +45,7 @@ export function videoLimitFailureOf(options: {
     ? "The limit is 0 seconds, so generated video is turned off."
     : `The limit is ${String(limitSeconds)} seconds.`;
   return {
-    kind: "generated-video-limit-reached",
+    kind: videoLimitKind,
     message: `This call asks for ${String(requested)} seconds of generated video. The project already has ${String(made)} seconds${running === 0 ? "" : `, and calls that run now make ${String(running)} more`}. ${limitText} The person sets the limit in Settings (limits.generatedVideoSeconds in media-tools.json). The AI cannot change it.`,
     hint: "Make no more video. Ask the person whether to raise the limit in Settings (limits.generatedVideoSeconds in media-tools.json), or use a shorter clip, a still image, or a code scene instead.",
     used_seconds: used,

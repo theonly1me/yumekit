@@ -1,10 +1,8 @@
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import { withCast } from "../cast/castRequest.js";
 import type { HarnessContext } from "../context.js";
 import type { ProgressListener } from "../harness/toolTable.js";
 import { failureResult } from "../results.js";
-import { withStory } from "../storyPlan/shotRequest.js";
-import { findReusableAsset } from "./assetFiles.js";
+import { assetFilesFolder, findReusableAsset } from "./assetFiles.js";
 import {
   generateAssetDescription,
   generateAssetInput,
@@ -15,13 +13,14 @@ import { mediaPathInput } from "./mediaPath.js";
 import { recordedInputOf, referencePathsInput } from "./referencePaths.js";
 import { reuseAsset } from "./reuseAsset.js";
 import { cutNoteOf } from "../storyPlan/cutNote.js";
-import { longPromptNoteOf } from "../storyPlan/promptAdditions.js";
-import { strongReasonOf } from "./strongReason.js";
-import { withStrongModel } from "./strongModel.js";
+import { lessonsForYouOf } from "../storyPlan/lessonsForYou.js";
+import { callFactsOf, withCallFacts } from "./callFacts.js";
+import { prepareCall } from "./preparedCall.js";
+import { longPromptNoteOf } from "./promptParts.js";
 import { talkingVoiceOf } from "./talkingVoice.js";
-import { videoInputOf } from "./videoChoices.js";
 import { makeAsset } from "./made/makeAsset.js";
 import { startMediaCall } from "./runningCall.js";
+import { videoLimitKind } from "./videoLimit.js";
 
 export async function generateAsset(options: {
   context: HarnessContext;
@@ -31,29 +30,19 @@ export async function generateAsset(options: {
 }): Promise<CallToolResult> {
   const { context, onProgress } = options;
   const snapshot = context.store.read();
-  const storied = withStory({ snapshot, request: options.request });
-  if (!storied.ok) return failureResult(storied.failure);
-  const why = strongReasonOf({ snapshot, request: storied.value });
-  const strong =
-    why === undefined
-      ? { request: storied.value, note: undefined }
-      : await withStrongModel({
-          request: storied.value,
-          mediaTools: context.mediaTools,
-          why,
-        });
-  const castApplied = await withCast({
+  const prepared = await prepareCall({
+    context,
     snapshot,
-    request: strong.request,
-    mediaTools: context.mediaTools,
+    request: options.request,
   });
-  if (!castApplied.ok) return failureResult(castApplied.failure);
-  const request = castApplied.value;
-  const sentInput = await videoInputOf({
-    request,
-    mediaTools: context.mediaTools,
+  if (!prepared.ok) return failureResult(prepared.failure);
+  const { request, prompt } = prepared.value;
+  const facts = callFactsOf({
+    prompt,
+    lessons: lessonsForYouOf({ snapshot, request }),
   });
-  if (!sentInput.ok) return failureResult(sentInput.failure);
+  const withFacts = (result: CallToolResult) =>
+    withCallFacts({ result, facts });
   const projectFolder = context.store.folder;
   const ids = {
     referenceAssetIds: request.reference_asset_ids,
@@ -82,8 +71,11 @@ export async function generateAsset(options: {
     tool,
     input,
   });
-  if (existing)
-    return reuseAsset({ context, existing, assetId: request.asset_id });
+  if (existing) {
+    return withFacts(
+      await reuseAsset({ context, existing, assetId: request.asset_id }),
+    );
+  }
   if (snapshot.assets.some((asset) => asset.id === request.asset_id)) {
     return failureResult({
       kind: "id-in-use",
@@ -91,30 +83,51 @@ export async function generateAsset(options: {
       hint: "Choose another asset_id. Call list_assets to see the ids in use.",
     });
   }
+  const mediaRequest = {
+    capability: request.capability,
+    ...(request.server === undefined ? {} : { server: request.server }),
+    ...(request.model === undefined ? {} : { model: request.model }),
+    input: { ...prepared.value.sentInput, ...paths.value, ...mediaPath.value },
+    outputDirectory: assetFilesFolder(projectFolder),
+    fileStem: request.asset_id,
+    ...(request.shot_id === undefined
+      ? {}
+      : { about: { shotId: request.shot_id } }),
+  };
   const started = startMediaCall({
     context,
     request,
     voiceSeconds: voice.value?.seconds,
   });
-  if (!started.ok) return failureResult(started.failure);
+  if (!started.ok) {
+    if (started.failure.kind === videoLimitKind) {
+      await context.mediaTools.recordRefusal({
+        request: mediaRequest,
+        failure: started.failure,
+      });
+    }
+    return failureResult(started.failure);
+  }
   try {
-    return await makeAsset({
-      context,
-      request,
-      snapshot,
-      sent: { ...sentInput.value, ...paths.value, ...mediaPath.value },
-      voice: voice.value,
-      tool,
-      input,
-      notes: [
-        strong.note,
-        longPromptNoteOf(request),
-        cutNoteOf({ snapshot, request }),
-      ],
-      ticket: started.value,
-      onProgress,
-      quotaServers: options.quotaServers,
-    });
+    return withFacts(
+      await makeAsset({
+        context,
+        request,
+        snapshot,
+        mediaRequest,
+        voice: voice.value,
+        tool,
+        input,
+        notes: [
+          prepared.value.strongNote,
+          longPromptNoteOf({ request, prompt }),
+          cutNoteOf({ snapshot, request }),
+        ],
+        ticket: started.value,
+        onProgress,
+        quotaServers: options.quotaServers,
+      }),
+    );
   } finally {
     started.value.finish();
   }

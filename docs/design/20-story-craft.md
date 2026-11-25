@@ -33,7 +33,7 @@ The cause in one sentence: yumekit gave the lead tools for pictures and a cast o
 | C1  | A project can hold a story plan: a logline, what the main character wants, what stands against it, what changes, and a shot list                             | A paid clip of a shot with no purpose is lost money and slop                                          |
 | C2  | A video clip of an `ai-video` or `mix` project, or of a project with a plan, names its shot, or the harness makes no call                                    | A rule in a text is not a guard. One free call to write the plan is cheap next to one paid clip       |
 | C3  | A cast entry has fixed facts in words, and a kind `prop`. Each shot names its cast, and a call for a shot needs their sheets                                 | The model reads words and pictures. "Knob on the right, hinges on the left" must be in both           |
-| C4  | The style of the bible is the art direction. The harness adds it to each picture and video prompt                                                            | Two shots cannot drift when the same words go into each prompt, and the lead cannot forget them       |
+| C4  | The style of the bible is the art direction. The lead writes it into each picture and video prompt (since WP73, C40; before, the harness added it)           | Two shots cannot drift when the same words go into each prompt                                        |
 | C5  | A shot in the same place as the shot before starts from the end picture of that shot. The plan warns when a start state differs from the end state before it | The world stays the same across a cut                                                                 |
 | C6  | Each clip of a shot gets a review: frames, measured motion, and a fixed list. A clip with no passed review cannot be placed                                  | An agent sees a pretty picture and says "looks right". Numbers and a list make it look for the faults |
 | C7  | The lead reads a story guide with one tool call: the plan, the sheets, how to write a video prompt, and the review list                                      | The scene guide teaches code. A film needs a director's guide                                         |
@@ -70,13 +70,13 @@ The brief of this work package names these parts S1 to S8. C1 and C2 are S1, C3 
 - `get_work` gives the plan in the story part, and `put_work` does not change it.
 - C2: `generate_asset` takes `shot_id`. A call with the capability `video` needs it when the video style is `ai-video` or `mix`, or when the project has a plan. Without a plan the failure is `story-plan-missing`; without `shot_id` it is `shot-not-named`; an unknown id is `shot-not-found`. Each hint names `set_story_plan` or the shot ids. A picture call can give `shot_id` too, for the start picture of a shot.
 - Why this strict: a refused call costs one free tool call, and the hint says what to write. A clip with no shot costs money and gives the default of the model, which is the slop of the first film. In a `graphics` project with no plan, a clip that the person asks for still works with no plan, because the person decided it.
-- With `shot_id`, the harness adds the place and the cast of the shot to `cast_ids`, and the camera move of the shot when the call gives none. The source record of the asset keeps `shot_id`, so the editor finds the start picture and the clip of each shot.
+- With `shot_id`, the harness adds the place and the cast of the shot to `cast_ids`, so their sheets go with a picture as reference pictures. Since WP73 (C40), it no longer adds the camera move of the shot: the lead writes the camera in the prompt. The source record of the asset keeps `shot_id`, so the editor finds the start picture and the clip of each shot.
 
 ## Sheets for characters, places, and props (C3)
 
 - `castKinds` gets `prop`: `person`, `place`, `product`, and `prop`. A product sells; a prop is an object of a story, such as a lantern or a sword.
 - A cast entry gets the optional `facts`: a list of fixed facts in words, at most 24, each at most 200 characters. `put_cast_member` takes `facts`, and an entry that exists keeps its facts when the call gives none.
-- The sentence of an entry in a prompt becomes `<name>: <description>. Fixed: <fact>; <fact>.` So each prompt repeats the facts in words.
+- Since WP73 (C40), yumekit adds no sentence of an entry to a prompt. The lead writes the facts that a picture needs in its own words, and `get_shot_brief` gives them.
 - A person: age, build, hair, each garment and its colors, marks and their side, five fingers on each hand, which hand holds which prop and how. Its first reference picture is a sheet: front, side, back, and a close up of the face, in the style of the film. Its second picture shows the hands with the prop.
 - A place: a wide establishing picture, and a floor plan in words: where the door is, which side its hinges and its knob are on, which way it opens, where the window and the light are, and what is on each wall.
 - A prop: a picture from two sides, and its facts: size, material, colors, and how a hand holds it.
@@ -85,7 +85,7 @@ The brief of this work package names these parts S1 to S8. C1 and C2 are S1, C3 
 ## One style for the film (C4)
 
 - The style of the bible (`set_bible` `style`) is the art direction: the medium, the line, the color, the light, the lens, and what never appears. The description of `set_bible` says so.
-- The harness adds `Art direction: <style>` after the prompt of each picture and video call, before the sentences of the cast and the camera move. The source record keeps the prompt with it, so a change of the style makes a new file. A project with an empty style gets nothing.
+- Since WP73 (C40), the harness adds no art direction to a prompt. The lead writes it into each prompt, and `get_shot_brief` gives it.
 - The look of the project stays the look of the scenes drawn by code. The art direction is for the media models. Step 5 of the server instructions no longer asks the lead to copy the style by hand.
 
 ## Continuity between shots (C5)
@@ -465,7 +465,7 @@ The cause in one sentence: the lead spent money first and learned later; the fac
 | C25 | At most two tries with the same approach for a sheet and for a shot. The second try starts from the refused version, on the strongest model. Then one simplified try. Then keep the best version, plan around it, or ask the person                  | A loop of remakes from nothing cost most of the money and changed the parts that were right                                    |
 | C26 | A failed sheet or shot does not block the film: a sheet can be used with a recorded restriction, and a refused shot does not block the next shot in the same place                                                                                   | Three sheets blocked the street, and one shot blocked eleven                                                                   |
 | C27 | Sheets and start pictures use the strongest picture model of the service unless the person picked a model. Facts are visual statements. A person's description covers each garment, the hair, the face, and what it must not resemble                | Every later picture copies the sheet. A thin description borrowed a known design                                               |
-| C28 | After the plan passes, the lead makes the easiest and the hardest shot first. The causes of their refusals become lessons that the harness adds to every later prompt                                                                                | The first two shots teach the rest, before the money of ten more                                                               |
+| C28 | After the plan passes, the lead makes the easiest and the hardest shot first. The causes of their refusals become lessons for the lead (since WP73, C39: never in a prompt)                                                                          | The first two shots teach the rest, before the money of ten more                                                               |
 | C29 | The sheet review asks if the design looks like a known character or uniform of an existing work. That is a blocking fault with the parts named                                                                                                       | The first hero looked like the characters of an existing series                                                                |
 | C31 | A clip of a shot starts on its start picture by construction: the start picture is the only picture of the call, in the strict first frame mode of the model, with a short prompt about motion. The critic reviews the start picture before the clip | The sheets did their work in the start picture. More pictures and 5,000 characters of facts let the model compose another shot |
 | C32 | A fact from the person's brief is protected: the lead cannot remove or change it to pass a review, and the critic judges each fact against it                                                                                                        | The lead turned a tall lord into one of the hero's height to pass a review                                                     |
@@ -523,7 +523,7 @@ The cause in one sentence: the lead spent money first and learned later; the fac
 ## Calibrate (C28)
 
 - The plan review names the easiest and the hardest shot. After the plan passes, a start picture or a clip of any other shot fails with `calibrate-first` until both have a reviewed clip.
-- When the critic refuses a calibration clip, the lead records the cause and the form that works with `record_lesson`. The plan keeps the list. The harness adds "Lessons of this film: ..." after the art direction to each later picture and video prompt of the project. Another shot waits with `lessons-missing` until each refused calibration shot has a lesson.
+- When the critic refuses a calibration clip, the lead records the cause and the form that works with `record_lesson`. The plan keeps the list. Since WP73 (C39), no lesson goes into a prompt: the lead reads the lessons in the answer of `record_lesson`, in `get_work`, in `get_shot_brief`, and in the answer of each picture or clip call of a shot, and writes what applies into its own prompt. Another shot waits with `lessons-missing` until each refused calibration shot has a lesson.
 - A lesson whose cause repeats becomes a known limit (`is_limit`).
 
 ## Likeness (C29)
@@ -539,7 +539,7 @@ The cause in one sentence: the lead spent money first and learned later; the fac
 ## The start picture decides the clip (C31)
 
 - A video call with a first frame sends that picture as its only picture. The harness adds no sheet pictures to it, and refuses a call that gives `reference_asset_ids` with `first_frame_asset_id` (`first-frame-only`). The Gemini server refuses the same pair, and sends the first frame (and a last frame when given) with `task: image_to_video`. The fal server already sends a first frame to the image to video endpoint of each model and refuses references with it. "Details of WP68" records each model.
-- The prompt of such a call is short and about motion: what moves in time order, the camera, and what stays still. The harness adds no cast facts and no art direction to it, because the picture carries the look. It adds only the lessons (C28) and one sentence: "The first picture is the exact first frame of one continuous shot with no cut; keep its framing, its characters, and its place." A video prompt over 1,500 characters gets a warning in the result and in `set_story_plan`.
+- The prompt of such a call is short and about motion: what moves in time order, the camera, and what stays still. The picture carries the look. Since WP73 (C40), the harness adds nothing to it: no lesson and no sentence about the first frame. A video prompt over 900 characters gets a note in the result and a warning in `set_story_plan`.
 - `review_start` has the critic check a start picture before its clip: the start state of the plan (each person and prop, its screen side, its facing, its hand), the framing of the shot (size, angle), each sheet, plain anatomy and hands, the known limits (a small target framed large, hands large or out of the frame), and every visible part. Blocking faults and notes, as in C24. A clip call fails with `start-not-reviewed` or `start-failed-review` until its first frame passed. A refused start picture is a refused try of the shot (C25).
 - The measured `does-not-start-on-the-start-picture` (a whole difference over 10, WP66) refuses a keep and a cut of a clip with a first frame: a correct call starts on it.
 - A model with a first and a last frame could take a reviewed end picture made from the end state of the plan. That is a follow-up, not this package.
@@ -804,6 +804,158 @@ These facts and choices came from the build of WP72 on 2026-11-25.
 23. One by one: the request asked for one tool call in each step. The lead called `generate_asset` and `review_start` for each shot in turn. 72.3 seconds.
 24. In both runs the critic failed each start picture, because the sample server draws the prompt as text on a plain color, so no clip ran (`start-failed-review`). The measured gain is the critic turns of 4 shots: 46.5 against 72.3 seconds. With a real video service each clip waits 60 to 120 seconds, and the clips of free shots now overlap too; that gain is an inference, not measured here.
 
+## What the models got in the sixth run
+
+On 2026-11-25 the owner asked to see what yumekit sent to the video model. He asked if the model or our instructions were bad. The builder of WP73 read the source record of each asset of the run `trailer-v3` and the lessons of its plan. A record keeps the prompt that the harness sent. Only the sentence of a camera move is missing from it, because the record keeps the move as the id `camera_move`.
+
+| Prompt  | Calls | The lead wrote (median) | yumekit added (median, largest) | What yumekit added                                                                                  |
+| ------- | ----- | ----------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Clip    | 27    | 640 characters          | 1,602, 1,893, and a camera move | The first frame sentence, all 7 lessons of the film, and the sentence of `static` (25 clips)        |
+| Picture | 55    | 869 characters          | 6,232, 8,198                    | The art direction (55 pictures), a sentence with the facts of each cast entry, and all lessons (37) |
+
+A close shot of a blade on a stone shoulder got "For the crawler on all fours, state where each of its two hands is". A lesson is advice to the lead on how to write a prompt. Most lessons name other characters and other actions than the shot. So this part of the instructions was bad, and the model got text about other shots.
+
+The owner then set the rule for all additions, in his words: "Why can't the lead be instructed to add it? it can be a skill for the lead that tells it to provide all useful information to ensure cohesion and consistency, why do we need to have a dumb blanket rule?" He also said: "trusting the lead is what is important".
+
+## Decisions of WP73
+
+| Id  | Decision                                                                                                                                                                                                 | Why                                                                                     |
+| --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| C39 | A lesson never goes into a prompt for a picture or video model. It goes to the lead only, outside the prompt                                                                                             | A lesson is advice to the lead, and most lessons concern other shots                    |
+| C40 | yumekit adds nothing to a prompt for a picture, video, or music model. The model gets the prompt of the lead byte for byte. `get_shot_brief` gives the lead what a complete prompt needs                 | Trust the lead. A model knows only its prompt and its pictures, so the lead writes both |
+| C41 | The person can read every request. The view "Requests" in Files lists each media call of the project, also a failed one. `list_media_requests` gives the lead the same list                              | The owner could not see what a model got, or why a call failed                          |
+| C42 | A limit that the person sets in Settings belongs to the project. The engine writes it to the `media-tools.json` of the open project                                                                      | A run lost its limits when its private configuration folder was removed                 |
+| C43 | No test can reach a paid service. One guard in each test project removes the media keys, gives each test file an empty configuration folder, and fails a request to a host that is not local or declared | A test inherited `OPENAI_API_KEY` from the shell and picked the `openai` server         |
+
+## Lessons for the lead only (C39)
+
+- The answer of `record_lesson` lists each lesson of the film in `lessons_for_you` and as numbered lines. It says that yumekit sends no lesson to a model.
+- `get_work` says the same before its list of lessons.
+- `get_shot_brief` lists the lessons too.
+- A picture or clip call with `shot_id` answers with the block "Lessons of this film, for you" and `lessons_for_you`. The lead decides which lesson concerns the shot.
+- This replaces the lessons in prompts of C28. Calibration and `lessons-missing` stay.
+
+## A prompt as written (C40)
+
+- `generate_asset` sends `input.prompt` as the call gives it. For the first try, it sends the prompt of the plan (C22).
+- The harness adds no art direction, no sentence of the cast, no lesson, and no sentence about the first frame. It adds no camera sentence, no restriction, and no plan note. A defect that changes the prompt throws.
+- The answer gives `prompt_from_you` (the prompt for the model) and `prompt_characters`. Its line says: "The prompt for the model is exactly as you wrote it".
+- A video prompt over 900 characters gets a note with its length in the answer, and a warning in `set_story_plan`. It is not a refusal.
+- `get_shot_brief` takes `shot_id`, and the `server` and `model` of the clip. It gives the facts of that shot only:
+  - the action, the camera, the start state, and the end state;
+  - the art direction;
+  - each person, place, and prop of the shot, with its description, facts, brief facts, restrictions, plan notes, and sheet pictures;
+  - the plan notes of the shot, and the prompts of the plan;
+  - the lessons, and the known limits that the plan check named for the shot (each known limit before a plan check);
+  - the limits of the picture model and the video model in use: a first frame, a last frame, references, and the lengths.
+- `get_work` points to `get_shot_brief`.
+- Four texts tell the lead how to write. They are rule 41 of the AI instructions, step 6 of the server instructions, the story guide, and the skill. They say:
+  - Write each prompt complete and self-contained.
+  - The model knows nothing but the prompt and its pictures.
+  - State the look of every character and of the place in your own words when the picture does not carry it.
+  - Keep a video prompt short and about this shot only.
+- The checks of a result do not change: the start picture against its sheets, and the clip against its first frame.
+
+## The record of requests (C41)
+
+- `@yumekit/tools` records each call of `MediaTools.run` in `<project>/.yumekit/requests.json`, next to the record of paid calls.
+- The record holds a call that a service made or failed. It also holds a call that the spending limit or a missing key refused.
+- The harness records a clip that its video seconds limit refused, with `MediaTools.recordRefusal`.
+- A refusal of a rule of the story (a plan check, a review) is not a media call. The record does not hold it.
+- `MediaTools.requests()` gives the records, the newest first. `GET /api/media/requests` gives them to the editor.
+- `list_media_requests` gives the lead the newest 20, or `count` up to 50. `failed_only` gives only the failed ones.
+- The view "Requests" is a tab of the Files view. Files lists what each call made. Requests lists the calls that made it and the calls that failed, so the two belong together. The Story view shows only the shots of a story film, and most requests (voice, music, sheets) are not shots.
+
+## Limits of the project (C42)
+
+- `MediaTools.setLimits` writes `limits` of `<project>/media-tools.json`, and keeps each other field of the file.
+- Before, it wrote the user file. A limit of a project file wins over the user file, so the field of Settings could do nothing.
+- The user file still gives the limit of a new project, and the person edits it by hand. Settings names each limit "in this project".
+
+## The test guard (C43)
+
+- The guard is in `packages/tools/src/testing/guard`.
+- `globalSetup.ts` runs once for a test project:
+  1. It points `YUMEKIT_CONFIG_DIRECTORY` at an empty temporary folder.
+  2. It starts each server of `tools/` from its source, and reads the `keys` of its description.
+  3. It removes each of those variables from the environment.
+- `nodeTestGuard.ts` runs before each test file. It removes the keys again, and gives the file its own empty configuration folder. A test that sets the folder itself wins. It also replaces `fetch`.
+- `browserTestGuard.ts` replaces `fetch` in the browser projects.
+- The guarded `fetch` lets through 127.0.0.1, `localhost`, `::1`, the page of a browser test, and each host that a test declares with `allowTestHosts`.
+- Any other request fails with "A test asked for <address>. No test may reach a real service". The test then fails, also when the code under test caught the failure.
+- A media server runs as its own process, where the guarded `fetch` does not reach. That server gets no key: the keys are gone from the environment, and the configuration folder has no key file. A hosted server checks its key before a request.
+
+## Work package WP73
+
+| Id   | Scope                                                                                                                                       | Needs      |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| WP73 | Lessons and every other addition out of prompts, the shot brief, the record and the view of requests, limits of the project, the test guard | WP72, WP64 |
+
+## Details of WP73
+
+These facts and choices came from the build of WP73 on 2026-11-25.
+
+### What yumekit no longer adds
+
+1. Each addition that WP73 removed, and where it was:
+
+   | Addition                                                                                   | Where it was                                                           | For                                                                           |
+   | ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+   | "Lessons of this film: ..."                                                                | `withPromptAdditions` in `storyPlan/promptAdditions.ts` of the harness | Each picture and clip of a project with a lesson                              |
+   | "Art direction: <style>."                                                                  | The same function                                                      | Each picture, and each clip with no first frame                               |
+   | "The first picture is the exact first frame of one continuous shot with no cut; ..." (C31) | The same function                                                      | Each clip of a shot with a first frame                                        |
+   | "<name>: <description>. Fixed: <fact>; <fact>." for each cast entry (C3)                   | `withCast` in `cast/castRequest.ts`                                    | Each picture, and each clip with no first frame, with `cast_ids` or `shot_id` |
+   | The sentence of the camera move (document 16, N2)                                          | `inputWithCameraMove` in `media/videoChoices.ts`                       | Each clip with `camera_move`                                                  |
+   | The camera move of the plan as `camera_move` of the call, and so its sentence              | `shotRequestOf` in `storyPlan/shotRequest.ts`                          | Each clip of a shot whose call gave no `camera_move`                          |
+
+2. Restrictions and plan notes were never in a prompt. They go to the critic and to the plan check, and now to `get_shot_brief`.
+3. Some parts of a call stay, because they are not text in the prompt:
+   - the sheet pictures of `cast_ids` and of the cast of a shot, as reference pictures of a picture call. The pictures of the call go first, up to the maximum of the model;
+   - the refusal `first-frame-only`;
+   - the strongest model for a sheet and a start picture (C27);
+   - `camera_move`, as a record of the move.
+4. The editor writes the sentence of a camera move into its own prompt when the person picks a move in "Make a real video clip". The person picked the move, so the sentence is part of the prompt of the person. When the sheet opens on a clip again, it shows the prompt without that sentence and picks the move.
+5. Two servers of yumekit still wrap a prompt, because their service needs it:
+   - The Codex picture server gives the Codex program an order around the prompt. The order says: make one picture and run no other tool. It gives the shape and the references, and then "Picture: <prompt>".
+   - The Gemini music server adds the length and the instrumental sentence from its settings, because Lyria takes the length only in the prompt.
+
+   Neither adds a fact, a lesson, or a style. They are not in `prompt_from_you`, because the harness does not see them.
+
+### The parts
+
+6. The harness of the engine has 75 tools, and the lead sees 70. `get_shot_brief` and `list_media_requests` are new, and both are read-only.
+7. The record file is `{ "requests": [...] }`, with sorted keys, 2 spaces, and a final newline (document 03). Each record has these fields:
+
+   | Field                    | Meaning                                                             |
+   | ------------------------ | ------------------------------------------------------------------- |
+   | `at`, `seconds`          | When the call started, and how long it ran                          |
+   | `capability`, `asset_id` | What the call made, and the asset id of the call                    |
+   | `shot_id`                | The shot of the call, when it names one                             |
+   | `server`, `model`        | The service and the model                                           |
+   | `prompt_from_you`        | The `prompt` of the call, or the `text` of a voice                  |
+   | `pictures`               | Each picture sent, with `role` and `file` (the path in the project) |
+   | `settings`               | Each other input with a plain value, such as `duration_seconds`     |
+   | `usd`, `basis`           | The cost of a charged call                                          |
+   | `files` or `failure`     | The files made, or the `kind` and the text of the failure           |
+
+8. The role of a picture is `first-frame`, `last-frame`, `reference`, or `media`. The record never holds a header.
+9. A server can echo its key in a failure. So the tools write `[<VARIABLE>]` in place of the value of each key that a server declares, in the prompt and in the failure text.
+10. The record keeps the newest 500 requests.
+11. When the record file is not valid, `MediaTools.requests()` fails with `request-log-not-valid`. yumekit then adds nothing to it until the person removes the file. Media calls still run: the record is for the person, and no money depends on it.
+12. A call to a service that does not exist (`server-not-found`) keeps the name that the call gave. When the usage limit of a plan refuses a call and yumekit sends it to another service, the record holds two requests.
+13. The view shows each request as a card:
+    - "Made" or "Failed", the kind in words, the asset id, the shot, and the time;
+    - the service and the model, the cost ("Free", "Not charged", or "About $0.40"), how long it ran, and the settings in words;
+    - each picture sent, with its role ("Start picture", "Reference");
+    - the prompt with its length, in four lines with "Show the whole prompt";
+    - the file made, or the failure text with its kind.
+14. "Only the failed ones" filters the list. The view reloads when the work of the AI changes.
+
+### Follow-ups
+
+15. A paid check that a start picture prompt from `get_shot_brief` holds the sheets as well as the old additions did. The critic of the start picture catches a weak prompt before its clip.
+16. A choice in Settings to keep more than 500 requests.
+
 ## What went wrong in the sixth run
 
 On 2026-11-25 a real run of 13 hours made a 35 second anime trailer. The plan of that run was a list of 14 shots with no story behind them. The owner rejected the film. His words:
@@ -854,7 +1006,7 @@ The product principle of the owner for this package: trust the lead, give it ful
 
 ## The person approves the story (C48)
 
-- Rule 41 of the instructions of the AI and step 6 of the server instructions: after `set_story`, end the turn, show the story in plain words, and ask for a yes or changes. A request to make a film is not a yes to its story. Skip the question only when the request says in words to go ahead without asking.
+- Rule 42 of the instructions of the AI and step 6 of the server instructions: after `set_story`, end the turn, show the story in plain words, and ask for a yes or changes. A request to make a film is not a yes to its story. Skip the question only when the request says in words to go ahead without asking.
 - `get_work`, the answer of `set_story`, and a note of `set_story_plan` say when the person has not said yes yet. No tool refuses for it.
 
 ## Story first in the guide and the skill (C49)
@@ -880,7 +1032,7 @@ These facts and choices came from the build of WP74 on 2026-11-25.
 
 ### The parts
 
-1. The harness of the engine has 74 tools, and the lead sees 69: `set_story` is new. The project has no new edit kind: the story, the form, the story facts, and the hits go through `setBible`.
+1. The harness of the engine has 76 tools, and the lead sees 71: `set_story` is new. The project has no new edit kind: the story, the form, the story facts, and the hits go through `setBible`.
 2. The kit already had `title-card`: an opening title with an accent circle that grows in and left aligned words that rise in. It does not fit a cinematic card, and a mode that changes all of its drawing would be two scenes in one. So the new scene is `trailer-card`, and `variant: "title"` is its larger form. The kit has 27 scenes.
 3. The props of `trailer-card`: `lines` (1 or 2, at most 60 characters each), `variant` (`card` or `title`), `face` (`display` or `body`), `scale` (0.5 to 2), `tracking` (0 to 0.6 em; 0.28 for a card and 0.14 for a title by default), `capitals` (true by default), `color`, `background` (`black` or `look`), `backgroundAssetId` (a picture or a video, shown from its start and darkened by 62 percent), `landsOnBeat` (0 to 16), `holdSeconds`, `flash`, and `storyFact`, which does not draw.
 4. The motion: the words fade in over 0.12 seconds from their beat. They push from 1 to 1.05 times their size until the end of the hold, and a still behind them pushes from 1.04 to 1.10 times over the clip. At the end of the hold the words cut to black with no fade. The flash is one frame of warm white (#f2eee6) on the frame where the words land. A calm look has no push and no flash. A clip too short for its beat brings the words in sooner, as each kit scene does, so a clip of one frame shows them.
@@ -893,7 +1045,7 @@ These facts and choices came from the build of WP74 on 2026-11-25.
 11. A spoken line has no field of its own. The story fact of its shot covers it. A shot whose start picture prompt or video prompt has words in quotes and no story fact gets a note. This is a word test, so it is a note.
 12. `put_cast_member` notes a person with no `story_character_id` when the project has a story, and a link to an id that is not a character or the opposing force of the story.
 13. The key of the plan check does not hold `form` or `story_fact`, because they do not change a picture. The critic of the plan does not see the story yet.
-14. The instructions of the AI get rule 41. The server instructions name `trailer-card` in step 3, and `set_story`, the question to the person, the form, the story fact, and the cards on the hits in step 6. `list_kit_scenes` names `trailer-card` for a trailer.
+14. The instructions of the AI get rule 42 (rule 41 is the one of WP73). The server instructions name `trailer-card` in step 3, and `set_story`, the question to the person, the form, the story fact, and the cards on the hits in step 6. `list_kit_scenes` names `trailer-card` for a trailer.
 
 ### The real check
 

@@ -7,7 +7,7 @@ export const firstCutSection = [
   "- The first try of a sheet or a shot sends the reviewed prompt: leave out input.prompt and the harness uses it.",
   "- Each fault of the critic is blocking or a note. Only a blocking fault refuses: a doubled object, a wrong side, a wrong count in the frame, a missing planned action, a broken body, merged fingers that a viewer sees, a missed contact, an effect with no source, a likeness to a known design. A note is a difference that a viewer would not see.",
   "- Tries: after one refusal, the second try starts from the refused version (the refused picture in reference_asset_ids, or the start picture of the refused clip) and changes only the named faults. After two, one simplified try with simpler_form. After three, keep the best sheet with restrictions on its cast entry, restage or drop the shot, or ask the person.",
-  "- After the plan passes, make the sheets, then the easiest and the hardest shot of the plan check. Record the cause of each refusal with record_lesson: the harness adds each lesson to every later prompt. Then make the rest in film order.",
+  "- After the plan passes, make the sheets, then the easiest and the hardest shot of the plan check. Record the cause of each refusal with record_lesson. yumekit sends no lesson to a model: write what applies into the prompts of the next shots. Then make the rest in film order.",
   "- A refused shot does not stop the film: the next shot starts from the start state of the plan. Restage or drop the refused one later.",
   "- Sheets and start pictures use the strongest picture model of the service unless the person picked one: every later picture copies them.",
   "",

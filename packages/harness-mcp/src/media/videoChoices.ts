@@ -1,6 +1,6 @@
 import {
   cameraMoveIds,
-  findCameraMove,
+  isCameraMoveId,
   type JsonObject,
 } from "@yumekit/project";
 import type { MediaTools } from "@yumekit/tools";
@@ -21,29 +21,20 @@ function notForVideo(options: {
   };
 }
 
-function inputWithCameraMove(
+function checkedCameraMove(
   request: GenerateAssetInput,
 ): Outcome<JsonObject, HarnessFailure> {
   const { camera_move: cameraMoveId, input } = request;
-  if (cameraMoveId === undefined) return { ok: true, value: input };
-  const cameraMove = findCameraMove(cameraMoveId);
-  if (cameraMove === undefined) {
-    return {
-      ok: false,
-      failure: {
-        kind: "camera-move-not-found",
-        message: `yumekit has no camera move "${cameraMoveId}".`,
-        hint: `Use one of these camera moves: ${cameraMoveIds.join(", ")}. Or leave out camera_move.`,
-      },
-    };
+  if (cameraMoveId === undefined || isCameraMoveId(cameraMoveId)) {
+    return { ok: true, value: input };
   }
-  const prompt = input["prompt"];
   return {
-    ok: true,
-    value:
-      typeof prompt === "string"
-        ? { ...input, prompt: `${prompt}\n\n${cameraMove.sentence}` }
-        : input,
+    ok: false,
+    failure: {
+      kind: "camera-move-not-found",
+      message: `yumekit has no camera move "${cameraMoveId}".`,
+      hint: `Use one of these camera moves: ${cameraMoveIds.join(", ")}. Or leave out camera_move.`,
+    },
   };
 }
 
@@ -94,5 +85,5 @@ export async function videoInputOf(options: {
   if (lastFrameFailure !== undefined) {
     return { ok: false, failure: lastFrameFailure };
   }
-  return inputWithCameraMove(request);
+  return checkedCameraMove(request);
 }

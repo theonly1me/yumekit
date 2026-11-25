@@ -7,10 +7,9 @@ import {
   shotCall,
   startStoryHarness,
 } from "../testing/storyFixture.js";
-import { firstFrameSentence } from "./promptAdditions.js";
 
 describe("a clip that starts on its start picture", () => {
-  it("sends the start picture as the only picture, with the short motion prompt and no sheets, facts, or art direction", async () => {
+  it("sends the start picture as the only picture, and the prompt byte for byte with no sheets, facts, or art direction", async () => {
     const harness = await startStoryHarness({ videoStyle: "ai-video" });
     await harness.call({
       name: "set_bible",
@@ -42,7 +41,7 @@ describe("a clip that starts on its start picture", () => {
     expect(clip.isError).toBe(false);
     expect(sent["first_frame_path"]).toContain("start.png");
     expect(sent).not.toHaveProperty("reference_image_paths");
-    expect(sent["prompt"]).toBe(`strike clip\n\n${firstFrameSentence}`);
+    expect(sent["prompt"]).toBe("strike clip");
   });
 
   it("needs a passed review of the start picture before its clip, and warns about a long video prompt in the plan", async () => {
@@ -71,7 +70,7 @@ describe("a clip that starts on its start picture", () => {
     });
 
     expect(plan.text).toContain(
-      'The video prompt of shot "strike" has 1700 characters. Keep it under 1500',
+      'The video prompt of shot "strike" has 1700 characters. Keep it under 900',
     );
     expect(clip.data).toMatchObject({ kind: "start-not-reviewed" });
   });

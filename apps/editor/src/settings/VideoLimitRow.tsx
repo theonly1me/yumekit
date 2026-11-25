@@ -70,7 +70,7 @@ export function VideoLimitRow(props: {
   return (
     <div className="setting-row">
       <label className="setting-name" htmlFor={fieldId}>
-        AI video in each project
+        AI video in this project
         <em>
           A video model stops when the project reaches this limit. 0 turns real
           video off. The change applies at once.

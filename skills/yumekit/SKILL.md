@@ -58,6 +58,16 @@ For a story film (a trailer, a short, an anime), write the story before any shot
 
 An example. The story: in a village where a bell under the frozen lake rings once before each death, a girl who hears it ring for her grandfather goes under the ice to silence it; the keeper of the bell rings it so that nobody dies without a goodbye. The trailer: the girl and her grandfather pull a net from the ice (the world as it was); the card "Every winter, the lake keeps one sound"; frost spreads from under her boot (the break); the card "Tonight it rang for him"; she takes the ice saw from the wall (the stakes); three short moments under the ice (the rise); the title on the biggest hit. It never shows the face of the keeper or how the story ends.
 
+## Prompts for a picture, video, or music model
+
+yumekit sends each prompt exactly as you write it, and adds nothing. The model knows nothing but your prompt and the pictures it gets.
+
+- Write each prompt complete and self-contained.
+- State the look of every character and of the place in your own words when the picture does not already carry it.
+- Keep a video prompt short (under 900 characters) and about this shot only.
+- For a shot of a story plan, read `get_shot_brief` first. It gives the art direction, the facts of the cast and the place, the sheets to pass as references, the plan notes, the lessons, the known limits, and the limits of the model.
+- Each answer of `generate_asset` gives the prompt as sent. `list_media_requests` lists every request, also the failed ones.
+
 ## Keys
 
 - The AI needs no key. yumekit uses the sign-in of the agent program.

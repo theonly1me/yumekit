@@ -26,6 +26,7 @@ export default defineProject({
   test: {
     name: "scene-browser",
     include: ["src/**/*.browser.test.tsx"],
+    setupFiles: ["../tools/src/testing/guard/browserTestGuard.ts"],
     browser: {
       enabled: true,
       headless: true,

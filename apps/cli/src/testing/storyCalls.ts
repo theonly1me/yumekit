@@ -83,6 +83,7 @@ export const storyCalls: ScriptedCall[] = [
     name: "record_lesson",
     input: { lesson: "Keep the paw large", cause: "The paw missed" },
   },
+  { name: "get_shot_brief", input: { shot_id: "dawn" } },
 ];
 
 export const reviewCalls: ScriptedCall[] = [

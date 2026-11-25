@@ -1,3 +1,4 @@
+import { lazy, Suspense, useState } from "react";
 import type { StepViewProps } from "../frame/stepViewProps.js";
 import { StatusLine } from "../sound/StatusLine.js";
 import { useMediaServers } from "../../tools/useMediaServers.js";
@@ -10,8 +11,47 @@ import "./filesView.css";
 const projectFileTypes =
   "image/*,audio/*,video/*,.svg,.mp3,.wav,.m4a,.mp4,.mov,.woff2,.woff,.ttf,.otf";
 
+const RequestsView = lazy(() =>
+  import("./requests/RequestsView.js").then((module) => ({
+    default: module.RequestsView,
+  })),
+);
+
+type FilesTab = "files" | "requests";
+
+function FilesTabs(props: {
+  tab: FilesTab;
+  fileCount: number;
+  onTab: (tab: FilesTab) => void;
+}) {
+  const tabs: { id: FilesTab; label: string }[] = [
+    { id: "files", label: "Files" },
+    { id: "requests", label: "Requests" },
+  ];
+  return (
+    <div className="files-tabs" role="tablist" aria-label="Files and requests">
+      {tabs.map((tab) => (
+        <button
+          key={tab.id}
+          type="button"
+          role="tab"
+          className="tab"
+          aria-selected={props.tab === tab.id}
+          onClick={() => {
+            props.onTab(tab.id);
+          }}
+        >
+          {tab.label}
+          {tab.id === "files" ? <span>{props.fileCount}</span> : undefined}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export function FilesView(props: StepViewProps) {
   const { client, snapshot, locked } = props;
+  const [tab, setTab] = useState<FilesTab>("files");
   const media = useMediaServers(client);
   const groups = fileGroupsOf({
     snapshot,
@@ -35,8 +75,37 @@ export function FilesView(props: StepViewProps) {
     },
   };
 
+  const fileCount = groups.reduce(
+    (...[count, group]) => count + group.rows.length,
+    0,
+  );
+  const tabs = <FilesTabs tab={tab} fileCount={fileCount} onTab={setTab} />;
+  if (tab === "requests") {
+    return (
+      <div className="files-part">
+        {tabs}
+        <Suspense
+          fallback={
+            <p className="fact lead" role="status">
+              Loading the requests.
+            </p>
+          }
+        >
+          <RequestsView
+            client={client}
+            assets={snapshot.assets}
+            servers={
+              media.state.kind === "ready" ? media.state.servers : undefined
+            }
+          />
+        </Suspense>
+      </div>
+    );
+  }
+
   return (
     <div className="files-part">
+      {tabs}
       {groups.length === 0 ? (
         <p className="fact lead">
           This video has no files yet. Add a picture, a sound, a video clip, or

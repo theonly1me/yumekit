@@ -30,7 +30,7 @@ function reviewOf(options: { harness: Harness; shotId: string }) {
 }
 
 describe("the tries of a shot", () => {
-  it("calibrates on the easiest and the hardest shot, turns a refusal into a lesson for later prompts, and does not block the next shot", async () => {
+  it("calibrates on the easiest and the hardest shot, turns a refusal into a lesson for the lead and never for the model, and does not block the next shot", async () => {
     const harness = await startStoryHarness({
       videoStyle: "ai-video",
       critic: {
@@ -79,11 +79,13 @@ describe("the tries of a shot", () => {
     expect(early.data).toMatchObject({ kind: "calibrate-first" });
     expect(unlearned.data).toMatchObject({ kind: "lessons-missing" });
     expect(next.isError).toBe(false);
-    expect(prompt).toEqual(
-      expect.stringContaining(
-        "Lessons of this film: Keep the anvil large in the frame.",
-      ),
+    expect(prompt).toBe("quench clip");
+    expect(next.text).toContain(
+      "1. Keep the anvil large in the frame (from shot strike)",
     );
+    expect(next.data["lessons_for_you"]).toEqual([
+      expect.objectContaining({ lesson: "Keep the anvil large in the frame" }),
+    ]);
     expect(again.data).toMatchObject({ verdict: "keep", stored: true });
     expect(harness.criticLog.briefs).toHaveLength(briefs);
     expect(work.text).toContain(

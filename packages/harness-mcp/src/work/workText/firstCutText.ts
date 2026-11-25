@@ -5,6 +5,7 @@ import {
   type ProjectSnapshot,
   type StoryPlan,
 } from "@yumekit/project";
+import { lessonsNotSentLine } from "../../storyPlan/lessonsForYou.js";
 import { planMembersOf } from "../../storyPlan/planKey.js";
 import { isPlanCheckUsedUp } from "../../critic/plan/openPlanFaults.js";
 import { isPlanReviewCurrent } from "../../storyPlan/planGate.js";
@@ -83,6 +84,9 @@ function reviewLine(options: {
   return `Plan check: ${verdict}. Difficulty 1 to 5: ${difficulty}. Easiest "${review.easiestShotId}", hardest "${review.hardestShotId}": make them first.${review.notes.length === 0 ? "" : ` Notes: ${review.notes.join("; ")}.`}`;
 }
 
+export const shotBriefLine =
+  "Prompts: yumekit sends each prompt as you write it and adds nothing. Before the start picture and the clip of a shot, read get_shot_brief, and write a complete prompt in your own words.";
+
 export function firstCutLines(options: {
   snapshot: ProjectSnapshot;
   plan: StoryPlan;
@@ -90,6 +94,10 @@ export function firstCutLines(options: {
   const lessons = options.plan.lessons ?? [];
   return [
     reviewLine(options),
+    shotBriefLine,
+    ...(lessons.length === 0
+      ? []
+      : [`Lessons, for you: ${lessonsNotSentLine}`]),
     ...lessons.map(
       (...[lesson, index]) =>
         `Lesson ${String(index + 1)}${lesson.isLimit ? " (a limit)" : ""}: ${lesson.text} (cause: ${lesson.cause})`,

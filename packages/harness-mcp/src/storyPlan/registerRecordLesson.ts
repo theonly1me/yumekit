@@ -2,6 +2,11 @@ import { z } from "zod";
 import { applyEditsResult } from "../applyEditsResult.js";
 import type { HarnessContext } from "../context.js";
 import { failureResult } from "../results.js";
+import {
+  lessonLinesOf,
+  lessonRecordsOf,
+  lessonsNotSentLine,
+} from "./lessonsForYou.js";
 
 const recordLessonInput = {
   lesson: z
@@ -37,7 +42,7 @@ export function registerRecordLesson(context: HarnessContext): void {
   context.tools.add({
     name: "record_lesson",
     description:
-      "Record what a refused sheet or clip taught: its cause and the form that works. The harness adds each lesson to every later picture and video prompt of the film, after the art direction. After the calibration shots, each refused one needs a lesson before another shot. With is_limit true, it is also a known limit of the models for this film.",
+      "Record what a refused sheet or clip taught: its cause and the form that works. A lesson is for you, not for a model: yumekit never adds it to a prompt. The answer, get_work, and each later picture or clip call of a shot list the lessons, and you write what applies into your own prompt. After the calibration shots, each refused one needs a lesson before another shot. With is_limit true, it is also a known limit of the models for this film.",
     inputSchema: recordLessonInput,
     run: ({ input }) => {
       const { bible } = context.store.read();
@@ -86,8 +91,15 @@ export function registerRecordLesson(context: HarnessContext): void {
             bible: { ...bible, storyPlan: { ...plan, lessons } },
           },
         ],
-        line: `Lesson ${String(lessons.length)} saved. The harness adds it to each later picture and video prompt.${lesson.isLimit ? " It is also a known limit of this film." : ""}`,
-        data: { lessons: lessons.length },
+        line: [
+          `Lesson ${String(lessons.length)} saved.${lesson.isLimit ? " It is also a known limit of this film." : ""} ${lessonsNotSentLine}`,
+          "Lessons of this film:",
+          ...lessonLinesOf(lessons),
+        ].join("\n"),
+        data: {
+          lessons: lessons.length,
+          lessons_for_you: lessonRecordsOf(lessons),
+        },
       });
     },
   });

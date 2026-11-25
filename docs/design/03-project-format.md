@@ -19,6 +19,7 @@ my-project/
   renders/                      finished files (not in git)
   .yumekit/                     undo history and cache (not in git)
   .yumekit/spending.json        the record of paid calls (document 15, "Details of WP64")
+  .yumekit/requests.json        the record of media requests (document 20, "Details of WP73")
   .cache/                       frame pictures of video assets (not in git)
 ```
 

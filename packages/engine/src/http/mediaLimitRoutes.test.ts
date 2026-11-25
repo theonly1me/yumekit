@@ -37,6 +37,12 @@ function putLimit(options: {
   });
 }
 
+async function fileOf(options: { folder: string }): Promise<unknown> {
+  return JSON.parse(
+    await readFile(join(options.folder, "media-tools.json"), "utf8"),
+  );
+}
+
 function videoOfSeconds(options: { engine: TestEngine; seconds: number }) {
   return callTool({
     ...options.engine,
@@ -51,10 +57,9 @@ function videoOfSeconds(options: { engine: TestEngine; seconds: number }) {
 }
 
 describe("the media limit request", () => {
-  it("saves the limit of real video in the user file, and the next video call uses it with no restart", async () => {
-    const { engine, configurationDirectory } = await startedTestEngine({
-      userMediaTools,
-    });
+  it("saves the limit of real video in the project file, keeps the user file, and the next video call uses it with no restart", async () => {
+    const { engine, configurationDirectory, projectFolder } =
+      await startedTestEngine({ userMediaTools });
 
     const answer = await putLimit({
       engine,
@@ -67,14 +72,12 @@ describe("the media limit request", () => {
       generated_video_seconds: 1,
       spending_usd: 5,
     });
-    expect(
-      JSON.parse(
-        await readFile(
-          join(configurationDirectory, "media-tools.json"),
-          "utf8",
-        ),
-      ),
-    ).toEqual({ ...userMediaTools, limits: { generatedVideoSeconds: 1 } });
+    expect(await fileOf({ folder: projectFolder })).toEqual({
+      limits: { generatedVideoSeconds: 1 },
+    });
+    expect(await fileOf({ folder: configurationDirectory })).toEqual(
+      userMediaTools,
+    );
     expect(bodyOf(tooLong)).toMatchObject({
       isError: true,
       data: { kind: "generated-video-limit-reached", limit_seconds: 1 },
@@ -93,8 +96,8 @@ describe("the media limit request", () => {
     expect(answers.map((answer) => answer.status)).toEqual([400, 400, 400]);
   });
 
-  it("saves a spending limit in US dollars and keeps the video limit", async () => {
-    const { engine, configurationDirectory } = await startedTestEngine({
+  it("saves a spending limit in US dollars in the project file and keeps the video limit", async () => {
+    const { engine, projectFolder } = await startedTestEngine({
       userMediaTools,
     });
 
@@ -105,16 +108,8 @@ describe("the media limit request", () => {
       generated_video_seconds: 30,
       spending_usd: 2.5,
     });
-    expect(
-      JSON.parse(
-        await readFile(
-          join(configurationDirectory, "media-tools.json"),
-          "utf8",
-        ),
-      ),
-    ).toEqual({
-      ...userMediaTools,
-      limits: { generatedVideoSeconds: 30, spendingUsd: 2.5 },
+    expect(await fileOf({ folder: projectFolder })).toEqual({
+      limits: { spendingUsd: 2.5 },
     });
   });
 
@@ -131,14 +126,9 @@ describe("the media limit request", () => {
 
     expect(answer.status).toBe(403);
     expect(bodyOf(answer)).toMatchObject({ kind: "limit-not-for-the-ai" });
-    expect(
-      JSON.parse(
-        await readFile(
-          join(configurationDirectory, "media-tools.json"),
-          "utf8",
-        ),
-      ),
-    ).toEqual(userMediaTools);
+    expect(await fileOf({ folder: configurationDirectory })).toEqual(
+      userMediaTools,
+    );
   });
 
   it("rejects a body with no limit", async () => {
