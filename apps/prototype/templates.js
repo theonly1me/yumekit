@@ -26,15 +26,7 @@ export const templates = [
     guide:
       "A video, about 60 seconds.\nWhat it is about: \nWho it is for: \nThe voice and the music: \nWhat it must show: ",
   },
-  {
-    id: "other",
-    name: "Something else",
-    line: "Say it in your own words. The lead asks what it needs.",
-    usual: "Any length",
-    length: "Let the AI decide",
-    guide: "",
-  },
 ];
 
 export const howToLine =
-  "Give the lead as much detail as you can. It asks you a few questions, then writes the whole story for you to approve before it makes anything.";
+  "Tell the lead as much as you can. It asks you questions, then writes the whole story for you to approve.";

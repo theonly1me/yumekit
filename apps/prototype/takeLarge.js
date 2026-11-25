@@ -37,6 +37,23 @@ function toolsMarkup(item) {
     </div>`;
 }
 
+function simpleMarkup(item) {
+  const older = itemOf(item.replaces);
+  const label =
+    item.kind === "music"
+      ? item.verdict === "approved"
+        ? "In use"
+        : "Use this one"
+      : item.verdict === "declined"
+        ? "Use this one again"
+        : "Don't use this one";
+  return `
+    <div class="simple-actions">
+      <button type="button" data-dont-use data-kind="${item.kind}" aria-pressed="${item.kind === "music" ? item.verdict === "approved" : item.verdict === "declined"}">${label}</button>
+      ${older === undefined ? "" : `<button type="button" class="link" data-compare>Compare with take ${older.take}</button>`}
+    </div>`;
+}
+
 function panelMarkup({ item, take }) {
   const check = whatToCheckOf(item);
   return `
@@ -46,9 +63,9 @@ function panelMarkup({ item, take }) {
       <div class="large-badges">${badgesMarkup({ item, take })}${checkMarkup(item)}</div>
       <p class="lead-note"><span>The lead</span>${escapeText(item.note)}</p>
       ${check === undefined ? "" : `<p class="check-line"><span>What to check</span>${escapeText(check)}</p>`}
-      ${verdictMarkup(item)}
+      ${takes.view.simple === true ? simpleMarkup(item) : verdictMarkup(item)}
       ${commentsMarkup({ item, scope: "large" })}
-      <p class="large-keys">Keys: A approve, D decline, C comment, arrows for the next item, Esc to close.${item.kind === "picture" ? "" : " Space plays, comma and period step one frame."}</p>
+      <p class="large-keys">${takes.view.simple === true ? "Keys: C to write a note, D for Don't use this one, arrows for the next item, Esc to close." : "Keys: A approve, D decline, C comment, arrows for the next item, Esc to close."}${item.kind === "picture" ? "" : " Space plays, comma and period step one frame."}</p>
     </aside>`;
 }
 
@@ -69,7 +86,7 @@ function compareMarkup(item) {
         ${column({ each: older, label: `Take ${older.take}, ${older.verdict}` })}
         ${column({ each: item, label: `Take ${item.take}, new` })}
       </div>
-      <div class="compare-foot">${verdictMarkup(item)}</div>
+      <div class="compare-foot">${takes.view.simple === true ? simpleMarkup(item) : verdictMarkup(item)}</div>
     </div>`;
 }
 

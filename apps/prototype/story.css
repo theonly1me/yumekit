@@ -129,3 +129,24 @@
     gap: 0;
   }
 }
+
+.own-words {
+  justify-self: stretch;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: end;
+}
+
+.own-words input {
+  font-size: var(--step--1);
+}
+
+.work-request {
+  margin: 12px 0 0;
+  padding-left: 14px;
+  border-left: 2px solid var(--line-strong);
+  color: var(--muted);
+  font-size: var(--step--1);
+  white-space: pre-line;
+}

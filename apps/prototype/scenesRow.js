@@ -28,7 +28,7 @@ function addFormMarkup() {
 
 function actionsMarkup(scene) {
   if (scene === undefined) {
-    return `<p class="fact scene-hint">Pick a scene to change it. Drag a scene to move it, also into another chapter. Drag the line between two chapters onto a scene to move the line.</p>`;
+    return "";
   }
   return `
     <div class="scene-actions" role="group" aria-label="Actions for scene ${numberOf(scene.id)}">

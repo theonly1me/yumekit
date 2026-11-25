@@ -56,6 +56,10 @@ export function openTake({ chapterId, number }) {
     openItemId: undefined,
     compareItemId: undefined,
   });
+  if (state.screen === "project") {
+    change({ projectView: "take" });
+    return;
+  }
   change({ sheet: "takes", playing: false });
 }
 

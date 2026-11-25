@@ -81,7 +81,8 @@ function onGridKey(event) {
 }
 
 function onKey(event) {
-  if (state.sheet !== "takes") {
+  const inProject = state.screen === "project" && state.sheet === undefined;
+  if (state.sheet !== "takes" && !inProject) {
     return;
   }
   const overlayOpen =
@@ -94,6 +95,9 @@ function onKey(event) {
     return;
   }
   if (isTyping(event.target)) {
+    return;
+  }
+  if (inProject && takes.view.openItemId === undefined) {
     return;
   }
   const action =

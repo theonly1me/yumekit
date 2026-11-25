@@ -1,4 +1,6 @@
 import { answerLimit } from "./limits.js";
+import { answerQuestion } from "./projectFlow.js";
+import { takes } from "./takesStore.js";
 import { openTake } from "./readySignal.js";
 import { change, escapeText, state, undo } from "./state.js";
 
@@ -7,6 +9,16 @@ function actionMarkup({ entry, index }) {
     return "";
   }
   return `<button type="button" class="entry-action" data-entry-action="${index}">${escapeText(entry.action.label)}</button>`;
+}
+
+function openQuestionMarkup({ entry, index }) {
+  const options = entry.options
+    .map(
+      (option) =>
+        `<button type="button" data-question="${index}" data-option="${escapeText(option)}">${escapeText(option)}</button>`,
+    )
+    .join("");
+  return `<li class="entry ai question-entry" data-open="true"><span class="who">AI</span><div><p>${escapeText(entry.text)}</p><div class="answer-buttons" role="group" aria-label="${escapeText(entry.text)}">${options}</div><form class="own-words" data-own-answer="${index}"><input type="text" placeholder="Or in your own words" aria-label="Your own answer" /><button type="submit">Send</button></form></div></li>`;
 }
 
 function questionMarkup(entry) {
@@ -39,7 +51,9 @@ export function entryMarkup([index, entry]) {
       </li>`;
   }
   if (entry.kind === "question") {
-    return questionMarkup(entry);
+    return entry.answer === undefined
+      ? openQuestionMarkup({ entry, index })
+      : questionMarkup(entry);
   }
   if (entry.kind === "limit") {
     return limitMarkup({ entry, index });
@@ -63,19 +77,52 @@ export function entryMarkup([index, entry]) {
 }
 
 function runAction(action) {
+  const inProject = state.screen === "project";
+  if (action.go === "takes" && inProject) {
+    Object.assign(takes.view, {
+      chapterId: action.chapterId,
+      takeNumber: action.number,
+    });
+    change({ projectView: "take" });
+    return;
+  }
   if (action.go === "takes") {
     openTake({ chapterId: action.chapterId, number: action.number });
     return;
   }
   if (action.go === "chapters") {
-    change({ sheet: undefined, timelineOpen: true });
+    change({ screen: "editor", sheet: undefined, timelineOpen: true });
     document.querySelector(".chapter-row")?.scrollIntoView({ block: "start" });
+    return;
+  }
+  if (inProject) {
+    change({ projectView: action.go });
     return;
   }
   change({ sheet: action.go });
 }
 
 export function bindEntries(element) {
+  element.querySelectorAll("[data-question]").forEach((button) => {
+    button.addEventListener("click", () =>
+      answerQuestion({
+        entry: state.chat[Number(button.dataset.question)],
+        answer: button.dataset.option,
+      }),
+    );
+  });
+  element.querySelectorAll("[data-own-answer]").forEach((form) => {
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const words = form.querySelector("input").value.trim();
+      if (words !== "") {
+        answerQuestion({
+          entry: state.chat[Number(form.dataset.ownAnswer)],
+          answer: words,
+        });
+      }
+    });
+  });
   element.querySelectorAll("[data-entry-action]").forEach((button) => {
     button.addEventListener("click", () =>
       runAction(state.chat[Number(button.dataset.entryAction)].action),

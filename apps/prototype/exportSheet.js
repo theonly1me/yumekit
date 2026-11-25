@@ -1,7 +1,7 @@
 import { chapterLength, minutesText } from "./chapters.js";
-import { fileNameOf, platformOf } from "./data.js";
+import { fileNameOf, platformOf, platforms } from "./data.js";
 import { bindSizes, realText, sizeMarkup } from "./exportSize.js";
-import { escapeText, state, totalSeconds } from "./state.js";
+import { change, escapeText, state, totalSeconds } from "./state.js";
 
 const run = {
   chosen: undefined,
@@ -9,6 +9,7 @@ const run = {
   timer: undefined,
   shown: {},
   part: "film",
+  more: false,
 };
 
 function secondsOfPart() {
@@ -83,8 +84,22 @@ export function renderExportSheet({ element }) {
     <div class="sheet-body">
       <h2 aria-live="polite">${headline()}</h2>
       <p class="fact lead">One file for each place, in its own shape. ${minutesText(secondsOfPart())}, with voice, music, and captions.</p>
-      ${partMarkup()}
       <ul class="export-rows">${state.platformIds.map(rowMarkup).join("")}</ul>
+      <details class="more" ${run.more ? "open" : ""}>
+        <summary>More</summary>
+        <div class="more-body">
+          <h3>What to export</h3>
+          ${partMarkup()}
+          <h3>More places</h3>
+          <div class="segments" role="group" aria-label="More places">${platforms
+            .filter((platform) => !state.platformIds.includes(platform.id))
+            .map(
+              (platform) =>
+                `<button type="button" data-add-place="${platform.id}">${platform.name}</button>`,
+            )
+            .join("")}</div>
+        </div>
+      </details>
       <div class="start-action">
         <button type="button" class="primary large" data-start-export ${count === 0 || busy ? "disabled" : ""}>${busy ? "Exporting" : `Export ${count} ${count === 1 ? "video" : "videos"}`}</button>
         <p class="fact">Files go to the Movies folder on this computer. Nothing is uploaded.</p>
@@ -100,6 +115,16 @@ export function renderExportSheet({ element }) {
     });
   });
   bindSizes({ element, redraw: () => renderExportSheet({ element }) });
+  element.querySelector(".more").addEventListener("toggle", (event) => {
+    run.more = event.target.open;
+  });
+  element.querySelectorAll("[data-add-place]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const platformId = button.dataset.addPlace;
+      run.chosen = [...run.chosen, platformId];
+      change({ platformIds: [...state.platformIds, platformId] });
+    });
+  });
   element.querySelectorAll("[data-part]").forEach((button) => {
     button.addEventListener("click", () => {
       run.part = button.dataset.part;

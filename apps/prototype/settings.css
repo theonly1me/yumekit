@@ -150,3 +150,35 @@ label.own-size {
   color: var(--muted);
   font-variant-numeric: tabular-nums;
 }
+
+details.more {
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+}
+
+details.more > summary {
+  cursor: pointer;
+  font-size: var(--step-0);
+  font-weight: 500;
+  color: var(--muted);
+}
+
+details.more[open] > summary {
+  margin-bottom: 24px;
+  color: var(--text);
+}
+
+details.more > .setting-group + .setting-group,
+.more-body {
+  display: grid;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.more-body {
+  margin-top: 0;
+}
+
+.more-body h3 {
+  font-size: var(--step-0);
+}

@@ -59,7 +59,8 @@ function commentKey({ comment, index }) {
 }
 
 export function commentsMarkup({ item, scope }) {
-  const open = takes.view.commentingId === item.id;
+  const open =
+    takes.view.simple === true || takes.view.commentingId === item.id;
   const rows = [...item.comments.entries()]
     .map(
       ([index, comment]) => `
@@ -82,11 +83,18 @@ export function commentsMarkup({ item, scope }) {
     : `<ul class="comments">${rows}</ul>${composer}`;
 }
 
+function reopenIfSimple(item) {
+  if (takes.view.simple === true && item.verdict === "approved") {
+    item.verdict = "waiting";
+  }
+}
+
 export function bindItem({ element, item, scope }) {
   bindMedia({
     element,
     item,
     onPin: () => {
+      reopenIfSimple(item);
       takes.view.commentingId = item.id;
       takes.view.focusId = `${scope}-comment-${item.id}-${item.comments.length}`;
     },
@@ -136,6 +144,7 @@ export function bindItem({ element, item, scope }) {
       }
       takes.view.focusId = `${scope}-note-${item.id}`;
       takes.drafts.delete(item.id);
+      reopenIfSimple(item);
       addComment({ item, comment: { kind: "note", text: input.value.trim() } });
     });
   element

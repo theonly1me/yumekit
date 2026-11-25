@@ -60,6 +60,13 @@ function tick() {
   notify();
 }
 
+export function stopTake(take) {
+  take.planned -= take.queue.length;
+  take.queue = [];
+  finish(take);
+  notify();
+}
+
 export function startTake({ chapterId, step, makeItems }) {
   const list = takesOf(chapterId);
   const last = list.at(-1);

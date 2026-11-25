@@ -1,46 +1,52 @@
-.start-ask {
-  display: grid;
-  gap: 22px;
+.start-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
-.templates {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
+.template-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: -18px;
 }
 
-button.template {
-  display: grid;
-  gap: 4px;
-  align-content: start;
-  text-align: left;
-  white-space: normal;
-  border-radius: 10px;
-  border-color: var(--line);
-  padding: 14px 14px 12px;
+button.template-chip {
+  padding: 7px 16px;
+  font-size: var(--step-0);
   font-weight: 400;
+  color: var(--muted);
 }
 
-button.template[aria-pressed="true"] {
+button.template-chip[aria-pressed="true"] {
+  color: var(--text);
   border-color: var(--accent);
   box-shadow: inset 0 0 0 1px var(--accent);
 }
 
-.template-name {
-  font-size: var(--step-0);
-  font-weight: 500;
+.prompt-box {
+  position: relative;
+  display: grid;
+  gap: 12px;
+  margin-top: -16px;
+  padding: 16px 18px 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 16px;
+  background: var(--raised);
 }
 
-.template-line {
-  font-size: var(--step--1);
-  color: var(--muted);
-  line-height: 1.35;
+.prompt-box:focus-within {
+  border-color: var(--accent);
 }
 
-.template-usual {
-  font-size: var(--step--2);
-  color: var(--faint);
-  font-variant-numeric: tabular-nums;
+.prompt-box #start-prompt {
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.prompt-box .prompt-foot {
+  justify-content: space-between;
 }
 
 .prompt-zone,
@@ -66,7 +72,7 @@ button.template[aria-pressed="true"] {
 }
 
 .how-to {
-  margin-top: -24px;
+  margin-top: -26px;
   max-width: 62ch;
   padding-left: 12px;
   border-left: 2px solid var(--accent);
@@ -173,10 +179,4 @@ label.add-files input {
 
 .ask-foot .fact {
   margin-right: auto;
-}
-
-@media (max-width: 760px) {
-  .templates {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 }

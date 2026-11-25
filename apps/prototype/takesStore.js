@@ -152,6 +152,23 @@ export function approveRest(take) {
   notify();
 }
 
+export function isMarked(item) {
+  return item.verdict === "declined" || item.comments.length > 0;
+}
+
+export function approveUnmarked(take) {
+  const items = currentItemsOf(take);
+  const music = items.filter((item) => item.section === "music");
+  if (music.length > 0 && !music.some((item) => item.verdict === "approved")) {
+    const [first, ...rest] = music;
+    first.verdict = "approved";
+    rest.forEach((item) => (item.verdict = "declined"));
+  }
+  items
+    .filter((item) => item.verdict === "waiting" && !isMarked(item))
+    .forEach((item) => markVerdict({ item, verdict: "approved" }));
+}
+
 export function addComment({ item, comment }) {
   const later = item.comments.findIndex(
     (other) =>

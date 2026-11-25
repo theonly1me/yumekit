@@ -33,7 +33,7 @@ function actionsMarkup() {
     (candidate) => candidate.id === state.pickedChapterId,
   );
   if (chapter === undefined) {
-    return `<p class="fact">Pick a chapter to rename, split, or join it. Drag a chapter to move it. Drop a scene on a chapter to move the scene there.</p>`;
+    return "";
   }
   const index = state.chapters.indexOf(chapter);
   const scene = pickedScene();

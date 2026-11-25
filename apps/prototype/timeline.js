@@ -115,7 +115,7 @@ export function renderTimeline({ element }) {
     ${barMarkup({ name: "Voice", text: voiceText, on: state.voice.on, kind: "voice-clip" })}
     ${musicMarkup()}
     ${barMarkup({ name: "Captions", text: `${state.captions.choice}, from the voice`, on: state.captions.on, kind: "voice-clip" })}
-    <p class="fact">Drag a chapter or a scene to move it. Drag the edge of a chapter, a scene, or the music to change it. Drag a picture or a clip from Takes onto a scene.</p>`;
+`;
   const lane = element.querySelector("[data-scene-lane]");
   element.querySelectorAll("[data-pick-clip]").forEach((button) => {
     button.addEventListener("click", () => pick(button.dataset.pickClip));

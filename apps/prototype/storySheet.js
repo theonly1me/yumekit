@@ -54,7 +54,7 @@ function chapterMarkup(chapter) {
 }
 
 function footMarkup() {
-  const count = total([...story.comments.values()].map((list) => list.length));
+  const count = storyNoteCount();
   if (story.writing) {
     return `<p class="take-state" data-state="making">The lead writes the story again from your notes.</p>`;
   }
@@ -80,7 +80,15 @@ export function storyIsApproved() {
   return story.approved;
 }
 
-function sendNotes() {
+export function storyNoteCount() {
+  return total([...story.comments.values()].map((list) => list.length));
+}
+
+export function storyIsWriting() {
+  return story.writing;
+}
+
+export function sendStoryNotes() {
   story.writing = true;
   change({});
   setTimeout(() => {
@@ -95,24 +103,29 @@ function sendNotes() {
   }, rewriteMilliseconds);
 }
 
-export function renderStorySheet({ element }) {
-  element.innerHTML = `
-    <article class="story-sheet">
+export function storyArticleMarkup() {
+  return `
       <header class="story-head">
         <p class="fact">The whole story and the script. Round ${story.round}.</p>
         <h2>${filmTitle}</h2>
-        <p class="fact lead">${state.chapters.length} chapters. Click Comment next to any paragraph to tell the lead what to change.</p>
+        <p class="fact lead">${state.chapters.length} chapters. Click a paragraph to tell the lead what to change.</p>
       </header>
-      ${state.chapters.map(chapterMarkup).join("")}
-      <footer class="takes-foot story-foot">${footMarkup()}</footer>
-    </article>`;
+      ${state.chapters.map(chapterMarkup).join("")}`;
+}
+
+function toggleComment({ element, key }) {
+  story.commenting = story.commenting === key ? undefined : key;
+  change({});
+  element.querySelector(`#story-note-${key}`)?.focus();
+}
+
+export function bindStoryArticle(element) {
   element.querySelectorAll("[data-comment-on]").forEach((button) => {
-    button.addEventListener("click", () => {
-      const key = button.dataset.commentOn;
-      story.commenting = story.commenting === key ? undefined : key;
-      change({});
-      element.querySelector(`#story-note-${key}`)?.focus();
-    });
+    const key = button.dataset.commentOn;
+    button.addEventListener("click", () => toggleComment({ element, key }));
+    button.parentElement
+      .querySelector("p")
+      .addEventListener("click", () => toggleComment({ element, key }));
   });
   element.querySelectorAll("[data-story-note]").forEach((form) => {
     form.addEventListener("submit", (event) => {
@@ -127,9 +140,18 @@ export function renderStorySheet({ element }) {
       change({});
     });
   });
+}
+
+export function renderStorySheet({ element }) {
+  element.innerHTML = `
+    <article class="story-sheet">
+      ${storyArticleMarkup()}
+      <footer class="takes-foot story-foot">${footMarkup()}</footer>
+    </article>`;
+  bindStoryArticle(element);
   element
     .querySelector("[data-send-story]")
-    ?.addEventListener("click", sendNotes);
+    ?.addEventListener("click", sendStoryNotes);
   element
     .querySelector("[data-approve-story]")
     ?.addEventListener("click", () => {

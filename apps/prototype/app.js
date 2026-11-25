@@ -2,7 +2,8 @@ import { renderClipSheet } from "./clipSheet.js";
 import { renderExportSheet } from "./exportSheet.js";
 import { renderLowerRows } from "./lowerRows.js";
 import { chapterNumber, progressText } from "./leadWork.js";
-import { enterMaking, renderMaking, stopMaking } from "./making.js";
+import { renderProject } from "./project.js";
+import { showSampleProject, startProject } from "./projectFlow.js";
 import { renderNotes } from "./notes.js";
 import { renderPartSheet } from "./parts.js";
 import { renderPreview } from "./preview.js";
@@ -11,6 +12,7 @@ import { renderSettings } from "./settings.js";
 import { renderSide } from "./side.js";
 import { renderStart } from "./start.js";
 import { change, onChange, state } from "./state.js";
+import { renderStartOptions } from "./startOptions.js";
 import { renderStorySheet } from "./storySheet.js";
 import { renderTakesSheet } from "./takes.js";
 import { seedAdvanced } from "./takesSeed.js";
@@ -22,6 +24,7 @@ const sheets = {
   export: renderExportSheet,
   settings: renderSettings,
   takes: renderTakesSheet,
+  "start-options": renderStartOptions,
   story: renderStorySheet,
   script: renderPartSheet("script"),
   pictures: renderPartSheet("pictures"),
@@ -85,14 +88,8 @@ function render() {
   if (state.screen === "start") {
     renderStart({ element: element("start") });
   }
-  if (state.screen === "making" && entered) {
-    enterMaking();
-  }
-  if (state.screen === "making") {
-    renderMaking({ element: element("making") });
-  }
-  if (state.screen !== "making") {
-    stopMaking();
+  if (state.screen === "project") {
+    renderProject({ element: element("project") });
   }
   if (state.screen === "editor") {
     renderWorkLine();
@@ -114,6 +111,14 @@ function render() {
 document.querySelectorAll("[data-go]").forEach((button) => {
   button.addEventListener("click", () => {
     const [screen, sheet] = button.dataset.go.split(":");
+    if (screen === "new-project") {
+      startProject();
+      return;
+    }
+    if (screen === "project" && sheet === undefined) {
+      showSampleProject();
+      return;
+    }
     if (sheet === "chapters") {
       change({ screen, sheet: undefined, timelineOpen: true, playing: false });
       document
@@ -138,10 +143,13 @@ element("sheet-close").addEventListener("click", () =>
 element("home").addEventListener("click", () =>
   change({ screen: "start", sheet: undefined, playing: false }),
 );
+element("back-to-project").addEventListener("click", () =>
+  change({ screen: "project", sheet: undefined, playing: false }),
+);
 element("ask-jump").addEventListener("click", () => {
   change({ sideTab: "chat" });
   element("side").scrollIntoView({ block: "end" });
-  element("ask-box").focus();
+  element("editor-ask-box").focus();
 });
 element("theme").addEventListener("click", () =>
   setTheme(

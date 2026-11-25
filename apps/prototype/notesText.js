@@ -1,118 +1,116 @@
+export const intro = {
+  title: "Sixth pass: simple by default",
+  text: "You said there are too many controls, and that the lead does most of the work. This pass keeps the look and puts one thing on the screen at a time: the lead at work, the story, a take, or the film. You talk to the lead in the chat, and you say yes or what to change. Everything else is still there, behind Edit by hand and More settings.",
+};
+
 export const changes = [
   [
+    "Start is one box",
+    "Three chips (A trailer, A movie, A video), one prompt box with Add files and Start inside, and one line on how to use the lead. Something else went: an empty prompt is something else. The places and the length moved behind Change. YouTube is the default, and the lead asks about the length.",
+  ],
+  [
+    "The project screen replaces Making",
+    "After Start, the lead asks its questions in the chat, with answer buttons. Then the story shows on the left with Approve the story. Then the chapters, then the pictures arrive as they finish. The step rail (Story, Pictures, Clips, Cut) shows where the chapter is. A past step opens its last take.",
+  ],
+  [
+    "Mark only what is wrong",
+    "A take is a contact sheet of pictures with no boxes and no buttons. Click a picture to see it large, pin a note, or say Don't use this one. A picture with no note counts as approved when you press the one button: Send 2 notes to the lead, or All good. Make the clips, about $2.52.",
+  ],
+  [
+    "The take number is the slate",
+    "Each take starts with its number set large. Earlier takes are a menu next to it. The six filters became one switch: Only new and waiting.",
+  ],
+  [
+    "Where the advanced parts went",
+    "Edit by hand opens the editor: the chapters by drag, the detailed timeline, and the full Takes page with its filters and Approve and Decline on each item. Compare, speeds, frame step, and What to check are in the large view. The editor lost its hint lines and its suggestion chips.",
+  ],
+  [
+    "Settings and Export show the basics first",
+    "Settings shows Who makes the film and Limits for every project. Media services, the checker, and Approve pictures before clips are under More settings. Export shows YouTube and the file size. The chapter choice and more places are under More.",
+  ],
+  [
     "A smaller file on Export",
-    "Each file has a File size choice: Best quality, or Smaller file under 10 MB, under 25 MB, or your own size. The sheet shows the expected size first and keeps the picture size. When the size is too small for the length, one line offers a smaller picture size. A done file shows its real size. You can export the whole film or one chapter.",
-  ],
-  [
-    "Start from a template",
-    'A trailer, a movie, a video, or something else. A template puts a short guide in the prompt, such as "The story:" and "The main characters:". You fill it in. One line tells you to give the lead as much detail as you can.',
-  ],
-  [
-    "Files in the prompt and in the chat",
-    "Drag, drop, or paste pictures, character sheets, places, clips, music, or a story. Each file shows as a chip with a small picture and Remove. Add files does the same with a click.",
-  ],
-  [
-    "The story comes first",
-    "The lead asks its questions first, with answer buttons and room for your own words. Then it writes the whole story and the script. You comment on a paragraph, send your notes, or approve the story.",
-  ],
-  [
-    "Chapters",
-    "A long film is split into chapters, and the lead says so in the chat. Chapters are the top row of the timeline. You drag a scene into another chapter, drag a chapter to move it, and drag the line between two chapters. Rename, split, and join are there too.",
-  ],
-  [
-    "The detailed timeline moves by hand",
-    "Drag a chapter, a scene, or the music. Drag an edge to change a length. Drag a picture or a clip from Takes onto a scene.",
-  ],
-  [
-    "Takes",
-    "Each round of the lead's work is a take: Take 1, Take 2. You approve, decline, pin a point on a picture, mark a moment in a clip, or write a note. Send my notes starts the next take, and the new items show with New. Make the clips opens only when every shot picture is approved.",
-  ],
-  [
-    "Limits for every project",
-    "Settings sets the money and the seconds of real video once, for every project. When the lead reaches a limit, the chat asks: Raise this project, or Keep the limit.",
+    "Best quality, or Smaller file under 10 MB, under 25 MB, or your own size. The sheet shows the expected size first and keeps the picture size. When the size is too small for the length, one line offers a smaller picture size. A done file shows its real size.",
   ],
 ];
 
 export const proposed = [
   [
     "Progress and a ready signal",
-    'The top bar and the Making screen show the step and a count, such as "making 6 of 18 pictures". When a take is ready, a sound, a browser notice, and a line in the corner say so. Why: in the last run you asked for the progress six times.',
+    'The project screen shows "making 6 of 18 pictures" with a thin line. When a take is ready, a sound, a browser notice, and a line in the corner say so.',
   ],
   [
     "The lead's honest note",
-    "Each item has a note from the lead: what it is, and what the lead sees wrong in it. Why: the lead's own list of faults told you where to look.",
+    "In the large view, the lead says what each item is and what it sees wrong in it.",
   ],
   [
-    "A price before each paid step",
-    '"Clips for chapter 2: about $2.52. Make them?" Each take shows its cost and the money that went to declined items.',
+    "A price on the next action",
+    'The one button says what it costs: "All good. Make the clips, about $2.52".',
   ],
   [
-    "The design check as a badge",
-    "Each picture and clip shows the result of the design check. Why: in the last run the lead placed clips with no check of its own.",
+    "The design check",
+    "A failed design check shows as one plain line under the picture. A passed check shows only in the large view.",
   ],
   [
     "What to check",
-    "Each clip and music item has one line that tells you what to watch or hear, because the lead cannot watch motion or hear sound.",
+    "Clips and music tell you what to watch or hear, because the lead cannot.",
   ],
   [
     "Approve pictures before clips",
-    "On by default, with a switch in Settings for a quick draft. Why: you found faults in three rounds of pictures before any money went to clips.",
+    "On by default, under More settings, for a quick draft.",
   ],
 ];
 
 export const screens = [
-  ["Start", "Templates, the prompt with files, where it goes, and how long."],
   [
-    "Making",
-    "The lead's questions, the story, the chapters, then the pictures of chapter 1, with a stop at each step.",
+    "Start",
+    "1 primary (Start). Other: Settings, Add files, Change. The three chips belong to the prompt.",
   ],
   [
-    "Editor",
-    "The film, the chat, and the chapters above the scene cards. Turn on Detailed timeline to drag.",
+    "The project",
+    "1 primary (the next action). Other: Edit by hand, Export, Settings. The step rail and the chapter menu are the place you are in.",
   ],
   [
-    "Story",
-    "The whole story and the script by chapter, with a comment on each paragraph.",
+    "A take",
+    "In the project: the switch and the earlier takes menu, nothing on each picture.",
   ],
-  [
-    "Takes",
-    "Every picture, clip, and music of a chapter, round by round. Click Large view, or press Enter on an item.",
-  ],
-  [
-    "Settings",
-    "Limits for every project, and two switches of how the lead works.",
-  ],
+  ["The large view", "Don't use this one, a note, Previous, Next, Close."],
+  ["Settings", "Who makes the film, Limits, then More settings."],
+  ["Export", "The file size and Export, then More."],
 ];
 
 export const limits = [
   "This is a mock. The lead's answers are fixed, and the pictures are simple drawings.",
   "A clip plays as a slow camera move on its picture. Music plays no sound.",
-  "The Making screen starts a new film. The editor opens on the same film, later, with chapter 2 in review.",
+  "A new project starts at the questions. The project tab opens the same film later, with chapter 2 in review.",
 ];
 
 export const questions = [
+  {
+    text: 'You said "select or decline". Is "mark only what is wrong" right?',
+    words: [
+      ["mark", "A picture with no note counts as approved, as in this mock."],
+      [
+        "each",
+        "You approve or decline each picture, as in the full Takes page.",
+      ],
+    ],
+  },
+  {
+    text: "Where do the lead's questions go?",
+    words: [
+      ["chat", "In the chat, as in this mock."],
+      ["page", "On the left, in place of the work."],
+    ],
+  },
   {
     text: "When you approve a take, what happens next?",
     words: [
       [
         "ask",
-        "The lead shows the price and waits for your yes, as in this mock.",
+        "The button shows the price, and the lead waits for your click, as in this mock.",
       ],
       ["go", "The lead starts the next step at once, inside your limits."],
-    ],
-  },
-  {
-    text: "How does the lead split a long film?",
-    words: [
-      ["chapters", "By story chapters of 1 to 3 minutes, as in this mock."],
-      ["equal", "Into equal parts, for example 2 minutes each."],
-    ],
-  },
-  {
-    text: "Where does Takes live?",
-    words: [
-      ["sheet", "A full page over the editor, as in this mock."],
-      ["tab", "A tab next to the chat."],
     ],
   },
   {

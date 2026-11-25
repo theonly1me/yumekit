@@ -9,7 +9,8 @@
     <link rel="stylesheet" href="tokens.css" />
     <link rel="stylesheet" href="shell.css" />
     <link rel="stylesheet" href="start.css" />
-    <link rel="stylesheet" href="making.css" />
+    <link rel="stylesheet" href="project.css" />
+    <link rel="stylesheet" href="slate.css" />
     <link rel="stylesheet" href="parts.css" />
     <link rel="stylesheet" href="pictures.css" />
     <link rel="stylesheet" href="sound.css" />
@@ -35,25 +36,19 @@
   </head>
   <body>
     <header class="review-bar">
-      <p>Editor design, sixth pass</p>
+      <p>Editor design, sixth pass, simple by default</p>
       <nav class="review-nav" aria-label="Screens to review">
         <button type="button" class="tab" data-go="start">Start</button>
-        <button type="button" class="tab" data-go="making">Making</button>
-        <button type="button" class="tab" data-go="editor">Editor</button>
-        <button type="button" class="tab" data-go="editor:story">Story</button>
-        <button type="button" class="tab" data-go="editor:chapters">
-          Chapters
+        <button type="button" class="tab" data-go="new-project">
+          A new project
         </button>
-        <button type="button" class="tab" data-go="editor:takes">Takes</button>
-        <button type="button" class="tab" data-go="editor:music">Music</button>
-        <button type="button" class="tab" data-go="editor:clip">
-          Make a real video clip
-        </button>
-        <button type="button" class="tab" data-go="editor:export">
-          Export
-        </button>
-        <button type="button" class="tab" data-go="editor:settings">
+        <button type="button" class="tab" data-go="project">The project</button>
+        <button type="button" class="tab" data-go="editor">Edit by hand</button>
+        <button type="button" class="tab" data-go="project:settings">
           Settings
+        </button>
+        <button type="button" class="tab" data-go="project:export">
+          Export
         </button>
         <a class="tab-link" href="#notes">Notes and questions</a>
       </nav>
@@ -65,9 +60,9 @@
     <main id="app" data-screen="start">
       <section class="screen" id="start" aria-label="Start"></section>
       <section
-        class="screen"
-        id="making"
-        aria-label="Making the video"
+        class="screen project"
+        id="project"
+        aria-label="Project"
       ></section>
       <section class="screen editor" id="editor" aria-label="Editor">
         <div class="editor-bar">
@@ -84,6 +79,9 @@
             <p class="work-line" id="work-line" aria-live="polite"></p>
           </div>
           <div class="bar-actions">
+            <button type="button" id="back-to-project">
+              Back to the project
+            </button>
             <button type="button" data-open-sheet="story">Story</button>
             <button type="button" class="takes-button" data-open-sheet="takes">
               Takes<span class="count" id="takes-count"></span>

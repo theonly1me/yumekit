@@ -71,6 +71,7 @@ function restoreFocus({ element, activeId }) {
 
 export function renderTakesSheet({ element }) {
   bindTakeKeys();
+  takes.view.simple = false;
   const activeId = document.activeElement?.id || undefined;
   const scroller = element.closest(".sheet");
   const scrollTop = scroller?.scrollTop ?? 0;

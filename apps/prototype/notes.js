@@ -1,4 +1,11 @@
-import { changes, limits, proposed, questions, screens } from "./notesText.js";
+import {
+  changes,
+  intro,
+  limits,
+  proposed,
+  questions,
+  screens,
+} from "./notesText.js";
 
 function rowsMarkup(rows) {
   return rows
@@ -31,13 +38,13 @@ function questionMarkup(question) {
 export function renderNotes({ element }) {
   element.innerHTML = `
     <div class="notes-intro">
-      <h2>Sixth pass: review each step in Takes</h2>
-      <p>You made a 56 second trailer in steps, with a review at each step. This pass puts that way of working into yumekit: a template and your files at the start, the story first, chapters for a long film, and Takes, where you approve, decline, and comment on every picture, clip, and music before the next step.</p>
+      <h2>${intro.title}</h2>
+      <p>${intro.text}</p>
     </div>
-    <div><h2>What changed since the fifth pass, and why</h2>${rowsMarkup(changes)}</div>
+    <div><h2>What moved where, and why</h2>${rowsMarkup(changes)}</div>
     <div><h2>Proposed by the architect. Keep or drop each one.</h2>${proposedMarkup(proposed)}</div>
     <div>
-      <h2>The screens</h2>${rowsMarkup(screens)}
+      <h2>The control count of each screen</h2>${rowsMarkup(screens)}
       <h2 class="notes-gap">Limits of this mock</h2>
       <ul class="plain-list">${limits.map((limit) => `<li>${limit}</li>`).join("")}</ul>
     </div>

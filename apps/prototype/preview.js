@@ -93,7 +93,6 @@ export function renderPreview({ element }) {
   element.innerHTML = `
     <div class="platform-tabs">${state.platformIds.map(tabMarkup).join("")}${addMarkup()}</div>
     <div class="frame-area" data-tall="${tall}">${frameMarkup({ scene, platform })}</div>
-    <p class="frame-hint">Click the text in the video to change it. ${platform.name}, ${platform.width} x ${platform.height}.</p>
     <div class="transport">
       <button type="button" data-play>${state.playing ? "Pause" : "Play"}</button>
       <div class="progress" aria-hidden="true"><i data-progress style="width:${(state.playheadSeconds / totalSeconds()) * 100}%"></i></div>
