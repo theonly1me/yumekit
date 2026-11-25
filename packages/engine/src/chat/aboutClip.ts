@@ -1,6 +1,8 @@
 import type { ProjectSnapshot } from "@yumekit/project";
 import type { Outcome } from "../engineTypes.js";
 import type { ChatFailure, RequestAbout } from "./chatTypes.js";
+import { filesTextOf } from "./questions/personText.js";
+import type { RequestFile } from "./questions/questionSchemas.js";
 
 export function aboutOf(options: {
   snapshot: ProjectSnapshot;
@@ -33,8 +35,12 @@ export function aboutOf(options: {
 export function requestTextOf(options: {
   text: string;
   about: RequestAbout | null;
+  files?: RequestFile[] | undefined;
 }): string {
   const { about } = options;
-  if (about === null) return options.text;
-  return `The person picked the scene "${about.title}" (scene id ${about.sceneId}, clip id ${about.clipId}).\n${options.text}`;
+  const text = [options.text, filesTextOf(options.files ?? [])]
+    .filter((part) => part !== "")
+    .join("\n\n");
+  if (about === null) return text;
+  return `The person picked the scene "${about.title}" (scene id ${about.sceneId}, clip id ${about.clipId}).\n${text}`;
 }

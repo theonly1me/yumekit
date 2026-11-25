@@ -50,3 +50,12 @@ export const sharperCopyCalls: ScriptedCall[] = [
     },
   },
 ];
+
+export const askPersonCalls: ScriptedCall[] = [
+  {
+    name: "ask_person",
+    input: {
+      questions: [{ id: "q1", text: "How long?", options: ["1 min", "3 min"] }],
+    },
+  },
+];

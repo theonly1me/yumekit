@@ -1,10 +1,5 @@
 import { readFile } from "node:fs/promises";
-import {
-  createHarness,
-  type AskCritic,
-  type AskHelper,
-  type Harness,
-} from "@yumekit/harness-mcp";
+import { createHarness, type Harness } from "@yumekit/harness-mcp";
 import type { ProjectStore } from "@yumekit/project";
 import { startPreviewServer, type PreviewServer } from "@yumekit/render";
 import {
@@ -14,6 +9,7 @@ import {
 } from "@yumekit/tools";
 import { z } from "zod";
 import type { EngineFailure, Outcome } from "../engineTypes.js";
+import type { ChatHooks } from "./chatHooks.js";
 
 export interface EngineParts {
   version: string;
@@ -42,8 +38,7 @@ function projectInvalid(message: string): {
 export async function startParts(options: {
   projectFolder: string;
   store: ProjectStore;
-  askHelper: AskHelper;
-  askCritic: AskCritic;
+  hooks: ChatHooks;
 }): Promise<Outcome<EngineParts, EngineFailure>> {
   const { projectFolder, store } = options;
   const connected = await connectMediaTools({
@@ -56,12 +51,7 @@ export async function startParts(options: {
     );
   }
   const mediaTools = connected.value;
-  const harness = createHarness({
-    store,
-    mediaTools,
-    askHelper: options.askHelper,
-    askCritic: options.askCritic,
-  });
+  const harness = createHarness({ store, mediaTools, ...options.hooks });
   const preview = await startPreviewServer({ projectFolder });
   if (!preview.ok) {
     await harness.close();

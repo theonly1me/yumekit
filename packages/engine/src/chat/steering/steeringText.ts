@@ -17,6 +17,7 @@ function messageTextOf(message: SteeringEntry): string {
   return requestTextOf({
     text: [message.text, message.details ?? ""].join("\n").trim(),
     about: message.about,
+    files: message.files,
   });
 }
 

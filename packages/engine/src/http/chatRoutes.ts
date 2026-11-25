@@ -1,21 +1,27 @@
-import { z } from "zod";
-import type { ChatFailure } from "../chat/chatTypes.js";
+import type { z } from "zod";
+import type { ChatFailure, ChatFailureKind } from "../chat/chatTypes.js";
+import type { PersonRequestInput } from "../chat/questions/personRequest.js";
+import {
+  answersBodySchema,
+  answersInputOf,
+  messageInputOf,
+  requestBodySchema,
+} from "./chatBodies.js";
 import { anySegment, type Exchange, type Route } from "./exchange.js";
 import { helperTokenOf } from "./helperCalls.js";
 import { agentClient, clientHeader } from "./projectRoutes.js";
 import { readJsonBody } from "./readJsonBody.js";
 import { sendJson, type Failure } from "./responses.js";
 
-const requestBodySchema = z.strictObject({
-  text: z.string().trim().min(1).max(20_000),
-  details: z.string().trim().min(1).max(20_000).optional(),
-  about_clip_id: z.string().min(1).max(200).nullable().optional(),
-});
+const statusByKind: Partial<Record<ChatFailureKind, number>> = {
+  "clip-not-found": 404,
+  "change-not-found": 404,
+  "file-not-found": 404,
+  "answers-not-valid": 400,
+};
 
 function httpFailureOf(failure: ChatFailure): Failure {
-  const isMissing =
-    failure.kind === "clip-not-found" || failure.kind === "change-not-found";
-  return { status: isMissing ? 404 : 409, ...failure };
+  return { status: statusByKind[failure.kind] ?? 409, ...failure };
 }
 
 async function readChat(exchange: Exchange) {
@@ -34,27 +40,30 @@ function isAgentCall(exchange: Exchange): boolean {
   );
 }
 
-async function startRequest(exchange: Exchange) {
-  if (isAgentCall(exchange)) {
-    return {
-      status: 403,
-      kind: "message-not-for-the-ai",
-      message: "Only the person can send a message to the chat.",
-    };
-  }
-  const body = await readJsonBody({
-    request: exchange.request,
-    schema: requestBodySchema,
-  });
-  if (!body.ok) return body.failure;
-  const started = await exchange.context.chat.startRequest({
-    text: body.value.text,
-    details: body.value.details,
-    aboutClipId: body.value.about_clip_id ?? undefined,
-  });
-  if (!started.ok) return httpFailureOf(started.failure);
-  sendJson({ response: exchange.response, status: 202, body: started.value });
-  return undefined;
+function personMessageRoute<Body>(options: {
+  schema: z.ZodType<Body>;
+  inputOf: (body: Body) => PersonRequestInput;
+}): Route["handle"] {
+  return async (exchange) => {
+    if (isAgentCall(exchange)) {
+      return {
+        status: 403,
+        kind: "message-not-for-the-ai",
+        message: "Only the person can send a message to the chat.",
+      };
+    }
+    const body = await readJsonBody({
+      request: exchange.request,
+      schema: options.schema,
+    });
+    if (!body.ok) return body.failure;
+    const started = await exchange.context.chat.startRequest(
+      options.inputOf(body.value),
+    );
+    if (!started.ok) return httpFailureOf(started.failure);
+    sendJson({ response: exchange.response, status: 202, body: started.value });
+    return undefined;
+  };
 }
 
 function stop(exchange: Exchange) {
@@ -76,7 +85,18 @@ export const chatRoutes: Route[] = [
   {
     method: "POST",
     pattern: ["api", "chat", "requests"],
-    handle: startRequest,
+    handle: personMessageRoute({
+      schema: requestBodySchema,
+      inputOf: messageInputOf,
+    }),
+  },
+  {
+    method: "POST",
+    pattern: ["api", "chat", "answers"],
+    handle: personMessageRoute({
+      schema: answersBodySchema,
+      inputOf: answersInputOf,
+    }),
   },
   { method: "POST", pattern: ["api", "chat", "stop"], handle: stop },
   {

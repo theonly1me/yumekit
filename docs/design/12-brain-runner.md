@@ -249,25 +249,29 @@ The `CURSOR_CONFIG_DIR` of the run keeps the permissions and the approval mode o
 
 The engine holds the chat of a project: the entries, the session id, and the request that runs.
 
-| Entry kind | Fields                                       | Meaning                                                                             |
-| ---------- | -------------------------------------------- | ----------------------------------------------------------------------------------- |
-| `request`  | `id`, `text`, `about`                        | What the person asked. `about` names the picked scene                               |
-| `answer`   | `id`, `text`, `state`, `steps`               | The text of the AI. `state` is `running`, `done`, `stopped`, or `failed`            |
-| `change`   | `id`, `by`, `summary`, `undoSteps`, `undone` | One change to the project, by `ai` or by `person`                                   |
-| `notice`   | `id`, `text`                                 | A failure or a fact for the person, in plain words                                  |
-| `steering` | `id`, `text`, `about`, `sentAt`, `state`     | A message of the person while a request runs (WP71). `state` is `waiting` or `read` |
+| Entry kind  | Fields                                       | Meaning                                                                               |
+| ----------- | -------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `request`   | `id`, `text`, `about`                        | What the person asked. `about` names the picked scene                                 |
+| `answer`    | `id`, `text`, `state`, `steps`               | The text of the AI. `state` is `running`, `done`, `stopped`, or `failed`              |
+| `change`    | `id`, `by`, `summary`, `undoSteps`, `undone` | One change to the project, by `ai` or by `person`                                     |
+| `notice`    | `id`, `text`                                 | A failure or a fact for the person, in plain words                                    |
+| `steering`  | `id`, `text`, `about`, `sentAt`, `state`     | A message of the person while a request runs (WP71). `state` is `waiting` or `read`   |
+| `questions` | `id`, `questions`, `state`, `answers`        | A round of questions of `ask_person` (document 21, T4). `state` is `open` or `closed` |
+
+A `request` and a `steering` entry can also have `files` and `roundId` (document 21, T4 and T5).
 
 - `steps` of an answer is the list of tool calls of the request, each with the tool name and `running`, `done`, or `failed`. The Making screen and the chat read it.
 - A request by the AI gives one `change` entry for the whole request, when it changed the project. `undoSteps` is the count of undo steps that it made. `summary` is the first sentence of the answer, cut at 140 characters. An empty answer gives "The AI changed the project."
 - A tool call by the person through `/api/tools/<name>` gives one `change` entry with one undo step. `@yumekit/brain` has a table with a plain sentence for each tool, for example "You changed the text of a scene." for `put_scene`.
 - An `undo` call, by anyone, lowers the count of the last change that is not undone. At zero, the entry is `undone`. A `redo` call does the reverse.
 
-| Request                            | Result                                                                                                                       |
-| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `GET /api/chat`                    | `{ agent, state, entries }`. `agent` has `id`, `name`, and `signIn`. `state` is `idle` or `running`                          |
-| `POST /api/chat/requests`          | Takes `{ text, about_clip_id }`. Status 202 with the `request` entry, or with a `steering` entry while a request runs (WP71) |
-| `POST /api/chat/stop`              | Stops the request that runs                                                                                                  |
-| `POST /api/chat/changes/<id>/undo` | Undoes that change and each later change that is not undone                                                                  |
+| Request                            | Result                                                                                                                              |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `GET /api/chat`                    | `{ agent, state, entries }`. `agent` has `id`, `name`, and `signIn`. `state` is `idle` or `running`                                 |
+| `POST /api/chat/requests`          | Takes `{ text, about_clip_id, files }`. Status 202 with the `request` entry, or with a `steering` entry while a request runs (WP71) |
+| `POST /api/chat/answers`           | Takes the answers of the open round, with an optional message and files (document 21, "Details of WP81")                            |
+| `POST /api/chat/stop`              | Stops the request that runs                                                                                                         |
+| `POST /api/chat/changes/<id>/undo` | Undoes that change and each later change that is not undone                                                                         |
 
 - Failure kinds of a new request: `no-agent` (409, no agent program is installed), `agent-signed-out` (409), and `message-not-for-the-ai` (403, WP71). The message of `agent-signed-out` tells the person to open a terminal, start the program once, and sign in.
 - With `about_clip_id`, the text for the agent starts with one line that names the scene, its id, and its clip id.

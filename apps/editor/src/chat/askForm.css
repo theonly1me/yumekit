@@ -23,6 +23,7 @@
 }
 
 .ask-form {
+  position: relative;
   display: grid;
   gap: 8px;
   padding: 12px 14px 10px;
@@ -79,6 +80,8 @@
 }
 
 button.agent-line {
+  flex: 1;
+  min-width: 0;
   border: 0;
   border-radius: 0;
   padding: 0;

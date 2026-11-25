@@ -34,6 +34,11 @@ const entrySchema = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("change"), id: z.string() }),
   z.object({ kind: z.literal("notice"), id: z.string(), text: z.string() }),
   z.object({ kind: z.literal("steering"), id: z.string() }),
+  z.object({
+    kind: z.literal("questions"),
+    id: z.string(),
+    state: z.enum(["open", "closed"]),
+  }),
 ]);
 
 const chatSchema = z.object({ entries: z.array(entrySchema) });
@@ -50,6 +55,7 @@ export interface FirstChat {
   phase: MakingPhase;
   answer: AnswerEntry | undefined;
   lastNotice: string | undefined;
+  hasOpenQuestions: boolean;
 }
 
 const continueTexts = [
@@ -98,6 +104,9 @@ export function firstChatOf(entries: ChatEntry[]): FirstChat {
     requestText: request === undefined ? "" : shownRequestTextOf(request),
     ...planAndRestOf({ requests, answers }),
     lastNotice: notices.at(-1)?.text,
+    hasOpenQuestions: entries.some(
+      (entry) => entry.kind === "questions" && entry.state === "open",
+    ),
   };
 }
 

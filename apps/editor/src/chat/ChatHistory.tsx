@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef } from "react";
 import { AnswerView } from "./AnswerView.js";
 import { ChangeLine } from "./ChangeLine.js";
-import { laterChangeCount, retryOf } from "./chatEntries.js";
+import { laterChangeCount, retryOf, roundOf } from "./chatEntries.js";
 import type { AskInput } from "./chatRequests.js";
 import type { ChatEntry } from "./chatSchemas.js";
 import { NoticeView, type NoticeAction } from "./NoticeView.js";
@@ -55,9 +55,12 @@ export function ChatHistory(props: {
           <PersonMessage
             key={entry.id}
             entry={entry}
+            round={roundOf({ entries: chat.entries, roundId: entry.roundId })}
             sceneNumberOf={props.sceneNumberOf}
           />
         );
+      case "questions":
+        return undefined;
       case "answer":
         return (
           <AnswerView key={entry.id} answer={entry} text={chat.textOf(entry)} />

@@ -17,6 +17,10 @@ import { failed, noServerCommand } from "./chatFailures.js";
 import type { ChatLog } from "./chatLog.js";
 import type { AnswerEntry, ChatFailure, RequestEntry } from "./chatTypes.js";
 import type { LeadRun } from "./helpers/helperDesk.js";
+import {
+  personExtrasOf,
+  type PersonRequest,
+} from "./questions/personRequest.js";
 import { runRequest, signInMessageOf } from "./requestRun.js";
 import type { SteeringDesk } from "./steering/steeringDesk.js";
 import { steeringRequestTextOf } from "./steering/steeringText.js";
@@ -132,11 +136,7 @@ function launch(options: {
 
 export async function beginPersonRequest(options: {
   parts: ChatParts;
-  request: {
-    text: string;
-    details?: string | undefined;
-    aboutClipId: string | undefined;
-  };
+  request: PersonRequest;
 }): Promise<Outcome<RequestEntry, ChatFailure>> {
   const { parts, request } = options;
   const about = aboutOf({
@@ -152,14 +152,17 @@ export async function beginPersonRequest(options: {
     text: request.text,
     ...(request.details === undefined ? {} : { details: request.details }),
     about: about.value,
+    ...personExtrasOf(request),
   };
   parts.log.put(entry);
+  request.closeRound();
   launch({
     parts,
     ready: ready.value,
     requestText: requestTextOf({
       text: [request.text, request.details ?? ""].join("\n").trim(),
       about: about.value,
+      files: request.files,
     }),
   });
   return { ok: true, value: entry };

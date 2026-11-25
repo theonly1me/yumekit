@@ -1,4 +1,5 @@
 import type {
+  AskPerson,
   CriticRequest,
   CriticTurn,
   HelperOutcome,
@@ -14,16 +15,15 @@ import type {
   SteeringEntry,
 } from "./chatTypes.js";
 import type { HelperCall } from "./helpers/helperDesk.js";
+import type { PersonRequestInput } from "./questions/personRequest.js";
 import type { CallNote } from "./stepNotes.js";
 import type { ToolCaller } from "./trackedStore.js";
 
 export interface Chat {
   view: () => Promise<ChatView>;
-  startRequest: (options: {
-    text: string;
-    details?: string | undefined;
-    aboutClipId: string | undefined;
-  }) => Promise<Outcome<RequestEntry | SteeringEntry, ChatFailure>>;
+  startRequest: (
+    request: PersonRequestInput,
+  ) => Promise<Outcome<RequestEntry | SteeringEntry, ChatFailure>>;
   stop: () => boolean;
   undoChange: (changeId: string) => Promise<Outcome<ChangeEntry, ChatFailure>>;
   noteAiCall: (tool: string) => CallNote;
@@ -35,6 +35,7 @@ export interface Chat {
     tool: string;
     call: () => Promise<HarnessResult>;
   }) => Promise<HarnessResult>;
+  askPerson: AskPerson;
   askHelper: (request: HelperRequest) => Promise<HelperOutcome>;
   askCritic: (request: CriticRequest) => Promise<CriticTurn>;
   helperCallOf: (token: string | undefined) => HelperCall;

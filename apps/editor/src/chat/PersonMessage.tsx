@@ -1,5 +1,7 @@
 import type { RequestEntry, SteeringEntry } from "./chatSchemas.js";
 import { FoldedText } from "./FoldedText.js";
+import { AnsweredRound } from "./questions/AnsweredRound.js";
+import type { QuestionsEntry } from "./questions/questionSchemas.js";
 import { shownRequestTextOf } from "./requestEntryText.js";
 
 const steeringStateTexts: Record<SteeringEntry["state"], string> = {
@@ -17,11 +19,18 @@ function aboutText(options: {
     : `About scene ${String(number)}: ${options.about.title}`;
 }
 
+function filesText(files: NonNullable<RequestEntry["files"]>): string {
+  const count = files.length === 1 ? "1 file" : `${String(files.length)} files`;
+  return `${count}: ${files.map((file) => file.name).join(", ")}`;
+}
+
 export function PersonMessage(props: {
   entry: RequestEntry | SteeringEntry;
+  round: QuestionsEntry | undefined;
   sceneNumberOf: (clipId: string) => number | undefined;
 }) {
   const { entry } = props;
+  const text = shownRequestTextOf(entry);
   return (
     <li
       className={entry.kind === "steering" ? "entry you steering" : "entry you"}
@@ -37,7 +46,15 @@ export function PersonMessage(props: {
             })}
           </em>
         )}
-        <FoldedText className="request-text" text={shownRequestTextOf(entry)} />
+        {entry.files === undefined ? undefined : (
+          <em>{filesText(entry.files)}</em>
+        )}
+        {text === "" ? undefined : (
+          <FoldedText className="request-text" text={text} />
+        )}
+        {props.round === undefined ? undefined : (
+          <AnsweredRound round={props.round} />
+        )}
         {entry.kind === "steering" ? (
           <span className="steering-state" role="status">
             {steeringStateTexts[entry.state]}

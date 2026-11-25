@@ -1,5 +1,19 @@
 import type { AskInput } from "./chatRequests.js";
 import type { ChatEntry } from "./chatSchemas.js";
+import type { QuestionsEntry } from "./questions/questionSchemas.js";
+
+export const answersAgainText = "Here are my answers again.";
+
+export function roundOf(options: {
+  entries: ChatEntry[];
+  roundId: string | undefined;
+}): QuestionsEntry | undefined {
+  if (options.roundId === undefined) return undefined;
+  return options.entries.find(
+    (entry): entry is QuestionsEntry =>
+      entry.kind === "questions" && entry.id === options.roundId,
+  );
+}
 
 export function withEntry(options: {
   entries: ChatEntry[];
@@ -46,11 +60,17 @@ export function retryOf(options: {
   const request = before
     .slice(answerIndex + 1)
     .find((entry) => entry.kind === "request" || entry.kind === "steering");
-  return request?.kind === "request" || request?.kind === "steering"
-    ? {
-        text: request.text,
-        details: request.details,
-        aboutClipId: request.about?.clipId,
-      }
-    : undefined;
+  if (request?.kind !== "request" && request?.kind !== "steering") {
+    return undefined;
+  }
+  const isAnswersOnly = request.roundId !== undefined && request.text === "";
+  return {
+    text: isAnswersOnly ? answersAgainText : request.text,
+    details: request.details,
+    aboutClipId: request.about?.clipId,
+    files: request.files?.map((file) => ({
+      assetId: file.assetId,
+      name: file.name,
+    })),
+  };
 }

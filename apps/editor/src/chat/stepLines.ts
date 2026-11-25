@@ -49,6 +49,7 @@ const sentencesByTool: Record<string, string> = {
   put_shared_code: "Writing the parts that scenes share",
   put_work: "Writing the video as one piece",
   ask_helper: "A helper made a part of the video",
+  ask_person: "Asking you a few questions",
   set_fonts: "Choosing the fonts",
   set_transitions: "Setting how the scenes change",
   preview_frame: lookingAtTheVideo,

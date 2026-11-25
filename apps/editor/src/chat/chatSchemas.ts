@@ -1,4 +1,8 @@
 import { z } from "zod";
+import {
+  personMessageExtras,
+  questionsEntrySchema,
+} from "./questions/questionSchemas.js";
 
 export const stepProgressSchema = z.object({
   done: z.number(),
@@ -28,6 +32,7 @@ export const chatEntrySchema = z.discriminatedUnion("kind", [
     text: z.string(),
     details: z.string().optional(),
     about: aboutSchema.nullable(),
+    ...personMessageExtras,
   }),
   z.object({
     kind: z.literal("answer"),
@@ -60,7 +65,9 @@ export const chatEntrySchema = z.discriminatedUnion("kind", [
     about: aboutSchema.nullable(),
     sentAt: z.string(),
     state: z.enum(["waiting", "read"]),
+    ...personMessageExtras,
   }),
+  questionsEntrySchema,
 ]);
 
 export const chatAgentSchema = z.object({

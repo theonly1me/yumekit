@@ -55,6 +55,7 @@ export function EditorSide(props: {
       <ChatPanel
         chat={editorChat.chat}
         box={editorChat.box}
+        files={editorChat.files}
         chip={editorChat.chip}
         hasScenes={view.facts.mainClips.length > 0}
         isHidden={isScene}

@@ -1,5 +1,6 @@
 import type { SceneChip } from "../chat/AskForm.js";
 import { useChat } from "../chat/useChat.js";
+import { usePendingFiles } from "../chat/files/index.js";
 import { useChatBox } from "../chat/useChatBox.js";
 import type { EngineClient } from "../engine/engineClient.js";
 import type { EditorView } from "./useEditorView.js";
@@ -13,6 +14,10 @@ export function useEditorChat(options: {
   const { view } = options;
   const chat = useChat(options.client);
   const box = useChatBox();
+  const files = usePendingFiles({
+    client: options.client,
+    onText: box.appendFileText,
+  });
   const { pickedCard } = view;
   const chip: SceneChip | undefined =
     pickedCard === undefined || box.chipRemovedClipId === pickedCard.clip.id
@@ -25,6 +30,7 @@ export function useEditorChat(options: {
   return {
     chat,
     box,
+    files,
     chip,
     sceneNumberOf: (clipId: string) => {
       const index = mainClipIds.indexOf(clipId);
