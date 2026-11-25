@@ -45,8 +45,8 @@ export function retryOf(options: {
   if (answer?.kind !== "answer" || answer.state !== "failed") return undefined;
   const request = before
     .slice(answerIndex + 1)
-    .find((entry) => entry.kind === "request");
-  return request?.kind === "request"
+    .find((entry) => entry.kind === "request" || entry.kind === "steering");
+  return request?.kind === "request" || request?.kind === "steering"
     ? {
         text: request.text,
         details: request.details,

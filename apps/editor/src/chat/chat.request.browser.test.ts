@@ -92,7 +92,7 @@ describe("a request in the chat", () => {
 
     await openGate(runningEngine());
 
-    await expect.poll(() => chat.sendButton.count()).toBe(1);
+    await expect.poll(() => chat.stopButton.count()).toBe(0);
     await expect
       .poll(() => chat.entryTexts(3))
       .toEqual([
@@ -153,7 +153,7 @@ describe("a request in the chat", () => {
     await expect
       .poll(() => chat.entryTexts(1))
       .toEqual(["AI\nWorking\nStopped"]);
-    await expect.poll(() => chat.sendButton.count()).toBe(1);
+    await expect.poll(() => chat.stopButton.count()).toBe(0);
     await editor.close();
   });
 });

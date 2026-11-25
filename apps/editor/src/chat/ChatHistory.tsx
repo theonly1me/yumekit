@@ -3,24 +3,13 @@ import { AnswerView } from "./AnswerView.js";
 import { ChangeLine } from "./ChangeLine.js";
 import { laterChangeCount, retryOf } from "./chatEntries.js";
 import type { AskInput } from "./chatRequests.js";
-import type { ChatEntry, RequestEntry } from "./chatSchemas.js";
-import { FoldedText } from "./FoldedText.js";
+import type { ChatEntry } from "./chatSchemas.js";
 import { NoticeView, type NoticeAction } from "./NoticeView.js";
-import { shownRequestTextOf } from "./requestEntryText.js";
+import { PersonMessage } from "./PersonMessage.js";
 import { StartFailureView } from "./StartFailureView.js";
 import type { Chat } from "./useChat.js";
 
 const stuckDistancePixels = 48;
-
-function aboutText(options: {
-  about: NonNullable<RequestEntry["about"]>;
-  sceneNumberOf: (clipId: string) => number | undefined;
-}): string {
-  const number = options.sceneNumberOf(options.about.clipId);
-  return number === undefined
-    ? `About ${options.about.title}`
-    : `About scene ${String(number)}: ${options.about.title}`;
-}
 
 export function ChatHistory(props: {
   chat: Chat;
@@ -61,24 +50,13 @@ export function ChatHistory(props: {
   const viewOf = (entry: ChatEntry) => {
     switch (entry.kind) {
       case "request":
+      case "steering":
         return (
-          <li key={entry.id} className="entry you">
-            <span className="who">You</span>
-            <div className="request-body">
-              {entry.about === null ? undefined : (
-                <em>
-                  {aboutText({
-                    about: entry.about,
-                    sceneNumberOf: props.sceneNumberOf,
-                  })}
-                </em>
-              )}
-              <FoldedText
-                className="request-text"
-                text={shownRequestTextOf(entry)}
-              />
-            </div>
-          </li>
+          <PersonMessage
+            key={entry.id}
+            entry={entry}
+            sceneNumberOf={props.sceneNumberOf}
+          />
         );
       case "answer":
         return (

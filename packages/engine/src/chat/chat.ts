@@ -1,28 +1,37 @@
 import { randomUUID } from "node:crypto";
-import { mkdir } from "node:fs/promises";
-import { join } from "node:path";
-import type { Turn } from "@yumekit/brain";
 import type { ProjectStore } from "@yumekit/project";
 import type { ServerCommand } from "../agents/agentTypes.js";
 import type { Outcome } from "../engineTypes.js";
 import type { EventHub } from "../events/eventHub.js";
-import { chooseAgent, findAgentPrograms } from "./agentChoice.js";
-import { aboutOf, requestTextOf } from "./aboutClip.js";
-import { createAnswerTracker, type AnswerTracker } from "./answerTracker.js";
+import { findAgentPrograms } from "./agentChoice.js";
+import { aboutOf } from "./aboutClip.js";
 import { createChangeLedger } from "./changeLedger.js";
 import type { Chat } from "./chatInterface.js";
-import { chatBusy, failed, noServerCommand } from "./chatFailures.js";
-import { createHelperDesk, type LeadRun } from "./helpers/helperDesk.js";
+import { chatBusy, failed } from "./chatFailures.js";
+import { createHelperDesk } from "./helpers/helperDesk.js";
 import { createCriticDesk, personCriticRun } from "./helpers/criticDesk.js";
 import { loadChat } from "./chatFile.js";
 import { createChatLog } from "./chatLog.js";
-import type { AnswerEntry, ChatFailure, RequestEntry } from "./chatTypes.js";
-import { runRequest, signInMessageOf } from "./requestRun.js";
+import type { ChatFailure, RequestEntry, SteeringEntry } from "./chatTypes.js";
+import {
+  beginPersonRequest,
+  beginSteeringRequest,
+  type ChatParts,
+  type RunState,
+} from "./requestStart.js";
+import { steeredLeadCall } from "./steering/steeredCall.js";
+import { createSteeringDesk } from "./steering/steeringDesk.js";
 import type { TrackedStore } from "./trackedStore.js";
 import { noCallNote } from "./stepNotes.js";
 import { undoChangeWith } from "./undoChange.js";
+import { chatViewOf } from "./chatView.js";
 
 export type { Chat } from "./chatInterface.js";
+
+const agentDidNotStart: ChatFailure = {
+  kind: "no-agent",
+  message: "The AI program did not start.",
+};
 
 export async function createChat(options: {
   projectFolder: string;
@@ -40,135 +49,119 @@ export async function createChat(options: {
   });
   const ledger = createChangeLedger(log);
   tracked.onCommit(ledger.onCommit);
-  let phase: "idle" | "starting" | "running" = "idle";
-  let turn: Turn | undefined;
-  let tracker: AnswerTracker | undefined;
-  let isStopRequested = false;
-  let running: Promise<void> = Promise.resolve();
-  let lead: LeadRun | undefined;
+  const steering = createSteeringDesk(log);
+  const state: RunState = {
+    phase: "idle",
+    turn: undefined,
+    tracker: undefined,
+    isStopRequested: false,
+    isClosing: false,
+    running: Promise.resolve(),
+    lead: undefined,
+  };
+  let starting: Promise<unknown> = Promise.resolve();
   const helpers = createHelperDesk();
   const critics = createCriticDesk();
-  const begin = async (request: {
+  const startWaitingMessages = async () => {
+    if (state.isClosing || state.phase !== "idle") return;
+    if (steering.waiting().length === 0) return;
+    state.phase = "starting";
+    const beginning = beginSteeringRequest(parts).catch(
+      (): Outcome<number, ChatFailure> => failed(agentDidNotStart),
+    );
+    starting = beginning;
+    const started = await beginning;
+    if (started.ok && started.value > 0) return;
+    state.phase = "idle";
+    if (started.ok) return;
+    log.put({
+      kind: "notice",
+      id: randomUUID(),
+      text: started.failure.message,
+    });
+  };
+  const parts: ChatParts = {
+    projectFolder,
+    store: options.store,
+    serverCommand: options.serverCommand,
+    programs,
+    log,
+    ledger,
+    steering,
+    state,
+    onEnded: () => {
+      startWaitingMessages().catch(() => undefined);
+    },
+  };
+  const steer = (request: {
     text: string;
     details?: string | undefined;
     aboutClipId: string | undefined;
-  }): Promise<Outcome<RequestEntry, ChatFailure>> => {
-    if (options.serverCommand === undefined) return failed(noServerCommand);
+  }): Outcome<SteeringEntry, ChatFailure> => {
     const about = aboutOf({
       snapshot: options.store.read(),
       clipId: request.aboutClipId,
     });
     if (!about.ok) return about;
-    const chosen = await chooseAgent(programs);
-    if (!chosen.ok) return chosen;
-    const adapter = chosen.value;
-    if ((await adapter.signInState()) === "signed-out") {
-      return failed({
-        kind: "agent-signed-out",
-        message: signInMessageOf(adapter),
-      });
-    }
-    const workingFolder = join(projectFolder, ".yumekit", "agent");
-    await mkdir(workingFolder, { recursive: true });
-    const entry: RequestEntry = {
-      kind: "request",
-      id: randomUUID(),
-      text: request.text,
-      ...(request.details === undefined ? {} : { details: request.details }),
-      about: about.value,
-    };
-    log.put(entry);
-    const answer: AnswerEntry = {
-      kind: "answer",
-      id: randomUUID(),
-      text: "",
-      state: "running",
-      steps: [],
-    };
-    log.put(answer);
-    const answerTracker = createAnswerTracker({ log, answer });
-    tracker = answerTracker;
-    const { serverCommand } = options;
-    lead = { adapter, serverCommand, projectFolder };
-    phase = "running";
-    isStopRequested = false;
-    running = runRequest({
-      adapter,
-      log,
-      ledger,
-      requestText: requestTextOf({
-        text: [request.text, request.details ?? ""].join("\n").trim(),
+    return {
+      ok: true,
+      value: steering.add({
+        text: request.text,
+        details: request.details,
         about: about.value,
       }),
-      tracker: answerTracker,
-      serverCommand,
-      workingFolder,
-      onTurn: (next) => {
-        turn = next;
-        if (isStopRequested) next.stop();
-      },
-      isStopRequested: () => isStopRequested,
-    })
-      .catch(() => undefined)
-      .finally(() => {
-        phase = "idle";
-        turn = undefined;
-        tracker = undefined;
-        lead = undefined;
-      });
-    return { ok: true, value: entry };
+    };
   };
   const stop = () => {
-    if (phase !== "running") return false;
-    isStopRequested = true;
+    if (state.phase !== "running") return false;
+    state.isStopRequested = true;
     helpers.stop();
     critics.stop();
-    turn?.stop();
+    state.turn?.stop();
     return true;
   };
+  startWaitingMessages().catch(() => undefined);
   return {
-    view: async () => {
-      const chosen = await chooseAgent(programs);
-      return {
-        agent: chosen.ok
-          ? {
-              id: chosen.value.id,
-              name: chosen.value.name,
-              signIn: await chosen.value.signInState(),
-            }
-          : null,
-        state: phase === "idle" ? "idle" : "running",
-        entries: log.entries(),
-      };
-    },
+    view: () => chatViewOf({ programs, phase: state.phase, log }),
     startRequest: async (request) => {
-      if (phase !== "idle") return failed(chatBusy);
-      phase = "starting";
-      const started = await begin(request).catch(
-        (): Outcome<RequestEntry, ChatFailure> =>
-          failed({
-            kind: "no-agent",
-            message: "The AI program did not start.",
-          }),
+      while (state.phase === "starting") await starting;
+      if (state.phase !== "idle") return steer(request);
+      state.phase = "starting";
+      const beginning = beginPersonRequest({ parts, request }).catch(
+        (): Outcome<RequestEntry, ChatFailure> => failed(agentDidNotStart),
       );
-      if (!started.ok) phase = "idle";
+      starting = beginning;
+      const started = await beginning;
+      if (!started.ok) state.phase = "idle";
       return started;
     },
     stop,
     undoChange: (changeId) =>
-      phase === "idle"
+      state.phase === "idle"
         ? undoChangeWith({ changeId, log, ledger, tracked })
         : Promise.resolve(failed(chatBusy)),
-    noteAiCall: (tool) => tracker?.noteCall(tool) ?? noCallNote,
+    noteAiCall: (tool) => state.tracker?.noteCall(tool) ?? noCallNote,
     runToolCall: tracked.runCall,
+    leadCall: ({ tool, call }) =>
+      state.phase === "running"
+        ? steeredLeadCall({
+            desk: steering,
+            tool,
+            call,
+            onDelivered: () => state.tracker?.continueInNewAnswer(),
+          })
+        : call(),
     askHelper: (request) =>
-      helpers.ask({ request, lead: phase === "running" ? lead : undefined }),
+      helpers.ask({
+        request,
+        lead: state.phase === "running" ? state.lead : undefined,
+      }),
     askCritic: async (request) =>
       critics.ask({
         request,
         run:
-          phase === "running"
-            ? lead
+          state.phase === "running"
+            ? state.lead
             : await personCriticRun({
                 isPerson: tracked.callerNow()?.by === "person",
                 programs,
@@ -178,8 +171,9 @@ export async function createChat(options: {
       }),
     helperCallOf: (token) => critics.callOf(token) ?? helpers.callOf(token),
     close: async () => {
+      state.isClosing = true;
       stop();
-      await running;
+      await state.running;
       await log.flush();
     },
   };

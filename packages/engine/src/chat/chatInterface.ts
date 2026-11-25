@@ -2,6 +2,7 @@ import type {
   CriticRequest,
   CriticTurn,
   HelperOutcome,
+  HarnessResult,
   HelperRequest,
 } from "@yumekit/harness-mcp";
 import type { Outcome } from "../engineTypes.js";
@@ -10,6 +11,7 @@ import type {
   ChatFailure,
   ChatView,
   RequestEntry,
+  SteeringEntry,
 } from "./chatTypes.js";
 import type { HelperCall } from "./helpers/helperDesk.js";
 import type { CallNote } from "./stepNotes.js";
@@ -21,7 +23,7 @@ export interface Chat {
     text: string;
     details?: string | undefined;
     aboutClipId: string | undefined;
-  }) => Promise<Outcome<RequestEntry, ChatFailure>>;
+  }) => Promise<Outcome<RequestEntry | SteeringEntry, ChatFailure>>;
   stop: () => boolean;
   undoChange: (changeId: string) => Promise<Outcome<ChangeEntry, ChatFailure>>;
   noteAiCall: (tool: string) => CallNote;
@@ -29,6 +31,10 @@ export interface Chat {
     caller: ToolCaller;
     call: () => Promise<Value>;
   }) => Promise<Value>;
+  leadCall: (options: {
+    tool: string;
+    call: () => Promise<HarnessResult>;
+  }) => Promise<HarnessResult>;
   askHelper: (request: HelperRequest) => Promise<HelperOutcome>;
   askCritic: (request: CriticRequest) => Promise<CriticTurn>;
   helperCallOf: (token: string | undefined) => HelperCall;

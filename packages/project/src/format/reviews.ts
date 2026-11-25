@@ -48,6 +48,7 @@ export const clipReviewSchema = z.strictObject({
   measures: motionMeasuresSchema,
   critic: criticRecordSchema.exactOptional(),
   notes: z.array(z.string()).exactOptional(),
+  personKept: z.strictObject({ words: z.string().min(1) }).exactOptional(),
 });
 
 export const sheetReviewSchema = z.strictObject({

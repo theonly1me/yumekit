@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import type { BrainEvent } from "@yumekit/brain";
 import type { ChatLog } from "./chatLog.js";
 import type { AnswerEntry } from "./chatTypes.js";
@@ -13,6 +14,7 @@ export interface AnswerTracker {
   finish: (state: AnswerEntry["state"]) => void;
   changeSummary: () => string;
   noteCall: (tool: string) => CallNote;
+  continueInNewAnswer: () => void;
 }
 
 const quoteMarks: Record<string, number> = {
@@ -67,6 +69,7 @@ export function createAnswerTracker(options: {
   const { log } = options;
   let answer = options.answer;
   const wholeTexts: string[] = [];
+  const closingTexts: string[] = [];
   let partText = "";
   let lastSentAt = 0;
   let trailingSend: NodeJS.Timeout | undefined;
@@ -106,6 +109,7 @@ export function createAnswerTracker(options: {
           }
           partText = "";
           wholeTexts.push(event.text);
+          closingTexts.push(event.text);
           put({ ...answer, text: fullText() });
           return;
         case "tool-started": {
@@ -141,7 +145,29 @@ export function createAnswerTracker(options: {
       trailingSend = undefined;
       put({ ...answer, text: fullText(), state });
     },
-    changeSummary: () => changeSummaryOfTexts([...wholeTexts, partText]),
+    changeSummary: () => changeSummaryOfTexts([...closingTexts, partText]),
     noteCall: notes.noteCall,
+    continueInNewAnswer: () => {
+      clearTimeout(trailingSend);
+      trailingSend = undefined;
+      const { steps } = answer;
+      const isRunning = (step: AnswerEntry["steps"][number]) =>
+        step.state === "running";
+      put({
+        ...answer,
+        text: fullText(),
+        state: "done",
+        steps: steps.filter((step) => !isRunning(step)),
+      });
+      wholeTexts.length = 0;
+      partText = "";
+      put({
+        kind: "answer",
+        id: randomUUID(),
+        text: "",
+        state: "running",
+        steps: steps.filter(isRunning),
+      });
+    },
   };
 }

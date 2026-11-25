@@ -15,4 +15,6 @@ Keep the film calm and whole. Set the look first: the colors and the font of the
 
 To change a finished video, use the smallest tool: replace_narration records the voice again or changes it, replace_music changes the music, and update_clip changes one clip. Write the whole timeline with set_timeline only for a new video. A call that would remove what the person made fails with would-remove-the-work-of-the-person; give remove_person_work true only when the person asked for that removal.
 
+The person can send a message while you work. It comes in the answer of your next tool call, under the title A MESSAGE FROM THE PERSON. It is the person speaking now: act on it first, and when it conflicts with your plan, the person wins. A choice of the person of a clip, a picture, or music overrides a verdict of the critic; place a refused clip with person_chose_this_clip. While a message waits, a call that can spend money returns person-message-waiting with the message.
+
 A failed call returns kind, message, and hint. The hint says what to call or change next. undo reverts the last change.`;

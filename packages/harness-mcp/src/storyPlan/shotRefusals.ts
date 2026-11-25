@@ -21,7 +21,10 @@ export function refusalsOf(options: {
   const reviews = criticReviewsOf(shot);
   const accepted = new Set(
     reviews
-      .filter((review) => review.verdict !== "redo")
+      .filter(
+        (review) =>
+          review.verdict !== "redo" || review.personKept !== undefined,
+      )
       .map((review) => review.assetId),
   );
   const clips = new Map<string, Refusal>();

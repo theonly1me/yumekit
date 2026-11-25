@@ -23,7 +23,7 @@ function failureOf(body: string): unknown {
 }
 
 describe("the failures and the stop of a chat request", () => {
-  it("refuses a second request while one runs, and stop ends the first as stopped", async () => {
+  it("stop ends a request that runs as stopped", async () => {
     const chat = await startChatEngine(runsUntilStopped);
     await chat.ask({ text: "Make a long video." });
     await chat.events.waitFor(
@@ -33,9 +33,6 @@ describe("the failures and the stop of a chat request", () => {
         Reflect.get(message, "type") === "chat-text",
     );
 
-    const second = await chat.ask({ text: "And another." });
-    expect(second.status).toBe(409);
-    expect(failureOf(second.body)).toMatchObject({ kind: "chat-busy" });
     expect((await chat.readChat()).state).toBe("running");
 
     const stopped = await chat.post({ path: "/api/chat/stop" });
