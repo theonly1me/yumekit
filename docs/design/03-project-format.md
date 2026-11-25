@@ -9,6 +9,7 @@ my-project/
   project.json                  name, frame rate, outputs
   script.md                     the script, free text
   bible.json                    style, palette, cast, voice, storyPlan
+  takes.json                    the takes and the notes of the person (document 21)
   scenes/<sceneId>/scene.json   one scene
   scenes/<sceneId>/scene.tsx    custom code, only for a module scene
   scenes/_shared/<name>.tsx     code that custom scenes share (document 19)
@@ -38,6 +39,7 @@ type Project = {
   outputs: Output[];
   videoStyle?: VideoStyle;
   checks?: "draft" | "critic";
+  approvePicturesFirst?: boolean;
   look?: LookId;
   calm?: boolean;
   tempo?: number;
@@ -209,6 +211,43 @@ WP75 (document 20, C50 to C55) adds `looks` to a cast member: `facts` are then t
 
 Document 20 defines `StoryPlan`, the kind `prop`, the fixed `facts` of a cast member, and its `sheetReview` (WP66). WP68 adds to a cast member `sheetTries`, `sheetPrompts`, `restrictions`, and `briefFacts`; to a shot `startPicturePrompt`, `videoPrompt`, and `startReviews`; to a clip review and a sheet review `notes`; and to the plan `review` (the plan check) and `lessons`. Each is optional, so a project of WP66 loads as before. A plan of WP66 holds the start and end states of a shot as a list of entries; a plan of WP65 with states in words still loads. WP74 adds the `story` of the bible, `storyCharacterId` of a cast member, `form` of the plan, `storyFact` of a shot, and `hits` of a music check (document 20, C44 to C47). Each is optional, so a project of WP72 loads as before. WP78 adds `form` of the story (document 20, C59). The form of the film is the form of the story, else the form of the plan, so a project of WP74 loads as before.
 
+WP80 (document 21) adds `chapters` to the plan: a list of `id`, `title`, and `shotIds`. A plan with no chapters is one chapter, `film`. It adds `approvePicturesFirst` to `project.json`: no value means true, and the store writes only `false`. It adds `takes.json`, `{ "takes": Take[] }`, which the store writes only when the project has a take. A project of WP76 loads and works as before.
+
+```ts
+type Take = {
+  id: string;
+  chapterId?: string;
+  step: "story" | "pictures" | "clips" | "cut";
+  number: number;
+  state: "open" | "ready" | "sent";
+  openedAt: string;
+  readyAt?: string;
+  sentAt?: string;
+  items: TakeItem[];
+  notes: TakeNote[];
+  costUsd?: number;
+  nextStepEstimateUsd?: number;
+};
+type TakeItem = {
+  kind: "asset" | "story" | "cut";
+  id: string;
+  note?: string;
+  whatToCheck?: string;
+  replaces?: string;
+  outputId?: string;
+  file?: string;
+  approved?: true;
+};
+type TakeNote = {
+  itemId: string;
+  text: string;
+  pin?: { x: number; y: number };
+  seconds?: number;
+  quote?: string;
+  dropped?: true;
+};
+```
+
 ## Rules that the store enforces
 
 1. Each id matches `^[a-z0-9][a-z0-9-]{0,63}$` and is unique within its list.
@@ -223,6 +262,7 @@ Document 20 defines `StoryPlan`, the kind `prop`, the fixed `facts` of a cast me
 10. A clip id is unique within its timeline, across all tracks.
 11. A platform is on one output only. The size of the output is the size of the platform in the catalog.
 12. `tempo` is from 60 to 200. Each entry of `fonts` names an asset of kind `font`. A shared code name matches the id rule. `frame` names shared code of the project (document 19, K9).
+13. Each shot of a plan with chapters is in exactly one chapter, and the chapters keep the order of the shots: `chapter-misses-shot`, `shot-in-two-chapters`, `chapters-break-order`.
 
 How a timeline reads:
 
@@ -316,6 +356,17 @@ function openProject(options: {
 | `updateClip`         | `outputId`, `clipId`, `changes`     | Changes the timing, the gain, or the target of one clip. The target is `sceneId` for a scene clip and `assetId` for an audio clip      |
 | `removeClip`         | `outputId`, `clipId`                | Removes one clip                                                                                                                       |
 | `copyTimeline`       | `fromOutputId`, `toOutputId`        | Replaces one timeline with a copy of another                                                                                           |
+
+WP80 adds these edits (document 21):
+
+| Kind                      | Effect                                                                                      |
+| ------------------------- | ------------------------------------------------------------------------------------------- |
+| `setChapters`             | Replaces the chapters of the plan. An empty list makes the film one chapter                 |
+| `setApprovePicturesFirst` | Turns "Approve pictures before clips" on or off                                             |
+| `openTake`                | Opens a take. An open take with no item gives way. An open take with items refuses it       |
+| `fillTake`                | Adds items to the open take. With no open take, it changes nothing                          |
+| `readyTake`               | Stores the items with the notes of the lead, the cost, and the estimate, and makes it ready |
+| `sendTake`                | Stores the notes of the person, approves each item with no note, and makes the take sent    |
 
 The store computes `contentHash` as `sha256:` plus the hex digest, and checks that the file exists, when it applies `addAsset`. It sets `hasWords` from the word timings.
 

@@ -201,3 +201,50 @@ These decisions came from the build of WP81.
 ### The real check
 
 24. On 2026-11-26, the engine of the worktree build ran one request with Claude Code 2.1.332 in a new temporary project and configuration folder, with no media key. The request asked for a 30 second film and for a few questions with choices first. The lead called `get_work`, `get_story_guide`, and `ask_person` with 6 questions of 4 options each. It then ended its turn with one sentence: "I've put a few questions about the story and the look on the card above the chat box." The turn took about 10 seconds, and the card showed the round. The lead's guide does not name `ask_person` yet (WP77), so the tool description alone led the lead to it.
+
+## Details of WP80
+
+These facts and choices came from the build of WP80 on 2026-11-26.
+
+### The format and the store
+
+1. `takes.json` holds `{ "takes": [...] }`, with sorted keys like the other files. The store writes it only when the project has a take, so a project with no take has no file and loads as before. Each take edit is one undo step.
+2. The id of a take is `take-<n>`, one higher than the highest id. Its number counts the takes of its chapter, or the takes of the story. The id of an item is the asset id, `story`, or `cut`.
+3. A plan with no chapters, and a project with no plan, has one chapter with the id `film` and the title "The whole film". `open_take` takes the only chapter when the call gives no `chapter_id`.
+4. A chapter has at least one shot. The three refusals of T6 are rules of the store, so a new plan through `setBible` is checked too. Each has its own failure kind: `chapter-misses-shot`, `shot-in-two-chapters`, and `chapters-break-order`. Two chapters with one id fail with `id-in-use`, and a shot that the plan does not have fails with `not-found`.
+5. `set_story_plan` with no `chapters` keeps the chapters: each shot keeps its chapter, a new shot joins the chapter of the shot before it (or the first chapter), and a chapter with no shot left goes. A plan that moves a shot to another chapter needs `chapters` in the call.
+6. One take is open at a time. An open take with no item gives way to a new `openTake`. An open take with items refuses it, and `open_take` says `take-already-open`. `open_take` for the chapter and the step of the open take returns that take.
+7. `approvePicturesFirst` is a field of `project.json`. No value means true, and the store writes only `false`. The tool is `set_approve_pictures_first`, and its description says to call it only when the person asks.
+
+### The round of the lead
+
+8. Each asset that `generate_asset` or `generate_assets` makes, or reuses under a new id, joins the open take in the same change. A voice does not join, because takes for the voice are not in this version. A picture that `check_design` saves at the end of a clip does not join. A picture that the person makes in the editor while a take is open joins it.
+9. `ready_take` refuses a take with an item that has no note, or a clip, a sound, or a cut with no `what_to_check` (`take-not-ready`). `leave_out` removes an asset that the person does not need to see. An item can name an earlier asset, which then joins the take. `replaces_asset_id` keeps `replaces` on the item, for "Compare with take N".
+10. The cost of a take is the sum of `costUsd` of its assets. The estimate of the next step uses the prices of the estimate of `set_story_plan`: after the story, the pictures of the first chapter (the sheets of its cast with no reference picture, and one start picture for each shot); after the pictures, the seconds of the shots of the chapter at the video price; after the clips, nothing, because a render is free; after the cut, the pictures of the next chapter, or nothing for the last chapter. With no plan, it is the `next_step_estimate_usd` of the lead.
+11. `render_video` with `chapter_id` renders from the first clip of the chapter on the scenes row to the end of its last clip, to `renders/chapters/<chapter id>-<output id>.mp4`. A scene clip belongs to the chapter of its shot when it shows a clip with `shot_id`. Another scene clip belongs to the chapter of the clip before it, or to the first chapter. The render joins an open take of the cut of that chapter as its `cut` item. `chapter_id` with `first_frame` or `frame_count` is refused.
+
+### The send and the approval
+
+12. The send is the function `sendTake` of `createHarness`, not a tool, so the lead cannot approve its own work. The engine route `POST /api/takes/<take id>/send` takes `notes`: each with `item_id`, `text`, and one of `pin`, `seconds`, `quote`, or `dropped`. It runs the send as a change of the person, which the chat can undo, and then starts the lead's turn. An AI caller gets 403. `GET /api/takes` gives the takes, the chapters, and `approvePicturesFirst`.
+13. A note names an item of the take, or an asset of an earlier sent take of the same chapter and step, because the take view shows the earlier approved items too.
+14. On send, each item with no note gets `approved: true`. The newest sent take decides: a later note on an approved asset takes the approval back, and a later approval gives it again.
+15. The request entry has a text for the person ("Take 2: 3 notes for the lead." or "Take 2: all good. Go on.") and details for the lead: each note with its item, its pin in percent from the left and the top, its moment in seconds, or its quote; then the approved items; then what to do next. With no notes, the details name the next step and its estimate. If the turn cannot start, the notes stay saved, and the route answers 409 with "Your notes are saved."
+16. T9: for each approved picture or clip of a shot, the send stores a design check `by` `person` with the words "Approved in take N", in the same change. A check that passed stays as it is. A check with a break keeps its frames and gets the words as `personKept`. An approved story item sets the approval of the story to `person-said-yes`.
+17. T10: `picture-not-approved` names the pictures, and its hint follows the state: a ready take waits for the person, an open take needs `ready_take`, a note asks for a new picture, a dropped picture needs another one, and a picture in no take needs a take of pictures. A picture that `check_design` saved at the end of a clip needs no approval. A picture that was in no sent take passes with the words of the person (`person_chose_this_picture`, in the call or stored before).
+18. `get_work` has "### Chapters and takes": the chapters, the setting of T10, the take that is open or ready, and the last take that the person sent with its notes and its approvals. Its next batch says that a shot waits for the person to approve its start picture. `get_project` gives `approve_pictures_first`.
+19. `@yumekit/project/takes` exports the chapters, the verdicts of the assets, and the time of a chapter, with no Node code, for the editor of WP83 and WP84.
+20. The tests of other parts of a clip turn "Approve pictures before clips" off (`approvePicturesFirst: false` in the test fixtures), so they keep testing what they tested before.
+
+### The run
+
+The engine of the branch ran a small film with the free sample server and the fake agent of the tests, and no key in the environment.
+
+1. The person asked: "Make a short film: a ferry crosses a strait in fog. Start with the pictures." The lead opened take 1, made three pictures in one `generate_assets` call, and gave each a note with `ready_take`.
+2. The person sent take 1 with a pin on the harbor ("Make the wall taller, like a cliff.", at 62% from the left and 35% from the top) and "Don't use this one" on the lantern. The chat got the change "You sent take 1 with 2 notes." and the request "Take 1: 2 notes for the lead.", whose details gave each note with its pin and the approved ferry.
+3. The lead made the harbor again in take 2 with `replaces_asset_id`. The person sent take 2 with no notes, and the request told the lead to go on to the clips.
+4. The lead made a clip from the approved ferry. A clip from the dropped lantern failed with `picture-not-approved` and the hint "The person dropped "lantern": use another picture."
+
+### Follow-ups
+
+1. The description of `set_story_plan` still says that no start picture or clip runs before the critic passes the plan. WP76 removed that gate. WP77 rewrites the guide and can correct it.
+2. Until WP77, the guide of the lead does not name takes. The descriptions of `open_take` and `ready_take` and the hints of `picture-not-approved` teach the flow.
