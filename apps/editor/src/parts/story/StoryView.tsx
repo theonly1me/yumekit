@@ -8,10 +8,8 @@ import { intensityText, stateLinesOf } from "./shotWords.js";
 import { shotFactsOf, type ShotFacts } from "./storyFacts.js";
 import { WholeStory } from "./WholeStory.js";
 import { filmFormLabels, storyPartNameOf } from "./wholeStorySchema.js";
+import { noPlanText, shotsNextText } from "./storyViewTexts.js";
 import "./story.css";
-
-export const noPlanText =
-  "This video has no story plan yet. Before the AI makes a real video clip, it writes the story: what the main character wants, what stands in the way, what changes, and each shot with one action. The plan shows here.";
 
 function StateList(props: { lines: string[] }) {
   return (
@@ -143,7 +141,9 @@ export function StoryView(props: StepViewProps) {
     return (
       <div className="files-part story-part">
         {wholeStory}
-        <p className="fact lead">{noPlanText}</p>
+        <p className="fact lead">
+          {story === undefined ? noPlanText : shotsNextText}
+        </p>
       </div>
     );
   }

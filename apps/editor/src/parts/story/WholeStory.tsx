@@ -51,7 +51,7 @@ export function WholeStory(props: { story: Story; snapshot: Snapshot }) {
   const force = story.opposingForce;
   return (
     <section className="whole-story" aria-labelledby="whole-story-title">
-      <h4 id="whole-story-title">The story</h4>
+      <h4 id="whole-story-title">The whole story</h4>
       <p className="story-premise">{story.premise}</p>
       <p className="story-approval" data-approval={story.approval ?? "waiting"}>
         {approvalTexts[story.approval ?? "waiting"]}

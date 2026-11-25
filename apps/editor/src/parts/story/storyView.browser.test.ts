@@ -7,7 +7,7 @@ import {
   lengthenStoryPlan,
 } from "../../testing/storyProject.js";
 import { forgeStory, writeForgeStory } from "../../testing/wholeStory.js";
-import { noPlanText } from "./StoryView.js";
+import { noPlanText } from "./storyViewTexts.js";
 
 let engine: RunningEngine | undefined;
 
