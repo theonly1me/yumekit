@@ -1,3 +1,4 @@
+import { castPictureIdsOf } from "../castLooks/index.js";
 import type { ProjectState } from "../format/state.js";
 import {
   sceneCodeFile,
@@ -36,7 +37,7 @@ function checkTimelinesMatchOutputs(
 function checkCastReferences(state: ProjectState): RuleFailure | undefined {
   const assetIds = new Set(state.assets.map((asset) => asset.id));
   for (const member of state.bible.cast) {
-    const missing = member.referenceAssetIds.find((id) => !assetIds.has(id));
+    const missing = castPictureIdsOf(member).find((id) => !assetIds.has(id));
     if (missing !== undefined) {
       return {
         kind: "not-found",

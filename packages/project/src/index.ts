@@ -68,6 +68,7 @@ export {
   type CastKind,
   type CastMember,
 } from "./format/bible.js";
+export * from "./castLooks/index.js";
 export {
   fixedStoryPartIds,
   storyApprovals,
