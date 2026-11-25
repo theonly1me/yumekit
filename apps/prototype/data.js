@@ -152,5 +152,5 @@ export function platformOf(platformId) {
 }
 
 export function fileNameOf(platformId) {
-  return `what-is-yumekit-${platformId}.mp4`;
+  return `the-ninth-bell-${platformId}.mp4`;
 }

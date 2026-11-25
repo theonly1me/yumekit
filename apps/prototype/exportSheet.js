@@ -1,7 +1,32 @@
+import { chapterLength, minutesText } from "./chapters.js";
 import { fileNameOf, platformOf } from "./data.js";
-import { state, totalSeconds } from "./state.js";
+import { bindSizes, realText, sizeMarkup } from "./exportSize.js";
+import { escapeText, state, totalSeconds } from "./state.js";
 
-const run = { chosen: undefined, percents: {}, timer: undefined, shown: {} };
+const run = {
+  chosen: undefined,
+  percents: {},
+  timer: undefined,
+  shown: {},
+  part: "film",
+};
+
+function secondsOfPart() {
+  return run.part === "film" ? totalSeconds() : chapterLength(run.part);
+}
+
+function partMarkup() {
+  const parts = [
+    ["film", "The whole film"],
+    ...state.chapters.map((chapter) => [chapter.id, chapter.name]),
+  ];
+  return `<div class="segments" role="group" aria-label="What to export">${parts
+    .map(
+      ([id, name]) =>
+        `<button type="button" data-part="${id}" aria-pressed="${run.part === id}" ${run.timer === undefined ? "" : "disabled"}>${escapeText(name)}</button>`,
+    )
+    .join("")}</div>`;
+}
 
 function rowMarkup(platformId) {
   const platform = platformOf(platformId);
@@ -12,13 +37,14 @@ function rowMarkup(platformId) {
     percent === undefined
       ? `<span class="fact">${platform.width} x ${platform.height}</span>`
       : done
-        ? `<button type="button" data-show-file="${platformId}">${run.shown[platformId] ? "In Movies/yumekit" : "Show the file"}</button>`
+        ? `<span class="export-done"><span class="real-size">${realText({ platformId, seconds: secondsOfPart() })}</span><button type="button" data-show-file="${platformId}">${run.shown[platformId] ? "In Movies/yumekit" : "Show the file"}</button></span>`
         : `<span class="progress small" role="progressbar" aria-valuenow="${percent}" aria-valuemin="0" aria-valuemax="100"><i style="width:${percent}%"></i></span>`;
   return `
     <li class="export-row">
       <label><input type="checkbox" data-export="${platformId}" ${checked ? "checked" : ""} ${run.timer === undefined ? "" : "disabled"} /> ${platform.name} <em>${platform.shape}</em></label>
-      <span class="export-file">${fileNameOf(platformId)}</span>
+      <span class="export-file">${fileNameOf(platformId).replace("bell-", run.part === "film" ? "bell-" : `bell-chapter-${state.chapters.findIndex((chapter) => chapter.id === run.part) + 1}-`)}</span>
       ${status}
+      ${checked && !done ? sizeMarkup({ platformId, seconds: secondsOfPart(), busy: run.timer !== undefined }) : ""}
     </li>`;
 }
 
@@ -56,7 +82,8 @@ export function renderExportSheet({ element }) {
   element.innerHTML = `
     <div class="sheet-body">
       <h2 aria-live="polite">${headline()}</h2>
-      <p class="fact lead">One file for each place, in its own shape. ${totalSeconds()} seconds, with voice, music, and captions.</p>
+      <p class="fact lead">One file for each place, in its own shape. ${minutesText(secondsOfPart())}, with voice, music, and captions.</p>
+      ${partMarkup()}
       <ul class="export-rows">${state.platformIds.map(rowMarkup).join("")}</ul>
       <div class="start-action">
         <button type="button" class="primary large" data-start-export ${count === 0 || busy ? "disabled" : ""}>${busy ? "Exporting" : `Export ${count} ${count === 1 ? "video" : "videos"}`}</button>
@@ -69,6 +96,14 @@ export function renderExportSheet({ element }) {
       run.chosen = input.checked
         ? [...run.chosen, platformId]
         : run.chosen.filter((id) => id !== platformId);
+      renderExportSheet({ element });
+    });
+  });
+  bindSizes({ element, redraw: () => renderExportSheet({ element }) });
+  element.querySelectorAll("[data-part]").forEach((button) => {
+    button.addEventListener("click", () => {
+      run.part = button.dataset.part;
+      run.percents = {};
       renderExportSheet({ element });
     });
   });

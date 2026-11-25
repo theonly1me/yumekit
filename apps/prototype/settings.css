@@ -107,3 +107,46 @@ label.setting-check input {
   padding-left: 24px;
   border-left: 2px solid var(--accent);
 }
+
+.size-choice {
+  flex-basis: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.size-choice .fact {
+  font-variant-numeric: tabular-nums;
+}
+
+label.own-size {
+  font-size: var(--step--1);
+  color: var(--muted);
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.own-size input {
+  width: 56px;
+  text-align: right;
+}
+
+.size-warning {
+  flex-basis: 100%;
+  font-size: var(--step--1);
+  color: var(--accent);
+}
+
+.export-done {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.real-size {
+  font-size: var(--step--1);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}

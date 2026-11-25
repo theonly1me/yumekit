@@ -1,5 +1,9 @@
 export const changes = [
   [
+    "A smaller file on Export",
+    "Each file has a File size choice: Best quality, or Smaller file under 10 MB, under 25 MB, or your own size. The sheet shows the expected size first and keeps the picture size. When the size is too small for the length, one line offers a smaller picture size. A done file shows its real size. You can export the whole film or one chapter.",
+  ],
+  [
     "Start from a template",
     'A trailer, a movie, a video, or something else. A template puts a short guide in the prompt, such as "The story:" and "The main characters:". You fill it in. One line tells you to give the lead as much detail as you can.',
   ],
