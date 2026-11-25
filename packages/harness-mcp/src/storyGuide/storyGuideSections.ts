@@ -8,7 +8,7 @@ export const barSection = [
 export const orderSection = [
   "## The order of work",
   "",
-  "1. The story first, with no paid call: set_story_plan with the logline, what the main character wants, what stands against it, what changes, and the shots with their states, strikes, camera, music map, and the prompts of each start picture and clip. Correct each warning.",
+  "1. The story first, with no paid call: set_story with the whole story, then show it to the person and ask for a yes or changes. Then set_story_plan with its form, the logline, what the main character wants, what stands against it, what changes, and the shots with their states, strikes, camera, music map, story_fact, and the prompts of each start picture and clip. Correct each warning.",
   "2. The cast: put_cast_member for each person, place, and prop of the plan, with its facts and sheet_prompts (a person who holds a prop: a second prompt for the hands with the prop).",
   "3. The art direction: set_bible style holds the medium, the line, the color, the light, the lens, and what never appears. The harness adds it to each picture and clip prompt.",
   "4. review_plan: the critic checks the whole first cut. Correct each blocking fault and call it again. No start picture or clip runs before a pass. A sheet picture can start as soon as its cast entry has facts and sheet_prompts. After two fails the check is used up: the work goes on, and each open fault goes to the critic of its shot as a note. A fault that breaks a fact of the brief still blocks until you restore its exact text.",

@@ -6,6 +6,7 @@ import {
   buildStoryProject,
   lengthenStoryPlan,
 } from "../../testing/storyProject.js";
+import { forgeStory, writeForgeStory } from "../../testing/wholeStory.js";
 import { noPlanText } from "./StoryView.js";
 
 let engine: RunningEngine | undefined;
@@ -112,6 +113,41 @@ describe("the story view", () => {
       .toContain(
         "The 2 shots of the plan have 20 seconds of video. With one retry of the two longest shots (20 seconds more), the film needs about 40 seconds, and the limit of the project is 30 seconds of generated video. Only the person can raise a limit, in Settings. The AI cannot.",
       );
+    await close();
+  });
+
+  it("shows the whole story first, above the form, the logline, and the shots", async () => {
+    await writeForgeStory(runningEngine());
+    const { page, close } = await openEditor(runningEngine().url);
+    await openStepSheet({ page, name: "Story" });
+    const sheet = page.getByRole("dialog", { name: "The story" });
+    const story = sheet.locator(".whole-story");
+
+    await expect.poll(() => story.count()).toBe(1);
+    const text = await story.innerText();
+    expect(text).toContain(forgeStory.premise);
+    expect(text).toContain("A blade that breaks in its first winter");
+    expect(text).toContain("Does not know");
+    expect(text).toContain("her father's last blade did not break");
+    expect(text).toContain("It tests every blade, and it does not care whose.");
+    expect(text).toContain("Drawn from the sheet of Aiko");
+    expect(text).toContain(
+      "The AI asks you to say yes to this story, or what to change, before it spends money.",
+    );
+    expect(
+      await sheet
+        .getByRole("list", { name: "The arc of the story" })
+        .getByRole("listitem")
+        .allInnerTexts(),
+    ).toEqual(forgeStory.arc.map((step) => step.step));
+    const storyTop = (await story.boundingBox())?.y ?? Infinity;
+    const loglineTop =
+      (await sheet.locator(".story-logline").boundingBox())?.y ?? 0;
+    expect(storyTop).toBeLessThan(loglineTop);
+    expect(await sheet.locator(".story-form").textContent()).toBe("A trailer");
+    expect(await sheet.locator(".shot-row .shot-text").innerText()).toContain(
+      "From the story: step 1 of the arc",
+    );
     await close();
   });
 });

@@ -17,6 +17,7 @@ import { Footage } from "./scenes/film/footage/Footage.js";
 import { Lines } from "./scenes/film/lines/Lines.js";
 import { LookSwap } from "./scenes/film/lookSwap/LookSwap.js";
 import { Shapes } from "./scenes/film/shapes/Shapes.js";
+import { TrailerCard } from "./scenes/film/trailerCard/TrailerCard.js";
 import { Wall } from "./scenes/film/wall/Wall.js";
 import { EndCard } from "./scenes/endCard/EndCard.js";
 import { Hero } from "./scenes/hero/Hero.js";
@@ -73,6 +74,7 @@ const kitSceneDefinitions: Record<string, KitSceneDefinition> = {
     command: Command,
     counts: Counts,
   }),
+  "trailer-card": { component: TrailerCard, paintsBackground: false },
 };
 
 function kitScenesFor(stylePack: StylePack): Record<string, SceneModule> {

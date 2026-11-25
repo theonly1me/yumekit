@@ -3,6 +3,7 @@ import type { Edit, ProjectSnapshot, Scene } from "@yumekit/project";
 import { applyEditsResult } from "../applyEditsResult.js";
 import type { HarnessContext } from "../context.js";
 import { failureResult } from "../results.js";
+import { withCardLines } from "../storyFirst/withCardLines.js";
 import { personWorkSentence } from "../timeline/personWorkInput.js";
 import { timelineEditOf } from "../timeline/timelineEdit.js";
 import { checkWork, workFailureOf } from "./checkWork.js";
@@ -121,6 +122,10 @@ export function registerPutWork(context: HarnessContext): void {
     name: "put_work",
     description: `Write the video as one piece in one call: shared code, scenes, the frame, and the timelines. The harness checks every part together, so a scene can import the shared code of the same call. When one part fails its check, nothing changes, and the failure lists each part. When all pass, the whole call is one change, and one undo removes all of it. Use kit scenes where they fit (they draw in the colors of set_look), write shared code only for what custom scenes share, then the timeline. remove takes away scenes and assets in the same change, for example the scenes that you made only to look at a file. Read the work with get_work before you change a video that exists. ${personWorkSentence}`,
     inputSchema: putWorkInput,
-    run: ({ input }) => putWork({ context, input }),
+    run: ({ input }) =>
+      withCardLines({
+        result: putWork({ context, input }),
+        read: () => context.store.read(),
+      }),
   });
 }

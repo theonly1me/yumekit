@@ -22,6 +22,36 @@ export const storyCalls: ScriptedCall[] = [
     },
   },
   {
+    name: "set_story",
+    input: {
+      premise: "A thirsty fox crosses a frozen lake to drink.",
+      world: "A frozen lake in a dry winter.",
+      world_rule: "The ice holds only what is light.",
+      characters: [
+        {
+          character_id: "fox",
+          name: "Fox",
+          background: "Born by the lake.",
+          want: "water",
+          fear: "the ice",
+          does_not_know: "the ice is thin",
+        },
+      ],
+      opposing_force: {
+        force_id: "ice",
+        name: "The ice",
+        what: "Thin winter ice.",
+        why: "It holds only what is light.",
+      },
+      arc: [
+        { step_id: "thirst", step: "The fox is thirsty." },
+        { step_id: "crack", step: "The ice cracks." },
+        { step_id: "drink", step: "The fox drinks." },
+      ],
+      unknown_at_end: "Whether the ice holds the fox.",
+    },
+  },
+  {
     name: "set_story_plan",
     input: {
       logline: "A fox finds a lake and drinks.",

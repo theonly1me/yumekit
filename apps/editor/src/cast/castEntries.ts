@@ -36,6 +36,7 @@ export const castEntrySchema = z.object({
     .optional(),
   restrictions: z.array(z.string()).optional(),
   briefFacts: z.array(z.string()).optional(),
+  storyCharacterId: z.string().optional(),
 });
 
 export type CastEntry = z.infer<typeof castEntrySchema>;

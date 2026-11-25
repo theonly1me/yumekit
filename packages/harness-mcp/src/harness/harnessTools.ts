@@ -43,6 +43,7 @@ import { registerAskHelper } from "../helpers/registerAskHelper.js";
 import { registerGetStoryGuide } from "../storyGuide/registerGetStoryGuide.js";
 import { registerRecordLesson } from "../storyPlan/registerRecordLesson.js";
 import { registerSetStoryPlan } from "../storyPlan/registerSetStoryPlan.js";
+import { registerSetStory } from "../storyFirst/registerSetStory.js";
 import { createSerialWrites } from "./serialWrites.js";
 import type { WorkBoard } from "../work/board/workBoard.js";
 import { callerStore } from "./callerStore.js";
@@ -80,6 +81,7 @@ export function harnessToolsOf(
   registerSetProjectName(context);
   registerCastTools(context);
   registerGetStoryGuide(context);
+  registerSetStory(context);
   registerSetStoryPlan(context);
   registerRecordLesson(context);
   registerPlatformTools(context);

@@ -3,6 +3,7 @@ import { promisify } from "node:util";
 import { fail, succeed, type Outcome } from "../outcome.js";
 import type { RenderFailure } from "../renderFailure.js";
 import { findFfmpeg } from "../video/findFfmpeg.js";
+import { musicHitsOf } from "./musicHits.js";
 
 const runFile = promisify(execFile);
 
@@ -21,6 +22,7 @@ export interface MusicCurve {
   lengthSeconds: number;
   loudness: number[];
   brightness: number[];
+  hits: number[];
 }
 
 async function samplesOf(options: {
@@ -86,5 +88,6 @@ export async function measureMusicCurve(
     lengthSeconds: Math.round((whole.length / sampleRate) * 100) / 100,
     loudness: decibelsPerStep(whole),
     brightness: decibelsPerStep(high),
+    hits: musicHitsOf({ samples: whole, sampleRate }),
   });
 }

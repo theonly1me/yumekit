@@ -29,7 +29,7 @@ function fieldsOf(options: { path: string; shape: z.core.$ZodShape }) {
 }
 
 describe("kitSceneSchemas", () => {
-  it("lists the twenty-six kit scenes of the design", () => {
+  it("lists the twenty-seven kit scenes of the design", () => {
     expect(Object.keys(kitSceneSchemas)).toEqual([
       "title-card",
       "bullet-list",
@@ -57,6 +57,7 @@ describe("kitSceneSchemas", () => {
       "look-swap",
       "command",
       "counts",
+      "trailer-card",
     ]);
   });
 

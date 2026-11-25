@@ -45,6 +45,19 @@ yumekit makes short videos on the computer of the person. It has no server and n
 5. To let the person watch and change the video, run `yumekit open <folder>`.
 6. Export only on request: the person clicks "Export" in the editor, or you call `render_video`.
 
+## Story first
+
+For a story film (a trailer, a short, an anime), write the story before any shot. A run once made a trailer from a list of 14 shots with no story behind them. The words on screen were generic ("the night is not empty"), the hero won each fight on screen, and two fights and the final encounter came one right after the other. The person rejected it: a trailer shows moments of a longer story, and it was the whole film pressed into 34 seconds.
+
+1. Read `get_story_guide`.
+2. Write the whole story with `set_story`: the premise in one sentence, the world and its rule, each main character (background, want, fear, and what they do not know), the opposing force and why it acts, the arc in 3 to 6 steps, and what stays unknown.
+3. Show the story to the person in plain words, and ask for a yes or changes. The question is free, and a wrong story wastes every paid shot after it. Skip it only when the person said to go ahead without asking.
+4. Write the plan with `set_story_plan`, with its `form` and the `story_fact` of each shot. A trailer raises a question and never shows how a conflict ends.
+5. Put a `trailer-card` between the moments of a trailer, with its `storyFact`, on a hit that `check_music` measured, and end on a `trailer-card` with `variant: "title"`.
+6. Test each line on screen: it is good when it could belong to this story only.
+
+An example. The story: in a village where a bell under the frozen lake rings once before each death, a girl who hears it ring for her grandfather goes under the ice to silence it; the keeper of the bell rings it so that nobody dies without a goodbye. The trailer: the girl and her grandfather pull a net from the ice (the world as it was); the card "Every winter, the lake keeps one sound"; frost spreads from under her boot (the break); the card "Tonight it rang for him"; she takes the ice saw from the wall (the stakes); three short moments under the ice (the rise); the title on the biggest hit. It never shows the face of the keeper or how the story ends.
+
 ## Keys
 
 - The AI needs no key. yumekit uses the sign-in of the agent program.

@@ -34,5 +34,6 @@ export const endCardSection = [
   "## The end card",
   "",
   "- Use the colors of the art direction with set_look colors, and a font that fits the film. Show only the words that the person asked for: no prompt sign, no extra line.",
+  "- For a trailer, the end card is a trailer-card with variant title: the name of the film on the biggest hit.",
   "",
 ].join("\n");

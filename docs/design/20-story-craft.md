@@ -803,3 +803,101 @@ These facts and choices came from the build of WP72 on 2026-11-25.
 22. Together: the request asked for the four shots with no word about tools. The lead read `get_work` and called `generate_assets` with 4 start pictures, `review_several` with 4 `review_start` (3 critic turns at once, the fourth waited for a place), and `generate_assets` with the 4 clips. 46.5 seconds from the request to the answer. The editor showed "Making now: 4" with 3 reviews running and 1 waiting.
 23. One by one: the request asked for one tool call in each step. The lead called `generate_asset` and `review_start` for each shot in turn. 72.3 seconds.
 24. In both runs the critic failed each start picture, because the sample server draws the prompt as text on a plain color, so no clip ran (`start-failed-review`). The measured gain is the critic turns of 4 shots: 46.5 against 72.3 seconds. With a real video service each clip waits 60 to 120 seconds, and the clips of free shots now overlap too; that gain is an inference, not measured here.
+
+## What went wrong in the sixth run
+
+On 2026-11-25 a real run of 13 hours made a 35 second anime trailer. The plan of that run was a list of 14 shots with no story behind them. The owner rejected the film. His words:
+
+- "the words like the night is not empty, some doors don't hold etc. are such generic bullshit words that make no sense there is no story or context. We first need to define the overarching story not just the scenes, what is the full story of the anime, hero's background, villain's background etc. Then, try to make a trailer, it should be clear that we're making a trailer"
+- "we didn't need to show the hero killing crawler and stone guy, this is just the trailer, not the full movie"
+- "All scenes are not happening right one after the other ... two fights happen back to back in the street and then final encounter underground ... that's not a movie or a movie trailer, that's just all of it in a 34 second clip it makes no sense"
+- "between the scenes I'd like a black screen ... with text that gives a brief message like a trailer does, it should look professional like a real cinematic trailer"
+
+The cause in one sentence: yumekit had a place for shots but none for the story behind them, no idea of the form of the film, and no scene for a card between shots, so the lead planned every event in order and wrote words that fit any film.
+
+## Decisions of WP74
+
+The product principle of the owner for this package: trust the lead, give it full information and good guidance, and check results. Do not add blanket rules that block.
+
+| Id  | Decision                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Why                                                                           |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| C44 | A story comes before shots. `bible.json` gets `story`: the premise in one sentence; the world and its rule; each main character with background, want, fear, and what they do not know; the opposing force and why it acts; the arc in 3 to 6 steps; what stays unknown at the end. The tool `set_story` writes it. `get_work` and the Story view show it first, above the shots. A plan with shots and no story gets a note from `set_story_plan`, not a refusal. A cast entry links to a character of the story | A list of shots with no story gives generic words and scenes                  |
+| C45 | The film has a form: `form` of the story plan is `trailer`, `short`, `explainer`, `music-video`, or `other`. The story guide gives the craft of each as advice with reasons, and the usual parts of a trailer                                                                                                                                                                                                                                                                                                     | A trailer that shows every fight to its end reads as the whole film           |
+| C46 | Every word on screen and every spoken line comes from the story. A shot and a card can carry `story_fact`, the id of a part of the story. A card or a line with no story fact gets a note. The guide gives the test: a line is good when it could belong to this story only                                                                                                                                                                                                                                       | "the night is not empty" could belong to any film                             |
+| C47 | A trailer card is a kit scene, `trailer-card`, with `variant: "title"` for the title. It costs nothing and uses the fonts and the look of the project. A card lands on a measured hit of the music when `check_music` measured one, else on the beat grid, and the answer says which                                                                                                                                                                                                                              | "a black screen ... with text ... like a real cinematic trailer"              |
+| C48 | The person approves the story before money, as a free step: after `set_story`, the lead shows the story in plain words and asks for a yes or changes, unless the request said to go ahead without asking. An instruction and a `get_work` line, not a gate                                                                                                                                                                                                                                                        | A wrong story wastes every paid shot after it, and the question costs nothing |
+| C49 | The story guide and `skills/yumekit/SKILL.md` get "Story first", with the reasons of the sixth run and one worked trailer built from an invented story                                                                                                                                                                                                                                                                                                                                                            | A lead follows a reason better than a rule                                    |
+
+## The story (C44)
+
+- `story` has `premise`, `world`, `worldRule`, `characters` (each with `id`, `name`, `background`, `want`, `fear`, `doesNotKnow`), `opposingForce` (`id`, `name`, `what`, `why`), `arc` (3 to 6 steps, each with `id` and `text`), `unknownAtEnd`, and `approval?`.
+- The parts of the story have ids for `story_fact`: the fixed ids `premise`, `world`, and `unknown`, and the id of each character, of the opposing force, and of each step of the arc.
+- `set_story` replaces the whole story as one undo step, through `setBible`. It refuses an id that two parts share, or a fixed id, with `id-in-use`. Its answer lists the ids and says what to ask the person.
+- `put_cast_member` takes `story_character_id`, the character or the opposing force that the entry plays.
+- `get_work` gives "### The story" in the story part, after the voice and before the cast and the plan, with the id of each part in brackets.
+- The Story view shows the story first: the premise, the answer of the person in plain words, the world and its rule, each character with what they want, fear, and do not know and the sheet that draws them, the opposing force with its reason, the arc, and what stays unknown.
+
+## The form (C45)
+
+- The story guide has "The form decides the structure": the craft of each form with its reason, and the usual parts of a trailer (the world as it was, the break, the stakes, the rise, the title), with what to leave out.
+- `set_story_plan` notes a plan with no form, and gives the craft of a trailer in its answer for a trailer. The Story view shows the form above the logline.
+
+## Words from the story (C46)
+
+- A shot has `story_fact`. A card has the prop `storyFact`. The Story view shows "From the story: ..." in each shot row.
+- Notes, never refusals: a card with no story behind it, with no `storyFact`, or with a `storyFact` that the story does not have; a shot whose `story_fact` is not a part of the story; a shot with words in quotes in its prompts and no story fact.
+
+## The trailer card (C47)
+
+- `trailer-card`: black, or the background of the look, or a still frame behind; one or two short lines in the display or body font of the look, with wide tracking; a fast fade in, a slow push, a hard cut out, and an optional flash of one frame on the beat where the words land. `variant: "title"` draws the name of the film larger.
+- `check_music` measures the hits of a track. The answer of `put_scene`, `put_work`, and `set_timeline` says where each card lands: on a measured hit, on a beat of the grid, or between beats, with the nearest hits.
+
+## The person approves the story (C48)
+
+- Rule 41 of the instructions of the AI and step 6 of the server instructions: show the story in plain words and ask for a yes or changes before any money, unless the request said to go ahead.
+- `get_work`, the answer of `set_story`, and a note of `set_story_plan` say when the person has not said yes yet. No tool refuses for it.
+
+## Story first in the guide and the skill (C49)
+
+- The story guide starts with "Story first" (the faults of the sixth run and the order of work), then the form, the words, the cards, and later "A worked example: a trailer built from its story". `skills/yumekit/SKILL.md` has the same section in short.
+
+## Work package WP74
+
+| Id   | Scope                                                                                                                      | Needs |
+| ---- | -------------------------------------------------------------------------------------------------------------------------- | ----- |
+| WP74 | The story and its tool, the form, story facts, the trailer card and the measured hits, the answer of the person, the guide | WP72  |
+
+### Checks of WP74
+
+1. `set_story` stores and returns the story; `set_story_plan` notes a plan with no story and saves it; the guide gives the forms and the parts of a trailer; the notes of a story fact fire for a card and a shot made to trigger them.
+2. A real render of `trailer-card` with its settings: black before its beat, the flash on it, the words, and black after the hold. A card on a measured hit and a card on the grid, each stated in the answer.
+3. The Story view shows the story first, in a browser test.
+4. A free real check with Claude Code as the lead on an empty project with sample media: a 20 second trailer of an original story.
+
+## Details of WP74
+
+These facts and choices came from the build of WP74 on 2026-11-25.
+
+### The parts
+
+1. The harness of the engine has 74 tools, and the lead sees 69: `set_story` is new. The project has no new edit kind: the story, the form, the story facts, and the hits go through `setBible`.
+2. The kit already had `title-card`: an opening title with an accent circle that grows in and left aligned words that rise in. It does not fit a cinematic card, and a mode that changes all of its drawing would be two scenes in one. So the new scene is `trailer-card`, and `variant: "title"` is its larger form. The kit has 27 scenes.
+3. The props of `trailer-card`: `lines` (1 or 2, at most 60 characters each), `variant` (`card` or `title`), `face` (`display` or `body`), `scale` (0.5 to 2), `tracking` (0 to 0.6 em; 0.28 for a card and 0.14 for a title by default), `capitals` (true by default), `color`, `background` (`black` or `look`), `backgroundAssetId` (a picture or a video, shown from its start and darkened by 62 percent), `landsOnBeat` (0 to 16), `holdSeconds`, `flash`, and `storyFact`, which does not draw.
+4. The motion: the words fade in over 0.12 seconds from their beat. They push from 1 to 1.05 times their size until the end of the hold, and a still behind them pushes from 1.04 to 1.10 times over the clip. At the end of the hold the words cut to black with no fade. The flash is one frame of warm white (#f2eee6) on the frame where the words land. A calm look has no push and no flash. A clip too short for its beat brings the words in sooner, as each kit scene does, so a clip of one frame shows them.
+5. The colors: black (#000000) by default. `look` takes the background of the look, also the own colors of `set_look`. The words take `color`, else the text color of the look when its contrast on the background is 4.5 or more, else warm white.
+6. Two text roles join the type scale: `filmCard` (4.2, 5, and 5.2 units in wide, square, and tall) and `filmTitle` (12, 11, and 11). The words sit between the side margins of the film grid, in the true middle of the picture, and out of the caption area.
+7. The hits: `measureMusicCurve` of `@yumekit/render` gives `hits`. It reads the level in windows of 20 milliseconds. A hit is a window at least 9 dB over the mean of the 10 windows before it, and at most 14 dB under the loud level of the track (the 95th percentile of all windows). Two hits are at least 0.3 seconds apart, and a track gives at most the 48 strongest. `check_music` stores them in seconds of the track as `hits` of the music check, and lists them in film seconds from the best start. A test track with two bursts at 1.0 and 2.5 seconds gives exactly those two hits.
+8. The landing: the words land at the start of the clip plus `landsOnBeat` beats (half a second for a beat with no tempo, as in the film kit), minus the scene start of the clip. The hits are those of each audio clip in the video whose asset has a music check with hits, moved by the start and the asset start of the clip. On a hit means within 2 frames. On the grid means within 1 frame of a whole or a half beat. `put_scene` (for that card), `put_work`, and `set_timeline` add one line for each card clip and `card_landings` with `lands_on`: `hit`, `beat`, or `off`. `get_work` lists the cards with their lines, their story fact, and their landing.
+9. The harness never moves a card. "Cards land on measured music hits" is reached by the measured hits, the guide, and an answer that says where each card landed. A snap of the start could move a cut that the lead chose, or make a card overlap a shot. This is the principle of the package: full information, no blanket rule.
+10. The answer of the person: `story.approval` is `person-said-yes` or `request-said-go-ahead`, or it is absent. `set_story` keeps an approval only when the story stays the same word for word, so a changed story is asked again. The person answers in the chat, and the lead records the yes with a second `set_story` call. No tool refuses for a missing yes.
+11. A spoken line has no field of its own. The story fact of its shot covers it. A shot whose start picture prompt or video prompt has words in quotes and no story fact gets a note. This is a word test, so it is a note.
+12. `put_cast_member` notes a person with no `story_character_id` when the project has a story, and a link to an id that is not a character or the opposing force of the story.
+13. The key of the plan check does not hold `form` or `story_fact`, because they do not change a picture. The critic of the plan does not see the story yet.
+14. The instructions of the AI get rule 41. The server instructions name `trailer-card` in step 3, and `set_story`, the question to the person, the form, the story fact, and the cards on the hits in step 6. `list_kit_scenes` names `trailer-card` for a trailer.
+
+### Follow-ups
+
+15. The critic of the plan sees the story and the form, and judges whether a trailer shows how a conflict ends.
+16. A field for a spoken line of a shot, with its speaker and its story fact.
+17. A button in the Story view for the yes of the person, so the person does not need the chat.
+18. A tool that places a card on a hit by itself, if real runs show that the lead often misses the hits.

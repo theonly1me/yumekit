@@ -5,6 +5,7 @@ import {
   type ProjectSnapshot,
 } from "@yumekit/project";
 import { tempoFactsOf } from "../../tempo/beatFacts.js";
+import { storyWorkLines } from "../../storyFirst/storyLines.js";
 import { planLines } from "./planText.js";
 
 function tempoLine(snapshot: ProjectSnapshot): string {
@@ -41,7 +42,11 @@ function castLines(snapshot: ProjectSnapshot): string[] {
       const prompts = (member.sheetPrompts ?? []).length;
       const planned =
         prompts === 0 ? "" : ` Sheet prompts: ${String(prompts)}.`;
-      return `- ${member.id} (${member.kind}) ${member.name}: ${member.description}${facts}${pictures}${checked}${restrictions}${planned}`;
+      const character =
+        member.storyCharacterId === undefined
+          ? ""
+          : ` Story character: ${member.storyCharacterId}.`;
+      return `- ${member.id} (${member.kind}) ${member.name}: ${member.description}${character}${facts}${pictures}${checked}${restrictions}${planned}`;
     }),
   ];
 }
@@ -69,6 +74,7 @@ export function storyText(snapshot: ProjectSnapshot): string {
     `Style (the art direction of each picture and clip): ${bible.style === "" ? "none" : bible.style}`,
     `Palette: ${bible.palette.length === 0 ? "the colors of the look" : bible.palette.join(", ")}`,
     `Voice: ${bible.voice === "" ? "none" : bible.voice}`,
+    ...storyWorkLines(snapshot),
     ...castLines(snapshot),
     ...planLines(snapshot),
     "### Script",

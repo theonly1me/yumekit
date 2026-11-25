@@ -23,6 +23,7 @@ export const kitSceneNames = [
   "video-clip",
   ...launchSceneNames,
   ...filmSceneNames,
+  "trailer-card",
 ] as const;
 
 export const typicalProps: Record<(typeof kitSceneNames)[number], JsonObject> =
@@ -59,6 +60,10 @@ export const typicalProps: Record<(typeof kitSceneNames)[number], JsonObject> =
     },
     ...launchTypicalProps,
     ...filmTypicalProps,
+    "trailer-card": {
+      lines: ["Every winter the lake", "keeps one sound"],
+      flash: true,
+    },
   };
 
 export const longProps: Record<(typeof kitSceneNames)[number], JsonObject> = {
@@ -82,6 +87,13 @@ export const longProps: Record<(typeof kitSceneNames)[number], JsonObject> = {
   "video-clip": { assetId: "clip", caption: longText },
   ...launchLongProps,
   ...filmLongProps,
+  "trailer-card": {
+    lines: [longText.slice(0, 60), longText.slice(60, 120)],
+    variant: "title",
+    scale: 2,
+    tracking: 0.6,
+    backgroundAssetId: "photo",
+  },
 };
 
 export async function testImageAsset(): Promise<SceneAsset> {

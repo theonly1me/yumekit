@@ -46,4 +46,16 @@ describe("the instructions for a film with AI video", () => {
       "Make the start pictures of all free shots in one generate_assets call, review them in one review_several call, make their clips in one generate_assets call, and review them in one review_several call.",
     );
   });
+
+  it("start a story film with the whole story, ask the person before the money, and keep every word in the story", () => {
+    expect(brainInstructions).toContain(
+      "41. A story film (a trailer, a short, an anime, a music video with a story) starts with its story, not its shots.",
+    );
+    expect(brainInstructions).toContain(
+      "Then end your turn: show the story to the person in plain words and ask for a yes or changes, and make nothing else until the person answers. A request to make a film is not a yes to its story;",
+    );
+    expect(brainInstructions).toContain(
+      "a line is good when it could belong to this story only",
+    );
+  });
 });

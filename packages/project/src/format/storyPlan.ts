@@ -22,6 +22,14 @@ export const shotAngles = [
 
 export const shotLenses = ["wide", "normal", "long"] as const;
 
+export const filmForms = [
+  "trailer",
+  "short",
+  "explainer",
+  "music-video",
+  "other",
+] as const;
+
 export const shotSecondsRange = { minimum: 2, maximum: 10 } as const;
 
 export const musicIntensityRange = { minimum: 1, maximum: 5 } as const;
@@ -59,6 +67,7 @@ export const shotSchema = z.strictObject({
   reviews: z.array(clipReviewSchema).exactOptional(),
   startReviews: z.array(startReviewSchema).exactOptional(),
   planNotes: z.array(z.string()).exactOptional(),
+  storyFact: idSchema.exactOptional(),
 });
 
 export const musicCheckSchema = z.strictObject({
@@ -66,9 +75,11 @@ export const musicCheckSchema = z.strictObject({
   startSeconds: z.number().min(0),
   fit: z.number().min(-1).max(1),
   warnings: z.array(z.string()),
+  hits: z.array(z.number().min(0)).exactOptional(),
 });
 
 export const storyPlanSchema = z.strictObject({
+  form: z.enum(filmForms).exactOptional(),
   logline: z.string(),
   want: z.string(),
   obstacle: z.string(),
@@ -86,6 +97,7 @@ export const storyPlanSchema = z.strictObject({
 export type ShotSize = (typeof shotSizes)[number];
 export type ShotAngle = (typeof shotAngles)[number];
 export type ShotLens = (typeof shotLenses)[number];
+export type FilmForm = (typeof filmForms)[number];
 export type Shot = z.infer<typeof shotSchema>;
 export type MusicCheck = z.infer<typeof musicCheckSchema>;
 export type StoryPlan = z.infer<typeof storyPlanSchema>;

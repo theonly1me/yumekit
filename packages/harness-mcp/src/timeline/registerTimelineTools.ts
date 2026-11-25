@@ -2,6 +2,7 @@ import type { Edit } from "@yumekit/project";
 import { z } from "zod";
 import { applyEditsResult } from "../applyEditsResult.js";
 import type { HarnessContext } from "../context.js";
+import { withCardLines } from "../storyFirst/withCardLines.js";
 import { idInput } from "../inputs.js";
 import { registerClipTools } from "./registerClipTools.js";
 import { keptLine, withKeptTransitions } from "./keptTransitions.js";
@@ -27,12 +28,16 @@ function registerSetTimeline(context: HarnessContext): void {
         outputId: output_id,
         tracks,
       });
-      return applyEditsResult({
-        store: context.store,
-        edits: [timeline.edit],
-        line: `Timeline of "${output_id}" set with ${String(tracks.length)} tracks.${keptLine(timeline.keptCount)}`,
-        data: { kept_transitions: timeline.keptCount },
-        keepPersonWork: remove_person_work !== true,
+      return withCardLines({
+        result: applyEditsResult({
+          store: context.store,
+          edits: [timeline.edit],
+          line: `Timeline of "${output_id}" set with ${String(tracks.length)} tracks.${keptLine(timeline.keptCount)}`,
+          data: { kept_transitions: timeline.keptCount },
+          keepPersonWork: remove_person_work !== true,
+        }),
+        read: () => context.store.read(),
+        outputId: output_id,
       });
     },
   });
