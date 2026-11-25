@@ -10,7 +10,7 @@ const headerPixels = 30;
 const labelPixels = 22;
 const gapPixels = 4;
 
-function escapeHtml(text: string): string {
+export function escapeHtml(text: string): string {
   return text
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
