@@ -8,6 +8,7 @@ import { tempoFactsOf } from "../../tempo/beatFacts.js";
 import { storyWorkLines } from "../../storyFirst/storyLines.js";
 import { castLookLines } from "./lookText.js";
 import { planLines } from "./planText.js";
+import { takesLines } from "./takesText.js";
 
 function tempoLine(snapshot: ProjectSnapshot): string {
   const { tempo, frames_per_beat } = tempoFactsOf(snapshot.project);
@@ -81,6 +82,7 @@ export function storyText(snapshot: ProjectSnapshot): string {
     ...storyWorkLines(snapshot),
     ...castLines(snapshot),
     ...planLines(snapshot),
+    ...takesLines(snapshot),
     "### Script",
     snapshot.script.trim() === "" ? "(no script yet)" : snapshot.script.trim(),
   ].join("\n");

@@ -34,7 +34,7 @@ function chosenCheckOf(options: {
   return isOpen(check) ? undefined : { ...check, personKept: { words } };
 }
 
-function withPersonChoice(options: {
+export function withPersonChoice(options: {
   snapshot: ProjectSnapshot;
   shotId: string;
   assetIds: string[];

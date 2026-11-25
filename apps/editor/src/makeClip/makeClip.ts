@@ -97,6 +97,9 @@ function pictureNameOf(options: {
     : `the picture "${assetNameOf(asset)}"`;
 }
 
+export const pickedPictureWords =
+  "I picked the start picture of this clip in Make a clip.";
+
 export function clipRequestOf(options: {
   choice: ModelChoice;
   prompt: string;
@@ -132,7 +135,10 @@ export function clipRequestOf(options: {
       },
       ...(options.firstFrameAssetId === undefined
         ? {}
-        : { first_frame_asset_id: options.firstFrameAssetId }),
+        : {
+            first_frame_asset_id: options.firstFrameAssetId,
+            person_chose_this_picture: pickedPictureWords,
+          }),
       ...(options.lastFrameAssetId === undefined
         ? {}
         : { last_frame_asset_id: options.lastFrameAssetId }),

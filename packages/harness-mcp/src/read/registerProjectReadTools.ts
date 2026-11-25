@@ -1,4 +1,5 @@
 import {
+  approvePicturesFirstOf,
   isCalm,
   lookOf,
   videoStyleOf,
@@ -32,6 +33,7 @@ function registerGetProject(context: HarnessContext): void {
           name: project.name,
           frames_per_second: project.framesPerSecond,
           video_style: videoStyleOf(project),
+          approve_pictures_first: approvePicturesFirstOf(project),
           look: lookOf(project),
           calm: isCalm(project),
           look_colors: project.lookColors ?? null,

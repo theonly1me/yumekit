@@ -45,7 +45,7 @@ function makeClip(options: {
 
 describe("generate_asset with camera_move", () => {
   it("records the id of the move and sends the prompt byte for byte, with no sentence of the move", async () => {
-    const harness = await startHarness();
+    const harness = await startHarness({ approvePicturesFirst: false });
 
     const result = await makeClip({ harness, extra: { camera_move: "orbit" } });
 
@@ -58,7 +58,7 @@ describe("generate_asset with camera_move", () => {
   });
 
   it("makes a new clip for another move, and reuses the clip for the same move", async () => {
-    const harness = await startHarness();
+    const harness = await startHarness({ approvePicturesFirst: false });
     await makeClip({ harness, extra: { camera_move: "orbit" } });
 
     const other = await makeClip({
@@ -78,7 +78,7 @@ describe("generate_asset with camera_move", () => {
   });
 
   it("fails with camera-move-not-found and the list of ids for an unknown move, and calls no tool", async () => {
-    const harness = await startHarness();
+    const harness = await startHarness({ approvePicturesFirst: false });
 
     const result = await makeClip({ harness, extra: { camera_move: "spin" } });
 
@@ -90,7 +90,7 @@ describe("generate_asset with camera_move", () => {
   });
 
   it("refuses camera_move for a picture", async () => {
-    const harness = await startHarness();
+    const harness = await startHarness({ approvePicturesFirst: false });
 
     const result = await harness.call({
       name: "generate_asset",
@@ -109,7 +109,7 @@ describe("generate_asset with camera_move", () => {
 
 describe("generate_asset with last_frame_asset_id", () => {
   it("passes the path of the picture as last_frame_path to a model that accepts a last picture", async () => {
-    const harness = await startHarness();
+    const harness = await startHarness({ approvePicturesFirst: false });
     await makeStill({ harness, assetId: "start" });
     await makeStill({ harness, assetId: "end" });
 
@@ -132,6 +132,7 @@ describe("generate_asset with last_frame_asset_id", () => {
   it("fails and names the model when the model takes no last picture", async () => {
     const harness = await startHarness({
       mediaToolsFile: { mcpServers: { fal: falServerCommand } },
+      approvePicturesFirst: false,
     });
     await makeStill({ harness, assetId: "start" });
     await makeStill({ harness, assetId: "end" });

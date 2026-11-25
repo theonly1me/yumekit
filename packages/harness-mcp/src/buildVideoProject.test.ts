@@ -50,6 +50,7 @@ describe("a 10 second video with generated clips, built with tool calls only", (
       outputs: [
         { id: "wide", label: "Wide", widthPixels: 640, heightPixels: 360 },
       ],
+      approvePicturesFirst: false,
     });
     const step = (call: {
       name: string;

@@ -39,7 +39,7 @@ export function keyPictureIdsOf(request: GenerateAssetInput): string[] {
   );
 }
 
-function isSavedClipEnd(options: {
+export function isSavedClipEnd(options: {
   snapshot: ProjectSnapshot;
   assetId: string;
 }): boolean {

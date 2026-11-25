@@ -27,29 +27,54 @@ function priceOf(options: {
   return known ?? cautiousPrices[capability].usd;
 }
 
-export async function planCostOf(options: {
-  mediaTools: MediaTools;
+export interface UnitPrices {
+  pictureUsd: number;
+  videoSecondUsd: number;
+}
+
+export async function unitPricesOf(
+  mediaTools: MediaTools,
+): Promise<UnitPrices> {
+  const imageModel =
+    (await strongestModelOf({ mediaTools, capability: "image" })) ??
+    (await mediaTools.chosenModel({ capability: "image" }));
+  const videoModel = await mediaTools.chosenModel({ capability: "video" });
+  return {
+    pictureUsd: priceOf({ model: imageModel, capability: "image" }),
+    videoSecondUsd: priceOf({ model: videoModel, capability: "video" }),
+  };
+}
+
+export function centsOf(usd: number): number {
+  return Math.round(usd * 100) / 100;
+}
+
+export function picturesOfPlan(options: {
   bible: Bible;
   plan: StoryPlan;
-}): Promise<number> {
-  const { mediaTools, plan } = options;
+}): number {
   const sheetPictures = planMembersOf(options).reduce(
     (...[total, member]) =>
       total + Math.max(1, (member.sheetPrompts ?? []).length),
     0,
   );
-  const pictures = sheetPictures + plan.shots.length;
+  return sheetPictures + options.plan.shots.length;
+}
+
+export async function planCostOf(options: {
+  mediaTools: MediaTools;
+  bible: Bible;
+  plan: StoryPlan;
+}): Promise<number> {
+  const { plan } = options;
   const seconds =
     plan.shots.reduce((...[total, shot]) => total + shot.seconds, 0) +
     retrySecondsOf(plan.shots);
-  const imageModel =
-    (await strongestModelOf({ mediaTools, capability: "image" })) ??
-    (await mediaTools.chosenModel({ capability: "image" }));
-  const videoModel = await mediaTools.chosenModel({ capability: "video" });
-  const usd =
-    pictures * priceOf({ model: imageModel, capability: "image" }) +
-    seconds * priceOf({ model: videoModel, capability: "video" });
-  return Math.round(usd * 100) / 100;
+  const prices = await unitPricesOf(options.mediaTools);
+  return centsOf(
+    picturesOfPlan(options) * prices.pictureUsd +
+      seconds * prices.videoSecondUsd,
+  );
 }
 
 export async function planBudgetWith(options: {

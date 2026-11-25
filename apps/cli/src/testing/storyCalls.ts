@@ -1,4 +1,5 @@
 import type { ScriptedCall } from "./everyToolCall.js";
+import { takeCalls } from "./takeCalls.js";
 
 export const storyCalls: ScriptedCall[] = [
   {
@@ -84,6 +85,7 @@ export const storyCalls: ScriptedCall[] = [
     input: { lesson: "Keep the paw large", cause: "The paw missed" },
   },
   { name: "get_shot_brief", input: { shot_id: "dawn" } },
+  ...takeCalls,
 ];
 
 export const reviewCalls: ScriptedCall[] = [

@@ -15,6 +15,13 @@ import { mcpInputFailureOf } from "./mcpInputFailure.js";
 import type { HarnessTool, ProgressListener } from "./toolTable.js";
 import { createWorkBoard, type WorkItem } from "../work/board/workBoard.js";
 import { createFilmClock, type ClockRecord } from "../clock/filmClock.js";
+import {
+  sendTake,
+  type SendTakeFailure,
+  type SentTake,
+  type TakeNoteInput,
+} from "../takes/sendTake.js";
+import type { Outcome } from "../results.js";
 
 export interface HarnessToolListing {
   name: string;
@@ -41,6 +48,10 @@ export interface Harness {
   work: HarnessWork;
   clock: () => Promise<ClockRecord>;
   call: (request: HarnessCall) => Promise<HarnessResult>;
+  sendTake: (request: {
+    takeId: string;
+    notes: TakeNoteInput[];
+  }) => Promise<Outcome<SentTake, SendTakeFailure>>;
   close: () => Promise<void>;
 }
 
@@ -130,6 +141,7 @@ export function createHarness(options: HarnessOptions): Harness {
         running.delete(pending);
       }
     },
+    sendTake: (request) => sendTake({ store: options.store, ...request }),
     close: async () => {
       isClosed = true;
       await Promise.allSettled([...running]);

@@ -62,8 +62,8 @@ describe("createHarness and createHarnessServer", () => {
   });
 
   it("give the same result for each tool of the full tool list", async () => {
-    const overMcp = await startHarness();
-    const direct = await startFunctionHarness();
+    const overMcp = await startHarness({ approvePicturesFirst: false });
+    const direct = await startFunctionHarness({ approvePicturesFirst: false });
     const calls = everyToolCall(await sourceImage());
 
     for (const { name, input } of calls) {

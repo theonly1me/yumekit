@@ -6,6 +6,12 @@ export {
   type HarnessWork,
 } from "./harness/createHarness.js";
 export type { WorkItem, WorkState } from "./work/board/workBoard.js";
+export {
+  takeNoteInput,
+  type SendTakeFailure,
+  type SentTake,
+  type TakeNoteInput,
+} from "./takes/sendTake.js";
 export type { ClockRecord, StageTimes } from "./clock/filmClock.js";
 export { filmStages, type FilmStage } from "./clock/filmStages.js";
 export {

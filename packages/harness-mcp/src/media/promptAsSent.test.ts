@@ -64,7 +64,7 @@ describe("the prompt as sent", () => {
   });
 
   it("notes a video prompt over 900 characters and still makes the clip", async () => {
-    const harness = await startHarness();
+    const harness = await startHarness({ approvePicturesFirst: false });
     const prompt =
       `A fox runs across the snow. ${"Its tail streams behind it. ".repeat(33)}`.trim();
 

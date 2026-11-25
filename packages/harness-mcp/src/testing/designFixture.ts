@@ -1,6 +1,6 @@
 import type { JsonObject } from "@yumekit/tools";
 import type { CriticScript } from "./criticFixture.js";
-import type { Harness, ToolCall } from "./harnessFixture.js";
+import type { Harness, ToolCall, ToolCaller } from "./harnessFixture.js";
 import {
   makeForgeSheets,
   passPlan,
@@ -24,7 +24,7 @@ export const smithLook = {
 };
 
 export function dressSmith(options: {
-  harness: Harness;
+  harness: ToolCaller;
   looks?: object[];
   extra?: Record<string, unknown>;
 }): Promise<ToolCall> {
@@ -115,7 +115,7 @@ export async function startDesignStory(critic: CriticScript): Promise<Harness> {
 }
 
 export async function reviewedStart(options: {
-  harness: Harness;
+  harness: ToolCaller;
   endPicture?: boolean;
 }): Promise<ToolCall> {
   const { harness } = options;

@@ -3,6 +3,7 @@ import type { Asset } from "@yumekit/project";
 import { applyEditsResult } from "../applyEditsResult.js";
 import type { HarnessContext } from "../context.js";
 import { successResult } from "../results.js";
+import { joinTakeEdits } from "../takes/joinTake.js";
 
 export function summaryOf(options: {
   asset: Pick<
@@ -63,6 +64,11 @@ export async function reuseAsset(options: {
         },
         ...(words.ok ? { words: words.value } : {}),
       },
+      ...joinTakeEdits({
+        assetId,
+        tool:
+          existing.source.kind === "tool" ? existing.source.tool : undefined,
+      }),
     ],
     line: `Asset "${assetId}" reuses the file of "${existing.id}", which has the same source. No new call to the media tool.`,
     data: summaryOf({ asset: { ...existing, id: assetId }, reused: true }),

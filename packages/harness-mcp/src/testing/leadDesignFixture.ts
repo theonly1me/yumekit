@@ -5,7 +5,7 @@ import {
   type DesignBreak,
 } from "./designFixture.js";
 import { designLooksOf } from "./designLooks.js";
-import type { Harness, ToolCall } from "./harnessFixture.js";
+import type { Harness, ToolCall, ToolCaller } from "./harnessFixture.js";
 import { makeSheet, setPlan, startStoryHarness } from "./storyFixture.js";
 
 export interface LeadTarget {
@@ -15,6 +15,15 @@ export interface LeadTarget {
 
 export async function startDraftStory(shotIds: string[]): Promise<Harness> {
   const harness = await startStoryHarness({ videoStyle: "ai-video" });
+  await dressDraftStory({ harness, shotIds });
+  return harness;
+}
+
+export async function dressDraftStory(options: {
+  harness: ToolCaller;
+  shotIds: string[];
+}): Promise<void> {
+  const { harness, shotIds } = options;
   await makeSheet({ harness, castId: "forge", kind: "place", facts: [] });
   await harness.call({
     name: "put_cast_member",
@@ -46,7 +55,6 @@ export async function startDraftStory(shotIds: string[]): Promise<Harness> {
     harness,
     shots: shotIds.map((shotId) => ({ shot_id: shotId })),
   });
-  return harness;
 }
 
 function sectionsOf(text: string): Map<string, string> {
@@ -59,7 +67,7 @@ function sectionsOf(text: string): Map<string, string> {
 }
 
 export async function checkedByLead(options: {
-  harness: Harness;
+  harness: ToolCaller;
   targets: LeadTarget[];
   designBreak?: DesignBreak;
 }): Promise<ToolCall> {
