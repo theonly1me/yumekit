@@ -77,7 +77,8 @@ function registerListMediaTools(context: HarnessContext): void {
       );
       const failedServers = context.mediaTools.failedServers();
       const generatedVideo = {
-        limit_seconds: context.mediaTools.limits().generatedVideoSeconds,
+        limit_seconds: (await context.mediaTools.limits())
+          .generatedVideoSeconds,
         used_seconds: roundedSeconds(
           generatedVideoSecondsOf(context.store.read()),
         ),

@@ -58,6 +58,17 @@ export const chatEntrySchema = z.discriminatedUnion("kind", [
   }),
   z.object({ kind: z.literal("notice"), id: z.string(), text: z.string() }),
   z.object({
+    kind: z.literal("money"),
+    id: z.string(),
+    what: z.string(),
+    estimateUsd: z.number(),
+    leftUsd: z.number(),
+    raiseToUsd: z.number(),
+    paidCalls: z.number().int().min(0),
+    callsThatFit: z.number().int().min(0),
+    choice: z.enum(["raise", "fewer", "stop", "replaced"]).nullable(),
+  }),
+  z.object({
     kind: z.literal("steering"),
     id: z.string(),
     text: z.string(),
@@ -82,6 +93,8 @@ export type RequestEntry = Extract<ChatEntry, { kind: "request" }>;
 export type AnswerEntry = Extract<ChatEntry, { kind: "answer" }>;
 export type ChangeEntry = Extract<ChatEntry, { kind: "change" }>;
 export type SteeringEntry = Extract<ChatEntry, { kind: "steering" }>;
+export type MoneyEntry = Extract<ChatEntry, { kind: "money" }>;
+export type MoneyChoice = Exclude<MoneyEntry["choice"], "replaced" | null>;
 export type RequestAbout = z.infer<typeof aboutSchema>;
 export type ChangeAuthor = ChangeEntry["by"];
 
@@ -95,7 +108,8 @@ export type ChatFailureKind =
   | "change-not-found"
   | "file-not-found"
   | "questions-closed"
-  | "answers-not-valid";
+  | "answers-not-valid"
+  | "money-warning-not-open";
 
 export interface ChatFailure {
   kind: ChatFailureKind;

@@ -249,3 +249,62 @@ The engine of the branch ran a small film with the free sample server and the fa
 
 1. The description of `set_story_plan` still says that no start picture or clip runs before the critic passes the plan. WP76 removed that gate. WP77 rewrites the guide and can correct it.
 2. Until WP77, the guide of the lead does not name takes. The descriptions of `open_take` and `ready_take` and the hints of `picture-not-approved` teach the flow.
+
+## Details of WP82
+
+These facts and choices came from the build of WP82 on 2026-11-26.
+
+### Limits for every project
+
+1. The limits for every project are `limits.spendingUsd` and `limits.generatedVideoSeconds` of `media-tools.json` in the yumekit configuration folder. This replaces C42 of document 20: Settings no longer writes a limit to the project by default.
+2. "Use other limits for this project" writes both limits to the project file, with the values in use. So the own limits of a project never mix the two files. Turning it off removes only these two fields, and keeps `callsAtOnce` and every other field of the file.
+3. `GET /api/media/limits` gives the limits in use, `every_project`, and `this_project` (`null` when the project has no own limits). `PUT /api/media/limits` takes `applies_to` (`every-project` or `this-project`) and one or both limits. `DELETE /api/media/limits/this-project` removes the own limits. Each answers with the same body as the GET. Each change refuses the header `x-yumekit-client: agent` with `limit-not-for-the-ai` (403), as before.
+4. An engine reads both files again before each limit check. Calls at the same time share one read, so the first call of a batch still starts first. So a change in the Settings of one project applies at once to the other open projects. When a file stops being valid, the last valid limits stay in use.
+5. Settings shows each limit with "-" and "+" (5 dollars and 10 seconds) and a field to type the amount. A press of Enter or a move out of the field saves it.
+6. "Who makes the film" keeps the AI apps and the model of the lead. The model of the AI that checks the work moves under "More settings", next to "How the AI checks the film".
+7. The switch "Approve pictures before clips" sits under "More settings", before "How the AI checks the film". It calls `set_approve_pictures_first` of WP80, and a project with no value shows it on.
+
+### The batch over the money left
+
+8. `MediaTools.estimate` adds the price of each call with the rule of the spending check: the catalog price, else the cautious price of document 15. It makes no call.
+9. A call counts as 0 when it cannot spend: a free server, a service with no key or a key that does not work, an asset id that the project has, the second call for one asset id, and a call that a rule of the story refuses before the media call, for example a clip of a picture that is not approved (`picture-not-approved`).
+10. The money left is the limit less the money spent and less the price of the calls that still run.
+11. `over-money-left` gives `estimate_usd`, `left_usd`, `limit_usd`, `spent_usd`, `what`, `paid_calls`, and `calls_that_fit`. `what` is the plural word of the kind with the largest share of the price, for example "clips". `calls_that_fit` is the largest number of calls that fit, the cheapest first. The record of requests keeps each refused call.
+12. The spending check rounds the sum to 0.0001 dollars before it compares it with the limit. Before, three pictures of $0.40 did not fit in $1.20, because the sum was 1.2000000000000002.
+
+### The warning and its three choices
+
+13. The warning is a chat entry of the kind `money`, with `what`, `estimateUsd`, `leftUsd`, `raiseToUsd`, `paidCalls`, `callsThatFit`, and `choice`. The engine adds it when a harness call returns `over-money-left`, and gives an earlier open warning the choice `replaced`. So only one warning has the buttons. WP83 shows the same entry in the next action area.
+14. `POST /api/chat/money/<id>` takes `choice` (`raise`, `fewer`, or `stop`). It refuses the AI (403) and a warning that already has a choice (409).
+15. X of "Raise this project to $X" is the money spent plus the estimate, rounded up to the next 5 dollars. Raise writes the own spending limit of the project, and asks the lead: "I raised the money of this project to $X. Go on with the clips." When the limit of the project is already X or more, it writes nothing.
+16. "Make fewer clips (N)" shows the number of calls that fit, and asks the lead: "Make fewer clips. The clips cost about $3.60, and $3.00 is left. Make at most N, the ones that matter most for the film, and tell me which ones you leave out." It does not show when nothing fits. "Stop here" asks nothing.
+
+### The smaller file
+
+17. The rule is in `@yumekit/project`. The editor imports it from the new path `@yumekit/project/file-size` (document 01). So the renderer and the Export sheet use the same rule.
+18. 1 MB is 1,000,000 bytes, so a file under 10 MB is also under 10 MiB.
+19. The renderer makes the best file first, in a temporary folder, and then two passes of H.264 (`-preset slow`) from it, with AAC at 128 kbps and `+faststart`. It removes the temporary folder.
+20. The video bitrate is 94 percent of the size, in bits, divided by the length, less 128 kbps when the video has sound. On the samples, a two-pass file was 95 to 108 percent of its target. So the renderer reads the real size, and encodes once more at a lower rate when the file is over the size. When it is still over, the result is `file-size-not-reached` with the smallest size, and no file stays.
+21. `render_video` takes `largest_megabytes` and `short_side_pixels`, and gives `bytes`. The file name ends with `-under-<size>mb`, for example `film-youtube-under-10mb.mp4`, so a smaller file never replaces the best file.
+22. Export has one file size for the whole export, under the places. "More" holds the picture size (the render scale) and the sharper copy. The real size shows next to "Show the file".
+
+### When a size is too small for the length
+
+23. Measured on 2026-11-26 on the computer of the owner, with FFmpeg 4.4 and libx264. Each value is the SSIM of the smaller file against the best file, at 1080p for the comparison. The samples:
+    - AI footage: a real clip of a video model, looped to 12 seconds at 1080p. The best file is 6.5 Mbps.
+    - The explainer example project, a 30 second render with screen recordings. The best file is 3.2 Mbps.
+    - The demo project, an 18 second render of kit scenes with a voice and music. The best file is 0.7 Mbps.
+
+    | Video kbps | Footage at 1080p | Footage at 720p | Footage at 480p | Explainer at 1080p | Demo at 1080p |
+    | ---------- | ---------------- | --------------- | --------------- | ------------------ | ------------- |
+    | 1500       | 0.978            | 0.979           |                 | 0.995              |               |
+    | 1000       | 0.970            | 0.972           |                 | 0.993              |               |
+    | 700        | 0.960            | 0.963           |                 | 0.990              |               |
+    | 500        | 0.947            | 0.952           | 0.929           | 0.987              | 1.000         |
+    | 350        | 0.925            | 0.936           | 0.916           | 0.983              |               |
+    | 250        | 0.891            | 0.913           | 0.900           | 0.977              | 0.999         |
+    | 150        | 0.792            |                 | 0.865           |                    | 0.997         |
+
+24. AI footage is the hard case, so the rule follows it. A look at frames of the footage showed little loss at 700 kbps at 1080p, soft hair and wood grain at 500, and smeared detail at 350. At 720p, 500 kbps looked like 1080p at 700.
+25. The rule: a picture looks sharp when the video has at least 700 × (short side / 1080)^1.5 kbps. That is 700 at 1080, 381 at 720, and 207 at 480. Under that, Export says "This video looks soft under 10 MB." and offers "Make it 720p", or 480p when 720p is not enough. When 480p is not enough either, it says "This video is too long to look good under 10 MB. Pick a larger size." Under 100 kbps of video, it says "A file under 10 MB cannot hold this video. Pick at least N MB.", and Export is off.
+26. The expected size of "Best quality" is an upper bound, "Up to about N MB": the rate of the footage sample, 6.5 Mbps at 1080p and 30 frames a second, scaled by the pixels in a second. Drawn scenes make a much smaller file.

@@ -82,7 +82,7 @@ export async function planBudgetWith(options: {
   bible: Bible;
   plan: StoryPlan;
 }): Promise<PlanBudget> {
-  const limits = options.mediaTools.limits();
+  const limits = await options.mediaTools.limits();
   return planBudgetOf({
     shots: options.plan.shots,
     estimateUsd: await planCostOf(options),

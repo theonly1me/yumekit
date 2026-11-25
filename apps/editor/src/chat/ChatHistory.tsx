@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef } from "react";
 import { AnswerView } from "./AnswerView.js";
 import { ChangeLine } from "./ChangeLine.js";
+import { MoneyNotice } from "./money/MoneyNotice.js";
 import { laterChangeCount, retryOf, roundOf } from "./chatEntries.js";
 import type { AskInput } from "./chatRequests.js";
 import type { ChatEntry } from "./chatSchemas.js";
@@ -47,6 +48,9 @@ export function ChatHistory(props: {
         ];
   };
 
+  const newestOpenMoney = chat.entries.findLast(
+    (entry) => entry.kind === "money" && entry.choice === null,
+  );
   const viewOf = (entry: ChatEntry) => {
     switch (entry.kind) {
       case "request":
@@ -76,6 +80,17 @@ export function ChatHistory(props: {
             })}
             isBusy={chat.isRunning}
             onUndo={() => chat.undo(entry.id)}
+          />
+        );
+      case "money":
+        return (
+          <MoneyNotice
+            key={entry.id}
+            entry={entry}
+            isNewestOpen={entry === newestOpenMoney}
+            onChoose={(choice) =>
+              chat.chooseMoney({ entryId: entry.id, choice })
+            }
           />
         );
       case "notice":

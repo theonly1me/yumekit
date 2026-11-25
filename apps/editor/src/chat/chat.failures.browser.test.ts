@@ -65,7 +65,7 @@ describe("the failures in the chat", () => {
     const settings = editor.page.getByRole("dialog", { name: "Settings" });
     expect(
       await settings
-        .getByRole("heading", { name: "AI", exact: true })
+        .getByRole("heading", { name: "Who makes the film", exact: true })
         .isVisible(),
     ).toBe(true);
     await editor.close();

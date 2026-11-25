@@ -5,6 +5,7 @@ import { z } from "zod";
 import { closeBrowser, openEditor } from "../testing/editorPage.js";
 import { buildKitSceneProject } from "../testing/kitSceneProject.js";
 import { runEngine, type RunningEngine } from "../testing/runEngine.js";
+import { openMoreSettings } from "../testing/mediaTestTools.js";
 
 const started: RunningEngine[] = [];
 const projectSchema = z.looseObject({ calm: z.boolean().optional() });
@@ -38,6 +39,7 @@ describe("Calm motion in Settings", () => {
     await editor.page
       .getByRole("button", { name: "Settings", exact: true })
       .click();
+    await openMoreSettings(editor.page);
     const calmSwitch = editor.page
       .getByRole("dialog", { name: "Settings" })
       .getByRole("switch", { name: /^Calm motion/ });

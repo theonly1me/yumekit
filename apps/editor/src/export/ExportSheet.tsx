@@ -3,16 +3,25 @@ import type { EngineClient } from "../engine/engineClient.js";
 import type { Snapshot } from "../engine/snapshot.js";
 import { useMediaChoices } from "../settings/services/index.js";
 import { Sheet } from "../sheets/Sheet.js";
-import { sceneNameById } from "../names/index.js";
 import { useMediaServers } from "../tools/useMediaServers.js";
-import type { ExportJob, ExportScale, SceneTarget } from "./exportJobs.js";
-import { ExportSize } from "./ExportSize.js";
+import type { ExportScale, SceneTarget } from "./exportJobs.js";
+import {
+  longestVideoOf,
+  rendersFolderOf,
+  shortRendersFolderOf,
+  withKey,
+} from "./exportSheetFacts.js";
+import { ExportMore } from "./ExportMore.js";
+import { ExportRowList } from "./ExportRowList.js";
 import { exportRowsOf, leadOf, outputIdsOf, videosWord } from "./exportRows.js";
-import { ExportRowView } from "./ExportRowView.js";
-import { FailedExport } from "./FailedExport.js";
+import {
+  bestQuality,
+  planOf,
+  type FileSizeChoice,
+} from "./fileSize/fileSizeChoice.js";
+import { FileSizeView } from "./fileSize/FileSizeView.js";
 import { sharperChoiceOf } from "./sharperChoice.js";
 import { sharperRequestsOf } from "./sharperRequests.js";
-import { SharperSwitch } from "./SharperSwitch.js";
 import type { Exports } from "./useExports.js";
 import "./export.css";
 
@@ -28,20 +37,6 @@ function headlineOf(exports: Exports): string {
   return files.length === 1 ? "Your video is ready" : "Your videos are ready";
 }
 
-function rendersFolderOf(projectFolder: string): string {
-  const separator = projectFolder.includes("\\") ? "\\" : "/";
-  return `${projectFolder.replace(/[\\/]+$/, "")}${separator}renders`;
-}
-
-function shortRendersFolderOf(projectFolder: string): string {
-  const folderName =
-    projectFolder
-      .split(/[\\/]+/)
-      .filter((part) => part !== "")
-      .at(-1) ?? "";
-  return `${folderName}/renders`;
-}
-
 export function ExportSheet(props: {
   client: EngineClient;
   snapshot: Snapshot;
@@ -52,15 +47,13 @@ export function ExportSheet(props: {
 }) {
   const { client, snapshot, exports } = props;
   const rows = exportRowsOf(snapshot);
-  const jobOf = (outputId: string): ExportJob | undefined =>
-    exports.jobs.find((job) => job.outputId === outputId);
   const [chosen, setChosen] = useState<ReadonlySet<string>>(
     () =>
       new Set(
         rows
           .filter((row) =>
             exports.jobs.length > 0
-              ? jobOf(row.output.id) !== undefined
+              ? exports.jobs.some((job) => job.outputId === row.output.id)
               : row.lengthFrames > 0,
           )
           .map((row) => row.key),
@@ -76,8 +69,14 @@ export function ExportSheet(props: {
   const [sharperKeys, setSharperKeys] = useState<ReadonlySet<string>>(
     () => new Set(),
   );
-  const failureShownFor = new Set<string>();
   const [scale, setScale] = useState<ExportScale>(1);
+  const [fileSize, setFileSize] = useState<FileSizeChoice>(bestQuality);
+  const { framesPerSecond } = snapshot.project;
+  const video = longestVideoOf({ rows: chosenRows, scale, framesPerSecond });
+  const isTooSmall =
+    fileSize.kind === "smaller" &&
+    video !== undefined &&
+    planOf({ choice: fileSize, video }).look === "too-small";
 
   return (
     <Sheet titleId="export-title" onClose={props.onClose}>
@@ -89,86 +88,47 @@ export function ExportSheet(props: {
           One file for each place, in its own shape.{" "}
           {leadOf({ snapshot, rows })}
         </p>
-        <ul className="export-rows" aria-label="Files to export">
-          {rows.map((row) => {
-            const job = jobOf(row.output.id);
-            const failed =
-              job?.state.kind === "failed" &&
-              !failureShownFor.has(row.output.id)
-                ? job.state
-                : undefined;
-            failureShownFor.add(row.output.id);
-            return (
-              <ExportRowView
-                key={row.key}
-                client={client}
-                row={row}
-                job={job}
-                scale={job?.scale ?? scale}
-                isChosen={chosen.has(row.key)}
-                isLocked={exports.isRunning}
-                onChoose={(isChosen) => {
-                  const next = new Set(chosen);
-                  if (isChosen) next.add(row.key);
-                  else next.delete(row.key);
-                  setChosen(next);
-                }}
-                sharper={
-                  sharperChoice === undefined ||
-                  !chosen.has(row.key) ||
-                  row.lengthFrames === 0 ? undefined : (
-                    <SharperSwitch
-                      row={row}
-                      choice={sharperChoice}
-                      framesPerSecond={snapshot.project.framesPerSecond}
-                      isOn={sharperKeys.has(row.key)}
-                      isLocked={exports.isRunning}
-                      onChange={(isOn) => {
-                        const next = new Set(sharperKeys);
-                        if (isOn) next.add(row.key);
-                        else next.delete(row.key);
-                        setSharperKeys(next);
-                      }}
-                    />
-                  )
-                }
-                failure={
-                  failed === undefined ? undefined : (
-                    <FailedExport
-                      message={failed.message}
-                      failedAt={failed.failedAt}
-                      sceneTitle={
-                        failed.failedAt === undefined
-                          ? undefined
-                          : sceneNameById({
-                              sceneId: failed.failedAt.sceneId,
-                              scenes: snapshot.scenes,
-                              assets: snapshot.assets,
-                            })
-                      }
-                      onOpenScene={(failedAt) => {
-                        props.onOpenScene({
-                          outputId: row.output.id,
-                          ...failedAt,
-                        });
-                      }}
-                    />
-                  )
-                }
-              />
-            );
-          })}
-        </ul>
-        <ExportSize
+        <div className="export-places">
+          <ExportRowList
+            client={client}
+            snapshot={snapshot}
+            rows={rows}
+            jobs={exports.jobs}
+            chosenKeys={chosen}
+            scale={scale}
+            fileSize={fileSize}
+            isLocked={exports.isRunning}
+            onChoose={({ key, isChosen }) => {
+              setChosen(withKey({ keys: chosen, key, isIn: isChosen }));
+            }}
+            onOpenScene={props.onOpenScene}
+          />
+          <FileSizeView
+            choice={fileSize}
+            video={video}
+            isLocked={exports.isRunning}
+            onChoose={setFileSize}
+          />
+        </div>
+        <ExportMore
+          rows={chosenRows}
+          framesPerSecond={framesPerSecond}
           scale={scale}
           isLocked={exports.isRunning}
           onScale={setScale}
+          sharperChoice={sharperChoice}
+          sharperKeys={sharperKeys}
+          onSharper={({ key, isOn }) => {
+            setSharperKeys(withKey({ keys: sharperKeys, key, isIn: isOn }));
+          }}
         />
         <div className="start-action">
           <button
             type="button"
             className="primary large"
-            disabled={exports.isRunning || chosenRows.length === 0}
+            disabled={
+              exports.isRunning || chosenRows.length === 0 || isTooSmall
+            }
             onClick={() => {
               exports.start({
                 outputIds: outputIdsOf(chosenRows),
@@ -177,6 +137,7 @@ export function ExportSheet(props: {
                   target: sharperChoice?.target,
                 }),
                 scale,
+                fileSize,
               });
             }}
           >

@@ -11,6 +11,7 @@ import { createHelperDesk } from "./helpers/helperDesk.js";
 import { createCriticDesk, personCriticRun } from "./helpers/criticDesk.js";
 import { loadChat } from "./chatFile.js";
 import { createChatLog } from "./chatLog.js";
+import { createMoneyDesk } from "./money/moneyDesk.js";
 import {
   createQuestionDesk,
   questionsWaitingResult,
@@ -131,6 +132,7 @@ export async function createChat(options: {
               }),
       }),
     helperCallOf: (token) => critics.callOf(token) ?? helpers.callOf(token),
+    money: createMoneyDesk({ log, startRequest: door.startRequest }),
     close: async () => {
       state.isClosing = true;
       stop();

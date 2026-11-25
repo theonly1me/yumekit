@@ -1,0 +1,22 @@
+.entry.notice.money-notice[data-open="true"] {
+  margin-left: 0;
+  padding: 12px 14px;
+  gap: 10px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--raised);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.entry.notice.money-notice[data-open="true"] p {
+  color: var(--text);
+  font-size: var(--step-0);
+}
+
+.money-notice[data-open="true"] .notice-actions button {
+  padding: 6px 14px;
+}
+
+.entry.notice.money-notice[data-open="false"] p {
+  color: var(--muted);
+}

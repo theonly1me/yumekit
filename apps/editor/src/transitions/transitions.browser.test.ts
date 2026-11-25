@@ -3,6 +3,7 @@ import { buildCounterProject } from "../testing/counterProject.js";
 import { closeBrowser, openEditor } from "../testing/editorPage.js";
 import { scenesRowClipsOf } from "../testing/projectFacts.js";
 import { runEngine, type RunningEngine } from "../testing/runEngine.js";
+import { openMoreSettings } from "../testing/mediaTestTools.js";
 
 let engine: RunningEngine | undefined;
 
@@ -61,6 +62,7 @@ describe("transitions in the editor", () => {
     await editor.page
       .getByRole("button", { name: "Settings", exact: true })
       .click();
+    await openMoreSettings(editor.page);
     const row = editor.page.getByRole("group", { name: "Between scenes" });
 
     await row.getByRole("button", { name: "Fade" }).click();

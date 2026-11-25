@@ -49,6 +49,7 @@ export interface SpendingBook {
     Outcome<Reservation, SpendingLimitReached | SpendingRecordNotValid>
   >;
   summary: () => Promise<Outcome<SpendingSummary, SpendingRecordNotValid>>;
+  heldUsd: () => number;
 }
 
 export function roundedUsd(usd: number): number {
@@ -61,7 +62,7 @@ function totalOf(entries: LedgerEntry[]): number {
 
 export function createSpendingBook(options: {
   projectFolder: string;
-  limitUsd: () => number;
+  limitUsd: () => Promise<number>;
 }): SpendingBook {
   const file = ledgerFileOf(options.projectFolder);
   const reserved = new Set<{ usd: number }>();
@@ -85,8 +86,8 @@ export function createSpendingBook(options: {
       const entries = await readLedger(file);
       if (!entries.ok) return entries;
       const spentUsd = totalOf(entries.value);
-      const limitUsd = options.limitUsd();
-      if (spentUsd + reservedUsd() + call.usd > limitUsd) {
+      const limitUsd = await options.limitUsd();
+      if (roundedUsd(spentUsd + reservedUsd() + call.usd) > limitUsd) {
         return {
           ok: false,
           failure: {
@@ -126,7 +127,7 @@ export function createSpendingBook(options: {
       await writes;
       const entries = await readLedger(file);
       if (!entries.ok) return entries;
-      const limitUsd = options.limitUsd();
+      const limitUsd = await options.limitUsd();
       const spentUsd = roundedUsd(totalOf(entries.value));
       return {
         ok: true,
@@ -138,5 +139,6 @@ export function createSpendingBook(options: {
         },
       };
     },
+    heldUsd: reservedUsd,
   };
 }

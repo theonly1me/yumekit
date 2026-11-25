@@ -83,3 +83,21 @@
   gap: 8px;
   justify-items: start;
 }
+
+.export-places {
+  display: grid;
+  gap: 4px;
+}
+
+.export-sharpers {
+  display: grid;
+  gap: 8px;
+}
+
+.export-sharpers .export-sharper {
+  padding-left: 0;
+}
+
+.export-row .real-size {
+  margin-left: auto;
+}

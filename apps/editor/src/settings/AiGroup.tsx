@@ -49,10 +49,10 @@ export function AiGroup(props: { client: EngineClient; chat: Chat }) {
   useEffect(reload, [reload]);
   return (
     <section className="setting-group" aria-labelledby="ai-title">
-      <h3 id="ai-title">AI</h3>
+      <h3 id="ai-title">Who makes the film</h3>
       <p className="fact">
-        The AI writes the script and builds the video. yumekit uses an AI app
-        that is already on this computer.
+        The lead is an AI app on this computer. It writes the story and makes
+        the film with you.
       </p>
       {state.kind === "ready" ? (
         <ul className="setting-rows" aria-label="AI apps">
@@ -84,7 +84,11 @@ export function AiGroup(props: { client: EngineClient; chat: Chat }) {
           {failure}
         </p>
       )}
-      <AiModels client={props.client} agentId={props.chat.agent?.id} />
+      <AiModels
+        client={props.client}
+        agentId={props.chat.agent?.id}
+        roles={["lead"]}
+      />
     </section>
   );
 }

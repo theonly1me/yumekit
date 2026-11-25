@@ -1,0 +1,59 @@
+.size-choice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.size-choice .segments {
+  flex: 0 0 auto;
+}
+
+.size-fact,
+.real-size {
+  font-size: var(--step--1);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+label.own-size {
+  display: inline-flex;
+  white-space: nowrap;
+  align-items: baseline;
+  gap: 6px;
+  font-size: var(--step--1);
+  color: var(--muted);
+}
+
+.own-size input[type="text"] {
+  width: 56px;
+  padding: 2px 4px;
+  border: 0;
+  border-bottom: 1px solid var(--line-strong);
+  border-radius: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.own-size input[type="text"]:focus {
+  outline: none;
+  border-bottom-color: var(--text);
+}
+
+.own-size input[type="text"][aria-invalid="true"] {
+  border-bottom-color: var(--accent);
+}
+
+.size-warning {
+  flex-basis: 100%;
+  font-size: var(--step--1);
+  color: var(--accent);
+}
+
+.size-warning button.link {
+  color: inherit;
+  font-size: inherit;
+}

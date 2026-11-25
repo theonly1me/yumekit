@@ -108,22 +108,25 @@ describe("several media calls at the same time", () => {
     expect(await paidCallsOfServer()).toHaveLength(2);
   });
 
-  it("holds the price of running calls, so parallel calls cannot pass the spending limit together", async () => {
+  it("holds the price of running calls, so calls at the same time cannot pass the spending limit together", async () => {
     const { harness, paidCallsOfServer } = await startPricedHarness({
       waitMilliseconds,
       spendingUsd: 1,
     });
 
-    const answer = await harness.call({
-      name: "generate_assets",
-      arguments: { calls: ["one", "two", "three"].map(imageCall) },
-    });
+    const answers = await Promise.all(
+      ["one", "two", "three"].map((id) =>
+        harness.call({ name: "generate_asset", arguments: imageCall(id) }),
+      ),
+    );
 
-    expect(kindsOf(answer.data).toSorted()).toEqual([
-      "made",
-      "made",
-      "spending-limit-reached",
-    ]);
+    expect(
+      answers
+        .map((answer) =>
+          answer.isError ? String(answer.data["kind"]) : "made",
+        )
+        .toSorted(),
+    ).toEqual(["made", "made", "spending-limit-reached"]);
     expect(await paidCallsOfServer()).toHaveLength(2);
   });
 

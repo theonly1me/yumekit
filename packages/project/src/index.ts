@@ -121,6 +121,14 @@ export {
   type PlanBudget,
 } from "./planBudget/index.js";
 export {
+  bytesInMegabyte,
+  shortSideOf,
+  sizeAtShortSide,
+  smallerFileAudioKilobits,
+  smallerFilePlanOf,
+  smallerFileShare,
+} from "./fileSize/index.js";
+export {
   filmMeasureOf,
   type FilmMeasure,
   type SheetTries,

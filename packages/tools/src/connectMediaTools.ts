@@ -17,7 +17,8 @@ import { createRequestLog, requestMethodsOf } from "./requests/requestLog.js";
 import { runMediaRequest } from "./runMediaRequest.js";
 import { createSpendingBook } from "./spending/spendingBook.js";
 import { saveUserDefault } from "./saveUserDefault.js";
-import { saveProjectLimits } from "./saveProjectLimits.js";
+import { createLimitBook } from "./limits/limitBook.js";
+import { estimateRequests } from "./spending/estimate.js";
 import {
   describedDefaultModel,
   isStarted,
@@ -61,7 +62,11 @@ export async function connectMediaTools(options: {
   if (!configurationRead.ok) return configurationRead;
   const configuration = configurationRead.value;
   let defaults = configuration.defaults;
-  let limits = configuration.limits;
+  const limitBook = createLimitBook({
+    projectFolder: options.projectFolder,
+    sources: configuration.limitSources,
+  });
+  const spendingLimitUsd = async () => (await limitBook.inUse()).spendingUsd;
   const toolTimeoutSeconds =
     options.toolTimeoutSeconds ?? defaultToolTimeoutSeconds;
   const pool = createServerPool(
@@ -86,7 +91,7 @@ export async function connectMediaTools(options: {
   const keyHealth = createKeyHealth();
   const spendingBook = createSpendingBook({
     projectFolder: options.projectFolder,
-    limitUsd: () => limits.spendingUsd,
+    limitUsd: spendingLimitUsd,
   });
   const requestLog = createRequestLog({
     projectFolder: options.projectFolder,
@@ -100,7 +105,7 @@ export async function connectMediaTools(options: {
     spendingBook,
     toolTimeoutSeconds,
     onDescriptionsChanged: notifyDescriptionsChanged,
-    spendingLimitUsd: () => limits.spendingUsd,
+    spendingLimitUsd,
     slots: createCallSlots(),
     callsAtOnce: () => configuration.callsAtOnce,
   };
@@ -118,18 +123,15 @@ export async function connectMediaTools(options: {
           server: connection.name,
           message: connection.message,
         })),
-    limits: () => ({ ...limits }),
-    setLimits: async (change) => {
-      const saved = await saveProjectLimits({
-        projectFolder: options.projectFolder,
-        change,
-      });
-      if (!saved.ok) return saved;
-      const reread = await readMediaToolsConfiguration(options);
-      if (!reread.ok) return reread;
-      limits = reread.value.limits;
-      return { ok: true, value: { ...limits } };
-    },
+    limits: limitBook.inUse,
+    limitSources: limitBook.sources,
+    setLimits: limitBook.set,
+    removeOwnLimits: limitBook.removeOwn,
+    estimate: (requests) =>
+      estimateRequests({
+        context: { pool, defaults: () => defaults, keyHealth, spendingBook },
+        requests,
+      }),
     choices: () =>
       mediaChoicesOf({ connections: pool.connections(), defaults, keyHealth }),
     pick: async (pick) => {

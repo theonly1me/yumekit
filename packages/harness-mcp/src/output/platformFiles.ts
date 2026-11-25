@@ -22,25 +22,34 @@ export function fileNameOfProject(name: string): string {
   return safe === "" ? "video" : safe;
 }
 
+export function smallerFileSuffixOf(largestMegabytes: number): string {
+  return `-under-${String(largestMegabytes)}mb`;
+}
+
 export function platformFilesOf(options: {
   snapshot: ProjectSnapshot;
   outputId: string;
   rendersFolder: string;
+  suffix?: string;
 }): [PlatformFile, ...PlatformFile[]] {
   const { snapshot, outputId, rendersFolder } = options;
+  const suffix = options.suffix ?? "";
   const output = snapshot.project.outputs.find(
     (candidate) => candidate.id === outputId,
   );
   const [first, ...others] = inCatalogOrder(output?.platforms ?? []);
   if (first === undefined) {
     return [
-      { platformId: undefined, file: join(rendersFolder, `${outputId}.mp4`) },
+      {
+        platformId: undefined,
+        file: join(rendersFolder, `${outputId}${suffix}.mp4`),
+      },
     ];
   }
   const projectFileName = fileNameOfProject(snapshot.project.name);
   const fileOf = (platformId: PlatformId): PlatformFile => ({
     platformId,
-    file: join(rendersFolder, `${projectFileName}-${platformId}.mp4`),
+    file: join(rendersFolder, `${projectFileName}-${platformId}${suffix}.mp4`),
   });
   return [fileOf(first), ...others.map(fileOf)];
 }

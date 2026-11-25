@@ -4,6 +4,11 @@ import { z } from "zod";
 import { configurationDirectory } from "./configurationDirectory.js";
 import { capabilities } from "./convention.js";
 import { errorMessage } from "./errorMessage.js";
+import {
+  limitSourcesOf,
+  limitsInUseOf,
+  type LimitSources,
+} from "./limits/limitSources.js";
 import type {
   Capability,
   ConnectFailure,
@@ -13,8 +18,6 @@ import type {
 } from "./types.js";
 
 export const configurationFileName = "media-tools.json";
-const defaultGeneratedVideoSeconds = 60;
-export const defaultSpendingUsd = 5;
 
 const serverEntrySchema = z.object({
   command: z.string().min(1).optional(),
@@ -62,6 +65,7 @@ export interface MediaToolsConfiguration {
   servers: ConfiguredServer[];
   defaults: Partial<Record<Capability, MediaDefault>>;
   limits: MediaLimits;
+  limitSources: LimitSources;
   callsAtOnce: number | undefined;
 }
 
@@ -154,6 +158,10 @@ export async function readMediaToolsConfiguration(options: {
     ...userFile?.mcpServers,
     ...projectFile?.mcpServers,
   };
+  const limitSources = limitSourcesOf({
+    userLimits: userFile?.limits,
+    projectLimits: projectFile?.limits,
+  });
   const fileServers = Object.entries(entries)
     .filter(([, entry]) => entry.disabled !== true)
     .map(([name, entry]) =>
@@ -170,16 +178,8 @@ export async function readMediaToolsConfiguration(options: {
         }),
       ],
       defaults: { ...userFile?.defaults, ...projectFile?.defaults },
-      limits: {
-        generatedVideoSeconds:
-          projectFile?.limits.generatedVideoSeconds ??
-          userFile?.limits.generatedVideoSeconds ??
-          defaultGeneratedVideoSeconds,
-        spendingUsd:
-          projectFile?.limits.spendingUsd ??
-          userFile?.limits.spendingUsd ??
-          defaultSpendingUsd,
-      },
+      limits: limitsInUseOf(limitSources),
+      limitSources,
       callsAtOnce:
         projectFile?.limits.callsAtOnce ?? userFile?.limits.callsAtOnce,
     },

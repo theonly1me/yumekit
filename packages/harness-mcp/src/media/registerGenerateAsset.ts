@@ -111,7 +111,7 @@ export async function generateAsset(options: {
       ? {}
       : { about: { shotId: request.shot_id } }),
   };
-  const started = startMediaCall({
+  const started = await startMediaCall({
     context,
     request,
     voiceSeconds: voice.value?.seconds,

@@ -9,7 +9,7 @@ export type CallPrice =
 export function priceOfCall(options: {
   connection: StartedServer;
   model: string | undefined;
-  request: MediaToolRequest;
+  request: Pick<MediaToolRequest, "capability" | "input" | "expectedSeconds">;
 }): CallPrice {
   const { connection, request } = options;
   const { description } = connection;

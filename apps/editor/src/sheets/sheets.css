@@ -60,3 +60,29 @@
 body:has(.sheet) {
   overflow: hidden;
 }
+
+details.more {
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+}
+
+details.more > summary {
+  cursor: pointer;
+  font-size: var(--step-0);
+  font-weight: 500;
+  color: var(--muted);
+}
+
+details.more > summary:hover,
+details.more[open] > summary {
+  color: var(--text);
+}
+
+details.more[open] > summary {
+  margin-bottom: 24px;
+}
+
+details.more > .more-body {
+  display: grid;
+  gap: 30px;
+}

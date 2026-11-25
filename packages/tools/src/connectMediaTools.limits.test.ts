@@ -8,7 +8,7 @@ describe("connectMediaTools limits", () => {
   it("gives 60 generated video seconds and 5 US dollars when no file sets a limit", async () => {
     const { tools } = await connectFixture({});
 
-    expect(tools.limits()).toEqual({
+    expect(await tools.limits()).toEqual({
       generatedVideoSeconds: 60,
       spendingUsd: 5,
     });
@@ -20,7 +20,7 @@ describe("connectMediaTools limits", () => {
       projectFile: { mcpServers: { sample: {} } },
     });
 
-    expect(tools.limits()).toMatchObject({ generatedVideoSeconds: 12 });
+    expect(await tools.limits()).toMatchObject({ generatedVideoSeconds: 12 });
   });
 
   it("lets the project file win over the user file", async () => {
@@ -29,7 +29,7 @@ describe("connectMediaTools limits", () => {
       projectFile: { limits: { generatedVideoSeconds: 0, spendingUsd: 2 } },
     });
 
-    expect(tools.limits()).toEqual({
+    expect(await tools.limits()).toEqual({
       generatedVideoSeconds: 0,
       spendingUsd: 2,
     });

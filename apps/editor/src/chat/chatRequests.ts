@@ -1,6 +1,10 @@
 import { z } from "zod";
 import type { EngineClient } from "../engine/engineClient.js";
-import { chatEntrySchema, chatViewSchema } from "./chatSchemas.js";
+import {
+  chatEntrySchema,
+  chatViewSchema,
+  type MoneyChoice,
+} from "./chatSchemas.js";
 import type { SentFileInput } from "./files/pendingFile.js";
 import type { AnswerInput } from "./questions/roundAnswers.js";
 
@@ -68,6 +72,12 @@ export function chatRequestsOf(client: EngineClient) {
         path: `/api/chat/changes/${encodeURIComponent(changeId)}/undo`,
         schema: chatEntrySchema,
         body: {},
+      }),
+    chooseMoney: (options: { entryId: string; choice: MoneyChoice }) =>
+      client.readJson({
+        path: `/api/chat/money/${encodeURIComponent(options.entryId)}`,
+        schema: chatEntrySchema,
+        body: { choice: options.choice },
       }),
     saveAgent: (agent: string) =>
       client.readJson({

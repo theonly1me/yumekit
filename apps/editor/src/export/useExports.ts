@@ -8,6 +8,10 @@ import {
   type ExportScale,
   type JobState,
 } from "./exportJobs.js";
+import {
+  renderInputOf,
+  type FileSizeChoice,
+} from "./fileSize/fileSizeChoice.js";
 import { withSharperCopy, type SharperRequest } from "./sharpenExport.js";
 
 export type Exports = ReturnType<typeof useExports>;
@@ -21,6 +25,7 @@ async function exportOne(options: {
     input: {
       output_id: options.job.outputId,
       ...(options.job.scale === 1 ? {} : { scale: options.job.scale }),
+      ...renderInputOf(options.job.fileSize),
     },
     callId: options.job.callId,
   });
@@ -48,6 +53,7 @@ async function exportOne(options: {
   if (!result.success) {
     return { kind: "failed", message: reply.value.text, failedAt: undefined };
   }
+  const { bytes, width_pixels: width, height_pixels: height } = result.data;
   const files = result.data.files ?? [{ file: result.data.file }];
   return {
     kind: "done",
@@ -56,6 +62,11 @@ async function exportOne(options: {
       fileName: fileNameOf(entry.file),
       platformId: entry.platform_id,
       isSharper: false,
+      bytes,
+      shortSidePixels:
+        width === undefined || height === undefined
+          ? undefined
+          : Math.min(width, height),
     })),
     sharperFailure: undefined,
   };
@@ -82,8 +93,9 @@ export function useExports(client: EngineClient) {
       outputIds: string[];
       sharper: SharperRequest[];
       scale: ExportScale;
+      fileSize: FileSizeChoice;
     }) => {
-      const { outputIds, sharper, scale } = request;
+      const { outputIds, sharper, scale, fileSize } = request;
       if (isRunningNow.current || outputIds.length === 0) return;
       isRunningNow.current = true;
       setRunning(true);
@@ -91,6 +103,7 @@ export function useExports(client: EngineClient) {
         callId: crypto.randomUUID(),
         outputId,
         scale,
+        fileSize,
         state: { kind: "waiting" },
       }));
       setJobs(queued);

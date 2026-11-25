@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { moneyWarningOf } from "../chat/money/moneyWarning.js";
 import { personSummaryOf } from "../chat/personSummary.js";
 import { anySegment, type Exchange, type Route } from "./exchange.js";
 import { helperRefusalOf, helperTokenOf, toolsFor } from "./helperCalls.js";
@@ -91,6 +92,8 @@ async function callTool(exchange: Exchange) {
     ? await context.chat.leadCall({ tool: name, call: run })
     : await run();
   note.finish(personReasonOf(result));
+  const moneyWarning = moneyWarningOf(result);
+  if (moneyWarning !== undefined) context.chat.money.warn(moneyWarning);
   if (helper.kind === "helper" && !result.isError) {
     helper.record({ tool: name, input });
   }
