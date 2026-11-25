@@ -33,7 +33,7 @@ async function readChat(exchange: Exchange) {
   return undefined;
 }
 
-function isAgentCall(exchange: Exchange): boolean {
+export function isAgentCall(exchange: Exchange): boolean {
   return (
     exchange.request.headers[clientHeader] === agentClient ||
     helperTokenOf(exchange) !== undefined
