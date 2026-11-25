@@ -7,6 +7,7 @@ import type {
 import { knownLimits } from "../../storyGuide/knownLimits.js";
 import { lessonLinesOf, lessonRecordsOf } from "../lessonsForYou.js";
 import { stateText, strikeText } from "../stateText.js";
+import { lookBriefOf } from "./lookBrief.js";
 
 function listText(items: string[] | undefined): string {
   return (items ?? []).join("; ");
@@ -15,7 +16,9 @@ function listText(items: string[] | undefined): string {
 function memberLineOf(member: CastMember): string {
   const parts = [
     `${member.name} (${member.kind} "${member.id}"): ${member.description}`,
-    listText(member.facts) === "" ? "" : `Facts: ${listText(member.facts)}.`,
+    listText(member.facts) === ""
+      ? ""
+      : `${member.looks === undefined ? "Facts" : "Base facts"}: ${listText(member.facts)}.`,
     listText(member.briefFacts) === ""
       ? ""
       : `From the brief of the person: ${listText(member.briefFacts)}.`,
@@ -89,7 +92,10 @@ export function shotBriefOf(options: {
     ...(shot.strikes ?? []).map((strike) => `Strike: ${strikeText(strike)}`),
     `Art direction: ${style === "" ? "none set (set_bible style)" : style}`,
     "The cast and the place of this shot:",
-    ...members.map(memberLineOf),
+    ...members.flatMap((member) => [
+      memberLineOf(member),
+      ...lookBriefOf({ plan, shot, member }).lines,
+    ]),
     ...missing.map((castId) => `- "${castId}" is not in the cast yet.`),
     ...(shot.planNotes === undefined || shot.planNotes.length === 0
       ? []
@@ -128,6 +134,7 @@ export function shotBriefOf(options: {
       restrictions: member.restrictions ?? [],
       plan_notes: member.planNotes ?? [],
       sheet_asset_ids: member.referenceAssetIds,
+      ...lookBriefOf({ plan, shot, member }).data,
     })),
     missing_cast_ids: missing,
     plan_notes: shot.planNotes ?? [],

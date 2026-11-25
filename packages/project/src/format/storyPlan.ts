@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { designCheckSchema } from "./designCheck.js";
 import { lessonSchema, planReviewSchema } from "./planReview.js";
 import { clipReviewSchema, startReviewSchema } from "./reviews.js";
 import { shotStateSchema, strikeSchema } from "./shotStates.js";
@@ -68,6 +69,8 @@ export const shotSchema = z.strictObject({
   startReviews: z.array(startReviewSchema).exactOptional(),
   planNotes: z.array(z.string()).exactOptional(),
   storyFact: idSchema.exactOptional(),
+  castLooks: z.record(idSchema, idSchema).exactOptional(),
+  designChecks: z.array(designCheckSchema).exactOptional(),
 });
 
 export const musicCheckSchema = z.strictObject({

@@ -9,6 +9,10 @@ import {
   withPersonKept,
 } from "../storyPlan/personKept.js";
 import { reviewGateFailureOf } from "../storyPlan/reviewGate.js";
+import {
+  designRangeFailureOf,
+  withChosenClip,
+} from "../storyPlan/designGate.js";
 import { voiceLevelEdits } from "./quietVoice.js";
 import { placementFramesOf } from "./videoPlacementFrames.js";
 import { removePersonWorkInput } from "./personWorkInput.js";
@@ -80,8 +84,13 @@ export function registerPlaceVideo(context: HarnessContext): void {
         asset: asset.value,
         words: request.person_chose_this_clip,
       });
-      const reviewFailure = reviewGateFailureOf({
+      const chosen = withChosenClip({
         snapshot: kept.snapshot,
+        asset: asset.value,
+        words: request.person_chose_this_clip,
+      });
+      const reviewFailure = reviewGateFailureOf({
+        snapshot: chosen.snapshot,
         asset: asset.value,
       });
       if (reviewFailure !== undefined) return failureResult(reviewFailure);
@@ -95,6 +104,12 @@ export function registerPlaceVideo(context: HarnessContext): void {
       });
       if (!frames.ok) return failureResult(frames.failure);
       const { startFrame, durationFrames } = frames.value;
+      const designFailure = designRangeFailureOf({
+        snapshot: chosen.snapshot,
+        asset: asset.value,
+        shownFrames: Math.min(durationFrames, assetLength),
+      });
+      if (designFailure !== undefined) return failureResult(designFailure);
       const plan = planVideo({
         snapshot,
         timeline: frames.value.remainingTimeline,
@@ -135,7 +150,7 @@ export function registerPlaceVideo(context: HarnessContext): void {
       return applyEditsResult({
         store: context.store,
         edits: [
-          ...kept.edits,
+          ...(chosen.edits.length > 0 ? chosen.edits : kept.edits),
           ...frames.value.removeEdits,
           ...plan.edits,
           ...voiceEdits,

@@ -109,6 +109,10 @@ function shotOf(options: {
       ? {}
       : { planNotes: earlier.planNotes }),
     ...(input.story_fact === undefined ? {} : { storyFact: input.story_fact }),
+    ...(input.cast_looks === undefined ? {} : { castLooks: input.cast_looks }),
+    ...(earlier?.designChecks === undefined
+      ? {}
+      : { designChecks: earlier.designChecks }),
   };
 }
 

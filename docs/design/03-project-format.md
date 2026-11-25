@@ -100,6 +100,21 @@ type CastMember = {
   briefFacts?: string[];
   storyCharacterId?: string;
   referenceAssetIds: string[];
+  looks?: CastLook[];
+};
+type CastLook = {
+  id: string;
+  name: string;
+  clothes: string[];
+  props: { name: string; count: number; side: string }[];
+  sheets: {
+    assetId: string;
+    kind: "turnaround" | "expressions" | "poses" | "hands-props";
+    poses?: string[];
+    check?: DesignCheck;
+  }[];
+  personAsked?: { words: string };
+  sheetReview?: SheetReview;
 };
 
 type Scene = { id: string; title: string; notes: string; source: SceneSource };
@@ -187,6 +202,8 @@ type WordTimings = {
   words: { text: string; startFrame: number; endFrame: number }[];
 };
 ```
+
+WP75 (document 20, C50 to C55) adds `looks` to a cast member: `facts` are then the base facts of the person, which no look changes, and each look is a named set of clothes and props with its own sheets. The look `default` is the design: its turnaround and its hands stay in `referenceAssetIds`, so a project of WP74 loads and works as before, and `looks` of `default` holds only its other sheets. A shot gets `castLooks` (a cast id to a look id, `default` when it names none) and `designChecks` (one `DesignCheck` for each checked picture or clip: `assetId`, `by` (`critic` or `lead`), `frames` with an answer `yes`, `no`, or `cannot-see` for each question, `breaks`, `cleanUntilSeconds` of a clip, and `personKept`). A start review gets `endPictureAssetId`. Rule 7 counts each sheet of a look as a use of its asset.
 
 Document 20 defines `StoryPlan`, the kind `prop`, the fixed `facts` of a cast member, and its `sheetReview` (WP66). WP68 adds to a cast member `sheetTries`, `sheetPrompts`, `restrictions`, and `briefFacts`; to a shot `startPicturePrompt`, `videoPrompt`, and `startReviews`; to a clip review and a sheet review `notes`; and to the plan `review` (the plan check) and `lessons`. Each is optional, so a project of WP66 loads as before. A plan of WP66 holds the start and end states of a shot as a list of entries; a plan of WP65 with states in words still loads. WP74 adds the `story` of the bible, `storyCharacterId` of a cast member, `form` of the plan, `storyFact` of a shot, and `hits` of a music check (document 20, C44 to C47). Each is optional, so a project of WP72 loads as before.
 

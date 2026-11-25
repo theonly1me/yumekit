@@ -27,6 +27,14 @@ const reviewSeveralInput = {
           .string()
           .optional()
           .describe("review_sheet: the cast entry."),
+        look_id: z
+          .string()
+          .optional()
+          .describe("review_sheet: the look to check."),
+        end_picture_asset_id: z
+          .string()
+          .optional()
+          .describe("review_start: the end picture of the shot."),
       }),
     )
     .min(1)
@@ -41,8 +49,20 @@ type ReviewRequest = z.infer<
 >["reviews"][number];
 
 function inputOf(review: ReviewRequest): Record<string, string> {
-  if (review.tool === "review_sheet") return { cast_id: review.cast_id ?? "" };
-  return { asset_id: review.asset_id ?? "", shot_id: review.shot_id ?? "" };
+  if (review.tool === "review_sheet") {
+    return {
+      cast_id: review.cast_id ?? "",
+      ...(review.look_id === undefined ? {} : { look_id: review.look_id }),
+    };
+  }
+  return {
+    asset_id: review.asset_id ?? "",
+    shot_id: review.shot_id ?? "",
+    ...(review.tool === "review_start" &&
+    review.end_picture_asset_id !== undefined
+      ? { end_picture_asset_id: review.end_picture_asset_id }
+      : {}),
+  };
 }
 
 function idOf(review: ReviewRequest): string {

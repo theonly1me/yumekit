@@ -1,5 +1,6 @@
 import { reviewVerdicts } from "@yumekit/project";
 import { z } from "zod";
+import { designInput } from "../design/designAnswer.js";
 
 const seenText = z
   .string()
@@ -113,6 +114,7 @@ export const clipAnswerInput = {
     .describe(
       "Each difference that a viewer would not see, with its time. Notes do not refuse the clip.",
     ),
+  design: designInput,
 };
 
 export type ClipAnswer = z.output<z.ZodObject<typeof clipAnswerInput>>;

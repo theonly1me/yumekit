@@ -2,6 +2,7 @@ import type { ProjectSnapshot, Shot } from "@yumekit/project";
 import { stateText, strikeText } from "../../storyPlan/stateText.js";
 import { freeShotLines } from "../../storyPlan/freeShots.js";
 import { firstCutLines } from "./firstCutText.js";
+import { poseSheetLines, shotDesignLines } from "./lookText.js";
 
 function reviewText(shot: Shot): string {
   const reviews = shot.reviews ?? [];
@@ -66,6 +67,7 @@ function shotLines(options: { shot: Shot; number: number }): string[] {
     `   Start picture prompt: ${shot.startPicturePrompt ?? "none"}`,
     `   Video prompt: ${shot.videoPrompt ?? "none"}`,
     `   ${reviewText(shot)}`,
+    ...shotDesignLines(shot),
   ];
 }
 
@@ -81,6 +83,7 @@ export function planLines(snapshot: ProjectSnapshot): string[] {
     `Wants: ${plan.want}. Against it: ${plan.obstacle}. Changes: ${plan.change}`,
     ...firstCutLines({ snapshot, plan }),
     ...freeShotLines({ snapshot, plan }),
+    ...poseSheetLines(snapshot),
     ...plan.shots.flatMap((...[shot, index]) =>
       shotLines({ shot, number: index + 1 }),
     ),

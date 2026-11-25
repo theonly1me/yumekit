@@ -10,6 +10,7 @@ import {
   shotSizes,
 } from "@yumekit/project";
 import { z } from "zod";
+import { castLooksInput } from "./shotLooks.js";
 import { videoPromptLimit } from "./firstFrameRule.js";
 import { idInput } from "../inputs.js";
 
@@ -115,6 +116,7 @@ export const shotInput = z.strictObject({
   video_prompt: words.describe(
     `The prompt of the clip that you will send: the format, the start, the action in beats with seconds, the body, the physics, what must not change, what moves in the background, the camera in words, and no writing. yumekit adds nothing, so keep it under ${String(videoPromptLimit)} characters and about this shot only. review_plan checks it, and the first try sends it.`,
   ),
+  cast_looks: castLooksInput,
   music_intensity: z
     .int()
     .min(musicIntensityRange.minimum)

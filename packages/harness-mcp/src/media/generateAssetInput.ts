@@ -1,6 +1,8 @@
 import { cameraMoveIds } from "@yumekit/project";
 import { z } from "zod";
 import { idInput, jsonObjectInput } from "../inputs.js";
+import { personChoseThisPictureInput } from "../storyPlan/designGate.js";
+import { kitSheetInput } from "../storyPlan/kitSheets.js";
 
 export const toolNameByCapability = {
   image: "generate_image",
@@ -129,6 +131,14 @@ export const generateAssetInput = {
     .describe(
       "true permits one more try of a sheet or a shot whose tries are used up. Give it only when the person asked for another try in this request.",
     ),
+  key_picture: z
+    .enum(["start", "end"])
+    .optional()
+    .describe(
+      "With shot_id and the capability image: which key picture of the shot this is. end is the picture that the clip ends on (last_frame_asset_id), for a move with a clear end pose; review_start checks it with end_picture_asset_id. Default start.",
+    ),
+  person_chose_this_picture: personChoseThisPictureInput,
+  ...kitSheetInput,
   camera_move: z
     .string()
     .optional()

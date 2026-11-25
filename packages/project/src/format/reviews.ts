@@ -69,6 +69,7 @@ export const sheetTrySchema = z.strictObject({
 
 export const startReviewSchema = z.strictObject({
   assetId: idSchema,
+  endPictureAssetId: idSchema.exactOptional(),
   verdict: z.enum(sheetVerdicts),
   faults: z.array(z.string()),
   notes: z.array(z.string()),

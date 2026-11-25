@@ -3,6 +3,7 @@ import type { JsonObject } from "@yumekit/tools";
 import { clipListItems } from "../critic/clip/clipList.js";
 import type { AskCritic } from "../critic/criticTypes.js";
 import { reviewJobMetaKey } from "../createHarnessServer.js";
+import { designLooksOf } from "./designLooks.js";
 import { planAnswerOf } from "./planCritic.js";
 
 export type CriticAnswer = JsonObject;
@@ -13,6 +14,7 @@ export interface CriticScript {
   plan?: (brief: string) => CriticAnswer;
   start?: (brief: string) => CriticAnswer;
   waitMilliseconds?: number;
+  skipDesignLooks?: boolean;
 }
 
 export interface CriticLog {
@@ -121,6 +123,14 @@ export function scriptedCritic(options: {
       start: script.start ?? passSheetAnswerOf,
       clip: script.clip ?? keepAnswerOf,
     }[kind](request.brief);
+    const looks = script.skipDesignLooks === true ? [] : designLooksOf(answer);
+    for (const look of looks) {
+      await options.call({
+        name: "view_for_review",
+        arguments: look,
+        _meta: meta,
+      });
+    }
     log.answers.push(
       await options.call({
         name: `give_${kind}_review`,

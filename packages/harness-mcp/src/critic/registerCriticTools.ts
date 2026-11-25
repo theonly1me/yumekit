@@ -6,6 +6,8 @@ import { failureResult, successResult } from "../results.js";
 import { clipAnswerIssuesOf } from "./clip/clipAnswerCheck.js";
 import { clipAnswerInput } from "./clip/clipAnswerInput.js";
 import { clipViewOf } from "./clip/clipViews.js";
+import { designIssuesOf } from "./design/designAnswer.js";
+import { designViewOf } from "./design/designView.js";
 import type { CriticDesk } from "./criticDesk.js";
 import { planAnswerIssuesOf } from "./plan/planAnswerCheck.js";
 import { planAnswerInput } from "./plan/planAnswerInput.js";
@@ -41,6 +43,14 @@ const viewInput = {
     .describe("Show only this part, as shares from 0 to 1."),
   from_seconds: z.number().min(0).optional().describe("The clip from here."),
   to_seconds: z.number().gt(0).optional().describe("The clip to here."),
+  cast_id: idInput(
+    "For the design check: the person to crop. With region, asset_id or seconds.",
+  ).optional(),
+  seconds: z
+    .number()
+    .min(0)
+    .optional()
+    .describe("For the design check of a clip: the time of the frame."),
 };
 
 export function registerCriticTools(
@@ -67,9 +77,15 @@ export function registerCriticTools(
         };
       }
       const view =
-        job.kind === "clip"
-          ? await clipViewOf({ context, job, look: input })
-          : await sheetViewOf({ context, job, look: input });
+        input.cast_id !== undefined
+          ? await designViewOf({
+              context,
+              job: job.design,
+              look: { ...input, cast_id: input.cast_id },
+            })
+          : job.kind === "clip"
+            ? await clipViewOf({ context, job, look: input })
+            : await sheetViewOf({ context, job, look: input });
       if (!view.ok) return failureResult(view.failure);
       return { content: view.value };
     },
@@ -82,7 +98,10 @@ export function registerCriticTools(
     run: ({ input, reviewJobId }) => {
       const job = critics.jobOf(reviewJobId);
       if (job?.kind !== "clip") return failureResult(noJob);
-      const issues = clipAnswerIssuesOf({ job, answer: input });
+      const issues = [
+        ...clipAnswerIssuesOf({ job, answer: input }),
+        ...designIssuesOf({ job: job.design, frames: input.design }),
+      ];
       if (issues.length > 0) return answerRefused(issues);
       job.answer = input;
       return successResult({
@@ -99,7 +118,10 @@ export function registerCriticTools(
     run: ({ input, reviewJobId }) => {
       const job = critics.jobOf(reviewJobId);
       if (job?.kind !== "sheet") return failureResult(noJob);
-      const issues = sheetAnswerIssuesOf({ job, answer: input });
+      const issues = [
+        ...sheetAnswerIssuesOf({ job, answer: input }),
+        ...designIssuesOf({ job: job.design, frames: input.design }),
+      ];
       if (issues.length > 0) return answerRefused(issues);
       job.answer = input;
       return successResult({

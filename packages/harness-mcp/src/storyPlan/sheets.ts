@@ -2,6 +2,7 @@ import type { CastMember, ProjectSnapshot, Shot } from "@yumekit/project";
 import { heldPropsOf } from "../critic/sheet/registerReviewSheet.js";
 import type { GenerateAssetInput } from "../media/generateAssetInput.js";
 import type { HarnessFailure } from "../results.js";
+import { lookLacksOf, lookReviewFailureOf } from "./lookSheets.js";
 
 function lackOf(options: {
   snapshot: ProjectSnapshot;
@@ -65,10 +66,13 @@ export function sheetFailureOf(options: {
 }): HarnessFailure | undefined {
   const { shot, snapshot } = options;
   const ids = [shot.placeId, ...shot.castIds];
-  const lacks = ids.flatMap((castId) => {
-    const lack = lackOf({ snapshot, castId });
-    return lack === undefined ? [] : [lack];
-  });
+  const lacks = [
+    ...ids.flatMap((castId) => {
+      const lack = lackOf({ snapshot, castId });
+      return lack === undefined ? [] : [lack];
+    }),
+    ...lookLacksOf({ snapshot, shot }),
+  ];
   if (lacks.length > 0) {
     return {
       kind: "cast-sheet-missing",
@@ -76,8 +80,10 @@ export function sheetFailureOf(options: {
       hint: "Make each sheet picture with generate_asset and no shot_id, then give it and the facts to put_cast_member (facts: hair, each garment and color, height against the hero, which hand holds what, five fingers on each hand; for a place, where the door is, its hinge and knob side, the window and the light). A person who holds a prop needs a second picture of the hands with the prop. Then call again.",
     };
   }
-  return reviewFailureOf(
-    snapshot.bible.cast.filter((member) => ids.includes(member.id)),
+  return (
+    reviewFailureOf(
+      snapshot.bible.cast.filter((member) => ids.includes(member.id)),
+    ) ?? lookReviewFailureOf({ snapshot, shot })
   );
 }
 

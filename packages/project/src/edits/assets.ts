@@ -1,4 +1,5 @@
 import { join } from "node:path";
+import { castPictureIdsOf } from "../castLooks/index.js";
 import type { ProjectState } from "../format/state.js";
 import { succeed } from "../outcome.js";
 import type { EditOfKind } from "./edit.js";
@@ -83,7 +84,7 @@ function referencesToAsset(options: {
     ),
   );
   const castReferences = state.bible.cast
-    .filter((member) => member.referenceAssetIds.includes(assetId))
+    .filter((member) => castPictureIdsOf(member).includes(assetId))
     .map((member) => `cast member "${member.id}"`);
   const fontReferences = (state.project.fonts ?? [])
     .filter((font) => font.assetId === assetId)

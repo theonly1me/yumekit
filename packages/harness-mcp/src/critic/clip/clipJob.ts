@@ -6,6 +6,8 @@ import {
   strikeText,
 } from "../../storyPlan/stateText.js";
 import type { ClipAnswer } from "./clipAnswerInput.js";
+import { designBriefLinesOf, designSheetsItem } from "../design/designBrief.js";
+import type { DesignJob } from "../design/designJob.js";
 import { planNoteSectionOf } from "../plan/planNoteLines.js";
 import { clipListText } from "./clipList.js";
 
@@ -20,6 +22,7 @@ export interface ClipJob {
   previousEnd: Asset | undefined;
   warnings: MotionWarning[];
   openPlanFaults: string[];
+  design: DesignJob | undefined;
   answer: ClipAnswer | undefined;
 }
 
@@ -68,7 +71,12 @@ export function clipBriefOf(job: ClipJob): string {
     warningLinesOf(job.warnings),
     "",
     "The list (answer each item by its number):",
-    clipListText(),
+    clipListText(job.design === undefined ? undefined : designSheetsItem),
+    ...designBriefLinesOf({
+      job: job.design,
+      viewTool: "view_for_review",
+      answerIn: "design of your answer",
+    }),
     "",
     "Severity: put each fault that the film cannot use in faults (blocking), and each difference that a viewer would not see in notes. Hands, bodies, objects, contact, the source of an effect, and continuity stay blocking. Count only what is in the frame.",
     "",

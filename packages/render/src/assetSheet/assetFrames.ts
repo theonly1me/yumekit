@@ -4,6 +4,7 @@ import type { AssetRegion } from "@yumekit/project";
 import { z } from "zod";
 import { fail, succeed, type Outcome } from "../outcome.js";
 import type { RenderFailure } from "../renderFailure.js";
+import { pickedSecondsOf } from "./assetSheetLayout.js";
 import { splitPngs } from "./splitPngs.js";
 
 const runFile = promisify(execFile);
@@ -101,4 +102,51 @@ export async function extractPictures(options: {
       hint: "Check that the file is a complete picture or video file.",
     });
   }
+}
+
+const defaultCount = 12;
+
+function roundSeconds(seconds: number): number {
+  return Math.round(seconds * 100) / 100;
+}
+
+export async function pickedFramesOf(request: {
+  file: string;
+  fromSeconds?: number | undefined;
+  toSeconds?: number | undefined;
+  count?: number | undefined;
+}): Promise<Outcome<{ frames: number[]; seconds: number[] }, RenderFailure>> {
+  const timing = await videoTimingOf(request.file);
+  if (timing === undefined || timing.frameCount === 0) {
+    return fail({
+      kind: "media-not-readable",
+      file: request.file,
+      message: `FFprobe cannot read the length of "${request.file}".`,
+      hint: "Check that the file is a complete video file.",
+    });
+  }
+  const lengthSeconds = timing.frameCount / timing.framesPerSecond;
+  const fromSeconds = Math.min(request.fromSeconds ?? 0, lengthSeconds);
+  const toSeconds = Math.min(request.toSeconds ?? lengthSeconds, lengthSeconds);
+  const picked = pickedSecondsOf({
+    fromSeconds,
+    toSeconds: Math.max(toSeconds, fromSeconds),
+    count: request.count ?? defaultCount,
+  });
+  const frames = [
+    ...new Set(
+      picked.map((seconds) =>
+        Math.min(
+          timing.frameCount - 1,
+          Math.round(seconds * timing.framesPerSecond),
+        ),
+      ),
+    ),
+  ];
+  return succeed({
+    frames,
+    seconds: frames.map((frame) =>
+      roundSeconds(frame / timing.framesPerSecond),
+    ),
+  });
 }

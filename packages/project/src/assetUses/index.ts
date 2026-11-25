@@ -20,7 +20,11 @@ export type UsesTrack =
 export interface UsesProject {
   scenes: readonly UsesScene[];
   timelines: readonly { outputId: string; tracks: readonly UsesTrack[] }[];
-  cast?: readonly { id: string; referenceAssetIds: readonly string[] }[];
+  cast?: readonly {
+    id: string;
+    referenceAssetIds: readonly string[];
+    looks?: readonly { sheets: readonly { assetId: string }[] }[];
+  }[];
   fonts?: readonly { assetId: string; family: string }[];
 }
 
@@ -83,7 +87,13 @@ export function assetUsesOf(options: {
     .filter((scene) => propsUseAsset({ value: scene.source.props, assetId }))
     .map((scene) => ({ kind: "scene" as const, sceneId: scene.id }));
   const castUses = (project.cast ?? [])
-    .filter((member) => member.referenceAssetIds.includes(assetId))
+    .filter(
+      (member) =>
+        member.referenceAssetIds.includes(assetId) ||
+        (member.looks ?? []).some((look) =>
+          look.sheets.some((sheet) => sheet.assetId === assetId),
+        ),
+    )
     .map((member) => ({ kind: "cast-member" as const, castId: member.id }));
   const fontUses = (project.fonts ?? [])
     .filter((font) => font.assetId === assetId)

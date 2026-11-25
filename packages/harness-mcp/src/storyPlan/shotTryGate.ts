@@ -128,13 +128,21 @@ function waitingFailure(options: {
     criticReviewsOf(shot).map((review) => review.assetId),
   );
   const startIds = new Set(
-    (shot.startReviews ?? []).map((review) => review.assetId),
+    (shot.startReviews ?? []).flatMap((review) => [
+      review.assetId,
+      ...(review.endPictureAssetId === undefined
+        ? []
+        : [review.endPictureAssetId]),
+    ]),
   );
   const kind = request.capability === "video" ? "video" : "image";
+  const key = request.key_picture ?? "start";
   const waiting = snapshot.assets.some(
     (asset) =>
       asset.kind === kind &&
       sourceTextOf({ asset, field: "shot_id" }) === shot.id &&
+      (kind === "video" ||
+        (sourceTextOf({ asset, field: "key_picture" }) ?? "start") === key) &&
       !(kind === "video" ? clipIds : startIds).has(asset.id),
   );
   if (!waiting) return undefined;
@@ -152,7 +160,9 @@ export function withShotTry(options: {
   const { snapshot, shot, request } = options;
   const waiting = waitingFailure(options);
   if (waiting !== undefined) return { ok: false, failure: waiting };
-  if (request.person_asked_for_another_try === true) {
+  const isEndPicture =
+    request.capability === "image" && request.key_picture === "end";
+  if (request.person_asked_for_another_try === true || isEndPicture) {
     return { ok: true, value: request };
   }
   const refusals = refusalsOf({

@@ -13,6 +13,7 @@ import { referencePathsInput } from "../media/referencePaths.js";
 import { failureResult, type HarnessFailure } from "../results.js";
 import { sourceTextOf } from "../storyPlan/tryRules.js";
 import { wireCastMemberOf } from "./castMembers.js";
+import { lookFieldsOf, noLookWarningOf, withLooks } from "./lookFields.js";
 import { putCastMemberInput } from "./putCastMemberInput.js";
 import { storyLinkNotesOf } from "../storyFirst/storyLink.js";
 
@@ -136,8 +137,9 @@ export function registerPutCastMember(context: HarnessContext): void {
       const existing = snapshot.bible.cast.find(
         (candidate) => candidate.id === input.cast_id,
       );
-      const referenceAssetIds =
-        input.reference_asset_ids ?? existing?.referenceAssetIds ?? [];
+      const looked = lookFieldsOf({ snapshot, existing, input });
+      if (!looked.ok) return failureResult(looked.failure);
+      const { looks, referenceAssetIds } = looked.value;
       const pictures = referencePathsInput({
         snapshot,
         projectFolder: context.store.folder,
@@ -153,21 +155,26 @@ export function registerPutCastMember(context: HarnessContext): void {
         personAsked: input.person_asked_to_change_brief === true,
       });
       if (briefChange !== undefined) return failureResult(briefChange);
-      const member = memberOf({
-        input,
-        existing,
-        facts: input.facts ?? existing?.facts,
-        referenceAssetIds,
-        sheetPrompts: input.sheet_prompts ?? existing?.sheetPrompts,
-        restrictions: input.restrictions ?? existing?.restrictions,
-        briefFacts,
-        storyCharacterId:
-          input.story_character_id ?? existing?.storyCharacterId,
+      const member = withLooks({
+        looks,
+        member: memberOf({
+          input,
+          existing,
+          facts: input.facts ?? existing?.facts,
+          referenceAssetIds,
+          sheetPrompts: input.sheet_prompts ?? existing?.sheetPrompts,
+          restrictions: input.restrictions ?? existing?.restrictions,
+          briefFacts,
+          storyCharacterId:
+            input.story_character_id ?? existing?.storyCharacterId,
+        }),
       });
       const warnings = [
         ...(snapshot.bible.storyPlan === undefined
           ? []
-          : planFindingsOf([member]).map((finding) => finding.text)),
+          : [...planFindingsOf([member]), ...noLookWarningOf(member)].map(
+              (finding) => finding.text,
+            )),
         ...storyLinkNotesOf({ member, story: snapshot.bible.story }),
       ];
       return applyEditsResult({

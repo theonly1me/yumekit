@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { designCheckSchema } from "../../cast/castEntries.js";
 
 const countSchema = z.object({
   object: z.string(),
@@ -91,6 +92,8 @@ const shotSchema = z.object({
   startReviews: z.array(startReviewSchema).optional(),
   planNotes: z.array(z.string()).optional(),
   storyFact: z.string().optional(),
+  castLooks: z.record(z.string(), z.string()).optional(),
+  designChecks: z.array(designCheckSchema).optional(),
 });
 
 const musicCheckSchema = z.object({

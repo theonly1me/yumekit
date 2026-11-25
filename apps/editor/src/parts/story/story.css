@@ -77,6 +77,30 @@
   color: var(--accent);
 }
 
+.shot-design {
+  justify-self: start;
+  padding: 2px 8px;
+  border-radius: 2px;
+  font-weight: 500;
+  color: var(--text);
+  box-shadow: inset 3px 0 0 var(--line);
+  background: var(--well);
+}
+
+.shot-design[data-mark="clean"] {
+  box-shadow: inset 3px 0 0 var(--text);
+}
+
+.shot-design[data-mark="cut"],
+.shot-design[data-mark="kept"] {
+  box-shadow: inset 3px 0 0 var(--muted);
+}
+
+.shot-design[data-mark="break"] {
+  color: var(--accent);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
 .shot-faults {
   margin: 0;
   padding-left: 18px;

@@ -2,6 +2,8 @@ import type { Asset, CastMember, Shot } from "@yumekit/project";
 import { knownLimitLinesOf } from "../../storyGuide/knownLimits.js";
 import { stateText } from "../../storyPlan/stateText.js";
 import { planNoteSectionOf } from "../plan/planNoteLines.js";
+import { designBriefLinesOf, designSheetsItem } from "../design/designBrief.js";
+import type { DesignJob } from "../design/designJob.js";
 import type { SheetAnswer } from "../sheet/sheetJob.js";
 
 export interface StartJob {
@@ -12,6 +14,8 @@ export interface StartJob {
   pictures: Asset[];
   previousEnd: Asset | undefined;
   openPlanFaults: string[];
+  endPicture: Asset | undefined;
+  design: DesignJob | undefined;
   answer: SheetAnswer | undefined;
 }
 
@@ -21,7 +25,7 @@ export const startListItems = [
   "The sheets: face, hair, each garment, each mark and its side, as the facts and the sheet pictures show. A likeness to a known character or uniform is blocking.",
   "Anatomy and hands: each arm joins its own shoulder and ends in the hand of that side; five natural fingers on each visible hand. Merged or extra fingers that a viewer sees are blocking.",
   "Objects: count each object that the facts name; nothing doubled, nothing on the wrong side.",
-  "The action can happen from here: the target of a contact is large in the frame, hands are large or out of the frame, and nothing on the list of known limits is asked of the clip.",
+  "The action can happen from here: the target of a contact is large in the frame, hands are small or out of the frame unless the shot is about them (then large and clear), and nothing on the list of known limits is asked of the clip.",
   "Every visible part is whole and clean: no lump or half drawn hand at an edge, no writing.",
   "The cut: with an end picture of the shot before, the same place, screen side, and facing.",
 ] as const;
@@ -37,11 +41,19 @@ export function startBriefOf(job: StartJob): string {
   const { shot } = job;
   return [
     `Review job: the start picture "${job.picture.id}" of the shot "${shot.id}". It becomes the exact first frame of the clip, so the clip can only be as good as this picture.`,
+    ...(job.endPicture === undefined
+      ? []
+      : [
+          `The end picture "${job.endPicture.id}" becomes the exact last frame of the same clip. Answer each item of the list for both pictures: the start state for the start picture, the end state for the end picture. A fault of either fails both.`,
+        ]),
     "",
     "The plan of the shot:",
     `- Action: ${shot.action}`,
     `- Camera: ${shot.camera.size}, ${shot.camera.angle}${shot.camera.lens === undefined ? "" : `, ${shot.camera.lens} lens`}.`,
     `- Start: ${stateText(shot.startState)}`,
+    ...(job.endPicture === undefined
+      ? []
+      : [`- End: ${stateText(shot.endState)}`]),
     "",
     "The cast in the shot and their fixed facts:",
     ...memberLines(job.members),
@@ -52,8 +64,14 @@ export function startBriefOf(job: StartJob): string {
     "",
     "The list (answer each item by its number):",
     ...startListItems.map(
-      (...[item, index]) => `${String(index + 1)}. ${item}`,
+      (...[item, index]) =>
+        `${String(index + 1)}. ${job.design !== undefined && item.startsWith("The sheets:") ? designSheetsItem : item}`,
     ),
+    ...designBriefLinesOf({
+      job: job.design,
+      viewTool: "view_for_review",
+      answerIn: "design of your answer",
+    }),
     "",
     "Severity: put each fault that the clip cannot recover from in faults (blocking), and each difference that a viewer would not see in notes. Only a blocking fault fails the picture.",
     "",

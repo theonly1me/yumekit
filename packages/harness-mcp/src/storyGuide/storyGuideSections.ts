@@ -50,7 +50,7 @@ export const pictureSection = [
   "## A start picture",
   "",
   "- Show the start state of the shot exactly: the place from its sheet, each person where the plan puts them, each prop in its hand.",
-  "- Frame for the action: a medium shot with one clear action beats a busy wide shot with many small hands. Keep hands large in the frame, or out of it.",
+  "- Frame for the action: a medium shot with one clear action beats a busy wide shot with many small hands. Keep hands small or out of the frame unless the shot is about them; a shot about a hand frames it large and clear.",
   '- Words in a picture: give the exact text in quotes with its place, or write an empty surface ("a blank wooden sign"). Picture models follow plain positive words better than "no".',
   "",
 ].join("\n");

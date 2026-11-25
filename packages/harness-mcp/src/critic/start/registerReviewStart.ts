@@ -1,42 +1,19 @@
-import type { Shot, StartReview } from "@yumekit/project";
-import { z } from "zod";
+import type { StartReview } from "@yumekit/project";
 import { applyEditsResult } from "../../applyEditsResult.js";
 import type { HarnessContext } from "../../context.js";
-import { idInput } from "../../inputs.js";
 import { failureResult } from "../../results.js";
-import { previousEndOf } from "../../storyPlan/continuity.js";
-import { planNoteLinesOf } from "../plan/planNoteLines.js";
 import { shotNextStepOf } from "../../storyPlan/shotNextStep.js";
 import type { CriticDesk } from "../criticDesk.js";
 import type { AskCritic } from "../criticTypes.js";
 import { runCritic } from "../runCritic.js";
 import { inReviewSlot } from "../reviewSlot.js";
-import { startBriefOf, type StartJob } from "./startJob.js";
-
-const reviewStartInput = {
-  asset_id: idInput("The start picture to check."),
-  shot_id: z.string().describe("The shot of the plan that it starts."),
-};
-
-function withStartReview(options: {
-  shots: Shot[];
-  shotId: string;
-  review: StartReview;
-}): Shot[] {
-  return options.shots.map((shot) =>
-    shot.id === options.shotId
-      ? {
-          ...shot,
-          startReviews: [
-            ...(shot.startReviews ?? []).filter(
-              (entry) => entry.assetId !== options.review.assetId,
-            ),
-            options.review,
-          ],
-        }
-      : shot,
-  );
-}
+import { designChecksOf, designLineOf } from "../design/designRecord.js";
+import { startBriefOf } from "./startJob.js";
+import {
+  reviewStartInput,
+  startTargetOf,
+  withStartReview,
+} from "./startTarget.js";
 
 export function registerReviewStart(
   context: HarnessContext & {
@@ -47,7 +24,7 @@ export function registerReviewStart(
   context.tools.add({
     name: "review_start",
     description:
-      "Have the independent critic check a start picture before its clip. The picture becomes the exact first frame, so the critic checks the start state of the plan, the framing of the shot, each sheet, anatomy and hands, the known limits, and every visible part. A clip with first_frame_asset_id needs a pass. A refused start picture is a refused try of the shot.",
+      "Have the independent critic check a start picture before its clip, and with end_picture_asset_id also the end picture that the clip ends on. A picture becomes an exact frame of the clip, so the critic checks the state of the plan, the framing of the shot, each sheet, anatomy and hands, the known limits, every visible part, and the design check: each person against the turnaround of the look of the shot, question by question. A clip with first_frame_asset_id needs a pass, and with last_frame_asset_id a pass of the same review with that end picture. A picture with a break of the design cannot start or end a clip unless the person chooses it. A refused start picture is a refused try of the shot.",
     inputSchema: reviewStartInput,
     run: ({ input, onProgress }) =>
       inReviewSlot({
@@ -60,27 +37,14 @@ export function registerReviewStart(
         },
         run: async (ticket) => {
           const snapshot = context.store.read();
-          const plan = snapshot.bible.storyPlan;
-          const index = (plan?.shots ?? []).findIndex(
-            (shot) => shot.id === input.shot_id,
-          );
-          const shot = plan?.shots[index];
-          const picture = snapshot.assets.find(
-            (asset) => asset.id === input.asset_id && asset.kind === "image",
-          );
-          if (
-            plan === undefined ||
-            shot === undefined ||
-            picture === undefined
-          ) {
-            return failureResult({
-              kind: "not-found",
-              message: `The plan has no shot "${input.shot_id}", or the project has no picture "${input.asset_id}".`,
-              hint: "Give the id of a start picture made with shot_id, and its shot.",
-            });
-          }
+          const target = startTargetOf({ snapshot, input });
+          if (!target.ok) return failureResult(target.failure);
+          const { plan, shot, job } = target.value;
+          const { picture } = job;
           const stored = (shot.startReviews ?? []).find(
-            (review) => review.assetId === picture.id,
+            (review) =>
+              review.assetId === picture.id &&
+              review.endPictureAssetId === input.end_picture_asset_id,
           );
           if (stored !== undefined) {
             return failureResult({
@@ -89,32 +53,6 @@ export function registerReviewStart(
               hint: "A picture that did not change keeps its verdict. Make a new start picture to get a new review.",
             });
           }
-          const ids = new Set([shot.placeId, ...shot.castIds]);
-          const members = snapshot.bible.cast.filter((member) =>
-            ids.has(member.id),
-          );
-          const previousEnd = previousEndOf({
-            snapshot,
-            plan,
-            shotIndex: index,
-          });
-          const sheetIds = new Set(
-            members.flatMap((member) => member.referenceAssetIds),
-          );
-          const job: StartJob = {
-            kind: "start",
-            picture,
-            shot,
-            members,
-            previousEnd,
-            openPlanFaults: planNoteLinesOf({ plan, shot, members }),
-            pictures: [
-              picture,
-              ...(previousEnd === undefined ? [] : [previousEnd]),
-              ...snapshot.assets.filter((asset) => sheetIds.has(asset.id)),
-            ],
-            answer: undefined,
-          };
           onProgress?.({
             done: 0,
             message: "The critic looks at the start picture",
@@ -132,19 +70,35 @@ export function registerReviewStart(
           if (answer === undefined) throw new Error("runCritic checks it.");
           const review: StartReview = {
             assetId: picture.id,
+            ...(job.endPicture === undefined
+              ? {}
+              : { endPictureAssetId: job.endPicture.id }),
             verdict: answer.verdict,
             faults: answer.faults,
             notes: answer.notes,
           };
+          const checks =
+            job.design === undefined
+              ? []
+              : designChecksOf({
+                  job: job.design,
+                  frames: answer.design,
+                  by: "critic",
+                });
           return context.writeLatest(async () => {
             const latest = context.store.read().bible;
             const latestPlan = latest.storyPlan ?? plan;
             const reviewedShot =
-              withStartReview({ shots: [shot], shotId: shot.id, review })[0] ??
-              shot;
-            const next =
-              review.verdict === "pass"
-                ? `Make the clip with first_frame_asset_id "${picture.id}".`
+              withStartReview({
+                shots: [shot],
+                shotId: shot.id,
+                review,
+                checks,
+              })[0] ?? shot;
+            const next = checks.some((check) => check.breaks.length > 0)
+              ? "A picture that breaks the design cannot start or end a clip unless the person chooses it: make a new picture that matches the turnaround of the look, or ask the person."
+              : review.verdict === "pass"
+                ? `Make the clip with first_frame_asset_id "${picture.id}"${job.endPicture === undefined ? "" : ` and last_frame_asset_id "${job.endPicture.id}"`}.`
                 : shotNextStepOf({
                     shotId: shot.id,
                     reviews: reviewedShot.reviews ?? [],
@@ -163,16 +117,18 @@ export function registerReviewStart(
                         shots: latestPlan.shots,
                         shotId: shot.id,
                         review,
+                        checks,
                       }),
                     },
                   },
                 },
               ],
-              line: `The critic says ${review.verdict} for the start picture "${picture.id}"${review.faults.length === 0 ? "." : `: ${review.faults.join("; ")}.`}${review.notes.length === 0 ? "" : ` Notes, which do not fail it: ${review.notes.join("; ")}.`} ${next}`,
+              line: `The critic says ${review.verdict} for the start picture "${picture.id}"${review.faults.length === 0 ? "." : `: ${review.faults.join("; ")}.`}${review.notes.length === 0 ? "" : ` Notes, which do not fail it: ${review.notes.join("; ")}.`}${designLineOf(checks)} ${next}`,
               data: {
                 verdict: review.verdict,
                 faults: review.faults,
                 notes: review.notes,
+                design_breaks: checks.flatMap((check) => check.breaks),
               },
             });
           });

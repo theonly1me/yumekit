@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { castLookSchema, lookLimits } from "./castLooks.js";
 import { sheetReviewSchema, sheetTrySchema } from "./reviews.js";
 import { storySchema } from "./story.js";
 import { storyPlanSchema } from "./storyPlan.js";
@@ -36,6 +37,7 @@ export const castMemberSchema = z.strictObject({
     .exactOptional(),
   planNotes: z.array(z.string()).exactOptional(),
   storyCharacterId: idSchema.exactOptional(),
+  looks: z.array(castLookSchema).max(lookLimits.looks).exactOptional(),
 });
 
 export const bibleSchema = z.strictObject({

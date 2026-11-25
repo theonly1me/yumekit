@@ -1,6 +1,7 @@
 import { castFactLimits, castKinds, castPromptLimits } from "@yumekit/project";
 import { z } from "zod";
 import { idInput } from "../inputs.js";
+import { looksInput } from "./lookInput.js";
 
 export const maximumCastPictures = 4;
 
@@ -62,4 +63,5 @@ export const putCastMemberInput = {
     .describe(
       `What the film must never show of this entry (${String(castFactLimits.characters)} characters at most for one, ${String(castFactLimits.count)} at most), when its best sheet keeps a blocking fault, for example 'never show both hands close up'. With restrictions, a failed sheet can be used, and review_plan refuses each shot that breaks one. Give [] to remove them. Leave it out to keep them.`,
     ),
+  looks: looksInput,
 };

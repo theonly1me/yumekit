@@ -46,6 +46,7 @@ export type {
   AssetSheet,
   AssetSheetRequest,
 } from "./assetSheet/drawAssetSheet.js";
+export type { BesidePicture } from "./assetSheet/pairSheet.js";
 export type {
   ContactSheet,
   ContactSheetRequest,

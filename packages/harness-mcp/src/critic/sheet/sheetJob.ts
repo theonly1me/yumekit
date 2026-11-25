@@ -4,6 +4,9 @@ import type { HarnessContext } from "../../context.js";
 import type { HarnessFailure, Outcome } from "../../results.js";
 import { checkAnswerInput, countInput } from "../clip/clipAnswerInput.js";
 import { joinedContent, pictureOf, type Content } from "../criticPictures.js";
+import { designInput } from "../design/designAnswer.js";
+import { designBriefLinesOf } from "../design/designBrief.js";
+import type { DesignJob } from "../design/designJob.js";
 import type { CriticLook } from "../clip/clipViews.js";
 
 export const sheetAnswerInput = {
@@ -31,6 +34,7 @@ export const sheetAnswerInput = {
     .describe(
       "Each difference that a viewer would not see, or that the next step can absorb. Notes do not fail the sheet.",
     ),
+  design: designInput,
 };
 
 export type SheetAnswer = z.output<z.ZodObject<typeof sheetAnswerInput>>;
@@ -40,6 +44,8 @@ export interface SheetJob {
   member: CastMember;
   pictures: Asset[];
   holds: string[];
+  lookLines: string[];
+  design: DesignJob | undefined;
   answer: SheetAnswer | undefined;
 }
 
@@ -71,12 +77,18 @@ export function sheetBriefOf(job: SheetJob): string {
       : [
           `From the person's brief, which wins over the facts: ${(member.briefFacts ?? []).join("; ")}`,
         ]),
+    ...job.lookLines,
     `Pictures: ${job.pictures.map((asset) => asset.id).join(", ")}`,
     "",
     "The list (answer each item by its number):",
     ...sheetListOf(job).map(
       (...[item, index]) => `${String(index + 1)}. ${item}`,
     ),
+    ...designBriefLinesOf({
+      job: job.design,
+      viewTool: "view_for_review",
+      answerIn: "design of your answer",
+    }),
     "",
     "Severity: put each fault that the film cannot use in faults (blocking), and each difference that a viewer would not see in notes. Only a blocking fault fails the sheet.",
     "",
