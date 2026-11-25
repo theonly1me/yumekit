@@ -51,7 +51,7 @@ For a story film (a trailer, a short, an anime), write the story before any shot
 
 1. Read `get_story_guide`.
 2. Write the whole story with `set_story`: the premise in one sentence, the world and its rule, each main character (background, want, fear, and what they do not know), the opposing force and why it acts, the arc in 3 to 6 steps, and what stays unknown.
-3. Show the story to the person in plain words, and ask for a yes or changes. The question is free, and a wrong story wastes every paid shot after it. Skip it only when the person said to go ahead without asking.
+3. End the turn: show the story to the person in plain words, and ask for a yes or changes. The question is free, and a wrong story wastes every shot after it. A request to make a film is not a yes to its story. Skip the question only when the person said in words to go ahead without asking.
 4. Write the plan with `set_story_plan`, with its `form` and the `story_fact` of each shot. A trailer raises a question and never shows how a conflict ends.
 5. Put a `trailer-card` between the moments of a trailer, with its `storyFact`, on a hit that `check_music` measured, and end on a `trailer-card` with `variant: "title"`.
 6. Test each line on screen: it is good when it could belong to this story only.
