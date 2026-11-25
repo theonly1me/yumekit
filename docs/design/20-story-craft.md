@@ -93,6 +93,7 @@ The brief of this work package names these parts S1 to S8. C1 and C2 are S1, C3 
 - `set_story_plan` warns when a shot in the same place as the shot before starts in another state (warning 1).
 - A kept review saves the picture at the end of the kept part of the clip as an image asset `<clip id>-end` (C6). The shot keeps its id as `endPictureAssetId` of the review.
 - A call with `shot_id` for the next shot in the same place, when the shot before has an end picture, must use it: as `first_frame_asset_id`, in `reference_asset_ids`, or through a first picture that was made with it as a reference. Otherwise the failure is `continuity-picture-missing` with the id of the end picture. A cut to another angle of the same place makes a start picture with the end picture as a reference.
+- Since WP72 (C38), this rule applies only to a shot with `continues_shot`. A cut is free, and gets a note.
 
 ## The review of a clip (C6)
 
@@ -743,3 +744,62 @@ These facts and choices came from the build of WP70 on 2026-11-24.
 28. The Story view could mark a brief fault that is restored. The harness knows it; the view shows each one that the stored check named.
 29. From the owner's judgment of real clips: the clip critic rates a fault by how long it shows. A fault of a few frames at full speed is a note with a cut range, and the lead removes it with a two-part placement of the clip; it does not refuse the clip.
 30. From the owner's judgment of real clips: stiffness is a fault of a clip. A clip where only one limb moves and the body does not move with the action counts against the clip.
+
+## What went wrong in the fifth run
+
+On 2026-11-25 the lead agent made a film of 14 shots. One accepted shot took 5 to 10 minutes: one start picture, a wait, a critic turn of 30 to 120 seconds, one clip with 60 to 120 seconds on the video service, a second critic turn, and only then the next shot. The 14 shots took hours, although the pictures, the clips, and the reviews of different shots do not depend on each other. Two more faults: the harness refused two start pictures that the person chose for a cut in the street ("starts where walk ended"), and 14 Gemini calls ended with only "status failed", while the service had answered `RESOURCE_EXHAUSTED`.
+
+## Decisions of WP72
+
+| Id  | Decision                                                                                                                                                                                                                                                                          | Why                                                      |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| P1  | Media calls of different shots run at the same time, with a limit for each service: 3 by default, 2 for Codex, lower with `limits.callsAtOnce`. Only the short write of the project is in a queue                                                                                 | The wait on a service is most of the time of a shot      |
+| P2  | The spending limit and the video seconds limit hold the cost of a running call, so calls at the same time cannot pass a limit together                                                                                                                                            | Money stays safe                                         |
+| P3  | A call waits only for what it needs. A shot with `continues_shot` waits for the kept clip of that shot, and the refusal names it                                                                                                                                                  | After the two calibration shots, each other shot is free |
+| P4  | Reviews of different work run at the same time, with at most 3 critic turns. Never two reviews of the same work at once                                                                                                                                                           | A critic turn is 30 to 120 seconds                       |
+| P5  | `get_work`, the story guide, and the instructions tell the lead to make all free shots in four steps                                                                                                                                                                              | The lead must know that it can                           |
+| P6  | The editor shows each running call with its shot, its service, and its state                                                                                                                                                                                                      | The person sees what runs                                |
+| C38 | Continuity is advice. A shot starts on the end picture of another shot only with `continues_shot` (the same camera, one unbroken action). Without it, a call in the same place as the shot before gets a note and is not refused. The plan check notes a missing `continues_shot` | A cut to a new camera position is not a continuation     |
+
+## Details of WP72
+
+These facts and choices came from the build of WP72 on 2026-11-25.
+
+### The facts before the build
+
+1. Nothing in yumekit put the calls of one lead in a line. The MCP SDK 1.32.2 starts the handler of each request with no wait (`Protocol._onrequest`). The bridge, the engine route, and `createHarness` await each call on its own. The project store writes in a queue (`createSerialQueue`), and a write takes milliseconds.
+2. The lead's own program did. Claude Code 2.1.331 runs a tool of an MCP server at the same time as others only when its annotation has `readOnlyHint: true` (read in its program file: `isConcurrencySafe(){return ie.mayOverlap||(oe.annotations?.readOnlyHint??!1)}`). It runs up to 10 such tools at once (`CLAUDE_CODE_MAX_TOOL_USE_CONCURRENCY`). `generate_asset` and the reviews change the project, so three of them in one step ran one after the other. Codex CLI 0.163.0 has the setting `supports_parallel_tool_calls` for each MCP server, off by default.
+3. The critic was in a line twice: the critic desk of the harness and the critic desk of the engine each ran one turn at a time, and the critic tools found their review by "the one open review".
+4. The spending limit already held the price of a running call (`SpendingBook.reserve`, the check and the hold with no wait between them). The video seconds limit counted only the clips in the project, so clips at the same time could pass it together.
+5. The order rules: the plan check, the calibration shots, `review-first` and the rule of tries for each shot and sheet, and continuity (the next shot in the same place waited for the kept clip of the shot before). Each reads the project at the start of the call, so two tries of one shot at the same time could pass `review-first` together.
+6. The services: the rate limit page of the Gemini API (aistudio.google.com/docs/rate-limits, read 2026-11-25, no date) gives Gemini Omni Flash 8 requests a minute and 40 a day on tier 1, no limit of requests at once, and "Specified rate limits are not guaranteed". The Codex server starts one `codex exec` for each picture, each in its own folder, and a test showed two at once. A critic turn is one agent program of the person.
+
+### The parts
+
+7. `generate_assets` takes 1 to 8 inputs of `generate_asset` and `review_several` takes 1 to 8 reviews (`review_start`, `review_clip`, `review_sheet`). Each part keeps every rule and answers on its own; the whole answer is a failure only when each part failed. The harness of the engine has 73 tools, and the lead sees 68. Why batch tools and not `readOnlyHint`: a client can run a read-only tool with no question to the person, and these calls cost money.
+8. The Codex lead gets `mcp_servers.yumekit.supports_parallel_tool_calls=true`, so separate calls in one step also run at the same time there. Cursor is not checked.
+9. The limit of a service: a description can give `calls_at_once`. The client runs `min(calls_at_once or 3, limits.callsAtOnce)` calls of one server at once, and the rest wait for a free place ("Waiting for a free place at <server>"). The price is held before the wait. `limits.callsAtOnce` is in `media-tools.json` only, not in Settings.
+10. The work board of the harness holds each running media call and review: its id, its shot or cast entry, its service, its state (`waiting` or `running`), its start, and the video seconds it holds. It refuses a second call for the same asset id (`id-in-use`), the same shot (`shot-call-running`), or the same sheet (`sheet-call-running`), because each try needs its review first; and a second review of the same work (`review-running`). The video limit counts the clips in the project and the seconds on the board, and a call leaves the board only after its asset is in the project.
+11. The critic desk of the harness runs at most 3 turns and gives each a review job id. The critic tools find their job by that id: the engine passes the job of the critic token, and a direct MCP client sends `_meta["yumekit/review-job"]`. The engine runs critic turns at the same time.
+12. The write of a review reads the project and writes it in one queue of the harness (`writeLatest`), so two reviews that end together do not overwrite each other. The slow part (the end picture of a clip) runs before the queue.
+13. `continues_shot` names an earlier shot of the plan (else `invalid-value`). It is in the key of the plan check, and the plan brief says how each shot starts. The refusal `waits-for-shot` has `waits_for_shot`. A shot whose continued shot was refused, a calibration shot, and a clip that the person kept (WP71) start from the plan, as in C26.
+14. `get_work` gives "Free shots now" and, for each other shot, what it waits for: the plan check, the calibration shots, a lesson, the shot it continues, or a passed sheet.
+15. The editor reads `GET /api/work` and the event `work-changed`, and shows "Making now" above the chat box and in the making screen: each call with its shot or entry, its service ("the critic" for a review), and "Waiting for a free place" or the time it runs.
+16. The steering guard of WP71 (`person-message-waiting`) also covers `generate_assets`.
+
+### The service quota
+
+17. A Gemini interaction that ends with a status other than `completed` gives the code and the message of each entry of its `errors` ("... with the status failed: RESOURCE_EXHAUSTED: <message>"). An API error gives its `status` before its message. Neither gives the key or a header.
+18. A message with `RESOURCE_EXHAUSTED` has `_meta: { "yumekit/failure": "service-quota" }`. The client gives the failure `service-quota` with the server and the message, and the hint says that the quota of the service for this model is used up, and that the person can wait or pick another service.
+19. After the first `service-quota` of a group, `generate_assets` sends no more calls of that group to that service: each call that still waits for a place answers `service-quota` with "yumekit did not send this call". The calls that already run finish.
+
+### The tests
+
+20. Through the public interface, with the priced test server (a wait, and a record of when each call starts and ends) and the fake critic (a wait and a count of turns at once): three pictures in one call run 3 at once and take less than three waits; `callsAtOnce` 1 runs one at a time; four calls run 3 at once; three clips of 2 seconds with a limit of 5 seconds send 2 to the service; three pictures of 0.40 US dollars with a limit of 1 send 2; the same asset id twice is refused; a quota stops the rest of a group; four sheet reviews run 3 critic turns at once; two reviews of one sheet are refused; a shot with `continues_shot` waits and names the shot; a cut gets a note; `get_work` names the free shots. The Gemini server: a failed interaction with `RESOURCE_EXHAUSTED`, a 429 answer, and a failed interaction with no errors.
+
+### The real check
+
+21. The run: a project of 6 shots in one place, made with the harness of this branch and the fake critic up to the point where the plan check passed, the two sheets passed, and the two calibration shots had kept clips, so 4 shots were free. Then two copies, each opened with `yumekit open` of this branch, the free sample server as the only media server, and Claude Code 2.1.331 with `ANTHROPIC_MODEL=sonnet` as the lead and as the critic. Each copy got one chat request.
+22. Together: the request asked for the four shots with no word about tools. The lead read `get_work` and called `generate_assets` with 4 start pictures, `review_several` with 4 `review_start` (3 critic turns at once, the fourth waited for a place), and `generate_assets` with the 4 clips. 46.5 seconds from the request to the answer. The editor showed "Making now: 4" with 3 reviews running and 1 waiting.
+23. One by one: the request asked for one tool call in each step. The lead called `generate_asset` and `review_start` for each shot in turn. 72.3 seconds.
+24. In both runs the critic failed each start picture, because the sample server draws the prompt as text on a plain color, so no clip ran (`start-failed-review`). The measured gain is the critic turns of 4 shots: 46.5 against 72.3 seconds. With a real video service each clip waits 60 to 120 seconds, and the clips of free shots now overlap too; that gain is an inference, not measured here.

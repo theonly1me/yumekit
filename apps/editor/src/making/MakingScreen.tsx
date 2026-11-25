@@ -15,6 +15,8 @@ import {
   hasReadyService,
   useMediaChoices,
 } from "../settings/services/index.js";
+import { RunningWork } from "../chat/running/RunningWork.js";
+import { useRunningWork } from "../chat/running/useRunningWork.js";
 
 const waitLine =
   "When a step is done, you can open it here. You can read the script, see each picture, and listen to the voice and the music. You can change each of them.";
@@ -96,6 +98,7 @@ export function MakingScreen(props: {
 }) {
   const { chat, snapshot } = props;
   const choices = useMediaChoices(props.client);
+  const runningWork = useRunningWork(props.client);
   const steps = makingStepsOf({
     answer: chat.answer,
     snapshot,
@@ -146,6 +149,7 @@ export function MakingScreen(props: {
                 });
               }}
             />
+            <RunningWork items={runningWork} />
             <MakingActions
               isRunning={isRunning}
               isPlanReady={planReady}

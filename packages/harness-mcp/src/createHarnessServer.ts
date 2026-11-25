@@ -8,6 +8,7 @@ import type {
 import { harnessToolsOf, type HarnessOptions } from "./harness/harnessTools.js";
 import type { HarnessTool, ProgressListener } from "./harness/toolTable.js";
 import { serverInstructions } from "./instructions.js";
+import { createWorkBoard } from "./work/board/workBoard.js";
 
 type RequestExtra = RequestHandlerExtra<ServerRequest, ServerNotification>;
 
@@ -37,6 +38,13 @@ function progressOptionOf(extra: RequestExtra): {
   };
 }
 
+export const reviewJobMetaKey = "yumekit/review-job";
+
+function reviewJobOf(extra: RequestExtra): { reviewJobId?: string } {
+  const value = extra._meta?.[reviewJobMetaKey];
+  return typeof value === "string" ? { reviewJobId: value } : {};
+}
+
 function registerMcpTool(options: {
   server: McpServer;
   tool: HarnessTool;
@@ -50,7 +58,11 @@ function registerMcpTool(options: {
   };
   if (Object.keys(tool.inputShape).length === 0) {
     server.registerTool(tool.name, config, (extra) =>
-      tool.run({ input: {}, ...progressOptionOf(extra) }),
+      tool.run({
+        input: {},
+        ...progressOptionOf(extra),
+        ...reviewJobOf(extra),
+      }),
     );
     return;
   }
@@ -59,7 +71,11 @@ function registerMcpTool(options: {
     { ...config, inputSchema: tool.inputShape },
     (...parameters) => {
       const [input, extra] = parameters;
-      return tool.run({ input, ...progressOptionOf(extra) });
+      return tool.run({
+        input,
+        ...progressOptionOf(extra),
+        ...reviewJobOf(extra),
+      });
     },
   );
 }
@@ -73,6 +89,7 @@ export function createHarnessServer(options: HarnessOptions): McpServer {
   const tools = harnessToolsOf({
     ...options,
     pictures,
+    board: createWorkBoard(),
     callerOf: () => "ai",
   });
   for (const tool of tools) {

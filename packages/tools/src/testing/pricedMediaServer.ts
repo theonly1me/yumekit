@@ -1,5 +1,6 @@
 import { appendFile, mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import { setTimeout as delay } from "node:timers/promises";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
@@ -96,6 +97,16 @@ async function noteCall(tool: string): Promise<void> {
   if (file) await appendFile(file, `${tool}\n`);
 }
 
+async function noteSpan(span: { startedAt: number; endedAt: number }) {
+  const file = process.env["YUMEKIT_PRICED_SPANS"];
+  if (file) {
+    await appendFile(
+      file,
+      `${String(span.startedAt)} ${String(span.endedAt)}\n`,
+    );
+  }
+}
+
 const server = new McpServer({
   name: "yumekit-priced-media",
   version: "0.0.0",
@@ -133,6 +144,14 @@ async function madeFile(options: {
   facts?: object;
 }) {
   await noteCall(options.tool);
+  const startedAt = Date.now();
+  await delay(Number(process.env["YUMEKIT_PRICED_WAIT_MS"] ?? "0"));
+  await noteSpan({ startedAt, endedAt: Date.now() });
+  if (process.env["YUMEKIT_PRICED_QUOTA"] === "used-up") {
+    const text = "The Priced API ended the call: RESOURCE_EXHAUSTED.";
+    const _meta = { "yumekit/failure": "service-quota" };
+    return { isError: true, content: [{ type: "text" as const, text }], _meta };
+  }
   if (process.env[keyVariable] === expiredKey) {
     const text = "The Priced API answered 401: Your API key has expired.";
     return { isError: true, content: [{ type: "text" as const, text }] };

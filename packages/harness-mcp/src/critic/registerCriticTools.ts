@@ -53,8 +53,8 @@ export function registerCriticTools(
       "For the critic only. With no input: every frame of the clip at 8 each second, the start picture next to the first frame, the end of the shot before, and the sheet pictures; or each picture of a sheet. With a region and a time: a closer look.",
     inputSchema: viewInput,
     annotations: { readOnlyHint: true },
-    run: async ({ input }) => {
-      const job = critics.current();
+    run: async ({ input, reviewJobId }) => {
+      const job = critics.jobOf(reviewJobId);
       if (job === undefined) return failureResult(noJob);
       if (job.kind === "plan") {
         return {
@@ -79,8 +79,8 @@ export function registerCriticTools(
     description:
       "For the critic only: your whole answer about the clip. Answer each item of the list, each measured warning, the counts, the action and each end entry, the match of the first frame, the verdict, and the faults with their times.",
     inputSchema: clipAnswerInput,
-    run: ({ input }) => {
-      const job = critics.current();
+    run: ({ input, reviewJobId }) => {
+      const job = critics.jobOf(reviewJobId);
       if (job?.kind !== "clip") return failureResult(noJob);
       const issues = clipAnswerIssuesOf({ job, answer: input });
       if (issues.length > 0) return answerRefused(issues);
@@ -96,8 +96,8 @@ export function registerCriticTools(
     description:
       "For the critic only: your whole answer about a sheet. Answer each item of the list, the counts, the verdict, and the faults.",
     inputSchema: sheetAnswerInput,
-    run: ({ input }) => {
-      const job = critics.current();
+    run: ({ input, reviewJobId }) => {
+      const job = critics.jobOf(reviewJobId);
       if (job?.kind !== "sheet") return failureResult(noJob);
       const issues = sheetAnswerIssuesOf({ job, answer: input });
       if (issues.length > 0) return answerRefused(issues);
@@ -113,8 +113,8 @@ export function registerCriticTools(
     description:
       "For the critic only: your whole answer about the plan. Answer each item of the list and each finding, rate each shot, judge each cast entry, sort each fault as blocking or a note (at most 3 blocking for one shot; a fault of one shot goes in its entry, once), put each break of a brief fact in brief_faults, name the easiest and the hardest shot, and give the verdict.",
     inputSchema: planAnswerInput,
-    run: ({ input }) => {
-      const job = critics.current();
+    run: ({ input, reviewJobId }) => {
+      const job = critics.jobOf(reviewJobId);
       if (job?.kind !== "plan") return failureResult(noJob);
       const answer = withoutRepeatedFaults({ plan: job.plan, answer: input });
       const issues = planAnswerIssuesOf({ job, answer });

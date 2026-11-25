@@ -29,11 +29,14 @@ export function videoLimitFailureOf(options: {
   snapshot: ProjectSnapshot;
   input: JsonObject;
   limitSeconds: number;
+  runningSeconds?: number;
 }): VideoLimitFailure | undefined {
   const { limitSeconds } = options;
   const requestedValue = options.input["duration_seconds"];
   const requested = typeof requestedValue === "number" ? requestedValue : 0;
-  const used = roundedSeconds(generatedVideoSecondsOf(options.snapshot));
+  const made = roundedSeconds(generatedVideoSecondsOf(options.snapshot));
+  const running = roundedSeconds(options.runningSeconds ?? 0);
+  const used = roundedSeconds(made + running);
   const isTurnedOff = limitSeconds === 0;
   if (!isTurnedOff && used + requested <= limitSeconds) return undefined;
   const limitText = isTurnedOff
@@ -41,7 +44,7 @@ export function videoLimitFailureOf(options: {
     : `The limit is ${String(limitSeconds)} seconds.`;
   return {
     kind: "generated-video-limit-reached",
-    message: `This call asks for ${String(requested)} seconds of generated video. The project already has ${String(used)} seconds. ${limitText} The person sets the limit in Settings (limits.generatedVideoSeconds in media-tools.json). The AI cannot change it.`,
+    message: `This call asks for ${String(requested)} seconds of generated video. The project already has ${String(made)} seconds${running === 0 ? "" : `, and calls that run now make ${String(running)} more`}. ${limitText} The person sets the limit in Settings (limits.generatedVideoSeconds in media-tools.json). The AI cannot change it.`,
     hint: "Make no more video. Ask the person whether to raise the limit in Settings (limits.generatedVideoSeconds in media-tools.json), or use a shorter clip, a still image, or a code scene instead.",
     used_seconds: used,
     requested_seconds: requested,

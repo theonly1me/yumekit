@@ -5,6 +5,7 @@ import { createCriticDesk } from "./criticDesk.js";
 import type { AskCritic } from "./criticTypes.js";
 import { registerReviewPlan } from "./plan/registerReviewPlan.js";
 import { registerCriticTools } from "./registerCriticTools.js";
+import { registerReviewSeveral } from "./registerReviewSeveral.js";
 import { registerReviewStart } from "./start/registerReviewStart.js";
 import { registerReviewSheet } from "./sheet/registerReviewSheet.js";
 
@@ -16,6 +17,7 @@ export function registerReviewWork(
   registerReviewSheet(reviewContext);
   registerReviewPlan(reviewContext);
   registerReviewStart(reviewContext);
+  registerReviewSeveral(reviewContext);
   registerCheckMusic(context);
   if (context.askCritic !== undefined) registerCriticTools(reviewContext);
 }

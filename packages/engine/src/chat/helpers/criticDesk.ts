@@ -52,8 +52,13 @@ function failed(message: string): CriticTurn {
   };
 }
 
+interface RunningCritic {
+  jobId: string;
+  turn: Turn | undefined;
+}
+
 export function createCriticDesk(): CriticDesk {
-  let running: { token: string; turn: Turn | undefined } | undefined;
+  const running = new Map<string, RunningCritic>();
   const runTurn = async (options: {
     request: CriticRequest;
     run: LeadRun;
@@ -74,7 +79,8 @@ export function createCriticDesk(): CriticDesk {
       workingFolder,
       onEvent: () => undefined,
     });
-    if (running !== undefined) running.turn = turn;
+    const entry = running.get(token);
+    if (entry !== undefined) entry.turn = turn;
     const timer = setTimeout(() => {
       turn.stop();
     }, criticSecondsLimit * 1000);
@@ -95,28 +101,23 @@ export function createCriticDesk(): CriticDesk {
         : `The critic of ${request.subject} stopped with a problem: ${end.message}`,
     );
   };
-  let queue: Promise<unknown> = Promise.resolve();
   return {
-    ask: ({ request, run }) => {
-      if (run === undefined) {
-        return Promise.resolve({ ok: false, failure: noCriticFailure });
+    ask: async ({ request, run }) => {
+      if (run === undefined) return { ok: false, failure: noCriticFailure };
+      const token = randomUUID();
+      running.set(token, { jobId: request.jobId, turn: undefined });
+      try {
+        return await runTurn({ request, run, token });
+      } finally {
+        running.delete(token);
       }
-      const next = queue.then(async () => {
-        const token = randomUUID();
-        running = { token, turn: undefined };
-        try {
-          return await runTurn({ request, run, token });
-        } finally {
-          running = undefined;
-        }
-      });
-      queue = next.catch(() => undefined);
-      return next;
     },
     callOf: (token) => {
-      if (token === undefined || running?.token !== token) return undefined;
+      const entry = token === undefined ? undefined : running.get(token);
+      if (entry === undefined) return undefined;
       return {
         kind: "critic",
+        reviewJobId: entry.jobId,
         refusalOf: ({ tool }) =>
           isCriticTool(tool)
             ? undefined
@@ -124,7 +125,9 @@ export function createCriticDesk(): CriticDesk {
       };
     },
     stop: () => {
-      running?.turn?.stop();
+      running.forEach((entry) => {
+        entry.turn?.stop();
+      });
     },
   };
 }

@@ -32,7 +32,7 @@ yumekit reads two files with the same shape. The project file wins for a server 
 - `passEnvironment` lists the names of environment variables that the server gets. The file never holds a secret value. Document 10 says where a key lives and how a server describes its models.
 - The user file is in the configuration folder: `~/.config/yumekit`, or the folder in the environment variable `YUMEKIT_CONFIG_DIRECTORY` (document 10).
 - `defaults` names the server for each capability when a tool call gives no server. An entry is a server name, or `{ "server": "...", "model": "..." }` (document 10).
-- `limits` is optional. `generatedVideoSeconds` is the limit of document 09, a number of 0 or more, and 30 by default. `spendingUsd` is the spending limit of document 15 ("Details of WP64"), in US dollars, and 5 by default. The project file wins over the user file. `MediaTools.limits()` gives the merged value.
+- `limits` is optional. `generatedVideoSeconds` is the limit of document 09, a number of 0 or more, and 30 by default. `spendingUsd` is the spending limit of document 15 ("Details of WP64"), in US dollars, and 5 by default. `callsAtOnce` is a whole number of 1 or more that lowers the calls that run at the same time on each server (document 20, "Details of WP72"). The project file wins over the user file. `MediaTools.limits()` gives the merged value of the first two.
 - The `yumekit` command passes the commands of the bundled servers as `bundledServers`. A file can use a bundled server by its name with no `command`.
 - With no file (user or project), yumekit connects each bundled server, in the order `sample`, `openai`, `gemini`, `fal`, `local-voice`, `local-music`, `codex`. A bundled server with a missing key starts, and the editor shows that it needs a key.
 - With a file, yumekit connects the servers of the file first. Then it connects each bundled server that the file does not name.
@@ -80,9 +80,10 @@ type MediaToolResult = {
 Rules for a server:
 
 1. Write each file inside `output_directory` with a name that starts with `file_stem`. Return the absolute path.
-2. Return a failure as a result with `isError: true` and a message that a person can act on, for example "OPENAI_API_KEY is not set". A failure because the plan of the person reached its usage limit also has `_meta: { "yumekit/failure": "usage-limit-reached" }`.
+2. Return a failure as a result with `isError: true` and a message that a person can act on, for example "OPENAI_API_KEY is not set". A failure because the plan of the person reached its usage limit also has `_meta: { "yumekit/failure": "usage-limit-reached" }`. A failure because the quota of the service for the model is used up (the code `RESOURCE_EXHAUSTED` of Gemini) has `_meta: { "yumekit/failure": "service-quota" }`, and its message gives the code and the message of the service, never a key or a header.
 3. Never write outside `output_directory`.
 4. `align_words` writes no file. It returns `files: []` and `words`.
+5. A description can give `calls_at_once`: the most calls of the server that run at the same time. With none, the client runs 3. The Codex server gives 2.
 
 The harness validates each result against the schema. A result that does not match is the failure `media-tool-invalid-result`, with the server name and the schema error.
 
@@ -162,7 +163,7 @@ type ConnectFailure = {
 };
 ```
 
-`MediaToolFailure` kinds: `no-server-for-capability`, `server-not-found`, `server-failed-to-start`, `media-tool-failed` (with the message of the server), `media-tool-invalid-result`, `media-tool-timeout`, `media-key-missing` (with `server`, `variable`, `getKeyUrl`, and `steps`, document 10), `media-key-not-working`, `media-service-not-ready` and `media-usage-limit-reached` (each with `server` and `message`, document 15, "Details of WP67"), `spending-limit-reached`, and `spending-record-not-valid` (document 15, "Details of WP64").
+`MediaToolFailure` kinds: `no-server-for-capability`, `server-not-found`, `server-failed-to-start`, `media-tool-failed` (with the message of the server), `media-tool-invalid-result`, `media-tool-timeout`, `media-key-missing` (with `server`, `variable`, `getKeyUrl`, and `steps`, document 10), `media-key-not-working`, `media-service-not-ready` and `media-usage-limit-reached` (each with `server` and `message`, document 15, "Details of WP67"), `service-quota` (with `server` and `message`, document 20, "Details of WP72"), `spending-limit-reached`, and `spending-record-not-valid` (document 15, "Details of WP64").
 
 `CheckKeyFailure` kinds: `server-not-found`, `server-failed-to-start`, `media-tool-failed`, `media-tool-invalid-result`, `media-tool-timeout`, and `no-check-key-tool` for a server that lists no `check_key`.
 

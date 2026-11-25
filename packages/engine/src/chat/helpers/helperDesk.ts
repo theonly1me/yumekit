@@ -33,6 +33,7 @@ export type HelperCall =
   | { kind: "ended" }
   | {
       kind: "critic";
+      reviewJobId: string;
       refusalOf: (call: { tool: string }) => string | undefined;
     }
   | {

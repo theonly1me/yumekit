@@ -28,8 +28,16 @@ export function successResult(structuredContent: object): CallToolResult {
   };
 }
 
+const quotaCode = "RESOURCE_EXHAUSTED";
+
 export function errorResult(message: string): CallToolResult {
-  return { isError: true, content: [{ type: "text", text: message }] };
+  return {
+    isError: true,
+    content: [{ type: "text", text: message }],
+    ...(message.includes(quotaCode)
+      ? { _meta: { "yumekit/failure": "service-quota" } }
+      : {}),
+  };
 }
 
 export function errorMessage(error: unknown): string {

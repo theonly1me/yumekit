@@ -1,6 +1,8 @@
+import { setTimeout as delay } from "node:timers/promises";
 import type { JsonObject } from "@yumekit/tools";
 import { clipListItems } from "../critic/clip/clipList.js";
 import type { AskCritic } from "../critic/criticTypes.js";
+import { reviewJobMetaKey } from "../createHarnessServer.js";
 import { planAnswerOf } from "./planCritic.js";
 
 export type CriticAnswer = JsonObject;
@@ -10,11 +12,13 @@ export interface CriticScript {
   sheet?: (brief: string) => CriticAnswer;
   plan?: (brief: string) => CriticAnswer;
   start?: (brief: string) => CriticAnswer;
+  waitMilliseconds?: number;
 }
 
 export interface CriticLog {
   briefs: string[];
   answers: { isError: boolean; text: string }[];
+  mostAtOnce: number;
 }
 
 function linesBetween(options: {
@@ -86,6 +90,7 @@ export function passSheetAnswerOf(): CriticAnswer {
 export type CriticToolCall = (request: {
   name: string;
   arguments: CriticAnswer;
+  _meta: Record<string, string>;
 }) => Promise<{ isError: boolean; text: string }>;
 
 export function scriptedCritic(options: {
@@ -93,10 +98,19 @@ export function scriptedCritic(options: {
   script: CriticScript;
   log: CriticLog;
 }): AskCritic {
+  let running = 0;
   return async (request) => {
     const { log, script } = options;
+    running += 1;
+    log.mostAtOnce = Math.max(log.mostAtOnce, running);
+    await delay(script.waitMilliseconds ?? 0);
     log.briefs.push(request.brief);
-    await options.call({ name: "view_for_review", arguments: {} });
+    const meta = { [reviewJobMetaKey]: request.jobId };
+    await options.call({
+      name: "view_for_review",
+      arguments: {},
+      _meta: meta,
+    });
     const kind =
       (["sheet", "plan", "start"] as const).find((candidate) =>
         request.brief.startsWith(`Review job: the ${candidate}`),
@@ -108,8 +122,13 @@ export function scriptedCritic(options: {
       clip: script.clip ?? keepAnswerOf,
     }[kind](request.brief);
     log.answers.push(
-      await options.call({ name: `give_${kind}_review`, arguments: answer }),
+      await options.call({
+        name: `give_${kind}_review`,
+        arguments: answer,
+        _meta: meta,
+      }),
     );
+    running -= 1;
     return { ok: true, seconds: 1 };
   };
 }

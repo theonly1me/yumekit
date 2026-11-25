@@ -1,6 +1,8 @@
 import { AskForm, type SceneChip } from "./AskForm.js";
 import { ChatHistory } from "./ChatHistory.js";
 import type { AskInput } from "./chatRequests.js";
+import { RunningWork } from "./running/RunningWork.js";
+import type { WorkItem } from "./running/workSchema.js";
 import { Suggestions } from "./Suggestions.js";
 import type { Chat } from "./useChat.js";
 import type { ChatBox } from "./useChatBox.js";
@@ -14,6 +16,7 @@ export function ChatPanel(props: {
   isHidden: boolean;
   sceneNumberOf: (clipId: string) => number | undefined;
   onOpenAiSettings: () => void;
+  runningWork: WorkItem[];
 }) {
   const { chat, box, chip } = props;
   const sendInput = (input: AskInput) => {
@@ -32,6 +35,7 @@ export function ChatPanel(props: {
         onOpenAiSettings={props.onOpenAiSettings}
       />
       <div className="ask">
+        <RunningWork items={props.runningWork} />
         <Suggestions
           hasScenes={props.hasScenes}
           isRunning={chat.isRunning}

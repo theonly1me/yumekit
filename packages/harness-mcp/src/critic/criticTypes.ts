@@ -1,6 +1,7 @@
 export interface CriticRequest {
   brief: string;
   subject: string;
+  jobId: string;
 }
 
 export type CriticTurn =

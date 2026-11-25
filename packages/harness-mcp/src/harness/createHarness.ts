@@ -13,6 +13,7 @@ import {
 import { harnessToolsOf, type HarnessOptions } from "./harnessTools.js";
 import { mcpInputFailureOf } from "./mcpInputFailure.js";
 import type { HarnessTool, ProgressListener } from "./toolTable.js";
+import { createWorkBoard, type WorkItem } from "../work/board/workBoard.js";
 
 export interface HarnessToolListing {
   name: string;
@@ -26,10 +27,17 @@ export interface HarnessCall {
   input: JsonObject;
   onProgress?: ProgressListener;
   by?: MadeBy;
+  reviewJobId?: string;
+}
+
+export interface HarnessWork {
+  items: () => WorkItem[];
+  subscribe: (listener: (items: WorkItem[]) => void) => () => void;
 }
 
 export interface Harness {
   tools: HarnessToolListing[];
+  work: HarnessWork;
   call: (request: HarnessCall) => Promise<HarnessResult>;
   close: () => Promise<void>;
 }
@@ -64,13 +72,15 @@ async function runTool(options: {
   tool: HarnessTool;
   input: JsonObject;
   onProgress: ProgressListener | undefined;
+  reviewJobId: string | undefined;
 }): Promise<HarnessResult> {
-  const { tool, input, onProgress } = options;
+  const { tool, input, onProgress, reviewJobId } = options;
   const mcpInputFailure = await mcpInputFailureOf({ tool, input });
   const result = harnessResultOf(
     await tool.run({
       input,
       ...(onProgress === undefined ? {} : { onProgress }),
+      ...(reviewJobId === undefined ? {} : { reviewJobId }),
     }),
   );
   return mcpInputFailure === undefined
@@ -81,15 +91,18 @@ async function runTool(options: {
 export function createHarness(options: HarnessOptions): Harness {
   const pictures = createPictureRenderer({ folder: options.store.folder });
   const callers = new AsyncLocalStorage<{ by: MadeBy | undefined }>();
+  const board = createWorkBoard();
   const harnessTools = harnessToolsOf({
     ...options,
     pictures,
+    board,
     callerOf: () => callers.getStore()?.by,
   });
   const toolsByName = new Map(harnessTools.map((tool) => [tool.name, tool]));
   const running = new Set<Promise<HarnessResult>>();
   let isClosed = false;
   return {
+    work: { items: board.items, subscribe: board.subscribe },
     tools: harnessTools.map((tool) => ({
       name: tool.name,
       description: tool.description,
@@ -98,12 +111,12 @@ export function createHarness(options: HarnessOptions): Harness {
         ? {}
         : { annotations: tool.annotations }),
     })),
-    call: async ({ name, input, onProgress, by }) => {
+    call: async ({ name, input, onProgress, by, reviewJobId }) => {
       if (isClosed) return harnessClosed;
       const tool = toolsByName.get(name);
       if (tool === undefined) return toolNotFound(name);
       const pending = callers.run({ by }, () =>
-        runTool({ tool, input, onProgress }),
+        runTool({ tool, input, onProgress, reviewJobId }),
       );
       running.add(pending);
       try {

@@ -41,9 +41,13 @@ function followProjectChanges(options: {
       options.events.send({ type: "media-servers-changed" });
     },
   );
+  const stopWork = options.parts.harness.work.subscribe((items) => {
+    options.events.send({ type: "work-changed", items });
+  });
   return async () => {
     unsubscribe();
     stopDescriptions();
+    stopWork();
     await refreshing;
   };
 }

@@ -1,5 +1,7 @@
 export const documentedToolNames = [
   "get_work",
+  "generate_assets",
+  "review_several",
   "get_project",
   "get_scene",
   "get_timeline",

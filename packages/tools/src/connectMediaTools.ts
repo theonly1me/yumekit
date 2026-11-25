@@ -6,6 +6,7 @@ import {
   type ServerConnection,
   type StartedServer,
 } from "./connectServer.js";
+import { createCallSlots } from "./callSlots.js";
 import { checkPick } from "./checkPick.js";
 import { mediaChoicesOf } from "./mediaChoices.js";
 import { checkKeys } from "./keyHealth/checkKeys.js";
@@ -93,6 +94,8 @@ export async function connectMediaTools(options: {
     toolTimeoutSeconds,
     onDescriptionsChanged: notifyDescriptionsChanged,
     spendingLimitUsd: () => limits.spendingUsd,
+    slots: createCallSlots(),
+    callsAtOnce: () => configuration.callsAtOnce,
   };
   const tools: MediaTools = {
     list: () =>

@@ -6,7 +6,7 @@ import {
 } from "@yumekit/project";
 import type { GenerateAssetInput } from "../media/generateAssetInput.js";
 import type { HarnessFailure, Outcome } from "../results.js";
-import { continuityFailureOf } from "./continuity.js";
+import { continuedShotOf, continuityFailureOf } from "./continuity.js";
 import {
   calibrationFailureOf,
   calibrationShotIdsOf,
@@ -85,11 +85,10 @@ function shotRequestOf(options: {
   };
 }
 
-function startsFromPlan(options: { plan: StoryPlan; index: number }): boolean {
-  const { plan, index } = options;
-  const shot = plan.shots[index];
-  const before = plan.shots[index - 1];
-  if (shot === undefined || before === undefined) return false;
+function startsFromPlan(options: { plan: StoryPlan; shot: Shot }): boolean {
+  const { plan, shot } = options;
+  const before = continuedShotOf(options);
+  if (before === undefined) return false;
   return (
     calibrationShotIdsOf(plan).includes(shot.id) ||
     refusalsOf({ shot: before }).length > 0
@@ -101,9 +100,8 @@ function withShot(options: {
   plan: StoryPlan;
   request: GenerateAssetInput;
   shot: Shot;
-  index: number;
 }): RequestOutcome {
-  const { snapshot, plan, request, shot, index } = options;
+  const { snapshot, plan, request, shot } = options;
   if (request.capability !== "image" && request.capability !== "video") {
     return failed({
       kind: "invalid-value",
@@ -117,9 +115,9 @@ function withShot(options: {
     continuityFailureOf({
       snapshot,
       plan,
-      index,
+      shot,
       request,
-      startsFromPlan: startsFromPlan({ plan, index }),
+      startsFromPlan: startsFromPlan({ plan, shot }),
     }) ??
     startGateFailureOf({ snapshot, shot, request });
   if (blocked !== undefined) return failed(blocked);

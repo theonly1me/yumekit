@@ -12,9 +12,15 @@ const modalityTokens = z.object({
   tokens: z.number(),
 });
 
+const interactionError = z.object({
+  message: z.string().optional(),
+  code: z.union([z.string(), z.number()]).optional(),
+});
+
 export const interactionSchema = z.object({
   id: z.string().min(1),
   status: z.string(),
+  errors: z.array(interactionError).optional(),
   steps: z
     .array(
       z.object({
@@ -84,4 +90,15 @@ export function fileExtensionOf(options: {
   if (known !== undefined) return known;
   if (/^[a-z0-9]+$/.test(subtype)) return subtype;
   return options.fallback;
+}
+
+export function errorTextOf(interaction: Interaction): string {
+  return (interaction.errors ?? [])
+    .map((error) =>
+      [error.code === undefined ? undefined : String(error.code), error.message]
+        .filter((part) => part !== undefined && part !== "")
+        .join(": "),
+    )
+    .filter((text) => text !== "")
+    .join("; ");
 }

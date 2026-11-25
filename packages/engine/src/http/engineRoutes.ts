@@ -9,6 +9,7 @@ import { mediaPrepareRoutes } from "./mediaPrepareRoutes.js";
 import { projectRoutes } from "./projectRoutes.js";
 import { settingsRoutes } from "./settingsRoutes.js";
 import { uploadRoutes } from "./uploadRoutes.js";
+import { workRoutes } from "./workRoutes.js";
 
 export const engineRoutes: Route[] = [
   ...projectRoutes,
@@ -21,4 +22,5 @@ export const engineRoutes: Route[] = [
   ...chatRoutes,
   ...settingsRoutes,
   ...uploadRoutes,
+  ...workRoutes,
 ];

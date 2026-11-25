@@ -11,13 +11,15 @@ export const missingKeyMessage =
   "GEMINI_API_KEY is not set. Create a key at https://aistudio.google.com/apikey, set GEMINI_API_KEY in your shell, and list it in passEnvironment of this server in media-tools.json.";
 
 const apiErrorBody = z.object({
-  error: z.object({ message: z.string() }),
+  error: z.object({ message: z.string(), status: z.string().optional() }),
 });
 
 function apiErrorMessage(text: string): string | undefined {
   try {
     const body = apiErrorBody.safeParse(JSON.parse(text));
-    return body.success ? body.data.error.message : undefined;
+    if (!body.success) return undefined;
+    const { message, status } = body.data.error;
+    return status === undefined ? message : `${status}: ${message}`;
   } catch {
     return undefined;
   }

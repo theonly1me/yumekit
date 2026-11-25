@@ -25,6 +25,8 @@ function failureMessage(failure: MediaToolFailure): string {
       return `The media server "${failure.server}" is not ready: ${failure.message}`;
     case "media-usage-limit-reached":
       return `The media server "${failure.server}" reached the usage limit of the plan of the person: ${failure.message}`;
+    case "service-quota":
+      return `The quota of the service "${failure.server}" for this model is used up: ${failure.message}`;
     case "spending-limit-reached":
       return spendingLimitMessage(failure);
     case "spending-record-not-valid":
@@ -67,6 +69,8 @@ function failureHint(failure: MediaToolFailure): string {
       return "Tell the person in one sentence why the service is not ready, with the step in the message. Use another ready server from list_media_tools for now.";
     case "media-usage-limit-reached":
       return "Tell the person that the plan reached its usage limit. Make no more calls to this server until the limit resets. Use another ready server from list_media_tools only when the person permits paid calls, or make the rest with free tools.";
+    case "service-quota":
+      return "Make no more calls to this service with this model for now. Tell the person in one sentence that the quota of the service for this model is used up, and that they can wait for it to reset or pick another service in Settings. Make the rest with another ready service, or with free tools.";
     case "spending-limit-reached":
       return "Make no more paid calls. Tell the person the limit, the amount spent, and the price, and that only they can raise the spending limit in Settings. Make the rest with free tools: graphics drawn by code, the music and the voice of this computer.";
     case "spending-record-not-valid":
@@ -107,7 +111,8 @@ export function mediaFailureOf(failure: MediaToolFailure): MediaHarnessFailure {
   }
   if (
     failure.kind === "media-service-not-ready" ||
-    failure.kind === "media-usage-limit-reached"
+    failure.kind === "media-usage-limit-reached" ||
+    failure.kind === "service-quota"
   ) {
     return { ...base, reason: failure.message, server: failure.server };
   }
