@@ -24,6 +24,17 @@ function videoAssetIdOf(scene: Scene | undefined): string | undefined {
   return typeof assetId === "string" ? assetId : undefined;
 }
 
+function clipStartFrameOf(options: {
+  scene: Scene | undefined;
+  framesPerSecond: number;
+}): number {
+  if (options.scene?.source.kind !== "kit") return 0;
+  const startSeconds = options.scene.source.props["startSeconds"];
+  return typeof startSeconds === "number"
+    ? Math.round(startSeconds * options.framesPerSecond)
+    : 0;
+}
+
 export function shownClipsFailureOf(options: {
   snapshot: ProjectSnapshot;
   edits: Edit[];
@@ -38,14 +49,20 @@ export function shownClipsFailureOf(options: {
       : [],
   );
   for (const clip of sceneClips) {
-    const assetId = videoAssetIdOf(scenes.get(clip.sceneId));
+    const scene = scenes.get(clip.sceneId);
+    const assetId = videoAssetIdOf(scene);
     const asset = snapshot.assets.find((candidate) => candidate.id === assetId);
     if (asset === undefined) continue;
-    const remaining = (asset.durationFrames ?? 0) - clip.sceneStartFrame;
+    const fromFrame =
+      clipStartFrameOf({
+        scene,
+        framesPerSecond: snapshot.project.framesPerSecond,
+      }) + clip.sceneStartFrame;
+    const remaining = (asset.durationFrames ?? 0) - fromFrame;
     const failure = shownClipFailureOf({
       snapshot,
       asset,
-      fromFrame: clip.sceneStartFrame,
+      fromFrame,
       shownFrames: Math.max(0, Math.min(clip.durationFrames, remaining)),
     });
     if (failure !== undefined) return failure;

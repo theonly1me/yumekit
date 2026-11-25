@@ -92,6 +92,26 @@ describe(
       expect(clean.isError).toBe(false);
     });
 
+    it("set_timeline counts the start of a video scene inside its clip, so a later start cannot show the break", async () => {
+      const harness = await clipOfStrike({ checked: true });
+      const startingAt = (startSeconds: number) =>
+        harness.call({
+          name: "put_scene",
+          arguments: {
+            ...videoScene,
+            props: { assetId: "strike-clip", startSeconds },
+          },
+        });
+
+      await startingAt(1);
+      const late = await setTimeline({ harness, durationFrames: 30 });
+      await startingAt(0.5);
+      const early = await setTimeline({ harness, durationFrames: 30 });
+
+      expect(late.data).toMatchObject({ kind: "design-break-in-range" });
+      expect(early.isError).toBe(false);
+    });
+
     it("set_timeline refuses a clip with no design check", async () => {
       const harness = await clipOfStrike({ checked: false });
       await harness.call({ name: "put_scene", arguments: videoScene });
