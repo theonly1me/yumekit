@@ -48,8 +48,13 @@ export function useMakingGate(options: {
   }
   const answerState =
     chatState.kind === "ready" ? chatState.chat.answer?.state : undefined;
+  const hasOpenQuestions =
+    chatState.kind === "ready" && chatState.chat.hasOpenQuestions;
 
-  if (decision === "making" && answerState === "stopped") {
+  if (
+    decision === "making" &&
+    (answerState === "stopped" || hasOpenQuestions)
+  ) {
     setDecision("editor");
   }
 

@@ -1,4 +1,6 @@
 import type { ReactNode } from "react";
+import { ChatEdge } from "./ChatEdge.js";
+import "./chatEdge.css";
 
 export type SideTab = "chat" | "scene";
 
@@ -29,6 +31,7 @@ export function SidePanel(props: {
         if (event.key === "Escape" && props.isOpen) props.onClose();
       }}
     >
+      <ChatEdge />
       <div className="side-tabs" role="tablist" aria-label="Side panel">
         {tabs.map((tab) => (
           <button

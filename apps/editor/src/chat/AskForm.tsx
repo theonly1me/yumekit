@@ -1,6 +1,12 @@
 import { useEffect, useRef } from "react";
 import { useFitHeight } from "./useFitHeight.js";
 import type { ChatAgent } from "./chatSchemas.js";
+import {
+  AddFilesButton,
+  DropHint,
+  FileChips,
+  type PendingFiles,
+} from "./files/index.js";
 import type { ChatBox } from "./useChatBox.js";
 import "./askForm.css";
 
@@ -21,6 +27,8 @@ function agentLineOf(agent: ChatAgent | null | undefined): string {
 
 export function AskForm(props: {
   box: ChatBox;
+  files: PendingFiles;
+  isDragging: boolean;
   chip: SceneChip | undefined;
   agent: ChatAgent | null | undefined;
   isRunning: boolean;
@@ -28,7 +36,7 @@ export function AskForm(props: {
   onStop: () => void;
   onOpenAiSettings: () => void;
 }) {
-  const { box, chip } = props;
+  const { box, chip, files } = props;
   const textArea = useRef<HTMLTextAreaElement>(null);
   useFitHeight({ element: textArea, text: box.draft });
 
@@ -40,7 +48,8 @@ export function AskForm(props: {
   }, [box.focusRequest]);
 
   const send = () => {
-    if (box.draft.trim() === "") return;
+    if (files.isAdding) return;
+    if (box.draft.trim() === "" && files.items.length === 0) return;
     props.onSend(box.draft.trim());
   };
   return (
@@ -75,7 +84,7 @@ export function AskForm(props: {
         placeholder={
           props.isRunning
             ? "Tell the AI something while it works"
-            : "Ask for a change"
+            : "Ask for a change, or drop files here"
         }
         value={box.draft}
         onChange={(event) => {
@@ -88,7 +97,9 @@ export function AskForm(props: {
           send();
         }}
       />
+      <FileChips files={files.items} onRemove={files.remove} />
       <div className="ask-foot">
+        <AddFilesButton onFiles={files.add} />
         <button
           type="button"
           className="agent-line"
@@ -99,18 +110,21 @@ export function AskForm(props: {
         <span className="ask-buttons">
           {props.isRunning ? (
             <>
-              <button type="submit">Send</button>
+              <button type="submit" disabled={files.isAdding}>
+                Send
+              </button>
               <button type="button" onClick={props.onStop}>
                 Stop
               </button>
             </>
           ) : (
-            <button type="submit" className="primary">
+            <button type="submit" className="primary" disabled={files.isAdding}>
               Send
             </button>
           )}
         </span>
       </div>
+      <DropHint isShown={props.isDragging} />
     </form>
   );
 }
