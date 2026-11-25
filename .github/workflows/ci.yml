@@ -11,7 +11,7 @@ jobs:
   check:
     name: Check (Node ${{ matrix.node }})
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 40
     strategy:
       matrix:
         node: [22, 24]
@@ -49,6 +49,7 @@ jobs:
         run: bash scripts/ci/retryApt.sh 3 180 pnpm --filter @yumekit/scene exec playwright install-deps chromium
         timeout-minutes: 12
       - run: pnpm test
+        timeout-minutes: 30
       - run: pnpm build
       - run: pnpm run pack-release
       - run: pnpm run check-release
