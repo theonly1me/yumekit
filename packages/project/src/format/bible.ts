@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { sheetReviewSchema, sheetTrySchema } from "./reviews.js";
+import { storySchema } from "./story.js";
 import { storyPlanSchema } from "./storyPlan.js";
 import { idSchema } from "./values.js";
 
@@ -34,6 +35,7 @@ export const castMemberSchema = z.strictObject({
     .max(castFactLimits.count)
     .exactOptional(),
   planNotes: z.array(z.string()).exactOptional(),
+  storyCharacterId: idSchema.exactOptional(),
 });
 
 export const bibleSchema = z.strictObject({
@@ -41,6 +43,7 @@ export const bibleSchema = z.strictObject({
   palette: z.array(z.string()),
   cast: z.array(castMemberSchema),
   voice: z.string(),
+  story: storySchema.exactOptional(),
   storyPlan: storyPlanSchema.exactOptional(),
 });
 

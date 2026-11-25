@@ -67,6 +67,8 @@ The example videos in both films were made by yumekit, and the free-hand agent u
 
 Each new scene follows each rule of document 08 and document 17, draws in each look, and has a wide, a tall, and a square layout.
 
+Document 20 (C47, WP74) adds `trailer-card`: a card between the shots of a trailer, and the title of the film with `variant: "title"`. It uses the fonts of `set_fonts` and the own colors of `set_look`, and the text roles `filmCard` and `filmTitle`.
+
 ## The contact sheet (K5)
 
 - `contact_sheet` takes `output_id`, `every_seconds` (default 1), and `columns`. It gives one picture with one frame for each step, each with its time and its beat.

@@ -124,6 +124,9 @@ export const shotInput = z.strictObject({
     .array(z.number().min(0))
     .optional()
     .describe("Seconds inside the shot that the music marks: a strike, a cut."),
+  story_fact: idInput(
+    "The id of the part of the story (set_story) that this shot shows: a character, a step of the arc, the world, or the premise. A spoken line or a text in the shot comes from this part.",
+  ).optional(),
 });
 
 export type ShotInput = z.infer<typeof shotInput>;

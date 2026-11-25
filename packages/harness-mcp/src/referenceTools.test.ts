@@ -77,7 +77,7 @@ describe("asset and reference read tools", () => {
     });
   });
 
-  it("list_kit_scenes gives the twenty-six kit scenes with a JSON schema of the props", async () => {
+  it("list_kit_scenes gives the twenty-seven kit scenes with a JSON schema of the props", async () => {
     const harness = await startHarness();
 
     const { data } = await harness.call({ name: "list_kit_scenes" });
@@ -110,6 +110,7 @@ describe("asset and reference read tools", () => {
       "look-swap",
       "command",
       "counts",
+      "trailer-card",
     ]);
     expect(kitScenes[0]?.props).toMatchObject({
       type: "object",

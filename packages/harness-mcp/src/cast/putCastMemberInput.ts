@@ -52,6 +52,9 @@ export const putCastMemberInput = {
     .describe(
       "true only when the person asked in this request to change a fact of the brief.",
     ),
+  story_character_id: idInput(
+    "For a person of a story film: the id of the character or the opposing force of the story (set_story) that this entry shows. Leave it out to keep it.",
+  ).optional(),
   restrictions: z
     .array(z.string().trim().min(1).max(castFactLimits.characters))
     .max(castFactLimits.count)

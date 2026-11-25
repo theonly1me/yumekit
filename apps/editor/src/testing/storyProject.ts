@@ -14,7 +14,7 @@ function smithState(state: string) {
   ];
 }
 
-const forgeShot = {
+export const forgeShot = {
   shot_id: "strike",
   purpose: "Show that the steel can bend.",
   action: "She strikes the red steel and the blade bends",
@@ -66,7 +66,7 @@ async function sheet(options: {
   await engine.callTool({ name: "review_sheet", input: { cast_id: castId } });
 }
 
-const storyArc = {
+export const storyArc = {
   logline: "A young smith forges a blade that will not break.",
   want: "A blade for her brother",
   obstacle: "The steel cracks when it cools",

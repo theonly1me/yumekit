@@ -1,0 +1,103 @@
+.whole-story {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 18px;
+  padding: 18px 20px 20px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--raised);
+}
+
+.whole-story h4,
+.story-form {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--step--2);
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.story-form {
+  color: var(--accent);
+}
+
+.story-premise {
+  margin: 0;
+  color: var(--text);
+  font-size: var(--step-1);
+  font-weight: 500;
+  line-height: 1.35;
+  text-wrap: pretty;
+}
+
+.story-approval {
+  display: inline-flex;
+  justify-self: start;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 4px 12px 4px 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  color: var(--text);
+  font-size: var(--step--2);
+}
+
+.story-approval::before {
+  content: "";
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.story-approval[data-approval="person-said-yes"]::before {
+  background: var(--text);
+}
+
+.story-people {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.story-person {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-size: var(--step--1);
+}
+
+.story-person .file-name {
+  white-space: normal;
+}
+
+.story-background {
+  color: var(--muted);
+}
+
+.story-role {
+  color: var(--accent);
+  font-weight: 400;
+}
+
+.story-steps {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding-left: 22px;
+  color: var(--text);
+  font-size: var(--step--1);
+}
+
+.story-steps li::marker {
+  color: var(--muted);
+}

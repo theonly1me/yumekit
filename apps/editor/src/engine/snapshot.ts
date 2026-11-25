@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { castEntrySchema } from "../cast/castEntries.js";
 import { storyPlanSchema } from "../parts/story/storyPlanSchema.js";
+import { wholeStorySchema } from "../parts/story/wholeStorySchema.js";
 import { videoStyleIds } from "../videoStyle/videoStyles.js";
 
 const outputSchema = z.object({
@@ -119,6 +120,7 @@ export const snapshotSchema = z.object({
   }),
   bible: z.object({
     cast: z.array(castEntrySchema),
+    story: wholeStorySchema.optional(),
     storyPlan: storyPlanSchema.optional(),
   }),
   script: z.string(),

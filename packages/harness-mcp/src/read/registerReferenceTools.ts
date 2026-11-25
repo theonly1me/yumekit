@@ -43,7 +43,7 @@ function registerListKitScenes(context: HarnessContext): void {
 }
 
 const filmChoiceLine =
-  "For a launch film: lines for a claim in a few words, footage for a recording cut to its region (with a heading and up to 4 lines beside it), wall for examples (each video with its own start in startSecondsEach), shapes for one video in each platform shape, look-swap for the same content in each look, counts for numbers, and command for the end with an install command. They share one layout and one type scale, and they draw in the own colors (set_look colors) and font (set_fonts look_font) of the person.";
+  "For a launch film: lines for a claim in a few words, footage for a recording cut to its region (with a heading and up to 4 lines beside it), wall for examples (each video with its own start in startSecondsEach), shapes for one video in each platform shape, look-swap for the same content in each look, counts for numbers, and command for the end with an install command. They share one layout and one type scale, and they draw in the own colors (set_look colors) and font (set_fonts look_font) of the person. For a trailer or a story film: trailer-card for each card between the shots and for the title at the end, with the storyFact of its line.";
 
 function registerGetSceneGuide(context: HarnessContext): void {
   context.tools.add({

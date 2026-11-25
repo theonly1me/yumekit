@@ -67,6 +67,7 @@ const defaultTextsByScene: Record<(typeof kitSceneNames)[number], string[]> = {
   "look-swap": [],
   command: ["command"],
   counts: ["0", "Count"],
+  "trailer-card": ["Title"],
 };
 
 afterEach(() => {

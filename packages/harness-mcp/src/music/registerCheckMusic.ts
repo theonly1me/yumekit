@@ -27,7 +27,7 @@ export function registerCheckMusic(context: HarnessContext): void {
   context.tools.add({
     name: "check_music",
     description:
-      "Measure a music track against the music map of the story plan, at the times where the clips of the shots are placed: its loudness and its brightness (energy over 2 kHz) each half second. It finds the start in the track that fits the map best, and warns when the music starts at full level, does not rise where the map rises, peaks away from the planned peak, or is loudest under the end card. It stores the check, so the person can compare the candidates in the Music view. Place the best one with replace_music, asset_id, and start_seconds. It judges where the music is loud and bright, not whether it is good: the person judges that by ear.",
+      "Measure a music track against the music map of the story plan, at the times where the clips of the shots are placed: its loudness and its brightness (energy over 2 kHz) each half second. It finds the start in the track that fits the map best, and warns when the music starts at full level, does not rise where the map rises, peaks away from the planned peak, or is loudest under the end card. It also measures the hits of the track (a sudden strong rise of the level, such as a drum or a boom), so a trailer-card can land on one. It stores the check, so the person can compare the candidates in the Music view. Place the best one with replace_music, asset_id, and start_seconds. It judges where the music is loud and bright, not whether it is good: the person judges that by ear.",
     inputSchema: { asset_id: idInput("The music track to check.") },
     annotations: { readOnlyHint: false },
     run: async ({ input }) => {
@@ -77,7 +77,15 @@ export function registerCheckMusic(context: HarnessContext): void {
         startSeconds: fit.startSeconds,
         fit: fit.fit,
         warnings: fit.warnings,
+        hits: curve.value.hits,
       };
+      const filmHits = curve.value.hits
+        .filter((hit) => hit >= fit.startSeconds)
+        .map((hit) => Math.round((hit - fit.startSeconds) * 100) / 100);
+      const hitLine =
+        filmHits.length === 0
+          ? "It has no clear hits, so cards land on the beat grid."
+          : `Its hits from the best start, in film seconds: ${filmHits.map((hit) => `${String(hit)}s`).join(", ")}. Land each trailer-card on one.`;
       return applyEditsResult({
         store: context.store,
         edits: [
@@ -86,13 +94,14 @@ export function registerCheckMusic(context: HarnessContext): void {
             bible: { ...snapshot.bible, storyPlan: withCheck({ plan, check }) },
           },
         ],
-        line: `"${asset.id}" fits the music map ${String(fit.fit)} of 1 from ${String(fit.startSeconds)}s of the track, and peaks at ${String(fit.peakSeconds)}s of the film. ${fit.warnings.length === 0 ? "No warnings." : fit.warnings.join(" ")}\nThe map:\n${cueSheetOf(parts)}`,
+        line: `"${asset.id}" fits the music map ${String(fit.fit)} of 1 from ${String(fit.startSeconds)}s of the track, and peaks at ${String(fit.peakSeconds)}s of the film. ${fit.warnings.length === 0 ? "No warnings." : fit.warnings.join(" ")}\n${hitLine}\nThe map:\n${cueSheetOf(parts)}`,
         data: {
           asset_id: asset.id,
           start_seconds: fit.startSeconds,
           fit: fit.fit,
           peak_seconds: fit.peakSeconds,
           warnings: fit.warnings,
+          hits_in_film_seconds: filmHits,
         },
       });
     },

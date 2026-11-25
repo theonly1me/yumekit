@@ -5,6 +5,7 @@ import { applyEditsResult } from "../applyEditsResult.js";
 import type { HarnessContext } from "../context.js";
 import { idInput, jsonObjectInput } from "../inputs.js";
 import { failureResult } from "../results.js";
+import { withCardLines } from "../storyFirst/withCardLines.js";
 import { checkKitMarks } from "./checkKitMarks.js";
 import { checkKitProps, checkModuleCode } from "./checkScene.js";
 
@@ -62,11 +63,15 @@ async function putScene(options: {
       ...common,
       source: { kind: "kit", component: input.kit_component, props },
     };
-    return applyEditsResult({
-      store: context.store,
-      edits: [{ kind: "putScene", scene }],
-      line: `Kit scene "${input.scene_id}" (${input.kit_component}) saved.`,
-      data: { scene_id: input.scene_id },
+    return withCardLines({
+      result: applyEditsResult({
+        store: context.store,
+        edits: [{ kind: "putScene", scene }],
+        line: `Kit scene "${input.scene_id}" (${input.kit_component}) saved.`,
+        data: { scene_id: input.scene_id },
+      }),
+      read: () => context.store.read(),
+      sceneIds: [input.scene_id],
     });
   }
   if (input.code !== undefined && input.kit_component === undefined) {

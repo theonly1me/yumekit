@@ -17,6 +17,7 @@ export const documentedToolNames = [
   "put_cast_member",
   "remove_cast_member",
   "get_story_guide",
+  "set_story",
   "set_story_plan",
   "record_lesson",
   "get_shot_brief",

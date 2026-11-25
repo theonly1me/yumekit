@@ -40,4 +40,40 @@ describe("get_story_guide", () => {
     expect(guide).toContain("Never draw two of it on one sheet");
     expect(guide).toContain("no prompt sign, no extra line");
   });
+
+  it("puts the story first, gives the craft of each form and the parts of a trailer, the test of a line, the cards, and a trailer built from its story", async () => {
+    const harness = await startHarness();
+
+    const result = await harness.call({ name: "get_story_guide" });
+    const guide = String(result.data["guide"]);
+
+    expect(guide.indexOf("## Story first")).toBeLessThan(
+      guide.indexOf("## The plan"),
+    );
+    expect(guide).toContain(
+      "A trailer needs the whole story too, because it shows a part of it.",
+    );
+    expect(guide).toContain(
+      "- trailer: moments from different times and places of a longer story. It raises a question and does not answer it, because the viewer must want to see the film. It never shows how a conflict ends",
+    );
+    expect(guide).toContain("- short: one complete small story with an end.");
+    for (const part of [
+      "1. The world as it was",
+      "2. The break",
+      "3. The stakes",
+      "4. The rise",
+      "5. The title",
+    ]) {
+      expect(guide).toContain(part);
+    }
+    expect(guide).toContain("Choose what to leave out");
+    expect(guide).toContain(
+      "The test: a line is good when it could belong to this story only.",
+    );
+    expect(guide).toContain("check_music measures the hits of a track");
+    expect(guide).toContain(
+      "## A worked example: a trailer built from its story",
+    );
+    expect(guide).toContain("No shot shows how anything ends.");
+  });
 });

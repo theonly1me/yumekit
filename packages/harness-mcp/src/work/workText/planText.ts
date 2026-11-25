@@ -53,6 +53,7 @@ function shotLines(options: { shot: Shot; number: number }): string[] {
   return [
     `${String(options.number)}. ${shot.id} (${String(shot.seconds)}s, place ${shot.placeId}, cast ${shot.castIds.join(", ") || "none"}, camera ${camera})`,
     `   Purpose: ${shot.purpose}`,
+    `   Shows from the story: ${shot.storyFact ?? "not named"}`,
     `   Action: ${shot.action}`,
     ...(shot.continuesShotId === undefined
       ? []
@@ -75,6 +76,7 @@ export function planLines(snapshot: ProjectSnapshot): string[] {
   }
   return [
     "### Story plan",
+    `Form: ${plan.form ?? "not set"}`,
     `Logline: ${plan.logline}`,
     `Wants: ${plan.want}. Against it: ${plan.obstacle}. Changes: ${plan.change}`,
     ...firstCutLines({ snapshot, plan }),

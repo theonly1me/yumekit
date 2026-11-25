@@ -13,6 +13,7 @@ import { footageSchema } from "./film/footage.js";
 import { linesSchema } from "./film/lines.js";
 import { lookSwapSchema } from "./film/lookSwap.js";
 import { shapesSchema } from "./film/shapes.js";
+import { trailerCardSchema } from "./film/trailerCard.js";
 import { wallSchema } from "./film/wall.js";
 import { heroSchema } from "./hero.js";
 import { imagePanSchema } from "./imagePan.js";
@@ -58,4 +59,5 @@ export const kitSceneSchemas = {
   "look-swap": lookSwapSchema,
   command: commandSchema,
   counts: countsSchema,
+  "trailer-card": trailerCardSchema,
 } satisfies Record<string, KitSceneSchema>;

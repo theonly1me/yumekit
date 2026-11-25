@@ -6,10 +6,10 @@ import { ShotPictures } from "./ShotPictures.js";
 import { SheetChecks } from "./SheetChecks.js";
 import { intensityText, stateLinesOf } from "./shotWords.js";
 import { shotFactsOf, type ShotFacts } from "./storyFacts.js";
+import { WholeStory } from "./WholeStory.js";
+import { filmFormLabels, storyPartNameOf } from "./wholeStorySchema.js";
+import { noPlanText, shotsNextText } from "./storyViewTexts.js";
 import "./story.css";
-
-export const noPlanText =
-  "This video has no story plan yet. Before the AI makes a real video clip, it writes the story: what the main character wants, what stands in the way, what changes, and each shot with one action. The plan shows here.";
 
 function StateList(props: { lines: string[] }) {
   return (
@@ -43,6 +43,13 @@ function ShotRow(props: {
   const { facts, nameOf } = props;
   const { shot } = facts;
   const checks = shotChecksOf({ snapshot: props.snapshot, shot });
+  const storyPart =
+    shot.storyFact === undefined
+      ? undefined
+      : storyPartNameOf({
+          story: props.snapshot.bible.story,
+          partId: shot.storyFact,
+        });
   return (
     <li className="shot-row">
       <ShotPictures
@@ -69,6 +76,9 @@ function ShotRow(props: {
             .join(" · ")}
         </span>
         <span className="shot-purpose">{shot.purpose}</span>
+        {storyPart === undefined ? null : (
+          <span className="fact">From the story: {storyPart}</span>
+        )}
         <dl className="shot-states">
           <dt>Starts</dt>
           <StateList lines={stateLinesOf({ state: shot.startState, nameOf })} />
@@ -122,11 +132,18 @@ function ShotRow(props: {
 }
 
 export function StoryView(props: StepViewProps) {
-  const plan = props.snapshot.bible.storyPlan;
+  const { story, storyPlan: plan } = props.snapshot.bible;
+  const wholeStory =
+    story === undefined ? null : (
+      <WholeStory story={story} snapshot={props.snapshot} />
+    );
   if (plan === undefined) {
     return (
       <div className="files-part story-part">
-        <p className="fact lead">{noPlanText}</p>
+        {wholeStory}
+        <p className="fact lead">
+          {story === undefined ? noPlanText : shotsNextText}
+        </p>
       </div>
     );
   }
@@ -136,6 +153,12 @@ export function StoryView(props: StepViewProps) {
     cast.find((member) => member.id === castId)?.name ?? castId;
   return (
     <div className="files-part story-part">
+      {wholeStory}
+      {plan.form === undefined ? null : (
+        <p className="story-form">
+          {filmFormLabels[plan.form] ?? filmFormLabels["other"]}
+        </p>
+      )}
       <p className="story-logline">{plan.logline}</p>
       <dl className="story-arc">
         <dt>Wants</dt>

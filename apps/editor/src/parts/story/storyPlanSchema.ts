@@ -90,6 +90,7 @@ const shotSchema = z.object({
   reviews: z.array(reviewSchema).optional(),
   startReviews: z.array(startReviewSchema).optional(),
   planNotes: z.array(z.string()).optional(),
+  storyFact: z.string().optional(),
 });
 
 const musicCheckSchema = z.object({
@@ -100,6 +101,7 @@ const musicCheckSchema = z.object({
 });
 
 export const storyPlanSchema = z.object({
+  form: z.string().optional(),
   logline: z.string(),
   want: z.string(),
   obstacle: z.string(),

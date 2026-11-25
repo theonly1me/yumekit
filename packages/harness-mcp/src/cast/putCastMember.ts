@@ -14,6 +14,7 @@ import { failureResult, type HarnessFailure } from "../results.js";
 import { sourceTextOf } from "../storyPlan/tryRules.js";
 import { wireCastMemberOf } from "./castMembers.js";
 import { putCastMemberInput } from "./putCastMemberInput.js";
+import { storyLinkNotesOf } from "../storyFirst/storyLink.js";
 
 function bibleWithMember(options: { bible: Bible; member: CastMember }): Bible {
   const { bible, member } = options;
@@ -86,6 +87,7 @@ function memberOf(options: {
   sheetPrompts: string[] | undefined;
   restrictions: string[] | undefined;
   briefFacts: string[] | undefined;
+  storyCharacterId: string | undefined;
 }): CastMember {
   const { input, existing, facts, referenceAssetIds } = options;
   const keepsReview =
@@ -118,6 +120,9 @@ function memberOf(options: {
     ...(existing?.planNotes === undefined
       ? {}
       : { planNotes: existing.planNotes }),
+    ...(options.storyCharacterId === undefined
+      ? {}
+      : { storyCharacterId: options.storyCharacterId }),
   };
 }
 
@@ -156,11 +161,15 @@ export function registerPutCastMember(context: HarnessContext): void {
         sheetPrompts: input.sheet_prompts ?? existing?.sheetPrompts,
         restrictions: input.restrictions ?? existing?.restrictions,
         briefFacts,
+        storyCharacterId:
+          input.story_character_id ?? existing?.storyCharacterId,
       });
-      const warnings =
-        snapshot.bible.storyPlan === undefined
+      const warnings = [
+        ...(snapshot.bible.storyPlan === undefined
           ? []
-          : planFindingsOf([member]).map((finding) => finding.text);
+          : planFindingsOf([member]).map((finding) => finding.text)),
+        ...storyLinkNotesOf({ member, story: snapshot.bible.story }),
+      ];
       return applyEditsResult({
         store: context.store,
         edits: [
