@@ -79,7 +79,10 @@ export async function startChatEngine(scenario: FakeAgentScenario) {
     waitUntilIdle,
     runs,
     writeScenario,
-    ask: (body: { text: string; about_clip_id?: string }) =>
-      post({ path: "/api/chat/requests", body }),
+    ask: (body: {
+      text: string;
+      about_clip_id?: string;
+      files?: { asset_id: string; name: string }[];
+    }) => post({ path: "/api/chat/requests", body }),
   };
 }
