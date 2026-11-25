@@ -1,5 +1,6 @@
 import { agents, mediaTools } from "./aiTools.js";
 import { bindKeyGuide, keyGuideMarkup } from "./keyGuide.js";
+import { bindLimits, limitsMarkup } from "./settingsLimits.js";
 import { change, notify, state } from "./state.js";
 
 const view = { openToolId: undefined };
@@ -57,18 +58,7 @@ export function renderSettings({ element }) {
         <p class="fact">Each tool makes pictures, voice, music, or video with your own account. yumekit asks for a key only when you first use a tool.</p>
         <ul class="setting-rows">${mediaTools.map(toolMarkup).join("")}</ul>
       </section>
-      <section class="setting-group">
-        <h3>Limits</h3>
-        <div class="setting-row">
-          <span>Real video in each project<em>The AI stops and asks when a project reaches this limit.</em></span>
-          <span class="stepper">
-            <button type="button" data-limit-step="-10" aria-label="10 seconds less">-</button>
-            <span>${state.limitSeconds} seconds</span>
-            <button type="button" data-limit-step="10" aria-label="10 seconds more">+</button>
-          </span>
-        </div>
-        <label class="switch setting-check"><input type="checkbox" checked /> Ask me before each step that costs money</label>
-      </section>
+      ${limitsMarkup()}
     </div>`;
   element.querySelectorAll("[data-use-agent]").forEach((button) => {
     button.addEventListener("click", () =>
@@ -90,15 +80,6 @@ export function renderSettings({ element }) {
       notify();
     });
   });
-  element.querySelectorAll("[data-limit-step]").forEach((button) => {
-    button.addEventListener("click", () =>
-      change({
-        limitSeconds: Math.max(
-          10,
-          state.limitSeconds + Number(button.dataset.limitStep),
-        ),
-      }),
-    );
-  });
+  bindLimits(element);
   bindKeyGuide({ element });
 }

@@ -1,30 +1,17 @@
-import { tones } from "./data.js";
+import { bindChapterRow, chapterRowMarkup } from "./chapterRow.js";
+import { bindCards, cardsMarkup } from "./sceneCards.js";
 import {
   change,
   escapeText,
   newSceneId,
   numberOf,
-  pick,
   pickedScene,
   record,
+  sceneOf,
   state,
 } from "./state.js";
 
-const view = { addingAfter: undefined, draggedId: undefined };
-
-function cardMarkup([index, scene]) {
-  const picked = scene.id === state.pickedSceneId;
-  const shown = scene.id === state.viewSceneId;
-  return `
-    <li class="card-slot">
-      <button type="button" class="card" draggable="true" data-card="${scene.id}" aria-pressed="${picked}" data-shown="${shown}">
-        <span class="thumb" style="background:${tones[scene.tone]}" data-dark="${scene.tone !== "paper"}"><i>${escapeText(scene.text)}</i></span>
-        <span class="card-title">${index + 1}. ${escapeText(scene.title)}</span>
-        <span class="card-facts">${scene.seconds} seconds${scene.isVideo ? ", video clip" : ""}</span>
-      </button>
-      <button type="button" class="plus" data-add-after="${scene.id}" aria-label="Add a scene after scene ${index + 1}" title="Add a scene here">+</button>
-    </li>`;
-}
+const view = { addingAfter: undefined };
 
 function addFormMarkup() {
   if (view.addingAfter === undefined) {
@@ -41,7 +28,7 @@ function addFormMarkup() {
 
 function actionsMarkup(scene) {
   if (scene === undefined) {
-    return `<p class="fact scene-hint">Pick a scene to change it. Drag a scene to move it.</p>`;
+    return `<p class="fact scene-hint">Pick a scene to change it. Drag a scene to move it, also into another chapter. Drag the line between two chapters onto a scene to move the line.</p>`;
   }
   return `
     <div class="scene-actions" role="group" aria-label="Actions for scene ${numberOf(scene.id)}">
@@ -56,24 +43,6 @@ function actionsMarkup(scene) {
       <button type="button" data-action="duplicate">Duplicate</button>
       <button type="button" data-action="delete">Delete</button>
     </div>`;
-}
-
-function moveScene({ draggedId, targetId }) {
-  if (draggedId === targetId || draggedId === undefined) {
-    return;
-  }
-  const dragged = state.scenes.find((scene) => scene.id === draggedId);
-  record({
-    text: `You moved scene "${dragged.title}".`,
-    apply: () => {
-      const targetIndex = state.scenes.findIndex(
-        (scene) => scene.id === targetId,
-      );
-      const rest = state.scenes.filter((scene) => scene.id !== draggedId);
-      rest.splice(targetIndex, 0, dragged);
-      state.scenes = rest;
-    },
-  });
 }
 
 const actions = {
@@ -95,6 +64,7 @@ const actions = {
       apply: () =>
         state.scenes.splice(numberOf(scene.id), 0, {
           ...scene,
+          shots: [...scene.shots],
           id: newSceneId(),
           title: `${scene.title} copy`,
         }),
@@ -123,6 +93,9 @@ export function addScene({ afterId, description }) {
     other: description,
     seconds: 4,
     tone: "moss",
+    art: "clear",
+    shots: [title],
+    chapterId: sceneOf(afterId)?.chapterId ?? state.chapters.at(-1).id,
     isVideo: false,
   };
   record({
@@ -140,7 +113,8 @@ export function addScene({ afterId, description }) {
 export function renderScenesRow({ element }) {
   const scene = pickedScene();
   element.innerHTML = `
-    <ol class="cards">${[...state.scenes.entries()].map(cardMarkup).join("")}</ol>
+    ${chapterRowMarkup()}
+    ${cardsMarkup()}
     ${addFormMarkup()}
     ${actionsMarkup(scene)}`;
   const cards = element.querySelector(".cards");
@@ -148,20 +122,13 @@ export function renderScenesRow({ element }) {
   if (pickedCard !== null) {
     cards.scrollLeft = Math.max(
       0,
-      pickedCard.parentElement.offsetLeft - cards.offsetLeft - 24,
+      pickedCard.getBoundingClientRect().left -
+        cards.getBoundingClientRect().left -
+        24,
     );
   }
-  element.querySelectorAll("[data-card]").forEach((card) => {
-    const sceneId = card.dataset.card;
-    card.addEventListener("click", () => pick(sceneId));
-    card.addEventListener("dragstart", () => (view.draggedId = sceneId));
-    card.addEventListener("dragover", (event) => event.preventDefault());
-    card.addEventListener("drop", (event) => {
-      event.preventDefault();
-      moveScene({ draggedId: view.draggedId, targetId: sceneId });
-      view.draggedId = undefined;
-    });
-  });
+  bindChapterRow(element);
+  bindCards(element);
   element.querySelectorAll("[data-add-after]").forEach((button) => {
     button.addEventListener("click", () => {
       view.addingAfter = button.dataset.addAfter;

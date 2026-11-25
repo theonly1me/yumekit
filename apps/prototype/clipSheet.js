@@ -1,6 +1,13 @@
 import { clipLengths, priceText, toolOf, videoModels } from "./aiTools.js";
 import { bindKeyGuide, keyGuideMarkup } from "./keyGuide.js";
 import {
+  projectLimits,
+  raiseProject,
+  raisedSecondsFor,
+  roomFor,
+  usedSeconds,
+} from "./limits.js";
+import {
   change,
   escapeText,
   numberOf,
@@ -45,15 +52,15 @@ function actionMarkup({ model, scene }) {
       <p class="fact">Add it once. It takes about two minutes. Then this clip costs ${price.toLowerCase()}.</p>
       ${keyGuideMarkup({ tool, saveLabel: "Save the key and continue" })}`;
   }
-  if (state.usedSeconds + choice.seconds > state.limitSeconds) {
+  if (!roomFor(choice.seconds)) {
     return `
       <p class="clip-price">Over the limit of this project</p>
-      <p class="fact">This project has used ${state.usedSeconds} of ${state.limitSeconds} seconds of real video. Pick a shorter clip, or raise the limit in Settings.</p>
-      <button type="button" data-open-settings>Open Settings</button>`;
+      <p class="fact">This project has used ${usedSeconds()} of ${projectLimits().seconds} seconds of real video. Pick a shorter clip, or raise the limit of this project.</p>
+      <button type="button" data-raise-limit>Raise this project to ${raisedSecondsFor(choice.seconds)} seconds</button>`;
   }
   return `
     <p class="clip-price">${price}</p>
-    <p class="fact">${choice.seconds} seconds with ${model.name}. This project has used ${state.usedSeconds} of ${state.limitSeconds} seconds of real video.</p>
+    <p class="fact">${choice.seconds} seconds with ${model.name}. This project has used ${usedSeconds()} of ${projectLimits().seconds} seconds of real video.</p>
     <button type="button" class="primary large" data-start-clip>Make the clip</button>`;
 }
 
@@ -67,7 +74,7 @@ function finish({ scene, model }) {
       scene.isVideo = true;
       scene.tone = scene.tone === "ocean" ? "dusk" : "ocean";
       scene.seconds = choice.seconds;
-      state.usedSeconds += choice.seconds;
+      state.extraSeconds += choice.seconds;
       state.sheet = undefined;
       state.viewSceneId = scene.id;
     },
@@ -123,9 +130,10 @@ export function renderClipSheet({ element }) {
       rerender();
     });
   });
-  element
-    .querySelector("[data-open-settings]")
-    ?.addEventListener("click", () => change({ sheet: "settings" }));
+  element.querySelector("[data-raise-limit]")?.addEventListener("click", () => {
+    raiseProject(raisedSecondsFor(choice.seconds));
+    change({});
+  });
   bindKeyGuide({ element });
   element.querySelector("[data-start-clip]")?.addEventListener("click", () => {
     if (choice.timer !== undefined) {

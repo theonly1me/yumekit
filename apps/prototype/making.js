@@ -1,106 +1,156 @@
-import { makingSteps } from "./data.js";
-import { renderPart } from "./parts.js";
-import { change, escapeText, state } from "./state.js";
+import { startChapterPictures } from "./chapterWork.js";
+import { firstRequest, storyQuestions } from "./chatSeed.js";
+import { stopWork } from "./leadWork.js";
+import { paneMarkup, run } from "./makingParts.js";
+import { openTake } from "./readySignal.js";
+import { change, escapeText, notify, state } from "./state.js";
+import { approveStory, resetStory } from "./storySheet.js";
+import { seedFresh } from "./takesSeed.js";
+import { latestTake } from "./takesStore.js";
 
-const stepMilliseconds = 1700;
-const run = { timer: undefined, stepIndex: 0, partId: undefined };
+const thinkMilliseconds = 1700;
+const steps = [
+  {
+    id: "story",
+    label: "Story",
+    phases: ["questions", "writing", "story"],
+    time: "3 min 10 s",
+  },
+  {
+    id: "chapters",
+    label: "Chapters and shots",
+    phases: ["planning", "chapters"],
+    time: "1 min 20 s",
+  },
+  { id: "pictures", label: "Pictures", phases: ["pictures"], time: "" },
+  { id: "clips", label: "Clips", phases: [], time: "" },
+  { id: "cut", label: "Cut", phases: [], time: "" },
+];
+const waitingPhases = new Set(["questions", "story", "chapters"]);
 
-function isWorking() {
-  return run.stepIndex < makingSteps.length;
+function picturesReady() {
+  return run.phase === "pictures" && latestTake("c1")?.state === "ready";
 }
 
-function stepMarkup([index, step]) {
-  if (index >= run.stepIndex) {
-    const status = index === run.stepIndex ? "now" : "next";
-    return `<li data-status="${status}"><span class="step-row"><span class="step-mark" aria-hidden="true"></span><span>${step.label}</span><em>${status === "now" ? "Working" : ""}</em></span></li>`;
+function statusOf(step) {
+  const order = steps.flatMap((each) => each.phases);
+  if (step.phases.includes(run.phase)) {
+    return waitingPhases.has(run.phase) || picturesReady() ? "you" : "now";
   }
-  const open = run.partId === step.id;
-  return `
-    <li data-status="done" data-open="${open}">
-      <button type="button" class="step-row" data-part="${step.id}" aria-pressed="${open}">
-        <span class="step-mark" aria-hidden="true"></span><span>${step.label}</span><em>${step.done}</em>
-        <span class="step-see">${open ? "Open now" : "See and change"}</span>
-      </button>
-    </li>`;
+  const last = order.indexOf(step.phases.at(-1));
+  return last !== -1 && last < order.indexOf(run.phase) ? "done" : "next";
 }
 
-function drawPart(element) {
-  const pane = element.querySelector(".making-part");
-  if (run.partId === undefined) {
-    pane.innerHTML = `<p class="fact lead making-wait">When a step is done, you can open it here. You can read the script, see each picture, and listen to the voice and the music. You can change each of them.</p>`;
-    return;
-  }
-  renderPart({ element: pane, partId: run.partId, locked: isWorking() });
+function stepMarkup(step) {
+  const status = statusOf(step);
+  const words = {
+    done: step.time,
+    now: "Working",
+    you: "Waits for you",
+    next: "",
+  };
+  return `<li data-status="${status}"><span class="step-row"><span class="step-mark" aria-hidden="true"></span><span>${step.label}</span><em>${words[status]}</em></span></li>`;
 }
 
-function drawSteps(element) {
-  const working = isWorking();
-  element.querySelector(".making-title").textContent = working
-    ? "Making your video"
-    : "Your video is ready";
-  element.querySelector(".making-steps").innerHTML = [...makingSteps.entries()]
-    .map(stepMarkup)
-    .join("");
-  element.querySelector(".making-action").innerHTML = working
-    ? `<button type="button" data-stop>Stop</button><p class="fact">You can stop at any time. What is made stays in the project.</p>`
-    : `<button type="button" class="primary large" data-editor>Open the editor</button><p class="fact">Or open a step to check it first.</p>`;
-  element.querySelectorAll("[data-part]").forEach((button) => {
-    button.addEventListener("click", () => {
-      run.partId = button.dataset.part;
-      drawSteps(element);
-      drawPart(element);
+function later(phase) {
+  clearTimeout(run.timer);
+  run.timer = setTimeout(() => {
+    run.phase = phase;
+    notify();
+  }, thinkMilliseconds);
+}
+
+function isAnswered(answer) {
+  return answer.choice !== undefined || answer.words.trim() !== "";
+}
+
+function sendAnswers() {
+  state.chat = [{ kind: "you", text: state.prompt }];
+  [...storyQuestions.entries()].forEach(([index, question]) => {
+    const answer = run.answers[index];
+    state.chat.push({
+      kind: "question",
+      ...question,
+      answer: answer.words.trim() || answer.choice,
     });
   });
-  element.querySelector("[data-stop]")?.addEventListener("click", () => {
-    stopMaking();
-    run.stepIndex = makingSteps.length;
-    drawSteps(element);
-    drawPart(element);
+  run.phase = "writing";
+  later("story");
+  notify();
+}
+
+function bindPane(element) {
+  const on = (selector) => (action) =>
+    element.querySelector(selector)?.addEventListener("click", action);
+  element.querySelectorAll("[data-answer]").forEach((button) => {
+    button.addEventListener("click", () => {
+      run.answers[Number(button.dataset.answer)].choice = button.dataset.option;
+      notify();
+    });
   });
-  element
-    .querySelector("[data-editor]")
-    ?.addEventListener("click", () =>
-      change({ screen: "editor", activePlatformId: state.platformIds[0] }),
-    );
+  element.querySelectorAll("[data-own-words]").forEach((input) => {
+    input.addEventListener("input", () => {
+      run.answers[Number(input.dataset.ownWords)].words = input.value;
+      element.querySelector("[data-send-answers]").disabled =
+        !run.answers.every(isAnswered);
+    });
+  });
+  on("[data-send-answers]")(sendAnswers);
+  on("[data-read-story]")(() => change({ sheet: "story" }));
+  on("[data-approve-story]")(() => {
+    approveStory();
+    run.phase = "planning";
+    later("chapters");
+    notify();
+  });
+  on("[data-see-chapters]")(() =>
+    change({ screen: "editor", timelineOpen: true }),
+  );
+  on("[data-approve-chapters]")(() => {
+    run.phase = "pictures";
+    startChapterPictures("c1");
+  });
+  on("[data-open-take]")(() => openTake({ chapterId: "c1", number: 1 }));
+  on("[data-editor]")(() =>
+    change({ screen: "editor", activePlatformId: state.platformIds[0] }),
+  );
 }
 
 export function stopMaking() {
-  clearInterval(run.timer);
-  run.timer = undefined;
+  clearTimeout(run.timer);
+}
+
+export function enterMaking() {
+  stopMaking();
+  stopWork();
+  seedFresh();
+  resetStory();
+  run.phase = "questions";
+  state.prompt = state.prompt.trim() === "" ? firstRequest : state.prompt;
+  run.answers.forEach((answer) =>
+    Object.assign(answer, { choice: undefined, words: "" }),
+  );
 }
 
 export function renderMaking({ element }) {
-  stopMaking();
-  run.stepIndex = 0;
-  run.partId = undefined;
+  const active = document.activeElement?.id;
+  const title = picturesReady()
+    ? "Take 1 is ready for you"
+    : "Making your film";
   element.innerHTML = `
     <div class="making-body">
-      <p class="fact">${escapeText(state.prompt || "A short video that explains what yumekit is.")}</p>
-      <h2 class="making-title" aria-live="polite"></h2>
+      <p class="fact making-request">${escapeText(state.prompt)}</p>
+      <h2 class="making-title" aria-live="polite">${title}</h2>
       <div class="making-desk">
         <div class="making-side">
-          <ol class="making-steps"></ol>
-          <div class="making-action"></div>
+          <ol class="making-steps">${steps.map(stepMarkup).join("")}</ol>
+          <p class="fact">The lead stops at the end of each step and waits for you.</p>
         </div>
-        <div class="making-part"></div>
+        <div class="making-part"><div class="part"><div class="part-body">${paneMarkup()}</div></div></div>
       </div>
     </div>`;
-  drawSteps(element);
-  drawPart(element);
-  run.timer = setInterval(() => {
-    run.stepIndex += 1;
-    if (run.partId === undefined) {
-      run.partId = makingSteps[0].id;
-    }
-    if (!isWorking()) {
-      stopMaking();
-    }
-    drawSteps(element);
-    const typing = element
-      .querySelector(".making-part")
-      .contains(document.activeElement);
-    if (!typing || !isWorking()) {
-      drawPart(element);
-    }
-  }, stepMilliseconds);
+  bindPane(element);
+  if (active !== undefined && active !== "") {
+    element.querySelector(`#${active}`)?.focus();
+  }
 }

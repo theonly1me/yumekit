@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex, nofollow" />
-    <title>yumekit editor design, fifth pass</title>
+    <title>yumekit editor design, sixth pass</title>
     <link rel="stylesheet" href="fonts.css" />
     <link rel="stylesheet" href="tokens.css" />
     <link rel="stylesheet" href="shell.css" />
@@ -23,20 +23,28 @@
     <link rel="stylesheet" href="sheets.css" />
     <link rel="stylesheet" href="settings.css" />
     <link rel="stylesheet" href="notes.css" />
+    <link rel="stylesheet" href="files.css" />
+    <link rel="stylesheet" href="questions.css" />
+    <link rel="stylesheet" href="chapters.css" />
+    <link rel="stylesheet" href="story.css" />
+    <link rel="stylesheet" href="takes.css" />
+    <link rel="stylesheet" href="takeCard.css" />
+    <link rel="stylesheet" href="takeActions.css" />
+    <link rel="stylesheet" href="takeMarks.css" />
+    <link rel="stylesheet" href="takeLarge.css" />
   </head>
   <body>
     <header class="review-bar">
-      <p>Editor design, fifth pass</p>
+      <p>Editor design, sixth pass</p>
       <nav class="review-nav" aria-label="Screens to review">
         <button type="button" class="tab" data-go="start">Start</button>
         <button type="button" class="tab" data-go="making">Making</button>
         <button type="button" class="tab" data-go="editor">Editor</button>
-        <button type="button" class="tab" data-go="editor:script">
-          Script
+        <button type="button" class="tab" data-go="editor:story">Story</button>
+        <button type="button" class="tab" data-go="editor:chapters">
+          Chapters
         </button>
-        <button type="button" class="tab" data-go="editor:pictures">
-          Pictures
-        </button>
+        <button type="button" class="tab" data-go="editor:takes">Takes</button>
         <button type="button" class="tab" data-go="editor:music">Music</button>
         <button type="button" class="tab" data-go="editor:clip">
           Make a real video clip
@@ -72,11 +80,14 @@
             >
               yumekit
             </button>
-            <p class="project-name" id="project-name"></p>
+            <p class="project-name" id="project-name">The Ninth Bell</p>
+            <p class="work-line" id="work-line" aria-live="polite"></p>
           </div>
           <div class="bar-actions">
-            <button type="button" data-open-sheet="script">Script</button>
-            <button type="button" data-open-sheet="pictures">Pictures</button>
+            <button type="button" data-open-sheet="story">Story</button>
+            <button type="button" class="takes-button" data-open-sheet="takes">
+              Takes<span class="count" id="takes-count"></span>
+            </button>
             <button type="button" data-open-sheet="settings">Settings</button>
             <button type="button" class="primary" data-open-sheet="export">
               Export

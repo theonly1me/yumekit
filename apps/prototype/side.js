@@ -1,30 +1,10 @@
 import { ask } from "./assistant.js";
 import { agents } from "./aiTools.js";
+import { bindEntries, entryMarkup } from "./chatEntries.js";
+import { addFilesMarkup, bindFiles, chipsMarkup } from "./fileChips.js";
 import { suggestions } from "./data.js";
 import { renderScenePanel } from "./scenePanel.js";
-import {
-  change,
-  escapeText,
-  numberOf,
-  pickedScene,
-  state,
-  undo,
-} from "./state.js";
-
-function entryMarkup([index, entry]) {
-  if (entry.kind === "change") {
-    return `
-      <li class="entry change" data-undone="${entry.undone}">
-        <p>${escapeText(entry.text)}</p>
-        ${entry.undone ? `<span class="fact">Undone</span>` : `<button type="button" class="link" data-undo="${index}">Undo</button>`}
-      </li>`;
-  }
-  const about =
-    entry.about === undefined
-      ? ""
-      : `<em>About ${escapeText(entry.about)}</em>`;
-  return `<li class="entry ${entry.kind}"><span class="who">${entry.kind === "you" ? "You" : "AI"}</span><p>${about}${escapeText(entry.text)}</p></li>`;
-}
+import { change, escapeText, numberOf, pickedScene, state } from "./state.js";
 
 function chipMarkup(scene) {
   if (scene === undefined || !state.aboutScene) {
@@ -43,14 +23,17 @@ function chatMarkup() {
     </ol>
     <div class="ask">
       <div class="suggestions">${suggestions.map((text) => `<button type="button" data-suggestion="${text}">${text}</button>`).join("")}</div>
-      <form class="ask-form" id="ask-form">
+      <form class="ask-form" id="ask-form" data-dragging="false">
         ${chipMarkup(scene)}
         <label for="ask-box" class="hidden-label">Ask for a change</label>
-        <textarea id="ask-box" rows="2" placeholder="Ask for a change">${escapeText(state.draft)}</textarea>
+        <textarea id="ask-box" rows="2" placeholder="Ask for a change, or drop files here">${escapeText(state.draft)}</textarea>
+        ${chipsMarkup(state.askFiles)}
         <div class="ask-foot">
+          ${addFilesMarkup("ask-files")}
           <p class="fact">${agent.name} on this computer</p>
           <button type="submit" class="primary">Send</button>
         </div>
+        <p class="drop-hint" aria-hidden="true">Drop the files for the lead</p>
       </form>
     </div>`;
 }
@@ -59,8 +42,9 @@ function bindChat(element) {
   const scene = state.aboutScene ? pickedScene() : undefined;
   const box = element.querySelector("#ask-box");
   const send = (text) => {
-    if (text.trim() !== "" && !state.thinking) {
-      ask({ text: text.trim(), scene });
+    const files = state.askFiles.splice(0);
+    if ((text.trim() !== "" || files.length > 0) && !state.thinking) {
+      ask({ text: text.trim() || "Use these files.", scene, files });
     }
   };
   box.addEventListener("input", () => (state.draft = box.value));
@@ -80,10 +64,10 @@ function bindChat(element) {
   element
     .querySelector("[data-remove-chip]")
     ?.addEventListener("click", () => change({ aboutScene: false }));
-  element.querySelectorAll("[data-undo]").forEach((button) => {
-    button.addEventListener("click", () =>
-      undo(state.chat[Number(button.dataset.undo)]),
-    );
+  bindEntries(element);
+  bindFiles({
+    zone: element.querySelector("#ask-form"),
+    files: state.askFiles,
   });
   const list = element.querySelector(".chat");
   list.scrollTop = list.scrollHeight;

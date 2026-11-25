@@ -1,0 +1,136 @@
+.badges {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  right: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  pointer-events: none;
+}
+
+.badge {
+  font-size: var(--step--2);
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgb(10 10 10 / 0.62);
+  color: #f2efe8;
+  backdrop-filter: blur(4px);
+}
+
+.badge.new {
+  background: var(--accent);
+  color: var(--ground);
+  font-weight: 500;
+}
+
+.badge.use {
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.6);
+}
+
+.check {
+  position: absolute;
+  left: 8px;
+  bottom: 10px;
+  font-size: var(--step--2);
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgb(10 10 10 / 0.62);
+  color: #f2efe8;
+  pointer-events: none;
+}
+
+.check::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: var(--approve);
+  vertical-align: 1px;
+}
+
+.check[data-passed="false"]::before {
+  background: var(--decline);
+}
+
+.card-text {
+  display: grid;
+  gap: 6px;
+}
+
+.card-text h4,
+.large-panel h3 {
+  font-size: var(--step-0);
+  font-weight: 500;
+}
+
+.lead-note,
+.check-line {
+  font-size: var(--step--1);
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.lead-note span,
+.check-line span {
+  display: block;
+  font-size: var(--step--2);
+  color: var(--faint);
+}
+
+.check-line span {
+  color: var(--accent);
+}
+
+.card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+}
+
+.card-links {
+  display: inline-flex;
+  gap: 14px;
+  font-size: var(--step--1);
+}
+
+.verdict {
+  display: inline-flex;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.verdict button {
+  border: 0;
+  border-radius: 0;
+  padding: 6px 13px;
+  color: var(--muted);
+}
+
+.verdict button + button {
+  box-shadow: inset 1px 0 0 var(--line);
+}
+
+.verdict button:hover {
+  color: var(--text);
+}
+
+.verdict [data-verdict="approved"][aria-pressed="true"] {
+  background: var(--approve-soft);
+  color: var(--approve);
+}
+
+.verdict [data-verdict="declined"][aria-pressed="true"] {
+  background: var(--decline-soft);
+  color: var(--decline);
+}
+
+.verdict [data-comment][aria-expanded="true"] {
+  background: var(--raised);
+  color: var(--text);
+}

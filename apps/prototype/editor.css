@@ -37,8 +37,31 @@
   gap: 8px;
 }
 
+.work-line {
+  font-size: var(--step--2);
+  color: var(--faint);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.work-line[data-working="true"] {
+  color: var(--accent);
+}
+
+.takes-button .count:not(:empty) {
+  margin-left: 7px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--ground);
+  font-size: var(--step--2);
+  font-variant-numeric: tabular-nums;
+}
+
 .stage {
   grid-area: stage;
+  grid-template-columns: minmax(0, 1fr);
   overflow-y: auto;
   padding: 14px 28px 40px;
   display: grid;
@@ -136,7 +159,8 @@
     height: 78vh;
   }
 
-  .project-name {
+  .project-name,
+  .work-line {
     display: none;
   }
 

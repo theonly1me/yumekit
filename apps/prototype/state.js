@@ -1,4 +1,5 @@
-import { firstScenes } from "./data.js";
+import { firstChat } from "./chatSeed.js";
+import { firstChapters, firstFilmScenes } from "./film.js";
 
 const listeners = [];
 
@@ -8,30 +9,37 @@ export const state = {
   prompt: "",
   platformIds: ["youtube", "tiktok"],
   activePlatformId: "youtube",
-  length: "30 seconds",
-  scenes: structuredClone(firstScenes),
-  viewSceneId: "s1",
+  length: "8 minutes",
+  templateId: undefined,
+  scenes: structuredClone(firstFilmScenes),
+  chapters: structuredClone(firstChapters),
+  pickedChapterId: undefined,
+  viewSceneId: "f1",
   pickedSceneId: undefined,
   aboutScene: true,
   sideTab: "chat",
   draft: "",
-  chat: [
-    { kind: "you", text: "Make a short video that explains what yumekit is." },
-    {
-      kind: "ai",
-      text: "I made 5 scenes with a voice, music, and captions. Pick a scene to change it, or ask me here.",
-    },
-  ],
+  chat: firstChat(),
+  startFiles: [],
+  askFiles: [],
   thinking: false,
   timelineOpen: false,
   openRow: undefined,
   voice: { on: true, choice: "Warm narrator" },
-  music: { on: true, choice: "Soft piano" },
+  music: { on: true, choice: "Low strings and a slow drum" },
+  musicClip: { start: 110, seconds: 130 },
   captions: { on: true, choice: "Word by word" },
   agentId: "claude-code",
   keys: { gemini: false, fal: false, openai: true, sample: true },
-  limitSeconds: 30,
-  usedSeconds: 4,
+  extraSeconds: 0,
+  takeConfirm: undefined,
+  limits: {
+    every: { dollars: 50, seconds: 60 },
+    own: false,
+    project: { dollars: 50, seconds: 60 },
+    approveFirst: true,
+    readySignal: true,
+  },
   playing: false,
   playheadSeconds: 0,
   script: undefined,
@@ -54,6 +62,8 @@ export function change(patch) {
 function snapshot() {
   return structuredClone({
     scenes: state.scenes,
+    chapters: state.chapters,
+    musicClip: state.musicClip,
     voice: state.voice,
     music: state.music,
     captions: state.captions,
@@ -142,7 +152,7 @@ export function pick(sceneId) {
   });
 }
 
-let nextNumber = 6;
+let nextNumber = 16;
 
 export function newSceneId() {
   nextNumber += 1;

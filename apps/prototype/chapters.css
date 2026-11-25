@@ -1,0 +1,195 @@
+.chapter-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+  scroll-margin-top: 12px;
+}
+
+.chapter-blocks {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 4px;
+}
+
+.chapter-blocks li {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+button.chapter-block {
+  width: 100%;
+  display: grid;
+  gap: 1px;
+  text-align: left;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border-color: var(--line);
+  background: var(--raised);
+  font-weight: 400;
+  overflow: hidden;
+  cursor: grab;
+}
+
+button.chapter-block[aria-pressed="true"] {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+button.chapter-block[data-over="true"],
+.chapter-clip[data-over="true"] {
+  border-color: var(--text);
+}
+
+.chapter-name {
+  font-size: var(--step--1);
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chapter-facts {
+  font-size: var(--step--2);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.chapter-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.cards {
+  align-items: flex-start;
+  gap: 0;
+}
+
+.card-group {
+  flex: 0 0 auto;
+  display: grid;
+  gap: 6px;
+}
+
+.group-label {
+  font-size: var(--step--2);
+  color: var(--faint);
+  padding-left: 2px;
+}
+
+.group-cards {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+}
+
+.chapter-line {
+  flex: 0 0 auto;
+  align-self: stretch;
+  width: 18px;
+  margin: 0 4px;
+  display: grid;
+  place-items: center;
+  cursor: ew-resize;
+}
+
+.chapter-line span {
+  width: 2px;
+  height: 100%;
+  border-radius: 1px;
+  background: var(--accent);
+  opacity: 0.6;
+}
+
+.chapter-line:hover span {
+  opacity: 1;
+  width: 4px;
+}
+
+.card[data-over="scene"] .thumb,
+.card[data-over="line"] .thumb,
+.card[data-over="take-item"] .thumb {
+  box-shadow: 0 0 0 2px var(--text);
+}
+
+.card[data-over="line"] .thumb {
+  box-shadow: -4px 0 0 0 var(--accent);
+}
+
+.chapter-lane {
+  position: relative;
+}
+
+.chapter-clip {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px 0 10px;
+  border-radius: 3px;
+  border: 1px solid var(--line-strong);
+  font-size: var(--step--2);
+  white-space: nowrap;
+  cursor: grab;
+}
+
+.chapter-clip span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chapter-clip em {
+  font-style: normal;
+  color: var(--accent);
+}
+
+.chapter-clip[data-step="done"] em {
+  color: var(--approve);
+}
+
+.chapter-clip[data-step="story"] em {
+  color: var(--faint);
+}
+
+.chapter-edge {
+  position: absolute;
+  top: 0;
+  right: -4px;
+  bottom: 0;
+  width: 9px;
+  cursor: ew-resize;
+  background: var(--accent);
+  opacity: 0.5;
+  touch-action: none;
+}
+
+.chapter-edge:hover,
+.chapter-edge:focus-visible {
+  opacity: 1;
+}
+
+.edge-ghost {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 3px;
+  margin-left: -1px;
+  background: var(--text);
+  pointer-events: none;
+}
+
+@media (max-width: 560px) {
+  .chapter-blocks {
+    flex-wrap: wrap;
+  }
+
+  .chapter-blocks li {
+    flex-basis: 40%;
+  }
+}

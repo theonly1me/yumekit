@@ -1,0 +1,131 @@
+.story-sheet {
+  width: min(720px, 100%);
+  display: grid;
+  gap: 40px;
+}
+
+.story-head {
+  display: grid;
+  gap: 10px;
+}
+
+.story-head h2 {
+  font-size: var(--step-3);
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.story-chapter {
+  display: grid;
+  gap: 18px;
+}
+
+.story-chapter h3 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line-strong);
+  font-size: var(--step-1);
+  letter-spacing: -0.02em;
+}
+
+.story-chapter h3 span {
+  font-size: var(--step--1);
+  color: var(--accent);
+  letter-spacing: 0;
+}
+
+.story-chapter h3 em {
+  margin-left: auto;
+  font-style: normal;
+  font-size: var(--step--1);
+  color: var(--faint);
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.story-paragraph {
+  position: relative;
+  display: grid;
+  gap: 8px;
+  padding: 4px 0 4px 16px;
+  border-left: 2px solid transparent;
+}
+
+.story-paragraph:hover,
+.story-paragraph[data-open="true"] {
+  border-left-color: var(--line-strong);
+}
+
+.story-paragraph[data-has-notes="true"] {
+  border-left-color: var(--decline);
+}
+
+.story-paragraph p {
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  max-width: 64ch;
+}
+
+.story-paragraph .badge {
+  display: inline-block;
+  margin-right: 8px;
+  vertical-align: 2px;
+}
+
+.story-paragraph > .link {
+  justify-self: start;
+  font-size: var(--step--1);
+  color: var(--muted);
+}
+
+.story-notes {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 4px;
+  font-size: var(--step--1);
+  color: var(--decline);
+}
+
+.story-script {
+  display: grid;
+  gap: 8px;
+  margin-left: 16px;
+  padding: 14px 18px;
+  border-radius: 8px;
+  background: var(--raised);
+}
+
+.script-line {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: 12px;
+  font-size: var(--step-0);
+}
+
+.script-line b {
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.story-foot {
+  bottom: -96px;
+  margin: 0 calc(-1 * var(--gutter));
+  border-radius: 12px 12px 0 0;
+}
+
+@media (max-width: 560px) {
+  .story-script {
+    margin-left: 0;
+  }
+
+  .script-line {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+}

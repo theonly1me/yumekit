@@ -1,7 +1,8 @@
 import { renderClipSheet } from "./clipSheet.js";
 import { renderExportSheet } from "./exportSheet.js";
 import { renderLowerRows } from "./lowerRows.js";
-import { renderMaking, stopMaking } from "./making.js";
+import { chapterNumber, progressText } from "./leadWork.js";
+import { enterMaking, renderMaking, stopMaking } from "./making.js";
 import { renderNotes } from "./notes.js";
 import { renderPartSheet } from "./parts.js";
 import { renderPreview } from "./preview.js";
@@ -10,12 +11,18 @@ import { renderSettings } from "./settings.js";
 import { renderSide } from "./side.js";
 import { renderStart } from "./start.js";
 import { change, onChange, state } from "./state.js";
+import { renderStorySheet } from "./storySheet.js";
+import { renderTakesSheet } from "./takes.js";
+import { seedAdvanced } from "./takesSeed.js";
+import { makingTake, waitingForPerson } from "./takesStore.js";
 
 const element = (id) => document.getElementById(id);
 const sheets = {
   clip: renderClipSheet,
   export: renderExportSheet,
   settings: renderSettings,
+  takes: renderTakesSheet,
+  story: renderStorySheet,
   script: renderPartSheet("script"),
   pictures: renderPartSheet("pictures"),
   voice: renderPartSheet("voice"),
@@ -54,6 +61,19 @@ function renderSheet() {
   }
 }
 
+function renderWorkLine() {
+  const take = makingTake();
+  const waiting = waitingForPerson();
+  element("takes-count").textContent = waiting === 0 ? "" : String(waiting);
+  element("work-line").textContent =
+    take === undefined
+      ? waiting === 0
+        ? "Nothing waits for you"
+        : `${waiting} wait for you in Takes`
+      : `Chapter ${chapterNumber(take.chapterId)}: ${progressText(take).replace("The lead is making", "making")}`;
+  element("work-line").dataset.working = String(take !== undefined);
+}
+
 function render() {
   const main = element("app");
   const entered = shown.screen !== state.screen;
@@ -66,13 +86,16 @@ function render() {
     renderStart({ element: element("start") });
   }
   if (state.screen === "making" && entered) {
+    enterMaking();
+  }
+  if (state.screen === "making") {
     renderMaking({ element: element("making") });
   }
   if (state.screen !== "making") {
     stopMaking();
   }
   if (state.screen === "editor") {
-    element("project-name").textContent = "What is yumekit";
+    renderWorkLine();
     renderPreview({ element: element("preview") });
     renderScenesRow({ element: element("scenes-row") });
     renderLowerRows({ element: element("lower-rows") });
@@ -91,6 +114,13 @@ function render() {
 document.querySelectorAll("[data-go]").forEach((button) => {
   button.addEventListener("click", () => {
     const [screen, sheet] = button.dataset.go.split(":");
+    if (sheet === "chapters") {
+      change({ screen, sheet: undefined, timelineOpen: true, playing: false });
+      document
+        .querySelector(".chapter-row")
+        ?.scrollIntoView({ block: "start" });
+      return;
+    }
     change({ screen, sheet, playing: false });
     window.scrollTo({ top: 0 });
   });
@@ -126,6 +156,7 @@ document.addEventListener("keydown", (event) => {
 });
 
 setTheme(storedTheme());
+seedAdvanced();
 renderNotes({ element: element("notes") });
 onChange(render);
 render();
