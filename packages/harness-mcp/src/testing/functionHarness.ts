@@ -1,6 +1,7 @@
 import type { ProjectStore } from "@yumekit/project";
 import { onTestFinished } from "vitest";
 import { createHarness, type Harness } from "../index.js";
+import { reviewJobMetaKey } from "../createHarnessServer.js";
 import { scriptedCritic } from "./criticFixture.js";
 import {
   startHarnessProject,
@@ -25,11 +26,12 @@ export async function startFunctionHarness(
         const result = await holder.harness?.call({
           name: request.name,
           input: request.arguments,
+          reviewJobId: request._meta[reviewJobMetaKey] ?? "",
         });
         return { isError: result?.isError ?? true, text: result?.text ?? "" };
       },
       script: {},
-      log: { briefs: [], answers: [] },
+      log: { briefs: [], answers: [], mostAtOnce: 0 },
     }),
   });
   holder.harness = harness;

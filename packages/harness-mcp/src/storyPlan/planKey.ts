@@ -23,6 +23,7 @@ function shotText(shot: Shot) {
     startState: shot.startState,
     endState: shot.endState,
     inherits: shot.inherits,
+    continuesShotId: shot.continuesShotId,
     strikes: shot.strikes ?? [],
     startPicturePrompt: shot.startPicturePrompt ?? "",
     videoPrompt: shot.videoPrompt ?? "",

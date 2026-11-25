@@ -4,29 +4,30 @@ import type { HarnessContext } from "../context.js";
 import type { ProgressListener } from "../harness/toolTable.js";
 import { failureResult } from "../results.js";
 import { withStory } from "../storyPlan/shotRequest.js";
-import { assetFilesFolder, findReusableAsset } from "./assetFiles.js";
+import { findReusableAsset } from "./assetFiles.js";
 import {
   generateAssetDescription,
   generateAssetInput,
   toolNameByCapability,
   type GenerateAssetInput,
 } from "./generateAssetInput.js";
-import { addMadeAsset } from "./made/addMadeAsset.js";
 import { mediaPathInput } from "./mediaPath.js";
-import { mediaFailureOf } from "./mediaFailures.js";
 import { recordedInputOf, referencePathsInput } from "./referencePaths.js";
 import { reuseAsset } from "./reuseAsset.js";
+import { cutNoteOf } from "../storyPlan/cutNote.js";
 import { longPromptNoteOf } from "../storyPlan/promptAdditions.js";
 import { strongReasonOf } from "./strongReason.js";
 import { withStrongModel } from "./strongModel.js";
-import { talkingVoiceOf, voicePathInput } from "./talkingVoice.js";
+import { talkingVoiceOf } from "./talkingVoice.js";
 import { videoInputOf } from "./videoChoices.js";
-import { roundedSeconds, videoLimitFailureOf } from "./videoLimit.js";
+import { makeAsset } from "./made/makeAsset.js";
+import { startMediaCall } from "./runningCall.js";
 
 export async function generateAsset(options: {
   context: HarnessContext;
   request: GenerateAssetInput;
   onProgress: ProgressListener | undefined;
+  quotaServers?: Set<string>;
 }): Promise<CallToolResult> {
   const { context, onProgress } = options;
   const snapshot = context.store.read();
@@ -90,52 +91,33 @@ export async function generateAsset(options: {
       hint: "Choose another asset_id. Call list_assets to see the ids in use.",
     });
   }
-  if (request.capability === "video" || voice.value !== undefined) {
-    const limitFailure = videoLimitFailureOf({
-      snapshot,
-      input:
-        voice.value === undefined
-          ? request.input
-          : { duration_seconds: roundedSeconds(voice.value.seconds) },
-      limitSeconds: context.mediaTools.limits().generatedVideoSeconds,
-    });
-    if (limitFailure) return failureResult(limitFailure);
-  }
-  const voicePath = await voicePathInput({
-    voice: voice.value,
-    projectFolder,
-    assetId: request.asset_id,
-  });
-  if (!voicePath.ok) return failureResult(voicePath.failure);
-  const ran = await context.mediaTools.run({
-    capability: request.capability,
-    ...(request.server === undefined ? {} : { server: request.server }),
-    ...(request.model === undefined ? {} : { model: request.model }),
-    input: {
-      ...sentInput.value,
-      ...paths.value,
-      ...mediaPath.value,
-      ...voicePath.value,
-    },
-    ...(voice.value === undefined
-      ? {}
-      : { expectedSeconds: voice.value.seconds }),
-    outputDirectory: assetFilesFolder(projectFolder),
-    fileStem: request.asset_id,
-    ...(onProgress === undefined ? {} : { onProgress }),
-  });
-  if (!ran.ok) return failureResult(mediaFailureOf(ran.failure));
-  return addMadeAsset({
+  const started = startMediaCall({
     context,
     request,
-    snapshot,
-    run: ran.value,
-    tool,
-    input,
-    notes: [strong.note, longPromptNoteOf(request)].filter(
-      (note) => note !== undefined,
-    ),
+    voiceSeconds: voice.value?.seconds,
   });
+  if (!started.ok) return failureResult(started.failure);
+  try {
+    return await makeAsset({
+      context,
+      request,
+      snapshot,
+      sent: { ...sentInput.value, ...paths.value, ...mediaPath.value },
+      voice: voice.value,
+      tool,
+      input,
+      notes: [
+        strong.note,
+        longPromptNoteOf(request),
+        cutNoteOf({ snapshot, request }),
+      ],
+      ticket: started.value,
+      onProgress,
+      quotaServers: options.quotaServers,
+    });
+  } finally {
+    started.value.finish();
+  }
 }
 
 export function registerGenerateAsset(context: HarnessContext): void {

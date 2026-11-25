@@ -15,7 +15,7 @@ export interface PlanJob {
 }
 
 export const planListItems = [
-  "Story: each shot has ONE action with a result, and each shot follows from the one before. A shot with more than one action, or too much in the frame, is a note.",
+  "Story: each shot has ONE action with a result, and each shot follows from the one before. A shot with more than one action, or too much in the frame, is a note. Two shots in a row that show one unbroken action from one camera need continues_shot on the second; a missing one is a note.",
   "Brief: no fact and no prompt changes or drops a fact of the person's brief. Each one that does goes in brief_faults, with the exact brief fact and the exact text to restore. This is blocking (kind a).",
   "Design: each person names each garment with its color and cut, the hair, the face, and what the design must NOT resemble. A thin design or a likeness to a known work is a note; the sheet review judges the picture.",
   "Known limits: a pose, a shot, or a sheet on the list of known limits, or a fact given as a bare number or a ratio (the limit of exact scale), written with no form that works, is blocking (kind c). The same limit written in its working form is fine.",
@@ -61,6 +61,9 @@ function shotLines(options: { shot: Shot; number: number }): string[] {
   return [
     `Shot ${String(options.number)} "${shot.id}", ${String(shot.seconds)} seconds, camera ${camera}, place ${shot.placeId}, cast ${shot.castIds.join(", ") || "none"}`,
     `  Action: ${shot.action}`,
+    shot.continuesShotId === undefined
+      ? "  Starts: a cut, on its own start picture"
+      : `  Starts: on the last frame of "${shot.continuesShotId}", with the same camera`,
     `  Start: ${stateText(shot.startState)}`,
     `  End: ${stateText(shot.endState)}`,
     ...(strikes.length === 0 ? [] : [`  Strikes: ${strikes.join(" | ")}`]),

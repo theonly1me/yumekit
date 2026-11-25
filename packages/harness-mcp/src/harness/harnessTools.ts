@@ -5,6 +5,7 @@ import { registerCastTools } from "../cast/registerCastTools.js";
 import { registerAlignWords } from "../media/registerAlignWords.js";
 import { registerImportAsset } from "../media/registerAssetFileTools.js";
 import { registerGenerateAsset } from "../media/registerGenerateAsset.js";
+import { registerGenerateAssets } from "../media/registerGenerateAssets.js";
 import { registerMarkAsset } from "../media/registerMarkAsset.js";
 import { registerPreviewAssets } from "../media/registerPreviewAssets.js";
 import { registerRemoveAsset } from "../media/registerRemoveAsset.js";
@@ -42,6 +43,8 @@ import { registerAskHelper } from "../helpers/registerAskHelper.js";
 import { registerGetStoryGuide } from "../storyGuide/registerGetStoryGuide.js";
 import { registerRecordLesson } from "../storyPlan/registerRecordLesson.js";
 import { registerSetStoryPlan } from "../storyPlan/registerSetStoryPlan.js";
+import { createSerialWrites } from "./serialWrites.js";
+import type { WorkBoard } from "../work/board/workBoard.js";
 import { callerStore } from "./callerStore.js";
 import { createToolTable, type HarnessTool } from "./toolTable.js";
 
@@ -56,6 +59,7 @@ export function harnessToolsOf(
   options: HarnessOptions & {
     pictures: PictureRenderer;
     callerOf: () => MadeBy | undefined;
+    board: WorkBoard;
   },
 ): HarnessTool[] {
   const context = {
@@ -65,6 +69,8 @@ export function harnessToolsOf(
     mediaTools: options.mediaTools,
     pictures: options.pictures,
     store: callerStore({ store: options.store, callerOf: options.callerOf }),
+    board: options.board,
+    writeLatest: createSerialWrites(),
   };
   registerGetWork(context);
   registerProjectReadTools(context);
@@ -93,6 +99,7 @@ export function harnessToolsOf(
   registerSceneClipTools(context);
   registerSetTransitions(context);
   registerGenerateAsset(context);
+  registerGenerateAssets(context);
   registerImportAsset(context);
   registerRemoveAsset(context);
   registerMarkAsset(context);

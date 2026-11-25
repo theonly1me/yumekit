@@ -101,6 +101,9 @@ export const shotInput = z.strictObject({
     .string()
     .trim()
     .describe("What the next shot takes from this one. Empty only last."),
+  continues_shot: idInput(
+    "Only when this shot continues the last frame of an earlier shot with the same camera, as one unbroken action: the id of that shot. This shot then starts on the end picture of its kept clip, and waits for it. Leave it out for a cut to a new camera position: the shot then starts on its own start picture and waits for nothing.",
+  ).optional(),
   strikes: z
     .array(strikeInput)
     .optional()

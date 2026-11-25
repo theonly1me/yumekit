@@ -64,7 +64,23 @@ export const storyCalls: ScriptedCall[] = [
 ];
 
 export const reviewCalls: ScriptedCall[] = [
+  {
+    name: "generate_assets",
+    input: {
+      calls: [
+        {
+          asset_id: "together",
+          capability: "image",
+          input: { prompt: "a fox by the lake" },
+        },
+      ],
+    },
+  },
   { name: "review_clip", input: { asset_id: "clip", shot_id: "dawn" } },
+  {
+    name: "review_several",
+    input: { reviews: [{ tool: "review_sheet", cast_id: "fox" }] },
+  },
   { name: "view_for_review", input: {} },
   {
     name: "give_plan_review",

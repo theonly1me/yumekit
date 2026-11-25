@@ -1,3 +1,4 @@
+import type { WorkItem } from "@yumekit/harness-mcp";
 import type { ChatEntry } from "./chat/chatTypes.js";
 
 export type Outcome<Value, Failure> =
@@ -24,6 +25,7 @@ export type EngineEvent =
       message?: string;
     }
   | { type: "media-servers-changed" }
+  | { type: "work-changed"; items: WorkItem[] }
   | { type: "agents-changed"; connected: number }
   | { type: "chat-changed"; entry: ChatEntry }
   | { type: "chat-text"; id: string; text: string }

@@ -3,7 +3,9 @@ export {
   type Harness,
   type HarnessCall,
   type HarnessToolListing,
+  type HarnessWork,
 } from "./harness/createHarness.js";
+export type { WorkItem, WorkState } from "./work/board/workBoard.js";
 export {
   harnessFailureResult,
   type HarnessImage,

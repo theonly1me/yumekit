@@ -7,6 +7,7 @@ import {
 } from "../geminiApi.ts";
 import type { Outcome } from "../toolResults.ts";
 import {
+  errorTextOf,
   interactionSchema,
   outputPartOf,
   type Interaction,
@@ -78,9 +79,10 @@ async function waitUntilDone(options: {
     interaction = read.value;
   }
   if (interaction.status !== "completed") {
+    const errors = errorTextOf(interaction);
     return {
       ok: false,
-      failure: `The Gemini API ended the interaction ${interaction.id} with the status ${interaction.status}.`,
+      failure: `The Gemini API ended the interaction ${interaction.id} with the status ${interaction.status}${errors === "" ? "." : `: ${errors}`}`,
     };
   }
   return { ok: true, value: interaction };

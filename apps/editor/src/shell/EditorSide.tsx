@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { ChatPanel } from "../chat/ChatPanel.js";
+import { useRunningWork } from "../chat/running/useRunningWork.js";
 import type { EngineClient } from "../engine/engineClient.js";
 import type { Scene, SceneClip, Snapshot } from "../engine/snapshot.js";
 import type { History } from "../scenePanel/history/useHistory.js";
@@ -21,6 +22,7 @@ export function EditorSide(props: {
 }) {
   const { client, snapshot, view, editorChat } = props;
   const { pickedClip, pickedScene } = view.facts;
+  const runningWork = useRunningWork(client);
   const isScene =
     view.sideTab === "scene" &&
     pickedClip !== undefined &&
@@ -58,6 +60,7 @@ export function EditorSide(props: {
         isHidden={isScene}
         sceneNumberOf={editorChat.sceneNumberOf}
         onOpenAiSettings={props.onOpenAiSettings}
+        runningWork={runningWork}
       />
     </SidePanel>
   );

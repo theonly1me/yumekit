@@ -1,0 +1,60 @@
+.running-work {
+  display: grid;
+  gap: 6px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.running-work h3 {
+  margin: 0;
+  font-size: var(--step--2);
+  font-weight: 500;
+  color: var(--faint);
+}
+
+.running-work ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+  max-height: 9.5em;
+  overflow-y: auto;
+}
+
+.running-work li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 10px;
+  align-items: baseline;
+  font-size: var(--step--1);
+  color: var(--muted);
+}
+
+.running-what {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.running-service,
+.running-state {
+  color: var(--faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.running-work li[data-state="running"] .running-state {
+  color: var(--accent);
+}
+
+.running-work li[data-state="waiting"] .running-what {
+  color: var(--faint);
+}
+
+@media (max-width: 520px) {
+  .running-service {
+    display: none;
+  }
+}

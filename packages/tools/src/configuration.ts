@@ -26,6 +26,7 @@ const serverEntrySchema = z.object({
 const limitsSchema = z.object({
   generatedVideoSeconds: z.number().nonnegative().optional(),
   spendingUsd: z.number().nonnegative().optional(),
+  callsAtOnce: z.number().int().min(1).optional(),
 });
 
 const defaultEntrySchema = z
@@ -61,6 +62,7 @@ export interface MediaToolsConfiguration {
   servers: ConfiguredServer[];
   defaults: Partial<Record<Capability, MediaDefault>>;
   limits: MediaLimits;
+  callsAtOnce: number | undefined;
 }
 
 function isMissingFile(error: unknown): boolean {
@@ -178,6 +180,8 @@ export async function readMediaToolsConfiguration(options: {
           userFile?.limits.spendingUsd ??
           defaultSpendingUsd,
       },
+      callsAtOnce:
+        projectFile?.limits.callsAtOnce ?? userFile?.limits.callsAtOnce,
     },
   };
 }

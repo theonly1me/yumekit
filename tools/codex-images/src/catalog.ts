@@ -10,6 +10,7 @@ const readOn = "2026-11-24";
 export const codexImagesDescription = {
   label: serviceLabel,
   runs: "hosted",
+  calls_at_once: 2,
   keys: [],
   models: [
     {

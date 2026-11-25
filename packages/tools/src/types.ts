@@ -64,6 +64,7 @@ export type MediaToolFailure =
     }
   | { kind: "media-service-not-ready"; server: string; message: string }
   | { kind: "media-usage-limit-reached"; server: string; message: string }
+  | { kind: "service-quota"; server: string; message: string }
   | SpendingLimitReached
   | SpendingRecordNotValid;
 
@@ -77,6 +78,7 @@ export type CheckKeyFailure =
           | "media-key-not-working"
           | "media-service-not-ready"
           | "media-usage-limit-reached"
+          | "service-quota"
           | "spending-limit-reached"
           | "spending-record-not-valid";
       }
@@ -109,6 +111,14 @@ export interface MediaToolRequest {
   outputDirectory: string;
   fileStem: string;
   onProgress?: (progress: MediaToolProgress) => void;
+  onState?: (state: MediaCallState) => void;
+  skipServers?: () => ReadonlySet<string>;
+  onServiceQuota?: (server: string) => void;
+}
+
+export interface MediaCallState {
+  server: string;
+  state: "waiting" | "running";
 }
 
 export type MediaModelChoice = Pick<

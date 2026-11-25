@@ -36,7 +36,7 @@ describe("read tools", () => {
       "A film is a chain of meaningful actions with cause and effect, in a world that stays the same; a character that only walks through places is a failure. Hands, fingers, and movement must look natural and human, and an object must never move, double, or change sides.",
     );
     expect(instructions).toContain(
-      "call review_clip: an independent critic gives the verdict, and you cannot overrule it; place only a clip that the critic kept or cut with place_video.",
+      "their review_clip checks in one review_several call: an independent critic gives the verdict, and you cannot overrule it; place only a clip that the critic kept or cut with place_video.",
     );
   });
 

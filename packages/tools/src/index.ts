@@ -57,6 +57,7 @@ export type {
   MediaToolFailure,
   MediaToolProgress,
   MediaToolRequest,
+  MediaCallState,
   MediaToolRun,
   MediaTools,
   Outcome,

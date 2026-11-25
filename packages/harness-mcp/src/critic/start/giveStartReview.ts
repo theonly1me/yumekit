@@ -21,8 +21,8 @@ export function registerGiveStartReview(options: {
     description:
       "For the critic only: your whole answer about a start picture. Answer each item of the list, the counts, the verdict, the blocking faults, and the notes.",
     inputSchema: sheetAnswerInput,
-    run: ({ input }) => {
-      const job = critics.current();
+    run: ({ input, reviewJobId }) => {
+      const job = critics.jobOf(reviewJobId);
       if (job?.kind !== "start") return failureResult(options.noJob);
       const issues = listAnswerIssuesOf({
         itemCount: startListItems.length,

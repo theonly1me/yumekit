@@ -36,6 +36,7 @@ export function codexArgumentsOf(options: {
     ...serverSetting({ key: "args", value: options.serverCommand.args }),
     ...serverSetting({ key: "default_tools_approval_mode", value: "approve" }),
     ...serverSetting({ key: "required", value: true }),
+    ...serverSetting({ key: "supports_parallel_tool_calls", value: true }),
     ...setting({ key: "developer_instructions", value: options.instructions }),
     "--",
     ...(options.sessionId === undefined ? [] : [options.sessionId]),

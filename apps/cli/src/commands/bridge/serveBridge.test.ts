@@ -33,7 +33,7 @@ describe("yumekit mcp with a running engine", () => {
 
     const { tools } = await connection.client.listTools();
 
-    expect(tools).toHaveLength(66);
+    expect(tools).toHaveLength(68);
     expect(tools.map((tool) => tool.name)).toContain("put_scene");
     expect(connection.client.getInstructions()).toContain("get_scene_guide");
     expect(connection.transportErrors).toEqual([]);

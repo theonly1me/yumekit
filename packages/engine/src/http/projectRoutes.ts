@@ -77,6 +77,9 @@ async function callTool(exchange: Exchange) {
           name,
           input,
           by: isAgent ? "ai" : "person",
+          ...(helper.kind === "critic"
+            ? { reviewJobId: helper.reviewJobId }
+            : {}),
           onProgress: (progress) => {
             note.onProgress(progress);
             if (callId === undefined) return;

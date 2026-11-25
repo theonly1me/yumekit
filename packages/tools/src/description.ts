@@ -93,6 +93,7 @@ function hasOneDefaultForEachCapability(
 export const mediaServerDescriptionSchema = z.object({
   label: z.string().min(1),
   runs: z.enum(["hosted", "on-this-computer"]),
+  calls_at_once: z.number().int().min(1).optional(),
   keys: z.array(mediaServerKeySchema),
   models: z
     .array(mediaModelSchema)

@@ -1,10 +1,12 @@
 import type { HarnessFailure, Outcome } from "../results.js";
+import type { WorkTicket } from "../work/board/workBoard.js";
 import type { CriticDesk, CriticJob } from "./criticDesk.js";
 import { noCriticFailure, type AskCritic } from "./criticTypes.js";
 
 export async function runCritic(options: {
   askCritic: AskCritic | undefined;
   critics: CriticDesk;
+  ticket: WorkTicket;
   job: CriticJob;
   brief: string;
   subject: string;
@@ -13,7 +15,14 @@ export async function runCritic(options: {
   if (askCritic === undefined) return { ok: false, failure: noCriticFailure };
   const turn = await options.critics.run({
     job,
-    work: () => askCritic({ brief: options.brief, subject: options.subject }),
+    work: (jobId) => {
+      options.ticket.update({ state: "running" });
+      return askCritic({
+        brief: options.brief,
+        subject: options.subject,
+        jobId,
+      });
+    },
   });
   if (!turn.ok) return { ok: false, failure: turn.failure };
   if (job.answer === undefined) {

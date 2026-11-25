@@ -26,6 +26,7 @@ export interface ShotDraft {
   strikes?: object[];
   music_intensity?: number;
   video_prompt?: string;
+  continues_shot?: string;
 }
 
 export function entryOf(draft: EntryDraft) {
@@ -65,6 +66,9 @@ export function shotOf(draft: ShotDraft) {
       ? {}
       : { camera_move: draft.camera_move }),
     ...(draft.strikes === undefined ? {} : { strikes: draft.strikes }),
+    ...(draft.continues_shot === undefined
+      ? {}
+      : { continues_shot: draft.continues_shot }),
   };
 }
 

@@ -100,6 +100,9 @@ describe("the Codex adapter", () => {
       'mcp_servers.yumekit.args=["/opt/yumekit/main.js","mcp","--project","/work/my project"]',
     );
     expect(firstRun.arguments).toContain(
+      "mcp_servers.yumekit.supports_parallel_tool_calls=true",
+    );
+    expect(firstRun.arguments).toContain(
       'developer_instructions="Line one.\\nSay \\"plain\\" words."',
     );
     expect(firstRun.arguments.slice(-2)).toEqual([

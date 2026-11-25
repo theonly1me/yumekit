@@ -88,6 +88,9 @@ function shotOf(options: {
     startState: input.start_state.map(entryOf),
     endState: input.end_state.map(entryOf),
     inherits: input.inherits,
+    ...(input.continues_shot === undefined
+      ? {}
+      : { continuesShotId: input.continues_shot }),
     ...(input.strikes === undefined
       ? {}
       : { strikes: input.strikes.map(strikeOf) }),
@@ -167,6 +170,13 @@ export function planRefusalOf(
         kind: "id-in-use",
         message: `The plan has the shot id "${shot.shot_id}" twice.`,
         hint: "Give each shot its own id.",
+      };
+    }
+    if (shot.continues_shot !== undefined && !seen.has(shot.continues_shot)) {
+      return {
+        kind: "invalid-value",
+        message: `Shot "${shot.shot_id}" continues "${shot.continues_shot}", which is not an earlier shot of the plan.`,
+        hint: "Give continues_shot the id of an earlier shot whose last frame this shot continues with the same camera. Leave it out for a cut.",
       };
     }
     seen.add(shot.shot_id);

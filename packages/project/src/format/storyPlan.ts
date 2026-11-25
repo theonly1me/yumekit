@@ -50,6 +50,7 @@ export const shotSchema = z.strictObject({
   startState: shotStateSchema,
   endState: shotStateSchema,
   inherits: z.string(),
+  continuesShotId: idSchema.exactOptional(),
   strikes: z.array(strikeSchema).exactOptional(),
   musicIntensity: musicIntensitySchema.exactOptional(),
   musicHits: z.array(z.number().min(0)).exactOptional(),

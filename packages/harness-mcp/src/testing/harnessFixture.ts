@@ -70,7 +70,7 @@ export async function startHarness(
 ): Promise<Harness> {
   const { store, mediaTools, runRequests } = await startHarnessProject(options);
   const client = new Client({ name: "harness-test", version: "0.0.0" });
-  const criticLog: CriticLog = { briefs: [], answers: [] };
+  const criticLog: CriticLog = { briefs: [], answers: [], mostAtOnce: 0 };
   const critic = options?.critic ?? {};
   const server = createHarnessServer({
     store,

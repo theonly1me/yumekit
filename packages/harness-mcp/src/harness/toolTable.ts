@@ -19,6 +19,7 @@ export type ProgressListener = (progress: HarnessProgress) => void;
 export interface ToolRequest<Input> {
   input: Input;
   onProgress?: ProgressListener;
+  reviewJobId?: string;
 }
 
 export interface ToolDefinition<Shape extends z.ZodRawShape> {
@@ -67,7 +68,7 @@ function harnessToolOf<Shape extends z.ZodRawShape>(options: {
     ...(definition.annotations === undefined
       ? {}
       : { annotations: definition.annotations }),
-    run: async ({ input, onProgress }) => {
+    run: async ({ input, onProgress, reviewJobId }) => {
       const checked = await twinSchema.safeParseAsync(input);
       if (!checked.success) {
         return invalidInput({ name: definition.name, error: checked.error });
@@ -81,6 +82,7 @@ function harnessToolOf<Shape extends z.ZodRawShape>(options: {
       return definition.run({
         input: parsed.data,
         ...(onProgress === undefined ? {} : { onProgress }),
+        ...(reviewJobId === undefined ? {} : { reviewJobId }),
       });
     },
   };

@@ -1,3 +1,4 @@
+import { defaultCallsAtOnce, type CallSlots } from "./callSlots.js";
 import type { MediaDefault } from "./configuration.js";
 import type { KeyHealth } from "./keyHealth/keyHealth.js";
 import { checkKeys } from "./keyHealth/checkKeys.js";
@@ -24,6 +25,8 @@ export interface RunContext {
   toolTimeoutSeconds: number;
   onDescriptionsChanged: () => void;
   spendingLimitUsd: () => number;
+  slots: CallSlots;
+  callsAtOnce: () => number | undefined;
 }
 
 function isNoPick(options: {
@@ -34,6 +37,20 @@ function isNoPick(options: {
     options.request.server === undefined &&
     options.context.defaults()[options.request.capability] === undefined
   );
+}
+
+function quotaSkipOf(server: string): {
+  ok: false;
+  failure: MediaToolFailure;
+} {
+  return {
+    ok: false,
+    failure: {
+      kind: "service-quota",
+      server,
+      message: `yumekit did not send this call: an earlier call of the same group used up the quota of ${server}.`,
+    },
+  };
 }
 
 export async function runMediaRequest(options: {
@@ -95,12 +112,36 @@ async function runOnce(options: {
           basis: price.basis,
         });
   if (reservation !== undefined && !reservation.ok) return reservation;
-  const ran = await runTool({
+  const ran = await context.slots.run({
     server: connection.name,
-    client: connection.client,
-    request,
-    model,
-    toolTimeoutSeconds: context.toolTimeoutSeconds,
+    callsAtOnce: Math.min(
+      connection.description?.calls_at_once ?? defaultCallsAtOnce,
+      context.callsAtOnce() ?? defaultCallsAtOnce,
+    ),
+    onWait: () => {
+      request.onState?.({ server: connection.name, state: "waiting" });
+      request.onProgress?.({
+        done: 0,
+        message: `Waiting for a free place at ${connection.name}`,
+      });
+    },
+    work: async () => {
+      if (request.skipServers?.().has(connection.name) === true) {
+        return quotaSkipOf(connection.name);
+      }
+      request.onState?.({ server: connection.name, state: "running" });
+      const result = await runTool({
+        server: connection.name,
+        client: connection.client,
+        request,
+        model,
+        toolTimeoutSeconds: context.toolTimeoutSeconds,
+      });
+      if (!result.ok && result.failure.kind === "service-quota") {
+        request.onServiceQuota?.(connection.name);
+      }
+      return result;
+    },
   });
   if (waitsForDownload(connection)) {
     await context.pool.redescribe(connection);

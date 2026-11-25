@@ -1,5 +1,6 @@
 import type { ProjectSnapshot, Shot } from "@yumekit/project";
 import { stateText, strikeText } from "../../storyPlan/stateText.js";
+import { freeShotLines } from "../../storyPlan/freeShots.js";
 import { firstCutLines } from "./firstCutText.js";
 
 function reviewText(shot: Shot): string {
@@ -53,6 +54,9 @@ function shotLines(options: { shot: Shot; number: number }): string[] {
     `${String(options.number)}. ${shot.id} (${String(shot.seconds)}s, place ${shot.placeId}, cast ${shot.castIds.join(", ") || "none"}, camera ${camera})`,
     `   Purpose: ${shot.purpose}`,
     `   Action: ${shot.action}`,
+    ...(shot.continuesShotId === undefined
+      ? []
+      : [`   Continues the last frame of: ${shot.continuesShotId}`]),
     `   Start: ${stateText(shot.startState)}`,
     `   End: ${stateText(shot.endState)}`,
     ...(shot.strikes ?? []).map((strike) => `   Strike: ${strikeText(strike)}`),
@@ -74,6 +78,7 @@ export function planLines(snapshot: ProjectSnapshot): string[] {
     `Logline: ${plan.logline}`,
     `Wants: ${plan.want}. Against it: ${plan.obstacle}. Changes: ${plan.change}`,
     ...firstCutLines({ snapshot, plan }),
+    ...freeShotLines({ snapshot, plan }),
     ...plan.shots.flatMap((...[shot, index]) =>
       shotLines({ shot, number: index + 1 }),
     ),

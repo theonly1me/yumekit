@@ -5,6 +5,7 @@ import { steeringBlockOf, steeringDataOf } from "./steeringText.js";
 
 export const toolsThatCanSpend = new Set([
   "generate_asset",
+  "generate_assets",
   "replace_narration",
   "replace_music",
   "make_sharper_copy",
