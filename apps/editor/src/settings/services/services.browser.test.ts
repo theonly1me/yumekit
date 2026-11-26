@@ -74,6 +74,27 @@ describe("the Services group of Settings", () => {
     await editor.close();
   });
 
+  it("shows each video model with its price for a second at its default size, and says which ones did not run with yumekit yet", async () => {
+    const editor = await openEditor(runningEngine().url);
+    const { page } = editor;
+    await openTools(page);
+
+    await page.getByRole("button", { name: "Change Video clips" }).click();
+    const list = page.getByRole("group", { name: "Models for Video clips" });
+
+    await expect
+      .poll(() =>
+        list.getByRole("button", { name: /Test video model/ }).textContent(),
+      )
+      .toBe(
+        "Test video modelAbout $0.10 a second at 480pNot tested with yumekit yet",
+      );
+    await expect
+      .poll(() => list.getByRole("button", { name: /Test clip/ }).textContent())
+      .toBe("Test clipFree");
+    await editor.close();
+  });
+
   it("opens the key guide for a model of a service with no key, and saves the pick after the key saves", async () => {
     const editor = await openEditor(runningEngine().url);
     const { page } = editor;

@@ -1,0 +1,68 @@
+{
+  "endpoint_id": "minimax/h3-max/reference-to-video",
+  "page": "https://fal.ai/models/minimax/h3-max/reference-to-video",
+  "schema_url": "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=minimax/h3-max/reference-to-video",
+  "read_on": "2026-11-26",
+  "required": ["prompt", "prompt_expansion_mode"],
+  "properties": {
+    "aspect_ratio": {
+      "types": ["string"],
+      "enum": ["adaptive", "21:9", "16:9", "4:3", "1:1", "3:4", "9:16"]
+    },
+    "duration": {
+      "types": ["number"],
+      "minimum": 0.92,
+      "maximum": 15
+    },
+    "enable_safety_checker": {
+      "types": ["boolean"]
+    },
+    "end_image_url": {
+      "types": ["string", "null"]
+    },
+    "image_url": {
+      "types": ["string", "null"]
+    },
+    "middle_frame_time": {
+      "types": ["number", "null"]
+    },
+    "middle_image_url": {
+      "types": ["string", "null"]
+    },
+    "prompt": {
+      "types": ["string"]
+    },
+    "prompt_expansion_mode": {
+      "types": ["string"]
+    },
+    "reference_audio_urls": {
+      "types": ["array"],
+      "maxItems": 3
+    },
+    "reference_conditions": {
+      "types": ["array"],
+      "maxItems": 12
+    },
+    "reference_image_urls": {
+      "types": ["array"],
+      "maxItems": 9
+    },
+    "reference_video_urls": {
+      "types": ["array"],
+      "maxItems": 3
+    },
+    "resolution": {
+      "types": ["string"],
+      "enum": ["480P", "768P", "1080P"]
+    },
+    "seed": {
+      "types": ["integer", "null"]
+    },
+    "sync_mode": {
+      "types": ["boolean"]
+    },
+    "target_audio_url": {
+      "types": ["string", "null"]
+    }
+  }
+}

@@ -4,10 +4,12 @@ import { KeyGuide } from "../../tools/KeyGuide.js";
 import { mediaServerRequests } from "../../tools/mediaServers.js";
 import {
   kindNames,
+  type ChoiceModel,
   type ChoiceService,
   type MediaChoice,
   type ModelTarget,
 } from "./mediaChoices.js";
+import { ModelOption } from "./ModelOption.js";
 import { ServiceLine } from "./ServiceLine.js";
 import "./services.css";
 
@@ -24,15 +26,21 @@ const serviceStateNames: Record<ChoiceService["state"], string> = {
   "not-ready": "Not ready",
 };
 
-function targetsOf(service: ChoiceService): ModelTarget[] {
+function targetsOf(
+  service: ChoiceService,
+): { target: ModelTarget; model: ChoiceModel | undefined }[] {
   const base = { server: service.server, serverLabel: service.label };
   if (service.models.length === 0) {
-    return [{ ...base, model: undefined, modelLabel: undefined }];
+    return [
+      {
+        target: { ...base, model: undefined, modelLabel: undefined },
+        model: undefined,
+      },
+    ];
   }
   return service.models.map((model) => ({
-    ...base,
-    model: model.id,
-    modelLabel: model.label,
+    target: { ...base, model: model.id, modelLabel: model.label },
+    model,
   }));
 }
 
@@ -121,19 +129,17 @@ export function ModelPicker(props: {
             )}
             <ServiceLine client={props.client} service={service} />
             <ul className="model-options">
-              {targetsOf(service).map((target) => (
+              {targetsOf(service).map(({ target, model }) => (
                 <li key={target.model ?? target.server}>
-                  <button
-                    type="button"
-                    className="model-option"
-                    aria-pressed={isSame({ target, selected: props.selected })}
-                    disabled={state.kind === "saving"}
-                    onClick={() => {
+                  <ModelOption
+                    target={target}
+                    model={model}
+                    isPicked={isSame({ target, selected: props.selected })}
+                    isSaving={state.kind === "saving"}
+                    onChoose={() => {
                       choose({ service, target });
                     }}
-                  >
-                    {target.modelLabel ?? "The model of this service"}
-                  </button>
+                  />
                 </li>
               ))}
             </ul>

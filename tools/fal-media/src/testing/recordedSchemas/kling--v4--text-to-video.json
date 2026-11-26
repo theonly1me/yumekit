@@ -2,7 +2,7 @@
   "endpoint_id": "kling/v4/text-to-video",
   "page": "https://fal.ai/models/kling/v4/text-to-video",
   "schema_url": "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=kling/v4/text-to-video",
-  "read_on": "2026-11-22",
+  "read_on": "2026-11-26",
   "required": [],
   "properties": {
     "aspect_ratio": {

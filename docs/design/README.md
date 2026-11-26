@@ -96,4 +96,6 @@ Use these words with these meanings in code and in documents.
 - Removal of media files and word timing files that no record references.
 - A failure with a `kind` and a hint when an input does not match the schema of a harness tool.
 - One paid check of `tools/fal-media` with a real key: a 4 second clip at 480p.
+- One paid check of `tools/sand-media` with a real key: a 4 second MAGI-2 clip at 1080p from a start picture (about 0.32 US dollars), which also confirms `check_key` (document 16, "Details of WP87").
+- The reference endpoints of Grok Imagine Video 1.5, Happy Horse 1.1, Kling 4, and Wan 3.0 on fal (document 16, "Details of WP87").
 - One paid check of a Gemini clip with only its start picture and `task: image_to_video`, and a reviewed end picture for a model with a first and a last frame (document 20, "Details of WP68").

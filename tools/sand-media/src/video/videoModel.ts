@@ -1,0 +1,20 @@
+export const videoModel = {
+  id: "magi-2",
+  label: "MAGI-2",
+  shortestSeconds: 4,
+  longestSeconds: 30,
+  defaultSeconds: 5,
+  resolution: "1080p",
+  aspectRatios: ["21:9", "16:9", "4:3", "1:1", "3:4", "9:16"],
+  usdPerSecond: 0.08,
+  maximumReferencePictures: 10,
+  maximumPromptCharacters: 15_000,
+  picturesUnderBytes: 30_000_000,
+  maximumBodyBytes: 64_000_000,
+  readOn: "2026-11-26",
+  sources: [
+    "https://platform.sand.ai/docs/model-pricing/",
+    "https://platform.sand.ai/docs/ark-generations/",
+    "https://platform.sand.ai/docs/upload-asset/",
+  ],
+} as const;

@@ -53,6 +53,9 @@ function wireServiceOf(service: ChoiceService) {
       label: model.label,
       is_default: model.isDefault,
       download: model.download ?? null,
+      tested: model.tested ?? null,
+      price_at_defaults: model.priceAtDefaults ?? null,
+      default_resolution: model.defaultResolution ?? null,
     })),
   };
 }

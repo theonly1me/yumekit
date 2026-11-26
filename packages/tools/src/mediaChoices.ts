@@ -1,3 +1,4 @@
+import { choiceModelOf } from "./choiceModel.js";
 import type {
   ChoiceCapability,
   ChoiceService,
@@ -67,12 +68,7 @@ function serviceFor(options: {
 }): ChoiceService {
   const models = (options.connection.description?.models ?? [])
     .filter((model) => model.capability === options.capability)
-    .map((model) => ({
-      id: model.id,
-      label: model.label,
-      isDefault: model.is_default,
-      ...(model.download === undefined ? {} : { download: model.download }),
-    }));
+    .map(choiceModelOf);
   return { ...options.facts, models };
 }
 

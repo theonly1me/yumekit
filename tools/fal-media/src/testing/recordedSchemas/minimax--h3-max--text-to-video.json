@@ -1,0 +1,40 @@
+{
+  "endpoint_id": "minimax/h3-max/text-to-video",
+  "page": "https://fal.ai/models/minimax/h3-max/text-to-video",
+  "schema_url": "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=minimax/h3-max/text-to-video",
+  "read_on": "2026-11-26",
+  "required": ["prompt", "prompt_expansion_mode"],
+  "properties": {
+    "aspect_ratio": {
+      "types": ["string"],
+      "enum": ["21:9", "16:9", "4:3", "1:1", "3:4", "9:16"]
+    },
+    "duration": {
+      "types": ["number"],
+      "minimum": 0.92,
+      "maximum": 15
+    },
+    "enable_safety_checker": {
+      "types": ["boolean"]
+    },
+    "prompt": {
+      "types": ["string"]
+    },
+    "prompt_expansion_mode": {
+      "types": ["string"]
+    },
+    "resolution": {
+      "types": ["string"],
+      "enum": ["480P", "768P", "1080P"]
+    },
+    "seed": {
+      "types": ["integer", "null"]
+    },
+    "sync_mode": {
+      "types": ["boolean"]
+    },
+    "target_audio_url": {
+      "types": ["string", "null"]
+    }
+  }
+}

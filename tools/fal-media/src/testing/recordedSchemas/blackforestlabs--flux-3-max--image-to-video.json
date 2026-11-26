@@ -1,0 +1,40 @@
+{
+  "endpoint_id": "blackforestlabs/flux-3-max/image-to-video",
+  "page": "https://fal.ai/models/blackforestlabs/flux-3-max/image-to-video",
+  "schema_url": "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=blackforestlabs/flux-3-max/image-to-video",
+  "read_on": "2026-11-26",
+  "required": ["prompt", "image_url"],
+  "properties": {
+    "aspect_ratio": {
+      "types": ["string"],
+      "enum": ["auto", "21:9", "2:1", "16:9", "4:3", "1:1", "3:4", "9:16"]
+    },
+    "duration": {
+      "types": ["integer"],
+      "enum": [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+    },
+    "end_image_url": {
+      "types": ["string", "null"]
+    },
+    "generate_audio": {
+      "types": ["boolean"]
+    },
+    "image_url": {
+      "types": ["string"]
+    },
+    "prompt": {
+      "types": ["string"]
+    },
+    "reasoning_level": {
+      "types": ["string"],
+      "enum": ["low", "high"]
+    },
+    "resolution": {
+      "types": ["string"],
+      "enum": ["720p", "1080p", "2K", "4K"]
+    },
+    "seed": {
+      "types": ["integer", "null"]
+    }
+  }
+}

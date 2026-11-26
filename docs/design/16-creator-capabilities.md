@@ -386,3 +386,68 @@ The builder of WP64 read these official price pages on 2026-11-24. Each price in
 1. `MediaModelPrice` gets the unit `call`: one price for each call, for example a song.
 2. The fal page names the Nano Banana 2.1 values "representative costs" for a short prompt. The catalog uses them, because the tool reports them as an estimate.
 3. `whisper-1` (0.006 for each minute) and `tts-1` and `tts-1-hd` (15 and 30 US dollars for one million characters) keep their prices. The page confirms them.
+
+## Details of WP87
+
+WP87 brings the video models of fal up to date, adds MAGI-2 of Sand AI as the new server `tools/sand-media`, and shows the price of each model in the picker of Settings.
+
+The builder read each fact below on 2026-11-26. For fal: the list at `api.fal.ai/v1/models` for the categories `text-to-video` and `image-to-video`, then each model page, its `llms.txt` page, and its schema at `fal.ai/api/openapi/queue/openapi.json?endpoint_id=<id>`. For Sand AI: the pages `get-started`, `api-keys`, `create-generation`, `get-generation`, `upload-asset`, `limits`, `errors`, `ark-generations`, `model-pricing`, and `credits` under `https://platform.sand.ai/docs/`.
+
+### The fal catalog
+
+1. Each of the 9 video models of WP45 has the same fields and the same prices on its pages of 2026-11-26 as in the recorded schemas of 2026-11-22. Each one keeps its settings, and its entry and its recorded schemas get `read_on` 2026-11-26.
+2. Seedance 2.5 now takes reference pictures through `bytedance/seedance-2.5/us/reference-to-video`, as `image_urls`. This closes item 7 of "Details of WP45" for Seedance. The page permits up to 30 pictures, and the price for each second is the same as for its other endpoints.
+3. The new video models of `tools/fal-media`. Each one has `tested: false`, and a test sends the default of each setting to a stub of fal and compares the body with the recorded schema of its endpoint.
+
+   | Model                       | Id                                 | First, last, reference      | Sound              | Price for one second                                           | Lengths       |
+   | --------------------------- | ---------------------------------- | --------------------------- | ------------------ | -------------------------------------------------------------- | ------------- |
+   | Seedance 2.5 Flash          | `bytedance/seedance-2.5/flash`     | Yes, yes, 30                | Switch             | 0.1345 (480p), 0.3024 (720p)                                   | 4 to 30       |
+   | Kling 4 Flash               | `kling/v4/flash`                   | Yes, no, no                 | No setting         | 0.094 (720p, the only size)                                    | 3 to 20       |
+   | MiniMax H3 Max              | `minimax/h3-max`                   | Yes, yes, 9                 | Always             | 0.05 (480P), 0.08 (768P), 0.16 (1080P)                         | 1 to 15       |
+   | MiniMax H3 Max Turbo        | `minimax/h3-max-turbo`             | Yes, yes, no                | Always             | 0.025 (480P), 0.04 (768P), 0.08 (1080P)                        | 1 to 15       |
+   | Wan 3.0 Prime               | `alibaba/wan-3.0-prime`            | Yes, yes, no                | Switch (`audio`)   | 0.068 (480p), 0.14 (720p), 0.28 (1080p)                        | 2 to 30       |
+   | Happy Horse 1.1             | `alibaba/happy-horse/v1.1`         | Yes, no, no                 | Always             | 0.14 (720p), 0.18 (1080p)                                      | 3 to 15       |
+   | Veo 3.1                     | `fal-ai/veo3.1`                    | Yes, yes (own endpoint), no | Switch             | 0.40 with sound, 0.20 without (720p, 1080p), 0.60, 0.40 (4k)   | 4, 6, or 8    |
+   | Veo 3.1 Lite                | `fal-ai/veo3.1/lite`               | Yes, yes (own endpoint), no | Switch             | 0.05 with sound, 0.03 without (720p), 0.08, 0.05 (1080p)       | 4, 6, or 8    |
+   | LTX 2.5 Fast                | `lightricks/ltx-2.5/fast`          | Yes, yes, no                | Switch             | 0.09 (720p), 0.13 (1080p), 0.19 (1440p), 0.30 (2160p)          | 6 to 20, even |
+   | PixVerse 6 Max              | `pixverse/v6/max`                  | Yes, no, no                 | Switch, off on fal | 0.081 with sound, 0.054 without (360p) to 0.252, 0.198 (1080p) | 1 to 15       |
+   | FLUX 3 Max Video            | `blackforestlabs/flux-3-max/video` | Yes, yes, no                | Switch             | 0.17 (720p), 0.29 (1080p), 0.40 (2K), 0.80 (4K)                | 5 to 20       |
+   | Grok Imagine Video 1.5 Lite | `xai/grok-imagine-video/v1.5/lite` | Yes, yes, no                | Switch             | 0.02 (480p), 0.03 (720p), 0.14 (1080p)                         | 1 to 15       |
+
+4. `tools/fal-media` now has 21 video models. Seedance 2.5 stays the default. The catalog keeps the models of one family next to each other, so a person sees each tier of a family together.
+5. The schema of MiniMax H3 Max and H3 Max Turbo requires `prompt_expansion_mode`. The server sends `balanced`, the default of the page. The page takes a length from 0.92 to 15 seconds, and yumekit takes whole seconds, so the range is 1 to 15.
+6. MiniMax H3 Max Turbo takes no reference pictures here: its reference endpoint costs 0.05, 0.08, and 0.16 for each second, twice the price of its text and picture endpoints, and a catalog price cannot depend on the endpoint.
+7. The FLUX 3 Max page gives 35% off until 2026-12-07 and the regular price from 2026-12-08. The catalog has the regular price, as for Mirelo in "Details of WP47". A clip before 2026-12-08 costs less than the estimate.
+8. Veo 3.1 and Veo 3.1 Lite take the length as `"4s"`, `"6s"`, or `"8s"`. A first and a last picture go to `first-last-frame-to-video` as `first_frame_url` and `last_frame_url`. The default length is 4, the shortest, so a first try costs the least.
+9. The estimate leaves out the small fees for pictures, as item 7 of "Details of WP45" does: 0.01 for each picture of Grok Imagine Video 1.5 Lite, the reference tokens of MiniMax H3 Max, and the input tokens of Seedance 2.5.
+10. Kling 4 Flash has no `end_image_url` and no sound field, so it takes no last picture and rejects `with_audio`. Happy Horse 1.1 has no sound field and its page says that it always makes sound, so it rejects `with_audio: false`.
+11. Left out, with the reason:
+    - Luma Ray 3.2: its price for a clip from a first picture differs from the price for a clip from text, and its price page gives a first picture only 5 seconds while its schema offers 10. The catalog cannot state either rule.
+    - Vidu Q4: it has no endpoint for a clip from text.
+    - HeyGen Video: its price page is out of date (a sale that ended on 2026-10-31), and its page gives 5 to 15 seconds while its schema gives 5 to 30.
+    - Kandinsky 6.0 Pro: its price depends on the number of steps, which does not fit `MediaModelPrice`.
+    - Mischief 1: it has only an endpoint for a clip from a picture.
+    - Veo 3.1 Fast: the catalog keeps the full tier and the cheapest tier of Veo 3.1.
+    - The reference endpoints of Grok Imagine Video 1.5 (it takes only 480p and 720p there, a rule the catalog has no field for), Happy Horse 1.1, Kling 4, and Wan 3.0 stay a follow-up.
+    - Older versions that have a newer version in the catalog: Seedance 2.0 (with Fast and Mini), Kling 3 and Kling O3, Hailuo 2.3, Veo 3, Wan 2.x, PixVerse 5.x and C1, LTX 2.3, Grok Imagine Video 1.0, and Gemini Omni Flash 1.1. fal marks MAGI-1 as deprecated, and it has no MAGI-2.
+    - Endpoints for work that yumekit does not do: LoRA endpoints, camera controls, transitions, effects, and keyframes of more than two pictures (FLUX 3 Max `keyframes-to-video`).
+
+### `tools/sand-media` and MAGI-2
+
+12. Sand AI is a new bundled server with the name `sand`, after `fal` in the order of document 06. It passes `SAND_API_KEY`, the name in the `get-started` and `api-keys` pages. The key has the label "Sand AI API key", the page `https://platform.sand.ai/app/keys/`, and the steps of the `api-keys` page, with one more step that asks the person to check the balance.
+13. The first picture: the native API (`POST https://api.sand.ai/v2/generations`) takes no `role`, and its page sends a first or a last frame to the Ark compatibility API. That API (`POST https://api.sand.ai/compatible/ark/api/v3/contents/generations/tasks`) takes items of `content` with the type `image_url` and the role `first_frame`, `last_frame`, or `reference_image`. So the server uses the Ark API for each call, also for a clip from text only: each call then has one request shape, one set of states, and one error shape.
+14. The Ark page takes a first frame alone, or a first and a last frame. It takes no reference picture together with a frame, so the server rejects both together. It takes up to 10 reference pictures.
+15. The server sends each picture as `data:<type>;base64,<data>`, which the Ark page permits for an image. So it needs no upload: the answer of `POST /v1/assets` has an int64 id as a JSON number, which JavaScript cannot read exactly. A picture must be under 30,000,000 bytes (the `upload-asset` page), and the whole JSON body at most 64,000,000 bytes (the Ark page). The server checks both, and takes PNG, JPEG, and WebP, before any request.
+16. The settings: a whole length from 4 to 30 seconds (the Ark page), 5 by default as in the examples; `resolution` only `1080p`; `with_audio` as `generate_audio`, true by default; a prompt of at most 15,000 characters. The Ark API needs one ratio of 21:9, 16:9, 4:3, 1:1, 3:4, and 9:16, also with a first frame, and has no `auto`. The server picks the nearest one to `width_pixels` and `height_pixels`, and 16:9 with no size. The editor always sends the size of the output.
+17. The price is 0.08 US dollars for each second at 1080p (the `model-pricing` page). `cost_usd` is 0.08 times the length of the MP4 file, or the requested length when the file gives none, with `cost_is_estimate: true`. The same page says "Top-up is not supported for the time being", while the `credits` page describes a top-up. So the steps and the failure text send the person to the balance, not to a top-up.
+18. The wait: the create answer is `{ "id" }` as text, and the page says that a create is not idempotent. So the server sends it once and never again. Then it reads the task every 10 seconds, as the pages say, at most 55 times (550 seconds), so it answers before `toolTimeoutSeconds`. `queued` and `running` wait. `succeeded` downloads `content.video_url` with no key. `failed`, `expired`, and `cancelled` are a failure with the code and the message of `error`. A read that fails with no answer, 429, 500, or 503 counts as one read, and the server reads again after the next wait, as the `limits` page asks. A failure after 550 seconds names the task id and says that Sand AI can still finish the clip and charge for it.
+19. The default limits are 20 reads a minute and 5 generations at once for each organization. yumekit runs 3 calls of a server at once (document 20, "Details of WP72"), so it reads at most 18 times a minute.
+20. Failures in plain words: a refused prompt or picture (`InputSensitiveContentDetected`, or `content_policy_violation` of a task), too few credits (`InsufficientBalance` or `insufficient_credits`) with the balance page, and a rate limit (`RateLimitExceeded`), which also has `_meta: { "yumekit/failure": "service-quota" }`. Each other answer is "Sand AI answered <status>: <code>: <message>", so a 401 or a 403 marks the key as one that does not work (document 15, "Details of WP64", item 16). No message holds the key.
+21. `check_key` reads `GET https://api.sand.ai/v2/generations/1`, a generation that is not there. The `errors` page gives `404 generation_not_found` for a generation that the organization of the key does not have, and `401 invalid_api_key` for a key that does not work. So 404 `generation_not_found` means a working key, 401 and 403 a rejected key, and each other answer is a failure. The pages name no check of a key, so this is a choice of the builder. The first real call must confirm it.
+22. MAGI-2 has `tested: false`. No test calls Sand AI.
+
+### The price in the picker
+
+23. Each model of `GET /api/media/choices` gets `tested`, `price_at_defaults` (the `usd` and the `unit` of the price that matches the default value of each setting, with the rule of the spending limit), and `default_resolution` (the default of a `resolution` setting). Each one is `null` when the model has none.
+24. Settings shows each model as a card with its name, its price ("About $0.473 a second at 720p", "About $0.03 a picture", "Free", or "Price not known"), and "Not tested with yumekit yet" when `tested` is false. A price shows up to three digits after the point, as the pages give it, for example "$0.473" and "$0.025", so close prices stay apart. It applies to each kind, not only to video. The cards are in a grid, with one column at the width of a phone.
+25. The default size differs between models (720p for Seedance 2.5, 1080p for Kling 4, 768P for MiniMax H3 Max, 1080p for MAGI-2). The card names the size, so a person sees what the price is for.

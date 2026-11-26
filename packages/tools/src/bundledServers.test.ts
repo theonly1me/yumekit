@@ -35,6 +35,20 @@ describe("findBundledServers", () => {
     });
   });
 
+  it("resolves the MAGI-2 server of Sand AI by the name sand and passes it SAND_API_KEY", async () => {
+    const servers = await findBundledServers();
+
+    expect(servers["sand"]).toEqual({
+      command: process.execPath,
+      args: [
+        fileURLToPath(
+          new URL("../../../tools/sand-media/dist/main.js", import.meta.url),
+        ),
+      ],
+      passEnvironment: ["SAND_API_KEY"],
+    });
+  });
+
   it("resolves the local voice by the name local-voice and passes it the configuration folder", async () => {
     const servers = await findBundledServers();
 

@@ -509,6 +509,9 @@ importers:
       '@yumekit/sample-media':
         specifier: workspace:*
         version: link:../../tools/sample-media
+      '@yumekit/sand-media':
+        specifier: workspace:*
+        version: link:../../tools/sand-media
       zod:
         specifier: 4.6.7
         version: 4.6.7
@@ -571,6 +574,15 @@ importers:
         version: 4.6.7
 
   tools/sample-media:
+    dependencies:
+      '@modelcontextprotocol/sdk':
+        specifier: 1.32.2
+        version: 1.32.2(zod@4.6.7)
+      zod:
+        specifier: 4.6.7
+        version: 4.6.7
+
+  tools/sand-media:
     dependencies:
       '@modelcontextprotocol/sdk':
         specifier: 1.32.2

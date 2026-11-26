@@ -1,5 +1,5 @@
 import type { Capability } from "./types.js";
-import type { MediaServerKey } from "./description.js";
+import type { MediaModelPrice, MediaServerKey } from "./description.js";
 import type { KeyState } from "./keys/index.js";
 
 export type ChoiceCapability = Exclude<Capability, "align">;
@@ -34,6 +34,9 @@ export interface ChoiceModel {
   label: string;
   isDefault: boolean;
   download?: { bytes: number; ready: boolean };
+  tested?: boolean;
+  priceAtDefaults?: Pick<MediaModelPrice, "usd" | "unit">;
+  defaultResolution?: string;
 }
 
 export interface ChoiceService {

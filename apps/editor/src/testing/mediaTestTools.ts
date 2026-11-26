@@ -37,6 +37,7 @@ export const withoutOtherBundled = {
   openai: { disabled: true },
   gemini: { disabled: true },
   fal: { disabled: true },
+  sand: { disabled: true },
   "local-voice": { disabled: true },
   "local-music": { disabled: true },
   codex: { disabled: true },

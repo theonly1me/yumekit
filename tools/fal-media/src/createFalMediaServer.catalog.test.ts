@@ -62,14 +62,18 @@ describe("describe_media_server", () => {
     ).toBeGreaterThanOrEqual(2);
   });
 
-  it("keeps Seedance 2.5 as the default video model with the per second prices of its fal page", async () => {
+  it("keeps Seedance 2.5 as the default video model with the per second prices of its fal page, and takes reference pictures through its reference endpoint", async () => {
     const { parsed } = await describeWithNoKey();
     const seedance = parsed.models.find(
       (model) => model.id === "bytedance/seedance-2.5/us",
     );
 
     expect(seedance?.is_default).toBe(true);
-    expect(seedance?.accepts).toEqual(["first_frame", "last_frame"]);
+    expect(seedance?.accepts).toEqual([
+      "first_frame",
+      "last_frame",
+      "reference_images",
+    ]);
     expect(seedance?.prices).toEqual([
       { usd: 0.2205, unit: "second", when: { resolution: "480p" } },
       { usd: 0.473, unit: "second", when: { resolution: "720p" } },

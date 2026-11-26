@@ -2,7 +2,7 @@
   "endpoint_id": "google/gemini-omni-flash/v1.2/text-to-video",
   "page": "https://fal.ai/models/google/gemini-omni-flash/v1.2/text-to-video",
   "schema_url": "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=google/gemini-omni-flash/v1.2/text-to-video",
-  "read_on": "2026-11-22",
+  "read_on": "2026-11-26",
   "required": ["prompt"],
   "properties": {
     "aspect_ratio": {

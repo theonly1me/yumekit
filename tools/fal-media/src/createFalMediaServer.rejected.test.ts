@@ -61,13 +61,13 @@ describe("generate_video rejects a setting before any request", () => {
       name: "an unknown model",
       input: { model: "fal-ai/unknown" },
       message:
-        'model "fal-ai/unknown" is not a model of this server. Use one of: bytedance/seedance-2.5/us, kling/v4, google/gemini-omni-flash/v1.2, minimax/h3, alibaba/wan-3.0, lightricks/ltx-2.5/pro, fal-ai/pixverse/v6, blackforestlabs/flux-3/video, xai/grok-imagine-video/v1.5.',
+        'model "fal-ai/unknown" is not a model of this server. Use one of: bytedance/seedance-2.5/us, bytedance/seedance-2.5/flash, kling/v4, kling/v4/flash, minimax/h3, minimax/h3-max, minimax/h3-max-turbo, alibaba/wan-3.0, alibaba/wan-3.0-prime, alibaba/happy-horse/v1.1, google/gemini-omni-flash/v1.2, fal-ai/veo3.1, fal-ai/veo3.1/lite, lightricks/ltx-2.5/pro, lightricks/ltx-2.5/fast, fal-ai/pixverse/v6, pixverse/v6/max, blackforestlabs/flux-3/video, blackforestlabs/flux-3-max/video, xai/grok-imagine-video/v1.5, xai/grok-imagine-video/v1.5/lite.',
     },
     {
-      name: "reference images",
-      input: { reference_image_paths: ["/tmp/a.png"] },
+      name: "reference images for a model with no reference endpoint",
+      input: { model: "kling/v4", reference_image_paths: ["/tmp/a.png"] },
       message:
-        "Seedance 2.5 does not accept reference_image_paths. Give first_frame_path and last_frame_path in their place.",
+        "Kling 4 does not accept reference_image_paths. Give first_frame_path and last_frame_path in their place.",
     },
     {
       name: "a last frame with no first frame",

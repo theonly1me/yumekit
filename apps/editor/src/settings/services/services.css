@@ -39,20 +39,49 @@
   list-style: none;
   margin: 0;
   padding: 0;
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 232px), 1fr));
   gap: 8px;
 }
 
+.model-options li {
+  display: grid;
+}
+
 button.model-option {
+  display: grid;
+  align-content: start;
+  gap: 3px;
+  border-radius: 12px;
+  padding: 10px 14px;
   font-weight: 400;
   text-align: left;
+}
+
+.model-option-name {
+  font-weight: 500;
+}
+
+.model-option-facts {
+  display: grid;
+  gap: 1px;
+  font-size: var(--step--2);
+  color: var(--muted);
+}
+
+.model-option-facts em {
+  font-style: normal;
 }
 
 button.model-option[aria-pressed="true"] {
   background: var(--solid);
   border-color: var(--solid);
   color: var(--on-solid);
+}
+
+button.model-option[aria-pressed="true"] .model-option-facts {
+  color: inherit;
+  opacity: 0.75;
 }
 
 .model-key {

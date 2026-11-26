@@ -1,0 +1,40 @@
+{
+  "endpoint_id": "fal-ai/veo3.1",
+  "page": "https://fal.ai/models/fal-ai/veo3.1",
+  "schema_url": "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=fal-ai/veo3.1",
+  "read_on": "2026-11-26",
+  "required": ["prompt"],
+  "properties": {
+    "aspect_ratio": {
+      "types": ["string"],
+      "enum": ["16:9", "9:16"]
+    },
+    "auto_fix": {
+      "types": ["boolean"]
+    },
+    "duration": {
+      "types": ["string"],
+      "enum": ["4s", "6s", "8s"]
+    },
+    "generate_audio": {
+      "types": ["boolean"]
+    },
+    "negative_prompt": {
+      "types": ["string", "null"]
+    },
+    "prompt": {
+      "types": ["string"]
+    },
+    "resolution": {
+      "types": ["string"],
+      "enum": ["720p", "1080p", "4k"]
+    },
+    "safety_tolerance": {
+      "types": ["string"],
+      "enum": ["1", "2", "3", "4", "5", "6"]
+    },
+    "seed": {
+      "types": ["integer", "null"]
+    }
+  }
+}
