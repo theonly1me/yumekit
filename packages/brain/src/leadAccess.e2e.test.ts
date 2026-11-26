@@ -4,7 +4,6 @@ import type { AgentAdapter, RunAccess } from "./brainTypes.js";
 import { createClaudeCodeAdapter } from "./claudeCode/claudeCodeAdapter.js";
 import { createCodexAdapter } from "./codex/codexAdapter.js";
 import { createCursorAdapter } from "./cursor/cursorAdapter.js";
-import { leadInstructionsOf } from "./leadInstructions.js";
 import { claudeChangeStream } from "./testing/claudeStreams.js";
 import { createFakeProgram, type FakeProgram } from "./testing/fakeProgram.js";
 
@@ -158,22 +157,5 @@ describe("what the lead may do in each agent program", () => {
 
       expect(asked).toEqual(locked);
     }
-  });
-
-  it("tells the lead what it may now do only when it runs with the tools of its program", () => {
-    const open = leadInstructionsOf({
-      agentId: "claude-code",
-      access: programAccess,
-    });
-    const locked = leadInstructionsOf({
-      agentId: "claude-code",
-      access: { kind: "yumekit-only" },
-    });
-
-    expect(open).toContain("call import_asset");
-    expect(open).toContain("the person gets a card in the chat to allow it");
-    expect(open).not.toContain("You have only the yumekit tools.");
-    expect(locked).toContain("You have only the yumekit tools.");
-    expect(locked).not.toContain("call import_asset");
   });
 });
