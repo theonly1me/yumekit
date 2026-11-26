@@ -74,39 +74,46 @@ async function startMcpWithPicture() {
     },
   });
   const picture = await answerOf(3);
-  const exited = new Promise((resolve) => child.on("exit", resolve));
+  const exited = new Promise<number | null>((resolve) => {
+    child.on("exit", (code) => {
+      resolve(code);
+    });
+  });
   return { child, picture, exited };
 }
 
 describe("the end of yumekit mcp", () => {
-  it("leaves no process of it 5 seconds after the end of its input", async () => {
+  it("ends after its close at the end of its input, and leaves no process of it 5 seconds later", async () => {
     const { child, picture, exited } = await startMcpWithPicture();
     const started = await processesStartedBy(child.pid ?? 0);
 
     child.stdin.end();
-    await Promise.race([exited, delay(5000)]);
+    const exitCode = await exited;
     const left = await processesLeftAfter({
       processes: started,
-      waitMilliseconds: 0,
+      waitMilliseconds: 5000,
     });
 
     expect(picture).toContain('"type":"image"');
     expect(
       started.some((row) => /chrom|headless_shell/i.test(row.command)),
     ).toBe(true);
+    expect(exitCode).toBe(0);
     expect(left).toEqual([]);
   }, 120_000);
 
-  it("leaves no process of it 5 seconds after SIGTERM", async () => {
-    const { child } = await startMcpWithPicture();
+  it("ends after its close on SIGTERM, and leaves no process of it 5 seconds later", async () => {
+    const { child, exited } = await startMcpWithPicture();
     const started = await processesStartedBy(child.pid ?? 0);
 
     child.kill("SIGTERM");
+    const exitCode = await exited;
     const left = await processesLeftAfter({
       processes: started,
       waitMilliseconds: 5000,
     });
 
+    expect(exitCode).toBe(0);
     expect(left).toEqual([]);
   }, 120_000);
 
