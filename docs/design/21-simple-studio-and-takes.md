@@ -580,3 +580,7 @@ These decisions came from the small fixes for version 0.1.1 on 2026-11-26.
 
 1. MiniMax H3 (`minimax/h3`) makes 768P by default, in place of 2K. The three fal pages of the model (`text-to-video`, `image-to-video`, and `reference-to-video`, with their `llms.txt` pages, read on 2026-11-26) give 0.06 US dollars a second at 768P and 0.13 at 2K. The field `resolution` says: "480P and 768P are native generation modes; 2K and 4K upscale a 768P base result." So a clip at 2K is the clip at 768P made larger, for more than twice the price. A person who wants a larger clip picks 2K or 4K, or makes the clip sharper afterwards.
 2. The default of fal itself stays 2K. yumekit always sends `resolution`, so the default of yumekit decides.
+
+### The line of a rename
+
+3. A rename in the Scene tab is a `put_scene` call with a new `title`. When the title differs from the title of the scene before the call, the chat line names the change and the new name: "You renamed scene 2 to "The harbor at dawn".". A scene that is on no scenes row gets "You renamed a scene to "The harbor at dawn".". A call that keeps the title keeps "You changed the text of scene 2.". This closes item 2 of the follow-ups of WP85.

@@ -32,6 +32,24 @@ function referenceOf(options: {
   return typeof clipId === "string" ? { clipId } : undefined;
 }
 
+function newSceneTitleOf(options: {
+  tool: string;
+  input: Readonly<Record<string, unknown>>;
+  snapshot: ProjectSnapshot;
+}): string | undefined {
+  const { input } = options;
+  const title = input["title"];
+  if (options.tool !== "put_scene" || typeof title !== "string") {
+    return undefined;
+  }
+  const scene = options.snapshot.scenes.find(
+    (candidate) => candidate.id === input["scene_id"],
+  );
+  return scene === undefined || scene.title === title
+    ? undefined
+    : title.trim();
+}
+
 function sceneNumberOf(options: {
   snapshot: ProjectSnapshot;
   reference: SceneReference;
@@ -75,6 +93,12 @@ export function personSummaryOf(options: {
     reference === undefined
       ? undefined
       : sceneNumberOf({ snapshot: options.snapshot, reference });
+  const newTitle = newSceneTitleOf(options);
+  if (newTitle !== undefined) {
+    return number === undefined
+      ? `You renamed a scene to "${newTitle}".`
+      : `You renamed scene ${String(number)} to "${newTitle}".`;
+  }
   if (sentence === undefined || number === undefined) {
     return personSentenceOf(options.tool);
   }
