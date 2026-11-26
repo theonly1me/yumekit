@@ -1,6 +1,7 @@
 import { chapterSchema } from "@yumekit/project/takes";
 import { z } from "zod";
 import { designCheckSchema } from "../../cast/castEntries.js";
+import { chapterSchema } from "../../project/takes/takeSchema.js";
 
 const countSchema = z.object({
   object: z.string(),

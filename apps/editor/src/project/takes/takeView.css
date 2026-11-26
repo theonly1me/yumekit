@@ -1,0 +1,125 @@
+:root {
+  --approve: #9cc79a;
+  --decline: #e8907c;
+}
+
+:root[data-theme="light"] {
+  --approve: #2f7a3e;
+  --decline: #b3412f;
+}
+
+.take-view {
+  display: grid;
+  gap: 26px;
+}
+
+.take-slate-head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: end;
+  gap: 8px 32px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--line);
+}
+
+.slate {
+  display: grid;
+  line-height: 1;
+}
+
+.slate span {
+  font-size: var(--step--1);
+  color: var(--muted);
+}
+
+.slate strong {
+  font-size: clamp(5.5rem, 11vw, 9rem);
+  font-weight: 500;
+  letter-spacing: -0.07em;
+  line-height: 0.82;
+  font-variant-numeric: tabular-nums;
+  margin-left: -0.06em;
+}
+
+.slate-facts {
+  display: grid;
+  gap: 6px;
+  padding-bottom: 6px;
+}
+
+.slate-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 18px;
+  margin-top: 6px;
+}
+
+.progress.wide {
+  width: 100%;
+  max-width: 520px;
+}
+
+.progress[data-moving="true"] i {
+  animation: travel 1.6s ease-in-out infinite alternate;
+}
+
+.chapter-menu select,
+.earlier select {
+  font: inherit;
+  font-size: var(--step--1);
+  color: var(--text);
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  padding: 6px 12px;
+}
+
+.chapter-menu select option,
+.earlier select option {
+  background: var(--raised);
+  color: var(--text);
+}
+
+.simple-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+}
+
+.simple-actions [aria-pressed="true"] {
+  border-color: var(--decline);
+  color: var(--decline);
+}
+
+@keyframes travel {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(250%);
+  }
+}
+
+@media (max-width: 560px) {
+  .take-slate-head {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .contact-sheet {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tile-picture img,
+  .tile-picture video {
+    transition: none;
+  }
+
+  .progress[data-moving="true"] i {
+    animation: none;
+  }
+}

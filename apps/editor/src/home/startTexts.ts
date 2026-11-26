@@ -4,7 +4,7 @@ import type { HomeAgent, ProjectLength, RecentProject } from "./homeApi.js";
 const dayMilliseconds = 24 * 60 * 60 * 1000;
 
 export function lengthLabelOf(length: ProjectLength): string {
-  return length === "auto" ? "Let the AI decide" : `${String(length)} seconds`;
+  return length === "auto" ? "The lead asks" : `${String(length)} seconds`;
 }
 
 function namesText(names: string[]): string {
@@ -43,19 +43,32 @@ export function recentFactsOf(options: {
     .join(", ");
 }
 
-export function agentLineOf(agents: HomeAgent[]): string {
+export function agentProblemOf(agents: HomeAgent[]): string | undefined {
   const inUse = agents.find((agent) => agent.in_use);
   if (inUse === undefined) {
     return "No AI program is on this computer. Install Claude Code, Codex, or Cursor, start it once in a terminal, and sign in.";
   }
-  if (inUse.sign_in === "signed-out") {
-    const signInStep =
-      inUse.id === "cursor"
-        ? "Open a terminal and run cursor-agent login."
-        : "Start it once in a terminal and sign in.";
-    return `${inUse.name} is on this computer, but it is not signed in. ${signInStep}`;
-  }
-  return `The AI is ${inUse.name} on this computer. No key needed.`;
+  if (inUse.sign_in !== "signed-out") return undefined;
+  const signInStep =
+    inUse.id === "cursor"
+      ? "Open a terminal and run cursor-agent login."
+      : "Start it once in a terminal and sign in.";
+  return `${inUse.name} is on this computer, but it is not signed in. ${signInStep}`;
+}
+
+export function placesLineOf(options: {
+  platformIds: readonly string[];
+  length: ProjectLength;
+}): string {
+  const names = platformCatalog
+    .filter((platform) => options.platformIds.includes(platform.id))
+    .map((platform) => platform.name);
+  if (names.length === 0) return "Pick at least one place.";
+  const length =
+    options.length === "auto"
+      ? "The lead asks about the length."
+      : `About ${String(options.length)} seconds.`;
+  return `For ${namesText(names)}. ${length}`;
 }
 
 export const longestRequestCharacters = 20_000;

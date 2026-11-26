@@ -20,7 +20,15 @@ export async function closeBrowser(): Promise<void> {
   browser = undefined;
 }
 
-export async function openEditor(url: string): Promise<EditorPage> {
+export function openEditor(url: string): Promise<EditorPage> {
+  return openPage(`${url}#edit`);
+}
+
+export function openProject(url: string): Promise<EditorPage> {
+  return openPage(url);
+}
+
+async function openPage(url: string): Promise<EditorPage> {
   const context = await (
     await sharedBrowser()
   ).newContext({ viewport: { width: 1440, height: 900 } });

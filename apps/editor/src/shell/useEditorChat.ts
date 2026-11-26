@@ -1,6 +1,6 @@
 import type { SceneChip } from "../chat/AskForm.js";
 import { useChat } from "../chat/useChat.js";
-import { usePendingFiles } from "../chat/files/index.js";
+import { assetUploadOf, usePendingFiles } from "../chat/files/index.js";
 import { useChatBox } from "../chat/useChatBox.js";
 import type { EngineClient } from "../engine/engineClient.js";
 import type { EditorView } from "./useEditorView.js";
@@ -15,7 +15,7 @@ export function useEditorChat(options: {
   const chat = useChat(options.client);
   const box = useChatBox();
   const files = usePendingFiles({
-    client: options.client,
+    upload: assetUploadOf(options.client),
     onText: box.appendFileText,
   });
   const { pickedCard } = view;

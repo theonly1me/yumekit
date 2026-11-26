@@ -3,6 +3,7 @@ import { z } from "zod";
 import { castEntrySchema } from "../cast/castEntries.js";
 import { storyPlanSchema } from "../parts/story/storyPlanSchema.js";
 import { wholeStorySchema } from "../parts/story/wholeStorySchema.js";
+import { takeSchema } from "../project/takes/takeSchema.js";
 import { checkModeIds } from "../settings/checkModes.js";
 import { videoStyleIds } from "../videoStyle/videoStyles.js";
 

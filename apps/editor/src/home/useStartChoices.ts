@@ -1,18 +1,20 @@
 import { useEffect, useState } from "react";
-import type { LookId } from "@yumekit/scene-kit";
-import {
-  firstStartFormatId,
-  type StartFormatId,
-} from "@yumekit/project/start-formats";
+import { usePendingFiles } from "../chat/files/index.js";
 import type { ClientFailure, EngineClient } from "../engine/engineClient.js";
-import type { VideoStyleId } from "../videoStyle/videoStyles.js";
 import {
   makeProject,
   openRecent,
   readHome,
+  stagedUploadOf,
   type HomeFacts,
   type ProjectLength,
 } from "./homeApi.js";
+import { longestRequestCharacters } from "./startTexts.js";
+import {
+  noTemplateVideoStyle,
+  startTemplates,
+  type StartForm,
+} from "./templates.js";
 
 export type Busy = "idle" | "making" | "opening";
 
@@ -31,18 +33,24 @@ export function useStartChoices(client: EngineClient) {
   const [home, setHome] = useState<HomeFacts>();
   const [loadFailure, setLoadFailure] = useState<string>();
   const [request, setRequest] = useState("");
-  const [platformIds, setPlatformIds] = useState<string[]>([
-    "youtube",
-    "tiktok",
-  ]);
-  const [length, setLength] = useState<ProjectLength>(30);
-  const [videoStyle, setVideoStyle] = useState<VideoStyleId>("graphics");
-  const [look, setLook] = useState<LookId>("midnight");
-  const [formatId, setFormatId] = useState<StartFormatId>(firstStartFormatId);
-  const [planFirst, setPlanFirst] = useState(false);
+  const [platformIds, setPlatformIds] = useState<string[]>(["youtube"]);
+  const [length, setLength] = useState<ProjectLength>("auto");
+  const [form, setForm] = useState<StartForm>();
   const [busy, setBusy] = useState<Busy>("idle");
   const [makeFailure, setMakeFailure] = useState<string>();
   const [openFailure, setOpenFailure] = useState<string>();
+  const files = usePendingFiles({
+    upload: stagedUploadOf(client),
+    onText: ({ name, text }) => {
+      const added = `From the file ${name}:\n${text.trim()}`;
+      const next = request.trim() === "" ? added : `${request}\n\n${added}`;
+      if (next.length > longestRequestCharacters) {
+        return "This text is too long for the box. Paste the part that the lead needs.";
+      }
+      setRequest(next);
+      return undefined;
+    },
+  });
 
   useEffect(() => {
     let isCurrent = true;
@@ -61,15 +69,20 @@ export function useStartChoices(client: EngineClient) {
   const make = async () => {
     setBusy("making");
     setMakeFailure(undefined);
+    const uploaded = await files.upload();
+    if (!uploaded.ok) {
+      setBusy("idle");
+      return;
+    }
+    const template = startTemplates.find((each) => each.id === form);
     const reply = await makeProject({
       client,
       request,
       platformIds,
       length,
-      videoStyle,
-      look,
-      formatId,
-      planFirst,
+      videoStyle: template?.videoStyle ?? noTemplateVideoStyle,
+      form,
+      files: uploaded.files,
     });
     if (reply.ok) {
       window.location.assign(reply.value.url);
@@ -106,14 +119,9 @@ export function useStartChoices(client: EngineClient) {
     },
     length,
     setLength,
-    videoStyle,
-    setVideoStyle,
-    look,
-    setLook,
-    formatId,
-    setFormatId,
-    planFirst,
-    setPlanFirst,
+    form,
+    setForm,
+    files,
     busy,
     makeFailure,
     openFailure,

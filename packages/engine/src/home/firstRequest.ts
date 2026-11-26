@@ -33,9 +33,25 @@ function formatLinesOf(formatId: StartFormatId): string[] {
     : [`Format: ${format.name}. ${format.direction}`];
 }
 
+export const startForms = ["trailer", "short", "explainer"] as const;
+
+export type StartForm = (typeof startForms)[number];
+
+export interface StartFile {
+  asset_id: string;
+  name: string;
+}
+
 export interface FirstRequest {
   text: string;
   details: string;
+  files?: StartFile[];
+}
+
+function formLinesOf(form: StartForm | undefined): string[] {
+  return form === undefined
+    ? []
+    : [`Form: ${form}. Give this form to set_story.`];
 }
 
 export function firstRequestOf(options: {
@@ -44,19 +60,29 @@ export function firstRequestOf(options: {
   length: ProjectLength;
   formatId: StartFormatId;
   planFirst: boolean;
+  form?: StartForm | undefined;
+  files?: StartFile[];
 }): FirstRequest {
   const names = options.platformIds.map((id) => platformOf(id).name);
   const details = [
     `Platforms: ${names.join(", ")}.`,
+    ...formLinesOf(options.form),
     ...formatLinesOf(options.formatId),
     lengthLineOf(options.length),
     betweenScenesLine,
     ...(options.planFirst ? [planFirstSentence] : []),
   ].join("\n");
-  return { text: options.request.trim(), details };
+  const files = options.files ?? [];
+  return {
+    text: options.request.trim(),
+    details,
+    ...(files.length === 0 ? {} : { files }),
+  };
 }
 
-async function failureOf(response: Response): Promise<FirstRequestFailure> {
+export async function failureOf(
+  response: Response,
+): Promise<FirstRequestFailure> {
   const body: unknown = await response.json().catch(() => undefined);
   const parsed = failureSchema.safeParse(body);
   return parsed.success

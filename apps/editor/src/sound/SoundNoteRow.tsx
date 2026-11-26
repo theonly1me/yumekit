@@ -1,4 +1,4 @@
-import { stepActionLabels } from "../making/StepWhyLine.js";
+import { stepActionLabels } from "../making/stepReasons.js";
 import type { SoundAction, SoundNote } from "./soundNotes.js";
 
 const noteActionLabels: Record<SoundAction, string> = {

@@ -6,9 +6,19 @@ const longestFolderName = 48;
 const longestProjectName = 40;
 const mostFolderNumbers = 1_000;
 
+const filledGuideLine = /^[^:]{1,40}:[ \t]*(\S.*)$/;
+
+function nameLineOf(request: string): string {
+  const [firstLine = "", ...rest] = request.trim().split(/\r?\n/);
+  if (firstLine.includes(":")) return firstLine;
+  const filled = rest
+    .map((line) => filledGuideLine.exec(line.trim())?.[1])
+    .find((value) => value !== undefined);
+  return filled ?? firstLine;
+}
+
 function firstWordsOf(request: string): string[] {
-  const [firstLine = ""] = request.trim().split(/\r?\n/);
-  return firstLine.split(/\s+/).filter(Boolean).slice(0, wordsInName);
+  return nameLineOf(request).split(/\s+/).filter(Boolean).slice(0, wordsInName);
 }
 
 function cutAtWord(words: string[]): string {
@@ -21,9 +31,12 @@ function cutAtWord(words: string[]): string {
   return name;
 }
 
+const wordsThatCannotEndAName = /(\s+(the|a|an|of|and|to|in|on|for|with))+$/i;
+
 export function projectNameOf(request: string): string {
   const trimmed = cutAtWord(firstWordsOf(request))
     .replace(/[\s.,;:!?]+$/, "")
+    .replace(wordsThatCannotEndAName, "")
     .trim();
   if (trimmed === "") return "New video";
   return `${trimmed.charAt(0).toUpperCase()}${trimmed.slice(1)}`;

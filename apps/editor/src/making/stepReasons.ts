@@ -1,4 +1,4 @@
-import type { AnswerEntry } from "./firstChat.js";
+import type { AnswerEntry } from "./answerTypes.js";
 
 export type SoundStepId = "voice" | "music";
 
@@ -9,6 +9,13 @@ export interface StepWhy {
   text: string;
   actions: StepAction[];
 }
+
+export const stepActionLabels: Record<StepAction, string> = {
+  "add-a-key": "Add a key",
+  "use-my-own-music": "Use my own music",
+  "make-the-rest": "Make the rest",
+  "try-again": "Try again",
+};
 
 export const noMusicServiceText =
   "No music yet. Music needs a key, or your own file.";

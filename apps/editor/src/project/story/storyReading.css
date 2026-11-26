@@ -1,0 +1,64 @@
+.story-reading {
+  width: min(680px, 100%);
+  display: grid;
+  gap: 26px;
+}
+
+.story-head {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.story-head h2 {
+  font-size: var(--step-3);
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.story-paragraph {
+  display: grid;
+  gap: 8px;
+  padding: 4px 0 4px 16px;
+  border-left: 2px solid transparent;
+}
+
+.story-paragraph:hover,
+.story-paragraph[data-open="true"] {
+  border-left-color: var(--line-strong);
+}
+
+.story-paragraph[data-has-notes="true"] {
+  border-left-color: var(--decline);
+}
+
+.story-label {
+  font-size: var(--step--1);
+  font-weight: 500;
+  color: var(--accent);
+}
+
+.story-paragraph p {
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  max-width: 64ch;
+  cursor: text;
+  white-space: pre-line;
+}
+
+.story-paragraph > .link {
+  justify-self: start;
+  font-size: var(--step--1);
+  color: var(--muted);
+}
+
+.story-notes {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 4px;
+  font-size: var(--step--1);
+  color: var(--decline);
+}

@@ -108,7 +108,7 @@ describe("a very long request", () => {
   it("keeps the chat, the box, and Send inside the window of a phone", async () => {
     const { page, close } = await openPhonePage({
       browser: await sharedBrowser(),
-      url: runningEngine().url,
+      url: `${runningEngine().url}#edit`,
     });
     await page.getByRole("button", { name: "Ask for a change" }).click();
     const chat = chatOf(page);

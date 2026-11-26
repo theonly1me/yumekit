@@ -30,7 +30,7 @@ afterAll(async () => {
 async function openEditorOnPhone() {
   const opened = await openPhonePage({
     browser: await sharedBrowser(),
-    url: runningEngine().url,
+    url: `${runningEngine().url}#edit`,
   });
   await opened.page.locator(".card", { hasText: "Harbor view" }).waitFor();
   return opened;
@@ -92,7 +92,7 @@ describe("the editor at the width of a phone", () => {
       viewport: { width: 1440, height: 900 },
     });
     const page = await context.newPage();
-    await page.goto(runningEngine().url);
+    await page.goto(`${runningEngine().url}#edit`);
     await page.locator(".card", { hasText: "Harbor view" }).waitFor();
     await page.waitForTimeout(500);
 

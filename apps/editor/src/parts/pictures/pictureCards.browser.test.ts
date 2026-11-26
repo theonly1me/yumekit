@@ -1,6 +1,6 @@
 import type { Page, Route } from "playwright";
 import { afterAll, describe, expect, it } from "vitest";
-import { closeBrowser, openEditor } from "../../testing/editorPage.js";
+import { closeBrowser, openProject } from "../../testing/editorPage.js";
 import { scriptAndTwoScenes } from "../../testing/makingCalls.js";
 import { browsersPath } from "../../testing/runEngine.js";
 import { runHome, type RunningHome } from "../../testing/runHome.js";
@@ -18,16 +18,18 @@ async function openTallMaking(options: { withChromium: boolean }) {
     ...(options.withChromium ? { browsersPath: browsersPath() } : {}),
   });
   homes.push(home);
-  return { home, ...(await openEditor(home.url)) };
+  return { home, ...(await openProject(home.url)) };
 }
 
 async function startTallRequest(page: Page): Promise<void> {
   await page.getByLabel("What do you want to make?").fill("Tea");
+  await page.getByRole("button", { name: "Change" }).click();
   await page.getByRole("button", { name: /^YouTube 16:9/ }).click();
   await page.getByRole("button", { name: /^TikTok/ }).click();
   await page.getByRole("button", { name: /^Instagram Reel/ }).click();
-  await page.getByRole("button", { name: "Make the video" }).click();
-  await page.getByRole("button", { name: /^Make the pictures/ }).click();
+  await page.getByRole("button", { name: "Start", exact: true }).click();
+  await page.getByRole("button", { name: "Edit by hand" }).click();
+  await page.getByRole("button", { name: "Pictures", exact: true }).click();
 }
 
 function cardFacts(page: Page) {

@@ -11,6 +11,7 @@ import { Preview } from "../preview/Preview.js";
 import { sceneEditsOf } from "../scenes/sceneEdits.js";
 import { useDirectChanges } from "../scenes/useDirectChanges.js";
 import { useHistory } from "../scenePanel/history/useHistory.js";
+import { useTakesSheet } from "../project/takes/useTakesSheet.js";
 import { useSettingsSheet } from "../settings/useSettingsSheet.js";
 import { EditorSide } from "./EditorSide.js";
 import { LowerArea } from "./LowerArea.js";
@@ -25,6 +26,7 @@ export function Editor(props: {
   client: EngineClient;
   snapshot: Snapshot;
   projectFolder: string;
+  onBackToProject: () => void;
 }) {
   const { client, snapshot, projectFolder } = props;
   const framesPerSecond = snapshot.project.framesPerSecond;
@@ -69,7 +71,8 @@ export function Editor(props: {
     playback.pause();
     stepSheet.open(stepId);
   };
-  const sheets = [exporting, clipTools, settings, stepSheet, cast];
+  const takes = useTakesSheet({ client, snapshot, onOpen: playback.pause });
+  const sheets = [exporting, clipTools, settings, stepSheet, cast, takes];
   const isSheetOpen = sheets.some((sheet) => sheet.isOpen);
   const openAiSettings = () => {
     playback.pause();
@@ -100,6 +103,9 @@ export function Editor(props: {
           theme={theme}
           onTheme={setTheme}
           exportLabel={exporting.label}
+          takesCount={takes.waitingCount}
+          onBackToProject={props.onBackToProject}
+          onTakes={takes.openLatest}
           onStepView={openStepView}
           onCast={cast.open}
           onSettings={openAiSettings}
@@ -173,6 +179,7 @@ export function Editor(props: {
           pictureGroupFor={clipTools.entryFor}
           onLength={edits.resize}
           onOpenAiSettings={openAiSettings}
+          afterHistory={takes.readyLines}
         />
         <button
           type="button"

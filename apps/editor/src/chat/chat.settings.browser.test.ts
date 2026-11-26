@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { chatOf, readSettings } from "../testing/chatTesting.js";
+import { readSettings } from "../testing/chatTesting.js";
 import { closeBrowser, openEditor } from "../testing/editorPage.js";
 import { runEngine, type RunningEngine } from "../testing/runEngine.js";
 
@@ -49,23 +49,6 @@ describe("the AI part of Settings and the empty chat", () => {
       .toContain("In use");
     await settings.getByRole("button", { name: "Close" }).click();
     await expect.poll(() => line.innerText()).toBe("Codex on this computer");
-    await editor.close();
-  });
-
-  it("shows starters for a project with no scenes, and a starter only fills the box", async () => {
-    const editor = await openEditor(runningEngine().url);
-    const chat = chatOf(editor.page);
-    const starters = editor.page.getByRole("group", { name: "Ideas to start" });
-
-    await starters
-      .getByRole("button", { name: "Make a 30 second video about ..." })
-      .click();
-
-    expect(await chat.box.inputValue()).toBe("Make a 30 second video about ");
-    expect(
-      await chat.box.evaluate((element) => element === document.activeElement),
-    ).toBe(true);
-    expect(await chat.sendButton.count()).toBe(1);
     await editor.close();
   });
 });

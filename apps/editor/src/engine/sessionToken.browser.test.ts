@@ -29,7 +29,7 @@ describe("the session token of the editor", () => {
     const page = await context.newPage();
     const consoleLines: string[] = [];
     page.on("console", (message) => consoleLines.push(message.text()));
-    await page.goto(url);
+    await page.goto(`${url}#edit`);
     await page.locator(".card", { hasText: "First counter" }).waitFor();
 
     await page.reload();
@@ -52,7 +52,7 @@ describe("the session token of the editor", () => {
     const { url, origin } = runningEngine();
     const context = await (await sharedBrowser()).newContext();
     const first = await context.newPage();
-    await first.goto(url);
+    await first.goto(`${url}#edit`);
     await first.locator(".card", { hasText: "First counter" }).waitFor();
 
     const second = await context.newPage();

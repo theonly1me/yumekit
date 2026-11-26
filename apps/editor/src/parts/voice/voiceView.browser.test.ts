@@ -117,7 +117,7 @@ describe("the voice view", () => {
       const agent = { ...view.agent, name: lateAgentName };
       return route.fulfill({ response, json: { ...view, agent } });
     });
-    await page.goto(runningEngine().url);
+    await page.goto(`${runningEngine().url}#edit`);
     await page.getByRole("button", { name: /on this computer$/ }).waitFor();
 
     await chatOf(page).ask("Make the video calmer.");

@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { AskForm, type SceneChip } from "./AskForm.js";
 import { ChatHistory } from "./ChatHistory.js";
 import type { AskInput } from "./chatRequests.js";
@@ -5,7 +6,6 @@ import { useDropZone, type PendingFiles } from "./files/index.js";
 import { QuestionCard } from "./questions/QuestionCard.js";
 import { RunningWork } from "./running/RunningWork.js";
 import type { WorkItem } from "./running/workSchema.js";
-import { Suggestions } from "./Suggestions.js";
 import { useAskSend } from "./useAskSend.js";
 import type { Chat } from "./useChat.js";
 import type { ChatBox } from "./useChatBox.js";
@@ -16,20 +16,18 @@ export function ChatPanel(props: {
   box: ChatBox;
   files: PendingFiles;
   chip: SceneChip | undefined;
-  hasScenes: boolean;
   isHidden: boolean;
   sceneNumberOf: (clipId: string) => number | undefined;
   onOpenAiSettings: () => void;
   runningWork: WorkItem[];
+  afterHistory?: ReactNode;
+  isMoneyElsewhere?: boolean;
 }) {
   const { chat, box, chip } = props;
   const ask = useAskSend({ chat, box, files: props.files, chip });
   const drop = useDropZone(props.files.add);
   const sendInput = (input: AskInput) => {
     chat.send(input).catch(() => undefined);
-  };
-  const sendForTheWholeVideo = (text: string) => {
-    sendInput({ text, aboutClipId: undefined });
   };
   return (
     <div className="chat-pane" hidden={props.isHidden} {...drop.zoneProps}>
@@ -39,17 +37,12 @@ export function ChatPanel(props: {
         sceneNumberOf={props.sceneNumberOf}
         onSend={sendInput}
         onOpenAiSettings={props.onOpenAiSettings}
+        after={props.afterHistory}
+        isMoneyElsewhere={props.isMoneyElsewhere === true}
       />
       <div className="ask">
         <RunningWork items={props.runningWork} />
-        {ask.round === undefined ? (
-          <Suggestions
-            hasScenes={props.hasScenes}
-            isRunning={chat.isRunning}
-            onSend={sendForTheWholeVideo}
-            onFill={box.fill}
-          />
-        ) : (
+        {ask.round === undefined ? undefined : (
           <QuestionCard
             key={ask.round.id}
             card={ask.card}

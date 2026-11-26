@@ -1,5 +1,5 @@
 import type { Snapshot } from "../engine/snapshot.js";
-import type { AnswerEntry } from "../making/firstChat.js";
+import type { AnswerEntry } from "../making/answerTypes.js";
 import {
   noMusicServiceText,
   stepWhyOf,

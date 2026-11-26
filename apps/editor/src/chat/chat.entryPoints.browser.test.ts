@@ -122,36 +122,14 @@ describe("the other places that talk to the chat", () => {
     await editor.close();
   });
 
-  it("sends a suggestion with a click", async () => {
+  it("shows no suggestion chips, also when a scene is picked", async () => {
     const editor = await openEditor(runningEngine().url);
-    const chat = chatOf(editor.page);
-    const suggestions = editor.page.getByRole("group", { name: "Suggestions" });
-    await expect
-      .poll(() => suggestions.getByRole("button").allInnerTexts())
-      .toEqual([
-        "Make it shorter",
-        "Change the voice",
-        "Add a scene about price",
-        "Make the opening stronger",
-      ]);
+    await chatOf(editor.page).box.waitFor();
+    const chips = editor.page.locator(".suggestions");
 
-    await suggestions.getByRole("button", { name: "Make it shorter" }).click();
-
-    await expect.poll(() => lastRequestText()).toBe("Make it shorter");
-    await expect
-      .poll(() => chat.entryTexts(2))
-      .toEqual(["You\nMake it shorter", "AI\nDone."]);
-    await editor.close();
-  });
-
-  it("sends a suggestion about the whole video, also when a scene is picked", async () => {
-    const editor = await openEditor(runningEngine().url);
+    expect(await chips.count()).toBe(0);
     await editor.page.locator(".card").first().click();
-    const suggestions = editor.page.getByRole("group", { name: "Suggestions" });
-
-    await suggestions.getByRole("button", { name: "Make it shorter" }).click();
-
-    await expect.poll(() => lastRequestText()).toBe("Make it shorter");
+    expect(await chips.count()).toBe(0);
     await editor.close();
   });
 });

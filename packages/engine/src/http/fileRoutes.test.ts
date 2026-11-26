@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { startedTestEngine } from "../testing/engineFixture.js";
@@ -108,5 +108,23 @@ describe("the asset file request", () => {
     });
 
     expect(missing.status).toBe(404);
+  });
+});
+
+describe("the render file request", () => {
+  it("serves the cut of a chapter from the chapters folder of the renders", async () => {
+    const { engine, projectFolder } = await startedTestEngine();
+    const folder = join(projectFolder, "renders", "chapters");
+    await mkdir(folder, { recursive: true });
+    await writeFile(join(folder, "film-wide.mp4"), "the cut of the film");
+
+    const cut = await rawRequest({
+      port: engine.port,
+      path: "/api/renders/chapters/film-wide.mp4",
+      headers: withToken(engine),
+    });
+
+    expect(cut.status).toBe(200);
+    expect(cut.bytes.toString()).toBe("the cut of the film");
   });
 });

@@ -165,7 +165,7 @@ describe("the changes in the chat", () => {
       await route.fulfill({ response });
       loads.answered += 1;
     });
-    await editor.page.goto(runningEngine().url);
+    await editor.page.goto(`${runningEngine().url}#edit`);
 
     await chat.ask("Make scene 2 longer.");
     await expect.poll(() => chat.stopButton.count()).toBe(0);

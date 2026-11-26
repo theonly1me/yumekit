@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { EngineClient } from "../../engine/engineClient.js";
 import { failureTextOf } from "../../tools/requestText.js";
+import type { FileUpload } from "./fileUpload.js";
 import {
   fileKindOf,
   notReadable,
@@ -39,10 +39,10 @@ function forget(files: PendingFile[]): void {
 }
 
 export function usePendingFiles(options: {
-  client: EngineClient;
+  upload: FileUpload;
   onText: (text: { name: string; text: string }) => string | undefined;
 }) {
-  const { client, onText } = options;
+  const { upload, onText } = options;
   const [items, setItems] = useState<PendingFile[]>([]);
   const current = useRef<PendingFile[]>([]);
   const setBoth = useCallback(
@@ -91,10 +91,7 @@ export function usePendingFiles(options: {
       return { assetId: file.state.assetId, name: file.file.name };
     }
     setState({ id: file.id, state: { kind: "adding" } });
-    const uploaded = await client.upload({
-      file: file.file,
-      actId: options.actId,
-    });
+    const uploaded = await upload({ file: file.file, actId: options.actId });
     if (!uploaded.ok) {
       const message = failureTextOf(uploaded.failure);
       setState({
@@ -103,7 +100,7 @@ export function usePendingFiles(options: {
       });
       return undefined;
     }
-    const assetId = uploaded.value.asset.id;
+    const assetId = uploaded.value;
     setState({ id: file.id, state: { kind: "added", assetId } });
     return { assetId, name: file.file.name };
   };

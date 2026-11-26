@@ -1,0 +1,128 @@
+.player-box {
+  display: grid;
+  gap: 10px;
+}
+
+.stage-box {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 4px;
+  background: var(--well);
+  box-shadow: 0 0 0 1px var(--line);
+}
+
+.stage-box img,
+.stage-box video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.stage-box[data-kind="picture"] {
+  cursor: crosshair;
+}
+
+.stage-box[data-sound="true"] {
+  aspect-ratio: 16 / 6;
+}
+
+.pin {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  margin: -11px 0 0 -11px;
+  border-radius: 50%;
+  background: var(--decline);
+  color: #fff;
+  border: 2px solid #fff;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 18px;
+  text-align: center;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.45);
+  pointer-events: none;
+}
+
+.player {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.player .play {
+  min-width: 64px;
+}
+
+.mark-moment {
+  border-color: var(--decline);
+  color: var(--decline);
+}
+
+.scrub {
+  position: relative;
+  display: grid;
+  align-items: center;
+}
+
+.scrub input[type="range"] {
+  width: 100%;
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+.moment-mark {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  width: 3px;
+  margin-left: -1px;
+  border-radius: 2px;
+  background: var(--decline);
+  pointer-events: none;
+}
+
+.time {
+  font-size: var(--step--2);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.large-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.tile-wave {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  padding: 10px;
+  text-align: center;
+  font-size: var(--step--1);
+  color: var(--accent);
+  background: repeating-linear-gradient(
+    90deg,
+    transparent 0 5px,
+    rgb(217 201 168 / 0.12) 5px 7px
+  );
+}
+
+.stage-box[data-sound="true"] audio {
+  display: none;
+}
+
+@media (max-width: 560px) {
+  .player {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .mark-moment {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+}
