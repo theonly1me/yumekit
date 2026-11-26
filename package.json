@@ -1,6 +1,6 @@
 {
   "name": "yumekit",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "The open source video harness for AI agents. Reels, explainers, trailers, and films with one story, one cast, and one look in every shot.",
   "license": "Apache-2.0",
