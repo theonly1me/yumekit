@@ -22,7 +22,16 @@ describe("the instructions for the work with the person", () => {
       "Then end your turn with one short line that gives the price of the next step. When the money left does not cover it, say so before the work, and offer fewer items.",
     );
     expect(brainInstructions).toContain(
-      "When the person sends notes, make again only the items with a note, in a new take. When a take comes back with no note, go on to the next step at once.",
+      "When the person sends a review, make again only the items that have mistakes, in a new take, and answer each item that the person is not sure about.",
+    );
+    expect(brainInstructions).toContain(
+      "When a take comes back with no change, go on to the next step at once.",
+    );
+  });
+
+  it("put each version that the person marks Looks right into the film as it is, and never undo it", () => {
+    expect(brainInstructions).toContain(
+      'Put each version that the person marks "Looks right" into the film as it is, because the person chose that version: remake nothing for its place, and never undo that choice.',
     );
   });
 });

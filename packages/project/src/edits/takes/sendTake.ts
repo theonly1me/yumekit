@@ -1,6 +1,7 @@
 import type { ProjectState } from "../../format/state.js";
 import type { Take, TakeItem } from "../../format/takes.js";
 import { succeed } from "../../outcome.js";
+import { unapprovedItemIdsOf } from "../../takes/verdicts.js";
 import type { EditOfKind } from "../edit.js";
 import { problem, type EditResult } from "../editFailure.js";
 import { takeOf, withTake } from "./roundTakes.js";
@@ -57,7 +58,7 @@ export function sendTake(options: {
       message: `A note names "${unknown.itemId}", which is not an item of take ${String(take.number)} or of an earlier take of its step.`,
     });
   }
-  const noted = new Set(edit.notes.map((note) => note.itemId));
+  const noted = unapprovedItemIdsOf(edit.notes);
   return succeed(
     withTake({
       state,

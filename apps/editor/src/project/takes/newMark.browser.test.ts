@@ -71,24 +71,20 @@ describe("the New mark of a take", () => {
       ],
     });
     const { page, close } = await openProject(runningEngine().url);
-    const tileOf = (caption: string) =>
-      page.locator(".tile", {
-        has: page.getByRole("button", { name: `Open ${caption}` }),
-      });
+    const rowOf = (caption: string) =>
+      page.getByRole("article", { name: caption });
 
-    await tileOf("The ferry in fog").waitFor();
+    await rowOf("The ferry in fog").waitFor();
     const newMarks = await Promise.all(
       ["The ferry in fog", "The harbor-2 in fog", "The lantern in fog"].map(
-        (caption) => tileOf(caption).locator(".tile-new").count(),
+        (caption) => rowOf(caption).locator(".badge.new").count(),
       ),
     );
-    await page.getByRole("button", { name: "Open The lantern in fog" }).click();
-    const badges = page
-      .getByRole("dialog", { name: /^Large view of / })
-      .locator(".large-badges");
 
     expect(newMarks).toEqual([1, 1, 0]);
-    await expect.poll(() => badges.innerText()).toBe("Made before this take");
+    expect(
+      await rowOf("The lantern in fog").locator(".review-badges").innerText(),
+    ).toContain("Made before this take");
     await close();
   });
 });

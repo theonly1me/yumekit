@@ -6,7 +6,7 @@ import {
 } from "../testing/takeHarness.js";
 
 describe("the person sends a take", { timeout: 60_000 }, () => {
-  it("gives the lead each note with its pin or moment, and the approved items", async () => {
+  it("gives the lead each item with its verdict, tags, words, pins, and moments", async () => {
     const harness = await startTakeHarness();
     await harness.call({ name: "open_take", arguments: { step: "pictures" } });
     await harness.call({
@@ -41,24 +41,44 @@ describe("the person sends a take", { timeout: 60_000 }, () => {
       notes: [
         {
           item_id: "harbor",
-          text: "Make the wall taller.",
+          text: "The wall is too low.",
+          tags: ["Wrong place"],
+        },
+        {
+          item_id: "harbor",
+          text: "Make it taller.",
           pin: { x: 0.25, y: 0.5 },
         },
-        { item_id: "theme", text: "The drum is too loud here.", seconds: 1.5 },
+        { item_id: "harbor", text: "", pin: { x: 0.6, y: 0.1 } },
+        { item_id: "theme", text: "Is the drum too loud?", question: true },
+        {
+          item_id: "theme",
+          text: "Here.",
+          seconds: 1.5,
+          question: true,
+        },
         { item_id: "lamp", text: "", dropped: true },
+        { item_id: "ferry", text: "Keep this light.", approved: true },
       ],
     });
 
     expect(sent.ok && sent.value.text).toBe(
-      "Take 1 of the pictures: 3 notes for the lead.",
+      "Take 1 of the pictures: 1 to change, 1 to leave out, and 1 question.",
     );
     expect(sent.ok && sent.value.details.split("\n")).toEqual([
-      'The person sent take 1 ("take-1", the pictures of chapter "film") with 3 notes:',
-      '1. The picture "harbor": "Make the wall taller." Pin at 25% from the left and 50% from the top.',
-      '2. The sound "theme": "The drum is too loud here." At 1.5 seconds.',
-      '3. The picture "lamp": Don\'t use this one.',
+      'The person sent take 1 ("take-1", the pictures of chapter "film"): 1 to change, 1 to leave out, and 1 question.',
+      '1. The picture "harbor": has mistakes. Tags: Wrong place. "The wall is too low."',
+      '   Pin 1 at 25% from the left and 50% from the top: "Make it taller."',
+      "   Pin 2 at 60% from the left and 10% from the top: no words",
+      '2. The sound "theme": the person is not sure. "Is the drum too loud?"',
+      '   At 1.5 seconds: "Here."',
+      '3. The picture "lamp": don\'t use this one.',
+      '4. The picture "ferry": looks right. "Keep this light."',
       'Approved, so keep them as they are: "ferry".',
-      "Make each item with a note again in a new take of the pictures: open_take, then ready_take with replaces_asset_id. Leave out each item that the person dropped. If a note is not clear, ask the person.",
+      "Make each item that has mistakes again in a new take of the pictures: open_take, then ready_take with replaces_asset_id. Start from the item and change only what the person asks for.",
+      "In that take, answer each item that the person is not sure about: name it again in ready_take with your answer in its note, or make it again with replaces_asset_id when the answer is a change.",
+      "Leave out each item that the person dropped.",
+      "If a note is not clear, ask the person.",
     ]);
   });
 
@@ -104,7 +124,7 @@ describe("the person sends a take", { timeout: 60_000 }, () => {
 
     expect(early.ok || early.failure.kind).toBe("take-not-ready");
     expect(work.text).toMatch(
-      /The person sent last: take 1 \("take-1", the pictures of chapter "film"\) at \S+, with 1 note\.\n1\. The picture "harbor": "More fog\."\nApproved: none\./,
+      /The person sent last: take 1 \("take-1", the pictures of chapter "film"\) at \S+: 1 to change\.\n1\. The picture "harbor": has mistakes\. "More fog\."\nApproved: none\./,
     );
     expect(work.text).toContain("Open take: none.");
   });

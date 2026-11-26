@@ -1,0 +1,70 @@
+.take-filters {
+  position: sticky;
+  top: -18px;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 20px;
+  margin: 0;
+  padding: 12px 0;
+  background: var(--ground);
+  border-bottom: 1px solid var(--line);
+}
+
+.review-progress {
+  font-size: var(--step--1);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.review-progress strong {
+  font-size: var(--step-1);
+  font-weight: 500;
+  color: var(--text);
+}
+
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+
+button.filter-chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 5px 12px;
+}
+
+button.filter-chip[aria-pressed="true"] {
+  background: var(--solid);
+  border-color: var(--solid);
+  color: var(--on-solid);
+}
+
+.filter-count {
+  font-size: var(--step--2);
+  font-variant-numeric: tabular-nums;
+  opacity: 0.7;
+}
+
+@media (max-width: 820px) {
+  .take-filters {
+    top: 0;
+  }
+}
+
+@media (max-width: 560px) {
+  .filter-chips {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    width: 100%;
+  }
+
+  button.filter-chip {
+    flex: none;
+  }
+}

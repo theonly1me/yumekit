@@ -8,6 +8,7 @@ export {
 export type { WorkItem, WorkState } from "./work/board/workBoard.js";
 export {
   takeNoteInput,
+  takeNoteOf,
   type SendTakeFailure,
   type SentTake,
   type TakeNoteInput,

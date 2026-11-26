@@ -18,6 +18,7 @@ import { renderStorySheet } from "./storySheet.js";
 import { renderTakesSheet } from "./takes.js";
 import { seedAdvanced } from "./takesSeed.js";
 import { makingTake, waitingForPerson } from "./takesStore.js";
+import { setTheme, storedTheme } from "./theme.js";
 
 const element = (id) => document.getElementById(id);
 const sheets = {
@@ -34,25 +35,6 @@ const sheets = {
 };
 const partSheets = new Set(["script", "pictures", "voice", "music"]);
 const shown = { screen: undefined, sheet: undefined };
-
-function storedTheme() {
-  try {
-    return localStorage.getItem("yumekit-design-theme") ?? "dark";
-  } catch {
-    return "dark";
-  }
-}
-
-function setTheme(theme) {
-  document.documentElement.dataset.theme = theme;
-  element("theme").textContent =
-    theme === "dark" ? "Show the light version" : "Show the dark version";
-  try {
-    localStorage.setItem("yumekit-design-theme", theme);
-  } catch {
-    return;
-  }
-}
 
 function renderSheet() {
   const sheet = element("sheet");

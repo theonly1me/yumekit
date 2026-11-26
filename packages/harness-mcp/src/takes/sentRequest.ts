@@ -1,16 +1,16 @@
 import {
   chaptersOf,
+  reviewCountTextOf,
+  reviewCountsOf,
+  reviewTotalOf,
   takeStepNames,
   takeTitleOf,
   type ProjectSnapshot,
+  type ReviewCounts,
   type Take,
 } from "@yumekit/project";
-import {
-  approvedIdsOf,
-  countOf,
-  noteLineOf,
-  takeNameOf,
-} from "./takeNoteText.js";
+import { pickLinesOf } from "./personPicks.js";
+import { approvedIdsOf, reviewLinesOf, takeNameOf } from "./takeNoteText.js";
 
 export interface SentRequest {
   text: string;
@@ -55,6 +55,36 @@ function estimateLine(take: Take): string[] {
       ];
 }
 
+function remakeLinesOf(options: {
+  take: Take;
+  counts: ReviewCounts;
+}): string[] {
+  const { counts } = options;
+  const step = takeStepNames[options.take.step];
+  const remake =
+    counts.change === 0
+      ? []
+      : [
+          `Make each item that has mistakes again in a new take of ${step}: open_take, then ready_take with replaces_asset_id. Start from the item and change only what the person asks for.`,
+        ];
+  const answer =
+    counts.question === 0
+      ? []
+      : [
+          `${counts.change === 0 ? `Open a new take of ${step} to answer` : "In that take, answer"} each item that the person is not sure about: name it again in ready_take with your answer in its note, or make it again with replaces_asset_id when the answer is a change.`,
+        ];
+  const leave =
+    counts.dropped === 0
+      ? []
+      : ["Leave out each item that the person dropped."];
+  return [
+    ...remake,
+    ...answer,
+    ...leave,
+    "If a note is not clear, ask the person.",
+  ];
+}
+
 export function sentRequestOf(options: {
   snapshot: ProjectSnapshot;
   take: Take;
@@ -66,29 +96,44 @@ export function sentRequestOf(options: {
     take,
     chapters: chaptersOf(snapshot.bible.storyPlan),
   });
-  if (take.notes.length === 0) {
+  const counts = reviewCountsOf(take.notes);
+  const lines = reviewLinesOf(options);
+  const picks = pickLinesOf(options);
+  const pickLines =
+    picks.length === 0
+      ? []
+      : [
+          'The person marked these "Looks right" over their other versions. Put each into the film as it is, remake nothing for its place, and never undo that choice:',
+          ...picks,
+        ];
+  if (reviewTotalOf(counts) === 0) {
     return {
       text: `${title}: all good. Go on.`,
       details: [
-        `The person sent ${name} with no notes, so each item is approved: ${quoted(approved)}.`,
+        `The person sent ${name} with no change, so each item is approved: ${quoted(approved)}.`,
+        ...(lines.length === 0
+          ? []
+          : [
+              "The person's words on approved items, to keep in mind:",
+              ...lines,
+            ]),
+        ...pickLines,
         nextStepOf(options),
         ...estimateLine(take),
       ].join("\n"),
     };
   }
-  const notes = countOf({ count: take.notes.length, word: "note" });
+  const summary = reviewCountTextOf(counts);
   return {
-    text: `${title}: ${notes} for the lead.`,
+    text: `${title}: ${summary}.`,
     details: [
-      `The person sent ${name} with ${notes}:`,
-      ...take.notes.map(
-        (...[note, index]) =>
-          `${String(index + 1)}. ${noteLineOf({ snapshot, take, note })}`,
-      ),
+      `The person sent ${name}: ${summary}.`,
+      ...lines,
       approved.length === 0
         ? "No item of the take is approved."
         : `Approved, so keep them as they are: ${quoted(approved)}.`,
-      `Make each item with a note again in a new take of ${takeStepNames[take.step]}: open_take, then ready_take with replaces_asset_id. Leave out each item that the person dropped. If a note is not clear, ask the person.`,
+      ...pickLines,
+      ...remakeLinesOf({ take, counts }),
     ].join("\n"),
   };
 }

@@ -6,6 +6,7 @@ import { nextActionOf } from "./nextAction.js";
 function actionOf(options: {
   state: WorkState;
   noteCount?: number;
+  countText?: string;
   isStoryApproved?: boolean;
   hasNextChapter?: boolean;
   money?: { leftUsd: number; limitUsd: number };
@@ -13,6 +14,7 @@ function actionOf(options: {
   return nextActionOf({
     money: undefined,
     noteCount: 0,
+    countText: "",
     latestTakeId: undefined,
     isStoryApproved: false,
     hasNextChapter: false,
@@ -29,13 +31,17 @@ const pictures = takeOf({
 });
 
 describe("the one next action", () => {
-  it("sends the notes of a take, with their count", () => {
+  it("sends the review of a take, and counts it by verdict", () => {
     expect(
-      actionOf({ state: { kind: "take", take: pictures }, noteCount: 2 }),
+      actionOf({
+        state: { kind: "take", take: pictures },
+        noteCount: 3,
+        countText: "2 to change and 1 question",
+      }),
     ).toEqual({
-      line: "Mark only what needs a change. Everything else counts as approved. This take cost $0.18.",
+      line: "2 to change and 1 question. Everything else counts as approved. This take cost $0.18.",
       buttons: [
-        { id: "send", label: "Send 2 notes to the lead", isPrimary: true },
+        { id: "send", label: "Send the review to the lead", isPrimary: true },
       ],
     });
   });
@@ -106,7 +112,8 @@ describe("the one next action", () => {
         state: { kind: "take", take: clips },
         money: short,
         noteCount: 1,
+        countText: "1 to change",
       }).buttons.map((button) => button.label),
-    ).toEqual(["Send 1 note to the lead"]);
+    ).toEqual(["Send the review to the lead"]);
   });
 });

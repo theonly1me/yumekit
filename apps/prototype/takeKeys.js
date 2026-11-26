@@ -1,6 +1,5 @@
 import { state } from "./state.js";
-import { closeLarge, stepItem } from "./takeLarge.js";
-import { frameSeconds, playerOf, seek, togglePlay } from "./takeMedia.js";
+import { closeLarge } from "./takeLarge.js";
 import {
   changeView,
   itemOf,
@@ -35,22 +34,7 @@ function answer({ item, verdict }) {
 }
 
 function onLargeKey(event) {
-  const item = itemOf(takes.view.openItemId);
-  const keys = {
-    Escape: closeLarge,
-    ArrowRight: () => stepItem(1),
-    ArrowLeft: () => stepItem(-1),
-    a: () => answer({ item, verdict: "approved" }),
-    d: () => answer({ item, verdict: "declined" }),
-    c: () => {
-      takes.view.focusId = `large-note-${item.id}`;
-      changeView({ commentingId: item.id });
-    },
-    " ": () => item.kind !== "picture" && togglePlay(item),
-    ",": () => seek({ item, seconds: playerOf(item).seconds - frameSeconds }),
-    ".": () => seek({ item, seconds: playerOf(item).seconds + frameSeconds }),
-  };
-  return keys[event.key];
+  return event.key === "Escape" ? closeLarge : undefined;
 }
 
 function onGridKey(event) {

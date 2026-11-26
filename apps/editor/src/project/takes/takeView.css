@@ -1,15 +1,18 @@
 :root {
   --approve: #9cc79a;
   --decline: #e8907c;
+  --question: #9db8e0;
 }
 
 :root[data-theme="light"] {
   --approve: #2f7a3e;
   --decline: #b3412f;
+  --question: #2f5f9e;
 }
 
 .take-view {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 26px;
 }
 
@@ -81,16 +84,57 @@
   color: var(--text);
 }
 
-.simple-actions {
+.take-filters {
+  position: sticky;
+  top: -18px;
+  z-index: 2;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px 16px;
+  justify-content: space-between;
+  gap: 10px 20px;
+  margin: 0;
+  padding: 12px 0;
+  background: var(--ground);
+  border-bottom: 1px solid var(--line);
 }
 
-.simple-actions [aria-pressed="true"] {
-  border-color: var(--decline);
-  color: var(--decline);
+.review-progress {
+  font-size: var(--step--1);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.review-progress strong {
+  font-size: var(--step-1);
+  font-weight: 500;
+  color: var(--text);
+}
+
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+
+button.filter-chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 5px 12px;
+}
+
+button.filter-chip[aria-pressed="true"] {
+  background: var(--solid);
+  border-color: var(--solid);
+  color: var(--on-solid);
+}
+
+.filter-count {
+  font-size: var(--step--2);
+  font-variant-numeric: tabular-nums;
+  opacity: 0.7;
 }
 
 @keyframes travel {
@@ -103,22 +147,30 @@
   }
 }
 
+@media (max-width: 820px) {
+  .take-filters {
+    top: 0;
+  }
+}
+
 @media (max-width: 560px) {
   .take-slate-head {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .contact-sheet {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .filter-chips {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    width: 100%;
+    padding-bottom: 2px;
+  }
+
+  button.filter-chip {
+    flex: none;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tile-picture img,
-  .tile-picture video {
-    transition: none;
-  }
-
   .progress[data-moving="true"] i {
     animation: none;
   }

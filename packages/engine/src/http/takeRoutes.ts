@@ -1,6 +1,11 @@
-import { takeNoteInput } from "@yumekit/harness-mcp";
-import { approvePicturesFirstOf, chaptersOf } from "@yumekit/project";
+import { takeNoteInput, takeNoteOf } from "@yumekit/harness-mcp";
+import {
+  approvePicturesFirstOf,
+  chaptersOf,
+  reviewCountsOf,
+} from "@yumekit/project";
 import { z } from "zod";
+import { removeTakeDraft } from "../takeDrafts/takeDraftFile.js";
 import { isAgentCall } from "./chatRoutes.js";
 import { anySegment, type Exchange, type Route } from "./exchange.js";
 import { readJsonBody } from "./readJsonBody.js";
@@ -54,7 +59,7 @@ async function sendTake(exchange: Exchange): Promise<Failure | undefined> {
       summary: sendSummaryOf({
         take: context.store.read().takes.find((take) => take.id === takeId),
         storyPlan,
-        notes: notes.length,
+        counts: reviewCountsOf(notes.map(takeNoteOf)),
         next,
       }),
     },
@@ -64,6 +69,10 @@ async function sendTake(exchange: Exchange): Promise<Failure | undefined> {
     const { kind, message } = sent.failure;
     return { status: kind === "take-not-found" ? 404 : 409, kind, message };
   }
+  await removeTakeDraft({
+    projectFolder: context.projectFolder,
+    draftId: takeId,
+  });
   if (next === "stop") {
     sendJson({
       response: exchange.response,

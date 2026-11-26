@@ -1,6 +1,15 @@
-import { notesLabelOf } from "../takes/notes/draftNotes.js";
-import type { Take, TakeStep } from "../takes/takeTypes.js";
+import { reviewCountsOf, reviewTotalOf } from "@yumekit/project/takes";
+import type { Take } from "../takes/takeTypes.js";
 import type { WorkState } from "../work/workState.js";
+import {
+  allGoodLabelOf,
+  costLineOf,
+  markHint,
+  moneyOf,
+  notesLabelOf,
+  sendReviewLabel,
+  upperFirst,
+} from "./footWords.js";
 import { moneyActionOf, type MoneyLeft } from "./moneyAction.js";
 
 export type ActionId =
@@ -26,37 +35,14 @@ export interface NextAction {
   buttons: FootButton[];
 }
 
-export const markHint =
-  "Mark only what needs a change. Everything else counts as approved.";
-
-const nextStepNames: Record<TakeStep, string> = {
-  story: "Make the pictures",
-  pictures: "Make the clips",
-  clips: "Make the cut",
-  cut: "Approve the cut",
-};
-
-export function moneyOf(dollars: number): string {
-  return `$${dollars.toFixed(2)}`;
-}
-
 function primary(options: { id: ActionId; label: string }): FootButton {
   return { ...options, isPrimary: true };
-}
-
-function allGoodLabelOf(take: Take): string {
-  const estimate = take.nextStepEstimateUsd ?? 0;
-  const price = estimate > 0 ? `, about ${moneyOf(estimate)}` : "";
-  return `All good. ${nextStepNames[take.step]}${price}`;
-}
-
-function costLineOf(takeCost: number): string {
-  return takeCost > 0 ? ` This take cost ${moneyOf(takeCost)}.` : "";
 }
 
 function takeActionOf(options: {
   take: Take;
   noteCount: number;
+  countText: string;
   latestTakeId: string | undefined;
   takeCost: number;
 }): NextAction {
@@ -66,18 +52,27 @@ function takeActionOf(options: {
       options.latestTakeId === undefined || options.latestTakeId === take.id;
     return {
       line:
-        take.notes.length === 0
+        reviewTotalOf(reviewCountsOf(take.notes)) === 0
           ? "You approved this take."
-          : "Your notes on this take went to the lead.",
+          : "Your review of this take went to the lead.",
       buttons: isLatest
         ? []
         : [primary({ id: "open-latest", label: "Open the latest take" })],
     };
   }
-  const label = noteCount > 0 ? notesLabelOf(noteCount) : allGoodLabelOf(take);
+  if (noteCount === 0) {
+    const line =
+      options.countText === ""
+        ? markHint
+        : `${upperFirst(options.countText)}. Everything else counts as approved.`;
+    return {
+      line: `${line}${costLineOf(options.takeCost)}`,
+      buttons: [primary({ id: "send", label: allGoodLabelOf(take) })],
+    };
+  }
   return {
-    line: `${markHint}${costLineOf(options.takeCost)}`,
-    buttons: [primary({ id: "send", label })],
+    line: `${upperFirst(options.countText)}. Everything else counts as approved.${costLineOf(options.takeCost)}`,
+    buttons: [primary({ id: "send", label: sendReviewLabel })],
   };
 }
 
@@ -115,6 +110,7 @@ function storyActionOf(options: {
 function filmActionOf(options: {
   take: Take | undefined;
   noteCount: number;
+  countText: string;
   hasNextChapter: boolean;
 }): NextAction {
   const { take } = options;
@@ -125,18 +121,16 @@ function filmActionOf(options: {
   if (take.state === "ready") {
     return options.noteCount > 0
       ? {
-          line: markHint,
-          buttons: [
-            primary({ id: "send", label: notesLabelOf(options.noteCount) }),
-          ],
+          line: `${upperFirst(options.countText)}.`,
+          buttons: [primary({ id: "send", label: sendReviewLabel })],
         }
       : {
           line: "Watch it once at full speed.",
           buttons: [primary({ id: "send", label: "Approve the cut" })],
         };
   }
-  if (take.notes.length > 0) {
-    return { line: "Your notes on the cut went to the lead.", buttons: [] };
+  if (reviewTotalOf(reviewCountsOf(take.notes)) > 0) {
+    return { line: "Your review of the cut went to the lead.", buttons: [] };
   }
   return options.hasNextChapter
     ? {
@@ -155,6 +149,7 @@ function filmActionOf(options: {
 export function nextActionOf(options: {
   state: WorkState;
   noteCount: number;
+  countText: string;
   latestTakeId: string | undefined;
   isStoryApproved: boolean;
   hasNextChapter: boolean;

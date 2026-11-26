@@ -97,6 +97,9 @@ export function startTake({ chapterId, step, makeItems }) {
 }
 
 export function needsNotes(item) {
+  if (["change", "question"].includes(item.review?.verdict)) {
+    return true;
+  }
   if (item.section === "music" && item.comments.length === 0) {
     return false;
   }

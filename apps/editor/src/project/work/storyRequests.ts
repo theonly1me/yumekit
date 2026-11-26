@@ -1,5 +1,5 @@
 import type { AskInput } from "../../chat/chatRequests.js";
-import type { SentNote } from "../takes/notes/draftNotes.js";
+import type { SentNote } from "../takes/review/sentNotes.js";
 
 export const storyYesText =
   "I approve the story. Save my yes to it, then go on to the next step.";

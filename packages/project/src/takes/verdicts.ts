@@ -1,6 +1,50 @@
-import { cutItemId, storyItemId, type Take } from "../format/takes.js";
+import {
+  cutItemId,
+  storyItemId,
+  type Take,
+  type TakeNote,
+} from "../format/takes.js";
 
-export type AssetVerdict = "approved" | "change" | "dropped";
+export type AssetVerdict = "approved" | "change" | "question" | "dropped";
+
+const verdictWeights: Record<AssetVerdict, number> = {
+  approved: 0,
+  question: 1,
+  change: 2,
+  dropped: 3,
+};
+
+export function noteVerdictOf(note: TakeNote): AssetVerdict {
+  if (note.dropped === true) return "dropped";
+  if (note.question === true) return "question";
+  if (note.approved === true) return "approved";
+  return "change";
+}
+
+export function noteVerdictsOf(
+  notes: readonly TakeNote[],
+): Map<string, AssetVerdict> {
+  const verdicts = new Map<string, AssetVerdict>();
+  for (const note of notes) {
+    const verdict = noteVerdictOf(note);
+    const before = verdicts.get(note.itemId);
+    if (
+      before === undefined ||
+      verdictWeights[verdict] > verdictWeights[before]
+    ) {
+      verdicts.set(note.itemId, verdict);
+    }
+  }
+  return verdicts;
+}
+
+export function unapprovedItemIdsOf(notes: readonly TakeNote[]): Set<string> {
+  return new Set(
+    [...noteVerdictsOf(notes)]
+      .filter(([, verdict]) => verdict !== "approved")
+      .map(([itemId]) => itemId),
+  );
+}
 
 export function openTakeOf(takes: readonly Take[]): Take | undefined {
   return takes.find((take) => take.state === "open");
@@ -51,12 +95,9 @@ export function assetDecisionsOf(
         decisions.set(item.id, { verdict: "approved", take });
       }
     }
-    for (const note of take.notes) {
-      if (isNoteOnAsset({ take, itemId: note.itemId })) {
-        decisions.set(note.itemId, {
-          verdict: note.dropped === true ? "dropped" : "change",
-          take,
-        });
+    for (const [itemId, verdict] of noteVerdictsOf(take.notes)) {
+      if (isNoteOnAsset({ take, itemId })) {
+        decisions.set(itemId, { verdict, take });
       }
     }
   }

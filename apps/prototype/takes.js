@@ -1,11 +1,11 @@
 import { startChapterPictures } from "./chapterWork.js";
 import { escapeText } from "./state.js";
-import { bindItem, cardMarkup } from "./takeCard.js";
+import { bindRows, rowMarkup } from "./takeRows.js";
 import { bindFooter, footerMarkup } from "./takeFooter.js";
 import { emptyMarkup, headMarkup, sections, visibleItems } from "./takeHead.js";
 import { bindTakeKeys } from "./takeKeys.js";
 import { bindLarge, largeMarkup } from "./takeLarge.js";
-import { changeView, itemOf, shownTake, takes } from "./takesStore.js";
+import { changeView, shownTake, takes } from "./takesStore.js";
 
 function groupsMarkup({ items, take }) {
   const groups = [];
@@ -20,7 +20,7 @@ function groupsMarkup({ items, take }) {
   return groups
     .map(
       (group) =>
-        `${group.name === undefined ? "" : `<h4 class="group-name">${escapeText(group.name)}</h4>`}<div class="take-grid">${group.items.map((item) => cardMarkup({ item, take })).join("")}</div>`,
+        `${group.name === undefined ? "" : `<h4 class="group-name">${escapeText(group.name)}</h4>`}<div class="take-rows">${group.items.map((item) => rowMarkup({ item, take })).join("")}</div>`,
     )
     .join("");
 }
@@ -91,13 +91,7 @@ export function renderTakesSheet({ element }) {
         ${footerMarkup(take)}
         ${largeMarkup(take)}
       </div>`;
-    element.querySelectorAll(".take-card").forEach((card) => {
-      bindItem({
-        element: card,
-        item: itemOf(card.dataset.item),
-        scope: "card",
-      });
-    });
+    bindRows({ element, restoreFocus: false });
     bindFooter({ element, take });
     bindLarge({ element, take });
   }

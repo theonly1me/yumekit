@@ -42,8 +42,23 @@ function hintOf(options: {
   }
   const changed = waiting.filter((id) => verdicts.get(id) === "change");
   const dropped = waiting.filter((id) => verdicts.get(id) === "dropped");
-  if (changed.length > 0 || dropped.length > 0) {
-    return `${changed.length === 0 ? "" : `The person asked for a change of ${quoted(changed)}: make it again in a new take of pictures. `}${dropped.length === 0 ? "" : `The person dropped ${quoted(dropped)}: use another picture.`}`.trim();
+  const unsure = waiting.filter((id) => verdicts.get(id) === "question");
+  if (changed.length > 0 || dropped.length > 0 || unsure.length > 0) {
+    return [
+      ...(changed.length === 0
+        ? []
+        : [
+            `The person asked for a change of ${quoted(changed)}: make it again in a new take of pictures.`,
+          ]),
+      ...(dropped.length === 0
+        ? []
+        : [`The person dropped ${quoted(dropped)}: use another picture.`]),
+      ...(unsure.length === 0
+        ? []
+        : [
+            `The person is not sure about ${quoted(unsure)}: answer in a new take of pictures that names it again.`,
+          ]),
+    ].join(" ");
   }
   return "Open a take of pictures with open_take, give the pictures to the person with ready_take (name an earlier picture in items), and end your turn. Only the person can turn this off, in Settings.";
 }
@@ -92,11 +107,22 @@ function messageOf(options: {
       ? [`The person dropped "${assetId}" in ${take}.`]
       : [`The person asked for a change of "${assetId}" in ${take}.`];
   });
+  const unsure = waiting.flatMap((assetId) => {
+    const decision = decisions.get(assetId);
+    return decision?.verdict === "question"
+      ? [
+          `The person is not sure about "${assetId}" in take ${String(decision.take.number)}.`,
+        ]
+      : [];
+  });
   const unapproved = waiting.filter(
-    (assetId) => !isRefusal(decisions.get(assetId)),
+    (assetId) =>
+      !isRefusal(decisions.get(assetId)) &&
+      decisions.get(assetId)?.verdict !== "question",
   );
   return [
     ...verdicts,
+    ...unsure,
     ...(unapproved.length === 0
       ? []
       : [`The person has not approved ${quoted(unapproved)} in a take.`]),

@@ -9,14 +9,14 @@ import {
   takes,
   takesOf,
 } from "./takesStore.js";
+import { isUsedNow, verdictOf } from "./takeReview.js";
 
 const filters = [
   ["all", "All", () => true],
-  ["new", "New", ({ item, take }) => item.take === take.number],
-  ["waiting", "Waiting for me", ({ item }) => item.verdict === "waiting"],
-  ["approved", "Approved", ({ item }) => item.verdict === "approved"],
-  ["declined", "Declined", ({ item }) => item.verdict === "declined"],
-  ["comments", "With comments", ({ item }) => item.comments.length > 0],
+  ["open", "Not reviewed", ({ item }) => verdictOf(item) === undefined],
+  ["mistakes", "Has mistakes", ({ item }) => verdictOf(item) === "change"],
+  ["in-use", "In use", ({ item }) => isUsedNow(item)],
+  ["new", "New in this take", ({ item, take }) => item.take === take.number],
 ];
 
 export const sections = [
