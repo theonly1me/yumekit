@@ -6,26 +6,7 @@ The open source video harness for AI agents.
 
 https://github.com/user-attachments/assets/16d412da-7d59-4053-bff8-73b35345bfd0
 
-This trailer was made with yumekit. Its new pictures, clips, and music cost $2.07, and it reuses shots of _Unwritten_. It is also on [YouTube](https://www.youtube.com/watch?v=3fW_o0VGqNc).
-
-## Made with yumekit: Unwritten
-
-[![Unwritten, an anime trailer made with yumekit](https://img.youtube.com/vi/Libmx_5CuEk/maxresdefault.jpg)](https://www.youtube.com/watch?v=Libmx_5CuEk)
-
-_Unwritten_ is a 56 second anime trailer. It started as a rough story. The lead agent wrote the whole story and the script, designed the cast, planned the shots, and cut the trailer. A person approved each step. [Watch it on YouTube](https://www.youtube.com/watch?v=Libmx_5CuEk).
-
-### What Unwritten cost
-
-| Part                                                              | Made with                             | Made     | In the trailer | Cost                   |
-| ----------------------------------------------------------------- | ------------------------------------- | -------- | -------------- | ---------------------- |
-| Story, script, shot plan, and edit                                | Claude Code as the lead agent         |          |                | Part of a Claude plan  |
-| Pictures: character sheets, costumes, places, props, first frames | Codex, signed in with ChatGPT         | 69       |                | Part of a ChatGPT plan |
-| Video clips of 3 and 4 seconds at 720p                            | Gemini Omni 1.2 Flash, $0.07 a second | 21 clips | 13 clips       | $4.59                  |
-| Music                                                             | Lyria 3.5, $0.08 a track              | 3 tracks | 1 track        | $0.24                  |
-| Title cards, edit, and render                                     | yumekit, on your computer             |          |                | $0                     |
-| **Total**                                                         |                                       |          |                | **$4.83**              |
-
-The clips and the music in the final cut cost $2.93. The other $1.90 went on retakes and on two music tracks that were not picked. The costs are the list prices of the models.
+This trailer was made with yumekit. Its new pictures, clips, and music cost $2.07, and it reuses shots of [_Unwritten_](#made-with-yumekit-unwritten). It is also on [YouTube](https://www.youtube.com/watch?v=3fW_o0VGqNc).
 
 ## How it works
 
@@ -167,6 +148,25 @@ flowchart LR
 - **A project is a folder of plain files.** It works with git.
 - **The render is our own open stack.** Headless Chromium and FFmpeg draw each frame, so each frame stays editable.
 - **One way to change a project.** The agent and the person use the same edit operations.
+
+## Made with yumekit: Unwritten
+
+[![Unwritten, an anime trailer made with yumekit](https://raw.githubusercontent.com/theonly1me/yumekit/main/docs/media/unwritten-eyes.jpg)](https://www.youtube.com/watch?v=Libmx_5CuEk)
+
+_Unwritten_ is a 56 second anime trailer. It started as a rough story. The lead agent wrote the whole story and the script, designed the cast, planned the shots, and cut the trailer. A person approved each step. [Watch it on YouTube](https://www.youtube.com/watch?v=Libmx_5CuEk).
+
+### What Unwritten cost
+
+| Part                                                              | Made with                             | Made     | In the trailer | Cost                   |
+| ----------------------------------------------------------------- | ------------------------------------- | -------- | -------------- | ---------------------- |
+| Story, script, shot plan, and edit                                | Claude Code as the lead agent         |          |                | Part of a Claude plan  |
+| Pictures: character sheets, costumes, places, props, first frames | Codex, signed in with ChatGPT         | 69       |                | Part of a ChatGPT plan |
+| Video clips of 3 and 4 seconds at 720p                            | Gemini Omni 1.2 Flash, $0.07 a second | 21 clips | 13 clips       | $4.59                  |
+| Music                                                             | Lyria 3.5, $0.08 a track              | 3 tracks | 1 track        | $0.24                  |
+| Title cards, edit, and render                                     | yumekit, on your computer             |          |                | $0                     |
+| **Total**                                                         |                                       |          |                | **$4.83**              |
+
+The clips and the music in the final cut cost $2.93. The other $1.90 went on retakes and on two music tracks that were not picked. The costs are the list prices of the models.
 
 ## Design and code
 
