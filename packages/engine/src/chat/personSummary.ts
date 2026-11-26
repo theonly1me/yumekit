@@ -2,6 +2,7 @@ import { personSentenceOf } from "@yumekit/brain";
 import { scenesRowOf, type ProjectSnapshot } from "@yumekit/project";
 import { addedSoundSentenceOf } from "./addedSound.js";
 import { chapterSentenceOf } from "./chapterSummary.js";
+import { settingSentenceOf } from "./settingSentences.js";
 
 type SceneReference = { sceneId: string } | { clipId: string };
 
@@ -66,6 +67,8 @@ export function personSummaryOf(options: {
   if (addedSound !== undefined) return addedSound;
   const chapters = chapterSentenceOf(options);
   if (chapters !== undefined) return chapters;
+  const setting = settingSentenceOf(options);
+  if (setting !== undefined) return setting;
   const sentence = sceneSentences[options.tool];
   const reference = referenceOf(options);
   const number =
