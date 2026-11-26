@@ -80,7 +80,7 @@ export const setStoryInput = {
     .enum(storyApprovals)
     .optional()
     .describe(
-      "Leave it out on the first write, then end the turn and ask the person. person-said-yes after the person said yes to this story. request-said-go-ahead only when the request says in words to go ahead without asking, for example 'just make it, don't ask me'. A request to make a film is not a yes to its story.",
+      "Leave it out on the first write, and give the story to the person in a take: a yes in the take saves person-said-yes. person-said-yes after the person said yes to this story in the chat. request-said-go-ahead only when the request says in words to go ahead without asking, for example 'just make it, don't ask me'. A request to make a film is not a yes to its story.",
     ),
 };
 

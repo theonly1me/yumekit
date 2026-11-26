@@ -42,6 +42,23 @@ describe("tool descriptions say what the first agent run could not learn", () =>
     expect(imagePan).toContain("It is not the narration caption");
   });
 
+  it("set_story_plan says that the critic of the plan is a second look that no picture or clip waits for", async () => {
+    const description = (await descriptionsByName()).get("set_story_plan");
+
+    expect(description).toContain(
+      "review_plan is a second look of the critic when the person asks for one: its faults are notes, and no picture or clip waits for it.",
+    );
+    expect(description).not.toContain("before the critic passes the plan");
+  });
+
+  it("set_story gives the story to the person in a take", async () => {
+    const description = (await descriptionsByName()).get("set_story");
+
+    expect(description).toContain(
+      'open_take with step story, this call, then ready_take with the item "story", and end the turn',
+    );
+  });
+
   it("update_clip offers scene_id and asset_id", async () => {
     const harness = await startHarness();
     const { tools } = await harness.client.listTools();

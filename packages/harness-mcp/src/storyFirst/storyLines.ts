@@ -9,7 +9,7 @@ const approvalLines = {
 } as const;
 
 export const storyNotApprovedLine =
-  "The person has not said yes to this story yet. End the turn now: show it to the person in plain words (the premise, the hero, what stands against them and why, the arc, and what stays unknown), ask for a yes or changes, and make nothing else until the answer. When the person says yes, call set_story again with approval person-said-yes. A request to make a film is not a yes to its story: give approval request-said-go-ahead only when the request says in words to go ahead without asking.";
+  'The person has not said yes to this story yet. Give it to the person in a take of the story: ready_take with the item "story" (open_take with step story first, when no take of the story is open). Then end the turn, and make nothing else until the answer. A yes in the take saves the yes. When the person says yes in the chat, call set_story again with approval person-said-yes. A request to make a film is not a yes to its story: give approval request-said-go-ahead only when the request says in words to go ahead without asking.';
 
 export function approvalLineOf(story: Story): string {
   return story.approval === undefined

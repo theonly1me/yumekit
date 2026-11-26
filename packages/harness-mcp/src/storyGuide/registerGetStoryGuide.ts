@@ -7,6 +7,7 @@ import {
 } from "./storyGuideCraft.js";
 import { designSection } from "./storyGuideDesign.js";
 import { exampleSection } from "./storyGuideExamples.js";
+import { flowSection } from "./storyGuideFlow.js";
 import {
   formSection,
   storyFirstSection,
@@ -20,7 +21,6 @@ import {
 } from "./storyGuideFirstCut.js";
 import {
   barSection,
-  orderSection,
   pictureSection,
   planSection,
   reviewSection,
@@ -30,12 +30,12 @@ import {
 
 export const storyGuide = [
   barSection,
+  flowSection,
   storyFirstSection,
   formSection,
   storyWordsSection,
   cardsSection,
   firstCutSection,
-  orderSection,
   planSection,
   spaceSection,
   fightSection,
@@ -55,7 +55,7 @@ export function registerGetStoryGuide(context: HarnessContext): void {
   context.tools.add({
     name: "get_story_guide",
     description:
-      "Read the director's guide for a film with AI video or a story: story first (the whole story before the shots, and why), the form of the film and the parts of a trailer, words on screen that come from the story, cards between the shots on the hits of the music, a worked trailer built from its story, the story plan, space across a cut, staging a fight, the sheets of the cast, one design in every frame (looks, the kit of a character, key pictures, the design check), how to write a start picture and a video prompt with natural motion, the four batches, the known limits of the models, the one hard check, the review by the critic, the music prompt, the end card, and the faults of an earlier film with their corrected prompts. Call it before set_story and set_story_plan.",
+      "Read the director's guide for a film with AI video or a story: the work with the person in takes (questions in rounds with ask_person, the story, chapters, and a take of the pictures, the clips, and the cut of each chapter, with honest notes and what to check), story first (the whole story before the shots, and why), the form of the film and the parts of a trailer, words on screen that come from the story, cards between the shots on the hits of the music, a worked trailer built from its story, the story plan, space across a cut, staging a fight, the sheets of the cast, one design in every frame (looks, the kit of a character, key pictures, the design check), how to write a start picture and a video prompt with natural motion, the known limits of the models, the one hard check, the review by the critic, the music prompt, the end card, and the faults of an earlier film with their corrected prompts. Call it first, before the questions and set_story.",
     inputSchema: {},
     annotations: { readOnlyHint: true },
     run: () => {

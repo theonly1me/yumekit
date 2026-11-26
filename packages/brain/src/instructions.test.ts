@@ -2,9 +2,12 @@ import { describe, expect, it } from "vitest";
 import { brainInstructions, instructionsOf } from "./index.js";
 
 describe("the instructions for the agent", () => {
-  it("leave the export to the person and check the work with preview pictures", () => {
+  it("leave the export to the person, render only the cut of a chapter for its take, and check the work with preview pictures", () => {
     expect(brainInstructions).toContain(
-      "Do not call render_video unless the person asks for the video file.",
+      "7. Do not call render_video for the whole video unless the person asks for the video file.",
+    );
+    expect(brainInstructions).toContain(
+      "The take of a cut renders one chapter with render_video and chapter_id.",
     );
     expect(brainInstructions).toContain(
       "To check your work, look at preview pictures with preview_frame.",

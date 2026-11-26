@@ -35,7 +35,7 @@ describe("set_story", () => {
     expect(harness.store.read().bible.story).toBeUndefined();
   });
 
-  it("asks the lead to show the story to the person until the person says yes, and keeps the yes only for the same story", async () => {
+  it("asks the lead to give the story in a take until the person says yes, and keeps the yes only for the same story", async () => {
     const harness = await startHarness();
 
     const first = await writeStory({ harness });
@@ -50,7 +50,7 @@ describe("set_story", () => {
     });
 
     expect(first.text).toContain(
-      "End the turn now: show it to the person in plain words",
+      'Give it to the person in a take of the story: ready_take with the item "story" (open_take with step story first, when no take of the story is open). Then end the turn',
     );
     expect(first.data["approval"]).toBe("not-asked-yet");
     expect(yes.text).toContain("The person said yes to this story.");

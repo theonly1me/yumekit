@@ -77,7 +77,7 @@ describe("the story notes of set_story_plan", () => {
     ]);
   });
 
-  it("reminds the lead to ask the person while the story has no yes", async () => {
+  it("reminds the lead to give the story in a take while the story has no yes", async () => {
     const harness = await startHarness();
     await writeStory({ harness });
 
@@ -88,7 +88,7 @@ describe("the story notes of set_story_plan", () => {
     });
 
     expect(notesOf(result)).toEqual([
-      "Note: the person has not said yes to the story yet. Show it in plain words and ask, and make nothing else until the answer, unless the request says in words to go ahead without asking.",
+      "Note: the person has not said yes to the story yet. Give it to the person in a take of the story, and make nothing else until the answer, unless the request says in words to go ahead without asking.",
     ]);
   });
 });

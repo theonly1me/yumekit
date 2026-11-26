@@ -30,6 +30,24 @@ describe("the server instructions", () => {
     );
   });
 
+  it("send a film to the guide and through takes with a note and what to check, and end the turn when a take is ready", () => {
+    expect(serverInstructions).toContain(
+      "A film with AI video, or a story, follows get_story_guide: it gives each step of the work with the person and its craft.",
+    );
+    expect(serverInstructions).toContain(
+      "Ask with ask_person when the request leaves open a choice that changes the film.",
+    );
+    expect(serverInstructions).toContain(
+      "A take starts with open_take and ends with ready_take, with an honest note on each item and what_to_check on each clip, music, and cut, because you cannot watch motion or hear sound.",
+    );
+    expect(serverInstructions).toContain(
+      "Then end the turn: the notes of the person come back as the next request, and an item with no note is approved.",
+    );
+    expect(serverInstructions).not.toContain(
+      "show it to the person in plain words",
+    );
+  });
+
   it("read the whole work first, write it as one piece, and keep the film calm", () => {
     expect(serverInstructions).toContain(
       "1. Call get_work (the whole video in one text",

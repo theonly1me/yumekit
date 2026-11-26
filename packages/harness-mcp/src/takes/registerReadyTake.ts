@@ -4,6 +4,7 @@ import {
   type Asset,
   type TakeItem,
 } from "@yumekit/project";
+import type { MediaTools } from "@yumekit/tools";
 import { applyEditsResult } from "../applyEditsResult.js";
 import type { HarnessContext } from "../context.js";
 import { failureResult } from "../results.js";
@@ -27,6 +28,24 @@ function costOf(options: { items: TakeItem[]; assets: Asset[] }): number {
       return total + cost;
     }, 0),
   );
+}
+
+async function moneyLeftOf(
+  mediaTools: MediaTools,
+): Promise<number | undefined> {
+  const spending = await mediaTools.spending();
+  return spending.ok ? centsOf(spending.value.remainingUsd) : undefined;
+}
+
+function estimateLineOf(options: {
+  estimate: number | undefined;
+  moneyLeft: number | undefined;
+}): string {
+  const { estimate, moneyLeft } = options;
+  if (estimate === undefined) return "";
+  const price = ` The next step costs about ${dollars(estimate)}.`;
+  if (moneyLeft === undefined || estimate <= moneyLeft) return price;
+  return `${price} Only ${dollars(moneyLeft)} of the money of this project is left, so the next step does not fit. Say so in your line, before any work, and offer fewer items: the ones that matter most for the film. Only the person raises a limit.`;
 }
 
 export function registerReadyTake(context: HarnessContext): void {
@@ -54,10 +73,12 @@ export function registerReadyTake(context: HarnessContext): void {
         take,
         given: input.next_step_estimate_usd,
       });
-      const estimateText =
-        estimate === undefined
+      const moneyLeft = await moneyLeftOf(context.mediaTools);
+      const estimateText = estimateLineOf({ estimate, moneyLeft });
+      const priceText =
+        estimate === undefined || estimate === 0
           ? ""
-          : ` The next step costs about ${dollars(estimate)}.`;
+          : ", with the price of the next step";
       return applyEditsResult({
         store: context.store,
         edits: [
@@ -72,7 +93,7 @@ export function registerReadyTake(context: HarnessContext): void {
               : { nextStepEstimateUsd: estimate }),
           },
         ],
-        line: `Take ${String(take.number)} of ${takeStepNames[take.step]} is ready for the person: ${countOf({ count: items.value.length, word: "item" })} for ${dollars(costUsd)}.${estimateText} End your turn now with one short line that take ${String(take.number)} is ready. The notes of the person come back as the next request.`,
+        line: `Take ${String(take.number)} of ${takeStepNames[take.step]} is ready for the person: ${countOf({ count: items.value.length, word: "item" })} for ${dollars(costUsd)}.${estimateText} End your turn now with one short line that take ${String(take.number)} is ready${priceText}. The notes of the person come back as the next request.`,
         data: {
           take_id: take.id,
           number: take.number,
@@ -81,6 +102,7 @@ export function registerReadyTake(context: HarnessContext): void {
           ...(estimate === undefined
             ? {}
             : { next_step_estimate_usd: estimate }),
+          ...(moneyLeft === undefined ? {} : { money_left_usd: moneyLeft }),
         },
       });
     },
