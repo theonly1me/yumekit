@@ -4,7 +4,7 @@ The open source video harness for AI agents.
 
 **Directed, not just generated.** Reels, explainers, trailers, and films, with one story, one cast, and one look in every shot.
 
-TRAILER_VIDEO_URL
+https://github.com/user-attachments/assets/f7c11c17-fc61-4ef2-8482-cb1943a13c23
 
 _Unwritten_ started as a rough story. The lead agent wrote the whole story and the script, designed the cast, planned the shots, and cut the trailer. A person approved each step.
 
