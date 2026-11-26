@@ -125,8 +125,8 @@ These decisions came from the work on a fast and steady CI on 2026-11-26. The ow
 9. CI runs `pnpm lint`, `pnpm typecheck`, `pnpm test`, and `pnpm build` on Node.js 22 and 24. It installs the Chromium of Playwright for the unit browser tests. It installs no FFmpeg, because no unit test may start a program. It runs no end-to-end test, no `pack-release`, and no `check-release`.
 10. `.github/workflows/release.yml` still runs `pack-release` and `check-release` before each publish (rule N8).
 11. The check names stay `Check (Node 22)` and `Check (Node 24)`. The ruleset of `main` requires no check (read on 2026-11-26).
-12. CI has no shards. The unit set takes UNIT_TIME on the runner, so one job for each Node.js version stays under 8 minutes. Vitest splits files into shards by count, not by time (the source of `BaseSequencer.shard` in Vitest 5.1.1).
-13. Before WP92, a job took 22 and 31.5 minutes (run 45827235607, Node.js 22 and 24). With WP92, a job took CI_TIME (the runs of the pull request).
+12. CI has no shards. The unit set took 55 seconds on Node.js 22 and 60 seconds on Node.js 24 on the runner, so one job for each Node.js version stays under 8 minutes. Vitest splits files into shards by count, not by time (the source of `BaseSequencer.shard` in Vitest 5.1.1).
+13. Before WP92, a job took 22 and 31.5 minutes (run 45827235607, Node.js 22 and 24). With WP92, a job took 3 minutes 23 seconds and 3 minutes 16 seconds (run 45855677311). Lint is the longest step, at about 80 seconds.
 
 ### Tests that failed under load
 
