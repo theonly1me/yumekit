@@ -58,7 +58,7 @@ function copyIdOf(options: {
 export function registerDuplicateSceneClip(context: HarnessContext): void {
   context.tools.add({
     name: "duplicate_scene_clip",
-    description: `Copy the scene of one scene clip, and put a clip of the copy right after the clip, with the same length. Each later clip of the scenes row moves later by that length. The copy gets the id "<scene_id>-copy" (a suffix such as "-2" keeps it unique) and the title "<title> (copy)". The new clip gets the id "<clip_id>-copy" in each changed output. Use it in place of put_scene and add_clip to repeat a scene, then change the copy with put_scene. ${sceneClipToolNote}`,
+    description: `Copy the scene of one scene clip, and put a clip of the copy right after the clip, with the same length. Each later clip of the scenes row moves later by that length, and the sound of each later video moves with its clip. The copy gets the id "<scene_id>-copy" (a suffix such as "-2" keeps it unique) and the title "<title> (copy)". The new clip gets the id "<clip_id>-copy" in each changed output. Use it in place of put_scene and add_clip to repeat a scene, then change the copy with put_scene. ${sceneClipToolNote}`,
     inputSchema: { output_ids: outputIdsInput, clip_id: sceneClipIdInput },
     run: ({ input }) => {
       const snapshot = context.store.read();

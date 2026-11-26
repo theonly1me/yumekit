@@ -8,6 +8,7 @@ import type {
 import { applyEditsResult } from "../applyEditsResult.js";
 import type { HarnessContext } from "../context.js";
 import type { StructuredData } from "../results.js";
+import { tracksWithVideoSounds } from "../timeline/videoSounds.js";
 import type { RowTarget } from "./rowTargets.js";
 
 export interface RowChange {
@@ -15,18 +16,40 @@ export interface RowChange {
   clips: SceneClip[];
 }
 
-function timelineEditOf(change: RowChange): Edit {
+function timelineEditOf(options: {
+  change: RowChange;
+  snapshot: ProjectSnapshot;
+}): Edit {
+  const { change, snapshot } = options;
   const { timeline, trackId } = change.target;
+  const tracks = tracksWithVideoSounds({
+    snapshot,
+    timeline,
+    sceneClips: change.clips,
+  });
   return {
     kind: "setTimeline",
     timeline: {
       ...timeline,
-      tracks: timeline.tracks.map((track) =>
+      tracks: tracks.map((track) =>
         track.id === trackId && track.kind === "scene"
           ? { ...track, clips: change.clips }
           : track,
       ),
     },
+  };
+}
+
+function withNewScenes(options: {
+  snapshot: ProjectSnapshot;
+  sceneEdits: Edit[];
+}): ProjectSnapshot {
+  const newScenes = options.sceneEdits.flatMap((edit) =>
+    edit.kind === "putScene" ? [edit.scene] : [],
+  );
+  return {
+    ...options.snapshot,
+    scenes: [...options.snapshot.scenes, ...newScenes],
   };
 }
 
@@ -68,12 +91,19 @@ export function rowChangeResult(options: {
 }): Promise<CallToolResult> {
   const { context, changes } = options;
   const snapshot = context.store.read();
+  const sceneEdits = options.sceneEdits ?? [];
   const voiceMayNotMatch = changes.some((change) =>
     hasVoiceClip({ snapshot, timeline: change.target.timeline }),
   );
+  const changedSnapshot = withNewScenes({ snapshot, sceneEdits });
   return applyEditsResult({
     store: context.store,
-    edits: [...(options.sceneEdits ?? []), ...changes.map(timelineEditOf)],
+    edits: [
+      ...sceneEdits,
+      ...changes.map((change) =>
+        timelineEditOf({ change, snapshot: changedSnapshot }),
+      ),
+    ],
     line: `${options.line}${voiceMayNotMatch ? " The voice may not match the scenes now." : ""}`,
     data: {
       ...options.data,

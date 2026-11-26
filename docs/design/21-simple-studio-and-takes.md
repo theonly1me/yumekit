@@ -584,3 +584,11 @@ These decisions came from the small fixes for version 0.1.1 on 2026-11-26.
 ### The line of a rename
 
 3. A rename in the Scene tab is a `put_scene` call with a new `title`. When the title differs from the title of the scene before the call, the chat line names the change and the new name: "You renamed scene 2 to "The harbor at dawn".". A scene that is on no scenes row gets "You renamed a scene to "The harbor at dawn".". A call that keeps the title keeps "You changed the text of scene 2.". This closes item 2 of the follow-ups of WP85.
+
+### The sound of a video in each change of the scenes row
+
+4. `resize_scene_clip`, `remove_scene_clip`, and `duplicate_scene_clip` move the sound of each later video with its clip, by the rule of item 4 of WP84: only when the video has one scene clip and one sound clip on the row, to the start of the clip, and no longer than the clip. Each tool description says so. This replaces item 4 of WP85 and item 6 of "Details of direct changes" in document 13.
+5. One rule in `timeline/videoSounds.ts` serves the four scene clip tools and `set_chapters`. It compares the scenes row before and after the change, and a sound changes only when its clip moved or changed length. So the sound of an earlier video stays where the person put it. Before, `move_scene_clip` also put the sound of a clip that did not move back to the start of its clip.
+6. The sound of the resized clip ends with the clip. A shorter clip trims it. A longer clip grows it up to the end of its file, counted from `assetStartFrame`. When the file has no known length, the sound only gets shorter.
+7. `remove_scene_clip` also removes the sound of the removed video, when the removed clip was the only scene clip of that video. Otherwise that sound would play over the next scene, and the sound of the next video could not move into its place, because two clips on one track cannot overlap. The one undo step brings both back.
+8. `duplicate_scene_clip` gives the copy no sound clip of its own. The video then has two scene clips, so its one sound stays with the first clip, and a later change of the row does not move it.
