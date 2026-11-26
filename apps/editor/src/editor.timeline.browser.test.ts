@@ -87,7 +87,12 @@ describe("the scene cards and the detailed timeline", () => {
     });
 
     await expect
-      .poll(() => editor.page.getByText("Renamed by an agent").count())
+      .poll(() =>
+        editor.page
+          .getByRole("list", { name: "Scenes" })
+          .getByText("Renamed by an agent")
+          .count(),
+      )
       .toBe(1);
     await expect.poll(editor.previewFrame).toBe(100);
     expect(
