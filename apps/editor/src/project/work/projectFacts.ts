@@ -1,7 +1,7 @@
 import type { ChatEntry } from "../../chat/chatSchemas.js";
 import { shownRequestTextOf } from "../../chat/requestEntryText.js";
 import type { Snapshot } from "../../engine/snapshot.js";
-import type { Chapter, Take } from "../takes/takeSchema.js";
+import type { Chapter, Take } from "../takes/takeTypes.js";
 import { chaptersOf, takesOfChapter } from "../takes/verdicts.js";
 import { autoChapterIdOf } from "./workState.js";
 

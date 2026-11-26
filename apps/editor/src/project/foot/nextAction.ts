@@ -1,5 +1,5 @@
 import { notesLabelOf } from "../takes/notes/draftNotes.js";
-import type { Take, TakeStep } from "../takes/takeSchema.js";
+import type { Take, TakeStep } from "../takes/takeTypes.js";
 import type { WorkState } from "../work/workState.js";
 import { moneyActionOf, type MoneyLeft } from "./moneyAction.js";
 

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { takeTitleOf } from "@yumekit/project/takes";
-import type { Chapter, Take } from "../takes/takeSchema.js";
+import type { Chapter, Take } from "../takes/takeTypes.js";
 import { playChime, showNotice, titleWithCount } from "./signals.js";
 
 export function readyNoticeOf(options: {

@@ -1,5 +1,5 @@
 import type { WorkItem } from "../../chat/running/workSchema.js";
-import type { Take, TakeStep } from "../takes/takeSchema.js";
+import type { Take, TakeStep } from "../takes/takeTypes.js";
 
 export interface Progress {
   line: string;

@@ -6,7 +6,7 @@ import { moneyShortOf, type MoneyLeft } from "../foot/moneyAction.js";
 import { sentNotesOf } from "./notes/draftNotes.js";
 import type { TakeNotes } from "./notes/useDraftNotes.js";
 import { sendTake, type SendNext } from "./sendTake.js";
-import type { Take } from "./takeSchema.js";
+import type { Take } from "./takeTypes.js";
 
 type Work = () => Promise<string | undefined>;
 

@@ -1,4 +1,4 @@
-import type { TakeStep } from "../takes/takeSchema.js";
+import type { TakeStep } from "../takes/takeTypes.js";
 import { takesOfChapter } from "../takes/verdicts.js";
 import type { ProjectFacts } from "../work/projectFacts.js";
 import type { ViewChoice, WorkState } from "../work/workState.js";

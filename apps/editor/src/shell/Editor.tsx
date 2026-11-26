@@ -164,6 +164,7 @@ export function Editor(props: {
             onEditText={view.editText}
             onMakeClip={clipTools.open}
             onOpenSound={openStepView}
+            onOpenTakes={takes.openChapter}
           />
         </main>
         <EditorSide

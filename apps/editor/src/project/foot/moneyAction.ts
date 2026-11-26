@@ -1,6 +1,6 @@
 import { nextWorkOf } from "@yumekit/project/takes";
 import { moneyLineOf, raisedLimitOf } from "../../chat/money/MoneyButtons.js";
-import type { Take } from "../takes/takeSchema.js";
+import type { Take } from "../takes/takeTypes.js";
 import type { WorkState } from "../work/workState.js";
 import type { NextAction } from "./nextAction.js";
 

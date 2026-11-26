@@ -44,6 +44,7 @@ export function ChapterRow(props: {
   edits: ChapterEdits;
   onPick: (chapterId: string | undefined) => void;
   onDropScene: (drop: { clipId: string; chapterId: string }) => void;
+  onOpenTakes: (chapterId: string) => void;
 }) {
   const { film, edits } = props;
   const [over, setOver] = useState<{ chapterId: string; kind: DragKind }>();
@@ -133,6 +134,7 @@ export function ChapterRow(props: {
           isLast={picked.number === film.chapters.length}
           pickedCard={props.pickedCard}
           edits={edits}
+          onOpenTakes={props.onOpenTakes}
         />
       )}
     </div>

@@ -9,7 +9,7 @@ import { useTakeNotes } from "./notes/useDraftNotes.js";
 import { useMoneyLeft } from "../foot/useMoneyLeft.js";
 import { useTakeSend } from "./useTakeSend.js";
 import { TakeView } from "./TakeView.js";
-import type { Take } from "./takeSchema.js";
+import type { Take } from "./takeTypes.js";
 import { chaptersOf } from "./verdicts.js";
 
 export function firstTakeToShow(takes: readonly Take[]): Take | undefined {
@@ -86,21 +86,27 @@ export function TakesSheet(props: {
   client: EngineClient;
   snapshot: Snapshot;
   takeId: string | undefined;
+  chapterId?: string | undefined;
   onPick: (takeId: string | undefined) => void;
   onClose: () => void;
 }) {
   const takes = props.snapshot.takes ?? [];
+  const pool =
+    props.chapterId === undefined
+      ? takes
+      : takes.filter((take) => take.chapterId === props.chapterId);
   const take =
     takes.find((candidate) => candidate.id === props.takeId) ??
-    firstTakeToShow(takes);
+    firstTakeToShow(pool);
   return (
     <Sheet titleId="takes-title" onClose={props.onClose}>
       <div className="sheet-body wide takes-sheet">
         <h2 id="takes-title">Takes</h2>
         {take === undefined ? (
           <p className="fact lead">
-            No takes yet. Each round of pictures, clips, and the cut that the
-            lead makes shows here.
+            {props.chapterId === undefined
+              ? "No takes yet. Each round of pictures, clips, and the cut that the lead makes shows here."
+              : "This chapter has no takes yet. Each round of its pictures, clips, and the cut shows here."}
           </p>
         ) : (
           <TakeOnSheet

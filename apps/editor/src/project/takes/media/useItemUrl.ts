@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import type { EngineClient } from "../../../engine/engineClient.js";
 import { useAssetUrl } from "../../../makeClip/useAssetUrl.js";
-import type { TakeItem } from "../takeSchema.js";
+import type { TakeItem } from "../takeTypes.js";
 
 const rendersPrefix = "renders/";
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { assetItem, takeOf } from "../../testing/takeFacts.js";
-import type { Take } from "../takes/takeSchema.js";
+import type { Take } from "../takes/takeTypes.js";
 import { workStateOf, type WorkFacts } from "./workState.js";
 
 function factsOf(fields: Partial<WorkFacts>): WorkFacts {

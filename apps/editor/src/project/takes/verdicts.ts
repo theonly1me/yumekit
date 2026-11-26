@@ -1,6 +1,6 @@
 import { filmChapterId, filmChapterTitle } from "@yumekit/project/takes";
 import type { StoryPlan } from "../../parts/story/storyPlanSchema.js";
-import type { Chapter, Take, TakeStep } from "./takeSchema.js";
+import type { Chapter, Take, TakeStep } from "./takeTypes.js";
 
 export type Verdict = "approved" | "change" | "dropped";
 

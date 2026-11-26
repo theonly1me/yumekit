@@ -1,7 +1,7 @@
 import type { Snapshot } from "../../engine/snapshot.js";
 import { assetNameOf } from "../../names/index.js";
 import type { ShownItem } from "./shownItems.js";
-import type { Take } from "./takeSchema.js";
+import type { Take } from "./takeTypes.js";
 
 export type ShownKind = "picture" | "clip" | "music" | "cut" | "story";
 

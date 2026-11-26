@@ -7,6 +7,7 @@ export function ChapterActions(props: {
   isLast: boolean;
   pickedCard: { card: ChapterCard; title: string } | undefined;
   edits: ChapterEdits;
+  onOpenTakes: (chapterId: string) => void;
 }) {
   const { chapter, edits, pickedCard } = props;
   const [isRenaming, setRenaming] = useState(false);
@@ -96,6 +97,14 @@ export function ChapterActions(props: {
         }}
       >
         Join with chapter {chapter.number + 1}
+      </button>
+      <button
+        type="button"
+        onClick={() => {
+          props.onOpenTakes(chapter.id);
+        }}
+      >
+        Open its takes
       </button>
     </div>
   );

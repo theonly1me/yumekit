@@ -10,7 +10,10 @@ export function useTakesSheet(options: {
   snapshot: Snapshot;
   onOpen: () => void;
 }) {
-  const [shown, setShown] = useState<{ takeId: string | undefined }>();
+  const [shown, setShown] = useState<{
+    takeId: string | undefined;
+    chapterId?: string;
+  }>();
   const takes = options.snapshot.takes ?? [];
   const open = (takeId: string | undefined) => {
     options.onOpen();
@@ -20,6 +23,10 @@ export function useTakesSheet(options: {
     isOpen: shown !== undefined,
     openLatest: () => {
       open(undefined);
+    },
+    openChapter: (chapterId: string) => {
+      options.onOpen();
+      setShown({ takeId: undefined, chapterId });
     },
     waitingCount: takes.filter((take) => take.state === "ready").length,
     readyLines: (
@@ -35,6 +42,7 @@ export function useTakesSheet(options: {
           client={options.client}
           snapshot={options.snapshot}
           takeId={shown.takeId}
+          chapterId={shown.chapterId}
           onPick={open}
           onClose={() => {
             setShown(undefined);

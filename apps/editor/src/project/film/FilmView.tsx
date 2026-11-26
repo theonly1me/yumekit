@@ -5,7 +5,7 @@ import { MediaStage } from "../takes/media/MediaStage.js";
 import { NoteList } from "../takes/notes/NoteList.js";
 import type { TakeNotes } from "../takes/notes/useDraftNotes.js";
 import { shownItemsOf } from "../takes/shownItems.js";
-import type { Take } from "../takes/takeSchema.js";
+import type { Take } from "../takes/takeTypes.js";
 import "../takes/media/media.css";
 import "./film.css";
 

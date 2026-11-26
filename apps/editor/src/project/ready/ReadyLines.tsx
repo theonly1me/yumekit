@@ -1,5 +1,5 @@
 import { takeTitleOf } from "@yumekit/project/takes";
-import type { Chapter, Take } from "../takes/takeSchema.js";
+import type { Chapter, Take } from "../takes/takeTypes.js";
 import "./readyLines.css";
 
 function readyTextOf(options: { take: Take; chapters: Chapter[] }): string {

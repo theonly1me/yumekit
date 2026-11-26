@@ -1,4 +1,4 @@
-import type { Chapter, Take, TakeStep } from "./takeSchema.js";
+import type { Chapter, Take, TakeStep } from "./takeTypes.js";
 import { takesOfChapter } from "./verdicts.js";
 
 export interface SlateProgress {

@@ -1,4 +1,4 @@
-import type { Take, TakeItem } from "../project/takes/takeSchema.js";
+import type { Take, TakeItem } from "../project/takes/takeTypes.js";
 
 export function takeOf(fields: Partial<Take> & Pick<Take, "id">): Take {
   return {

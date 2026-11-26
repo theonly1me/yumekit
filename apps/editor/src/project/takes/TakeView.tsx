@@ -6,7 +6,7 @@ import { LargeView } from "./large/LargeView.js";
 import type { TakeNotes } from "./notes/useDraftNotes.js";
 import { shownItemsOf } from "./shownItems.js";
 import { TakeSlate, type SlateProgress } from "./TakeSlate.js";
-import type { Chapter, Take } from "./takeSchema.js";
+import type { Chapter, Take } from "./takeTypes.js";
 import "./media/media.css";
 import "./takeView.css";
 

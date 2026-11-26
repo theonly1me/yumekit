@@ -1,4 +1,4 @@
-import type { TakeStep } from "../takes/takeSchema.js";
+import type { TakeStep } from "../takes/takeTypes.js";
 import type { RailStep } from "./railSteps.js";
 import "./projectBar.css";
 

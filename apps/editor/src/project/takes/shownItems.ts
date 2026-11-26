@@ -1,6 +1,6 @@
 import type { Asset, Snapshot } from "../../engine/snapshot.js";
 import { inPlanOrder } from "./planOrder.js";
-import type { Take, TakeItem } from "./takeSchema.js";
+import type { Take, TakeItem } from "./takeTypes.js";
 import { takesOfStep, verdictsOf, type Verdict } from "./verdicts.js";
 
 export type SectionId =

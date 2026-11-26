@@ -1,4 +1,4 @@
-import type { Take, TakeStep } from "../takes/takeSchema.js";
+import type { Take, TakeStep } from "../takes/takeTypes.js";
 import { takesOfChapter } from "../takes/verdicts.js";
 
 export type RailStatus = "done" | "now" | "next";

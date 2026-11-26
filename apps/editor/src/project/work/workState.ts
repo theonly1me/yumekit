@@ -1,4 +1,4 @@
-import type { Chapter, Take } from "../takes/takeSchema.js";
+import type { Chapter, Take } from "../takes/takeTypes.js";
 import { takesOfChapter } from "../takes/verdicts.js";
 
 export type ViewChoice =
