@@ -199,13 +199,14 @@ The editor is milestone 2. These rules are its input. The engine gives the edito
 
 ## Bundled video servers
 
-Document 09 named one video server. With decision P1, yumekit bundles three, and each one has its own work package.
+Document 09 named one video server. With decision P1, yumekit bundles three, and each one has its own work package. WP87 adds a fourth, `tools/sand-media`.
 
-| Folder               | Runs             | Key              | Models at the start                                                                     |
-| -------------------- | ---------------- | ---------------- | --------------------------------------------------------------------------------------- |
-| `tools/gemini-media` | Hosted           | `GEMINI_API_KEY` | `gemini-omni-1.2-flash`                                                                 |
-| `tools/fal-media`    | Hosted           | `FAL_KEY`        | 9 video, 8 picture, 4 sound effect, 10 talking clip, and 9 sharper models (document 16) |
-| `tools/local-video`  | On this computer | None             | Not built. LTX-2.3 is the first candidate                                               |
+| Folder               | Runs             | Key              | Models at the start                                                                                   |
+| -------------------- | ---------------- | ---------------- | ----------------------------------------------------------------------------------------------------- |
+| `tools/gemini-media` | Hosted           | `GEMINI_API_KEY` | `gemini-omni-1.2-flash`                                                                               |
+| `tools/fal-media`    | Hosted           | `FAL_KEY`        | 21 video (since WP87), 8 picture, 4 sound effect, 10 talking clip, and 9 sharper models (document 16) |
+| `tools/sand-media`   | Hosted           | `SAND_API_KEY`   | `magi-2` of Sand AI (document 16, "Details of WP87")                                                  |
+| `tools/local-video`  | On this computer | None             | Not built. LTX-2.3 is the first candidate                                                             |
 
 ### `tools/fal-media`
 

@@ -75,7 +75,7 @@ You choose the tool for each job, in Settings.
 | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
 | The lead agent, and the agent that checks its work | Claude Code, Codex, or Cursor, on the plan that you already pay for. You also choose the model, and the effort for Claude Code and Codex.  |
 | Pictures                                           | Codex signed in with ChatGPT, with no API key. Or an API key for OpenAI GPT Image, Google Nano Banana and the Gemini image models, or fal. |
-| Video clips                                        | Google Gemini Omni Flash, or fal models such as Kling, Wan, PixVerse, LTX, and MiniMax.                                                    |
+| Video clips                                        | Google Gemini Omni Flash, MAGI-2 of Sand AI, or fal models such as Seedance, Kling, Veo, Wan, MiniMax, and LTX.                            |
 | Music                                              | Your own royalty-free track, music that yumekit composes on your computer with no key, or Google Lyria.                                    |
 | Voice                                              | A voice that runs on your computer with no key, or the OpenAI and Gemini voices.                                                           |
 | Anything else                                      | Any media tool that is an MCP server, also one that runs a model on your computer.                                                         |
