@@ -79,7 +79,7 @@ export function planStoryNotesOf(options: {
   const approval =
     story.approval === undefined
       ? [
-          "Note: the person has not said yes to the story yet. Show it in plain words and ask, and make nothing else until the answer, unless the request says in words to go ahead without asking.",
+          "Note: the person has not said yes to the story yet. Give it to the person in a take of the story, and make nothing else until the answer, unless the request says in words to go ahead without asking.",
         ]
       : [];
   return [
