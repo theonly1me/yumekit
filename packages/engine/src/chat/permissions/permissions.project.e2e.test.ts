@@ -1,3 +1,4 @@
+import { realpath, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
@@ -7,6 +8,7 @@ import { init, result } from "../testing/claudeLines.js";
 import {
   answerCard,
   askSteps,
+  checkFileOf,
   waitForOpenCard,
 } from "./testing/permissionChat.js";
 
@@ -104,5 +106,32 @@ describe("what the person allows for this project", () => {
     expect(valuesAfter({ flags, flag: "--permission-prompt-tool" })).toEqual([
       "mcp__yumekit__ask_permission",
     ]);
+  });
+
+  it("allows nothing more when the lead writes grants into the project folder", async () => {
+    const chat = await startChatEngine({ steps: quietSteps });
+    await writeFile(
+      join(chat.project.projectFolder, ".yumekit", "lead-permissions.json"),
+      JSON.stringify({
+        project: await realpath(chat.project.projectFolder),
+        folders: ["/"],
+        rules: ["Bash(*)"],
+      }),
+    );
+
+    await chat.ask({ text: "Set the script to ready." });
+    await chat.waitUntilIdle();
+    const [flags = []] = await chat.runs();
+    const allowed = flags.indexOf("--allowedTools");
+    const outsideCheck = await checkFileOf({
+      chat,
+      input: { tool: "Read", path: join(outsideFolder, "clip.mov") },
+    });
+
+    expect(flags[allowed + 2]).toBe("--permission-mode");
+    expect(flags).not.toContain("--add-dir");
+    expect(outsideCheck).toMatchObject({
+      hookSpecificOutput: { permissionDecision: "ask" },
+    });
   });
 });

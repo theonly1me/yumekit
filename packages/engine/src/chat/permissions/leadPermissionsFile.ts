@@ -1,24 +1,44 @@
+import { createHash } from "node:crypto";
 import { join } from "node:path";
+import { configurationDirectory } from "@yumekit/tools";
 import { z } from "zod";
 import { readOptionalFile, writeFileAtomic } from "../../agents/agentFiles.js";
 
 const leadPermissionsSchema = z.object({
+  project: z.string(),
   folders: z.array(z.string().min(1)).default([]),
   rules: z.array(z.string().min(1)).default([]),
 });
 
-export type LeadPermissions = z.infer<typeof leadPermissionsSchema>;
+export interface LeadPermissions {
+  folders: string[];
+  rules: string[];
+}
 
 const nothingAllowed: LeadPermissions = { folders: [], rules: [] };
 
 export function leadPermissionsFileOf(projectFolder: string): string {
-  return join(projectFolder, ".yumekit", "lead-permissions.json");
+  const projectKey = createHash("sha256")
+    .update(projectFolder)
+    .digest("hex")
+    .slice(0, 32);
+  return join(
+    configurationDirectory(),
+    "lead-permissions",
+    `${projectKey}.json`,
+  );
 }
 
-function permissionsOf(text: string): LeadPermissions {
+function permissionsOf(options: {
+  text: string;
+  projectFolder: string;
+}): LeadPermissions {
   try {
-    const parsed = leadPermissionsSchema.safeParse(JSON.parse(text));
-    return parsed.success ? parsed.data : nothingAllowed;
+    const parsed = leadPermissionsSchema.safeParse(JSON.parse(options.text));
+    if (!parsed.success || parsed.data.project !== options.projectFolder) {
+      return nothingAllowed;
+    }
+    return { folders: parsed.data.folders, rules: parsed.data.rules };
   } catch {
     return nothingAllowed;
   }
@@ -29,7 +49,7 @@ export async function readLeadPermissions(
 ): Promise<LeadPermissions> {
   const read = await readOptionalFile(leadPermissionsFileOf(projectFolder));
   return read.ok && read.value !== undefined
-    ? permissionsOf(read.value)
+    ? permissionsOf({ text: read.value, projectFolder })
     : nothingAllowed;
 }
 
@@ -42,9 +62,10 @@ async function writeChange(options: {
   const changed = options.change(
     await readLeadPermissions(options.projectFolder),
   );
+  const stored = { project: options.projectFolder, ...changed };
   const written = await writeFileAtomic({
     file: leadPermissionsFileOf(options.projectFolder),
-    content: `${JSON.stringify(changed, undefined, 2)}\n`,
+    content: `${JSON.stringify(stored, undefined, 2)}\n`,
   });
   return written.ok ? changed : undefined;
 }
