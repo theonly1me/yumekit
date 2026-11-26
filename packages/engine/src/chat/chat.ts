@@ -1,8 +1,9 @@
 import { randomUUID } from "node:crypto";
-import { noPersonFailure } from "@yumekit/harness-mcp";
+import { noPersonFailure, type Harness } from "@yumekit/harness-mcp";
 import type { ProjectStore } from "@yumekit/project";
 import type { ServerCommand } from "../agents/agentTypes.js";
 import type { EventHub } from "../events/eventHub.js";
+import { createExportDesk } from "../exports/exportDesk.js";
 import { findAgentPrograms } from "./agentChoice.js";
 import { createChangeLedger } from "./changeLedger.js";
 import type { Chat } from "./chatInterface.js";
@@ -34,6 +35,7 @@ export async function createChat(options: {
   store: ProjectStore;
   tracked: TrackedStore;
   events: EventHub;
+  harness: Harness;
   serverCommand: ServerCommand | undefined;
   permissionWaitMilliseconds?: number | undefined;
 }): Promise<Chat> {
@@ -63,6 +65,13 @@ export async function createChat(options: {
     waitMilliseconds:
       options.permissionWaitMilliseconds ?? permissionWaitMilliseconds,
     onAnswered: () => state.tracker?.continueInNewAnswer(),
+  });
+  const exports = createExportDesk({
+    log,
+    events: options.events,
+    store: options.store,
+    harness: options.harness,
+    projectFolder,
   });
   const helpers = createHelperDesk();
   const critics = createCriticDesk({
@@ -155,8 +164,10 @@ export async function createChat(options: {
       checkFile: permissions.checkFile,
       answer: permissions.answer,
     },
+    exports,
     close: async () => {
       state.isClosing = true;
+      exports.close();
       stop();
       await state.running;
       await log.flush();

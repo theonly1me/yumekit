@@ -4,6 +4,8 @@ import type { Snapshot } from "../../engine/snapshot.js";
 import { TakeFilters } from "./filters/TakeFilters.js";
 import { useTakeFilter } from "./filters/useTakeFilter.js";
 import { FullSize, type FullSizeView } from "./large/FullSize.js";
+import { isReadOnlyTake, newerTakeOf } from "./newerTake.js";
+import { OlderTakeLine } from "./OlderTakeLine.js";
 import { verdictOfDraft } from "./review/itemDrafts.js";
 import { picksOf } from "./review/picks.js";
 import { sentDraftOf } from "./review/sentDraft.js";
@@ -27,7 +29,8 @@ export function TakeView(props: {
   const { snapshot, take, review } = props;
   const [view, setView] = useState<FullSizeView>();
   const items = shownItemsOf({ snapshot, take, withEarlier: true });
-  const canMark = take.state !== "sent";
+  const newer = newerTakeOf({ takes: snapshot.takes ?? [], take });
+  const canMark = !isReadOnlyTake({ take, newer });
   const draftOf = (itemId: string) =>
     canMark ? review.draftOf(itemId) : sentDraftOf({ take, itemId });
   const picks = picksOf({
@@ -51,6 +54,7 @@ export function TakeView(props: {
   ).length;
   return (
     <div className="take-view">
+      <OlderTakeLine take={take} newer={newer} onGo={props.onPickTake} />
       <TakeSlate
         take={take}
         takes={snapshot.takes ?? []}

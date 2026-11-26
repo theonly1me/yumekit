@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { takeTitleOf } from "@yumekit/project/takes";
+import { takeTitleOf, waitingTakesOf } from "@yumekit/project/takes";
 import type { Chapter, Take } from "../takes/takeTypes.js";
 import { playChime, showNotice, titleWithCount } from "./signals.js";
 
@@ -17,13 +17,11 @@ export function useReadySignal(options: {
 }): void {
   const { takes, chapters, projectName } = options;
   const known = useRef<ReadonlySet<string> | undefined>(undefined);
-  const readyIds = takes
-    .filter((take) => take.state === "ready")
-    .map((take) => take.id);
+  const readyIds = waitingTakesOf(takes).map((take) => take.id);
   const readyKey = readyIds.join(" ");
 
   useEffect(() => {
-    const ready = takes.filter((take) => take.state === "ready");
+    const ready = waitingTakesOf(takes);
     const previous = known.current;
     known.current = new Set(ready.map((take) => take.id));
     if (previous === undefined) return;

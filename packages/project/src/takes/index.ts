@@ -55,6 +55,15 @@ export {
   type AssetVerdict,
 } from "./verdicts.js";
 export {
+  currentTakesOf,
+  isTakeReplaced,
+  isTakeWaiting,
+  newestLaterTakeOf,
+  newestTakeOf,
+  replacingTakeOf,
+  waitingTakesOf,
+} from "./newestTakes.js";
+export {
   inUseByPlaceOf,
   personPicksOf,
   placeKeyOf,

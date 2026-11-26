@@ -1,3 +1,4 @@
+import { isTakeWaiting, waitingTakesOf } from "@yumekit/project/takes";
 import type { Chapter, Take } from "../takes/takeTypes.js";
 import { takesOfChapter } from "../takes/verdicts.js";
 
@@ -40,17 +41,12 @@ export function autoChapterIdOf(options: {
   takes: readonly Take[];
   chapters: readonly Chapter[];
 }): string | undefined {
-  const byState = (state: Take["state"]) =>
-    options.takes.find(
-      (take) => take.state === state && take.chapterId !== undefined,
-    );
-  const newest = options.takes
-    .filter((take) => take.chapterId !== undefined)
-    .toSorted((...[first, second]) =>
-      first.openedAt.localeCompare(second.openedAt),
-    )
-    .at(-1);
-  const take = byState("open") ?? byState("ready") ?? newest;
+  const inChapters = (takes: readonly Take[]) =>
+    takes.filter((take) => take.chapterId !== undefined);
+  const take =
+    inChapters(options.takes).find((each) => each.state === "open") ??
+    inChapters(waitingTakesOf(options.takes)).at(-1) ??
+    inChapters(options.takes).at(-1);
   return take?.chapterId ?? options.chapters[0]?.id;
 }
 
@@ -65,15 +61,28 @@ function lastStoryTake(takes: readonly Take[]): Take | undefined {
   return takes.filter((take) => take.step === "story").at(-1);
 }
 
+function isApprovedCut(take: Take | undefined): boolean {
+  return (
+    take?.step === "cut" &&
+    take.state === "sent" &&
+    take.items.length > 0 &&
+    take.items.every((item) => item.approved === true)
+  );
+}
+
 function autoStateOf(facts: WorkFacts): WorkState {
-  const own = facts.takes.filter((take) =>
+  const newest = facts.takes.findLast((take) =>
     inChapter({ take, chapterId: facts.chapterId }),
   );
-  const live =
-    own.find((take) => take.state === "open") ??
-    own.find((take) => take.state === "ready");
-  if (live !== undefined) return stateOfTake(live);
+  if (
+    newest !== undefined &&
+    (newest.state === "open" ||
+      isTakeWaiting({ takes: facts.takes, take: newest }))
+  ) {
+    return stateOfTake(newest);
+  }
   if (facts.isLeadRunning) {
+    if (isApprovedCut(newest)) return { kind: "film", take: newest };
     const isFresh = !facts.hasStory && facts.takes.length === 0;
     return { kind: "waiting", phase: isFresh ? "reading" : "working" };
   }
@@ -81,10 +90,6 @@ function autoStateOf(facts: WorkFacts): WorkState {
   if (facts.hasStory && !facts.isStoryApproved) {
     return { kind: "story", take: lastStoryTake(facts.takes) };
   }
-  const newest = takesOfChapter({
-    takes: facts.takes,
-    chapterId: facts.chapterId,
-  }).at(-1);
   if (newest !== undefined) return stateOfTake(newest);
   return facts.hasStory
     ? { kind: "story", take: lastStoryTake(facts.takes) }

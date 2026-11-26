@@ -1,57 +1,8 @@
-import { bytesInMegabyte } from "@yumekit/project/file-size";
-import { useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import type { EngineClient } from "../engine/engineClient.js";
+import { ExportedFile } from "./done/ExportedFile.js";
 import { shareOf, type ExportJob, type MadeFile } from "./exportJobs.js";
-import { linesText, megabytesText } from "./fileSize/fileSizeChoice.js";
 import type { ExportRow } from "./exportRows.js";
-import { openVideoFile, type OpenOutcome } from "./openVideoFile.js";
-
-function openMessageOf(outcome: OpenOutcome | undefined): ReactNode {
-  if (outcome === undefined || outcome.kind === "opened") return undefined;
-  if (outcome.kind === "too-large") {
-    return "The file is too large to open here. Open it from the folder above in your video player.";
-  }
-  if (outcome.kind === "failed") return outcome.message;
-  return (
-    <>
-      The browser blocked the new tab.{" "}
-      <a href={outcome.url} target="_blank" rel="noreferrer">
-        Open the video
-      </a>
-    </>
-  );
-}
-
-function ShowFile(props: {
-  client: EngineClient;
-  made: MadeFile;
-  label: string;
-}) {
-  const [opened, setOpened] = useState<OpenOutcome>();
-  const message = openMessageOf(opened);
-  return (
-    <>
-      <button
-        type="button"
-        onClick={() => {
-          setOpened(undefined);
-          openVideoFile({ client: props.client, fileName: props.made.fileName })
-            .then(setOpened)
-            .catch((error: unknown) => {
-              setOpened({ kind: "failed", message: String(error) });
-            });
-        }}
-      >
-        {props.label}
-      </button>
-      {message === undefined ? undefined : (
-        <p className="fact export-note" role="status">
-          {message}
-        </p>
-      )}
-    </>
-  );
-}
 
 function statusOf(options: {
   client: EngineClient;
@@ -84,6 +35,9 @@ function statusOf(options: {
       />
     );
   }
+  if (job.state.kind === "waiting") {
+    return <span className="fact">Waits for its turn</span>;
+  }
   const percent = Math.round(shareOf(job.state) * 100);
   const progressLabel =
     job.state.kind === "sharpening"
@@ -115,33 +69,18 @@ function DoneFiles(props: {
   const ofRow = props.files.filter(
     (file) => file.platformId === props.row.platformId,
   );
-  const made = ofRow.find((file) => !file.isSharper);
-  const sharper = ofRow.find((file) => file.isSharper);
-  if (made === undefined) return <span className="fact">Not made</span>;
+  if (ofRow.length === 0) return <span className="fact">Not made</span>;
   return (
-    <>
-      {made.bytes === undefined ? undefined : (
-        <span className="real-size">
-          {megabytesText(made.bytes / bytesInMegabyte)}
-          {made.shortSidePixels === undefined
-            ? ""
-            : `, ${linesText(made.shortSidePixels)}`}
-        </span>
-      )}
-      <ShowFile client={props.client} made={made} label="Show the file" />
-      {sharper === undefined ? undefined : (
-        <ShowFile
-          client={props.client}
-          made={sharper}
-          label="Show the sharper file"
-        />
-      )}
+    <div className="export-made">
+      {ofRow.map((made) => (
+        <ExportedFile key={made.file} client={props.client} made={made} />
+      ))}
       {props.sharperFailure === undefined ? undefined : (
         <p className="fact export-note" role="status">
           {props.sharperFailure}
         </p>
       )}
-    </>
+    </div>
   );
 }
 
@@ -169,7 +108,9 @@ export function ExportRowView(props: {
         />{" "}
         {row.name} <em>{row.shape}</em>
       </label>
-      <span className="export-file">{row.fileName}</span>
+      {props.job?.state.kind === "done" ? undefined : (
+        <span className="export-file">{row.fileName}</span>
+      )}
       {statusOf({
         client: props.client,
         row,

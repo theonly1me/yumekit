@@ -1,4 +1,5 @@
 import { useLayoutEffect, useRef, type ReactNode } from "react";
+import { ExportLine } from "../export/done/ExportLine.js";
 import { AnswerView } from "./AnswerView.js";
 import { ChangeLine } from "./ChangeLine.js";
 import { MoneyNotice } from "./money/MoneyNotice.js";
@@ -113,6 +114,8 @@ export function ChatHistory(props: {
             isAlert={false}
           />
         );
+      case "export":
+        return <ExportLine key={entry.id} client={chat.client} entry={entry} />;
     }
   };
 

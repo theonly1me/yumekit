@@ -2,6 +2,7 @@ import { agentRoutes } from "./agentRoutes.js";
 import { chatRoutes } from "./chatRoutes.js";
 import { clockRoutes } from "./clockRoutes.js";
 import type { Route } from "./exchange.js";
+import { exportRoutes } from "./exportRoutes.js";
 import { fileRoutes } from "./fileRoutes.js";
 import { keyRoutes } from "./keyRoutes.js";
 import { mediaChoiceRoutes } from "./mediaChoiceRoutes.js";
@@ -35,4 +36,5 @@ export const engineRoutes: Route[] = [
   ...clockRoutes,
   ...takeRoutes,
   ...takeDraftRoutes,
+  ...exportRoutes,
 ];

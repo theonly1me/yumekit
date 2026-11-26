@@ -1,6 +1,7 @@
 import {
   approvePicturesFirstOf,
   chaptersOf,
+  currentTakesOf,
   filmChapterId,
   lastSentTakeOf,
   reviewCountTextOf,
@@ -37,7 +38,7 @@ function chapterLine(snapshot: ProjectSnapshot): string {
 }
 
 function currentTakeLine(takes: readonly Take[]): string {
-  const current = takes.findLast((take) => take.state !== "sent");
+  const current = currentTakesOf(takes).at(-1);
   if (current === undefined) {
     return "Open take: none. Call open_take before the next round of work.";
   }

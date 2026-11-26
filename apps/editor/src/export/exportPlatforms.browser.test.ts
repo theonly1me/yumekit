@@ -81,24 +81,23 @@ describe("export for each platform", () => {
     ).toEqual([
       "editor-test-tiktok.mp4",
       "editor-test-instagram-reel.mp4",
-      "wide.mp4",
+      "editor-test-wide.mp4",
     ]);
     await sheet.getByRole("checkbox", { name: /^Wide/ }).uncheck();
     await sheet.getByRole("button", { name: "Export 2 videos" }).click();
 
     await expect
-      .poll(
-        () => sheet.getByRole("button", { name: "Show the file" }).count(),
-        { timeout: 90_000 },
-      )
+      .poll(() => sheet.getByRole("button", { name: "Play" }).count(), {
+        timeout: 90_000,
+      })
       .toBe(2);
-    const renders = join(runningEngine().projectFolder, "renders");
-    const tiktok = await readFile(join(renders, "editor-test-tiktok.mp4"));
+    const exports = join(runningEngine().projectFolder, "exports");
+    const tiktok = await readFile(join(exports, "editor-test-tiktok.mp4"));
     const reel = await readFile(
-      join(renders, "editor-test-instagram-reel.mp4"),
+      join(exports, "editor-test-instagram-reel.mp4"),
     );
     expect(reel.equals(tiktok)).toBe(true);
-    const probe = await probeVideo(join(renders, "editor-test-tiktok.mp4"));
+    const probe = await probeVideo(join(exports, "editor-test-tiktok.mp4"));
     expect(probe.streams).toContainEqual({
       codec_type: "video",
       width: 1080,

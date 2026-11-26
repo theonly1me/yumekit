@@ -135,6 +135,7 @@ export async function startEngine(options: {
     tracked,
     events,
     permissionWaitMilliseconds: options.permissionWaitMilliseconds,
+    harness: parts.harness,
     serverCommand: options.serverCommand,
   });
   helperChat.current = chat;

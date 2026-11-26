@@ -127,6 +127,7 @@ export function useChat(client: EngineClient) {
   );
 
   return {
+    client,
     entries,
     agent,
     textOf: (answer: AnswerEntry) =>

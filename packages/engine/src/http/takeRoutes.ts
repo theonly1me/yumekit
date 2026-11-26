@@ -5,6 +5,7 @@ import {
   reviewCountsOf,
 } from "@yumekit/project";
 import { z } from "zod";
+import { exportApprovedFilm } from "../exports/approvedFilm.js";
 import { removeTakeDraft } from "../takeDrafts/takeDraftFile.js";
 import { isAgentCall } from "./chatRoutes.js";
 import { anySegment, type Exchange, type Route } from "./exchange.js";
@@ -72,6 +73,11 @@ async function sendTake(exchange: Exchange): Promise<Failure | undefined> {
   await removeTakeDraft({
     projectFolder: context.projectFolder,
     draftId: takeId,
+  });
+  exportApprovedFilm({
+    snapshot: context.store.read(),
+    take: sent.value.take,
+    exports: context.chat.exports,
   });
   if (next === "stop") {
     sendJson({

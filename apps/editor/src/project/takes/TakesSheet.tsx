@@ -3,8 +3,13 @@ import type { Snapshot } from "../../engine/snapshot.js";
 import { Sheet } from "../../sheets/Sheet.js";
 import { NextActionBar } from "../foot/NextActionBar.js";
 import { nextActionOf } from "../foot/nextAction.js";
-import { latestTakeIdOf, takeCostOf } from "../work/projectFacts.js";
-import { reviewCountTextOf, reviewTotalOf } from "@yumekit/project/takes";
+import { takeCostOf } from "../work/projectFacts.js";
+import {
+  reviewCountTextOf,
+  reviewTotalOf,
+  waitingTakesOf,
+} from "@yumekit/project/takes";
+import { newerTakeOf } from "./newerTake.js";
 import { useMoneyLeft } from "../foot/useMoneyLeft.js";
 import { useTakeReview } from "./review/useTakeReview.js";
 import { reviewItemIdsOf } from "./shownItems.js";
@@ -13,15 +18,16 @@ import { TakeView } from "./TakeView.js";
 import type { Take } from "./takeTypes.js";
 import { chaptersOf } from "./verdicts.js";
 
-export function firstTakeToShow(takes: readonly Take[]): Take | undefined {
+function firstTakeToShow(options: {
+  takes: readonly Take[];
+  chapterId: string | undefined;
+}): Take | undefined {
+  const isShown = (take: Take) =>
+    options.chapterId === undefined || take.chapterId === options.chapterId;
   return (
-    takes.find((take) => take.state === "ready") ??
-    takes.find((take) => take.state === "open") ??
-    takes
-      .toSorted((...[first, second]) =>
-        first.openedAt.localeCompare(second.openedAt),
-      )
-      .at(-1)
+    waitingTakesOf(options.takes).findLast(isShown) ??
+    options.takes.find((take) => take.state === "open" && isShown(take)) ??
+    options.takes.findLast(isShown)
   );
 }
 
@@ -34,9 +40,11 @@ function TakeOnSheet(props: {
   const { client, snapshot, take } = props;
   const takes = snapshot.takes ?? [];
   const review = useTakeReview({ client, draftId: take.id });
+  const newer = newerTakeOf({ takes, take });
   const money = useMoneyLeft({
     client,
-    readyTakeId: take.state === "ready" ? take.id : undefined,
+    readyTakeId:
+      take.state === "ready" && newer === undefined ? take.id : undefined,
   });
   const sending = useTakeSend({
     client,
@@ -51,7 +59,7 @@ function TakeOnSheet(props: {
       take.state === "open" ? { kind: "making", take } : { kind: "take", take },
     noteCount: reviewTotalOf(sending.counts),
     countText: reviewCountTextOf(sending.counts),
-    latestTakeId: latestTakeIdOf({ takes, take }),
+    newer,
     isStoryApproved: true,
     hasNextChapter: false,
     isLeadRunning: false,
@@ -94,13 +102,9 @@ export function TakesSheet(props: {
   onClose: () => void;
 }) {
   const takes = props.snapshot.takes ?? [];
-  const pool =
-    props.chapterId === undefined
-      ? takes
-      : takes.filter((take) => take.chapterId === props.chapterId);
   const take =
     takes.find((candidate) => candidate.id === props.takeId) ??
-    firstTakeToShow(pool);
+    firstTakeToShow({ takes, chapterId: props.chapterId });
   return (
     <Sheet titleId="takes-title" onClose={props.onClose}>
       <div className="sheet-body wide takes-sheet">

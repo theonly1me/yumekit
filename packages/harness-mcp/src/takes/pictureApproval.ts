@@ -2,6 +2,7 @@ import {
   approvePicturesFirstOf,
   assetDecisionsOf,
   assetVerdictsOf,
+  currentTakesOf,
   type AssetDecision,
   type ProjectSnapshot,
   type Take,
@@ -20,10 +21,8 @@ function waitingTakeOf(options: {
   takes: readonly Take[];
   assetIds: string[];
 }): Take | undefined {
-  return options.takes.findLast(
-    (take) =>
-      take.state !== "sent" &&
-      take.items.some((item) => options.assetIds.includes(item.id)),
+  return currentTakesOf(options.takes).findLast((take) =>
+    take.items.some((item) => options.assetIds.includes(item.id)),
   );
 }
 

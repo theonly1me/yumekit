@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { waitingTakesOf } from "@yumekit/project/takes";
 import type { EngineClient } from "../../engine/engineClient.js";
 import type { Snapshot } from "../../engine/snapshot.js";
 import { ReadyLines } from "../ready/ReadyLines.js";
@@ -28,7 +29,7 @@ export function useTakesSheet(options: {
       options.onOpen();
       setShown({ takeId: undefined, chapterId });
     },
-    waitingCount: takes.filter((take) => take.state === "ready").length,
+    waitingCount: waitingTakesOf(takes).length,
     readyLines: (
       <ReadyLines
         takes={takes}

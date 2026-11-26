@@ -2,18 +2,18 @@ import type { ExportScale } from "./exportJobs.js";
 import type { ExportRow } from "./exportRows.js";
 import type { SizedVideo } from "./fileSize/fileSizeChoice.js";
 
-export function rendersFolderOf(projectFolder: string): string {
+export function exportsFolderOf(projectFolder: string): string {
   const separator = projectFolder.includes("\\") ? "\\" : "/";
-  return `${projectFolder.replace(/[\\/]+$/, "")}${separator}renders`;
+  return `${projectFolder.replace(/[\\/]+$/, "")}${separator}exports`;
 }
 
-export function shortRendersFolderOf(projectFolder: string): string {
+export function shortExportsFolderOf(projectFolder: string): string {
   const folderName =
     projectFolder
       .split(/[\\/]+/)
       .filter((part) => part !== "")
       .at(-1) ?? "";
-  return `${folderName}/renders`;
+  return `${folderName}/exports`;
 }
 
 export function longestVideoOf(options: {

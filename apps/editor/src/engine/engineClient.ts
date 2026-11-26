@@ -115,6 +115,8 @@ export function createEngineClient(token: string) {
       send({
         path: `/api/renders/${file.split("/").map(encodeURIComponent).join("/")}`,
       }),
+    exportFile: (fileName: string) =>
+      send({ path: `/api/exports/${encodeURIComponent(fileName)}` }),
     readJson,
     assetFile: async (assetId: string): Promise<Reply<Blob>> => {
       const sent = await send({

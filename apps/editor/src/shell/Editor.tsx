@@ -49,6 +49,7 @@ export function Editor(props: {
     client,
     snapshot,
     projectFolder,
+    entries: editorChat.chat.entries,
     onShowScene: view.showScene,
   });
   const clipTools = useClipTools({

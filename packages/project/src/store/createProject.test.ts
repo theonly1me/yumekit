@@ -34,10 +34,10 @@ describe("createProject", () => {
     });
   });
 
-  it("writes a .gitignore that keeps renders, the undo history, the cache, and the agent files out of git", async () => {
+  it("writes a .gitignore that keeps renders, exports, the undo history, the cache, and the agent files out of git", async () => {
     const store = await createTestProject();
     expect(await readProjectFile({ store, file: ".gitignore" })).toBe(
-      "renders/\n.yumekit/\n.cache/\n.mcp.json\n.codex/config.toml\n.cursor/mcp.json\n",
+      "renders/\nexports/\n.yumekit/\n.cache/\n.mcp.json\n.codex/config.toml\n.cursor/mcp.json\n",
     );
   });
 

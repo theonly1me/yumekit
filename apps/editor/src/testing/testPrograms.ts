@@ -18,6 +18,30 @@ export async function linkMediaPrograms(folder: string): Promise<void> {
   }
 }
 
+export function callsFileOf(options: {
+  root: string;
+  program: string;
+}): string {
+  return join(options.root, "bin", `${options.program}.calls`);
+}
+
+export async function installRecordingPrograms(options: {
+  root: string;
+  path: string;
+  programs: readonly string[];
+}): Promise<void> {
+  const [folder] = options.path.split(delimiter);
+  if (folder === undefined) return;
+  for (const program of options.programs) {
+    const calls = callsFileOf({ root: options.root, program });
+    await writeFile(
+      join(folder, program),
+      `#!/bin/sh\nprintf '%s\\n' "$@" >> '${calls}'\n`,
+    );
+    await chmod(join(folder, program), 0o755);
+  }
+}
+
 export async function pathOfTestPrograms(options: {
   root: string;
   agentPrograms: string[];

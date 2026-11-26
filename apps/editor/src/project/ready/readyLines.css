@@ -1,4 +1,4 @@
-.entry.take-ready .answer-body {
+.entry.take-card .answer-body {
   display: grid;
   gap: 10px;
   justify-items: start;
@@ -8,6 +8,34 @@
   background: var(--raised);
 }
 
-.entry.take-ready .answer-body p {
+.entry.take-card .answer-body p {
   color: var(--text);
+}
+
+.entry.take-making .answer-body {
+  border-style: dashed;
+}
+
+.entry.take-making .answer-body p::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  vertical-align: 1px;
+  animation: take-making-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes take-making-pulse {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .entry.take-making .answer-body p::before {
+    animation: none;
+  }
 }

@@ -98,7 +98,7 @@ export async function createProject(
   await writeFileAtomic({
     path: join(folder, ".gitignore"),
     content:
-      "renders/\n.yumekit/\n.cache/\n.mcp.json\n.codex/config.toml\n.cursor/mcp.json\n",
+      "renders/\nexports/\n.yumekit/\n.cache/\n.mcp.json\n.codex/config.toml\n.cursor/mcp.json\n",
   });
   return succeed(
     createProjectStore({ folder, state: state.value, history: emptyHistory }),

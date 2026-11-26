@@ -1,6 +1,7 @@
 import type { ProjectState } from "../../format/state.js";
 import type { Take, TakeItem } from "../../format/takes.js";
 import { succeed } from "../../outcome.js";
+import { replacingTakeOf } from "../../takes/newestTakes.js";
 import { unapprovedItemIdsOf } from "../../takes/verdicts.js";
 import type { EditOfKind } from "../edit.js";
 import { problem, type EditResult } from "../editFailure.js";
@@ -44,6 +45,13 @@ export function sendTake(options: {
     return problem({
       kind: "invalid-value",
       message: `Take ${String(take.number)} is ${take.state}. Only a ready take can be sent.`,
+    });
+  }
+  const replacing = replacingTakeOf({ takes: state.takes, take });
+  if (replacing !== undefined) {
+    return problem({
+      kind: "invalid-value",
+      message: `Take ${String(replacing.number)} replaced take ${String(take.number)}. Only the newest take of a chapter can be sent.`,
     });
   }
   const earlier = earlierAssetIdsOf({ state, take });

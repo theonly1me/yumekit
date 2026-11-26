@@ -6,9 +6,9 @@ import { Sheet } from "../sheets/Sheet.js";
 import { useMediaServers } from "../tools/useMediaServers.js";
 import type { ExportScale, SceneTarget } from "./exportJobs.js";
 import {
+  exportsFolderOf,
   longestVideoOf,
-  rendersFolderOf,
-  shortRendersFolderOf,
+  shortExportsFolderOf,
   withKey,
 } from "./exportSheetFacts.js";
 import { ExportMore } from "./ExportMore.js";
@@ -145,12 +145,18 @@ export function ExportSheet(props: {
               ? "Exporting"
               : `Export ${videosWord(chosenRows.length)}`}
           </button>
+          {exports.failure === undefined ? undefined : (
+            <p className="export-start-failure" role="alert">
+              {exports.failure}
+            </p>
+          )}
           <p className="fact">
             Files go to{" "}
-            <span title={rendersFolderOf(props.projectFolder)}>
-              {shortRendersFolderOf(props.projectFolder)}
+            <span title={exportsFolderOf(props.projectFolder)}>
+              {shortExportsFolderOf(props.projectFolder)}
             </span>{" "}
-            on this computer. Nothing is uploaded.
+            on this computer. An earlier export stays, and a new one gets a
+            number. Nothing is uploaded.
           </p>
         </div>
       </div>

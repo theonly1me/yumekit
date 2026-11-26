@@ -12,7 +12,9 @@ import { reviewItemIdsOf } from "../takes/shownItems.js";
 import { useTakeSend } from "../takes/useTakeSend.js";
 import { storyItemId } from "../story/StoryReading.js";
 import { storyRequestOf } from "./storyRequests.js";
-import { latestTakeIdOf, projectFactsOf, takeCostOf } from "./projectFacts.js";
+import { newerTakeOf } from "../takes/newerTake.js";
+import { autoChoice, choiceInForceOf, type HeldChoice } from "./heldChoice.js";
+import { projectFactsOf, takeCostOf } from "./projectFacts.js";
 import { workStateOf, type ViewChoice } from "./workState.js";
 
 export type ProjectWork = ReturnType<typeof useProjectWork>;
@@ -25,7 +27,15 @@ export function useProjectWork(options: {
   onExport: () => void;
 }) {
   const { client, snapshot, chat } = options;
-  const [choice, setChoice] = useState<ViewChoice>({ kind: "auto" });
+  const newestTakeId = (snapshot.takes ?? []).at(-1)?.id;
+  const [held, setHeld] = useState<HeldChoice>({
+    choice: autoChoice,
+    newestTakeId,
+  });
+  const choice = choiceInForceOf({ held, newestTakeId });
+  const setChoice = (next: ViewChoice) => {
+    setHeld({ choice: next, newestTakeId });
+  };
   const [pickedChapterId, setPickedChapterId] = useState<string>();
   const facts = projectFactsOf({
     snapshot,
@@ -52,9 +62,12 @@ export function useProjectWork(options: {
         ? [storyItemId]
         : []
       : reviewItemIdsOf({ snapshot, take });
+  const newer =
+    take === undefined ? undefined : newerTakeOf({ takes: facts.takes, take });
   const money = useMoneyLeft({
     client,
-    readyTakeId: take?.state === "ready" ? take.id : undefined,
+    readyTakeId:
+      take?.state === "ready" && newer === undefined ? take.id : undefined,
   });
   const sending = useTakeSend({
     client,
@@ -72,10 +85,7 @@ export function useProjectWork(options: {
     state,
     noteCount: isStory ? sent.length : reviewTotalOf(sending.counts),
     countText: reviewCountTextOf(sending.counts),
-    latestTakeId:
-      take === undefined
-        ? undefined
-        : latestTakeIdOf({ takes: facts.takes, take }),
+    newer,
     isStoryApproved: facts.isStoryApproved,
     hasNextChapter: next !== undefined,
     isLeadRunning: chat.isRunning,
@@ -114,6 +124,7 @@ export function useProjectWork(options: {
     facts,
     state,
     choice,
+    newer,
     review,
     action,
     isBusy: sending.isBusy,

@@ -1,180 +1,142 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
+import type { ChatEntry } from "../chat/chatSchemas.js";
 import type { EngineClient } from "../engine/engineClient.js";
+import { failureTextOf } from "../tools/requestText.js";
+import { newestExportOf, type ExportEntry } from "./done/exportEntry.js";
+import { startExport } from "./done/exportRequests.js";
 import {
-  exportFailureSchema,
-  exportResultSchema,
-  fileNameOf,
-  type ExportJob,
-  type ExportScale,
-  type JobState,
-} from "./exportJobs.js";
-import {
-  renderInputOf,
-  type FileSizeChoice,
-} from "./fileSize/fileSizeChoice.js";
+  jobsOfEntry,
+  madeFilesOf,
+  type SharperByOutput,
+  type SharperState,
+} from "./done/jobsOfEntry.js";
+import { useExportProgress } from "./done/useExportProgress.js";
+import type { ExportScale } from "./exportJobs.js";
+import type { FileSizeChoice } from "./fileSize/fileSizeChoice.js";
 import { withSharperCopy, type SharperRequest } from "./sharpenExport.js";
 
 export type Exports = ReturnType<typeof useExports>;
 
-async function exportOne(options: {
-  client: EngineClient;
-  job: ExportJob;
-}): Promise<JobState> {
-  const reply = await options.client.callTool({
-    name: "render_video",
-    input: {
-      output_id: options.job.outputId,
-      ...(options.job.scale === 1 ? {} : { scale: options.job.scale }),
-      ...renderInputOf(options.job.fileSize),
-    },
-    callId: options.job.callId,
-  });
-  if (!reply.ok) {
-    const message =
-      reply.failure.kind === "request-failed"
-        ? reply.failure.message
-        : "The engine is not reachable. Check that yumekit open still runs.";
-    return { kind: "failed", message, failedAt: undefined };
-  }
-  if (reply.value.isError) {
-    const failure = exportFailureSchema.safeParse(reply.value.data);
-    return failure.success
-      ? {
-          kind: "failed",
-          message: failure.data.message,
-          failedAt:
-            failure.data.scene_id === undefined
-              ? undefined
-              : { sceneId: failure.data.scene_id, frame: failure.data.frame },
-        }
-      : { kind: "failed", message: reply.value.text, failedAt: undefined };
-  }
-  const result = exportResultSchema.safeParse(reply.value.data);
-  if (!result.success) {
-    return { kind: "failed", message: reply.value.text, failedAt: undefined };
-  }
-  const { bytes, width_pixels: width, height_pixels: height } = result.data;
-  const files = result.data.files ?? [{ file: result.data.file }];
-  return {
-    kind: "done",
-    files: files.map((entry) => ({
-      file: entry.file,
-      fileName: fileNameOf(entry.file),
-      platformId: entry.platform_id,
-      isSharper: false,
-      bytes,
-      shortSidePixels:
-        width === undefined || height === undefined
-          ? undefined
-          : Math.min(width, height),
-    })),
-    sharperFailure: undefined,
-  };
+export interface ExportStart {
+  outputIds: string[];
+  sharper: SharperRequest[];
+  scale: ExportScale;
+  fileSize: FileSizeChoice;
 }
 
-export function useExports(client: EngineClient) {
-  const [jobs, setJobs] = useState<ExportJob[]>([]);
-  const [isRunning, setRunning] = useState(false);
-  const isRunningNow = useRef(false);
+interface KeptSharper {
+  entryId: string;
+  byOutput: SharperByOutput;
+}
 
-  const setState = useCallback(
-    (change: { callId: string; state: JobState }) => {
-      setJobs((current) =>
-        current.map((job) =>
-          job.callId === change.callId ? { ...job, state: change.state } : job,
-        ),
-      );
+export function useExports(options: {
+  client: EngineClient;
+  entries: readonly ChatEntry[];
+}) {
+  const { client } = options;
+  const entry = newestExportOf(options.entries);
+  const progress = useExportProgress({ client, entry });
+  const [sharper, setSharper] = useState<KeptSharper>();
+  const [isStarting, setStarting] = useState(false);
+  const [failure, setFailure] = useState<string>();
+  const isStartingNow = useRef(false);
+
+  const setSharperOf = useCallback(
+    (change: { entryId: string; outputId: string; state: SharperState }) => {
+      setSharper((current) => {
+        const byOutput = new Map(
+          current?.entryId === change.entryId ? current.byOutput : [],
+        );
+        byOutput.set(change.outputId, change.state);
+        return { entryId: change.entryId, byOutput };
+      });
     },
     [],
   );
 
-  const start = useCallback(
-    (request: {
-      outputIds: string[];
-      sharper: SharperRequest[];
-      scale: ExportScale;
-      fileSize: FileSizeChoice;
-    }) => {
-      const { outputIds, sharper, scale, fileSize } = request;
-      if (isRunningNow.current || outputIds.length === 0) return;
-      isRunningNow.current = true;
-      setRunning(true);
-      const queued: ExportJob[] = outputIds.map((outputId) => ({
-        callId: crypto.randomUUID(),
-        outputId,
-        scale,
-        fileSize,
-        state: { kind: "waiting" },
-      }));
-      setJobs(queued);
-      const stopListening = client.events.listen((event) => {
-        if (event.type !== "call-progress") return;
-        setJobs((current) =>
-          current.map((job) =>
-            job.callId === event.callId && job.state.kind === "exporting"
-              ? {
-                  ...job,
-                  state: {
-                    kind: "exporting",
-                    framesDone: event.done,
-                    frameCount: event.total,
-                  },
-                }
-              : job,
-          ),
+  const sharpen = useCallback(
+    async (request: { entry: ExportEntry; sharper: SharperRequest[] }) => {
+      for (const job of request.entry.jobs) {
+        const asked = request.sharper.find(
+          (each) => each.outputId === job.outputId,
         );
-      });
-      const runAll = async () => {
-        for (const job of queued) {
-          setState({
-            callId: job.callId,
-            state: { kind: "exporting", framesDone: 0, frameCount: undefined },
-          });
-          const exported = await exportOne({ client, job });
-          setState({ callId: job.callId, state: exported });
-          const request = sharper.find(
-            (each) => each.outputId === job.outputId,
-          );
-          if (exported.kind !== "done" || request === undefined) continue;
-          setState({
-            callId: job.callId,
-            state: { kind: "sharpening", files: exported.files },
-          });
-          setState({
-            callId: job.callId,
-            state: await withSharperCopy({
-              client,
-              request,
-              files: exported.files,
-            }),
-          });
-        }
-      };
-      runAll()
-        .catch((error: unknown) => {
-          setJobs((current) =>
-            current.map((job) =>
-              job.state.kind === "done"
-                ? job
-                : {
-                    ...job,
-                    state: {
-                      kind: "failed",
-                      message: String(error),
-                      failedAt: undefined,
-                    },
-                  },
-            ),
-          );
-        })
-        .finally(() => {
-          stopListening();
-          isRunningNow.current = false;
-          setRunning(false);
+        if (job.state !== "done" || asked === undefined) continue;
+        const change = { entryId: request.entry.id, outputId: job.outputId };
+        setSharperOf({ ...change, state: { kind: "sharpening" } });
+        const done = await withSharperCopy({
+          client,
+          request: asked,
+          files: madeFilesOf(job),
         });
+        setSharperOf({
+          ...change,
+          state: {
+            kind: "done",
+            files: done.files,
+            failure: done.sharperFailure,
+          },
+        });
+      }
     },
-    [client, setState],
+    [client, setSharperOf],
   );
 
-  return useMemo(() => ({ jobs, isRunning, start }), [jobs, isRunning, start]);
+  const start = useCallback(
+    (request: ExportStart) => {
+      if (isStartingNow.current || request.outputIds.length === 0) return;
+      isStartingNow.current = true;
+      setStarting(true);
+      setFailure(undefined);
+      const finished = new Map<string, ExportEntry>();
+      let startedId: string | undefined;
+      const sharpenOnce = (done: ExportEntry) => {
+        stopListening();
+        sharpen({ entry: done, sharper: request.sharper }).catch(
+          (error: unknown) => {
+            setFailure(String(error));
+          },
+        );
+      };
+      const stopListening = client.events.listen((event) => {
+        if (event.type !== "chat-changed" || event.entry.kind !== "export") {
+          return;
+        }
+        if (event.entry.state === "running") return;
+        finished.set(event.entry.id, event.entry);
+        if (event.entry.id === startedId) sharpenOnce(event.entry);
+      });
+      startExport({ client, ...request })
+        .then((started) => {
+          if (!started.ok) {
+            stopListening();
+            setFailure(failureTextOf(started.failure));
+            return;
+          }
+          startedId = started.value.id;
+          const done = finished.get(startedId);
+          if (request.sharper.length === 0) stopListening();
+          else if (done !== undefined) sharpenOnce(done);
+        })
+        .catch((error: unknown) => {
+          stopListening();
+          setFailure(String(error));
+        })
+        .finally(() => {
+          isStartingNow.current = false;
+          setStarting(false);
+        });
+    },
+    [client, sharpen],
+  );
+
+  const byOutput: SharperByOutput =
+    sharper !== undefined && sharper.entryId === entry?.id
+      ? sharper.byOutput
+      : new Map();
+  const jobs = jobsOfEntry({ entry, progress, sharper: byOutput });
+  const isRunning =
+    isStarting ||
+    entry?.state === "running" ||
+    jobs.some((job) => job.state.kind === "sharpening");
+  return { entry, progress, jobs, isRunning, failure, start };
 }

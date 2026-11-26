@@ -1,5 +1,10 @@
 import {
+  chaptersOf,
+  newestLaterTakeOf,
+  replacingTakeOf,
   takeTagLimit,
+  takeTitleInTextOf,
+  takeTitleOf,
   takeTextLimit,
   unapprovedItemIdsOf,
   type ProjectStore,
@@ -48,7 +53,8 @@ export interface SentTake extends SentRequest {
 }
 
 export type SendTakeFailure = HarnessFailure & {
-  kind: "take-not-found" | "take-not-ready" | "note-not-valid";
+  kind:
+    "take-not-found" | "take-not-ready" | "take-replaced" | "note-not-valid";
 };
 
 export function takeNoteOf(input: TakeNoteInput): TakeNote {
@@ -91,6 +97,20 @@ export async function sendTake(options: {
         kind: "take-not-ready",
         message: `Take ${String(take.number)} is ${take.state === "open" ? "still being made" : "already sent"}.`,
         hint: "Send a take when it is ready.",
+      },
+    };
+  }
+  const replacing = replacingTakeOf({ takes: snapshot.takes, take });
+  if (replacing !== undefined) {
+    const chapters = chaptersOf(snapshot.bible.storyPlan);
+    const newest =
+      newestLaterTakeOf({ takes: snapshot.takes, take }) ?? replacing;
+    return {
+      ok: false,
+      failure: {
+        kind: "take-replaced",
+        message: `${takeTitleOf({ take: replacing, chapters })} replaced ${takeTitleInTextOf({ take, chapters })}, so it cannot be sent. Review take ${String(newest.number)}.`,
+        hint: "Send the newest take of the chapter.",
       },
     };
   }
