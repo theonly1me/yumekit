@@ -7,7 +7,7 @@ export const firstCutSection = [
   "- With no input.prompt, a sheet or a shot sends the next prompt of the plan.",
   "- One check blocks a result: the design check. A picture whose design breaks cannot start a clip, and a clip whose design breaks shows only its clean part, unless the person chooses it. Every other fault of a check or a review is a note: you decide what serves the film. A short fault at the start or the end of a clip is a cut.",
   "- To correct a picture or a clip, start from it (the picture in reference_asset_ids, or the start picture of the clip) and change only what is wrong. Every try stays recorded and shown.",
-  "- Make the film in four batches: all sheets, all start pictures, all clips, then the music, each in one generate_assets call, and check each batch of pictures or clips in one call. Record a cause that will hit other shots with record_lesson. yumekit sends no lesson to a model: write what applies into the prompts of the next shots.",
+  "- Record a cause that will hit other shots with record_lesson. yumekit sends no lesson to a model: write what applies into the prompts of the next shots.",
   "- Sheets and start pictures use the strongest picture model of the service unless the person picked one: every later picture copies them.",
   "",
 ].join("\n");

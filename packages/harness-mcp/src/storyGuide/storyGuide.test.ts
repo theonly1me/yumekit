@@ -32,7 +32,9 @@ describe("get_story_guide", () => {
 
     expect(guide).toContain("## Staging a fight for a trailer");
     expect(guide).toContain("Start late, inside the action");
-    expect(guide).toContain("Fight one or two opponents, not ten.");
+    expect(guide).toContain(
+      "A fight against many works as a run of short shots, each with one strike and one reaction.",
+    );
     expect(guide).toContain(
       "An effect that starts on the ground or at a random place is a fault.",
     );
