@@ -36,7 +36,7 @@ export function MusicLane(props: {
         const label = audioClipLabel({ clip, assets: props.assets });
         const isDraftShown =
           draft?.clipId === clip.id &&
-          (draft.isDragging || isSame({ first: draft.base, second: clip }));
+          (draft.isDragging || draft.baseClip === clip);
         const shown = isDraftShown ? draft : clip;
         const keyLimits = limitsOf({
           clip,
@@ -56,7 +56,12 @@ export function MusicLane(props: {
             setDraft(undefined);
             return;
           }
-          setDraft({ clipId: clip.id, ...next, base: clip, isDragging: false });
+          setDraft({
+            clipId: clip.id,
+            ...next,
+            baseClip: clip,
+            isDragging: false,
+          });
           props.edits
             .changeMusic({ clip, ...next })
             .then((isDone) => {
@@ -75,7 +80,7 @@ export function MusicLane(props: {
               setDraft({
                 clipId: clip.id,
                 ...options.placementOf(delta),
-                base: clip,
+                baseClip: clip,
                 isDragging: true,
               });
             },

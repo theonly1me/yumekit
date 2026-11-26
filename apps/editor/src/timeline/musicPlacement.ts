@@ -7,7 +7,7 @@ export interface Placement {
 
 export interface MusicDraft extends Placement {
   clipId: string;
-  base: Placement;
+  baseClip: AudioClip;
   isDragging: boolean;
 }
 

@@ -16,7 +16,7 @@ import type { TimelineEdits } from "./timelineEdits.js";
 interface LengthDraft {
   clipId: string;
   durationFrames: number;
-  baseFrames: number;
+  baseClip: SceneClip;
   isDragging: boolean;
 }
 
@@ -27,7 +27,7 @@ function activeDraftOf(options: {
   const { draft } = options;
   const card = options.cards.find((each) => each.clip.id === draft?.clipId);
   if (draft === undefined || card === undefined) return undefined;
-  const isWaiting = card.clip.durationFrames === draft.baseFrames;
+  const isWaiting = card.clip === draft.baseClip;
   if (!draft.isDragging && !isWaiting) return undefined;
   return {
     index: card.index,
@@ -83,7 +83,7 @@ export function SceneLane(props: {
           setLengthDraft({
             clipId: clip.id,
             durationFrames,
-            baseFrames: clip.durationFrames,
+            baseClip: clip,
             isDragging: false,
           });
           props.edits
@@ -162,7 +162,7 @@ export function SceneLane(props: {
                     setLengthDraft({
                       clipId: clip.id,
                       durationFrames: lengthOf({ from: clip, delta }),
-                      baseFrames: clip.durationFrames,
+                      baseClip: clip,
                       isDragging: true,
                     });
                   },

@@ -93,6 +93,7 @@ describe("the detailed timeline by drag", () => {
     expect(await rowText(runningEngine())).toBe("a b c d e f");
     await undo(page);
     await expect.poll(lengths).toBe("60 60 60 60 60 60");
+    await expect.poll(() => edge.getAttribute("aria-valuenow")).toBe("2");
     await close();
   });
 

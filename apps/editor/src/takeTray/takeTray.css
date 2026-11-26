@@ -8,6 +8,11 @@
   color: var(--muted);
 }
 
+.tray-name {
+  font-size: var(--step--2);
+  color: var(--muted);
+}
+
 .tray .fact {
   font-size: var(--step--2);
 }

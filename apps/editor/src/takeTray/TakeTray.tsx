@@ -47,7 +47,7 @@ export function TakeTray(props: {
 }) {
   return (
     <div className="tray">
-      <span className="track-name">From Takes</span>
+      <span className="tray-name">From Takes</span>
       {props.items.length === 0 ? (
         <p className="fact">
           Approved pictures and clips from Takes show here. Drag one onto a

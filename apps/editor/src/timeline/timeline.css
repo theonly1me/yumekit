@@ -3,6 +3,12 @@
   gap: 4px;
 }
 
+.scene-lane,
+.music-lane {
+  overflow-x: clip;
+  overflow-clip-margin: 4px;
+}
+
 .clip.scene-clip,
 .clip.music-clip {
   display: flex;
