@@ -81,7 +81,7 @@ Use these words with these meanings in code and in documents.
 ## Follow-ups that have no design yet
 
 - One paid check of `tools/gemini-media` with a real key: a 3 second clip at 720p, and confirmation that background mode works for the model.
-- Timeline changes by drag in the editor (milestone 3), the first run screen, and a desktop shell with Tauri.
+- The first run screen, and a desktop shell with Tauri.
 - A spending limit for each run of a request, next to the limit of each project (document 15, "Details of WP64").
 - The cast and style rules for long content (milestone 5). Document 20 adds the sheets, the art direction, and the story plan for a film with AI video.
 - Publishing to a platform (milestone 6).
