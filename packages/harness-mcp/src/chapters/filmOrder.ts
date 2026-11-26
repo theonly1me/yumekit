@@ -6,7 +6,10 @@ import {
   type Timeline,
 } from "@yumekit/project";
 import { shotIdOf } from "../storyPlan/shotOfAsset.js";
-import { videoSoundTrackId } from "../timeline/narrationPlan.js";
+import {
+  tracksWithVideoSounds,
+  videoAssetIdOf,
+} from "../timeline/videoSounds.js";
 
 interface ClipRun {
   shotId: string | undefined;
@@ -16,19 +19,6 @@ interface ClipRun {
 export interface RowOrderChange {
   timeline: Timeline;
   edit: Edit;
-}
-
-function videoAssetIdOf(options: {
-  snapshot: ProjectSnapshot;
-  clip: SceneClip;
-}): string | undefined {
-  const scene = options.snapshot.scenes.find(
-    (candidate) => candidate.id === options.clip.sceneId,
-  );
-  if (scene?.source.kind !== "kit") return undefined;
-  if (scene.source.component !== "video-clip") return undefined;
-  const assetId = scene.source.props["assetId"];
-  return typeof assetId === "string" ? assetId : undefined;
 }
 
 export function shotIdOfClip(options: {
@@ -74,46 +64,6 @@ function packedClips(options: {
   });
 }
 
-function countBy(values: string[]): Map<string, number> {
-  const counts = new Map<string, number>();
-  for (const value of values) counts.set(value, (counts.get(value) ?? 0) + 1);
-  return counts;
-}
-
-function withVideoSounds(options: {
-  snapshot: ProjectSnapshot;
-  timeline: Timeline;
-  after: SceneClip[];
-}): Timeline["tracks"] {
-  const shown = options.after.flatMap((clip) => {
-    const assetId = videoAssetIdOf({ snapshot: options.snapshot, clip });
-    return assetId === undefined ? [] : [{ assetId, clip }];
-  });
-  const shownCounts = countBy(shown.map((entry) => entry.assetId));
-  return options.timeline.tracks.map((track) => {
-    if (track.kind !== "audio" || track.id !== videoSoundTrackId) return track;
-    const soundCounts = countBy(track.clips.map((clip) => clip.assetId));
-    return {
-      ...track,
-      clips: track.clips.map((sound) => {
-        const scene = shown.find((entry) => entry.assetId === sound.assetId);
-        const isOnlyPair =
-          shownCounts.get(sound.assetId) === 1 &&
-          soundCounts.get(sound.assetId) === 1;
-        if (scene === undefined || !isOnlyPair) return sound;
-        return {
-          ...sound,
-          startFrame: scene.clip.startFrame,
-          durationFrames: Math.min(
-            sound.durationFrames,
-            scene.clip.durationFrames,
-          ),
-        };
-      }),
-    };
-  });
-}
-
 export function rowOrderChangesOf(options: {
   snapshot: ProjectSnapshot;
   shotIds: string[];
@@ -141,7 +91,11 @@ export function rowOrderChangesOf(options: {
       clips: ordered,
       firstFrame: before[0]?.startFrame ?? 0,
     });
-    const tracks = withVideoSounds({ snapshot, timeline, after });
+    const tracks = tracksWithVideoSounds({
+      snapshot,
+      timeline,
+      sceneClips: after,
+    });
     return [
       {
         timeline,

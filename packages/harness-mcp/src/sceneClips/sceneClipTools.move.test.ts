@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { startChapteredFilm, trackClipsOf } from "../testing/chapteredFilm.js";
 import { harnessWithThreeScenes, rowOf } from "../testing/sceneClipFixture.js";
 
 describe("move_scene_clip", () => {
@@ -46,6 +47,28 @@ describe("move_scene_clip", () => {
       ["two", "b", 5, 20],
       ["three", "c", 25, 40],
       ["one", "a", 65, 25],
+    ]);
+  });
+
+  it("moves the sound of each video with its clip, so a sound stays in step with its picture", async () => {
+    const harness = await startChapteredFilm();
+
+    await harness.call({
+      name: "move_scene_clip",
+      arguments: { clip_id: "video-c-clip", to_index: 0 },
+    });
+
+    expect(trackClipsOf({ harness, trackId: "scenes" })).toEqual([
+      "video-c-clip@0",
+      "video-a-clip@12",
+      "video-b-clip@22",
+      "video-d-clip@33",
+    ]);
+    expect(trackClipsOf({ harness, trackId: "video-sound" })).toEqual([
+      "video-sound-c-clip@0",
+      "video-sound-a-clip@12",
+      "video-sound-b-clip@22",
+      "video-sound-d-clip@33",
     ]);
   });
 
