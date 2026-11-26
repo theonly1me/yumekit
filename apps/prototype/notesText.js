@@ -25,12 +25,12 @@ export const changes = [
     "After Start, the lead asks its questions in the chat, with answer buttons. Then the story shows on the left with Approve the story. Then the chapters, then the pictures arrive as they finish. The step rail (Story, Pictures, Clips, Cut) shows where the chapter is. A past step opens its last take.",
   ],
   [
-    "Mark only what is wrong",
-    "A take is a contact sheet of pictures with no boxes and no buttons. Click a picture to see it large, pin a note, or say Don't use this one. A picture with no note counts as approved when you press the one button: Send 2 notes to the lead, or All good. Make the clips, about $2.82.",
+    "Review each take on the page",
+    "Each item of a take is a row: the picture or the clip at a size to judge, and its review next to it. Click a picture to drop a numbered pin with its own words; play a clip in the row and mark a moment. Pick Looks right, Has mistakes, Not sure, or Don't use this one, add a tag, and write a note. It saves as you type, with no Add button. Looks right also makes this version the one in use for its place, also an older one from Compare. Nothing marked counts as approved when you press the one button.",
   ],
   [
     "The take number is the slate",
-    "Each take starts with its number set large. Earlier takes are a menu next to it. The six filters became one switch: Only new and waiting.",
+    "Each take starts with its number set large. Earlier takes are a menu next to it. The filters above the rows are All, Not reviewed, Has mistakes, In use, and New in this take. Full size shows a picture large with its pins.",
   ],
   [
     "Where the advanced parts went",

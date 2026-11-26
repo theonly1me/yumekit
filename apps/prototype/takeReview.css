@@ -44,7 +44,7 @@ button.use-this:disabled {
   color: var(--decline);
 }
 
-.compare-link {
+.use-row button.link {
   font-size: var(--step--1);
 }
 

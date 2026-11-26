@@ -1,17 +1,17 @@
 import { escapeText } from "./state.js";
 import { mediaMarkup, stopPlayback, togglePlay } from "./takeMedia.js";
-import { isUsedNow, pickUse, reviewOf } from "./takeReview.js";
+import { isUsedNow, pickVerdict, verdictOf } from "./takeReview.js";
 import { changeView, itemOf, takes } from "./takesStore.js";
 
-function useButtonMarkup(each) {
-  return `<button type="button" class="use-this" data-use-item="${each.id}" aria-pressed="${reviewOf(each).use}">Use this</button>`;
+function looksRightMarkup(each) {
+  return `<button type="button" class="use-this" data-looks-right="${each.id}" aria-pressed="${verdictOf(each) === "approved"}">Looks right</button>`;
 }
 
 function compareMarkup(item) {
   const older = itemOf(item.replaces);
   const column = ({ each, label }) => `
     <figure class="compare-column">
-      <figcaption>${label}${isUsedNow(each) ? `<span class="badge in-use">In use</span>` : ""}${useButtonMarkup(each)}</figcaption>
+      <figcaption>${label}${isUsedNow(each) ? `<span class="badge in-use">In use</span>` : ""}${looksRightMarkup(each)}</figcaption>
       ${mediaMarkup({ item: each, large: true })}
     </figure>`;
   return `
@@ -72,9 +72,12 @@ export function bindLarge({ element }) {
       closeLarge();
     }
   });
-  large.querySelectorAll("[data-use-item]").forEach((button) => {
+  large.querySelectorAll("[data-looks-right]").forEach((button) => {
     button.addEventListener("click", () =>
-      pickUse(itemOf(button.dataset.useItem)),
+      pickVerdict({
+        item: itemOf(button.dataset.looksRight),
+        verdict: "approved",
+      }),
     );
   });
   large.querySelectorAll("[data-play]").forEach((button) => {

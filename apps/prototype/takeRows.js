@@ -4,7 +4,6 @@ import { whatToCheckOf } from "./takeNotes.js";
 import {
   isUsedNow,
   openWithMistakes,
-  pickUse,
   pickVerdict,
   reviewOf,
   reviewTags,
@@ -72,10 +71,7 @@ export function rowMarkup({ item, take }) {
         <p class="review-badges">${badgesMarkup({ item, take })}</p>
         <p class="lead-note"><span>The lead</span>${escapeText(item.note)}</p>
         ${check === undefined ? "" : `<p class="check-line"><span>What to check</span>${escapeText(check)}</p>`}
-        <div class="use-row">
-          <button type="button" class="use-this" data-use aria-pressed="${review.use}">Use this</button>
-          ${older === undefined ? "" : `<button type="button" class="link" data-compare>Compare with take ${older.take}</button>`}
-        </div>
+        ${older === undefined ? "" : `<div class="use-row"><button type="button" class="link" data-compare>Compare with take ${older.take}</button></div>`}
         <div class="verdicts" role="group" aria-label="Your verdict">${reviewVerdicts
           .map(
             ([id, label]) =>
@@ -114,9 +110,6 @@ export function bindRow({ row, item }) {
       takes.view.focusId = `row-mark-${item.id}-${item.comments.length}`;
     },
   });
-  row
-    .querySelector("[data-use]")
-    .addEventListener("click", () => pickUse(item));
   row.querySelectorAll("[data-review-verdict]").forEach((button) => {
     button.addEventListener("click", () =>
       pickVerdict({ item, verdict: button.dataset.reviewVerdict }),

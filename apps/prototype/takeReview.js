@@ -71,11 +71,18 @@ export function openWithMistakes(item) {
   keepOldVerdict(item);
 }
 
+function slotOf(item) {
+  return [...takes.items.values()].filter((other) => other.slot === item.slot);
+}
+
 export function pickVerdict({ item, verdict }) {
   const review = reviewOf(item);
   review.verdict = review.verdict === verdict ? undefined : verdict;
-  if (review.verdict !== "approved") {
-    review.use = false;
+  review.use = review.verdict === "approved";
+  if (review.use) {
+    slotOf(item)
+      .filter((other) => other !== item && other.review !== undefined)
+      .forEach((other) => (other.review.use = false));
   }
   keepOldVerdict(item);
   notify();
@@ -100,38 +107,22 @@ export function writeNote({ item, text }) {
   }
 }
 
-export function pickUse(item) {
-  const review = reviewOf(item);
-  if (review.use) {
-    review.use = false;
-    notify();
-    return;
-  }
-  for (const other of takes.items.values()) {
-    if (other.slot === item.slot && other.review !== undefined) {
-      other.review.use = false;
-    }
-  }
-  review.use = true;
-  review.verdict = "approved";
-  keepOldVerdict(item);
-  notify();
+function isLive(item) {
+  const verdict = verdictOf(item);
+  return (
+    item.verdict !== "declined" &&
+    (verdict === undefined || verdict === "approved")
+  );
 }
 
 export function isUsedNow(item) {
-  const picked = [...takes.items.values()].find(
-    (other) => other.slot === item.slot && other.review?.use === true,
-  );
+  const slot = slotOf(item);
+  const picked = slot.find((other) => other.review?.use === true);
   if (picked !== undefined) {
     return picked === item;
   }
-  if (item.verdict !== "approved") {
-    return false;
-  }
-  return ![...takes.items.values()].some(
-    (other) =>
-      other.slot === item.slot &&
-      other.take > item.take &&
-      other.verdict === "approved",
-  );
+  const live = slot
+    .filter(isLive)
+    .toSorted((...[first, second]) => first.take - second.take);
+  return live.at(-1) === item;
 }
