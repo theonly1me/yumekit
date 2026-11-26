@@ -55,7 +55,10 @@ function takeFoot(take) {
   }
   const count = currentItemsOf(take).filter(needsNotes).length;
   if (count > 0) {
-    return [markHint, [["send", notesLabel(count)]]];
+    return [
+      `${count} to change, leave out, or answer. Everything else counts as approved.`,
+      [["send", "Send the review to the lead"]],
+    ];
   }
   if (take.step === "pictures") {
     const planned = plannedClips(take);

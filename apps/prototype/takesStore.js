@@ -153,7 +153,8 @@ export function approveRest(take) {
 }
 
 export function isMarked(item) {
-  return item.verdict === "declined" || item.comments.length > 0;
+  const asks = ["change", "question"].includes(item.review?.verdict);
+  return asks || item.verdict === "declined" || item.comments.length > 0;
 }
 
 export function approveUnmarked(take) {
