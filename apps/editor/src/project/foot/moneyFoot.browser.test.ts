@@ -1,22 +1,8 @@
-import { fileURLToPath } from "node:url";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { chatOf, claudeLines, setScenario } from "../../testing/chatTesting.js";
 import { closeBrowser, openProject } from "../../testing/editorPage.js";
-import { withoutOtherBundled } from "../../testing/mediaTestTools.js";
+import { pricedEngineOptions } from "../../testing/pricedMedia.js";
 import { runEngine, type RunningEngine } from "../../testing/runEngine.js";
-
-const pricedServer = {
-  command: process.execPath,
-  args: [
-    fileURLToPath(
-      new URL(
-        "../../../../../packages/tools/src/testing/pricedMediaServer.ts",
-        import.meta.url,
-      ),
-    ),
-  ],
-  passEnvironment: ["YUMEKIT_PRICED_KEY"],
-};
 
 let engine: RunningEngine | undefined;
 
@@ -26,15 +12,7 @@ function runningEngine(): RunningEngine {
 }
 
 beforeAll(async () => {
-  engine = await runEngine({
-    fakeAgent: true,
-    environment: { YUMEKIT_PRICED_KEY: "made-up-priced-key" },
-    mediaTools: {
-      mcpServers: { priced: pricedServer, ...withoutOtherBundled },
-      defaults: { video: "priced" },
-      limits: { spendingUsd: 3 },
-    },
-  });
+  engine = await runEngine(pricedEngineOptions);
   await setScenario({
     engine,
     scenario: {

@@ -1,6 +1,7 @@
 import { notesLabelOf } from "../takes/notes/draftNotes.js";
 import type { Take, TakeStep } from "../takes/takeSchema.js";
 import type { WorkState } from "../work/workState.js";
+import { moneyActionOf, type MoneyLeft } from "./moneyAction.js";
 
 export type ActionId =
   | "send"
@@ -9,7 +10,10 @@ export type ActionId =
   | "send-story"
   | "open-latest"
   | "next-chapter"
-  | "export";
+  | "export"
+  | "raise"
+  | "fewer"
+  | "stop-here";
 
 export interface FootButton {
   id: ActionId;
@@ -156,8 +160,11 @@ export function nextActionOf(options: {
   hasNextChapter: boolean;
   isLeadRunning: boolean;
   takeCost: number;
+  money: MoneyLeft | undefined;
 }): NextAction {
   const { state } = options;
+  const warning = moneyActionOf(options);
+  if (warning !== undefined) return warning;
   const stop: FootButton = { id: "stop", label: "Stop", isPrimary: false };
   switch (state.kind) {
     case "failed":

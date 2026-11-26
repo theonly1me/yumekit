@@ -8,8 +8,10 @@ function actionOf(options: {
   noteCount?: number;
   isStoryApproved?: boolean;
   hasNextChapter?: boolean;
+  money?: { leftUsd: number; limitUsd: number };
 }) {
   return nextActionOf({
+    money: undefined,
     noteCount: 0,
     latestTakeId: undefined,
     isStoryApproved: false,
@@ -83,5 +85,28 @@ describe("the one next action", () => {
       line: "The film is done.",
       buttons: [{ id: "export", label: "Export", isPrimary: true }],
     });
+  });
+
+  it("warns before the send when the next step costs more than the money left", () => {
+    const short = { leftUsd: 1.1, limitUsd: 5 };
+    const clips = { ...pictures, nextStepEstimateUsd: 3.2 };
+
+    expect(
+      actionOf({ state: { kind: "take", take: clips }, money: short }),
+    ).toEqual({
+      line: "The clips cost about $3.20 and $1.10 is left. Nothing is spent until you pick.",
+      buttons: [
+        { id: "raise", label: "Raise this project to $10", isPrimary: true },
+        { id: "fewer", label: "Make fewer clips", isPrimary: false },
+        { id: "stop-here", label: "Stop here", isPrimary: false },
+      ],
+    });
+    expect(
+      actionOf({
+        state: { kind: "take", take: clips },
+        money: short,
+        noteCount: 1,
+      }).buttons.map((button) => button.label),
+    ).toEqual(["Send 1 note to the lead"]);
   });
 });

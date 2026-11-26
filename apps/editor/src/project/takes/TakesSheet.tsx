@@ -1,4 +1,3 @@
-import { useState } from "react";
 import type { EngineClient } from "../../engine/engineClient.js";
 import type { Snapshot } from "../../engine/snapshot.js";
 import { Sheet } from "../../sheets/Sheet.js";
@@ -7,7 +6,8 @@ import { nextActionOf } from "../foot/nextAction.js";
 import { latestTakeIdOf, takeCostOf } from "../work/projectFacts.js";
 import { sentNotesOf } from "./notes/draftNotes.js";
 import { useTakeNotes } from "./notes/useDraftNotes.js";
-import { sendTake } from "./sendTake.js";
+import { useMoneyLeft } from "../foot/useMoneyLeft.js";
+import { useTakeSend } from "./useTakeSend.js";
 import { TakeView } from "./TakeView.js";
 import type { Take } from "./takeSchema.js";
 import { chaptersOf } from "./verdicts.js";
@@ -33,18 +33,27 @@ function TakeOnSheet(props: {
   const { client, snapshot, take } = props;
   const takes = snapshot.takes ?? [];
   const notes = useTakeNotes(take.id);
-  const [failure, setFailure] = useState<string>();
-  const [isBusy, setBusy] = useState(false);
-  const sent = sentNotesOf(notes.draft);
+  const money = useMoneyLeft({
+    client,
+    readyTakeId: take.state === "ready" ? take.id : undefined,
+  });
+  const sending = useTakeSend({
+    client,
+    take,
+    notes,
+    money,
+    onDone: () => undefined,
+  });
   const action = nextActionOf({
     state:
       take.state === "open" ? { kind: "making", take } : { kind: "take", take },
-    noteCount: sent.length,
+    noteCount: sentNotesOf(notes.draft).length,
     latestTakeId: latestTakeIdOf({ takes, take }),
     isStoryApproved: true,
     hasNextChapter: false,
     isLeadRunning: false,
     takeCost: takeCostOf({ take, snapshot }),
+    money,
   });
   return (
     <>
@@ -59,24 +68,14 @@ function TakeOnSheet(props: {
       />
       <NextActionBar
         action={action}
-        isBusy={isBusy}
-        failure={failure}
+        isBusy={sending.isBusy}
+        failure={sending.failure}
         onAction={(id) => {
-          if (id === "open-latest") {
-            props.onPick(undefined);
-            return;
+          if (id === "open-latest") props.onPick(undefined);
+          if (id in sending.handlers) {
+            const handlers: Record<string, () => void> = sending.handlers;
+            handlers[id]?.();
           }
-          if (id !== "send") return;
-          setBusy(true);
-          sendTake({ client, takeId: take.id, notes: sent })
-            .then((outcome) => {
-              setFailure(outcome.ok ? undefined : outcome.message);
-              if (outcome.ok) notes.clear();
-            })
-            .finally(() => {
-              setBusy(false);
-            })
-            .catch(() => undefined);
         }}
       />
     </>

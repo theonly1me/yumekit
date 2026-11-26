@@ -51,3 +51,15 @@ export function StateScreen(props: { state: ScreenState }) {
     </main>
   );
 }
+
+export function NoVideoShape(props: { onBackToProject: () => void }) {
+  return (
+    <main className="state">
+      <h1>This project has no video shape yet</h1>
+      <p>Ask the lead to add a platform, for example YouTube.</p>
+      <button type="button" onClick={props.onBackToProject}>
+        Back to the project
+      </button>
+    </main>
+  );
+}

@@ -42,6 +42,34 @@ describe("a round of the lead's work as a take", { timeout: 60_000 }, () => {
     ]);
   });
 
+  it("keeps the items of a ready take in the order that the lead names them", async () => {
+    const harness = await startTakeHarness();
+    await harness.call({ name: "open_take", arguments: { step: "pictures" } });
+    for (const assetId of ["lantern", "ferry", "harbor"]) {
+      await harness.call({
+        name: "generate_asset",
+        arguments: picture(assetId),
+      });
+    }
+
+    await harness.call({
+      name: "ready_take",
+      arguments: {
+        items: ["harbor", "ferry", "lantern"].map((id) => ({
+          id,
+          note: `The picture ${id}.`,
+        })),
+      },
+    });
+
+    const [take] = harness.store.read().takes;
+    expect(take?.items.map((item) => item.id)).toEqual([
+      "harbor",
+      "ferry",
+      "lantern",
+    ]);
+  });
+
   it("is ready only with a note on each item and what to check on each clip", async () => {
     const harness = await startTakeHarness({ approvePicturesFirst: false });
     await harness.call({ name: "open_take", arguments: { step: "clips" } });

@@ -55,6 +55,7 @@ export const chatEntrySchema = z.discriminatedUnion("kind", [
     summary: z.string(),
     undoSteps: z.number(),
     undone: z.boolean(),
+    quiet: z.literal(true).optional(),
   }),
   z.object({ kind: z.literal("notice"), id: z.string(), text: z.string() }),
   z.object({

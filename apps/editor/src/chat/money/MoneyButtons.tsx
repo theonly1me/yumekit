@@ -2,8 +2,23 @@ import { useState } from "react";
 import { dollarsText } from "../../settings/dollarsText.js";
 import type { MoneyChoice, MoneyEntry } from "../chatSchemas.js";
 
-export function moneyLineOf(entry: MoneyEntry): string {
+export function moneyLineOf(
+  entry: Pick<MoneyEntry, "what" | "estimateUsd" | "leftUsd">,
+): string {
   return `The ${entry.what} cost about ${dollarsText(entry.estimateUsd)} and ${dollarsText(entry.leftUsd)} is left.`;
+}
+
+const raiseStepUsd = 5;
+
+export function raisedLimitOf(options: {
+  limitUsd: number;
+  leftUsd: number;
+  estimateUsd: number;
+}): number {
+  const neededCents = Math.round(
+    (options.limitUsd - options.leftUsd + options.estimateUsd) * 100,
+  );
+  return Math.ceil(neededCents / (raiseStepUsd * 100)) * raiseStepUsd;
 }
 
 export function MoneyButtons(props: {

@@ -1,4 +1,5 @@
 import type { Asset, Snapshot } from "../../engine/snapshot.js";
+import { inPlanOrder } from "./planOrder.js";
 import type { Take, TakeItem } from "./takeSchema.js";
 import { takesOfStep, verdictsOf, type Verdict } from "./verdicts.js";
 
@@ -115,6 +116,9 @@ export function shownItemsOf(options: {
     };
   });
   return sectionOrder.flatMap((section) =>
-    shown.filter((each) => each.section === section),
+    inPlanOrder({
+      snapshot,
+      items: shown.filter((each) => each.section === section),
+    }),
   );
 }

@@ -36,6 +36,7 @@ export async function openPicturesTake(options: {
 export async function readyTake(options: {
   engine: RunningEngine;
   items: { id: string; what_to_check?: string; replaces_asset_id?: string }[];
+  nextStepEstimateUsd?: number;
 }): Promise<void> {
   await options.engine.callTool({
     name: "ready_take",
@@ -44,6 +45,9 @@ export async function readyTake(options: {
         note: `The lead's note on ${item.id}.`,
         ...item,
       })),
+      ...(options.nextStepEstimateUsd === undefined
+        ? {}
+        : { next_step_estimate_usd: options.nextStepEstimateUsd }),
     },
   });
 }

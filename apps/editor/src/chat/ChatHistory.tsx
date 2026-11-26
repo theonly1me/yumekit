@@ -72,6 +72,7 @@ export function ChatHistory(props: {
           <AnswerView key={entry.id} answer={entry} text={chat.textOf(entry)} />
         );
       case "change":
+        if (entry.quiet === true) return undefined;
         return (
           <ChangeLine
             key={entry.id}

@@ -146,10 +146,16 @@ export function readyItemsOf(options: {
       return added === undefined || take.items.includes(added) ? [] : [added];
     }),
   ].filter((item) => !leftOut.has(item.id));
-  const noted = items.map((item) => {
-    const given = notes.get(item.id);
-    return given === undefined ? item : withNote({ item, input: given });
-  });
+  const order = input.items.map((item) => item.id);
+  const noted = items
+    .map((item) => {
+      const given = notes.get(item.id);
+      return given === undefined ? item : withNote({ item, input: given });
+    })
+    .toSorted(
+      (...[first, second]) =>
+        order.indexOf(first.id) - order.indexOf(second.id),
+    );
   const unnoted = noted.filter((item) => item.note === undefined);
   const unchecked = noted.filter(
     (item) =>

@@ -65,13 +65,13 @@ describe("the ready signal", () => {
 
     await expect.poll(() => page.title()).toBe("(1) Editor test");
     expect(await signals()).toEqual({
-      notices: ["yumekit: Take 1 is ready for you"],
+      notices: ["yumekit: Take 1 of the pictures is ready for you"],
       tones: 2,
       asks: 1,
     });
     const line = page.locator(".take-ready");
     expect(await line.locator("p").innerText()).toBe(
-      "Take 1 is ready for you: 1 picture to check.",
+      "Take 1 of the pictures is ready for you: 1 to check.",
     );
     await page.getByRole("button", { name: "Edit by hand" }).click();
     await page.getByRole("button", { name: "Open take 1" }).click();

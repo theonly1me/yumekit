@@ -27,6 +27,7 @@ export {
   videoClipComponent,
   type ChapterWork,
 } from "./chapterTimes.js";
+export { nextWorkOf, takeTitleInTextOf, takeTitleOf } from "./takeTitles.js";
 export {
   assetDecisionsOf,
   assetVerdictsOf,

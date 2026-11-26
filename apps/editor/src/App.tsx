@@ -9,6 +9,7 @@ import { StartScreen } from "./home/StartScreen.js";
 import { useServerKind } from "./home/useServerKind.js";
 import { ProjectScreen } from "./project/ProjectScreen.js";
 import { useReadySignal } from "./project/ready/useReadySignal.js";
+import { chaptersOf } from "./project/takes/verdicts.js";
 import { useScreen } from "./project/useScreen.js";
 import { StateScreen } from "./shell/StateScreen.js";
 
@@ -26,6 +27,7 @@ function ProjectScreens(props: {
   const { screen, go } = useScreen();
   useReadySignal({
     takes: snapshot.takes ?? [],
+    chapters: chaptersOf(snapshot.bible.storyPlan),
     projectName: snapshot.project.name,
   });
   if (screen === "editor") {

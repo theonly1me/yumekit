@@ -393,12 +393,12 @@ These decisions came from the build of WP83 on 2026-11-26.
 9. The large view moves with the arrow keys when the focus is not in a field. Escape closes the comparison first, then the large view. The frame step uses the frames per second of the project. A sent take shows its items with no marking.
 10. The story is a reading view: the premise, the world and its rule, each character, the opposing force, each step of the arc, what stays unknown, then the script in paragraphs. A comment is a note with `quote`, the words of the paragraph. When a ready take of the story exists, "Approve the story" and "Send N notes" use `POST /api/takes/<id>/send`. When the lead made no take of the story, "Approve the story" asks in the chat: "I approve the story. Save my yes to it, then go on to the next step." Notes go as one request with each quote. The lead then saves the yes with `set_story`, as its guide says.
 11. The film is the player of the cut of the newest take of the cut. "Approve the cut" sends that take with no notes. After an approved cut, "Next chapter" shows the next chapter, because the lead starts it after the send (T11), and "Export" stays next to it. The last chapter shows "Export" only.
-12. The money warning of WP82 replaces the next action while it is open, and the chat of the project screen does not show it. "Edit by hand" keeps it in the chat. Before a send, the price is on the button; the warning comes when a batch of the lead is over the money left.
+12. The money warning of WP82 replaces the next action while it is open, and the chat of the project screen does not show it. "Edit by hand" keeps it in the chat. Item 24 adds the warning before a send.
 
 ### The ready signal
 
-13. When a take turns ready while the page is open, the editor plays two tones made with Web Audio (660 and 880 Hz), shows the notice "Take N is ready for you" ("The story is ready for you" for the story), and puts "(N)" before the name of the project in the title of the tab, for each ready take. A take that was ready before the page opened counts only in the title.
-14. The chat shows one line for each ready take at its end, with "Open take N" ("Read the story" for the story), until the take is sent.
+13. When a take turns ready while the page is open, the editor plays two tones made with Web Audio (660 and 880 Hz), shows the notice with the name of item 27, for example "Take 1 of the pictures is ready for you", and puts "(N)" before the name of the project in the title of the tab, for each ready take. A take that was ready before the page opened counts only in the title.
+14. The chat shows one line for each ready take at its end, for example "Take 1 of the pictures is ready for you: 3 to check.", with "Open take N" ("Read the story" for the story), until the take is sent.
 15. Each project runs on its own port, so its page has another origin than Start, and a browser keeps the notice permission for each origin. So the project screen asks for the permission at the first click of the person in it, and Start asks nothing.
 
 ### Start
@@ -414,3 +414,12 @@ These decisions came from the build of WP83 on 2026-11-26.
 
 22. The Making screen and its step list are removed. The words of the step actions move to `making/stepReasons.ts`, for the sound rows.
 23. The suggestion chips are removed from the chat. The chat of the project screen shows no list of running work, because the work area shows the progress.
+
+### After the review of the pull request
+
+24. The next action compares `nextStepEstimateUsd` of a ready take with the money left (`spending` of `GET /api/media/servers`) before the send. When the estimate is more and the take has no note, the next action shows the line of WP82, for example "The clips cost about $3.20 and $1.10 is left. Nothing is spent until you pick.", with "Raise this project to $X", "Make fewer clips", and "Stop here". X follows the rule of WP82 item 15. The work of the next step is pictures after the story and after the cut of a chapter, and clips after the pictures.
+25. "Raise" writes the own money limit of the project through `PUT /api/media/limits`, the route of the person, and then sends the take with no notes. `POST /api/takes/<id>/send` takes `next`: `go` (the default), `fewer`, or `stop`. With `fewer`, the request says "Take 1 of the pictures: all good. Make fewer clips.", and its details add the estimate and the money left, and ask the lead to make only what fits. With `stop`, the send approves the items and starts no turn, and the change line says "You approved take 1 of the pictures, and stopped there.".
+26. A turn of the lead that calls `open_take` or `ready_take` keeps its change entry with `quiet: true`. The chat shows no change line for it, so a take shows as the words of the lead and the card of item 14. The edits stay in the history of the project.
+27. A take has one name in the chat, the requests, and the notice: "The story" for the story, and "Take N of the pictures", "of the clips", or "of the cut" for the other steps, with "in chapter K" when the film has more than one chapter. The function `takeTitleOf` of `@yumekit/project/takes` makes it. So the send says "You approved the story." and "The story: all good. Go on.", and then "Take 1 of the pictures is ready".
+28. `ready_take` keeps the items in the order in which the lead names them. The contact sheet orders each section by the shot of the plan, then by the cast, then by that order, so the order does not change with the time at which each file finished.
+29. The ask box says "Ask the lead, or drop files here". The state "This project has no video shape yet" of the editor has "Back to the project".

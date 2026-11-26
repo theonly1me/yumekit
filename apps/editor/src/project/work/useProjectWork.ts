@@ -2,19 +2,17 @@ import { useState } from "react";
 import type { Chat } from "../../chat/useChat.js";
 import type { EngineClient } from "../../engine/engineClient.js";
 import type { Snapshot } from "../../engine/snapshot.js";
+import { takeOfState } from "../foot/moneyAction.js";
 import { nextActionOf, type ActionId } from "../foot/nextAction.js";
+import { useMoneyLeft } from "../foot/useMoneyLeft.js";
 import { sentNotesOf } from "../takes/notes/draftNotes.js";
 import { useTakeNotes } from "../takes/notes/useDraftNotes.js";
-import { sendTake } from "../takes/sendTake.js";
+import { useTakeSend } from "../takes/useTakeSend.js";
 import { storyRequestOf } from "./storyRequests.js";
 import { latestTakeIdOf, projectFactsOf, takeCostOf } from "./projectFacts.js";
-import { workStateOf, type ViewChoice, type WorkState } from "./workState.js";
+import { workStateOf, type ViewChoice } from "./workState.js";
 
 export type ProjectWork = ReturnType<typeof useProjectWork>;
-
-function takeOf(state: WorkState) {
-  return "take" in state ? state.take : undefined;
-}
 
 export function useProjectWork(options: {
   client: EngineClient;
@@ -26,8 +24,6 @@ export function useProjectWork(options: {
   const { client, snapshot, chat } = options;
   const [choice, setChoice] = useState<ViewChoice>({ kind: "auto" });
   const [pickedChapterId, setPickedChapterId] = useState<string>();
-  const [isBusy, setBusy] = useState(false);
-  const [failure, setFailure] = useState<string>();
   const facts = projectFactsOf({
     snapshot,
     entries: chat.entries,
@@ -41,8 +37,21 @@ export function useProjectWork(options: {
     },
     choice,
   });
-  const take = takeOf(state);
+  const take = takeOfState(state);
   const notes = useTakeNotes(take?.id ?? `${state.kind}-draft`);
+  const money = useMoneyLeft({
+    client,
+    readyTakeId: take?.state === "ready" ? take.id : undefined,
+  });
+  const sending = useTakeSend({
+    client,
+    take,
+    notes,
+    money,
+    onDone: () => {
+      setChoice({ kind: "auto" });
+    },
+  });
   const sent = sentNotesOf(notes.draft);
   const next = facts.chapters[facts.chapterIndex + 1];
   const action = nextActionOf({
@@ -56,54 +65,22 @@ export function useProjectWork(options: {
     hasNextChapter: next !== undefined,
     isLeadRunning: chat.isRunning,
     takeCost: take === undefined ? 0 : takeCostOf({ take, snapshot }),
+    money,
   });
   const show = (view: { choice: ViewChoice; chapterId?: string }) => {
-    setFailure(undefined);
+    sending.clearFailure();
     setChoice(view.choice);
     if (view.chapterId !== undefined) setPickedChapterId(view.chapterId);
   };
-  const busyWith = (work: () => Promise<string | undefined>) => {
-    setBusy(true);
-    setFailure(undefined);
-    work()
-      .then((problem) => {
-        setFailure(problem);
-        if (problem === undefined) {
-          notes.clear();
-          setChoice({ kind: "auto" });
-        }
-      })
-      .finally(() => {
-        setBusy(false);
-      })
-      .catch(() => undefined);
+  const askLead = (input: Parameters<Chat["send"]>[0]) => () => {
+    sending.run(async () =>
+      (await chat.send(input)) ? undefined : "The lead did not start.",
+    );
   };
   const handlers: Record<ActionId, () => void> = {
-    send: () => {
-      if (take === undefined) return;
-      busyWith(async () => {
-        const outcome = await sendTake({
-          client,
-          takeId: take.id,
-          notes: sent,
-        });
-        return outcome.ok ? undefined : outcome.message;
-      });
-    },
-    "approve-story": () => {
-      busyWith(async () =>
-        (await chat.send(storyRequestOf([])))
-          ? undefined
-          : "The lead did not start.",
-      );
-    },
-    "send-story": () => {
-      busyWith(async () =>
-        (await chat.send(storyRequestOf(sent)))
-          ? undefined
-          : "The lead did not start.",
-      );
-    },
+    ...sending.handlers,
+    "approve-story": askLead(storyRequestOf([])),
+    "send-story": askLead(storyRequestOf(sent)),
     stop: () => {
       chat.stop().catch(() => undefined);
     },
@@ -124,8 +101,8 @@ export function useProjectWork(options: {
     choice,
     notes,
     action,
-    isBusy,
-    failure,
+    isBusy: sending.isBusy,
+    failure: sending.failure,
     show,
     act: (id: ActionId) => {
       handlers[id]();

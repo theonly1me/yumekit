@@ -14,6 +14,7 @@ import { useHistory } from "../scenePanel/history/useHistory.js";
 import { useTakesSheet } from "../project/takes/useTakesSheet.js";
 import { useSettingsSheet } from "../settings/useSettingsSheet.js";
 import { EditorSide } from "./EditorSide.js";
+import { NoVideoShape } from "./StateScreen.js";
 import { LowerArea } from "./LowerArea.js";
 import { TopBar } from "./TopBar.js";
 import { Transport } from "./Transport.js";
@@ -88,12 +89,7 @@ export function Editor(props: {
   const edits = sceneEditsOf({ changes, onPicked: view.setPicked });
   const { output, tab } = facts;
   if (output === undefined || tab === undefined) {
-    return (
-      <main className="state">
-        <h1>This project has no video shape yet</h1>
-        <p>Ask your agent to add a platform, for example YouTube.</p>
-      </main>
-    );
+    return <NoVideoShape onBackToProject={props.onBackToProject} />;
   }
   return (
     <div className="editor">

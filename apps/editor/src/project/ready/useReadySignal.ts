@@ -1,18 +1,21 @@
 import { useEffect, useRef } from "react";
-import type { Take } from "../takes/takeSchema.js";
+import { takeTitleOf } from "@yumekit/project/takes";
+import type { Chapter, Take } from "../takes/takeSchema.js";
 import { playChime, showNotice, titleWithCount } from "./signals.js";
 
-export function readyNoticeOf(take: Take): string {
-  return take.step === "story"
-    ? "The story is ready for you"
-    : `Take ${String(take.number)} is ready for you`;
+export function readyNoticeOf(options: {
+  take: Take;
+  chapters: readonly Chapter[];
+}): string {
+  return `${takeTitleOf(options)} is ready for you`;
 }
 
 export function useReadySignal(options: {
   takes: readonly Take[];
+  chapters: readonly Chapter[];
   projectName: string;
 }): void {
-  const { takes, projectName } = options;
+  const { takes, chapters, projectName } = options;
   const known = useRef<ReadonlySet<string> | undefined>(undefined);
   const readyIds = takes
     .filter((take) => take.state === "ready")
@@ -27,8 +30,8 @@ export function useReadySignal(options: {
     const fresh = ready.filter((take) => !previous.has(take.id));
     if (fresh.length === 0) return;
     playChime();
-    for (const take of fresh) showNotice(readyNoticeOf(take));
-  }, [takes]);
+    for (const take of fresh) showNotice(readyNoticeOf({ take, chapters }));
+  }, [takes, chapters]);
 
   useEffect(() => {
     document.title = titleWithCount({

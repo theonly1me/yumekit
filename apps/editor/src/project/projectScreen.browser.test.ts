@@ -120,7 +120,7 @@ describe("the work area of the project screen", () => {
     await next.click();
     await expect
       .poll(async () => (await requestTextsSent(runningEngine)).at(-1))
-      .toContain("Take 1: all good. Go on.");
+      .toContain("Take 1 of the pictures: all good. Go on.");
   });
 
   it("shows the cut of the chapter in a player, with Approve the cut", async () => {
@@ -131,7 +131,7 @@ describe("the work area of the project screen", () => {
       .click();
     await expect
       .poll(async () => (await requestTextsSent(runningEngine)).at(-1))
-      .toContain("Take 2: all good. Go on.");
+      .toContain("Take 2 of the clips: all good. Go on.");
     await readyCutTake(runningEngine);
 
     await opened.page
