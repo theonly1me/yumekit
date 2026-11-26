@@ -1,7 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { mkdir } from "node:fs/promises";
-import { join } from "node:path";
-import type { AgentAdapter, Turn } from "@yumekit/brain";
+import type { AgentAdapter, RunAccess, Turn } from "@yumekit/brain";
 import type { ProjectStore } from "@yumekit/project";
 import type { ServerCommand } from "../agents/agentTypes.js";
 import type { Outcome } from "../engineTypes.js";
@@ -17,6 +16,7 @@ import { failed, noServerCommand } from "./chatFailures.js";
 import type { ChatLog } from "./chatLog.js";
 import type { AnswerEntry, ChatFailure, RequestEntry } from "./chatTypes.js";
 import type { LeadRun } from "./helpers/helperDesk.js";
+import { leadRunOf } from "./permissions/leadRunAccess.js";
 import {
   personExtrasOf,
   type PersonRequest,
@@ -52,6 +52,7 @@ interface ReadyLead {
   choices: RoleChoices;
   serverCommand: ServerCommand;
   workingFolder: string;
+  access: RunAccess;
 }
 
 async function readyLeadOf(
@@ -68,11 +69,14 @@ async function readyLeadOf(
       message: signInMessageOf(adapter),
     });
   }
-  const workingFolder = join(parts.projectFolder, ".yumekit", "agent");
+  const { access, workingFolder } = await leadRunOf({
+    projectFolder: parts.projectFolder,
+    agentId: adapter.id,
+  });
   await mkdir(workingFolder, { recursive: true });
   return {
     ok: true,
-    value: { adapter, choices, serverCommand, workingFolder },
+    value: { adapter, choices, serverCommand, workingFolder, access },
   };
 }
 

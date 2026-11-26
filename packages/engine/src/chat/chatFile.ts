@@ -18,6 +18,9 @@ function parsedChatOf(text: string): ChatFile {
 }
 
 function stoppedIfRunning(entry: ChatEntry): ChatEntry {
+  if (entry.kind === "permission" && entry.state === "open") {
+    return { ...entry, state: "ended" };
+  }
   return entry.kind === "answer" && entry.state === "running"
     ? { ...entry, state: "stopped" }
     : entry;

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { permissionEntrySchema } from "./permissions/permissionSchemas.js";
 import {
   personMessageExtras,
   questionsEntrySchema,
@@ -80,6 +81,7 @@ export const chatEntrySchema = z.discriminatedUnion("kind", [
     ...personMessageExtras,
   }),
   questionsEntrySchema,
+  permissionEntrySchema,
 ]);
 
 export const chatAgentSchema = z.object({

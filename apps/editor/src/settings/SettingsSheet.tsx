@@ -10,6 +10,7 @@ import { AiModels } from "./aiModels/AiModels.js";
 import type { VideoStyleId } from "../videoStyle/videoStyles.js";
 import { CalmRow } from "./CalmRow.js";
 import { ChecksRow } from "./ChecksRow.js";
+import { LeadAccessGroup } from "./leadAccess/LeadAccessGroup.js";
 import { LimitsGroup } from "./limits/LimitsGroup.js";
 import { LookRow } from "./LookRow.js";
 import { ServicesGroup } from "./services/index.js";
@@ -35,6 +36,7 @@ export function SettingsSheet(props: {
       <div className="sheet-body">
         <h2 id="settings-title">Settings</h2>
         <AiGroup client={props.client} chat={props.chat} />
+        <LeadAccessGroup client={props.client} agent={props.chat.agent} />
         <LimitsGroup client={props.client} />
         <ThemeRow />
         <MoreSettings isOpenAtStart={props.openServerId !== undefined}>

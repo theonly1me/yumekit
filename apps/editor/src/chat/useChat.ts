@@ -4,6 +4,7 @@ import { useEngineEvents } from "../engine/useEngineEvents.js";
 import { failureTextOf } from "../tools/requestText.js";
 import { hasRunningAnswer, withEntry } from "./chatEntries.js";
 import { chatRequestsOf, type AskInput } from "./chatRequests.js";
+import type { PermissionAnswer } from "./permissions/permissionSchemas.js";
 import type {
   AnswerEntry,
   ChatAgent,
@@ -147,6 +148,17 @@ export function useChat(client: EngineClient) {
       if (!chosen.ok) return failureTextOf(chosen.failure);
       setEntries((current) =>
         withEntry({ entries: current, entry: chosen.value }),
+      );
+      return undefined;
+    },
+    answerPermission: async (options: {
+      entryId: string;
+      answer: PermissionAnswer;
+    }): Promise<string | undefined> => {
+      const answered = await requests.answerPermission(options);
+      if (!answered.ok) return failureTextOf(answered.failure);
+      setEntries((current) =>
+        withEntry({ entries: current, entry: answered.value }),
       );
       return undefined;
     },

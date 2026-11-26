@@ -21,9 +21,12 @@ const chatSchema = z.object({
 });
 
 export async function startChatEngine(
-  setup: FakeAgentScenario & { userMediaTools?: object },
+  setup: FakeAgentScenario & {
+    userMediaTools?: object;
+    permissionWaitMilliseconds?: number;
+  },
 ) {
-  const { userMediaTools, ...scenario } = setup;
+  const { userMediaTools, permissionWaitMilliseconds, ...scenario } = setup;
   const project = await createTestProject(
     userMediaTools === undefined ? undefined : { userMediaTools },
   );
@@ -40,6 +43,9 @@ export async function startChatEngine(
   );
   const engine = await startTestEngine({
     projectFolder: project.projectFolder,
+    ...(permissionWaitMilliseconds === undefined
+      ? {}
+      : { permissionWaitMilliseconds }),
     serverCommand: { command: "/bin/false", args: [] },
   });
   const events = await openEvents(engine);

@@ -6,6 +6,7 @@ import {
   type MoneyChoice,
 } from "./chatSchemas.js";
 import type { SentFileInput } from "./files/pendingFile.js";
+import type { PermissionAnswer } from "./permissions/permissionSchemas.js";
 import type { AnswerInput } from "./questions/roundAnswers.js";
 
 export type ChatRequests = ReturnType<typeof chatRequestsOf>;
@@ -78,6 +79,15 @@ export function chatRequestsOf(client: EngineClient) {
         path: `/api/chat/money/${encodeURIComponent(options.entryId)}`,
         schema: chatEntrySchema,
         body: { choice: options.choice },
+      }),
+    answerPermission: (options: {
+      entryId: string;
+      answer: PermissionAnswer;
+    }) =>
+      client.readJson({
+        path: `/api/chat/permissions/${encodeURIComponent(options.entryId)}`,
+        schema: chatEntrySchema,
+        body: { answer: options.answer },
       }),
     saveAgent: (agent: string) =>
       client.readJson({

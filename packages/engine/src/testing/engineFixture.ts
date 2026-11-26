@@ -55,6 +55,7 @@ export async function startTestEngine(options: {
   editorFolder?: string;
   port?: number;
   serverCommand?: ServerCommand;
+  permissionWaitMilliseconds?: number;
 }): Promise<TestEngine> {
   const started = await startEngine(options);
   if (!started.ok) {

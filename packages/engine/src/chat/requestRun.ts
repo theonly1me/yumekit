@@ -1,8 +1,9 @@
 import { randomUUID } from "node:crypto";
 import {
-  instructionsOf,
+  leadInstructionsOf,
   type AgentAdapter,
   type ModelChoice,
+  type RunAccess,
   type ServerCommand,
   type Turn,
   type TurnEnd,
@@ -60,6 +61,7 @@ export interface RequestRun {
   tracker: AnswerTracker;
   serverCommand: ServerCommand;
   workingFolder: string;
+  access: RunAccess;
   onTurn: (turn: Turn) => void;
   isStopRequested: () => boolean;
 }
@@ -74,7 +76,11 @@ async function runAttempt(options: {
     request: run.requestText,
     sessionId: run.log.sessionId(),
     choice: run.choice,
-    instructions: instructionsOf(run.adapter.id),
+    access: run.access,
+    instructions: leadInstructionsOf({
+      agentId: run.adapter.id,
+      access: run.access,
+    }),
     serverCommand: run.serverCommand,
     workingFolder: run.workingFolder,
     onEvent: (event) => {

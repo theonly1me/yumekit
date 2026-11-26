@@ -92,6 +92,7 @@ export async function startEngine(options: {
   editorFolder?: string;
   port?: number;
   serverCommand?: ServerCommand;
+  permissionWaitMilliseconds?: number;
 }): Promise<Outcome<Engine, EngineFailure>> {
   const opened = await openProject({ folder: resolve(options.projectFolder) });
   if (!opened.ok) {
@@ -133,6 +134,7 @@ export async function startEngine(options: {
     store,
     tracked,
     events,
+    permissionWaitMilliseconds: options.permissionWaitMilliseconds,
     serverCommand: options.serverCommand,
   });
   helperChat.current = chat;

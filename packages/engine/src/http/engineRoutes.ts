@@ -9,6 +9,7 @@ import { mediaLimitRoutes } from "./mediaLimitRoutes.js";
 import { mediaPrepareRoutes } from "./mediaPrepareRoutes.js";
 import { mediaRequestRoutes } from "./mediaRequestRoutes.js";
 import { moneyRoutes } from "./moneyRoutes.js";
+import { permissionRoutes } from "./permissionRoutes.js";
 import { projectRoutes } from "./projectRoutes.js";
 import { settingsRoutes } from "./settingsRoutes.js";
 import { takeDraftRoutes } from "./takeDraftRoutes.js";
@@ -27,6 +28,7 @@ export const engineRoutes: Route[] = [
   ...agentRoutes,
   ...chatRoutes,
   ...moneyRoutes,
+  ...permissionRoutes,
   ...settingsRoutes,
   ...uploadRoutes,
   ...workRoutes,

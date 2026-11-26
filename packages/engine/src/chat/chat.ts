@@ -12,6 +12,8 @@ import { createCriticDesk, personCriticRun } from "./helpers/criticDesk.js";
 import { loadChat } from "./chatFile.js";
 import { createChatLog } from "./chatLog.js";
 import { createMoneyDesk } from "./money/moneyDesk.js";
+import { createPermissionDesk } from "./permissions/permissionDesk.js";
+import { permissionWaitMilliseconds } from "./permissions/permissionReplies.js";
 import {
   createQuestionDesk,
   questionsWaitingResult,
@@ -33,6 +35,7 @@ export async function createChat(options: {
   tracked: TrackedStore;
   events: EventHub;
   serverCommand: ServerCommand | undefined;
+  permissionWaitMilliseconds?: number | undefined;
 }): Promise<Chat> {
   const { projectFolder, tracked } = options;
   const programs = await findAgentPrograms();
@@ -54,6 +57,13 @@ export async function createChat(options: {
     running: Promise.resolve(),
     lead: undefined,
   };
+  const permissions = createPermissionDesk({
+    log,
+    projectFolder,
+    waitMilliseconds:
+      options.permissionWaitMilliseconds ?? permissionWaitMilliseconds,
+    onAnswered: () => state.tracker?.continueInNewAnswer(),
+  });
   const helpers = createHelperDesk();
   const critics = createCriticDesk({
     onNotice: (text) => {
@@ -70,6 +80,7 @@ export async function createChat(options: {
     steering,
     state,
     onEnded: () => {
+      permissions.endRequest();
       door.startWaitingMessages().catch(() => undefined);
     },
   };
@@ -77,6 +88,7 @@ export async function createChat(options: {
   const stop = () => {
     if (state.phase !== "running") return false;
     state.isStopRequested = true;
+    permissions.endRequest();
     helpers.stop();
     critics.stop();
     state.turn?.stop();
@@ -133,6 +145,16 @@ export async function createChat(options: {
       }),
     helperCallOf: (token) => critics.callOf(token) ?? helpers.callOf(token),
     money: createMoneyDesk({ log, startRequest: door.startRequest }),
+    permissions: {
+      ask: ({ call, isLead }) =>
+        permissions.ask({
+          call,
+          isLeadAtWork: isLead && state.phase === "running",
+        }),
+      isRequestOn: () => state.phase !== "idle",
+      checkFile: permissions.checkFile,
+      answer: permissions.answer,
+    },
     close: async () => {
       state.isClosing = true;
       stop();
