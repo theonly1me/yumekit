@@ -60,6 +60,13 @@ describe("chapters with the keyboard in Edit by hand", () => {
       .poll(() => chaptersText(runningEngine()))
       .toBe("The harbor: a | Into the fog: b c d | The island: e f");
     expect(await rowText(runningEngine())).toBe("a b c d e f");
+    const movedCard = page.locator(
+      '[data-group="fog"] [data-card="video-b-clip"]',
+    );
+    await expect.poll(() => movedCard.count()).toBe(1);
+    await expect
+      .poll(() => movedCard.evaluate((card) => card === document.activeElement))
+      .toBe(true);
     await page.keyboard.press("Alt+ArrowRight");
 
     await expect.poll(() => rowText(runningEngine())).toBe("a c b d e f");
@@ -78,6 +85,11 @@ describe("chapters with the keyboard in Edit by hand", () => {
     await expect
       .poll(() => chaptersText(runningEngine()))
       .toBe("The harbor: a | Into the fog: b c d | The island: e f");
+    await expect
+      .poll(() =>
+        page.locator('[data-group="fog"] [data-card="video-b-clip"]').count(),
+      )
+      .toBe(1);
     await page.keyboard.press("ArrowRight");
 
     await expect.poll(() => chaptersText(runningEngine())).toBe(firstChapters);
@@ -96,12 +108,16 @@ describe("chapters with the keyboard in Edit by hand", () => {
     await expect
       .poll(() => chaptersText(runningEngine()))
       .toBe("The harbor: a b | The fog bank: c d | The island: e f");
+    await expect
+      .poll(() => page.locator(".chapter-name").allInnerTexts())
+      .toContain("2. The fog bank");
     await actions.getByRole("button", { name: /^Split at "/ }).click();
     await expect
       .poll(() => chaptersText(runningEngine()))
       .toMatch(
         /^The harbor: a b \| The fog bank: c \| From .+: d \| The island: e f$/,
       );
+    await expect.poll(() => page.locator(".chapter-name").count()).toBe(4);
     await actions.getByRole("button", { name: "Join with chapter 3" }).click();
 
     await expect

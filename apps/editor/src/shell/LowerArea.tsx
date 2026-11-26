@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { chapterEditsOf } from "../chapters/chapterEdits.js";
+import { chapterEditsOf, type WaitingFilm } from "../chapters/chapterEdits.js";
 import { filmChaptersOf } from "../chapters/filmChapters.js";
 import { changeStartOf } from "../chat/requestTexts.js";
 import type { EngineClient } from "../engine/engineClient.js";
@@ -52,7 +52,8 @@ export function LowerArea(props: {
     () => filmChaptersOf({ snapshot, clips: mainClips }),
     [snapshot, mainClips],
   );
-  const chapterEdits = chapterEditsOf({ changes, film, sceneEdits: edits });
+  const [waitingFilm] = useState<WaitingFilm>(() => ({ current: undefined }));
+  const chapterEdits = chapterEditsOf({ changes, film, waiting: waitingFilm });
   const timelineEdits = timelineEditsOf({
     changes,
     outputId: output.id,

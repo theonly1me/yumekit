@@ -1,5 +1,4 @@
 import type { Chapter } from "@yumekit/project/takes";
-import type { SceneEdits } from "../scenes/sceneEdits.js";
 import type { DirectChanges } from "../scenes/useDirectChanges.js";
 import {
   chapterMovedOf,
@@ -38,25 +37,42 @@ function wireOf(chapters: Chapter[]) {
   }));
 }
 
+export interface WaitingFilm {
+  current: FilmChapters | undefined;
+}
+
 export function chapterEditsOf(options: {
   changes: DirectChanges;
   film: FilmChapters;
-  sceneEdits: SceneEdits;
+  waiting: WaitingFilm;
 }): ChapterEdits {
-  const { changes, film, sceneEdits } = options;
+  const { changes, film, waiting } = options;
   const order = () =>
     filmOrderOf({ chapters: film.chapters, cards: film.cards });
+  const runOnce = (call: { name: string; input: object }) => {
+    if (waiting.current === film) return;
+    waiting.current = film;
+    changes
+      .run({ area: "scenes", ...call })
+      .then((outcome) => {
+        if (outcome.kind === "failed") waiting.current = undefined;
+      })
+      .catch(() => {
+        waiting.current = undefined;
+      });
+  };
   const send = (chapters: Chapter[] | undefined) => {
     if (chapters === undefined) return;
     const wire = wireOf(chapters);
     if (JSON.stringify(wire) === JSON.stringify(wireOf(film.chapters))) return;
-    changes
-      .run({ area: "scenes", name: "set_chapters", input: { chapters: wire } })
-      .catch(() => undefined);
+    runOnce({ name: "set_chapters", input: { chapters: wire } });
   };
   const moveClip = (move: { card: ChapterCard; toIndex: number }) => {
     if (move.toIndex === move.card.index) return;
-    sceneEdits.move({ clip: move.card.clip, toIndex: move.toIndex });
+    runOnce({
+      name: "move_scene_clip",
+      input: { clip_id: move.card.clip.id, to_index: move.toIndex },
+    });
   };
   const shotFrom = (from: { card: ChapterCard; skipClipId: string }) =>
     film.cards
