@@ -14,7 +14,9 @@
     "typecheck": "tsc --build && tsc -p scripts/importRules && tsc -p scripts/release && tsc -p scripts/testFolders",
     "lint": "eslint . && prettier --check . && pnpm run check-imports",
     "check-imports": "node --experimental-strip-types scripts/importRules/checkImports.ts",
-    "test": "node --experimental-strip-types scripts/testFolders/main.ts",
+    "test": "node --experimental-strip-types scripts/testFolders/main.ts --project=unit-*",
+    "test:e2e": "node --experimental-strip-types scripts/testFolders/main.ts --project=e2e-*",
+    "test:all": "node --experimental-strip-types scripts/testFolders/main.ts",
     "format": "prettier --write .",
     "pack-release": "tsc --build --clean && pnpm build && node --experimental-strip-types scripts/release/packRelease.ts",
     "check-release": "node --experimental-strip-types scripts/release/installCheck/main.ts"

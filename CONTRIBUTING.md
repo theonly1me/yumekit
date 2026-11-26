@@ -5,7 +5,7 @@ Small and focused changes are easiest to review.
 ## Before you open a pull request
 
 1. Open an issue for a large change. Describe the problem first.
-2. Run `pnpm lint`, `pnpm typecheck`, `pnpm test`, and `pnpm build`. All checks must pass.
+2. Run `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:e2e`, and `pnpm build`. All checks must pass. CI runs all of them except `pnpm test:e2e`.
 3. Add a test for each behavior that you add or change.
 
 ## Design first
@@ -34,8 +34,9 @@ You need Node.js 22 or later and pnpm. The version of pnpm is pinned in `package
 2. Install the dependencies: `pnpm install`.
 3. Run the linter and the format check: `pnpm lint`.
 4. Run the type check: `pnpm typecheck`.
-5. Run the tests: `pnpm test`.
-6. Build each package: `pnpm build`.
+5. Run the unit tests: `pnpm test`.
+6. Run the end-to-end tests: `pnpm test:e2e`. They start yumekit, its media servers, Chromium, and FFmpeg, so they need FFmpeg and the browser of Playwright. `pnpm test:all` runs both sets.
+7. Build each package: `pnpm build`.
 
 To format the files, run `pnpm format`.
 

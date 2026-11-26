@@ -29,6 +29,7 @@ export function useScriptSaves(options: {
   const scriptBeforeSaves = useRef(options.storedScript);
   const ownRevision = useRef(0);
   const savesInFlight = useRef(0);
+  const lastSaveSettled = useRef<Promise<void>>(Promise.resolve());
   const latest = useRef(options);
 
   useEffect(() => {
@@ -45,7 +46,11 @@ export function useScriptSaves(options: {
       scriptBeforeSaves.current = latest.current.storedScript;
     }
     savesInFlight.current += 1;
-    callInOrder({ client, name: "set_script", input: { script } })
+    lastSaveSettled.current = callInOrder({
+      client,
+      name: "set_script",
+      input: { script },
+    })
       .finally(() => {
         savesInFlight.current -= 1;
       })
@@ -81,6 +86,7 @@ export function useScriptSaves(options: {
     window.clearTimeout(timer.current);
     timer.current = undefined;
     pending.current = undefined;
+    await lastSaveSettled.current;
     const count = savedCount.current;
     savedCount.current = 0;
     const isLastChangeMine = latest.current.revision === ownRevision.current;

@@ -26,7 +26,7 @@ export default defineProject({
     },
   ],
   test: {
-    name: "scene-kit-browser",
+    name: "unit-scene-kit-browser",
     include: ["src/**/*.browser.test.tsx"],
     setupFiles: ["../tools/src/testing/guard/browserTestGuard.ts"],
     browser: {

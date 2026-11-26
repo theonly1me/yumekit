@@ -51,38 +51,50 @@ function darkPixelCount(picture: DecodedPicture): number {
   return count;
 }
 
-describe("renderFrame with kit scenes", () => {
-  it("renders each kit scene, and draws the title card on paper with ink and the accent", async () => {
-    const folder = await createRenderProject({
-      edits: [
-        ...kitClips.map(kitScene),
-        sceneTracks({
-          tracks: [
-            [...kitClips.entries()].map(([index, clip]) => ({
+async function lastFrameOf(clip: {
+  component: string;
+  props: JsonObject;
+}): Promise<DecodedPicture> {
+  const folder = await createRenderProject({
+    edits: [
+      kitScene(clip),
+      sceneTracks({
+        tracks: [
+          [
+            {
               id: `clip-${clip.component}`,
               sceneId: clip.component,
-              startFrame: index * clipFrames,
+              startFrame: 0,
               durationFrames: clipFrames,
-            })),
+            },
           ],
-        }),
-      ],
+        ],
+      }),
+    ],
+  });
+  const rendered = valueOf(
+    await renderFrame({ folder, outputId: "wide", frame: clipFrames - 1 }),
+  );
+  return decodePng(rendered.png);
+}
+
+describe("renderFrame with kit scenes", () => {
+  it.each(kitClips)(
+    "renders the last frame of the $component kit scene",
+    async (clip) => {
+      const picture = await lastFrameOf(clip);
+
+      expect(picture.widthPixels).toBe(320);
+      expect(picture.heightPixels).toBe(180);
+    },
+  );
+
+  it("draws the title card on paper with ink and the accent", async () => {
+    const titleCard = await lastFrameOf({
+      component: "title-card",
+      props: { heading: "Kit title" },
     });
-    const pictures: DecodedPicture[] = [];
-    for (const index of kitClips.keys()) {
-      const rendered = valueOf(
-        await renderFrame({
-          folder,
-          outputId: "wide",
-          frame: index * clipFrames + clipFrames - 1,
-        }),
-      );
-      pictures.push(await decodePng(rendered.png));
-    }
-    const [titleCard] = pictures;
-    if (titleCard === undefined) {
-      throw new Error("The title card did not render");
-    }
+
     expect(
       isNear({ actual: titleCard.pixelAt({ x: 2, y: 177 }), expected: paper }),
     ).toBe(true);

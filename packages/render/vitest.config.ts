@@ -3,7 +3,7 @@ import { defineProject } from "vitest/config";
 
 export default defineProject({
   test: {
-    name: "render-page-browser",
+    name: "unit-render-page-browser",
     include: ["src/page/**/*.browser.test.ts"],
     setupFiles: ["../tools/src/testing/guard/browserTestGuard.ts"],
     browser: {

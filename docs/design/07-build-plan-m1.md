@@ -92,7 +92,7 @@ Each builder uses the thing it builds, in the way a user would, before it opens 
 3. Stay inside your packages. Do not change another package, the design documents, or the lint rules, except where your work package says so.
 4. Add a new package folder with the same files as an existing package.
 5. Check library versions and interfaces in current documents, never from memory.
-6. Run `pnpm lint`, `pnpm typecheck`, `pnpm test`, and `pnpm build` before each push.
+6. Run `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:e2e`, and `pnpm build` before each push.
 7. Open one pull request from a branch named `feat/<work-package-id>-<short-name>`, for example `feat/wp1-scene`. Watch CI until it is green.
 8. Do not merge. The lead agent reviews and merges with a squash commit.
 
