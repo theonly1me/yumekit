@@ -2,6 +2,8 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
   chatOf,
   claudeLines,
+  gateFileOf,
+  openGate,
   requestTextsSent,
   setScenario,
 } from "../testing/chatTesting.js";
@@ -34,6 +36,7 @@ beforeAll(async () => {
       steps: [
         { print: claudeLines.init },
         { print: claudeLines.whole("Done.") },
+        { waitForFile: gateFileOf(engine) },
         { print: claudeLines.result("completed") },
       ],
     },
@@ -105,6 +108,9 @@ describe("the changes in the chat", () => {
     expect((await requestTextsSent(runningEngine())).at(-1)).toBe(
       'The person picked the scene "Second counter" (scene id second, clip id second).\nMake it blue.',
     );
+    await expect.poll(() => chat.stopButton.count()).toBe(1);
+    await openGate(runningEngine());
+    await expect.poll(() => chat.stopButton.count()).toBe(0);
 
     await chip
       .getByRole("button", { name: "Ask about the full video" })

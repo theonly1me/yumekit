@@ -234,6 +234,7 @@ type TakeItem = {
   note?: string;
   whatToCheck?: string;
   replaces?: string;
+  earlier?: true;
   outputId?: string;
   file?: string;
   approved?: true;

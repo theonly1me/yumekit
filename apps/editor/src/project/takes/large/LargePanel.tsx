@@ -13,6 +13,18 @@ import { NoteList } from "../notes/NoteList.js";
 import type { TakeNotes } from "../notes/useDraftNotes.js";
 import type { ShownItem } from "../shownItems.js";
 
+function OriginBadge(props: { shown: ShownItem }) {
+  const { shown } = props;
+  switch (shown.origin) {
+    case "new":
+      return <span className="badge new">New in take {shown.takeNumber}</span>;
+    case "earlier":
+      return <span className="badge">Made before this take</span>;
+    case "approved":
+      return <span className="badge">Approved in take {shown.takeNumber}</span>;
+  }
+}
+
 export function LargePanel(props: {
   snapshot: Snapshot;
   shown: ShownItem;
@@ -39,11 +51,7 @@ export function LargePanel(props: {
     <aside className="large-panel">
       <h3>{captionOf(shown)}</h3>
       <p className="large-badges">
-        {shown.isNew ? (
-          <span className="badge new">New in take {shown.takeNumber}</span>
-        ) : (
-          <span className="badge">Approved in take {shown.takeNumber}</span>
-        )}
+        <OriginBadge shown={shown} />
         {olderTake === undefined ? undefined : (
           <span className="badge">Replaces take {olderTake}</span>
         )}

@@ -462,3 +462,43 @@ These decisions came from the build of the skill and the guide on 2026-11-26.
 20. The person sent that take with one note and a pin on the first shot: open wider on the village, with people who wave, to show that the town knows her. In 93 seconds the lead added a wide shot of the village stairs before the close shot at the workbench, with two people who wave. It kept the crowd to two and said why ("crowds tend to come out frozen or all looking alike"), and it kept the workbench shot in the take with a note to mark it if the person wants it gone.
 21. What the lead still does wrong: its first plan had no wide shot of the village and did not show the town that knows her, although the guide asks for both. It did not say what it took from the answers before the story. With no estimate from `ready_take`, it guessed "about $1 to 2" (with an en dash) and said that the sheets cost nothing. In the take after the note, it ran no `check_design` for the new picture, and said so.
 22. The evidence (the chat, the questions, the takes with the notes, the story and the plan, and a screenshot of take 2 of the pictures) is in the pull request.
+
+## Details of WP85
+
+These decisions came from the cleanup of the follow-ups of WP80 to WP84 on 2026-11-26.
+
+### Test engines and agent programs
+
+1. Each engine that the editor test helper `runEngine` starts gets a `PATH` of its own: one folder with links to `node`, `ffmpeg`, and `ffprobe`, and the empty agent programs that the test names, then `/usr/bin` and `/bin`. The fake agent keeps its own `PATH`. So a test engine never finds the `claude`, `codex`, or `cursor-agent` of the computer, and a request or a sign-in check never starts one.
+2. The folder of the running `node` is no longer on that `PATH`, because a global npm install of an agent program puts the program there.
+
+### The sound of a video in a move
+
+3. `move_scene_clip` moves the sound of each video with its clip, by the rule of item 4 of WP84: only when the video has one scene clip and one sound clip, to the start of the clip, and no longer than the clip. The tool description says so.
+4. `resize_scene_clip`, `remove_scene_clip`, and `duplicate_scene_clip` still leave the sound of each later video in place. A resize needs the full length of the sound to grow it again, so that change waits for its own design.
+
+### The ruler
+
+5. The labels of the ruler are at least 64 pixels apart. The step is the smallest of 1, 2, 5, 10, 15, 30, 60, 120, 300, and 600 seconds that keeps that space at the width of the ruler. A label shows only when 40 pixels are left before the end of the ruler, and a label never wraps.
+6. A film of 40 seconds now shows "0 s", "10 s", "20 s", and "30 s" at the width of a phone, and a label every 5 seconds at 1440 pixels, as before.
+
+### Lines of the changes of the person
+
+7. Each tool that changes the project has its own line in the chat, for example "You changed the music.", "You changed the fonts of the video.", "You changed the beat of the video.", and "You changed how the AI checks the film.". "You changed the project." stays only for a change that no tool names.
+8. Two lines name the value: "You turned off "Approve pictures before clips"." (or "on"), and "You renamed the project to "The ferry".".
+9. One act of the person that only adds files says how many: "You added 3 files to the project.". One file keeps "You added a file to the project.". An act that adds a file and then changes something else keeps the line of its last change.
+
+### Test folders and a test that raced
+
+10. `temporaryFolder` of the render tests removes its folder when the test ends. A test file that makes its project in `beforeAll` uses `folderOfTheFile` and removes the folder in `afterAll`. A full run of the render tests now leaves no `yumekit-render-test-*` folder.
+11. The cause of the steering in `chat.changes.browser.test.ts`: the words of an answer show in the chat before the request ends, and the engine turns a message into steering while a request runs. Under load, the second message came in that gap. The test now holds the end of the first answer, checks that Stop shows, lets the answer end, and sends the second message only after Stop goes.
+
+### Found in the run of WP77
+
+12. "New" in a take means new in this take: the lead made it while the take was open, or it is a remake with `replaces_asset_id`. `ready_take` stores `earlier: true` on an item that names an asset that the take did not hold yet. The take view shows no "New" on it, and the large view says "Made before this take". A take that was ready before this change has no `earlier`, so it shows as before.
+13. The editor follows the theme that the person picks, as document 11 and the prototype say: dark by default, and light from the button of the top bar, kept in `localStorage` as `yumekit-theme`. Neither the editor nor the prototype follows the color scheme of the browser. So a light screenshot sets `yumekit-theme` to `light` before the page loads, or presses "Use the light theme". The color scheme of Playwright alone gives the dark editor twice. No code changed for this.
+
+### Follow-ups
+
+1. Other tests also leave folders in the temporary folder of the system, for example `yumekit-project-*`, `yumekit-gemini-media-*`, `yumekit-fal-media-*`, `yumekit-openai-media-*`, and `yumekit-local-music-*`.
+2. A rename of a scene in the Scene tab shows "You changed the text of scene N.".

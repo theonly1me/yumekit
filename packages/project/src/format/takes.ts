@@ -22,6 +22,7 @@ export const takeItemSchema = z.discriminatedUnion("kind", [
     note: leadTextSchema.exactOptional(),
     whatToCheck: leadTextSchema.exactOptional(),
     replaces: idSchema.exactOptional(),
+    earlier: z.literal(true).exactOptional(),
     approved: approvedSchema,
   }),
   z.strictObject({

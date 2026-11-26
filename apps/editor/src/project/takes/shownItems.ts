@@ -24,13 +24,25 @@ const sectionOrder: SectionId[] = [
   "pictures",
 ];
 
+export type ItemOrigin = "new" | "earlier" | "approved";
+
 export interface ShownItem {
   item: TakeItem;
   asset: Asset | undefined;
   takeNumber: number;
-  isNew: boolean;
+  origin: ItemOrigin;
   verdict: Verdict | undefined;
   section: SectionId;
+}
+
+function originOf(options: { item: TakeItem; isOwn: boolean }): ItemOrigin {
+  const { item } = options;
+  if (!options.isOwn) return "approved";
+  const isNamedAgain =
+    item.kind === "asset" &&
+    item.earlier === true &&
+    item.replaces === undefined;
+  return isNamedAgain ? "earlier" : "new";
 }
 
 function castSheetIdsOf(snapshot: Snapshot): Set<string> {
@@ -110,7 +122,7 @@ export function shownItemsOf(options: {
       item,
       asset,
       takeNumber,
-      isNew: takeNumber === take.number,
+      origin: originOf({ item, isOwn: takeNumber === take.number }),
       verdict: verdicts.get(item.id),
       section: sectionOf({ item, asset, castSheetIds }),
     };

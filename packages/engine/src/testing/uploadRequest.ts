@@ -31,12 +31,17 @@ export function uploadRequest(options: {
   name: string;
   body: Buffer;
   headers?: Record<string, string>;
+  actId?: string;
 }): Promise<RawResponse> {
   const tokenHeaders =
     options.token === undefined ? {} : withToken({ token: options.token });
+  const query = new URLSearchParams({
+    name: options.name,
+    ...(options.actId === undefined ? {} : { act: options.actId }),
+  });
   return rawRequest({
     port: options.port,
-    path: `/api/uploads?name=${encodeURIComponent(options.name)}`,
+    path: `/api/uploads?${query.toString()}`,
     method: "POST",
     headers: {
       ...tokenHeaders,

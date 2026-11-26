@@ -1,3 +1,4 @@
+import { join } from "node:path";
 import type { SceneTransition } from "@yumekit/project";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { renderFrame } from "./index.js";
@@ -9,14 +10,21 @@ import {
 } from "./testing/openPreview.js";
 import {
   createRenderProject,
+  folderOfTheFile,
   moduleScene,
   sceneTracks,
+  type FolderOfTheFile,
 } from "./testing/renderProject.js";
 import { solidColorCode } from "./testing/sceneCodes.js";
 import { valueOf } from "./testing/valueOf.js";
 
-function redThenBlue(transition: SceneTransition | undefined) {
+function redThenBlue(options: {
+  transition: SceneTransition | undefined;
+  projectFolder: string;
+}) {
+  const { transition } = options;
   return createRenderProject({
+    projectFolder: options.projectFolder,
     edits: [
       moduleScene({
         sceneId: "red",
@@ -53,11 +61,17 @@ async function pictureAt(options: { folder: string; frame: number }) {
 let fadeFolder = "";
 let cutFolder = "";
 let preview: OpenPreview | undefined;
+let files: FolderOfTheFile | undefined;
 
 beforeAll(async () => {
+  files = await folderOfTheFile();
+  const { folder } = files;
   [fadeFolder, cutFolder] = await Promise.all([
-    redThenBlue({ kind: "fade", durationFrames: 10 }),
-    redThenBlue(undefined),
+    redThenBlue({
+      transition: { kind: "fade", durationFrames: 10 },
+      projectFolder: join(folder, "fade"),
+    }),
+    redThenBlue({ transition: undefined, projectFolder: join(folder, "cut") }),
   ]);
   preview = await openPreview({ folder: fadeFolder });
   await preview.parent.waitForReply((reply) => reply.type === "ready");
@@ -65,6 +79,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await preview?.close();
+  await files?.remove();
 });
 
 describe("renderFrame with a transition", () => {

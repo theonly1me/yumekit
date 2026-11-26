@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { HarnessContext } from "../context.js";
 import { failureResult } from "../results.js";
+import { tracksWithVideoSounds } from "../timeline/videoSounds.js";
 import { registerDuplicateSceneClip } from "./registerDuplicateSceneClip.js";
 import { registerSetTrackOff } from "./registerSetTrackOff.js";
 import { movedRow, resizedRow, rowWithout } from "./rowArrangements.js";
@@ -55,7 +56,7 @@ function registerResizeSceneClip(context: HarnessContext): void {
 function registerMoveSceneClip(context: HarnessContext): void {
   context.tools.add({
     name: "move_scene_clip",
-    description: `Put one scene clip at another place in the scenes row. The tool then places the clips of the row end to end from the start frame of the first clip, so each clip keeps its length and a gap between clips closes. An index equal to the current index changes nothing. Use it in place of update_clip to change the order of the scenes. ${sceneClipToolNote}`,
+    description: `Put one scene clip at another place in the scenes row. The tool then places the clips of the row end to end from the start frame of the first clip, so each clip keeps its length and a gap between clips closes. The sound of each video moves with its clip. An index equal to the current index changes nothing. Use it in place of update_clip to change the order of the scenes. ${sceneClipToolNote}`,
     inputSchema: {
       output_ids: outputIdsInput,
       clip_id: sceneClipIdInput,
@@ -82,12 +83,21 @@ function registerMoveSceneClip(context: HarnessContext): void {
           hint: `Give to_index from 0 to ${String(outside.clips.length - 1)}. Call get_timeline to see the clips of the row.`,
         });
       }
+      const snapshot = context.store.read();
       return rowChangeResult({
         context,
-        changes: targets.value.map((target) => ({
-          target,
-          clips: movedRow({ ...target, toIndex: input.to_index }),
-        })),
+        changes: targets.value.map((target) => {
+          const clips = movedRow({ ...target, toIndex: input.to_index });
+          const tracks = tracksWithVideoSounds({
+            snapshot,
+            timeline: target.timeline,
+            sceneClips: clips,
+          });
+          return {
+            target: { ...target, timeline: { ...target.timeline, tracks } },
+            clips,
+          };
+        }),
         line: `Clip "${input.clip_id}" moved to place ${String(input.to_index)} of the scenes row.`,
       });
     },

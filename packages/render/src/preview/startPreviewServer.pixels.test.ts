@@ -1,3 +1,4 @@
+import { join } from "node:path";
 import type { Edit } from "@yumekit/project";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { renderFrame } from "../index.js";
@@ -8,8 +9,10 @@ import {
 } from "../testing/openPreview.js";
 import {
   createRenderProject,
+  folderOfTheFile,
   moduleScene,
   sceneTracks,
+  type FolderOfTheFile,
 } from "../testing/renderProject.js";
 import { movingSquareCode } from "../testing/sceneCodes.js";
 import { addVideoAsset, movingMarkerVideo } from "../testing/testVideo.js";
@@ -38,9 +41,12 @@ const sceneFrames = [
 
 let folder = "";
 let preview: OpenPreview | undefined;
+let files: FolderOfTheFile | undefined;
 
 beforeAll(async () => {
+  files = await folderOfTheFile();
   folder = await createRenderProject({
+    projectFolder: join(files.folder, "project"),
     edits: async (store) => [
       await addVideoAsset({
         folder: store.folder,
@@ -77,6 +83,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await preview?.close();
+  await files?.remove();
 });
 
 describe("the preview page pixels", () => {

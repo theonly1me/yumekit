@@ -49,6 +49,7 @@
   top: 0;
   color: var(--faint);
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
   pointer-events: none;
 }
 
