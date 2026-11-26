@@ -104,6 +104,7 @@ export const snapshotSchema = z.object({
     videoStyle: z.enum(videoStyleIds).optional(),
     look: z.string().optional(),
     calm: z.boolean().optional(),
+    approvePicturesFirst: z.boolean().optional(),
     checks: z.enum(checkModeIds).optional(),
     tempo: z.number().optional(),
     fonts: z

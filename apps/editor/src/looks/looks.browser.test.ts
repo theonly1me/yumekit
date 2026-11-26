@@ -6,6 +6,7 @@ import { closeBrowser, openEditor } from "../testing/editorPage.js";
 import { buildKitSceneProject } from "../testing/kitSceneProject.js";
 import { runEngine, type RunningEngine } from "../testing/runEngine.js";
 import { runHome, type RunningHome } from "../testing/runHome.js";
+import { openMoreSettings } from "../testing/mediaTestTools.js";
 
 const lookLabels = ["Midnight", "Studio", "Editorial", "Neon", "Paper"];
 const started: (RunningHome | RunningEngine)[] = [];
@@ -68,6 +69,7 @@ describe("the looks", () => {
       .getByRole("button", { name: "Settings", exact: true })
       .click();
     const settings = editor.page.getByRole("dialog", { name: "Settings" });
+    await openMoreSettings(editor.page);
     await settings.getByRole("button", { name: /^Neon/ }).click();
 
     await expect.poll(() => lookInFolder(engine.projectFolder)).toBe("neon");

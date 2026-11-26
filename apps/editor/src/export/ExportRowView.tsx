@@ -1,6 +1,8 @@
+import { bytesInMegabyte } from "@yumekit/project/file-size";
 import { useState, type ReactNode } from "react";
 import type { EngineClient } from "../engine/engineClient.js";
 import { shareOf, type ExportJob, type MadeFile } from "./exportJobs.js";
+import { linesText, megabytesText } from "./fileSize/fileSizeChoice.js";
 import type { ExportRow } from "./exportRows.js";
 import { openVideoFile, type OpenOutcome } from "./openVideoFile.js";
 
@@ -118,6 +120,14 @@ function DoneFiles(props: {
   if (made === undefined) return <span className="fact">Not made</span>;
   return (
     <>
+      {made.bytes === undefined ? undefined : (
+        <span className="real-size">
+          {megabytesText(made.bytes / bytesInMegabyte)}
+          {made.shortSidePixels === undefined
+            ? ""
+            : `, ${linesText(made.shortSidePixels)}`}
+        </span>
+      )}
       <ShowFile client={props.client} made={made} label="Show the file" />
       {sharper === undefined ? undefined : (
         <ShowFile
@@ -143,7 +153,6 @@ export function ExportRowView(props: {
   isChosen: boolean;
   isLocked: boolean;
   onChoose: (isChosen: boolean) => void;
-  sharper: ReactNode;
   failure: ReactNode;
 }) {
   const { row } = props;
@@ -167,7 +176,6 @@ export function ExportRowView(props: {
         job: props.job,
         scale: props.scale,
       })}
-      {props.sharper}
       {props.failure}
     </li>
   );

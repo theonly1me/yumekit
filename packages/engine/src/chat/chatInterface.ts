@@ -16,6 +16,7 @@ import type {
 } from "./chatTypes.js";
 import type { HelperCall } from "./helpers/helperDesk.js";
 import type { PersonRequestInput } from "./questions/personRequest.js";
+import type { MoneyDesk } from "./money/moneyDesk.js";
 import type { CallNote } from "./stepNotes.js";
 import type { ToolCaller } from "./trackedStore.js";
 
@@ -39,5 +40,6 @@ export interface Chat {
   askHelper: (request: HelperRequest) => Promise<HelperOutcome>;
   askCritic: (request: CriticRequest) => Promise<CriticTurn>;
   helperCallOf: (token: string | undefined) => HelperCall;
+  money: MoneyDesk;
   close: () => Promise<void>;
 }

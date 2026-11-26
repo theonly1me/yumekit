@@ -11,6 +11,7 @@ import {
 import {
   linkOrCopy,
   platformFilesOf,
+  smallerFileSuffixOf,
   type PlatformFile,
 } from "./platformFiles.js";
 
@@ -32,6 +33,9 @@ export async function renderOutputFiles(
     snapshot,
     outputId: request.outputId,
     rendersFolder: join(request.folder, "renders"),
+    ...(request.smallerFile === undefined
+      ? {}
+      : { suffix: smallerFileSuffixOf(request.smallerFile.largestMegabytes) }),
   });
   await rm(first.file, { force: true });
   const rendered = await renderVideo({ ...request, destination: first.file });

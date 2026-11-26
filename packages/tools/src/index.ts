@@ -43,7 +43,15 @@ export {
   type RequestLogNotValid,
 } from "./requests/requestFile.js";
 export { readUserLimits } from "./userLimits.js";
-export { defaultSpendingUsd } from "./configuration.js";
+export {
+  defaultSpendingUsd,
+  hasOwnLimits,
+  limitsInUseOf,
+  type LimitScope,
+  type LimitSources,
+} from "./limits/limitSources.js";
+export type { LimitChange } from "./limits/limitBook.js";
+export type { MoneyEstimate, PricedRequest } from "./spending/estimate.js";
 export { cautiousPrices } from "./spending/cautiousPrice.js";
 export type { CostBasis, SpendingRecordNotValid } from "./spending/ledger.js";
 export type {

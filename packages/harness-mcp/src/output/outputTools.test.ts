@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+import { readFile, stat } from "node:fs/promises";
 import { join } from "node:path";
 import { CallToolResultSchema } from "@modelcontextprotocol/sdk/types.js";
 import { describe, expect, it } from "vitest";
@@ -150,6 +150,7 @@ describe("preview and render tools", () => {
       expect(result.structuredContent).toEqual({
         file,
         files: [{ file }],
+        bytes: (await stat(file)).size,
         frame_count: 20,
         duration_seconds: 20 / 30,
         width_pixels: 160,

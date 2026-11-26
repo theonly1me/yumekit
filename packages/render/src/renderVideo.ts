@@ -9,6 +9,10 @@ import { checkRepeatable } from "./session/checkRepeatable.js";
 import { encodeRange } from "./session/encodeRange.js";
 import { withStagePage } from "./session/withStagePage.js";
 import { findFfmpeg } from "./video/findFfmpeg.js";
+import {
+  renderSmallerVideo,
+  type SmallerFileChoice,
+} from "./video/smallerVideo.js";
 
 export interface RenderedVideo {
   file: string;
@@ -25,6 +29,7 @@ export interface RenderVideoOptions {
   firstFrame?: number;
   frameCount?: number;
   scale?: RenderScale;
+  smallerFile?: SmallerFileChoice;
   onProgress?: (progress: { framesDone: number; frameCount: number }) => void;
 }
 
@@ -85,7 +90,20 @@ export async function renderVideo(
   options: RenderVideoOptions,
 ): Promise<Outcome<RenderedVideo, RenderFailure>> {
   const loaded = await loadOutput(options);
-  return loaded.ok
-    ? renderLoadedVideo({ loaded: loaded.value, request: options })
-    : loaded;
+  if (!loaded.ok) return loaded;
+  const { smallerFile } = options;
+  if (smallerFile === undefined) {
+    return renderLoadedVideo({ loaded: loaded.value, request: options });
+  }
+  const destination = resolve(options.destination);
+  await mkdir(dirname(destination), { recursive: true });
+  return renderSmallerVideo({
+    destination,
+    choice: smallerFile,
+    renderBest: (bestFile) =>
+      renderLoadedVideo({
+        loaded: loaded.value,
+        request: { ...options, destination: bestFile },
+      }),
+  });
 }

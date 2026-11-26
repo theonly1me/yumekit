@@ -53,6 +53,10 @@
     "./takes": {
       "types": "./dist/takes/index.d.ts",
       "default": "./dist/takes/index.js"
+    },
+    "./file-size": {
+      "types": "./dist/fileSize/index.d.ts",
+      "default": "./dist/fileSize/index.js"
     }
   },
   "files": [

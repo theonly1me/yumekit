@@ -106,9 +106,17 @@ export async function sceneClipsOf(options: {
     .flatMap((track) => track.clips);
 }
 
+export async function openMoreSettings(page: Page): Promise<void> {
+  await page
+    .getByRole("dialog", { name: "Settings" })
+    .locator("summary", { hasText: "More settings" })
+    .click();
+}
+
 export async function openTools(page: Page): Promise<void> {
   await page.getByRole("button", { name: "Settings", exact: true }).click();
   await page.getByRole("dialog", { name: "Settings" }).waitFor();
+  await openMoreSettings(page);
 }
 
 export async function openMakeClip(page: Page): Promise<void> {

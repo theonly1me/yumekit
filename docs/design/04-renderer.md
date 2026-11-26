@@ -72,6 +72,7 @@ function renderVideo(options: {
   firstFrame?: number;
   frameCount?: number;
   scale?: RenderScale;
+  smallerFile?: { largestMegabytes: number; shortSidePixels?: number };
   onProgress?: (progress: { framesDone: number; frameCount: number }) => void;
 }): Promise<
   Outcome<
@@ -132,6 +133,8 @@ function checkSceneCode(options: {
 
 Video: H.264, `yuv420p`, constant rate factor 18, with `-movflags +faststart`. The frame rate is the frame rate of the project. The container is MP4.
 
+A smaller file (`smallerFile`, document 21, T15 and "Details of WP82"): the renderer makes the best file in a temporary folder, then two passes of H.264 from it at a bitrate from the size and the length, with AAC at 128 kbps and `-movflags +faststart`. It keeps the picture size, or makes the short side `shortSidePixels`.
+
 Audio: FFmpeg reads each audio clip of the output as an input. For each clip it trims to `assetStartFrame` and `durationFrames`, delays to `startFrame`, and applies `gainDecibels`. It mixes all clips. The audio codec is AAC at 192 kbit/s, 48 kHz, stereo. An output with no audio clip gets no audio stream.
 
 A render of a frame range includes only the audio inside that range.
@@ -148,22 +151,23 @@ Before a video render, the renderer draws the first frame and the middle frame t
 
 `RenderFailure` is `{ kind, message, hint? }` plus the fields below.
 
-| Kind                         | Extra fields                | When                                                                                                          |
-| ---------------------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `project-invalid`            | `openFailure`               | The project does not open                                                                                     |
-| `output-not-found`           | `outputId`                  | No output has that id                                                                                         |
-| `frame-out-of-range`         | `frame`, `frameCount`       | The frame or the range is outside the output                                                                  |
-| `browser-not-installed`      |                             | Chromium is missing. The hint gives the install command                                                       |
-| `ffmpeg-not-found`           |                             | `ffmpeg` is not on the `PATH`. The hint gives install commands                                                |
-| `scene-import-not-permitted` | `sceneId`, `importName`     | Scene code imports a package that is not permitted                                                            |
-| `scene-compile-failed`       | `sceneId`, `line`, `column` | Scene code has an error that stops the bundler                                                                |
-| `kit-scene-not-found`        | `sceneId`, `component`      | A kit scene names a component that the kit does not have                                                      |
-| `scene-not-found`            | `sceneId`                   | `renderSceneFrame` names a scene that the project does not have                                               |
-| `scene-error`                | `sceneId`, `frame`          | Scene code threw, or logged an error, or `seek` took more than 30 seconds. `frame` is the frame of the output |
-| `scene-not-repeatable`       | `sceneIds`, `frame`         | The repeat check failed                                                                                       |
-| `media-not-readable`         | `file`                      | `probeMedia` cannot read the file                                                                             |
-| `encode-failed`              | `stderrTail`                | FFmpeg exited with an error                                                                                   |
-| `video-frames-failed`        | `assetId`, `stderrTail`     | FFmpeg cannot make the frame pictures of a video asset. `stderrTail` is the last line of its error output     |
+| Kind                         | Extra fields                            | When                                                                                                          |
+| ---------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `project-invalid`            | `openFailure`                           | The project does not open                                                                                     |
+| `output-not-found`           | `outputId`                              | No output has that id                                                                                         |
+| `frame-out-of-range`         | `frame`, `frameCount`                   | The frame or the range is outside the output                                                                  |
+| `browser-not-installed`      |                                         | Chromium is missing. The hint gives the install command                                                       |
+| `ffmpeg-not-found`           |                                         | `ffmpeg` is not on the `PATH`. The hint gives install commands                                                |
+| `scene-import-not-permitted` | `sceneId`, `importName`                 | Scene code imports a package that is not permitted                                                            |
+| `scene-compile-failed`       | `sceneId`, `line`, `column`             | Scene code has an error that stops the bundler                                                                |
+| `kit-scene-not-found`        | `sceneId`, `component`                  | A kit scene names a component that the kit does not have                                                      |
+| `scene-not-found`            | `sceneId`                               | `renderSceneFrame` names a scene that the project does not have                                               |
+| `scene-error`                | `sceneId`, `frame`                      | Scene code threw, or logged an error, or `seek` took more than 30 seconds. `frame` is the frame of the output |
+| `scene-not-repeatable`       | `sceneIds`, `frame`                     | The repeat check failed                                                                                       |
+| `media-not-readable`         | `file`                                  | `probeMedia` cannot read the file                                                                             |
+| `encode-failed`              | `stderrTail`                            | FFmpeg exited with an error                                                                                   |
+| `video-frames-failed`        | `assetId`, `stderrTail`                 | FFmpeg cannot make the frame pictures of a video asset. `stderrTail` is the last line of its error output     |
+| `file-size-not-reached`      | `largestMegabytes`, `smallestMegabytes` | A smaller file cannot fit under the size. `smallestMegabytes` is the smallest size that yumekit can make      |
 
 ## Tests
 

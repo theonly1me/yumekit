@@ -38,6 +38,7 @@ export {
 } from "./renderVideo.js";
 export { checkSceneCode, checkSharedCode } from "./sceneCode/checkSceneCode.js";
 export { findFfmpeg } from "./video/findFfmpeg.js";
+export type { SmallerFileChoice } from "./video/smallerVideo.js";
 export {
   createPictureRenderer,
   type PictureRenderer,

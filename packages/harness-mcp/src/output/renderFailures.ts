@@ -20,6 +20,8 @@ function hintOf(failure: RenderFailure): string {
       return `Scenes ${failure.sceneIds.join(", ")} draw a different picture for the same frame. Remove Date, Math.random, timers, and CSS animations from their code. See get_scene_guide.`;
     case "media-not-readable":
       return "Ask the user for a complete image, audio, or video file, then call import_asset again.";
+    case "file-size-not-reached":
+      return `Tell the person that the smallest file is about ${String(failure.smallestMegabytes)} MB, and ask for a larger size, 720p, or a shorter part.`;
     case "video-frames-failed":
       return `FFmpeg cannot read the video asset "${failure.assetId}". Ask the user for a complete video file, import it as a new asset, and use the new asset id in the scene.`;
     case "browser-not-installed":

@@ -24,7 +24,7 @@ export function SharperSwitch(props: {
             props.onChange(event.currentTarget.checked);
           }}
         />{" "}
-        Sharper
+        Sharper copy of {row.name}
       </label>
       <span className="fact">
         {sharperPriceText({ choice, seconds })}{" "}

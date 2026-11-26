@@ -8,6 +8,7 @@ import {
   runEngine,
   type RunningEngine,
 } from "../../testing/runEngine.js";
+import { openMoreSettings } from "../../testing/mediaTestTools.js";
 
 let engine: RunningEngine | undefined;
 
@@ -48,6 +49,7 @@ function startBridge() {
 async function openSettings() {
   const editor = await openEditor(runningEngine().url);
   await editor.page.getByRole("button", { name: "Settings" }).click();
+  await openMoreSettings(editor.page);
   return editor;
 }
 

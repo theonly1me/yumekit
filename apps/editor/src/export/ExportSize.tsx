@@ -8,7 +8,7 @@ export function ExportSize(props: {
   return (
     <div className="export-size">
       <span className="field-label" id="export-size-label">
-        Size
+        Picture size
       </span>
       <div
         className="segments"
@@ -30,7 +30,8 @@ export function ExportSize(props: {
         ))}
       </div>
       <p className="fact">
-        A smaller size exports faster and makes a smaller file.
+        A smaller picture exports faster. For a file under a size, use File size
+        above.
       </p>
     </div>
   );

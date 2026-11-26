@@ -20,8 +20,13 @@ const chatSchema = z.object({
   entries: z.array(z.looseObject({ kind: z.string(), id: z.string() })),
 });
 
-export async function startChatEngine(scenario: FakeAgentScenario) {
-  const project = await createTestProject();
+export async function startChatEngine(
+  setup: FakeAgentScenario & { userMediaTools?: object },
+) {
+  const { userMediaTools, ...scenario } = setup;
+  const project = await createTestProject(
+    userMediaTools === undefined ? undefined : { userMediaTools },
+  );
   const { programPath, scenarioFile, writeScenario } = await installFakeAgent({
     folder: join(project.root, "fake-agent"),
     scenario,

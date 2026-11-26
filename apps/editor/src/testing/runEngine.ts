@@ -45,6 +45,7 @@ export interface EngineOptions {
   agentPrograms?: string[];
   fakeAgent?: boolean;
   withVoiceServer?: boolean;
+  environment?: Record<string, string>;
 }
 
 async function pathWithAgents(options: {
@@ -92,6 +93,7 @@ async function createProject(options: EngineOptions): Promise<{
           configurationFolder: join(root, "config"),
         })
       : {}),
+    ...options.environment,
   };
   const folder = join(root, "project");
   await runFile(

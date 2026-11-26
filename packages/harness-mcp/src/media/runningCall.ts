@@ -20,12 +20,13 @@ function secondsOf(input: JsonObject): number {
   return typeof value === "number" ? value : 0;
 }
 
-export function startMediaCall(options: {
+export async function startMediaCall(options: {
   context: HarnessContext;
   request: GenerateAssetInput;
   voiceSeconds: number | undefined;
-}): Outcome<WorkTicket, HarnessFailure> {
+}): Promise<Outcome<WorkTicket, HarnessFailure>> {
   const { context, request, voiceSeconds } = options;
+  const limits = await context.mediaTools.limits();
   const isVideo = request.capability === "video" || voiceSeconds !== undefined;
   const input =
     voiceSeconds === undefined
@@ -35,7 +36,7 @@ export function startMediaCall(options: {
     const limitFailure = videoLimitFailureOf({
       snapshot: context.store.read(),
       input,
-      limitSeconds: context.mediaTools.limits().generatedVideoSeconds,
+      limitSeconds: limits.generatedVideoSeconds,
       runningSeconds: context.board.reservedVideoSeconds(),
     });
     if (limitFailure) return { ok: false, failure: limitFailure };

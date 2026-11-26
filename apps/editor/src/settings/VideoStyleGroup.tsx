@@ -41,7 +41,7 @@ export function VideoStyleGroup(props: {
       />
       {usesAiVideo(props.videoStyle) ? (
         <p className="fact">
-          AI video stays inside the limit below. Each second of AI video costs
+          AI video stays inside the limits above. Each second of AI video costs
           money.
         </p>
       ) : undefined}

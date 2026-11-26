@@ -32,6 +32,7 @@ describe("Sharper in Export", () => {
     await page.getByRole("button", { name: "Export", exact: true }).click();
     const sheet = page.getByRole("dialog");
     await sheet.getByRole("checkbox", { name: /^Tall/ }).uncheck();
+    await sheet.locator("summary", { hasText: "More" }).click();
     const sharper = sheet.getByRole("switch", { name: "Sharper copy of Wide" });
 
     await expect.poll(() => sharper.count()).toBe(1);

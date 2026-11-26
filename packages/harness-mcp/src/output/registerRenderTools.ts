@@ -1,6 +1,7 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, stat, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { HarnessContext } from "../context.js";
+import { z } from "zod";
 import { durationInput, frameInput, idInput, scaleInput } from "../inputs.js";
 import { failureResult, successResult } from "../results.js";
 import { renderChapter } from "./chapterRender.js";
@@ -28,12 +29,44 @@ function registerRenderVideo(context: HarnessContext): void {
       chapter_id: idInput(
         "The chapter to render, from the chapters of get_work. Not with first_frame or frame_count.",
       ).optional(),
+      largest_megabytes: z
+        .number()
+        .positive()
+        .max(10_000)
+        .optional()
+        .describe(
+          "Make a smaller file under this many megabytes (1 MB is 1,000,000 bytes), for a place with a size limit. yumekit uses two passes of H.264 at a bitrate from the size and the length, and AAC sound at 128 kbps. The file name ends in -under-<size>mb. Not with chapter_id. Leave it out for the best quality.",
+        ),
+      short_side_pixels: z
+        .number()
+        .int()
+        .min(144)
+        .optional()
+        .describe(
+          "Only with largest_megabytes: make the picture smaller, to this many pixels on its short side, for example 720. A long video looks sharper at 720 in a small file.",
+        ),
     },
     run: async ({
-      input: { output_id, first_frame, frame_count, scale, chapter_id },
+      input: {
+        output_id,
+        first_frame,
+        frame_count,
+        scale,
+        chapter_id,
+        largest_megabytes,
+        short_side_pixels,
+      },
       onProgress,
     }) => {
       if (chapter_id !== undefined) {
+        if (largest_megabytes !== undefined) {
+          return failureResult({
+            kind: "invalid-input",
+            message:
+              "A chapter renders at the best quality, as the cut of its take.",
+            hint: "Leave out largest_megabytes, or render the whole output under the size with no chapter_id.",
+          });
+        }
         if (first_frame !== undefined || frame_count !== undefined) {
           return failureResult({
             kind: "invalid-input",
@@ -56,12 +89,23 @@ function registerRenderVideo(context: HarnessContext): void {
         ...(first_frame === undefined ? {} : { firstFrame: first_frame }),
         ...(frame_count === undefined ? {} : { frameCount: frame_count }),
         ...(scale === undefined ? {} : { scale }),
+        ...(largest_megabytes === undefined
+          ? {}
+          : {
+              smallerFile: {
+                largestMegabytes: largest_megabytes,
+                ...(short_side_pixels === undefined
+                  ? {}
+                  : { shortSidePixels: short_side_pixels }),
+              },
+            }),
         onProgress: ({ framesDone, frameCount }) => {
           onProgress?.({ done: framesDone, total: frameCount });
         },
       });
       if (!rendered.ok) return failureResult(renderFailureOf(rendered.failure));
       const { video, files } = rendered.value;
+      const bytes = (await stat(video.file)).size;
       return successResult({
         line: `Rendered ${String(video.frameCount)} frames (${video.durationSeconds.toFixed(2)} seconds) to ${files.map((entry) => entry.file).join(", ")}.`,
         data: {
@@ -72,6 +116,7 @@ function registerRenderVideo(context: HarnessContext): void {
               ? {}
               : { platform_id: entry.platformId }),
           })),
+          bytes,
           frame_count: video.frameCount,
           duration_seconds: video.durationSeconds,
           width_pixels: video.widthPixels,

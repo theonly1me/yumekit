@@ -4,7 +4,12 @@ import { useEngineEvents } from "../engine/useEngineEvents.js";
 import { failureTextOf } from "../tools/requestText.js";
 import { hasRunningAnswer, withEntry } from "./chatEntries.js";
 import { chatRequestsOf, type AskInput } from "./chatRequests.js";
-import type { AnswerEntry, ChatAgent, ChatEntry } from "./chatSchemas.js";
+import type {
+  AnswerEntry,
+  ChatAgent,
+  ChatEntry,
+  MoneyChoice,
+} from "./chatSchemas.js";
 
 export type Chat = ReturnType<typeof useChat>;
 
@@ -134,6 +139,17 @@ export function useChat(client: EngineClient) {
     send,
     undo,
     stop: () => requests.stop().then(() => undefined),
+    chooseMoney: async (options: {
+      entryId: string;
+      choice: MoneyChoice;
+    }): Promise<string | undefined> => {
+      const chosen = await requests.chooseMoney(options);
+      if (!chosen.ok) return failureTextOf(chosen.failure);
+      setEntries((current) =>
+        withEntry({ entries: current, entry: chosen.value }),
+      );
+      return undefined;
+    },
     chooseAgent: async (agentId: string): Promise<string | undefined> => {
       const saved = await requests.saveAgent(agentId);
       reload();

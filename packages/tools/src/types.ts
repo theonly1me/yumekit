@@ -11,6 +11,9 @@ import type {
   MediaRequestRecord,
   RequestLogNotValid,
 } from "./requests/requestFile.js";
+import type { LimitChange } from "./limits/limitBook.js";
+import type { LimitSources } from "./limits/limitSources.js";
+import type { MoneyEstimate, PricedRequest } from "./spending/estimate.js";
 import type { CostBasis, SpendingRecordNotValid } from "./spending/ledger.js";
 import type {
   SpendingLimitReached,
@@ -171,10 +174,15 @@ export interface MediaTools {
     failure: { kind: string; message: string };
   }) => Promise<void>;
   failedServers: () => { server: string; message: string }[];
-  limits: () => MediaLimits;
+  limits: () => Promise<MediaLimits>;
+  limitSources: () => Promise<Outcome<LimitSources, ConnectFailure>>;
   setLimits: (
-    change: Partial<MediaLimits>,
-  ) => Promise<Outcome<MediaLimits, UserFileFailure>>;
+    change: LimitChange,
+  ) => Promise<Outcome<LimitSources, UserFileFailure>>;
+  removeOwnLimits: () => Promise<Outcome<LimitSources, UserFileFailure>>;
+  estimate: (
+    requests: PricedRequest[],
+  ) => Promise<Outcome<MoneyEstimate, SpendingRecordNotValid>>;
   choices: () => Promise<MediaChoices>;
   pick: (pick: MediaPick) => Promise<Outcome<MediaChoices, MediaPickFailure>>;
   prepare: (request: {

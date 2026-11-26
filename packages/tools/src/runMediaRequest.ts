@@ -22,7 +22,7 @@ export interface RunContext {
   requestLog: RequestLog;
   toolTimeoutSeconds: number;
   onDescriptionsChanged: () => void;
-  spendingLimitUsd: () => number;
+  spendingLimitUsd: () => Promise<number>;
   slots: CallSlots;
   callsAtOnce: () => number | undefined;
 }
@@ -64,7 +64,9 @@ export async function runMediaRequest(options: {
   });
   const ran = await runAndRecord(options);
   if (ran.ok || ran.failure.kind !== "media-usage-limit-reached") return ran;
-  if (!isNoPick(options) || context.spendingLimitUsd() <= 0) return ran;
+  if (!isNoPick(options) || (await context.spendingLimitUsd()) <= 0) {
+    return ran;
+  }
   const next = await runAndRecord(options);
   return !next.ok && next.failure.kind === "spending-limit-reached"
     ? ran

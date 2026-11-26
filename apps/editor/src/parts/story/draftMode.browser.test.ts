@@ -11,6 +11,7 @@ import {
   forgeShot,
   storyArc,
 } from "../../testing/storyProject.js";
+import { openMoreSettings } from "../../testing/mediaTestTools.js";
 
 let engine: RunningEngine | undefined;
 
@@ -65,6 +66,7 @@ describe("a film in draft mode in the editor", () => {
   it("picks how the AI checks the film in Settings, with the fast draft first", async () => {
     const { page, close } = await openEditor(runningEngine().url);
     await page.getByRole("button", { name: "Settings", exact: true }).click();
+    await openMoreSettings(page);
     const choices = page
       .getByRole("dialog", { name: "Settings" })
       .getByRole("group", { name: "How the AI checks the film" });

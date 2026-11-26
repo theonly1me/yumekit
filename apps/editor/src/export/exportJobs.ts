@@ -1,12 +1,15 @@
 import { z } from "zod";
 import type { Snapshot } from "../engine/snapshot.js";
 import { timelineOf } from "../timeline/timelineFacts.js";
+import type { FileSizeChoice } from "./fileSize/fileSizeChoice.js";
 
 export interface MadeFile {
   file: string;
   fileName: string;
   platformId: string | undefined;
   isSharper: boolean;
+  bytes?: number | undefined;
+  shortSidePixels?: number | undefined;
 }
 
 export type JobState =
@@ -35,11 +38,15 @@ export interface ExportJob {
   callId: string;
   outputId: string;
   scale: ExportScale;
+  fileSize: FileSizeChoice;
   state: JobState;
 }
 
 export const exportResultSchema = z.object({
   file: z.string(),
+  bytes: z.number().optional(),
+  width_pixels: z.number().optional(),
+  height_pixels: z.number().optional(),
   files: z
     .array(z.object({ file: z.string(), platform_id: z.string().optional() }))
     .optional(),
