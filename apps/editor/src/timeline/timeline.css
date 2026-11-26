@@ -1,0 +1,163 @@
+.timeline-area {
+  display: grid;
+  gap: 4px;
+}
+
+.clip.scene-clip,
+.clip.music-clip {
+  display: flex;
+  align-items: stretch;
+  padding: 0;
+  cursor: grab;
+}
+
+.clip.music-clip {
+  box-shadow: inset 0 0 0 1px var(--line-strong);
+  touch-action: none;
+}
+
+button.clip-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+  padding: 0 8px;
+  background: transparent;
+  text-align: left;
+  font-size: var(--step--2);
+  font-weight: 500;
+  line-height: 24px;
+  color: inherit;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  cursor: inherit;
+}
+
+button.clip-name:hover {
+  border: 0;
+}
+
+.music-clip button.clip-name {
+  font-weight: 400;
+  touch-action: none;
+}
+
+.clip:has(.clip-name[aria-current="true"]) {
+  box-shadow:
+    0 0 0 1px var(--surface),
+    0 0 0 2px var(--accent);
+}
+
+.trim {
+  flex: 0 0 9px;
+  cursor: ew-resize;
+  border-left: 2px solid currentColor;
+  opacity: 0.4;
+  touch-action: none;
+}
+
+.trim:hover,
+.trim:focus-visible {
+  opacity: 1;
+  background: var(--accent);
+  outline: none;
+}
+
+.scene-clip[data-over="scene"],
+.scene-clip[data-over="take-item"] {
+  outline: 2px solid var(--text);
+  outline-offset: 1px;
+}
+
+.scene-clip[data-over="line"] {
+  box-shadow: -4px 0 0 0 var(--accent);
+}
+
+.chapter-lane {
+  height: 30px;
+}
+
+button.chapter-clip {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px 0 10px;
+  border-radius: 3px;
+  border: 1px solid var(--line-strong);
+  background: transparent;
+  font-size: var(--step--2);
+  font-weight: 400;
+  white-space: nowrap;
+  overflow: hidden;
+  cursor: grab;
+}
+
+button.chapter-clip span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+button.chapter-clip em {
+  font-style: normal;
+  color: var(--accent);
+}
+
+button.chapter-clip[data-step="done"] em {
+  color: var(--chapter-done);
+}
+
+button.chapter-clip[data-step="story"] em {
+  color: var(--faint);
+}
+
+button.chapter-clip[aria-pressed="true"] {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+button.chapter-clip[data-over="true"] {
+  border-color: var(--text);
+}
+
+.chapter-edge {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 9px;
+  margin-left: -6px;
+  border-radius: 2px;
+  background: var(--accent);
+  opacity: 0.55;
+  cursor: ew-resize;
+  touch-action: none;
+  z-index: 1;
+}
+
+.chapter-edge:hover,
+.chapter-edge:focus-visible {
+  opacity: 1;
+  outline: none;
+}
+
+.edge-ghost {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 3px;
+  margin-left: -1px;
+  background: var(--text);
+  pointer-events: none;
+  z-index: 2;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .trim,
+  .chapter-edge {
+    transition: opacity 120ms ease;
+  }
+}

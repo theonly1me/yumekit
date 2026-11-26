@@ -8,7 +8,7 @@ export interface PickedCard {
 }
 
 export function SceneActions(props: {
-  picked: PickedCard | undefined;
+  picked: PickedCard;
   isVideo: boolean;
   isChatRunning: boolean;
   framesPerSecond: number;
@@ -20,13 +20,6 @@ export function SceneActions(props: {
   onDelete: () => void;
 }) {
   const { picked } = props;
-  if (picked === undefined) {
-    return (
-      <p className="fact scene-hint">
-        Pick a scene to change it. Drag a scene to move it.
-      </p>
-    );
-  }
   return (
     <div
       className="scene-actions"

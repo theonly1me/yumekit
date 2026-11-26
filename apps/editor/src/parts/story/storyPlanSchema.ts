@@ -1,3 +1,4 @@
+import { chapterSchema } from "@yumekit/project/takes";
 import { z } from "zod";
 import { designCheckSchema } from "../../cast/castEntries.js";
 
@@ -116,6 +117,7 @@ export const storyPlanSchema = z.object({
   failedPlanChecks: z.number().optional(),
   costEstimateUsd: z.number().optional(),
   planNotes: z.array(z.string()).optional(),
+  chapters: z.array(chapterSchema).optional(),
 });
 
 export type StoryPlan = z.infer<typeof storyPlanSchema>;

@@ -22,7 +22,7 @@ function framesOf(brief: string): { assetId?: string; seconds?: number }[] {
     });
 }
 
-async function checkDesign(options: {
+export async function checkDesign(options: {
   engine: RunningEngine;
   assetId: string;
   shotId: string;

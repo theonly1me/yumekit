@@ -106,10 +106,6 @@ button.card {
   font-weight: 500;
 }
 
-.scene-hint {
-  padding: 6px 0;
-}
-
 .voice-note {
   font-size: var(--step--1);
   color: var(--accent);

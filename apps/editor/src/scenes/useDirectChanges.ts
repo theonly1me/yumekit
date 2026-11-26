@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from "react";
 import type { EngineClient } from "../engine/engineClient.js";
 import { changeProject, type ChangeOutcome } from "./directChange.js";
 
-export type ChangeArea = "scenes" | "sound" | "platforms";
+export type ChangeArea = "scenes" | "sound" | "platforms" | "timeline";
 
 export interface DirectChanges {
   run: (change: {
@@ -10,6 +10,7 @@ export interface DirectChanges {
     name: string;
     input: object;
   }) => Promise<ChangeOutcome>;
+  refuse: (failure: { area: ChangeArea; message: string }) => void;
   failureOf: (area: ChangeArea) => string | undefined;
   voiceMayNotMatch: boolean;
 }
@@ -51,7 +52,7 @@ export function useDirectChanges(client: EngineClient): DirectChanges {
   );
 
   return useMemo(
-    () => ({ run, failureOf, voiceMayNotMatch }),
+    () => ({ run, refuse: setFailure, failureOf, voiceMayNotMatch }),
     [run, failureOf, voiceMayNotMatch],
   );
 }

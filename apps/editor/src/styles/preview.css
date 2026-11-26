@@ -83,11 +83,6 @@
   transform-origin: 0 0;
 }
 
-.frame-hint {
-  font-size: var(--step--2);
-  color: var(--faint);
-}
-
 .preview-failure {
   font-size: var(--step--1);
   color: var(--accent);

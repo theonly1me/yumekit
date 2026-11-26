@@ -1,21 +1,25 @@
-import { changeStartOf, fitTheVoiceRequest } from "../chat/requestTexts.js";
+import { useMemo, useState } from "react";
+import { chapterEditsOf } from "../chapters/chapterEdits.js";
+import { filmChaptersOf } from "../chapters/filmChapters.js";
+import { changeStartOf } from "../chat/requestTexts.js";
 import type { EngineClient } from "../engine/engineClient.js";
-import { fixedRequestTextOf } from "../parts/fixedRequests.js";
 import type {
   Output,
   SceneClip,
   Snapshot,
   Timeline as TimelineData,
 } from "../engine/snapshot.js";
-import { SceneActions, type PickedCard } from "../scenes/SceneActions.js";
-import { isVideoScene, SceneCards } from "../scenes/SceneCards.js";
+import type { PickedCard } from "../scenes/SceneActions.js";
 import type { SceneEdits } from "../scenes/sceneEdits.js";
+import { ScenesRow } from "../scenes/ScenesRow.js";
 import type { DirectChanges } from "../scenes/useDirectChanges.js";
 import { useSceneStills } from "../scenes/useSceneStills.js";
 import { SoundRows } from "../sound/SoundRows.js";
 import { soundRowsOf, type SoundPartName } from "../sound/soundRowFacts.js";
 import { useSoundNotes } from "../sound/useSoundNotes.js";
+import { trayItemsOf } from "../takeTray/trayItems.js";
 import { Timeline, type PickedClip } from "../timeline/Timeline.js";
+import { timelineEditsOf } from "../timeline/timelineEdits.js";
 import type { EditorChat } from "./useEditorChat.js";
 
 export function LowerArea(props: {
@@ -41,16 +45,25 @@ export function LowerArea(props: {
   onMakeClip: (clip: SceneClip) => void;
   onOpenSound: (part: SoundPartName) => void;
 }) {
-  const { client, snapshot, output, mainClips, picked, changes, edits } = props;
+  const { client, snapshot, output, mainClips, changes, edits } = props;
   const { editorChat } = props;
-  const framesPerSecond = snapshot.project.framesPerSecond;
+  const [pickedChapterId, setPickedChapterId] = useState<string>();
+  const film = useMemo(
+    () => filmChaptersOf({ snapshot, clips: mainClips }),
+    [snapshot, mainClips],
+  );
+  const chapterEdits = chapterEditsOf({ changes, film, sceneEdits: edits });
+  const timelineEdits = timelineEditsOf({
+    changes,
+    outputId: output.id,
+    film,
+  });
   const stills = useSceneStills({
     client,
     snapshot,
     output,
     clips: mainClips,
   });
-  const sceneFailure = changes.failureOf("scenes");
   const soundRows = soundRowsOf({
     timeline: props.timeline,
     scenes: snapshot.scenes,
@@ -63,86 +76,46 @@ export function LowerArea(props: {
     editorChat,
     onOpenSound: props.onOpenSound,
   });
+  const dropSceneInChapter = (drop: { clipId: string; chapterId: string }) => {
+    const card = film.cards.find((each) => each.clip.id === drop.clipId);
+    if (card === undefined) return;
+    chapterEdits.dropSceneInChapter({ card, chapterId: drop.chapterId });
+  };
+  const timelineFailure = changes.failureOf("timeline");
   return (
     <>
-      <section className="scenes-row" aria-label="Scenes and actions">
-        {mainClips.length === 0 ? (
-          <p className="fact">
-            This video has no scenes yet. Ask the AI in the chat to make it.
-          </p>
-        ) : (
-          <SceneCards
-            output={output}
-            clips={mainClips}
-            scenes={snapshot.scenes}
-            assets={snapshot.assets}
-            stills={stills}
-            pickedClipId={picked?.clip.id}
-            shownClipId={props.shownClipId}
-            framesPerSecond={framesPerSecond}
-            onPick={props.onPickCard}
-            onMove={edits.move}
-            onAddScene={editorChat.sendText}
-            onTransition={edits.transition}
-          />
-        )}
-        {changes.voiceMayNotMatch ? (
-          <div className="voice-note" role="status">
-            <p>The voice may not match the scenes now.</p>
-            <button
-              type="button"
-              disabled={editorChat.chat.isRunning}
-              onClick={() => {
-                editorChat.sendText(fitTheVoiceRequest);
-              }}
-            >
-              Ask the AI to fit the voice
-            </button>
-          </div>
-        ) : undefined}
-        {mainClips.length === 0 ? undefined : (
-          <SceneActions
-            picked={picked}
-            isVideo={isVideoScene(
-              snapshot.scenes.find(
-                (scene) => scene.id === picked?.clip.sceneId,
-              ),
-            )}
-            isChatRunning={editorChat.chat.isRunning}
-            framesPerSecond={framesPerSecond}
-            onEditText={props.onEditText}
-            onLength={(durationFrames) => {
-              if (picked !== undefined) {
-                edits.resize({ clip: picked.clip, durationFrames });
-              }
-            }}
-            onMakeClip={() => {
-              if (picked !== undefined) props.onMakeClip(picked.clip);
-            }}
-            onBackToGraphics={() => {
-              if (picked === undefined) return;
-              editorChat.sendAboutClip({
-                text: fixedRequestTextOf({
-                  kind: "back-to-graphics",
-                  aboutClipId: picked.clip.id,
-                }),
-                clipId: picked.clip.id,
-              });
-            }}
-            onDuplicate={() => {
-              if (picked !== undefined) edits.duplicate(picked.clip);
-            }}
-            onDelete={() => {
-              if (picked !== undefined) edits.remove(picked.clip);
-            }}
-          />
-        )}
-        {sceneFailure === undefined ? undefined : (
-          <p className="change-failure" role="alert">
-            {sceneFailure}
-          </p>
-        )}
-      </section>
+      <ScenesRow
+        snapshot={snapshot}
+        context={{
+          outputId: output.id,
+          scenes: snapshot.scenes,
+          assets: snapshot.assets,
+          stills,
+          pickedClipId: props.picked?.clip.id,
+          shownClipId: props.shownClipId,
+          framesPerSecond: snapshot.project.framesPerSecond,
+        }}
+        film={film}
+        picked={props.picked}
+        changes={changes}
+        edits={edits}
+        chapterEdits={chapterEdits}
+        editorChat={editorChat}
+        pickedChapterId={pickedChapterId}
+        onPickChapter={setPickedChapterId}
+        onDropSceneInChapter={dropSceneInChapter}
+        onDropItem={({ assetId, clip }) => {
+          const item = trayItemsOf(snapshot).find(
+            (each) => each.assetId === assetId,
+          );
+          if (item !== undefined) {
+            timelineEdits.placeItem({ item, clip, area: "scenes" });
+          }
+        }}
+        onPickCard={props.onPickCard}
+        onEditText={props.onEditText}
+        onMakeClip={props.onMakeClip}
+      />
       <section className="lower-rows" aria-label="Sound and timeline">
         <SoundRows
           rows={soundRows}
@@ -177,18 +150,28 @@ export function LowerArea(props: {
         </label>
         {props.isTimelineOpen ? (
           <Timeline
+            client={client}
+            snapshot={snapshot}
             timeline={props.timeline}
-            scenes={snapshot.scenes}
-            assets={snapshot.assets}
             lengthFrames={props.lengthFrames}
             frame={props.frame}
-            framesPerSecond={framesPerSecond}
-            tempo={snapshot.project.tempo}
             selectedClipId={props.selectedClipId}
+            pickedClip={props.picked?.clip}
+            film={film}
+            chapterEdits={chapterEdits}
+            edits={timelineEdits}
+            pickedChapterId={pickedChapterId}
+            onPickChapter={setPickedChapterId}
+            onDropSceneInChapter={dropSceneInChapter}
             onPick={props.onPick}
             onSeek={props.onSeek}
           />
         ) : undefined}
+        {timelineFailure === undefined ? undefined : (
+          <p className="change-failure" role="alert">
+            {timelineFailure}
+          </p>
+        )}
       </section>
     </>
   );

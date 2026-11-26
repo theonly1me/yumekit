@@ -63,7 +63,6 @@ export function Preview(props: {
   output: Output;
   frame: number;
   framesPerSecond: number;
-  hint: string;
   snapshot: Snapshot;
   onTextEditing: (clickedFrame: number | undefined) => void;
 }) {
@@ -129,7 +128,6 @@ export function Preview(props: {
           )}
         </div>
       </div>
-      <p className="frame-hint">{props.hint}</p>
       {shownFailure === undefined ? undefined : (
         <p className="preview-failure" role="status">
           {shownFailure}
