@@ -104,6 +104,24 @@ describe("the voices and the download of the natural voice", () => {
     ]);
   });
 
+  it("keeps the added word list in the folder of the voice, so it leaves no folder in the temporary folder of the system", async () => {
+    const setup = await voiceSetup();
+
+    await setup.voice.callTool({
+      name: "generate_speech",
+      arguments: {
+        text: "Meet Hoshi.",
+        pronunciations: { Hoshi: "hoe she" },
+        output_directory: join(setup.folder, "assets"),
+        file_stem: "line",
+      },
+    });
+
+    const [call] = setup.spoken;
+    const [wordListPath = ""] = call?.wordListPaths ?? [];
+    expect(wordListPath.startsWith(join(setup.folder, "config"))).toBe(true);
+  });
+
   it("refuses a sound spelling with a word that the voice does not know", async () => {
     const setup = await voiceSetup();
 

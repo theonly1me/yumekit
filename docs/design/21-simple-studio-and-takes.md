@@ -571,3 +571,40 @@ The editor of the branch ran with the fake agent and the sample media server, wi
 
 1. Two open browsers do not see each other's review until a reload.
 2. A take of the voice can use the same rows when takes for the voice come.
+
+## Details of WP88
+
+These decisions came from the small fixes for version 0.1.1 on 2026-11-26.
+
+### The size of MiniMax H3 on fal
+
+1. MiniMax H3 (`minimax/h3`) makes 768P by default, in place of 2K. The three fal pages of the model (`text-to-video`, `image-to-video`, and `reference-to-video`, with their `llms.txt` pages, read on 2026-11-26) give 0.06 US dollars a second at 768P and 0.13 at 2K. The field `resolution` says: "480P and 768P are native generation modes; 2K and 4K upscale a 768P base result." So a clip at 2K is the clip at 768P made larger, for more than twice the price. A person who wants a larger clip picks 2K or 4K, or makes the clip sharper afterwards.
+2. The default of fal itself stays 2K. yumekit always sends `resolution`, so the default of yumekit decides.
+
+### The line of a rename
+
+3. A rename in the Scene tab is a `put_scene` call with a new `title`. When the title differs from the title of the scene before the call, the chat line names the change and the new name: "You renamed scene 2 to "The harbor at dawn".". A scene that is on no scenes row gets "You renamed a scene to "The harbor at dawn".". A call that keeps the title keeps "You changed the text of scene 2.". This closes item 2 of the follow-ups of WP85.
+
+### The sound of a video in each change of the scenes row
+
+4. `resize_scene_clip`, `remove_scene_clip`, and `duplicate_scene_clip` move the sound of each later video with its clip, by the rule of item 4 of WP84: only when the video has one scene clip and one sound clip on the row, to the start of the clip, and no longer than the clip. Each tool description says so. This replaces item 4 of WP85 and item 6 of "Details of direct changes" in document 13.
+5. One rule in `timeline/videoSounds.ts` serves the four scene clip tools and `set_chapters`. It compares the scenes row before and after the change, and a sound changes only when its clip moved or changed length. So the sound of an earlier video stays where the person put it. Before, `move_scene_clip` also put the sound of a clip that did not move back to the start of its clip.
+6. The sound of the resized clip ends with the clip. A shorter clip trims it. A longer clip grows it up to the end of its file, counted from `assetStartFrame`. When the file has no known length, the sound only gets shorter.
+7. `remove_scene_clip` also removes the sound of the removed video, when the removed clip was the only scene clip of that video. Otherwise that sound would play over the next scene, and the sound of the next video could not move into its place, because two clips on one track cannot overlap. The one undo step brings both back.
+8. `duplicate_scene_clip` gives the copy no sound clip of its own. The video then has two scene clips, so its one sound stays with the first clip, and a later change of the row does not move it.
+
+### The install check and the sample server
+
+9. The step "the sample media server makes an asset" of `pnpm run check-release` made its picture with the Codex program of the computer. With no `server`, a picture goes to the first ready server in the order with no pick, and Codex comes first. So the check started a real agent program.
+10. Each program that the check starts now gets one environment of its own, as each test engine of WP85 does. Its `PATH` is one folder with links to `node`, `npm`, `ffmpeg`, and `ffprobe`, then `/usr/bin` and `/bin`. So the check never finds the `claude`, `codex`, or `cursor-agent` of the computer, and `yumekit open` lists no agent.
+11. The environment also leaves out each variable whose name ends with `KEY` or starts with `YUMEKIT_` or `CODEX_`. So no media key and no Codex path of the computer reaches the check, and no call goes to a paid service. `YUMEKIT_CONFIG_DIRECTORY` names a folder of the check.
+12. The step names `server: "sample"`, and it stops unless the answer says "made by sample". Its line ends with "made by sample".
+
+### Folders in the temporary folder
+
+13. Each test that makes a folder in the temporary folder removes it when the test ends, with `onTestFinished`. A package uses another package only through its public interface, so each package keeps its own helper `temporaryFolder`: `packages/project`, `packages/harness-mcp` (`testing/temporaryFolder.ts`), and the test helpers of `gemini-media`, `fal-media`, `openai-media`, `sand-media`, `local-voice`, and `local-music`. The tests of the plan service, the import rules, the fonts, the design crop, and the saved result of the fake agent do the same.
+14. The harness of the harness tests now closes its MCP server when the test ends. The server closes its picture renderer, so a test that shows a picture no longer leaves a `yumekit-render-*` folder and a Chromium profile.
+15. The local voice keeps an added word list in the folder of its model (`<configuration folder>/voices/<model>/word-lists`), not in the folder `yumekit-voice-words` of the temporary folder.
+16. `pnpm test` runs `scripts/testFolders/main.ts`. It gives the run its own temporary folder (`TMPDIR`, `TMP`, and `TEMP`) and runs `vitest run` with the arguments of the command. Then it lists that folder. When a `yumekit-*` folder is left, the run fails and names each prefix with its count, for example "The tests left 1 folder in the temporary folder: yumekit-leak-probe-\* (1).". Then it removes the folder of the run, also after a failure.
+17. So a test run leaves nothing in the temporary folder of the system, and the folders of another run on the same computer do not count. CI runs `pnpm test`, so CI has the same guard. A direct `vitest run` has no guard.
+18. Playwright 1.65.1 leaves a `playwright-artifacts-*` and a `playwright_chromiumdev_profile-*` folder when Chromium is not installed and a launch fails (a probe on 2026-11-26). The test engines run with no Chromium, so a full run made about 280 such pairs. The folder of the run now holds them. A person with no Chromium still gets one pair for each failed start of the browser until `yumekit setup` runs. That is a follow-up.

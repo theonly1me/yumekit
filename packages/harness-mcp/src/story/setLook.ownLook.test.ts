@@ -1,8 +1,8 @@
-import { mkdtemp, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
+import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { startHarness, type Harness } from "../testing/harnessFixture.js";
+import { temporaryFolder } from "../testing/temporaryFolder.js";
 
 const appColors = {
   background: "#0c0c0d",
@@ -12,10 +12,7 @@ const appColors = {
 };
 
 async function importFont(harness: Harness): Promise<void> {
-  const source = join(
-    await mkdtemp(join(tmpdir(), "yumekit-font-")),
-    "Geist-Variable.woff2",
-  );
+  const source = join(await temporaryFolder(), "Geist-Variable.woff2");
   await writeFile(source, "font bytes");
   await harness.call({
     name: "import_asset",

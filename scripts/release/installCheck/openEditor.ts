@@ -20,12 +20,9 @@ export async function checkEditorPage(options: {
   command: string;
   args: string[];
   cwd: string;
+  environment: NodeJS.ProcessEnv;
 }): Promise<string> {
-  const child = startProgram({
-    command: options.command,
-    args: options.args,
-    cwd: options.cwd,
-  });
+  const child = startProgram(options);
   const output: string[] = [];
   child.stdout.on("data", (chunk: Buffer) => output.push(chunk.toString()));
   child.stderr.on("data", (chunk: Buffer) => output.push(chunk.toString()));

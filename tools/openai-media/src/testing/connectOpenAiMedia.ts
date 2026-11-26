@@ -1,4 +1,4 @@
-import { mkdtemp } from "node:fs/promises";
+import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
@@ -8,6 +8,7 @@ import {
   type CallToolResult,
 } from "@modelcontextprotocol/sdk/types.js";
 import { createOpenAiMediaServer } from "../createOpenAiMediaServer.ts";
+import { onTestFinished } from "vitest";
 
 export const placeholderKey = "not-a-real-key";
 
@@ -72,8 +73,10 @@ export function imageResponse(png: Buffer): Promise<Response> {
   );
 }
 
-export function temporaryFolder(): Promise<string> {
-  return mkdtemp(join(tmpdir(), "yumekit-openai-media-"));
+export async function temporaryFolder(): Promise<string> {
+  const folder = await mkdtemp(join(tmpdir(), "yumekit-openai-media-"));
+  onTestFinished(() => rm(folder, { recursive: true, force: true }));
+  return folder;
 }
 
 export function fakeWav(options: {

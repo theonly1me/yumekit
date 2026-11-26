@@ -89,6 +89,26 @@ describe("the changes of the person in the chat", () => {
     ]);
   });
 
+  it("names a rename of a scene and its new name, as the Scene tab sends it", async () => {
+    const chat = await startChatEngine({ steps: [] });
+    await twoScenesOnTheRow(chat);
+
+    await callTool({
+      ...chat.engine,
+      name: "put_scene",
+      input: {
+        scene_id: "s-k2",
+        title: "The harbor at dawn",
+        kit_component: "title-card",
+        props: { heading: "Harbor" },
+      },
+    });
+
+    expect(await lastChange(chat)).toMatchObject({
+      summary: 'You renamed scene 2 to "The harbor at dawn".',
+    });
+  });
+
   it("counts the files of one upload of several files, and keeps one file in the singular", async () => {
     const chat = await startChatEngine({ steps: [] });
 

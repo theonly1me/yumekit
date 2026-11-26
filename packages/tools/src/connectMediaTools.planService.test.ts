@@ -1,7 +1,7 @@
-import { mkdtemp, readFile } from "node:fs/promises";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, onTestFinished, vi } from "vitest";
 import {
   connectFixture,
   planServerCommand,
@@ -14,7 +14,9 @@ async function planFixture(options: {
   spendingUsd?: number;
   picked?: string;
 }) {
-  const callsFile = join(await mkdtemp(join(tmpdir(), "yumekit-plan-")), "c");
+  const callsFolder = await mkdtemp(join(tmpdir(), "yumekit-plan-"));
+  onTestFinished(() => rm(callsFolder, { recursive: true, force: true }));
+  const callsFile = join(callsFolder, "c");
   vi.stubEnv("YUMEKIT_PLAN_STATE", options.planState);
   vi.stubEnv("YUMEKIT_PRICED_KEY", "made-up-priced-key");
   vi.stubEnv("YUMEKIT_PRICED_CALLS", callsFile);

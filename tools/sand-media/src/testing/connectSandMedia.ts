@@ -1,4 +1,4 @@
-import { mkdtemp, writeFile } from "node:fs/promises";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
@@ -9,6 +9,7 @@ import {
   type Progress,
 } from "@modelcontextprotocol/sdk/types.js";
 import { createSandMediaServer } from "../createSandMediaServer.ts";
+import { onTestFinished } from "vitest";
 
 export const placeholderKey = "sand-test-key-not-real-5d21";
 
@@ -62,8 +63,10 @@ export function resultText(result: CallToolResult): string {
     .join("\n");
 }
 
-export function temporaryFolder(): Promise<string> {
-  return mkdtemp(join(tmpdir(), "yumekit-sand-media-"));
+export async function temporaryFolder(): Promise<string> {
+  const folder = await mkdtemp(join(tmpdir(), "yumekit-sand-media-"));
+  onTestFinished(() => rm(folder, { recursive: true, force: true }));
+  return folder;
 }
 
 export async function writePicture(options: {

@@ -105,6 +105,7 @@ export async function startHarness(
   ]);
   onTestFinished(async () => {
     await client.close();
+    await server.close();
     await mediaTools.close();
   });
   return {

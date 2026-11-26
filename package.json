@@ -11,10 +11,10 @@
   },
   "scripts": {
     "build": "tsc --build && pnpm --filter @yumekit/editor run build",
-    "typecheck": "tsc --build && tsc -p scripts/importRules && tsc -p scripts/release",
+    "typecheck": "tsc --build && tsc -p scripts/importRules && tsc -p scripts/release && tsc -p scripts/testFolders",
     "lint": "eslint . && prettier --check . && pnpm run check-imports",
     "check-imports": "node --experimental-strip-types scripts/importRules/checkImports.ts",
-    "test": "vitest run",
+    "test": "node --experimental-strip-types scripts/testFolders/main.ts",
     "format": "prettier --write .",
     "pack-release": "tsc --build --clean && pnpm build && node --experimental-strip-types scripts/release/packRelease.ts",
     "check-release": "node --experimental-strip-types scripts/release/installCheck/main.ts"

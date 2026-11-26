@@ -110,6 +110,11 @@ describe("generate_video with the newer fal models and their cheaper tiers", () 
       input: { model: "minimax/h3-max-turbo", duration_seconds: 5 },
       usd: 0.2,
     },
+    {
+      name: "5 seconds of MiniMax H3 at 768P, its native size, when the call names no size",
+      input: { model: "minimax/h3", duration_seconds: 5 },
+      usd: 0.3,
+    },
   ])("estimates $name", async ({ input, usd }) => {
     const video = fakeMp4({
       widthPixels: 1280,

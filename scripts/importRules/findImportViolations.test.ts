@@ -1,12 +1,13 @@
-import { mkdir, mkdtemp, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, onTestFinished } from "vitest";
 import { findImportViolations } from "./findImportViolations.ts";
 
 async function workspaceWith(files: Record<string, string>): Promise<string> {
   const root = await mkdtemp(join(tmpdir(), "yumekit-imports-"));
+  onTestFinished(() => rm(root, { recursive: true, force: true }));
   const packages = [
     "packages/scene",
     "packages/stage",

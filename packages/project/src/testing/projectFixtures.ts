@@ -1,7 +1,15 @@
-import { mkdir, mkdtemp, readdir, readFile, writeFile } from "node:fs/promises";
+import {
+  mkdir,
+  mkdtemp,
+  readFile,
+  readdir,
+  rm,
+  writeFile,
+} from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, relative } from "node:path";
 import { createProject, type Edit, type ProjectStore } from "../index.js";
+import { onTestFinished } from "vitest";
 
 export type EditOfKind<Kind extends Edit["kind"]> = Extract<
   Edit,
@@ -22,8 +30,10 @@ export const tallOutput = {
   heightPixels: 1920,
 };
 
-export function temporaryFolder(): Promise<string> {
-  return mkdtemp(join(tmpdir(), "yumekit-project-"));
+export async function temporaryFolder(): Promise<string> {
+  const folder = await mkdtemp(join(tmpdir(), "yumekit-project-"));
+  onTestFinished(() => rm(folder, { recursive: true, force: true }));
+  return folder;
 }
 
 export async function createTestProject(): Promise<ProjectStore> {

@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { mkdtemp } from "node:fs/promises";
+import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
@@ -12,6 +12,7 @@ import { createLocalVoiceServer } from "../createLocalVoiceServer.ts";
 import type { NaturalModel } from "../naturalVoice/modelFiles.ts";
 import type { NaturalSpeaker } from "../naturalVoice/naturalSpeaker.ts";
 import { kokoroVoices, type VoiceEntry } from "../naturalVoice/voices.ts";
+import { onTestFinished } from "vitest";
 
 export const lexiconLines = [
   "meet m ˈ i t",
@@ -150,6 +151,8 @@ export function resultText(result: CallToolResult): string {
     .join("\n");
 }
 
-export function temporaryFolder(): Promise<string> {
-  return mkdtemp(join(tmpdir(), "yumekit-local-voice-"));
+export async function temporaryFolder(): Promise<string> {
+  const folder = await mkdtemp(join(tmpdir(), "yumekit-local-voice-"));
+  onTestFinished(() => rm(folder, { recursive: true, force: true }));
+  return folder;
 }

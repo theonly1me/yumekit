@@ -27,7 +27,7 @@ export const minimaxH3: VideoModel = {
   ],
   durationSeconds: { minimum: 5, maximum: 15, default: 5 },
   resolutions: ["480P", "768P", "2K", "4K"],
-  defaultResolution: "2K",
+  defaultResolution: "768P",
   aspectRatios: ["21:9", "16:9", "4:3", "1:1", "3:4", "9:16"],
   sound: "always",
   prices: perSecondByResolution({

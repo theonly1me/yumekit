@@ -1,4 +1,4 @@
-import { mkdtemp } from "node:fs/promises";
+import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
@@ -9,6 +9,7 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import { createLocalMusicServer } from "../createLocalMusicServer.ts";
 import { styleEntries, type StyleEntry } from "../styles/styleList.ts";
+import { onTestFinished } from "vitest";
 
 export async function connectLocalMusic(options: {
   styles?: readonly StyleEntry[];
@@ -24,6 +25,7 @@ export async function connectLocalMusic(options: {
   await server.connect(serverTransport);
   await client.connect(clientTransport);
   const folder = await mkdtemp(join(tmpdir(), "yumekit-local-music-"));
+  onTestFinished(() => rm(folder, { recursive: true, force: true }));
   return {
     folder,
     toolNames: async () =>

@@ -1,6 +1,6 @@
-import { readFile } from "node:fs/promises";
+import { readFile, rm } from "node:fs/promises";
 import { join } from "node:path";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, onTestFinished, vi } from "vitest";
 import { callTool } from "../testing/rawRequest.js";
 import { uploadRequest, wavBytes } from "../testing/uploadRequest.js";
 import { init, result, whole } from "./testing/claudeLines.js";
@@ -87,6 +87,7 @@ describe("the work of the person in a chat request", () => {
       process.env["TMPDIR"] ?? "/tmp",
       `set-timeline-${String(Date.now())}.json`,
     );
+    onTestFinished(() => rm(resultFile, { force: true }));
     const chat = await startChatEngine({
       steps: [
         { print: init },

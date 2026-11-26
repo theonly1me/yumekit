@@ -1,8 +1,8 @@
-import { mkdtemp, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
+import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { startHarness, type Harness } from "../testing/harnessFixture.js";
+import { temporaryFolder } from "../testing/temporaryFolder.js";
 
 const themeCode = 'export const accent: string = "#ff3366";\n';
 
@@ -17,10 +17,7 @@ async function importFile(options: {
   assetId: string;
   kind: string;
 }) {
-  const source = join(
-    await mkdtemp(join(tmpdir(), "yumekit-font-")),
-    "Display.woff2",
-  );
+  const source = join(await temporaryFolder(), "Display.woff2");
   await writeFile(source, "font bytes");
   return options.harness.call({
     name: "import_asset",
