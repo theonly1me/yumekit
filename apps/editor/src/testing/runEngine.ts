@@ -1,12 +1,13 @@
 import { voiceTestServer } from "./mediaTestTools.js";
 import { execFile, spawn } from "node:child_process";
-import { chmod, mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
-import { delimiter, dirname, join } from "node:path";
+import { join } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 import { installFakeAgent } from "./fakeAgent.js";
+import { pathOfTestPrograms } from "./testPrograms.js";
 
 const runFile = promisify(execFile);
 export const cliMainFile = fileURLToPath(
@@ -48,24 +49,6 @@ export interface EngineOptions {
   environment?: Record<string, string>;
 }
 
-async function pathWithAgents(options: {
-  root: string;
-  agentPrograms: string[] | undefined;
-}): Promise<{ PATH?: string }> {
-  if (options.agentPrograms === undefined) return {};
-  const folder = join(options.root, "bin");
-  await mkdir(folder);
-  for (const program of options.agentPrograms) {
-    await writeFile(join(folder, program), "#!/bin/sh\n");
-    await chmod(join(folder, program), 0o755);
-  }
-  return {
-    PATH: [folder, dirname(process.execPath), "/usr/bin", "/bin"].join(
-      delimiter,
-    ),
-  };
-}
-
 async function createProject(options: EngineOptions): Promise<{
   root: string;
   folder: string;
@@ -86,7 +69,10 @@ async function createProject(options: EngineOptions): Promise<{
     GEMINI_API_KEY: "",
     FAL_KEY: "",
     YUMEKIT_EDITOR_TEST_KEY: "",
-    ...(await pathWithAgents({ root, agentPrograms: options.agentPrograms })),
+    PATH: await pathOfTestPrograms({
+      root,
+      agentPrograms: options.agentPrograms ?? [],
+    }),
     ...(options.fakeAgent === true
       ? await installFakeAgent({
           root,

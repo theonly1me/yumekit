@@ -1,7 +1,7 @@
-import { existsSync } from "node:fs";
-import { chmod, mkdir, symlink, writeFile } from "node:fs/promises";
-import { delimiter, join } from "node:path";
+import { chmod, mkdir, writeFile } from "node:fs/promises";
+import { join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { linkMediaPrograms, pathWithSystemFolders } from "./testPrograms.js";
 
 export type FakeStep =
   | { print: string }
@@ -24,16 +24,6 @@ const fakeAgentFile = fileURLToPath(
     import.meta.url,
   ),
 );
-
-async function linkMediaPrograms(folder: string): Promise<void> {
-  const searched = (process.env["PATH"] ?? "").split(delimiter);
-  for (const program of ["ffmpeg", "ffprobe"]) {
-    const found = searched
-      .map((searchedFolder) => join(searchedFolder, program))
-      .find((candidate) => existsSync(candidate));
-    if (found !== undefined) await symlink(found, join(folder, program));
-  }
-}
 
 export async function installFakeAgent(options: {
   root: string;
@@ -63,7 +53,7 @@ export async function installFakeAgent(options: {
   await writeFakeScenario({ scenarioFile, scenario: { steps: [] } });
   return {
     YUMEKIT_FAKE_AGENT_SCENARIO: scenarioFile,
-    PATH: [folder, "/usr/bin", "/bin"].join(delimiter),
+    PATH: pathWithSystemFolders(folder),
   };
 }
 
