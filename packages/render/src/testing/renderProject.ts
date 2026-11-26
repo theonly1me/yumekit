@@ -1,6 +1,7 @@
-import { mkdtemp } from "node:fs/promises";
+import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { onTestFinished } from "vitest";
 import {
   createProject,
   openProject,
@@ -28,8 +29,23 @@ export interface TestClip {
   transition?: SceneTransition;
 }
 
-export function temporaryFolder(): Promise<string> {
-  return mkdtemp(join(tmpdir(), "yumekit-render-test-"));
+export interface FolderOfTheFile {
+  folder: string;
+  remove: () => Promise<void>;
+}
+
+export async function folderOfTheFile(): Promise<FolderOfTheFile> {
+  const folder = await mkdtemp(join(tmpdir(), "yumekit-render-test-"));
+  return {
+    folder,
+    remove: () => rm(folder, { recursive: true, force: true }),
+  };
+}
+
+export async function temporaryFolder(): Promise<string> {
+  const { folder, remove } = await folderOfTheFile();
+  onTestFinished(remove);
+  return folder;
 }
 
 export function moduleScene(options: {
@@ -81,9 +97,10 @@ export function sceneTracks(options: {
 export async function createRenderProject(options: {
   outputs?: Output[];
   edits: Edit[] | ((store: ProjectStore) => Promise<Edit[]>);
+  projectFolder?: string;
 }): Promise<string> {
   const created = await createProject({
-    folder: join(await temporaryFolder(), "project"),
+    folder: options.projectFolder ?? join(await temporaryFolder(), "project"),
     name: "Render test",
     framesPerSecond: 30,
     outputs: options.outputs ?? [smallOutput],

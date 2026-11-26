@@ -1,14 +1,18 @@
+import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { decodePng } from "../testing/decodePng.js";
 import { openPreview, type OpenPreview } from "../testing/openPreview.js";
 import {
   createRenderProject,
+  folderOfTheFile,
   moduleScene,
   sceneTracks,
+  type FolderOfTheFile,
 } from "../testing/renderProject.js";
 import { solidColorCode, throwingCode } from "../testing/sceneCodes.js";
 
 let preview: OpenPreview | undefined;
+let files: FolderOfTheFile | undefined;
 
 function openedPreview(): OpenPreview {
   if (preview === undefined) {
@@ -18,7 +22,9 @@ function openedPreview(): OpenPreview {
 }
 
 beforeAll(async () => {
+  files = await folderOfTheFile();
   const folder = await createRenderProject({
+    projectFolder: join(files.folder, "project"),
     edits: [
       moduleScene({ sceneId: "solid", code: solidColorCode }),
       moduleScene({ sceneId: "broken", code: throwingCode }),
@@ -42,6 +48,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await preview?.close();
+  await files?.remove();
 });
 
 describe("the preview page messages", () => {
