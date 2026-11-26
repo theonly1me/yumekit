@@ -117,6 +117,20 @@ The file tells the agent how to install yumekit, how to check the computer, and 
 - **Your keys stay on your computer.** yumekit sends each key only to its own service.
 - **New models are marked.** A model that nobody has run with yumekit yet shows "Not tested with yumekit yet".
 
+| Service       | Key              | Get it at                            | What it makes                                                                                 |
+| ------------- | ---------------- | ------------------------------------ | --------------------------------------------------------------------------------------------- |
+| fal           | `FAL_KEY`        | https://fal.ai/dashboard/keys        | Video clips (Seedance, Kling, Veo, Wan, MiniMax, LTX, PixVerse, FLUX, Grok), pictures, sounds |
+| Google Gemini | `GEMINI_API_KEY` | https://aistudio.google.com/apikey   | Video clips (Gemini Omni Flash), pictures (Nano Banana), music (Lyria), voices                |
+| Sand AI       | `SAND_API_KEY`   | https://platform.sand.ai/app/keys/   | Video clips (MAGI-2)                                                                          |
+| OpenAI        | `OPENAI_API_KEY` | https://platform.openai.com/api-keys | Pictures (GPT Image), voices                                                                  |
+
+To pick a model and add its key:
+
+1. In yumekit, open Settings, then "More settings", then "Services".
+2. Next to "Video clips" (or pictures, music, or voice), click "Change" and pick a model. Each model shows its service and its price for a second.
+3. If its service needs a key, the steps to get one show there. Paste the key, and click "Save the key".
+4. Or add the key in a terminal, for example `yumekit keys set FAL_KEY`. It asks for the key and does not show it.
+
 ## Use an agent from the terminal
 
 Connect Claude Code, Codex, or Cursor to a project:
