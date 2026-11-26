@@ -4,7 +4,7 @@ The open source video harness for AI agents.
 
 **Directed, not just generated.** Reels, explainers, trailers, and films, with one story, one cast, and one look in every shot.
 
-YUMEKIT_TRAILER_VIDEO
+https://github.com/user-attachments/assets/16d412da-7d59-4053-bff8-73b35345bfd0
 
 This trailer was made with yumekit. Its new pictures, clips, and music cost $2.07, and it reuses shots of _Unwritten_. It is also on [YouTube](https://www.youtube.com/watch?v=3fW_o0VGqNc).
 
