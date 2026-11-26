@@ -2,7 +2,7 @@ import { defineProject } from "vitest/config";
 
 export default defineProject({
   test: {
-    name: "editor-browser",
+    name: "e2e-editor-browser",
     include: ["src/**/*.browser.test.ts"],
     globalSetup: [
       "../../packages/tools/src/testing/guard/globalSetup.ts",

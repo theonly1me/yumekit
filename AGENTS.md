@@ -35,6 +35,7 @@ These rules apply to each agent that works in this repository.
 - Get an expected value from an independent source, such as a formula or a value computed by hand.
 - Replace a dependency only at an outside boundary: the network, a paid service, or another program.
 - No test and no CI job calls a paid service.
+- A unit test runs in the test process. A test that starts another program, or a server of yumekit, is an end-to-end test: its file name ends in `.e2e.test.ts`. CI runs no end-to-end test.
 
 ## Use what you build
 
@@ -52,7 +53,7 @@ Before you open a pull request, use your change in the way a user would. Follow 
 1. Run `git status` before `git add` and before `git commit`.
 2. Work on a branch. Never commit to `main`.
 3. Write each commit message as one line: `type(scope): subject`. Add no body, no trailer, and no attribution.
-4. Run `pnpm lint`, `pnpm typecheck`, `pnpm test`, and `pnpm build` before each push.
+4. Run `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:e2e`, and `pnpm build` before each push.
 5. Open one pull request for one change. Use the pull request template. Add no attribution line.
 6. Use a pull request title in the same format as a commit message. The title becomes the commit on `main`.
 7. Watch CI after each push until it is green. A red check on your pull request is your job.
