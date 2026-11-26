@@ -6,7 +6,7 @@ import {
   type TurnEnd,
 } from "../brainTypes.js";
 import { jsonLineOf } from "../program/jsonLine.js";
-import { claudeServerToolPrefix } from "./claudeArguments.js";
+import { claudeServerToolPrefix } from "./claudeAccess.js";
 import {
   claudeLineSchema,
   textBlockSchema,

@@ -3,6 +3,8 @@ import { AskForm, type SceneChip } from "./AskForm.js";
 import { ChatHistory } from "./ChatHistory.js";
 import type { AskInput } from "./chatRequests.js";
 import { useDropZone, type PendingFiles } from "./files/index.js";
+import { PermissionCard } from "./permissions/PermissionCard.js";
+import { openPermissionsOf } from "./permissions/openPermissions.js";
 import { QuestionCard } from "./questions/QuestionCard.js";
 import { RunningWork } from "./running/RunningWork.js";
 import type { WorkItem } from "./running/workSchema.js";
@@ -42,6 +44,15 @@ export function ChatPanel(props: {
       />
       <div className="ask">
         <RunningWork items={props.runningWork} />
+        {openPermissionsOf(chat.entries).map((entry) => (
+          <PermissionCard
+            key={entry.id}
+            entry={entry}
+            onAnswer={(answer) =>
+              chat.answerPermission({ entryId: entry.id, answer })
+            }
+          />
+        ))}
         {ask.round === undefined ? undefined : (
           <QuestionCard
             key={ask.round.id}

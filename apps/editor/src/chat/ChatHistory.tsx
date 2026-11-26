@@ -6,6 +6,7 @@ import { laterChangeCount, retryOf, roundOf } from "./chatEntries.js";
 import type { AskInput } from "./chatRequests.js";
 import type { ChatEntry } from "./chatSchemas.js";
 import { NoticeView, type NoticeAction } from "./NoticeView.js";
+import { PermissionLine } from "./permissions/PermissionLine.js";
 import { PersonMessage } from "./PersonMessage.js";
 import { StartFailureView } from "./StartFailureView.js";
 import type { Chat } from "./useChat.js";
@@ -67,6 +68,10 @@ export function ChatHistory(props: {
         );
       case "questions":
         return undefined;
+      case "permission":
+        return entry.state === "open" ? undefined : (
+          <PermissionLine key={entry.id} entry={entry} />
+        );
       case "answer":
         return (
           <AnswerView key={entry.id} answer={entry} text={chat.textOf(entry)} />

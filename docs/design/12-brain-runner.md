@@ -11,10 +11,10 @@ A probe on 2026-11-22 measured Claude Code 2.1.330 and Codex CLI 0.163.0 on the 
 | B1  | The engine starts the installed agent program as a child process, one process for a request                                                                                                                                                                           | The person already has the program and its sign-in. yumekit holds no sign-in     |
 | B2  | yumekit does not use an agent SDK                                                                                                                                                                                                                                     | The command gives the same events, and an SDK pins its own program version       |
 | B3  | One adapter for each program, behind one interface, in `@yumekit/brain`                                                                                                                                                                                               | The programs differ in flags, events, and how a request ends                     |
-| B4  | The agent gets the yumekit MCP server and nothing more: no shell, no file tool, no web                                                                                                                                                                                | A request from a chat box must not run a command on the computer                 |
+| B4  | The agent gets the yumekit MCP server and nothing more: no shell, no file tool, no web. Since WP90, this holds for the critic, the helpers, and the choice "Only yumekit's tools". The lead of "Ask me when it needs to" follows L1                                   | A request from a chat box must not run a command on the computer                 |
 | B5  | The agent uses the `yumekit mcp` bridge to the engine that runs                                                                                                                                                                                                       | The same tools, events, and undo history as a change by the person               |
 | B6  | One request runs at a time for a project. A message of the person while it runs steers it (WP71). A helper that the lead starts with `ask_helper`, and a critic that `review_clip` or `review_sheet` starts, run inside the request of the lead (documents 19 and 20) | Two agents that change one project at once give a result that nobody can explain |
-| B7  | The settings, hooks, plugins, and other MCP servers of the person do not load                                                                                                                                                                                         | They cost tokens, and they can reach mail and files                              |
+| B7  | The settings, hooks, plugins, and other MCP servers of the person do not load. Since WP90, this holds where B4 holds                                                                                                                                                  | They cost tokens, and they can reach mail and files                              |
 | B8  | The chat history is a file in the project, in `.yumekit/chat/`                                                                                                                                                                                                        | A reload and a restart keep the conversation                                     |
 
 ### The sign-in of the person
@@ -35,9 +35,20 @@ interface AgentAdapter {
     instructions: string;
     serverCommand: ServerCommand;
     workingFolder: string;
+    access?: RunAccess;
     onEvent: (event: BrainEvent) => void;
   }) => { ended: Promise<TurnEnd>; stop: () => void };
 }
+
+type RunAccess =
+  | { kind: "yumekit-only" }
+  | {
+      kind: "program";
+      readFolders: string[];
+      closedFolders: string[];
+      readOnly: { files: string[]; folders: string[] };
+      allowedRules: string[];
+    };
 
 type BrainEvent =
   | { type: "session"; sessionId: string }
@@ -340,6 +351,104 @@ The owner, after a film run of 4 hours: "yumekit takes no message while it works
 13. (D7) A helper and the critic never get a message: the engine adds the block only to a call of the lead (`helperCallOf` gives `lead`) while a chat request runs.
 14. The Making screen has no box. A person opens the editor to send a message. This is a follow-up.
 
+## What the lead may do (WP90)
+
+The owner asked the lead to open the prototype and record a video of it. The lead answered that it cannot open websites. The owner then said: "its running on my own machine, it makes no sense to restrict it, let default clauyde code permissions work and use auto mode it can ask when it needs help". After the lead said "I can't open or read code files, even inside the project folder", the owner added: "it also needs to be able to read files on the machine, it can ask permission from user first and only access folders outside the project that user approves and adds to exceptions etc. but we need to have that too".
+
+| Id  | Decision                                                                                                                                                                                                                            | Why                                                                                                                |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| L1  | The lead runs with the tools and the permissions of its agent program: the built-in tools, the settings, plugins, skills, and MCP servers of the person, and the yumekit server                                                     | yumekit runs on the computer of the person. A lead that cannot open a page or run a command cannot record a screen |
+| L2  | Settings has one choice, "What the lead may do", in its first part: "Ask me when it needs to" (the default) and "Only yumekit's tools" (the locked run of WP26). The choice is `leadAccess` in `settings.json`                      | A person who wants the locked run keeps it                                                                         |
+| L3  | A yumekit tool, `ask_permission`, is the permission prompt tool of the run. Each question is a card in the chat: "Allow once", "Allow for this project", and "Don't allow". The run waits. No answer in 10 minutes is "Don't allow" | The person decides in the editor, not in a terminal                                                                |
+| L4  | The lead works in the project folder and reads it with no question. A read outside the project and outside the folders that the person allowed always asks the person. "Allow for this project" adds the folder                     | The lead must read files, and it must ask first outside the project                                                |
+| L5  | The run denies a direct edit of each file that the store owns: `project.json`, `bible.json`, `script.md`, `scenes/`, `timelines/`, `assets/index.json`, `takes.json`, and `.yumekit/`. The lead may read them                       | D8 holds: each change of the project goes through the harness tools                                                |
+| L6  | The run denies each read and each edit of the yumekit configuration folder (the folder of `keys.json`), also inside a folder that the person allowed. The instructions tell the lead never to read or print a key                   | The keys stay secret                                                                                               |
+| L7  | The critic and the helpers keep the locked run                                                                                                                                                                                      | Each does one piece of work with the yumekit tools                                                                 |
+| L8  | With Codex and with Cursor, the lead keeps the locked run for both choices. Settings says so in one sentence                                                                                                                        | Neither program can send a permission question to yumekit, so "Ask me when it needs to" has no meaning there       |
+
+### Claude Code with "Ask me when it needs to"
+
+```
+claude -p <request>
+  --output-format stream-json --verbose --include-partial-messages
+  --mcp-config <inline JSON with the server yumekit>
+  --allowedTools mcp__yumekit__* <each rule allowed for this project>
+  --permission-mode auto
+  --permission-prompt-tool mcp__yumekit__ask_permission
+  --settings <inline JSON with the deny rules and the file check hooks>
+  [--add-dir <each folder allowed for this project>]
+  --append-system-prompt-file <file>
+  [--model <model>] [--effort <effort>] [--resume <session id>]
+  -- <request>
+```
+
+The working folder is the project folder. The run has no `--tools`, no `--strict-mcp-config`, and no `--setting-sources`, so the setup of the person loads. The inline settings are:
+
+```json
+{
+  "permissions": {
+    "deny": [
+      "Read(//<keys folder>/**)",
+      "Edit(//<keys folder>/**)",
+      "Edit(//<project>/project.json)",
+      "Edit(//<project>/scenes/**)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "mcp_tool",
+            "server": "yumekit",
+            "tool": "check_file_access",
+            "input": { "tool": "Read", "path": "${tool_input.file_path}" }
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+The deny list has a rule for each file and folder of L5. The hooks have one more entry for `Grep|Glob` with `${tool_input.path}`, and one for `Bash` with `${tool_input.command}`.
+
+| Fact (from the documents of 2026-11-26)                                                                                                                                                              | Rule                                                                              |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| Without `--bare`, a `-p` run loads the hooks, skills, plugins, MCP servers, and `CLAUDE.md` of the person, as an interactive session does                                                            | L1 needs no flag                                                                  |
+| In auto mode, a classifier reviews each action. Reads and edits in the working folders run with no question. An ask rule, a hook that answers `ask`, and three blocks in a row go to the prompt      | "Ask me when it needs to" is `--permission-mode auto`                             |
+| When auto mode is not open to the session, Claude Code starts in Manual mode                                                                                                                         | Then more actions ask the person. This is the safe side                           |
+| In `-p`, the permission prompt tool answers each prompt. It returns one text block, `{"behavior":"allow"}` or `{"behavior":"deny","message":"..."}`, and no `structuredContent`                      | `ask_permission` returns only that text                                           |
+| The prompt of auto mode before the first read outside the working folders does not show in `-p`. There, the read runs                                                                                | Without a hook, a read outside the project would run with no question             |
+| A `PreToolUse` hook that answers `ask` in auto mode sends the call to the prompt, and the classifier does not decide it. An `mcp_tool` hook calls a tool of a configured server                      | `check_file_access` answers `ask` for a path outside, so the person gets the card |
+| Rules go in the order deny, ask, allow. A `Read` deny rule also blocks Edit and Write. `//path` is an absolute path. A Bash command that Claude Code can read, such as `cat`, follows the deny rules | L5 and L6 are deny rules                                                          |
+| `permissions.blockReadsOutsideWorkingDirectories` refuses each file-tool read outside the working folders in every mode                                                                              | Not used: a refused read cannot become "Allow once"                               |
+
+### The permission card
+
+- `ask_permission` takes the call of the program: `tool_name`, `input`, and `tool_use_id`. The engine shows the call in plain words: "Open a web page" with the address, "Run a command" with the command, "Read a file outside the project" with the path, "Change a file" with the path, or "Use the tool X of Y" for a tool of another MCP server.
+- The card sits above the chat box, like the card of a round of questions. It says "The AI wants to open a web page.", shows the exact address, command, or path in a well, and has the three buttons. A line under the buttons gives the minutes that are left.
+- "Allow once" allows this call. "Allow for this project" stores a rule, or the folder for a read, in the yumekit configuration folder (see "Details of WP90", item 10), and the next run gets it with `--allowedTools` or `--add-dir`. "Don't allow" refuses it. No answer in 10 minutes refuses it, and the chat line says "No answer in 10 minutes".
+- After the answer, the card folds into one line in the chat, such as "You allowed the AI once to open a web page.", with the address under it.
+- Only the person answers: `POST /api/chat/permissions/<id>` with `x-yumekit-client: agent` or a helper token gives `permission-not-for-the-ai` (403).
+
+### Codex and Cursor
+
+- Codex names its matching mode in its documents: `approvals_reviewer = "auto_review"` with `approval_policy = "on-request"` and the `workspace-write` sandbox. A reviewer agent decides each approval. `codex exec --help` of 0.163.0 has `--approve-for-me` for the same review. Codex has no permission prompt tool, so a question never reaches the person.
+- Cursor names `--auto-review` in the help of 2026.11.22: "a server classifier auto-runs safe tool calls and prompts for the rest". Its documents say that print mode "follows the same approval rules as an interactive session, but it can't stop to ask you."
+- So with Codex and with Cursor, both choices give the locked run of WP26 and WP35 (L8). Settings says: "Codex cannot send its questions to yumekit, so with Codex the lead uses only yumekit's tools."
+
+### The instructions of the lead
+
+With "Ask me when it needs to", the last line of the instructions ("You have only the yumekit tools.") becomes these rules:
+
+1. The lead can also use the tools of its program: look at a web page, run a command, read a file, or record the screen.
+2. Every change to the project goes through the yumekit tools. The lead never writes, moves, or removes a file of the project. It may read them.
+3. To bring in a file that it made, such as a screen recording, the lead saves it in a temporary folder and calls `import_asset`.
+4. The lead never reads, prints, or sends a key.
+5. When an action needs the yes of the person, the lead does it, and the person gets the card. The lead never asks for a permission in its text. After "Don't allow", it does not try again and says in one sentence what it could not do.
+
 ## Work package
 
 | Id   | Scope                                                                                                                                                                                                                  | Needs |
@@ -347,6 +456,16 @@ The owner, after a film run of 4 hours: "yumekit takes no message while it works
 | WP26 | `@yumekit/brain` with the interface, the two adapters, and the instructions. The chat of the engine with its requests, events, and file                                                                                | WP25  |
 | WP71 | Steering messages: the queue in `chat.json`, the block in the answer of the next call of the lead, the guard of paid calls, the next request, the choice of the person over the critic, and the open box of the editor | WP26  |
 | WP35 | The Cursor adapter. `cursor` is an agent id of the chat, in the engine, in the settings, and in the editor                                                                                                             | WP26  |
+| WP90 | The lead with the tools of its program: the choice in Settings, the permission card, the folders that the lead may read, the deny rules of the store and the keys, and the new instructions                            | WP71  |
+
+### WP90 checks
+
+1. With the fake agent, each program gets the arguments of each choice. Codex and Cursor get the same arguments for both choices.
+2. The permission tool shows a card, waits, and returns the answer of the person. No answer in time returns "Don't allow".
+3. "Allow for this project" of a rule and of a folder reaches the next run.
+4. A read inside the project asks nothing. A read outside asks. A read of the key folder is denied, also under a folder that the person allowed. The run denies a direct edit of each file of the store.
+5. Screenshots of the choice in Settings and of a permission card, dark and light, wide and phone.
+6. One real run with Claude Code in a new temporary project and configuration folder, with no media key: the lead opens `https://example.com` and describes it.
 
 ### WP35 checks
 
@@ -371,3 +490,56 @@ The owner, after a film run of 4 hours: "yumekit takes no message while it works
 - An API key in place of the sign-in of the program.
 - A limit on the cost of one request (the cost guard, milestone 4).
 - More than one conversation for a project.
+
+## Details of WP90
+
+These facts and choices came from the build of WP90 on 2026-11-26.
+
+### Sources
+
+1. The documents of Claude Code, read on 2026-11-26: `code.claude.com/docs/en/cli-reference` (`--permission-mode`, `--permission-prompt-tool`, `--permission-prompts`, `--tools`, `--setting-sources`, `--strict-mcp-config`, `--settings`, `--add-dir`), `headless` (what a `-p` run loads, Manual mode as the start of `-p` since 2.1.302, `--permission-prompts`), `permission-modes` (auto mode, its fallback, the first read outside the working folders, protected paths), `permissions` (rule order, `Read` and `Edit` rules, `//path`, Bash limits, hooks and rules), `hooks` (`PreToolUse` decisions, `ask` in auto mode, `mcp_tool` hooks, the default timeout of 600 seconds), `errors` (the answer of the permission prompt tool), `settings-reference` (`blockReadsOutsideWorkingDirectories`), and `mcp` (the tool timeout of about 28 hours). The help of `claude` 2.1.332 on the computer of the owner lists `--permission-mode auto` and `--permission-prompts host`. It does not list `--permission-prompt-tool` or `--append-system-prompt-file`, and the CLI reference names both.
+2. The documents of Codex, read on 2026-11-26: `learn.chatgpt.com/docs/agent-approvals-security` (`approvals_reviewer = "auto_review"`, and `codex exec --sandbox workspace-write` for runs with no person) and `learn.chatgpt.com/docs/config-file/config-reference` (`permissions.<name>.filesystem.<path> = "deny"` denies reads, and `approvals_reviewer` is `user` or `auto_review`). Neither page says what `codex exec` does with an approval request. `codex exec --help` of 0.163.0 lists `--approve-for-me`.
+3. The documents of Cursor, read on 2026-11-26: `cursor.com/docs/cli/headless` ("Print mode follows the same approval rules as an interactive session, but it can't stop to ask you.") and `cursor.com/docs/cli/reference/permissions` (`Read` and `Write` rules, and deny before allow). `cursor-agent --help` of 2026.11.22 lists `--auto-review`.
+4. No page of today names the fields that the permission prompt tool gets. `ask_permission` takes `tool_name`, `input`, and `tool_use_id`, each optional. The real check measured `tool_name` and `input.file_path` (item 21).
+
+### The two tools of the lead
+
+5. The engine owns `ask_permission` and `check_file_access`, not the harness: they belong to the chat. `@yumekit/brain` exports their names, and the adapter puts them in the arguments. The engine lists them in `GET /api/tools` only for a call by the agent with no helper token while a chat request runs. So a helper, the critic, an agent in a terminal, and `yumekit mcp` with no engine keep the same tool list as before.
+6. A call of these tools never passes the steering block of WP71, the guard of an open round of questions, the film clock, or the change ledger. Its result is one text block with no `structuredContent`, as the errors document asks.
+7. "Allow" is `{"behavior":"allow"}` with no `updatedInput`. Claude Code 2.1.207 and later keep the input. Versions 2.1.86 to 2.1.206 needed `"updatedInput": {}`, and the probe of WP26 already measured 2.1.330. The engine copies no input, so a large Write never meets the limit of about 40 KB that the errors document names.
+8. A refusal says what to do: "The person did not allow this. Do not try it again. Say in one sentence what you could not do." No answer says "The person did not answer in 10 minutes, so this is not allowed." A call outside a chat request is refused with a sentence that only the lead of a chat request can ask.
+
+### The card
+
+9. "Allow once" holds for the rest of the request for the same rule or folder, so a second read of the same folder asks nothing. "Don't allow" also holds for the rest of the request: the same call is refused at once. Both end with the request. One look at a folder is often many reads.
+10. "Allow for this project" writes `<configuration folder>/lead-permissions/<key>.json`, where the key is the first 32 hex digits of the SHA-256 of the real path of the project. The file holds `project` (that path), `folders`, and `rules`, and a file whose `project` differs gives nothing. The grants live there and not in the project, because the run denies each read and edit of the configuration folder, while a shell command of the lead can write in the project folder. A grants file in the project folder is ignored: no release ever wrote one. The rule of each tool: `Bash(<the exact command>)`, `WebFetch(domain:<host>)`, `WebSearch`, `Edit(//<path>)` for Edit, Write, and NotebookEdit, the full name of a tool of another MCP server, and the tool name for each other tool. A read stores its folder: the folder of the file for Read, and the path for Grep and Glob. The engine also answers a prompt that matches a stored rule with "allow" and shows no card, so a rule that Claude Code cannot read still asks nothing.
+11. The chat entry `permission` has `id`, `what`, `detail`, `folder`, `canAllowForProject`, `askedAt`, `waitSeconds`, and `state` (`open`, `allowed-once`, `allowed-for-project`, `denied`, `timed-out`, or `ended`). An open card after a restart of the engine loads as `ended`. Stop and the end of a request end each open card, and the program gets a refusal.
+12. After an answer, the text of the lead goes on in a new answer entry below the line of the card, as after a steering message (WP71, item 8).
+13. The chat shows a step line for the tools of the program: "Running a command", "Opening a web page", "Searching the web", "Reading a file", "Looking through files", "Writing a file", and "Starting a helper of the AI".
+
+### The files that the lead reads
+
+14. `check_file_access` answers no decision for a path in the project, in an allowed folder, or in a temporary folder (`os.tmpdir()`, `/tmp`, `/private/tmp`, `/var/folders`, `/private/var/folders`, and `/dev`). It answers `deny` for a path in the keys folder, and `ask` with the folder for each other path. The temporary folders are open because the lead saves a capture there before `import_asset`, and they hold no files of the person.
+15. For Bash, the check reads each word of the command that starts with `/`, `~`, or `$HOME`, or that has a `..` part, and the part after `=`. A word with `://` is an address. One word in the keys folder denies the command. One word outside asks. A program that opens files by itself, such as a script, is not seen. The permissions document gives the same limit for its own Read rules. This check is a best effort, not a sandbox.
+16. The hooks document does not say what a missing field gives in `${...}`. A Grep or a Glob with no `path` sends an empty value or the literal text, and the engine reads both as the project folder.
+17. The keys folder is `configurationDirectory()` and its real path. Both are in the deny rules and in the check.
+18. With "Ask me when it needs to", the working folder of the lead is the project folder. With "Only yumekit's tools", it stays `.yumekit/agent`. A session resumes after a change of the choice: Claude Code finds a session by its id from any folder (headless document).
+
+### Settings and the engine
+
+19. `GET /api/lead-permissions` gives `access`, `askingAgents`, `home`, `folders`, `rules` (each with `rule` and `text` in plain words), `suggestions`, and `note`. `PUT /api/lead-permissions/access` takes `{ access }`. `POST` and `DELETE /api/lead-permissions/folders` take `{ folder }`. `DELETE /api/lead-permissions/rules` takes `{ rule }`. `POST /api/chat/permissions/<id>` takes `{ answer }`: `allow-once`, `allow-for-project`, or `deny`. An answered card gives `permission-not-open` (409). Each route refuses the AI with `permission-not-for-the-ai` (403).
+20. "Add a folder" expands `~`, needs a folder that exists, and stores its real path. The keys folder or a folder in it gives `folder-holds-keys` (400): "This folder holds your yumekit keys, so the AI may never read it." A parent of the keys folder is allowed, with the line "The folder of your yumekit keys inside it stays closed to the AI." A folder in the project gives `folder-in-project`. "Or pick one" offers Desktop, Documents, Downloads, Movies, Pictures, and Music of the home folder when they exist. A folder in the home folder shows as `~/...`. On its own initiative, the build also lists "Allowed for this project" with Remove for each stored rule. `startEngine` takes `permissionWaitMilliseconds` for tests. The default is 10 minutes.
+
+### The real check
+
+21. On 2026-11-26, the engine of the worktree build ran one request with Claude Code 2.1.332 (the model `claude-opus-5-5`) in a new temporary project and configuration folder, with no media key: "Open https://example.com and describe the page in two sentences." The setup of the person loaded. A user instructions file of Claude Code asked the AI to read a file in the home folder before each task, and a helper of the lead tried that read. The file check asked, and the card showed "The AI wants to read a file outside the project." with the path after 15 seconds. So the hook with `${tool_input.file_path}` worked, and the prompt tool got `tool_name` "Read" and `input.file_path`. The check allowed it once. Auto mode then let the fetch of the page run with no card. The answer: "The page has the title "Example Domain" and one short paragraph of text. The text says the domain is for examples in documentation, and that people should not use it for testing or monitoring." The request took 33 seconds. The steps were a helper of the program, a read, a fetch, and the report of the helper.
+
+### Follow-ups
+
+22. A probe of Codex with `auto_review` and a permission profile that denies the keys folder, and of Cursor with `--auto-review` and the deny rules of L5 and L6. Then each program can run with its own tools, still with no card.
+23. A rule wider than one exact command, for example from the `permission_suggestions` of a `PermissionRequest` hook.
+24. The screen recording permission of macOS for a program that records the screen. The operating system asks for it, not yumekit.
+
+### Known limit
+
+25. A shell command of the lead can still change a file of the store in the project folder, for example with a script or a redirect that Claude Code does not read. The deny rules stop the file tools and the commands that Claude Code can read, and the instructions forbid such a change, but the change ledger and undo do not see one that gets through.

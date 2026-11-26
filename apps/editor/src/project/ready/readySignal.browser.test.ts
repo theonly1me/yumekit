@@ -59,7 +59,7 @@ describe("the ready signal", () => {
         return watched;
       });
 
-    await page.getByRole("main").click();
+    await page.locator("main.work").click();
     await openPicturesTake({ engine: runningEngine(), assetIds: ["ferry"] });
     await readyTake({ engine: runningEngine(), items: [{ id: "ferry" }] });
 

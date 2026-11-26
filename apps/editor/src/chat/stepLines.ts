@@ -62,6 +62,15 @@ const sentencesByTool: Record<string, string> = {
   undo: "Undoing a change",
   redo: "Doing a change again",
   delete_everything: "Clearing the project",
+  Bash: "Running a command",
+  WebFetch: "Opening a web page",
+  WebSearch: "Searching the web",
+  Read: "Reading a file",
+  Grep: "Looking through files",
+  Glob: "Looking through files",
+  Write: "Writing a file",
+  Edit: "Writing a file",
+  Agent: "Starting a helper of the AI",
 };
 
 export const fallbackStepSentence = "Working on the project";

@@ -3,6 +3,7 @@ import { moneyWarningOf } from "../chat/money/moneyWarning.js";
 import { personSummaryOf } from "../chat/personSummary.js";
 import { anySegment, type Exchange, type Route } from "./exchange.js";
 import { helperRefusalOf, helperTokenOf, toolsFor } from "./helperCalls.js";
+import { callLeadTool, isLeadTool, leadToolListings } from "./leadToolCalls.js";
 import { readJsonBody } from "./readJsonBody.js";
 import { noCallNote } from "../chat/stepNotes.js";
 import { notFound, sendJson } from "./responses.js";
@@ -37,6 +38,15 @@ function sendBody(options: { exchange: Exchange; body: unknown }): void {
 async function callTool(exchange: Exchange) {
   const { context } = exchange;
   const [name = ""] = exchange.parameters;
+  if (isLeadTool(name)) {
+    return callLeadTool({
+      exchange,
+      name,
+      isLead:
+        exchange.request.headers[clientHeader] === agentClient &&
+        context.chat.helperCallOf(helperTokenOf(exchange)).kind === "lead",
+    });
+  }
   if (!context.harness.tools.some((tool) => tool.name === name)) {
     return {
       status: 404,
@@ -143,13 +153,19 @@ export const projectRoutes: Route[] = [
     method: "GET",
     pattern: ["api", "tools"],
     handle: (exchange) => {
+      const { chat } = exchange.context;
+      const call = chat.helperCallOf(helperTokenOf(exchange));
+      const isChatLead =
+        call.kind === "lead" &&
+        exchange.request.headers[clientHeader] === agentClient &&
+        chat.permissions.isRequestOn();
       sendBody({
         exchange,
         body: {
-          tools: toolsFor({
-            call: exchange.context.chat.helperCallOf(helperTokenOf(exchange)),
-            tools: exchange.context.harness.tools,
-          }),
+          tools: [
+            ...toolsFor({ call, tools: exchange.context.harness.tools }),
+            ...(isChatLead ? leadToolListings : []),
+          ],
         },
       });
       return Promise.resolve(undefined);

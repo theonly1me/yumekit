@@ -55,8 +55,16 @@ async function callTool(options: {
       ],
     },
   });
+  const inProjectFolder = join(process.cwd(), ".yumekit", "engine.json");
   const engine = engineFileSchema.parse(
-    JSON.parse(readFileSync(join(process.cwd(), "..", "engine.json"), "utf8")),
+    JSON.parse(
+      readFileSync(
+        existsSync(inProjectFolder)
+          ? inProjectFolder
+          : join(process.cwd(), "..", "engine.json"),
+        "utf8",
+      ),
+    ),
   );
   const response = await fetch(
     `http://127.0.0.1:${String(engine.port)}/api/tools/${options.name}`,

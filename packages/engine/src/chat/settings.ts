@@ -9,6 +9,10 @@ export const aiRoles = ["lead", "critic"] as const;
 
 export type AiRole = (typeof aiRoles)[number];
 
+export const leadAccessChoices = ["ask-me", "yumekit-only"] as const;
+
+export type LeadAccessChoice = (typeof leadAccessChoices)[number];
+
 const modelChoiceSchema = z.strictObject({
   model: z.string().min(1).optional(),
   effort: z.string().min(1).optional(),
@@ -25,6 +29,7 @@ const settingsSchema = z.looseObject({
       z.partialRecord(z.enum(aiRoles), modelChoiceSchema),
     )
     .optional(),
+  leadAccess: z.enum(leadAccessChoices).optional(),
 });
 
 export type ChatSettings = z.infer<typeof settingsSchema>;

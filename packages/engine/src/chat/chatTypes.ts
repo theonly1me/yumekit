@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { permissionEntrySchema } from "./permissions/permissionSchemas.js";
 import {
   personMessageExtras,
   questionsEntrySchema,
@@ -80,6 +81,7 @@ export const chatEntrySchema = z.discriminatedUnion("kind", [
     ...personMessageExtras,
   }),
   questionsEntrySchema,
+  permissionEntrySchema,
 ]);
 
 export const chatFileSchema = z.object({
@@ -110,7 +112,8 @@ export type ChatFailureKind =
   | "file-not-found"
   | "questions-closed"
   | "answers-not-valid"
-  | "money-warning-not-open";
+  | "money-warning-not-open"
+  | "permission-not-open";
 
 export interface ChatFailure {
   kind: ChatFailureKind;

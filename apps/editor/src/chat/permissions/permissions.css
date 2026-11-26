@@ -1,0 +1,87 @@
+.permission-card {
+  --detail-font: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  display: grid;
+  gap: 10px;
+  padding: 13px 14px 12px;
+  border-radius: 14px;
+  background: var(--raised);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.permission-ask {
+  font-size: var(--step-0);
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.permission-detail {
+  max-height: 7.5em;
+  overflow-y: auto;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--well);
+  font-family: var(--detail-font);
+  font-size: var(--step--2);
+  line-height: 1.5;
+  color: var(--text);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.permission-note,
+.permission-wait {
+  font-size: var(--step--2);
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+.permission-wait {
+  color: var(--faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.permission-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.permission-choices button,
+.permission-foot button {
+  padding: 6px 14px;
+}
+
+.permission-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.permission-foot button {
+  flex: none;
+}
+
+.entry.permission-line {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2px;
+  margin-left: 38px;
+  padding: 9px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  font-size: var(--step--1);
+  color: var(--muted);
+}
+
+.entry.permission-line .permission-line-detail {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: var(--step--2);
+  color: var(--faint);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

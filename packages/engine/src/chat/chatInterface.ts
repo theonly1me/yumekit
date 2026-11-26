@@ -17,6 +17,8 @@ import type {
 import type { HelperCall } from "./helpers/helperDesk.js";
 import type { PersonRequestInput } from "./questions/personRequest.js";
 import type { MoneyDesk } from "./money/moneyDesk.js";
+import type { ProgramToolCall } from "./permissions/permissionAsk.js";
+import type { PermissionDesk } from "./permissions/permissionDesk.js";
 import type { CallNote } from "./stepNotes.js";
 import type { ToolCaller } from "./trackedStore.js";
 
@@ -41,5 +43,13 @@ export interface Chat {
   askCritic: (request: CriticRequest) => Promise<CriticTurn>;
   helperCallOf: (token: string | undefined) => HelperCall;
   money: MoneyDesk;
+  permissions: ChatPermissions;
   close: () => Promise<void>;
+}
+
+export interface ChatPermissions {
+  ask: (options: { call: ProgramToolCall; isLead: boolean }) => Promise<string>;
+  isRequestOn: () => boolean;
+  checkFile: PermissionDesk["checkFile"];
+  answer: PermissionDesk["answer"];
 }

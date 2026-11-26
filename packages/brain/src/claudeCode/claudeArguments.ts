@@ -1,10 +1,10 @@
 import {
   serverName,
   type ModelChoice,
+  type RunAccess,
   type ServerCommand,
 } from "../brainTypes.js";
-
-export const claudeServerToolPrefix = `mcp__${serverName}__`;
+import { claudeAccessArgumentsOf } from "./claudeAccess.js";
 
 export function claudeArgumentsOf(options: {
   request: string;
@@ -12,6 +12,7 @@ export function claudeArgumentsOf(options: {
   instructionsFile: string;
   serverCommand: ServerCommand;
   choice: ModelChoice | undefined;
+  access: RunAccess | undefined;
 }): string[] {
   const { model, effort } = options.choice ?? {};
   const serverConfiguration = {
@@ -29,11 +30,7 @@ export function claudeArgumentsOf(options: {
     "--verbose",
     "--include-partial-messages",
     ...["--mcp-config", JSON.stringify(serverConfiguration)],
-    "--strict-mcp-config",
-    ...["--tools", ""],
-    ...["--allowedTools", `${claudeServerToolPrefix}*`],
-    ...["--permission-mode", "dontAsk"],
-    ...["--setting-sources", ""],
+    ...claudeAccessArgumentsOf(options.access),
     ...["--append-system-prompt-file", options.instructionsFile],
     ...(model === undefined ? [] : ["--model", model]),
     ...(effort === undefined ? [] : ["--effort", effort]),

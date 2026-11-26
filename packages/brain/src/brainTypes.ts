@@ -27,9 +27,25 @@ export interface ModelChoice {
   effort?: string | undefined;
 }
 
+export interface ReadOnlyPaths {
+  files: string[];
+  folders: string[];
+}
+
+export type RunAccess =
+  | { kind: "yumekit-only" }
+  | {
+      kind: "program";
+      readFolders: string[];
+      closedFolders: string[];
+      readOnly: ReadOnlyPaths;
+      allowedRules: string[];
+    };
+
 export interface TurnOptions {
   request: string;
   choice?: ModelChoice | undefined;
+  access?: RunAccess | undefined;
   sessionId: string | undefined;
   instructions: string;
   serverCommand: ServerCommand;
