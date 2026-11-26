@@ -84,7 +84,7 @@ describe("the New mark of a take", () => {
     expect(newMarks).toEqual([1, 1, 0]);
     expect(
       await rowOf("The lantern in fog").locator(".review-badges").innerText(),
-    ).toBe("Made before this take");
+    ).toContain("Made before this take");
     await close();
   });
 });

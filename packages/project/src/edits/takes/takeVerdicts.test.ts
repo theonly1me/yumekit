@@ -80,13 +80,13 @@ describe("the verdicts of a review", () => {
   it("counts each item once, by its verdict, in plain words", () => {
     const counts = reviewCountsOf(notes);
 
-    expect(counts).toEqual({ change: 1, dropped: 1, question: 1, use: 1 });
+    expect(counts).toEqual({ change: 1, dropped: 1, question: 1 });
     expect(reviewCountTextOf(counts)).toBe(
-      "1 to change, 1 to leave out, 1 question, and 1 to use",
+      "1 to change, 1 to leave out, and 1 question",
     );
-    expect(
-      reviewCountTextOf({ change: 2, dropped: 0, question: 2, use: 0 }),
-    ).toBe("2 to change and 2 questions");
+    expect(reviewCountTextOf({ change: 2, dropped: 0, question: 2 })).toBe(
+      "2 to change and 2 questions",
+    );
   });
 
   it("refuses a note that is both a drop and a question, and a pick that does not approve", async () => {

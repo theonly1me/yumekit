@@ -4,10 +4,15 @@ import type { Snapshot } from "../../../engine/snapshot.js";
 import { captionOf, replacedIdOf, shownKindOf } from "../itemFacts.js";
 import type { FullSizeView } from "../large/FullSize.js";
 import type { PlayerMedia } from "../media/Player.js";
-import { verdictOfDraft, type DraftChange } from "../review/itemDrafts.js";
+import {
+  verdictOfDraft,
+  type DraftChange,
+  type DraftVerdict,
+} from "../review/itemDrafts.js";
 import type { ShownItem } from "../shownItems.js";
 import { ReviewPanel, type PanelState } from "./ReviewPanel.js";
 import { RowMedia } from "./RowMedia.js";
+import "./reviewControls.css";
 import "./rows.css";
 
 export function ReviewRow(props: {
@@ -19,7 +24,7 @@ export function ReviewRow(props: {
   onChange: (next: DraftChange) => void;
   onSaveAgain: () => void;
   onOpen: (view: FullSizeView) => void;
-  onUse: () => void;
+  onVerdict: (verdict: DraftVerdict) => void;
 }) {
   const { shown, state } = props;
   const mediaRef = useRef<PlayerMedia | null>(null);
@@ -71,7 +76,7 @@ export function ReviewRow(props: {
           if (replaced === undefined) return;
           props.onOpen({ kind: "compare", itemId, olderId: replaced });
         }}
-        onUse={props.onUse}
+        onVerdict={props.onVerdict}
       />
     </article>
   );

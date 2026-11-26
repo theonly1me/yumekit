@@ -29,8 +29,8 @@ async function readyMusic(options: {
   });
 }
 
-describe("a Use this pick of the person", { timeout: 60_000 }, () => {
-  it("tells the lead to use the pick for its place, in place of the version used before, and get_work keeps it until it is placed", async () => {
+describe("a Looks right on an older version", { timeout: 60_000 }, () => {
+  it("names the older version for its place in place of the newer one, and get_work keeps it until it is placed", async () => {
     const harness = await startTakeHarness();
     await readyMusic({ harness, assetId: "theme" });
     const first = await harness.sendTake({
@@ -41,26 +41,22 @@ describe("a Use this pick of the person", { timeout: 60_000 }, () => {
 
     const second = await harness.sendTake({
       takeId: "take-2",
-      notes: [
-        { item_id: "theme-2", text: "Warmer.", approved: true, use: true },
-      ],
+      notes: [{ item_id: "theme", text: "Warmer.", approved: true, use: true }],
     });
     const work = await harness.call({ name: "get_work", arguments: {} });
 
-    expect(first.ok && first.value.details).toContain(
-      'Use the music "theme" as the music.',
-    );
+    expect(first.ok && first.value.details).not.toContain("Use the music");
     expect(second.ok && second.value.text).toBe(
       "Take 2 of the clips: all good. Go on.",
     );
     expect(second.ok && second.value.details).toContain(
-      'Use the music "theme-2" as the music, in place of "theme".',
+      'Use the music "theme" as the music, in place of "theme-2".',
     );
     expect(second.ok && second.value.details).toContain(
-      "remake nothing for its place, and never undo a pick",
+      "remake nothing for its place, and never undo that choice",
     );
     expect(work.text).toContain(
-      'Picks of the person that wait for you: put each into the film as it is, and remake nothing for its place.\n- Use the music "theme-2" as the music.',
+      'and that wait for you: put each into the film as it is, and remake nothing for its place.\n- Use the music "theme" as the music.',
     );
   });
 });

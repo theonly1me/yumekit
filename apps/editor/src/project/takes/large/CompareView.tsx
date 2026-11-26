@@ -3,7 +3,7 @@ import type { Snapshot } from "../../../engine/snapshot.js";
 import { shownKindOf, takeNumberOfAsset } from "../itemFacts.js";
 import { useItemUrl } from "../media/useItemUrl.js";
 import type { Picks } from "../review/picks.js";
-import { UseButton } from "../rows/UseRow.js";
+import type { DraftVerdict } from "../review/itemDrafts.js";
 import type { ShownItem } from "../shownItems.js";
 
 function Column(props: {
@@ -12,6 +12,7 @@ function Column(props: {
   takeId: string;
   label: string;
   picks: Picks;
+  verdictOf: (itemId: string) => DraftVerdict | undefined;
 }) {
   const itemId = props.shown.item.id;
   const url = useItemUrl({
@@ -27,13 +28,17 @@ function Column(props: {
         {props.picks.inUseIds.has(itemId) ? (
           <span className="badge in-use">In use</span>
         ) : undefined}
-        <UseButton
-          isPicked={props.picks.isPicked(itemId)}
-          canPick={props.picks.canPick}
-          onUse={() => {
-            props.picks.toggle(itemId);
+        <button
+          type="button"
+          className="looks-right"
+          aria-pressed={props.verdictOf(itemId) === "approved"}
+          disabled={!props.picks.canPick}
+          onClick={() => {
+            props.picks.lookRight(itemId);
           }}
-        />
+        >
+          Looks right
+        </button>
       </figcaption>
       <div className="stage-box">
         {url === undefined ? undefined : kind === "picture" ? (
@@ -53,6 +58,7 @@ export function CompareView(props: {
   olderId: string;
   takeId: string;
   picks: Picks;
+  verdictOf: (itemId: string) => DraftVerdict | undefined;
 }) {
   const { snapshot, shown } = props;
   const olderNumber = takeNumberOfAsset({
@@ -72,6 +78,7 @@ export function CompareView(props: {
         shown={older}
         takeId={props.takeId}
         picks={props.picks}
+        verdictOf={props.verdictOf}
         label={`Take ${String(olderNumber ?? 1)}`}
       />
       <Column
@@ -79,6 +86,7 @@ export function CompareView(props: {
         shown={shown}
         takeId={props.takeId}
         picks={props.picks}
+        verdictOf={props.verdictOf}
         label={`Take ${String(shown.takeNumber)}, new`}
       />
     </div>

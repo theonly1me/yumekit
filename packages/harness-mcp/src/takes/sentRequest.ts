@@ -103,7 +103,7 @@ export function sentRequestOf(options: {
     picks.length === 0
       ? []
       : [
-          "The person picked these with Use this. Put each into the film as it is, remake nothing for its place, and never undo a pick:",
+          'The person marked these "Looks right" over their other versions. Put each into the film as it is, remake nothing for its place, and never undo that choice:',
           ...picks,
         ];
   if (reviewTotalOf(counts) === 0) {

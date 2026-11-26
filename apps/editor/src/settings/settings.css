@@ -97,3 +97,14 @@
 .spend-meter[data-near-limit="true"] > span {
   background: var(--accent);
 }
+
+.theme-choices {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.theme-choices button[aria-pressed="true"] {
+  background: var(--solid);
+  border-color: var(--solid);
+  color: var(--on-solid);
+}

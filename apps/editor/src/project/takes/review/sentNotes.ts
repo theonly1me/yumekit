@@ -96,7 +96,6 @@ export function draftCountsOf(options: {
     const draft = options.drafts.get(itemId);
     const verdict = draft === undefined ? undefined : verdictOfDraft(draft);
     if (verdict !== undefined && verdict !== "approved") counts[verdict] += 1;
-    if (verdict === "approved" && draft?.use === true) counts.use += 1;
   }
   return counts;
 }

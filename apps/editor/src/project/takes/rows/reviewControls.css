@@ -1,0 +1,163 @@
+button.looks-right {
+  padding: 7px 20px;
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+button.looks-right[aria-pressed="true"] {
+  background: var(--accent);
+  color: var(--ground);
+}
+
+button.looks-right:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.lead-note,
+.check-line {
+  font-size: var(--step--1);
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.lead-note span,
+.check-line span {
+  display: block;
+  font-size: var(--step--2);
+  color: var(--faint);
+}
+
+.check-line span {
+  color: var(--accent);
+}
+
+.tile-fault {
+  font-size: var(--step--2);
+  color: var(--decline);
+}
+
+button.compare-link {
+  justify-self: start;
+  font-size: var(--step--1);
+}
+
+.review-fields {
+  gap: 12px;
+}
+
+.review-fields:disabled {
+  opacity: 0.55;
+}
+
+.verdicts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(122px, 1fr));
+  gap: 6px;
+}
+
+.verdicts button {
+  padding: 7px 10px;
+  white-space: nowrap;
+}
+
+.verdicts button[aria-pressed="true"] {
+  --picked: var(--text);
+  border-color: var(--picked);
+  color: var(--picked);
+  background: color-mix(in srgb, var(--picked) 14%, transparent);
+}
+
+.verdicts [data-verdict="approved"][aria-pressed="true"] {
+  --picked: var(--approve);
+}
+
+.verdicts [data-verdict="change"][aria-pressed="true"] {
+  --picked: var(--decline);
+}
+
+.verdicts [data-verdict="question"][aria-pressed="true"] {
+  --picked: var(--question);
+}
+
+.review-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+button.review-tag {
+  padding: 3px 10px;
+  font-size: var(--step--2);
+  font-weight: 400;
+  color: var(--muted);
+  border-style: dashed;
+}
+
+button.review-tag[aria-pressed="true"] {
+  border-style: solid;
+  border-color: var(--decline);
+  color: var(--decline);
+  background: color-mix(in srgb, var(--decline) 12%, transparent);
+}
+
+.mark-lines {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.mark-line {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.mark-line input[type="text"] {
+  font-size: var(--step--1);
+  padding: 4px 0 6px;
+}
+
+.mark-key,
+button.mark-key {
+  min-width: 24px;
+  padding: 2px 7px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--decline);
+  color: #fff;
+  font-size: var(--step--2);
+  font-weight: 600;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+button.mark-remove {
+  border: 0;
+  padding: 2px 4px;
+  font-size: var(--step--2);
+  font-weight: 400;
+  color: var(--faint);
+}
+
+button.mark-remove:hover {
+  color: var(--text);
+}
+
+.review-note {
+  font-size: var(--step--1);
+  min-height: 3.2em;
+}
+
+.save-line {
+  font-size: var(--step--2);
+  color: var(--faint);
+  min-height: 1.4em;
+}
+
+.save-line[data-failed="true"] {
+  color: var(--decline);
+}

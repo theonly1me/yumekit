@@ -65,7 +65,7 @@ describe("get_story_guide on the work with the person", () => {
       "Make again only the items that have mistakes, in a new take of the same step, with replaces_asset_id.",
     );
     expect(guide).toContain(
-      'Put each "Use this" pick into the film as it is, because the person chose that version for its place, also an older one. Remake nothing for that place, and never undo a pick.',
+      'Put each version that the person marks "Looks right" into the film as it is, because the person chose that version for its place, also an older one. Remake nothing for that place, and never undo that choice.',
     );
     expect(guide).toContain(
       "When the person is not sure about an item, answer in that new take",

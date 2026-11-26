@@ -71,12 +71,29 @@ describe("the places of a film and the version in use", () => {
     expect(placeOf({ facts, assetId: "theme" })).toEqual({ kind: "music" });
   });
 
-  it("keeps an older version that the person picked with Use this over a newer one", () => {
+  it("keeps an older version that the person marked Looks right over a newer one", () => {
     const inUse = inUseByPlaceOf({ facts, usedIds: new Set() });
 
     expect(
       inUse.get(placeKeyOf({ kind: "shot-picture", shotId: "harbor" })),
     ).toBe("harbor-start");
+  });
+
+  it("puts the newest version with no review in use, until a Looks right picks another", () => {
+    const unreviewed = inUseByPlaceOf({
+      facts,
+      usedIds: new Set(),
+      draftDefaults: ["lamp-2"],
+    });
+    const picked = inUseByPlaceOf({
+      facts,
+      usedIds: new Set(),
+      draftDefaults: ["lamp-2"],
+      draftPicks: ["lamp"],
+    });
+
+    expect(unreviewed.get("versions:lamp")).toBe("lamp-2");
+    expect(picked.get("versions:lamp")).toBe("lamp");
   });
 
   it("moves In use to a pick of the draft, and keeps the film's use where nothing is picked", () => {

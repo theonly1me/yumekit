@@ -60,12 +60,14 @@ export interface PlaceUses {
 
 export function placeUsesOf(options: {
   snapshot: Snapshot;
+  draftDefaults: readonly string[];
   draftPicks: readonly string[];
 }): PlaceUses {
   const facts = placeFactsOf(options.snapshot);
   const inUse = inUseByPlaceOf({
     facts,
     usedIds: filmUsesOf(options.snapshot),
+    draftDefaults: options.draftDefaults,
     draftPicks: options.draftPicks,
   });
   return {

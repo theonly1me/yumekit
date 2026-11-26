@@ -148,6 +148,7 @@ describe("the send of a review", () => {
       { itemId: "strings", text: "The swell comes late.", seconds: 1.5 },
       { itemId: "lantern", text: "", dropped: true },
       { itemId: "ferry", text: "Is the fog too thick?", question: true },
+      { itemId: "pier", text: "", approved: true, use: true },
     ]);
     expect(
       sent?.items.map((item) => [item.id, item["approved"] ?? false]),

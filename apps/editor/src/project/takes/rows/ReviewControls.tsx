@@ -1,18 +1,18 @@
 import { draftVerdicts } from "@yumekit/project/takes";
 import type { ShownKind } from "../itemFacts.js";
 import {
-  pickVerdict,
   toggleTag,
   verdictOfDraft,
   writeNote,
   type DraftChange,
+  type DraftVerdict,
   type ItemDraft,
 } from "../review/itemDrafts.js";
 import { itemTags, verdictNames } from "../review/itemTags.js";
 
 export function VerdictButtons(props: {
   draft: ItemDraft;
-  onChange: (next: DraftChange) => void;
+  onVerdict: (verdict: DraftVerdict) => void;
 }) {
   const verdict = verdictOfDraft(props.draft);
   return (
@@ -24,7 +24,7 @@ export function VerdictButtons(props: {
           data-verdict={each}
           aria-pressed={verdict === each}
           onClick={() => {
-            props.onChange(pickVerdict(each));
+            props.onVerdict(each);
           }}
         >
           {verdictNames[each]}

@@ -5,14 +5,12 @@ export interface ReviewCounts {
   change: number;
   dropped: number;
   question: number;
-  use: number;
 }
 
 export const noReviewCounts: ReviewCounts = {
   change: 0,
   dropped: 0,
   question: 0,
-  use: 0,
 };
 
 export function reviewCountsOf(notes: readonly TakeNote[]): ReviewCounts {
@@ -20,9 +18,6 @@ export function reviewCountsOf(notes: readonly TakeNote[]): ReviewCounts {
   for (const verdict of noteVerdictsOf(notes).values()) {
     if (verdict !== "approved") counts[verdict] += 1;
   }
-  counts.use = new Set(
-    notes.filter((note) => note.use === true).map((note) => note.itemId),
-  ).size;
   return counts;
 }
 
@@ -43,6 +38,5 @@ export function reviewCountTextOf(counts: ReviewCounts): string {
     ...(counts.change > 0 ? [`${String(counts.change)} to change`] : []),
     ...(counts.dropped > 0 ? [`${String(counts.dropped)} to leave out`] : []),
     ...(counts.question > 0 ? [`${String(counts.question)} ${questions}`] : []),
-    ...(counts.use > 0 ? [`${String(counts.use)} to use`] : []),
   ]);
 }

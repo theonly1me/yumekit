@@ -98,36 +98,28 @@ export function personPicksOf(takes: readonly Take[]): string[] {
   );
 }
 
-function approvedShotPicturesOf(takes: readonly Take[]): string[] {
-  return sentTakesOf(takes).flatMap((take) =>
-    take.items
-      .filter((item) => item.kind === "asset" && item.approved === true)
-      .map((item) => item.id),
-  );
-}
-
 export function inUseByPlaceOf(options: {
   facts: PlaceFacts;
   usedIds: ReadonlySet<string>;
+  draftDefaults?: readonly string[];
   draftPicks?: readonly string[];
 }): Map<string, string> {
   const { facts } = options;
   const inUse = new Map<string, string>();
-  const set = (pick: { assetId: string; onlyPictures: boolean }) => {
-    const place = placeOf({ facts, assetId: pick.assetId });
-    if (place === undefined) return;
-    if (pick.onlyPictures && place.kind !== "shot-picture") return;
-    inUse.set(placeKeyOf(place), pick.assetId);
+  const set = (assetId: string) => {
+    const place = placeOf({ facts, assetId });
+    if (place !== undefined) inUse.set(placeKeyOf(place), assetId);
   };
-  for (const assetId of approvedShotPicturesOf(facts.takes)) {
-    set({ assetId, onlyPictures: true });
+  for (const assetId of options.usedIds) set(assetId);
+  for (const take of sentTakesOf(facts.takes)) {
+    for (const item of take.items) {
+      if (item.kind === "asset" && item.approved === true) set(item.id);
+    }
+    for (const note of take.notes) {
+      if (note.use === true) set(note.itemId);
+    }
   }
-  for (const assetId of options.usedIds) set({ assetId, onlyPictures: false });
-  for (const assetId of [
-    ...personPicksOf(facts.takes),
-    ...(options.draftPicks ?? []),
-  ]) {
-    set({ assetId, onlyPictures: false });
-  }
+  for (const assetId of options.draftDefaults ?? []) set(assetId);
+  for (const assetId of options.draftPicks ?? []) set(assetId);
   return inUse;
 }

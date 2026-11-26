@@ -10,6 +10,7 @@ import {
 import {
   hasWords,
   type DraftChange,
+  type DraftVerdict,
   type ItemDraft,
 } from "../review/itemDrafts.js";
 import type { SaveState } from "../review/useTakeReview.js";
@@ -17,7 +18,6 @@ import type { ShownItem } from "../shownItems.js";
 import { MarkLines } from "./MarkLines.js";
 import { NoteBox, TagChips, VerdictButtons } from "./ReviewControls.js";
 import { SaveLine } from "./SaveLine.js";
-import { UseRow } from "./UseRow.js";
 
 function OriginBadge(props: { shown: ShownItem }) {
   const { shown } = props;
@@ -37,7 +37,6 @@ export interface PanelState {
   canMark: boolean;
   isLoaded: boolean;
   isInUse: boolean;
-  canUse: boolean;
   focusId: string | undefined;
 }
 
@@ -50,7 +49,7 @@ export function ReviewPanel(props: {
   onSaveAgain: () => void;
   onSeek: (seconds: number) => void;
   onCompare: () => void;
-  onUse: () => void;
+  onVerdict: (verdict: DraftVerdict) => void;
 }) {
   const { shown, kind, state } = props;
   const replaced = replacedIdOf(shown);
@@ -93,20 +92,21 @@ export function ReviewPanel(props: {
           {check}
         </p>
       )}
-      <UseRow
-        canUse={state.canUse}
-        isPicked={state.draft.use === true}
-        canPick={state.canMark && state.isLoaded}
-        olderTake={olderTake}
-        onUse={props.onUse}
-        onCompare={props.onCompare}
-      />
+      {olderTake === undefined ? undefined : (
+        <button
+          type="button"
+          className="link compare-link"
+          onClick={props.onCompare}
+        >
+          Compare with take {olderTake}
+        </button>
+      )}
       <fieldset
         className="review-fields"
         disabled={!state.canMark || !state.isLoaded}
         aria-label={`Your review of ${captionOf(shown)}`}
       >
-        <VerdictButtons draft={state.draft} onChange={props.onChange} />
+        <VerdictButtons draft={state.draft} onVerdict={props.onVerdict} />
         <TagChips kind={kind} draft={state.draft} onChange={props.onChange} />
         <MarkLines
           kind={kind === "picture" ? "pins" : "moments"}

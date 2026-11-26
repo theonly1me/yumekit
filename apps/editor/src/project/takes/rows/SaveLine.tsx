@@ -1,5 +1,5 @@
 import type { SaveState } from "../review/useTakeReview.js";
-import "./rows.css";
+import "./reviewControls.css";
 
 export function SaveLine(props: {
   save: SaveState | undefined;

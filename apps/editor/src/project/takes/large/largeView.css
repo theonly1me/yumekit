@@ -4,7 +4,7 @@
   z-index: 7;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
-  background: rgb(6 6 7 / 0.97);
+  background: #060607;
   color: #ecebe8;
   --text: #ecebe8;
   --muted: #a3a29e;

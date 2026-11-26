@@ -29,9 +29,9 @@ describe("the instructions for the work with the person", () => {
     );
   });
 
-  it("put each Use this pick into the film as it is, and never undo it", () => {
+  it("put each version that the person marks Looks right into the film as it is, and never undo it", () => {
     expect(brainInstructions).toContain(
-      'Put each "Use this" pick into the film as it is, because the person chose that version: remake nothing for its place, and never undo a pick.',
+      'Put each version that the person marks "Looks right" into the film as it is, because the person chose that version: remake nothing for its place, and never undo that choice.',
     );
   });
 });

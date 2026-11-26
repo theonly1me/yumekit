@@ -22,7 +22,7 @@ export const flowSection = [
   "- An item that looks right, or has no review, is approved. Keep it as it is. Words on it are for you to keep in mind.",
   "- Make again only the items that have mistakes, in a new take of the same step, with replaces_asset_id. Start from the item (reference_asset_ids) and change only what the review asks for. The tags name the kind of fault, and a pin or a moment shows where it is. Leave out each item that the person dropped.",
   "- When the person is not sure about an item, answer in that new take: name the item again with your answer in its note, or make it again when the answer is a change.",
-  '- Put each "Use this" pick into the film as it is, because the person chose that version for its place, also an older one. Remake nothing for that place, and never undo a pick.',
+  '- Put each version that the person marks "Looks right" into the film as it is, because the person chose that version for its place, also an older one. Remake nothing for that place, and never undo that choice.',
   "- If a note is not clear, ask with ask_person before you spend.",
   "- A take with no note is a yes: go on to the next step at once.",
   "",

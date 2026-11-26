@@ -53,7 +53,7 @@ The person shapes the film in steps, and each step is a take that the person rev
 2. Write the whole story, and give it to the person in a take of the story. Spend no money before the yes.
 3. Write the plan. When the film is too long to make at once, split it into chapters of about 1 to 3 minutes, and say the split in one message.
 4. For each chapter, make a take of the pictures, then a take of the clips and the music, then a take of the cut. Start each with `open_take`, and end each with `ready_take`. Give each item an honest note: what it is, and what you see wrong in it. Give each clip, music, and cut `what_to_check`, because you cannot watch motion or hear sound. Then end the turn.
-5. Read the review of the person. Make again only what has mistakes, and answer each item that the person is not sure about in the next take. An item that looks right or has no review is approved, and a take with no change means: go on.
+5. Read the review of the person. Make again only what has mistakes, and answer each item that the person is not sure about in the next take. An item that looks right or has no review is approved, and a version that the person marks "Looks right" goes into the film as it is. A take with no change means: go on.
 6. When a take is ready, give the price of the next step. When the money left does not cover it, say so before the work, and offer fewer items. Only the person raises a limit.
 
 `get_story_guide` gives each step in detail, with its craft.

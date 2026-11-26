@@ -1,7 +1,7 @@
 import type { EngineClient } from "../../engine/engineClient.js";
 import type { Snapshot } from "../../engine/snapshot.js";
 import type { FullSizeView } from "./large/FullSize.js";
-import type { ItemDraft } from "./review/itemDrafts.js";
+import { pickVerdict, type ItemDraft } from "./review/itemDrafts.js";
 import type { Picks } from "./review/picks.js";
 import type { TakeReview } from "./review/useTakeReview.js";
 import { ReviewRow } from "./rows/ReviewRow.js";
@@ -44,7 +44,6 @@ export function TakeRows(props: {
                 canMark: props.canMark,
                 isLoaded: !props.canMark || review.isLoaded,
                 isInUse: props.picks.inUseIds.has(itemId),
-                canUse: shown.item.kind === "asset",
               }}
               onChange={(next) => {
                 review.change({ itemId, next });
@@ -53,8 +52,12 @@ export function TakeRows(props: {
                 review.saveAgain(itemId);
               }}
               onOpen={props.onOpen}
-              onUse={() => {
-                props.picks.toggle(itemId);
+              onVerdict={(verdict) => {
+                if (verdict === "approved" && shown.item.kind === "asset") {
+                  props.picks.lookRight(itemId);
+                } else {
+                  review.change({ itemId, next: pickVerdict(verdict) });
+                }
               }}
             />
           );

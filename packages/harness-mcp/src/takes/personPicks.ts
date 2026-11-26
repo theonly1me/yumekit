@@ -77,6 +77,18 @@ function wordOf(options: { snapshot: ProjectSnapshot; assetId: string }) {
     : assetWords[asset.kind];
 }
 
+function otherVersionsOf(options: {
+  facts: PlaceFacts;
+  assetId: string;
+  key: string;
+}): string[] {
+  return [...options.facts.assets.keys()].filter((otherId) => {
+    if (otherId === options.assetId) return false;
+    const otherPlace = placeOf({ facts: options.facts, assetId: otherId });
+    return otherPlace !== undefined && placeKeyOf(otherPlace) === options.key;
+  });
+}
+
 export function pickLinesOf(options: {
   snapshot: ProjectSnapshot;
   take: Take;
@@ -93,20 +105,15 @@ export function pickLinesOf(options: {
     if (place === undefined) return [];
     const key = placeKeyOf(place);
     const earlier = inUse.get(key);
-    const others = [...facts.assets.keys()].filter((otherId) => {
-      const otherPlace = placeOf({ facts, assetId: otherId });
-      return (
-        otherId !== assetId &&
-        otherPlace !== undefined &&
-        placeKeyOf(otherPlace) === key
-      );
-    });
-    const instead =
-      earlier !== undefined && earlier !== assetId
-        ? `, in place of "${earlier}"`
-        : others.length > 0
-          ? `, in place of ${others.map((id) => `"${id}"`).join(" and ")}`
-          : "";
+    const moves = earlier !== undefined && earlier !== assetId;
+    const isOlder = !take.items.some((item) => item.id === assetId);
+    if (!moves && !isOlder) return [];
+    const others = otherVersionsOf({ facts, assetId, key });
+    const instead = moves
+      ? `, in place of "${earlier}"`
+      : others.length > 0
+        ? `, in place of ${others.map((id) => `"${id}"`).join(" and ")}`
+        : "";
     return [
       `Use the ${wordOf({ snapshot, assetId })} "${assetId}" ${placeWordsOf(place)}${instead}.`,
     ];
@@ -130,17 +137,23 @@ function isPlaced(options: {
 
 export function waitingPickLinesOf(snapshot: ProjectSnapshot): string[] {
   const facts = placeFactsOf({ snapshot, takes: snapshot.takes });
+  const inUse = inUseByPlaceOf({ facts, usedIds: usedIdsOf(snapshot) });
   const latest = new Map<string, { assetId: string; place: Place }>();
   for (const assetId of personPicksOf(snapshot.takes)) {
     const place = placeOf({ facts, assetId });
     if (place !== undefined) latest.set(placeKeyOf(place), { assetId, place });
   }
-  const waiting = [...latest.values()].filter(
-    (pick) => !isPlaced({ snapshot, ...pick }),
-  );
+  const waiting = [...latest.entries()]
+    .filter(
+      ([key, pick]) =>
+        inUse.get(key) === pick.assetId &&
+        otherVersionsOf({ facts, assetId: pick.assetId, key }).length > 0 &&
+        !isPlaced({ snapshot, ...pick }),
+    )
+    .map(([, pick]) => pick);
   if (waiting.length === 0) return [];
   return [
-    "Picks of the person that wait for you: put each into the film as it is, and remake nothing for its place.",
+    'Versions that the person marked "Looks right" over their other versions, and that wait for you: put each into the film as it is, and remake nothing for its place.',
     ...waiting.map(
       (pick) =>
         `- Use the ${wordOf({ snapshot, assetId: pick.assetId })} "${pick.assetId}" ${placeWordsOf(pick.place)}.`,

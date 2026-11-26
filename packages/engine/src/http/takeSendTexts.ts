@@ -35,10 +35,9 @@ export function sendSummaryOf(options: {
   if (reviewTotalOf(counts) > 0) {
     return `You sent ${name}: ${reviewCountTextOf(counts)}.`;
   }
-  const picks = counts.use === 0 ? "" : `, with ${reviewCountTextOf(counts)}`;
   return options.next === "stop"
-    ? `You approved ${name}${picks}, and stopped there.`
-    : `You approved ${name}${picks}.`;
+    ? `You approved ${name}, and stopped there.`
+    : `You approved ${name}.`;
 }
 
 export async function fewerRequestOf(options: {

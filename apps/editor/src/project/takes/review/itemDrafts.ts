@@ -49,9 +49,13 @@ function part(value: number): number {
 export function pickVerdict(verdict: DraftVerdict): DraftChange {
   return (draft) => {
     if (draft.verdict === verdict) return withoutVerdict(draft);
-    const picked = { ...draft, verdict };
-    return verdict === "approved" ? picked : withoutUse(picked);
+    const picked = withoutUse({ ...draft, verdict });
+    return verdict === "approved" ? { ...picked, use: true } : picked;
   };
+}
+
+export function useThisVersion(draft: ItemDraft): ItemDraft {
+  return { ...withoutUse(draft), verdict: "approved", use: true };
 }
 
 export function withoutUse(draft: ItemDraft): ItemDraft {
@@ -59,12 +63,6 @@ export function withoutUse(draft: ItemDraft): ItemDraft {
   return verdict === undefined
     ? withoutVerdict(draft)
     : { ...withoutVerdict(draft), verdict };
-}
-
-export function toggleUse(draft: ItemDraft): ItemDraft {
-  return draft.use === true
-    ? withoutUse(draft)
-    : { ...draft, verdict: "approved", use: true };
 }
 
 export function toggleTag(tag: string): DraftChange {

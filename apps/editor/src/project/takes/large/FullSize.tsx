@@ -4,7 +4,7 @@ import type { Snapshot } from "../../../engine/snapshot.js";
 import { captionOf } from "../itemFacts.js";
 import { PinnedPicture } from "../media/PinnedPicture.js";
 import { useItemUrl } from "../media/useItemUrl.js";
-import type { ItemDraft } from "../review/itemDrafts.js";
+import type { DraftVerdict, ItemDraft } from "../review/itemDrafts.js";
 import type { Picks } from "../review/picks.js";
 import type { ShownItem } from "../shownItems.js";
 import { CompareView } from "./CompareView.js";
@@ -43,6 +43,7 @@ export function FullSize(props: {
   takeId: string;
   pins: ItemDraft["pins"];
   picks: Picks;
+  verdictOf: (itemId: string) => DraftVerdict | undefined;
   onClose: () => void;
 }) {
   const { shown, view, onClose } = props;
@@ -82,6 +83,7 @@ export function FullSize(props: {
           olderId={view.olderId}
           takeId={props.takeId}
           picks={props.picks}
+          verdictOf={props.verdictOf}
         />
       ) : (
         <div className="full-size-stage" onClick={closeOutside}>

@@ -5,7 +5,6 @@ import {
   emptyItemDraft,
   pickVerdict,
   toggleTag,
-  toggleUse,
   writeMark,
   writeNote,
   type ItemDraft,
@@ -37,18 +36,9 @@ const drafts = new Map<string, ItemDraft>([
   ["ferry", draftWith(pickVerdict("approved"))],
   ["pier", draftWith(pickVerdict("change"))],
   ["gull", emptyItemDraft],
-  ["gate", toggleUse(emptyItemDraft)],
 ]);
 
-const itemIds = [
-  "harbor",
-  "strings",
-  "lantern",
-  "ferry",
-  "pier",
-  "gull",
-  "gate",
-];
+const itemIds = ["harbor", "strings", "lantern", "ferry", "pier", "gull"];
 
 describe("the notes that a review sends", () => {
   it("gives a pin, a tag, or a note the verdict Has mistakes when the item has none", () => {
@@ -58,7 +48,7 @@ describe("the notes that a review sends", () => {
     ).toBe("question");
   });
 
-  it("sends each verdict with its tags, note, pins, and moments, a Use this pick, and nothing for an item with no review", () => {
+  it("sends each verdict with its tags, note, pins, and moments, Looks right as the version in use, and nothing for an item with no review", () => {
     expect(sentNotesOf({ drafts, itemIds })).toEqual([
       {
         item_id: "harbor",
@@ -72,17 +62,16 @@ describe("the notes that a review sends", () => {
       },
       { item_id: "strings", question: true, text: "Too loud?", seconds: 1.2 },
       { item_id: "lantern", dropped: true, text: "" },
+      { item_id: "ferry", approved: true, text: "", use: true },
       { item_id: "pier", text: "" },
-      { item_id: "gate", approved: true, text: "", use: true },
     ]);
   });
 
-  it("counts each item once by its verdict, and counts a pick apart from the changes", () => {
+  it("counts each item once by its verdict, and leaves approvals out of the count", () => {
     expect(draftCountsOf({ drafts, itemIds })).toEqual({
       change: 2,
       question: 1,
       dropped: 1,
-      use: 1,
     });
   });
 

@@ -96,9 +96,7 @@ function itemLinesOf(options: {
     isSilent && (options.verdict === "change" || options.verdict === "question")
       ? " The person gave no words: look at it again, or ask."
       : "";
-  const verdict = own.some((note) => note.use === true)
-    ? "use this one"
-    : verdictWords[options.verdict];
+  const verdict = verdictWords[options.verdict];
   return [
     `The ${itemWordOf(options)}: ${verdict}.${tags.length === 0 ? "" : ` Tags: ${tags.join(", ")}.`}${words.join("")}${silence}`,
     ...places.map((line) => `   ${line}`),

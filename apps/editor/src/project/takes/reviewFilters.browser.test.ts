@@ -114,7 +114,7 @@ describe("the filters of a take", () => {
     const fresh = await rowNames(page);
 
     expect(before.replace(/\s+/g, " ")).toBe(
-      "All 4 Not reviewed 4 Has mistakes 0 In use 1 New in this take 3",
+      "All 4 Not reviewed 4 Has mistakes 0 In use 4 New in this take 3",
     );
     expect(mistakes).toEqual(["The ferry in fog"]);
     expect(open).toEqual([
@@ -124,7 +124,11 @@ describe("the filters of a take", () => {
     ]);
     expect(keptWhileReviewing).toEqual(open);
     expect(openAgain).toEqual(["Low strings", "The harbor in fog"]);
-    expect(inUse).toEqual(["Low strings"]);
+    expect(inUse).toEqual([
+      "Low strings",
+      "The lantern-2 in fog",
+      "The harbor in fog",
+    ]);
     expect(fresh).toEqual([
       "Low strings",
       "The ferry in fog",

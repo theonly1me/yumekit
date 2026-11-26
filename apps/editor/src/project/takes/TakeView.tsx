@@ -33,6 +33,7 @@ export function TakeView(props: {
   const picks = picksOf({
     snapshot,
     review,
+    ownIds: take.items.map((item) => item.id),
     reviewIds: reviewItemIdsOf({ snapshot, take }),
     canMark,
   });
@@ -108,6 +109,7 @@ export function TakeView(props: {
           takeId={take.id}
           pins={draftOf(opened.item.id).pins}
           picks={picks}
+          verdictOf={(itemId) => verdictOfDraft(draftOf(itemId))}
           onClose={() => {
             setView(undefined);
           }}

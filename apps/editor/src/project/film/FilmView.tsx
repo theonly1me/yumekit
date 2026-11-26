@@ -1,5 +1,6 @@
 import type { EngineClient } from "../../engine/engineClient.js";
 import type { Snapshot } from "../../engine/snapshot.js";
+import { pickVerdict } from "../takes/review/itemDrafts.js";
 import { sentDraftOf } from "../takes/review/sentDraft.js";
 import type { TakeReview } from "../takes/review/useTakeReview.js";
 import { ReviewRow } from "../takes/rows/ReviewRow.js";
@@ -52,7 +53,6 @@ export function FilmView(props: {
           canMark,
           isLoaded: !canMark || review.isLoaded,
           isInUse: false,
-          canUse: false,
         }}
         onChange={(next) => {
           review.change({ itemId, next });
@@ -61,7 +61,9 @@ export function FilmView(props: {
           review.saveAgain(itemId);
         }}
         onOpen={() => undefined}
-        onUse={() => undefined}
+        onVerdict={(verdict) => {
+          review.change({ itemId, next: pickVerdict(verdict) });
+        }}
       />
     </div>
   );
