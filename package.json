@@ -2,7 +2,7 @@
   "name": "yumekit",
   "version": "0.1.0",
   "private": true,
-  "description": "Open source harness for content creation. Turn an idea into editable content for YouTube, TikTok, Instagram, and more, with your own AI tools.",
+  "description": "The open source video harness for AI agents. Reels, explainers, trailers, and films with one story, one cast, and one look in every shot.",
   "license": "Apache-2.0",
   "type": "module",
   "packageManager": "pnpm@12.21.0+sha512.66fd8278ee28935ce951792d34367ff3af5c432a2756445823029533835b8da529bbe0be5130afd56ed0713fb8789e47bad82d93bd5ae2fe54b15562d6276ef0",
