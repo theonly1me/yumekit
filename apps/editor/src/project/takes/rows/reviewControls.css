@@ -37,7 +37,7 @@ button.looks-right:disabled {
   color: var(--decline);
 }
 
-button.compare-link {
+.review-panel button.compare-link {
   justify-self: start;
   font-size: var(--step--1);
 }
