@@ -32,7 +32,7 @@ The visual reference for the editor is the prototype in [apps/prototype](../../a
 
 ## Product in one paragraph
 
-yumekit is an open source harness for content creation. A person gives an idea. An agent writes the script, the scenes, and the timeline. Media tools make the images and the audio. yumekit renders the result to video and still images for any platform. The person can edit each part by prompt or by hand. All of it runs on the machine of the user, with the AI tools of the user.
+yumekit is an open source video harness for AI agents. A person gives an idea. The lead agent asks questions, writes the story, and makes the film in takes that the person reviews. It writes the script, the scenes, and the timeline. Media tools make the images and the audio. yumekit renders the result to video and still images for any platform. The person can edit each part by prompt or by hand. All of it runs on the machine of the user, with the AI tools of the user.
 
 ## Principles
 
