@@ -493,6 +493,11 @@ These decisions came from the cleanup of the follow-ups of WP80 to WP84 on 2026-
 10. `temporaryFolder` of the render tests removes its folder when the test ends. A test file that makes its project in `beforeAll` uses `folderOfTheFile` and removes the folder in `afterAll`. A full run of the render tests now leaves no `yumekit-render-test-*` folder.
 11. The cause of the steering in `chat.changes.browser.test.ts`: the words of an answer show in the chat before the request ends, and the engine turns a message into steering while a request runs. Under load, the second message came in that gap. The test now holds the end of the first answer, checks that Stop shows, lets the answer end, and sends the second message only after Stop goes.
 
+### Found in the run of WP77
+
+12. "New" in a take means new in this take: the lead made it while the take was open, or it is a remake with `replaces_asset_id`. `ready_take` stores `earlier: true` on an item that names an asset that the take did not hold yet. The take view shows no "New" on it, and the large view says "Made before this take". A take that was ready before this change has no `earlier`, so it shows as before.
+13. The editor follows the theme that the person picks, as document 11 and the prototype say: dark by default, and light from the button of the top bar, kept in `localStorage` as `yumekit-theme`. Neither the editor nor the prototype follows the color scheme of the browser. So a light screenshot sets `yumekit-theme` to `light` before the page loads, or presses "Use the light theme". The color scheme of Playwright alone gives the dark editor twice. No code changed for this.
+
 ### Follow-ups
 
 1. Other tests also leave folders in the temporary folder of the system, for example `yumekit-project-*`, `yumekit-gemini-media-*`, `yumekit-fal-media-*`, `yumekit-openai-media-*`, and `yumekit-local-music-*`.
