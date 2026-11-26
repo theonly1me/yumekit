@@ -4,16 +4,16 @@ A person installs yumekit with one command, and an agent starts it with `npx`. T
 
 ## Decisions
 
-| Id  | Decision                                                                                                                             | Why                                                                 |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------- |
-| N1  | One npm package with the name `yumekit`. No `@yumekit/*` package is published                                                        | One install and one version. The name was free on 2026-11-22        |
-| N2  | The package holds the command, the engine, the built editor, the harness, the renderer, the scene kit, and the bundled media servers | A person needs nothing more to make a video                         |
-| N3  | The workspace packages stay private. A build step makes the folder that is published                                                 | The repository keeps its package map and its import rules           |
-| N4  | Each dependency from outside is a normal dependency with an exact version                                                            | npm installs it. The package holds no copy of it                    |
-| N5  | The package has no install script. It downloads nothing at install                                                                   | An install script is a risk for each person who installs            |
-| N6  | `yumekit doctor` checks what the computer needs. `yumekit setup` gets the browser of the renderer                                    | A person learns what is missing before the first render             |
-| N7  | Only the owner publishes. An agent never runs `npm publish`                                                                          | A release is not reversible                                         |
-| N8  | CI installs the packed file in a clean folder and uses it                                                                            | A package that works only inside the repository is the usual defect |
+| Id  | Decision                                                                                                                                                                      | Why                                                                 |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| N1  | One npm package with the name `yumekit`. No `@yumekit/*` package is published                                                                                                 | One install and one version. The name was free on 2026-11-22        |
+| N2  | The package holds the command, the engine, the built editor, the harness, the renderer, the scene kit, and the bundled media servers                                          | A person needs nothing more to make a video                         |
+| N3  | The workspace packages stay private. A build step makes the folder that is published                                                                                          | The repository keeps its package map and its import rules           |
+| N4  | Each dependency from outside is a normal dependency with an exact version                                                                                                     | npm installs it. The package holds no copy of it                    |
+| N5  | The package has no install script. It downloads nothing at install                                                                                                            | An install script is a risk for each person who installs            |
+| N6  | `yumekit doctor` checks what the computer needs. `yumekit setup` gets the browser of the renderer                                                                             | A person learns what is missing before the first render             |
+| N7  | Only the owner releases. GitHub Actions publishes a tag `v<version>` on `main` after the owner approves the run. An agent never runs `npm publish` and never approves the run | A release is not reversible                                         |
+| N8  | CI installs the packed file in a clean folder and uses it                                                                                                                     | A package that works only inside the repository is the usual defect |
 
 ## The package
 
@@ -71,12 +71,22 @@ WP34 chose these details.
 
 ## Release
 
-1. The owner signs in to npm on the computer.
-2. `pnpm run pack-release` makes the file. The owner reads the file list that it prints.
-3. The owner runs `npm publish <file> --access public`.
-4. The owner makes a git tag `v<version>` on the commit.
+The owner published `0.1.0` from the computer on 2026-11-26. Each later version is published by GitHub Actions with npm trusted publishing: the workflow proves who it is with a short-lived identity token, so no npm token exists and no one types a one-time code.
 
-A later change can move the release to GitHub Actions with trusted publishing.
+1. A pull request changes `version` in the root `package.json`, and it merges into `main`.
+2. The owner, or an agent on the owner's word, pushes the tag `v<version>` on that commit of `main`.
+3. `.github/workflows/release.yml` starts. Its job uses the GitHub environment `npm`, so it waits until the owner approves it on GitHub.
+4. The job checks that the tag is on `main` and matches the version, builds the file with `pnpm run pack-release`, runs `pnpm run check-release`, and runs `npm publish <file> --access public`. npm adds a provenance statement on its own.
+
+## Details of the release workflow
+
+- The trusted publisher on npmjs.com (the package settings, "Trusted publishing") has the user `theonly1me`, the repository `yumekit`, the workflow file `release.yml`, the environment `npm`, and "Allow npm publish". These fields cannot change. To change one, delete the connection and make a new one.
+- A new connection expires when it has no successful publish within 2 days.
+- The GitHub environment `npm` has the owner as its required reviewer, and it accepts only tags in the form `v*`.
+- npm needs `id-token: write`, a GitHub-hosted runner, npm 11.5.1 or later, and Node.js 22.14 or later. The job uses Node.js 24 and stops when its npm is older. It passes no npm token.
+- The `repository.url` of the published `package.json` must name this repository exactly.
+- After the first publish from the workflow, the package setting "Require two-factor authentication and disallow tokens" (the package settings, "Publishing access") turns off publishing with a token. The trusted publisher still works.
+- Sources, read on 2026-11-26: https://docs.npmjs.com/trusted-publishers and https://docs.npmjs.com/cli/v12/commands/npm-trust. The documents do not say whether a trusted publisher can publish a `.tgz` file. The first run of the workflow shows it.
 
 ## Work package
 
