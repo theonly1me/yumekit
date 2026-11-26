@@ -358,6 +358,10 @@ These choices came from the build of "Edit by hand" on 2026-11-26.
 26. "Edit by hand" lost the line "Pick a scene to change it. Drag a scene to move it." and the line under the preview ("Click the text in the video to change it", the platform, and the size). The scene actions show only for a picked scene. The empty states stay.
 27. `@yumekit/project/takes` also exports `takeSchema` and `chapterSchema`, so the editor reads the takes and the chapters of the snapshot.
 
+### Quick changes
+
+28. While a change of the chapters or of the order of the scenes waits for the engine, a further drop or key on the scenes and the chapters does nothing. So a quick second press never acts on the old order. The press after the new order shows works again.
+
 ### The run
 
 The editor of the branch ran a film of three chapters, with nine shots made by the free sample server, the fake agent, and no key in the environment. The person approved the pictures and the clips of chapter 1 in three takes. Then, in "Edit by hand":
