@@ -58,4 +58,4 @@ jobs:
       - run: pnpm run pack-release
       - run: pnpm run check-release
       - name: Publish with the identity of this workflow
-        run: npm publish "release/yumekit-$VERSION.tgz" --access public
+        run: npm publish "./release/yumekit-$VERSION.tgz" --access public
