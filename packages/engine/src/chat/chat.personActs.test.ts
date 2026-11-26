@@ -1,9 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { callTool } from "../testing/rawRequest.js";
+import { uploadRequest } from "../testing/uploadRequest.js";
 import { init, result, whole } from "./testing/claudeLines.js";
 import { startChatEngine } from "./testing/chatEngine.js";
 
 type ChatEngine = Awaited<ReturnType<typeof startChatEngine>>;
+
+const picture = Buffer.from(
+  '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="9"></svg>',
+);
 
 async function twoScenesOnTheRow(chat: ChatEngine): Promise<void> {
   for (const [sceneId, title] of [
@@ -82,6 +87,29 @@ describe("the changes of the person in the chat", () => {
         summary: "You changed the length of scene 1.",
       }),
     ]);
+  });
+
+  it("counts the files of one upload of several files, and keeps one file in the singular", async () => {
+    const chat = await startChatEngine({ steps: [] });
+
+    await uploadRequest({ ...chat.engine, name: "alone.svg", body: picture });
+    const single = await lastChange(chat);
+    for (const name of ["harbor.svg", "gulls.svg", "bell.svg"]) {
+      await uploadRequest({
+        ...chat.engine,
+        name,
+        body: picture,
+        actId: "act-files",
+      });
+    }
+
+    expect(single).toMatchObject({
+      summary: "You added a file to the project.",
+    });
+    expect(await lastChange(chat)).toMatchObject({
+      summary: "You added 3 files to the project.",
+      undoSteps: 3,
+    });
   });
 
   it("makes one entry with one undo for the calls of one act", async () => {

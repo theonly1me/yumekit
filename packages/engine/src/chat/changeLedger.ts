@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { personSentenceOf } from "@yumekit/brain";
+import { actSummaryOf } from "./actSummary.js";
 import type { ChatLog } from "./chatLog.js";
 import type { ChangeAuthor, ChangeEntry } from "./chatTypes.js";
 import type { StoreCommit, ToolCaller } from "./trackedStore.js";
@@ -24,6 +25,7 @@ function summaryOf(caller: ToolCaller | undefined): string {
 export function createChangeLedger(log: ChatLog): ChangeLedger {
   let request: { changeId: string | undefined; isQuiet: boolean } | undefined;
   const changeIdsByAct = new Map<string, string>();
+  const toolsByAct = new Map<string, string[]>();
   const changeOf = (changeId: string) =>
     log
       .entries()
@@ -64,13 +66,22 @@ export function createChangeLedger(log: ChatLog): ChangeLedger {
       addStep({ changeId: caller.changeId });
       return;
     }
+    const actId = caller?.actId;
     const actChangeId =
-      caller?.actId === undefined
-        ? undefined
-        : changeIdsByAct.get(caller.actId);
-    if (actChangeId !== undefined && changeOf(actChangeId) !== undefined) {
-      addStep({ changeId: actChangeId, summary: summaryOf(caller) });
-      if (caller !== undefined) caller.changeId = actChangeId;
+      actId === undefined ? undefined : changeIdsByAct.get(actId);
+    if (
+      caller !== undefined &&
+      actId !== undefined &&
+      actChangeId !== undefined &&
+      changeOf(actChangeId) !== undefined
+    ) {
+      const tools = [...(toolsByAct.get(actId) ?? []), caller.tool];
+      toolsByAct.set(actId, tools);
+      addStep({
+        changeId: actChangeId,
+        summary: actSummaryOf({ tools, lastSummary: summaryOf(caller) }),
+      });
+      caller.changeId = actChangeId;
       return;
     }
     const changeId = newChange({
@@ -79,7 +90,9 @@ export function createChangeLedger(log: ChatLog): ChangeLedger {
     });
     if (caller === undefined) return;
     caller.changeId = changeId;
-    if (caller.actId !== undefined) changeIdsByAct.set(caller.actId, changeId);
+    if (actId === undefined) return;
+    changeIdsByAct.set(actId, changeId);
+    toolsByAct.set(actId, [caller.tool]);
   };
   const recordUndo = () => {
     const change = log
