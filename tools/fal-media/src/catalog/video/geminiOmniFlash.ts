@@ -19,7 +19,7 @@ export const geminiOmniFlash: VideoModel = {
   id: "google/gemini-omni-flash/v1.2",
   label: "Gemini Omni Flash 1.2",
   isDefault: false,
-  readOn: "2026-11-22",
+  readOn: "2026-11-26",
   tested: false,
   sources: [
     falPage(textEndpoint),

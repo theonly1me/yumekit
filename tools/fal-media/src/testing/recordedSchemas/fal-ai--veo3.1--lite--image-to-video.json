@@ -1,0 +1,43 @@
+{
+  "endpoint_id": "fal-ai/veo3.1/lite/image-to-video",
+  "page": "https://fal.ai/models/fal-ai/veo3.1/lite/image-to-video",
+  "schema_url": "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=fal-ai/veo3.1/lite/image-to-video",
+  "read_on": "2026-11-26",
+  "required": ["prompt", "image_url"],
+  "properties": {
+    "aspect_ratio": {
+      "types": ["string"],
+      "enum": ["auto", "16:9", "9:16"]
+    },
+    "auto_fix": {
+      "types": ["boolean"]
+    },
+    "duration": {
+      "types": ["string"],
+      "enum": ["4s", "6s", "8s"]
+    },
+    "generate_audio": {
+      "types": ["boolean"]
+    },
+    "image_url": {
+      "types": ["string"]
+    },
+    "negative_prompt": {
+      "types": ["string", "null"]
+    },
+    "prompt": {
+      "types": ["string"]
+    },
+    "resolution": {
+      "types": ["string"],
+      "enum": ["720p", "1080p"]
+    },
+    "safety_tolerance": {
+      "types": ["string"],
+      "enum": ["1", "2", "3", "4", "5", "6"]
+    },
+    "seed": {
+      "types": ["integer", "null"]
+    }
+  }
+}

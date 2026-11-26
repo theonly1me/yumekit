@@ -19,7 +19,7 @@ export const fluxVideo: VideoModel = {
   id: "blackforestlabs/flux-3/video",
   label: "FLUX 3 Video",
   isDefault: false,
-  readOn: "2026-11-22",
+  readOn: "2026-11-26",
   tested: false,
   sources: [
     falPage(textEndpoint),

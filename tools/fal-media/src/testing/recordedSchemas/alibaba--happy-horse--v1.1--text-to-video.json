@@ -1,0 +1,40 @@
+{
+  "endpoint_id": "alibaba/happy-horse/v1.1/text-to-video",
+  "page": "https://fal.ai/models/alibaba/happy-horse/v1.1/text-to-video",
+  "schema_url": "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=alibaba/happy-horse/v1.1/text-to-video",
+  "read_on": "2026-11-26",
+  "required": ["prompt"],
+  "properties": {
+    "aspect_ratio": {
+      "types": ["string"],
+      "enum": [
+        "16:9",
+        "9:16",
+        "1:1",
+        "4:3",
+        "3:4",
+        "21:9",
+        "9:21",
+        "5:4",
+        "4:5"
+      ]
+    },
+    "duration": {
+      "types": ["integer"],
+      "enum": [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+    },
+    "enable_safety_checker": {
+      "types": ["boolean"]
+    },
+    "prompt": {
+      "types": ["string"]
+    },
+    "resolution": {
+      "types": ["string"],
+      "enum": ["720p", "1080p"]
+    },
+    "seed": {
+      "types": ["integer", "null"]
+    }
+  }
+}

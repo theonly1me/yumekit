@@ -2,7 +2,7 @@
   "endpoint_id": "lightricks/ltx-2.5/image-to-video/pro",
   "page": "https://fal.ai/models/lightricks/ltx-2.5/image-to-video/pro",
   "schema_url": "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=lightricks/ltx-2.5/image-to-video/pro",
-  "read_on": "2026-11-22",
+  "read_on": "2026-11-26",
   "required": ["image_url", "prompt"],
   "properties": {
     "aspect_ratio": {

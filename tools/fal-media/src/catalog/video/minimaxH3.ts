@@ -18,7 +18,7 @@ export const minimaxH3: VideoModel = {
   id: "minimax/h3",
   label: "MiniMax H3",
   isDefault: false,
-  readOn: "2026-11-22",
+  readOn: "2026-11-26",
   tested: false,
   sources: [
     falPage(textEndpoint),

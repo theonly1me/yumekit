@@ -14,6 +14,25 @@ export function perSecondByResolution(
   }));
 }
 
+export function perSecondByResolutionAndSound(
+  usdByResolution: Readonly<
+    Record<string, { silent: number; withSound: number }>
+  >,
+): ModelPrice[] {
+  return Object.entries(usdByResolution).flatMap(([resolution, usd]) => [
+    {
+      usd: usd.withSound,
+      unit: "second",
+      when: { resolution, with_audio: "true" },
+    },
+    {
+      usd: usd.silent,
+      unit: "second",
+      when: { resolution, with_audio: "false" },
+    },
+  ]);
+}
+
 export function matchingPrice(options: {
   prices: readonly ModelPrice[];
   values: Readonly<Record<string, string>>;

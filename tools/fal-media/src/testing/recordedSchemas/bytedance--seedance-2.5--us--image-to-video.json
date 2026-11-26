@@ -2,7 +2,7 @@
   "endpoint_id": "bytedance/seedance-2.5/us/image-to-video",
   "page": "https://fal.ai/models/bytedance/seedance-2.5/us/image-to-video",
   "schema_url": "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=bytedance/seedance-2.5/us/image-to-video",
-  "read_on": "2026-11-22",
+  "read_on": "2026-11-26",
   "required": ["image_url"],
   "properties": {
     "aspect_ratio": {

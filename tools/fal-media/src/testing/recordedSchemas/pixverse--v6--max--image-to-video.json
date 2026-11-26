@@ -1,0 +1,47 @@
+{
+  "endpoint_id": "pixverse/v6/max/image-to-video",
+  "page": "https://fal.ai/models/pixverse/v6/max/image-to-video",
+  "schema_url": "https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=pixverse/v6/max/image-to-video",
+  "read_on": "2026-11-26",
+  "required": ["prompt", "image_url"],
+  "properties": {
+    "duration": {
+      "types": ["integer"],
+      "minimum": 1,
+      "maximum": 15
+    },
+    "enable_safety_checker": {
+      "types": ["boolean"]
+    },
+    "generate_audio_switch": {
+      "types": ["boolean"]
+    },
+    "generate_multi_clip_switch": {
+      "types": ["boolean"]
+    },
+    "image_url": {
+      "types": ["string"]
+    },
+    "negative_prompt": {
+      "types": ["string"]
+    },
+    "prompt": {
+      "types": ["string"]
+    },
+    "resolution": {
+      "types": ["string"],
+      "enum": ["360p", "540p", "720p", "1080p"]
+    },
+    "seed": {
+      "types": ["integer", "null"]
+    },
+    "style": {
+      "types": ["string", "null"],
+      "enum": ["anime", "3d_animation", "clay", "comic", "cyberpunk"]
+    },
+    "thinking_type": {
+      "types": ["string", "null"],
+      "enum": ["enabled", "disabled", "auto"]
+    }
+  }
+}

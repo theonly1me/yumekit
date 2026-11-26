@@ -2,7 +2,7 @@
 
 A media tool server that makes pictures, video clips, sound effects, talking clips, and sharper copies with models that fal hosts. It uses the fal API key of the user, so each picture, each sound, each copy, and each second of video or of a talking clip costs money.
 
-Not tested with a real key yet. Tests check each request against the schemas of the fal model pages of 2026-11-22 and 2026-11-23.
+Not tested with a real key yet. Tests check each request against the schemas of the fal model pages of 2026-11-22, 2026-11-23, and 2026-11-26 (video).
 
 | Tool                    | Result                                                                                                  |
 | ----------------------- | ------------------------------------------------------------------------------------------------------- |
@@ -17,7 +17,7 @@ Not tested with a real key yet. Tests check each request against the schemas of 
 ## Models
 
 - Pictures: Seedream 5.5 (the default), Nano Banana 2.1, FLUX 3, GPT Image 2.6 Flare, Ideogram 4.6, Qwen Image 3, MiniMax H3 Image, and Krea 3.
-- Video clips: Seedance 2.5 (the default), Kling 4, Gemini Omni Flash 1.2, MiniMax H3, Wan 3.0, LTX 2.5 Pro, PixVerse 6, FLUX 3 Video, and Grok Imagine Video 1.5.
+- Video clips: Seedance 2.5 (the default) and Seedance 2.5 Flash, Kling 4 and Kling 4 Flash, MiniMax H3, H3 Max, and H3 Max Turbo, Wan 3.0 and Wan 3.0 Prime, Happy Horse 1.1, Gemini Omni Flash 1.2, Veo 3.1 and Veo 3.1 Lite, LTX 2.5 Pro and LTX 2.5 Fast, PixVerse 6 and PixVerse 6 Max, FLUX 3 Video and FLUX 3 Max Video, and Grok Imagine Video 1.5 and its Lite tier.
 - Sound effects: ElevenLabs Sound Effects 3 (the default), Mirelo SFX 2.0, Sonilo 1.1 Sound Effects, and Stable Audio 3 Small SFX.
 - Talking clips from a picture: HeyGen Avatar 6 Turbo (the default), MiniMax H3 Max Lip Sync, VEED Fabric 1.0, HeyGen Avatar 6, Kling AI Avatar 2 Pro, and sync-3 Avatar. From a video: PixVerse Lipsync, VEED Lipsync 2, HeyGen Lipsync Precision, and sync-3 Lipsync. A talking model takes a picture or a video, as its `accepts` says.
 - Sharper copies of video: Bria Increase Resolution (the default), Topaz Precision, SeedVR2, FlashVSR+, and Crystal Upscaler. Of pictures: Bria Increase Resolution, Topaz Precision, SeedVR2, and Crystal Upscaler. A sharper model takes pictures or video, as its `accepts` says (`image_input` or `video_input`).
