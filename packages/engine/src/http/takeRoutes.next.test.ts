@@ -48,7 +48,7 @@ describe("what follows the send of a take", { timeout: 120_000 }, () => {
       }),
     );
     const request = lastRequestOf(await chat.runs());
-    expect(request).toContain("with no notes, so each item is approved");
+    expect(request).toContain("with no change, so each item is approved");
     expect(request).toContain(
       "The person asks for fewer clips. The clips cost about $0.00, and $5.00 is left.",
     );

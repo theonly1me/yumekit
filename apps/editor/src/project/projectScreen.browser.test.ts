@@ -82,12 +82,10 @@ describe("the work area of the project screen", () => {
     await openPicturesTake({ engine: runningEngine, assetIds: ["ferry"] });
 
     await opened.page.getByText("1 picture made so far").waitFor();
-    expect(
-      await opened.page.getByRole("button", { name: /^Open / }).count(),
-    ).toBe(1);
+    expect(await opened.page.getByRole("article").count()).toBe(1);
   });
 
-  it("shows a ready take as a contact sheet with the next step", async () => {
+  it("shows a ready take as rows to review in place, with the next step", async () => {
     const { engine: runningEngine, project: opened } = running();
     await runningEngine.callTool({
       name: "generate_assets",
@@ -114,7 +112,7 @@ describe("the work area of the project screen", () => {
     expect(
       await opened.page
         .getByRole("region", { name: "Pictures" })
-        .getByRole("button")
+        .getByRole("article")
         .count(),
     ).toBe(3);
     await next.click();

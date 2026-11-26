@@ -1,7 +1,7 @@
 .film {
   display: grid;
   gap: 14px;
-  max-width: 980px;
+  max-width: 1040px;
 }
 
 .film-title {
@@ -9,20 +9,12 @@
   font-weight: 500;
 }
 
-.film .lead-note,
-.film .check-line {
-  font-size: var(--step--1);
-  color: var(--muted);
-  line-height: 1.45;
+.film .review-row {
+  grid-template-columns: minmax(0, 1fr);
+  padding-top: 8px;
+  border-top: 0;
 }
 
-.film .lead-note span,
-.film .check-line span {
-  display: block;
-  font-size: var(--step--2);
-  color: var(--faint);
-}
-
-.film .check-line span {
-  color: var(--accent);
+.film .row-media {
+  --stage-height: min(66vh, 620px);
 }

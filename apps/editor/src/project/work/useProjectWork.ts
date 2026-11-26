@@ -5,9 +5,12 @@ import type { Snapshot } from "../../engine/snapshot.js";
 import { takeOfState } from "../foot/moneyAction.js";
 import { nextActionOf, type ActionId } from "../foot/nextAction.js";
 import { useMoneyLeft } from "../foot/useMoneyLeft.js";
-import { sentNotesOf } from "../takes/notes/draftNotes.js";
-import { useTakeNotes } from "../takes/notes/useDraftNotes.js";
+import { reviewCountTextOf, reviewTotalOf } from "@yumekit/project/takes";
+import { sentNotesOf } from "../takes/review/sentNotes.js";
+import { useTakeReview } from "../takes/review/useTakeReview.js";
+import { reviewItemIdsOf } from "../takes/shownItems.js";
 import { useTakeSend } from "../takes/useTakeSend.js";
+import { storyItemId } from "../story/StoryReading.js";
 import { storyRequestOf } from "./storyRequests.js";
 import { latestTakeIdOf, projectFactsOf, takeCostOf } from "./projectFacts.js";
 import { workStateOf, type ViewChoice } from "./workState.js";
@@ -38,7 +41,17 @@ export function useProjectWork(options: {
     choice,
   });
   const take = takeOfState(state);
-  const notes = useTakeNotes(take?.id ?? `${state.kind}-draft`);
+  const isStory = state.kind === "story";
+  const review = useTakeReview({
+    client,
+    draftId: take?.id ?? (isStory ? storyItemId : undefined),
+  });
+  const itemIds =
+    take === undefined
+      ? isStory
+        ? [storyItemId]
+        : []
+      : reviewItemIdsOf({ snapshot, take });
   const money = useMoneyLeft({
     client,
     readyTakeId: take?.state === "ready" ? take.id : undefined,
@@ -46,17 +59,19 @@ export function useProjectWork(options: {
   const sending = useTakeSend({
     client,
     take,
-    notes,
+    review,
+    itemIds,
     money,
     onDone: () => {
       setChoice({ kind: "auto" });
     },
   });
-  const sent = sentNotesOf(notes.draft);
+  const sent = sentNotesOf({ drafts: review.drafts, itemIds });
   const next = facts.chapters[facts.chapterIndex + 1];
   const action = nextActionOf({
     state,
-    noteCount: sent.length,
+    noteCount: isStory ? sent.length : reviewTotalOf(sending.counts),
+    countText: reviewCountTextOf(sending.counts),
     latestTakeId:
       take === undefined
         ? undefined
@@ -99,7 +114,7 @@ export function useProjectWork(options: {
     facts,
     state,
     choice,
-    notes,
+    review,
     action,
     isBusy: sending.isBusy,
     failure: sending.failure,

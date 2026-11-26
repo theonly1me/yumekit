@@ -22,6 +22,7 @@ my-project/
   .yumekit/spending.json        the record of paid calls (document 15, "Details of WP64")
   .yumekit/requests.json        the record of media requests (document 20, "Details of WP73")
   .yumekit/clock.json           the clock of the film: the target and the time of each stage (document 20, C63)
+  .yumekit/take-drafts/<id>.json  the review of a take that the person has not sent yet (document 21, "Details of WP86")
   .cache/                       frame pictures of video assets (not in git)
 ```
 

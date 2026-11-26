@@ -62,7 +62,13 @@ describe("get_story_guide on the work with the person", () => {
     );
     expect(guide).toContain("offer fewer items: the ones that matter most");
     expect(guide).toContain(
-      "Make again only the items with a note, in a new take of the same step, with replaces_asset_id.",
+      "Make again only the items that have mistakes, in a new take of the same step, with replaces_asset_id.",
+    );
+    expect(guide).toContain(
+      'Put each "Use this" pick into the film as it is, because the person chose that version for its place, also an older one. Remake nothing for that place, and never undo a pick.',
+    );
+    expect(guide).toContain(
+      "When the person is not sure about an item, answer in that new take",
     );
     expect(guide).toContain(
       "A take with no note is a yes: go on to the next step at once.",

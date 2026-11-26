@@ -1,7 +1,7 @@
 import { z } from "zod";
 import type { EngineClient } from "../../engine/engineClient.js";
 import { failureTextOf } from "../../tools/requestText.js";
-import type { SentNote } from "./notes/draftNotes.js";
+import type { SentNote } from "./review/sentNotes.js";
 
 const sentSchema = z.object({ take: z.object({ id: z.string() }) });
 

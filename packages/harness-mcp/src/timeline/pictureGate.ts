@@ -17,7 +17,11 @@ function verdictFailureOf(options: {
 }): HarnessFailure | undefined {
   const { asset } = options;
   const decision = assetDecisionsOf(options.snapshot.takes).get(asset.id);
-  if (decision === undefined || decision.verdict === "approved") {
+  if (
+    decision === undefined ||
+    decision.verdict === "approved" ||
+    decision.verdict === "question"
+  ) {
     return undefined;
   }
   const take = `take ${String(decision.take.number)}`;

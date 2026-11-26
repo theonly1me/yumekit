@@ -1,10 +1,11 @@
+import { reviewTotalOf } from "@yumekit/project/takes";
 import { useState } from "react";
 import type { EngineClient } from "../../engine/engineClient.js";
 import { saveLimit } from "../../settings/limits/limitRequests.js";
 import { failureTextOf } from "../../tools/requestText.js";
 import { moneyShortOf, type MoneyLeft } from "../foot/moneyAction.js";
-import { sentNotesOf } from "./notes/draftNotes.js";
-import type { TakeNotes } from "./notes/useDraftNotes.js";
+import { draftCountsOf, sentNotesOf } from "./review/sentNotes.js";
+import type { TakeReview } from "./review/useTakeReview.js";
 import { sendTake, type SendNext } from "./sendTake.js";
 import type { Take } from "./takeTypes.js";
 
@@ -13,27 +14,29 @@ type Work = () => Promise<string | undefined>;
 export function useTakeSend(options: {
   client: EngineClient;
   take: Take | undefined;
-  notes: TakeNotes;
+  review: TakeReview;
+  itemIds: readonly string[];
   money: MoneyLeft | undefined;
   onDone: () => void;
 }) {
-  const { client, take, notes } = options;
+  const { client, take, review } = options;
   const [isBusy, setBusy] = useState(false);
   const [failure, setFailure] = useState<string>();
-  const sent = sentNotesOf(notes.draft);
+  const drafts = { drafts: review.drafts, itemIds: options.itemIds };
+  const counts = draftCountsOf(drafts);
   const short = moneyShortOf({
     take,
-    noteCount: sent.length,
+    noteCount: reviewTotalOf(counts),
     money: options.money,
   });
   const run = (work: Work) => {
     setBusy(true);
     setFailure(undefined);
     work()
-      .then((problem) => {
+      .then(async (problem) => {
         setFailure(problem);
         if (problem !== undefined) return;
-        notes.clear();
+        await review.forget({ onEngine: take === undefined });
         options.onDone();
       })
       .finally(() => {
@@ -45,10 +48,11 @@ export function useTakeSend(options: {
     (next: SendNext): Work =>
     async () => {
       if (take === undefined) return "No take is ready.";
+      await review.flush();
       const outcome = await sendTake({
         client,
         takeId: take.id,
-        notes: next === "go" ? sent : [],
+        notes: sentNotesOf(drafts),
         next,
       });
       return outcome.ok ? undefined : outcome.message;
@@ -68,6 +72,7 @@ export function useTakeSend(options: {
   return {
     isBusy,
     failure,
+    counts,
     clearFailure: () => {
       setFailure(undefined);
     },

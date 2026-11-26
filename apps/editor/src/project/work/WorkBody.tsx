@@ -28,7 +28,7 @@ export function WorkBody(props: {
       return (
         <StoryReading
           snapshot={snapshot}
-          notes={work.notes}
+          review={work.review}
           round={state.take?.number ?? 1}
         />
       );
@@ -39,7 +39,7 @@ export function WorkBody(props: {
           snapshot={snapshot}
           take={state.take}
           chapterLine={chapterLineOf(facts)}
-          notes={work.notes}
+          review={work.review}
         />
       );
     case "making":
@@ -51,7 +51,7 @@ export function WorkBody(props: {
           snapshot={snapshot}
           take={state.take}
           chapters={facts.chapters}
-          notes={work.notes}
+          review={work.review}
           progress={
             state.kind === "making"
               ? progressOf({ take: state.take, work: props.running })

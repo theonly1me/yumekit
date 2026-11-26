@@ -11,6 +11,7 @@ import { mediaRequestRoutes } from "./mediaRequestRoutes.js";
 import { moneyRoutes } from "./moneyRoutes.js";
 import { projectRoutes } from "./projectRoutes.js";
 import { settingsRoutes } from "./settingsRoutes.js";
+import { takeDraftRoutes } from "./takeDraftRoutes.js";
 import { takeRoutes } from "./takeRoutes.js";
 import { uploadRoutes } from "./uploadRoutes.js";
 import { workRoutes } from "./workRoutes.js";
@@ -31,4 +32,5 @@ export const engineRoutes: Route[] = [
   ...workRoutes,
   ...clockRoutes,
   ...takeRoutes,
+  ...takeDraftRoutes,
 ];

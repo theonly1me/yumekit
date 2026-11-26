@@ -2,6 +2,8 @@ import type { EngineClient } from "../../../engine/engineClient.js";
 import type { Snapshot } from "../../../engine/snapshot.js";
 import { shownKindOf, takeNumberOfAsset } from "../itemFacts.js";
 import { useItemUrl } from "../media/useItemUrl.js";
+import type { Picks } from "../review/picks.js";
+import { UseButton } from "../rows/UseRow.js";
 import type { ShownItem } from "../shownItems.js";
 
 function Column(props: {
@@ -9,7 +11,9 @@ function Column(props: {
   shown: ShownItem;
   takeId: string;
   label: string;
+  picks: Picks;
 }) {
+  const itemId = props.shown.item.id;
   const url = useItemUrl({
     client: props.client,
     item: props.shown.item,
@@ -18,7 +22,19 @@ function Column(props: {
   const kind = shownKindOf(props.shown);
   return (
     <figure className="compare-column">
-      <figcaption>{props.label}</figcaption>
+      <figcaption>
+        {props.label}
+        {props.picks.inUseIds.has(itemId) ? (
+          <span className="badge in-use">In use</span>
+        ) : undefined}
+        <UseButton
+          isPicked={props.picks.isPicked(itemId)}
+          canPick={props.picks.canPick}
+          onUse={() => {
+            props.picks.toggle(itemId);
+          }}
+        />
+      </figcaption>
       <div className="stage-box">
         {url === undefined ? undefined : kind === "picture" ? (
           <img src={url} alt={props.label} />
@@ -36,6 +52,7 @@ export function CompareView(props: {
   shown: ShownItem;
   olderId: string;
   takeId: string;
+  picks: Picks;
 }) {
   const { snapshot, shown } = props;
   const olderNumber = takeNumberOfAsset({
@@ -54,12 +71,14 @@ export function CompareView(props: {
         client={props.client}
         shown={older}
         takeId={props.takeId}
+        picks={props.picks}
         label={`Take ${String(olderNumber ?? 1)}`}
       />
       <Column
         client={props.client}
         shown={shown}
         takeId={props.takeId}
+        picks={props.picks}
         label={`Take ${String(shown.takeNumber)}, new`}
       />
     </div>

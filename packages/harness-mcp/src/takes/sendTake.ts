@@ -1,5 +1,7 @@
 import {
+  takeTagLimit,
   takeTextLimit,
+  unapprovedItemIdsOf,
   type ProjectStore,
   type Take,
   type TakeNote,
@@ -21,11 +23,23 @@ export const takeNoteInput = z
       .optional(),
     seconds: z.number().min(0).optional(),
     quote: z.string().trim().min(1).max(takeTextLimit).optional(),
+    tags: z
+      .array(z.string().trim().min(1).max(40))
+      .min(1)
+      .max(takeTagLimit)
+      .optional(),
     dropped: z.literal(true).optional(),
+    question: z.literal(true).optional(),
+    approved: z.literal(true).optional(),
+    use: z.literal(true).optional(),
   })
-  .refine((note) => note.text !== "" || note.dropped === true, {
-    message: "A note needs text, unless it drops the item.",
-  });
+  .refine(
+    (note) =>
+      [note.dropped, note.question, note.approved].filter(
+        (verdict) => verdict !== undefined,
+      ).length <= 1,
+    { message: "A note has at most one of dropped, question, and approved." },
+  );
 
 export type TakeNoteInput = z.infer<typeof takeNoteInput>;
 
@@ -37,14 +51,18 @@ export type SendTakeFailure = HarnessFailure & {
   kind: "take-not-found" | "take-not-ready" | "note-not-valid";
 };
 
-function noteOf(input: TakeNoteInput): TakeNote {
+export function takeNoteOf(input: TakeNoteInput): TakeNote {
   return {
     itemId: input.item_id,
     text: input.text,
     ...(input.pin === undefined ? {} : { pin: input.pin }),
     ...(input.seconds === undefined ? {} : { seconds: input.seconds }),
     ...(input.quote === undefined ? {} : { quote: input.quote }),
+    ...(input.tags === undefined ? {} : { tags: input.tags }),
     ...(input.dropped === undefined ? {} : { dropped: input.dropped }),
+    ...(input.question === undefined ? {} : { question: input.question }),
+    ...(input.approved === undefined ? {} : { approved: input.approved }),
+    ...(input.use === undefined ? {} : { use: input.use }),
   };
 }
 
@@ -76,7 +94,7 @@ export async function sendTake(options: {
       },
     };
   }
-  const notes = options.notes.map(noteOf);
+  const notes = options.notes.map(takeNoteOf);
   const applied = await store.applyChange({
     by: "person",
     edits: [
@@ -84,7 +102,7 @@ export async function sendTake(options: {
       ...takeApprovalEdits({
         snapshot,
         take,
-        notedIds: new Set(notes.map((note) => note.itemId)),
+        notedIds: unapprovedItemIdsOf(notes),
       }),
     ],
   });

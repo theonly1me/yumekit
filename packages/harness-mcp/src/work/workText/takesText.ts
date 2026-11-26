@@ -3,14 +3,18 @@ import {
   chaptersOf,
   filmChapterId,
   lastSentTakeOf,
+  reviewCountTextOf,
+  reviewCountsOf,
+  reviewTotalOf,
   type ProjectSnapshot,
   type Take,
 } from "@yumekit/project";
+import { waitingPickLinesOf } from "../../takes/personPicks.js";
 import { approvePicturesFirstMeaning } from "../../takes/registerSetApprovePicturesFirst.js";
 import {
   approvedIdsOf,
   countOf,
-  noteLineOf,
+  reviewLinesOf,
   takeNameOf,
 } from "../../takes/takeNoteText.js";
 
@@ -48,12 +52,12 @@ function sentLines(snapshot: ProjectSnapshot): string[] {
   const take = lastSentTakeOf(snapshot.takes);
   if (take === undefined) return ["The person sent last: no take yet."];
   const approved = approvedIdsOf(take);
+  const counts = reviewCountsOf(take.notes);
+  const review =
+    reviewTotalOf(counts) === 0 ? "no change" : reviewCountTextOf(counts);
   return [
-    `The person sent last: ${takeNameOf(take)} at ${take.sentAt ?? "an unknown time"}, with ${countOf({ count: take.notes.length, word: "note" })}.`,
-    ...take.notes.map(
-      (...[note, index]) =>
-        `${String(index + 1)}. ${noteLineOf({ snapshot, take, note })}`,
-    ),
+    `The person sent last: ${takeNameOf(take)} at ${take.sentAt ?? "an unknown time"}: ${review}.`,
+    ...reviewLinesOf({ snapshot, take }),
     `Approved: ${quoted(approved) || "none"}.`,
   ];
 }
@@ -66,5 +70,6 @@ export function takesLines(snapshot: ProjectSnapshot): string[] {
     `Approve pictures before clips: ${setting}. ${approvePicturesFirstMeaning}`,
     currentTakeLine(snapshot.takes),
     ...sentLines(snapshot),
+    ...waitingPickLinesOf(snapshot),
   ];
 }

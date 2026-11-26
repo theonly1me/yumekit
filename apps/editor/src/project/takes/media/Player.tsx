@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState } from "react";
+import { PlayerTools } from "./PlayerTools.js";
+import { stageStyleOf } from "./stageShape.js";
 
-const speeds = [0.25, 0.5, 1];
+export type PlayerMedia = HTMLVideoElement & HTMLAudioElement;
 
 export function clockOf(seconds: number): string {
-  const whole = Math.floor(seconds);
-  const tenth = Math.floor((seconds - whole) * 10);
+  const tenths = Math.floor(seconds * 10 + 1e-6);
+  const whole = Math.floor(tenths / 10);
+  const tenth = tenths % 10;
   return `${String(Math.floor(whole / 60))}:${String(whole % 60).padStart(2, "0")}.${String(tenth)}`;
 }
 
@@ -14,13 +17,16 @@ export function Player(props: {
   title: string;
   framesPerSecond: number;
   moments: number[];
+  onMedia: (element: PlayerMedia | null) => void;
   onMark: ((seconds: number) => void) | undefined;
 }) {
-  const media = useRef<HTMLVideoElement & HTMLAudioElement>(null);
+  const media = useRef<PlayerMedia | null>(null);
+  const { onMedia } = props;
   const [seconds, setSeconds] = useState(0);
   const [length, setLength] = useState(0);
   const [isPlaying, setPlaying] = useState(false);
   const [speed, setSpeed] = useState(1);
+  const [shape, setShape] = useState<number>();
 
   useEffect(() => {
     if (media.current !== null) media.current.playbackRate = speed;
@@ -32,21 +38,26 @@ export function Player(props: {
     element.currentTime = Math.min(Math.max(0, to), length);
     setSeconds(element.currentTime);
   };
-  const step = (frames: number) => {
-    media.current?.pause();
-    seek(seconds + frames / props.framesPerSecond);
+  const showTime = () => {
+    setSeconds(media.current?.currentTime ?? 0);
   };
   const mediaProps = {
-    ref: media,
+    ref: (element: PlayerMedia | null) => {
+      media.current = element;
+      onMedia(element);
+    },
     src: props.url,
     preload: "auto",
     onLoadedMetadata: () => {
-      const duration = media.current?.duration ?? 0;
+      const element = media.current;
+      const duration = element?.duration ?? 0;
       setLength(Number.isFinite(duration) ? duration : 0);
+      if (element !== null && element.videoWidth > 0) {
+        setShape(element.videoWidth / element.videoHeight);
+      }
     },
-    onTimeUpdate: () => {
-      setSeconds(media.current?.currentTime ?? 0);
-    },
+    onTimeUpdate: showTime,
+    onSeeked: showTime,
     onPlay: () => {
       setPlaying(true);
     },
@@ -56,7 +67,11 @@ export function Player(props: {
   } as const;
   return (
     <div className="player-box">
-      <div className="stage-box" data-sound={props.isSound}>
+      <div
+        className="stage-box"
+        data-sound={props.isSound}
+        style={props.isSound ? undefined : stageStyleOf(shape)}
+      >
         {props.isSound ? (
           <>
             <span className="tile-wave">{props.title}</span>
@@ -91,9 +106,9 @@ export function Player(props: {
               seek(Number(event.target.value));
             }}
           />
-          {props.moments.map((moment) => (
+          {props.moments.map((...[moment, index]) => (
             <span
-              key={moment}
+              key={`${String(moment)}-${String(index)}`}
               className="moment-mark"
               style={{ left: `${String((moment / (length || 1)) * 100)}%` }}
             />
@@ -106,45 +121,21 @@ export function Player(props: {
             className="mark-moment"
             onClick={() => {
               media.current?.pause();
-              props.onMark?.(Math.round(seconds * 10) / 10);
+              props.onMark?.(seconds);
             }}
           >
             Mark this moment
           </button>
         )}
       </div>
-      <div className="large-tools">
-        <button
-          type="button"
-          onClick={() => {
-            step(-1);
-          }}
-        >
-          One frame back
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            step(1);
-          }}
-        >
-          One frame on
-        </button>
-        <span className="segments" role="group" aria-label="Speed">
-          {speeds.map((each) => (
-            <button
-              key={each}
-              type="button"
-              aria-pressed={each === speed}
-              onClick={() => {
-                setSpeed(each);
-              }}
-            >
-              {each} x
-            </button>
-          ))}
-        </span>
-      </div>
+      <PlayerTools
+        speed={speed}
+        onSpeed={setSpeed}
+        onStep={(frames) => {
+          media.current?.pause();
+          seek(seconds + frames / props.framesPerSecond);
+        }}
+      />
     </div>
   );
 }
