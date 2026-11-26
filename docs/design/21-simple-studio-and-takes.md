@@ -357,3 +357,14 @@ These choices came from the build of "Edit by hand" on 2026-11-26.
 
 26. "Edit by hand" lost the line "Pick a scene to change it. Drag a scene to move it." and the line under the preview ("Click the text in the video to change it", the platform, and the size). The scene actions show only for a picked scene. The empty states stay.
 27. `@yumekit/project/takes` also exports `takeSchema` and `chapterSchema`, so the editor reads the takes and the chapters of the snapshot.
+
+### The run
+
+The editor of the branch ran a film of three chapters, with nine shots made by the free sample server, the fake agent, and no key in the environment. The person approved the pictures and the clips of chapter 1 in three takes. Then, in "Edit by hand":
+
+1. A scene of chapter 1 dropped on a scene of chapter 2 moved into chapter 2 before it. The chat said "You moved a scene to another chapter."
+2. Chapter 3 dropped on chapter 1 went to the front, and its three scenes moved with it: "You moved the chapter "Snow on Hollin"." Two presses of Cmd+Z brought back the first order.
+3. The line between chapter 1 and chapter 2 dropped on the third scene made that scene the first scene of chapter 2, and no scene moved.
+4. "Split at" the fifth scene, "Rename", and "Join with chapter 3" each made one change with its own chat line.
+5. A drag of the right edge of scene 1 showed "6 seconds" in the clip while it moved, and made the scene 6 seconds long. The clips after it moved with it.
+6. The approved clip "bell-alt-clip" from the tray took the place of the scene of the bell. A clip of chapter 1 dropped on a scene of chapter 2 showed the refusal in plain words, and nothing changed.
