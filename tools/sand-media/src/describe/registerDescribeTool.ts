@@ -1,0 +1,14 @@
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { successResult } from "../toolResults.ts";
+import { catalog } from "./catalog.ts";
+
+export function registerDescribeTool(server: McpServer): void {
+  server.registerTool(
+    "describe_media_server",
+    {
+      description:
+        "Describe this server: its model, the settings and the price, and the key it needs. Free, and makes no network request.",
+    },
+    () => successResult(catalog),
+  );
+}

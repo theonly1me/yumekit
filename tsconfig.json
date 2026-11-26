@@ -16,6 +16,7 @@
     { "path": "tools/openai-media" },
     { "path": "tools/gemini-media" },
     { "path": "tools/fal-media" },
+    { "path": "tools/sand-media" },
     { "path": "tools/local-voice" },
     { "path": "tools/local-music" },
     { "path": "tools/codex-images" }

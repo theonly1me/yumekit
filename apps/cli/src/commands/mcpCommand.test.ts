@@ -31,6 +31,7 @@ describe("yumekit mcp", () => {
         { server: "openai" },
         { server: "gemini" },
         { server: "fal" },
+        { server: "sand" },
         { server: "local-voice" },
         { server: "local-music" },
         { server: "codex" },

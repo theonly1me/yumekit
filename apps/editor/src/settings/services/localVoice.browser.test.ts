@@ -20,6 +20,7 @@ beforeAll(async () => {
         openai: { disabled: true },
         gemini: { disabled: true },
         fal: { disabled: true },
+        sand: { disabled: true },
       },
     },
   });

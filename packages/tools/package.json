@@ -23,6 +23,7 @@
     "@yumekit/local-voice": "workspace:*",
     "@yumekit/openai-media": "workspace:*",
     "@yumekit/sample-media": "workspace:*",
+    "@yumekit/sand-media": "workspace:*",
     "zod": "4.6.7"
   }
 }

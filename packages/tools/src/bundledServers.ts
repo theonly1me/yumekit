@@ -30,6 +30,7 @@ const bundledServersByName: Record<string, BundledServer> = {
     ],
   },
   fal: { folder: "fal-media", passEnvironment: ["FAL_KEY"] },
+  sand: { folder: "sand-media", passEnvironment: ["SAND_API_KEY"] },
   "local-voice": {
     folder: "local-voice",
     passEnvironment: ["YUMEKIT_CONFIG_DIRECTORY"],

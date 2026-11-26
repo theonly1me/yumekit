@@ -126,12 +126,13 @@ describe("connectMediaTools descriptions", () => {
     });
   });
 
-  it("reads a valid description of the gemini and fal servers", async () => {
+  it("reads a valid description of the gemini, fal, and sand servers", async () => {
     const { tools } = await connectFixture({
       projectFile: {
         mcpServers: {
           gemini: bundledSourceServer("gemini-media"),
           fal: bundledSourceServer("fal-media"),
+          sand: bundledSourceServer("sand-media"),
           sample: { disabled: true },
         },
       },
@@ -146,6 +147,7 @@ describe("connectMediaTools descriptions", () => {
     ).toEqual([
       { server: "gemini", failure: undefined, keys: ["GEMINI_API_KEY"] },
       { server: "fal", failure: undefined, keys: ["FAL_KEY"] },
+      { server: "sand", failure: undefined, keys: ["SAND_API_KEY"] },
     ]);
   });
 });
