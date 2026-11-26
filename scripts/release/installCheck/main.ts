@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
+import { installCheckEnvironment } from "./checkEnvironment.ts";
 import { startMcpSession } from "./mcpSession.ts";
 import { checkEditorPage } from "./openEditor.ts";
 import { runOrStop } from "./processes.ts";
@@ -50,7 +51,13 @@ const yumekit = values.global
   ? join(prefix, "bin", "yumekit")
   : join(folder, "node_modules", ".bin", "yumekit");
 const projectFolder = join(folder, "video");
-process.env["YUMEKIT_CONFIG_DIRECTORY"] = join(folder, "config");
+const place = {
+  cwd: folder,
+  environment: await installCheckEnvironment({
+    folder,
+    environment: process.env,
+  }),
+};
 try {
   await writeFile(join(folder, "package.json"), '{ "private": true }\n');
   await step({
@@ -62,13 +69,12 @@ try {
           ...["install", "--no-audit", "--no-fund", packedFile],
           ...["--cache", join(folder, "npm-cache"), ...installPlace],
         ],
-        cwd: folder,
+        ...place,
       }),
   });
   await step({
     name: "yumekit --version",
-    work: () =>
-      runOrStop({ command: yumekit, args: ["--version"], cwd: folder }),
+    work: () => runOrStop({ command: yumekit, args: ["--version"], ...place }),
   });
   await step({
     name: "yumekit init",
@@ -76,13 +82,13 @@ try {
       runOrStop({
         command: yumekit,
         args: ["init", projectFolder, "--output", "wide:320x180"],
-        cwd: folder,
+        ...place,
       }),
   });
   const session = await startMcpSession({
     command: yumekit,
     args: ["mcp", "--project", projectFolder],
-    cwd: folder,
+    ...place,
   });
   try {
     await step({
@@ -125,7 +131,7 @@ try {
       await runOrStop({
         command: yumekit,
         args: ["render", "--project", projectFolder, "--output", "wide"],
-        cwd: folder,
+        ...place,
       });
       return runOrStop({
         command: "ffprobe",
@@ -134,7 +140,7 @@ try {
           ...["-show_entries", "stream=codec_name,width,height,nb_read_frames"],
           ...["-of", "csv=p=0", join(projectFolder, "renders", "wide.mp4")],
         ],
-        cwd: folder,
+        ...place,
       });
     },
   });
@@ -144,7 +150,7 @@ try {
       checkEditorPage({
         command: yumekit,
         args: ["open", projectFolder, "--no-browser"],
-        cwd: folder,
+        ...place,
       }),
   });
   await step({
@@ -153,7 +159,7 @@ try {
       checkEditorPage({
         command: yumekit,
         args: ["--no-browser"],
-        cwd: folder,
+        ...place,
       }),
   });
 } finally {

@@ -10,11 +10,11 @@ export function runProgram(options: {
   command: string;
   args: string[];
   cwd: string;
-  environment?: NodeJS.ProcessEnv;
+  environment: NodeJS.ProcessEnv;
 }): Promise<Finished> {
   const child = spawn(options.command, options.args, {
     cwd: options.cwd,
-    env: options.environment ?? process.env,
+    env: options.environment,
     stdio: ["ignore", "pipe", "pipe"],
   });
   const stdout: string[] = [];
@@ -37,6 +37,7 @@ export async function runOrStop(options: {
   command: string;
   args: string[];
   cwd: string;
+  environment: NodeJS.ProcessEnv;
 }): Promise<string> {
   const finished = await runProgram(options);
   if (finished.exitCode !== 0) {
@@ -51,9 +52,11 @@ export function startProgram(options: {
   command: string;
   args: string[];
   cwd: string;
+  environment: NodeJS.ProcessEnv;
 }): ChildProcessWithoutNullStreams {
   return spawn(options.command, options.args, {
     cwd: options.cwd,
+    env: options.environment,
     stdio: ["pipe", "pipe", "pipe"],
   });
 }

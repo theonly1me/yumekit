@@ -48,15 +48,20 @@ export async function buildVideoProject(session: McpSession): Promise<void> {
 }
 
 export async function makeSampleAsset(session: McpSession): Promise<string> {
-  return callTool({
+  const made = await callTool({
     session,
     name: "generate_asset",
     input: {
       asset_id: "still",
       capability: "image",
+      server: "sample",
       input: { prompt: "a lake", width_pixels: 64, height_pixels: 48 },
     },
   });
+  if (!made.includes("made by sample")) {
+    throw new Error(`The sample media server did not make the asset: ${made}`);
+  }
+  return "made by sample";
 }
 
 export async function listLocalVoice(session: McpSession): Promise<string> {

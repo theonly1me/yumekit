@@ -592,3 +592,10 @@ These decisions came from the small fixes for version 0.1.1 on 2026-11-26.
 6. The sound of the resized clip ends with the clip. A shorter clip trims it. A longer clip grows it up to the end of its file, counted from `assetStartFrame`. When the file has no known length, the sound only gets shorter.
 7. `remove_scene_clip` also removes the sound of the removed video, when the removed clip was the only scene clip of that video. Otherwise that sound would play over the next scene, and the sound of the next video could not move into its place, because two clips on one track cannot overlap. The one undo step brings both back.
 8. `duplicate_scene_clip` gives the copy no sound clip of its own. The video then has two scene clips, so its one sound stays with the first clip, and a later change of the row does not move it.
+
+### The install check and the sample server
+
+9. The step "the sample media server makes an asset" of `pnpm run check-release` made its picture with the Codex program of the computer. With no `server`, a picture goes to the first ready server in the order with no pick, and Codex comes first. So the check started a real agent program.
+10. Each program that the check starts now gets one environment of its own, as each test engine of WP85 does. Its `PATH` is one folder with links to `node`, `npm`, `ffmpeg`, and `ffprobe`, then `/usr/bin` and `/bin`. So the check never finds the `claude`, `codex`, or `cursor-agent` of the computer, and `yumekit open` lists no agent.
+11. The environment also leaves out each variable whose name ends with `KEY` or starts with `YUMEKIT_` or `CODEX_`. So no media key and no Codex path of the computer reaches the check, and no call goes to a paid service. `YUMEKIT_CONFIG_DIRECTORY` names a folder of the check.
+12. The step names `server: "sample"`, and it stops unless the answer says "made by sample". Its line ends with "made by sample".

@@ -19,6 +19,7 @@ export async function startMcpSession(options: {
   command: string;
   args: string[];
   cwd: string;
+  environment: NodeJS.ProcessEnv;
 }): Promise<McpSession> {
   const child = startProgram(options);
   const waiters = new Map<number, Waiter>();
