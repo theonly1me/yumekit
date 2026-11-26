@@ -108,6 +108,15 @@ describe("the state of the work area", () => {
     expect(
       autoStateOf({ ...story, takes: owners, isLeadRunning: true }),
     ).toEqual({ kind: "making", take: open });
+    const ready = takeOf({ id: "take-6", number: 6, step: "clips" });
+    expect(
+      autoStateOf({ ...story, takes: [...owners.slice(0, 5), ready] }),
+    ).toEqual({ kind: "take", take: ready });
+    const cut = takeOf({ id: "take-7", number: 7, step: "cut" });
+    const sent = { ...ready, state: "sent" as const };
+    expect(
+      autoStateOf({ ...story, takes: [...owners.slice(0, 5), sent, cut] }),
+    ).toEqual({ kind: "film", take: cut });
   });
 
   it("keeps the approved cut in view while the lead answers, so the export shows", () => {
