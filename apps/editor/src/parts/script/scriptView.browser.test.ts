@@ -5,6 +5,7 @@ import {
   requestTextsSent,
 } from "../../testing/chatTesting.js";
 import { closeBrowser, openEditor } from "../../testing/editorPage.js";
+import { holdEngineAnswers } from "../../testing/heldAnswers.js";
 import { runEngine, type RunningEngine } from "../../testing/runEngine.js";
 import {
   answerAfterGate,
@@ -144,6 +145,29 @@ describe("the Script view", () => {
     await expect
       .poll(() => scriptPage.locator("li").last().textContent())
       .toBe("Black");
+    await close();
+  });
+
+  it("puts the whole script back with Undo my changes while the answer to the last save is still on its way", async () => {
+    const { page, scriptPage, close } = await openScript();
+    const answers = await holdEngineAnswers(page);
+    await scriptPage.locator("li").last().click();
+    await page.keyboard.press("End");
+    await page.keyboard.type(" tea");
+    await expect
+      .poll(() => {
+        const [firstSave] = answers.savedRevisions();
+        return firstSave !== undefined && answers.shownRevision() >= firstSave;
+      })
+      .toBe(true);
+
+    answers.hold();
+    await page.keyboard.type(" leaves");
+    await expect.poll(() => answers.savedRevisions().length).toBe(2);
+    await page.getByRole("button", { name: "Undo my changes" }).click();
+    answers.release();
+
+    await expect.poll(() => readScript(runningEngine())).toBe(firstScript);
     await close();
   });
 });
