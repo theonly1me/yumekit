@@ -6,7 +6,7 @@ function placeOf(options: { index: number }): number {
   return options.index === -1 ? unplanned : options.index;
 }
 
-function shotIdOf(asset: Asset | undefined): string | undefined {
+export function shotIdOf(asset: Asset | undefined): string | undefined {
   if (asset?.source.kind !== "tool") return undefined;
   const shotId = asset.source.input["shot_id"];
   return typeof shotId === "string" ? shotId : undefined;

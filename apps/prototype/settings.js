@@ -2,6 +2,7 @@ import { agents, mediaTools } from "./aiTools.js";
 import { bindKeyGuide, keyGuideMarkup } from "./keyGuide.js";
 import { bindLimits, leadWorkMarkup, limitsMarkup } from "./settingsLimits.js";
 import { change, notify, state } from "./state.js";
+import { currentTheme, setTheme } from "./theme.js";
 
 const view = { openToolId: undefined, more: false };
 
@@ -55,6 +56,17 @@ export function renderSettings({ element }) {
         <div class="setting-row"><span>Model of the lead<em>The default model is the most careful. A faster one costs less time.</em></span><span class="segments" role="group" aria-label="Model of the lead">${["Default", "Faster"].map((name) => `<button type="button" data-model="${name}" aria-pressed="${state.model === name}">${name}</button>`).join("")}</span></div>
       </section>
       ${limitsMarkup()}
+      <section class="setting-group">
+        <div class="setting-row"><span>Dark or light<em>Dark is the default. The choice applies to every screen.</em></span><span class="segments" role="group" aria-label="Dark or light">${[
+          ["dark", "Dark"],
+          ["light", "Light"],
+        ]
+          .map(
+            ([id, name]) =>
+              `<button type="button" data-theme-choice="${id}" aria-pressed="${currentTheme() === id}">${name}</button>`,
+          )
+          .join("")}</span></div>
+      </section>
       <details class="more" ${view.more ? "open" : ""}>
         <summary>More settings</summary>
         <section class="setting-group">
@@ -93,6 +105,12 @@ export function renderSettings({ element }) {
     button.addEventListener("click", () =>
       change({ model: button.dataset.model }),
     );
+  });
+  element.querySelectorAll("[data-theme-choice]").forEach((button) => {
+    button.addEventListener("click", () => {
+      setTheme(button.dataset.themeChoice);
+      renderSettings({ element });
+    });
   });
   bindKeyGuide({ element });
 }

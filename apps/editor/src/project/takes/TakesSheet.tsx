@@ -4,9 +4,10 @@ import { Sheet } from "../../sheets/Sheet.js";
 import { NextActionBar } from "../foot/NextActionBar.js";
 import { nextActionOf } from "../foot/nextAction.js";
 import { latestTakeIdOf, takeCostOf } from "../work/projectFacts.js";
-import { sentNotesOf } from "./notes/draftNotes.js";
-import { useTakeNotes } from "./notes/useDraftNotes.js";
+import { reviewCountTextOf, reviewTotalOf } from "@yumekit/project/takes";
 import { useMoneyLeft } from "../foot/useMoneyLeft.js";
+import { useTakeReview } from "./review/useTakeReview.js";
+import { reviewItemIdsOf } from "./shownItems.js";
 import { useTakeSend } from "./useTakeSend.js";
 import { TakeView } from "./TakeView.js";
 import type { Take } from "./takeTypes.js";
@@ -32,7 +33,7 @@ function TakeOnSheet(props: {
 }) {
   const { client, snapshot, take } = props;
   const takes = snapshot.takes ?? [];
-  const notes = useTakeNotes(take.id);
+  const review = useTakeReview({ client, draftId: take.id });
   const money = useMoneyLeft({
     client,
     readyTakeId: take.state === "ready" ? take.id : undefined,
@@ -40,14 +41,16 @@ function TakeOnSheet(props: {
   const sending = useTakeSend({
     client,
     take,
-    notes,
+    review,
+    itemIds: reviewItemIdsOf({ snapshot, take }),
     money,
     onDone: () => undefined,
   });
   const action = nextActionOf({
     state:
       take.state === "open" ? { kind: "making", take } : { kind: "take", take },
-    noteCount: sentNotesOf(notes.draft).length,
+    noteCount: reviewTotalOf(sending.counts),
+    countText: reviewCountTextOf(sending.counts),
     latestTakeId: latestTakeIdOf({ takes, take }),
     isStoryApproved: true,
     hasNextChapter: false,
@@ -62,7 +65,7 @@ function TakeOnSheet(props: {
         snapshot={snapshot}
         take={take}
         chapters={chaptersOf(snapshot.bible.storyPlan)}
-        notes={notes}
+        review={review}
         progress={undefined}
         onPickTake={props.onPick}
       />

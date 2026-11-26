@@ -1,9 +1,10 @@
-import { artMarkup } from "./art.js";
 import { chapterNumber, chapterOf, progressText } from "./leadWork.js";
 import { escapeText } from "./state.js";
 import { sections } from "./takeHead.js";
 import { bindTakeKeys } from "./takeKeys.js";
 import { bindLarge, largeMarkup } from "./takeLarge.js";
+import { isUsedNow, verdictOf } from "./takeReview.js";
+import { bindRows, rowMarkup } from "./takeRows.js";
 import {
   changeView,
   itemsOf,
@@ -13,17 +14,43 @@ import {
   takesOf,
 } from "./takesStore.js";
 
-function isFresh({ item, take }) {
-  return item.take === take.number || item.verdict === "waiting";
+const filters = [
+  ["all", "All", () => true],
+  ["open", "Not reviewed", ({ item }) => verdictOf(item) === undefined],
+  ["mistakes", "Has mistakes", ({ item }) => verdictOf(item) === "change"],
+  ["in-use", "In use", ({ item }) => isUsedNow(item)],
+  ["new", "New in this take", ({ item, take }) => item.take === take.number],
+];
+
+function testOf(id) {
+  return (filters.find(([each]) => each === id) ?? filters[0])[2];
 }
 
 export function shownItems(take) {
+  const test = testOf(takes.view.filter);
+  const kept = takes.view.keptIds ?? [];
   const items = itemsOf(take).filter(
-    (item) => takes.view.allItems === true || isFresh({ item, take }),
+    (item) => test({ item, take }) || kept.includes(item.id),
   );
   return sections.flatMap(([id]) =>
     items.filter((item) => item.section === id),
   );
+}
+
+function filtersMarkup(take) {
+  const items = itemsOf(take);
+  const reviewed = items.filter((item) => verdictOf(item) !== undefined);
+  const chips = filters
+    .map(
+      ([id, name, test]) =>
+        `<button type="button" class="filter-chip" data-filter="${id}" aria-pressed="${takes.view.filter === id}">${name} <span class="filter-count">${items.filter((item) => test({ item, take })).length}</span></button>`,
+    )
+    .join("");
+  return `
+    <div class="take-filters">
+      <p class="review-progress"><strong>${reviewed.length}</strong> of ${items.length} reviewed</p>
+      <div class="filter-chips" role="group" aria-label="Show">${chips}</div>
+    </div>`;
 }
 
 function summaryOf(take) {
@@ -38,38 +65,21 @@ function summaryOf(take) {
   return `The lead made ${made.length} new.`;
 }
 
-function tileMarkup({ item, take }) {
-  const notes = item.comments.length;
-  const marked = item.verdict === "declined" || notes > 0;
-  const visual =
-    item.kind === "music"
-      ? `<span class="tile-wave">${escapeText(item.title)}</span>`
-      : artMarkup(item.picture);
-  return `
-    <li class="tile" data-marked="${marked}" data-out="${item.verdict === "declined"}">
-      <button type="button" class="tile-open" data-open-item="${item.id}" aria-label="Open ${escapeText(item.title)}">
-        <span class="tile-picture" data-kind="${item.kind}">${visual}${item.take === take.number && take.number > 1 ? `<span class="tile-new">New</span>` : ""}${marked ? `<span class="tile-notes">${item.verdict === "declined" ? "Not used" : `${notes} note${notes === 1 ? "" : "s"}`}</span>` : ""}</span>
-        <span class="tile-caption">${escapeText(item.group === undefined ? item.title : `${item.group}, ${item.title}`)}</span>
-        ${item.check.passed || item.kind === "music" ? "" : `<span class="tile-fault">${escapeText(item.check.text)}</span>`}
-      </button>
-    </li>`;
-}
-
-function sheetMarkup(take) {
+function rowsMarkup(take) {
   const items = shownItems(take);
   if (items.length === 0) {
-    return `<p class="fact lead">Nothing new waits for you. Turn off the switch to see every item.</p>`;
+    return `<p class="fact lead">Nothing here right now. <button type="button" class="link" data-filter="all">Show all</button></p>`;
   }
   return sections
     .filter(([id]) => items.some((item) => item.section === id))
     .map(
       ([id, name]) => `
-        <section class="contact" aria-label="${name}">
+        <section class="review-section" aria-label="${name}">
           <h3>${name}</h3>
-          <ul class="contact-sheet" data-section="${id}">${items
+          ${items
             .filter((item) => item.section === id)
-            .map((item) => tileMarkup({ item, take }))
-            .join("")}</ul>
+            .map((item) => rowMarkup({ item, take }))
+            .join("")}
         </section>`,
     )
     .join("");
@@ -92,7 +102,6 @@ function earlierMarkup(take) {
 export function takeMarkup() {
   const take = shownTake();
   const chapter = chapterOf(take.chapterId);
-  const fresh = itemsOf(take).filter((item) => isFresh({ item, take })).length;
   const share = (take.planned - take.queue.length) / Math.max(1, take.planned);
   takes.view.order = shownItems(take).map((item) => item.id);
   takes.view.simple = true;
@@ -103,32 +112,33 @@ export function takeMarkup() {
         <p>Chapter ${chapterNumber(chapter.id)}, ${escapeText(chapter.name)}. ${stepNames[take.step].charAt(0).toUpperCase()}${stepNames[take.step].slice(1)}.</p>
         <p class="fact lead">${summaryOf(take)}</p>
         ${take.state === "making" ? `<div class="progress wide"><i style="width:${share * 100}%"></i></div>` : ""}
-        <div class="slate-controls">
-          <label class="switch"><input type="checkbox" data-only-new ${takes.view.allItems ? "" : "checked"} /> Only new and waiting (${fresh})</label>
-          ${earlierMarkup(take)}
-        </div>
+        <div class="slate-controls">${earlierMarkup(take)}</div>
       </div>
     </header>
-    ${sheetMarkup(take)}
+    ${filtersMarkup(take)}
+    ${rowsMarkup(take)}
     ${largeMarkup(take)}`;
 }
 
 export function bindTake(element) {
   bindTakeKeys();
-  element.querySelectorAll("[data-open-item]").forEach((button) => {
-    button.addEventListener("click", () =>
-      changeView({ openItemId: button.dataset.openItem }),
-    );
+  const take = shownTake();
+  element.querySelectorAll("[data-filter]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const test = testOf(button.dataset.filter);
+      changeView({
+        filter: button.dataset.filter,
+        keptIds: itemsOf(take)
+          .filter((item) => test({ item, take }))
+          .map((item) => item.id),
+      });
+    });
   });
-  element
-    .querySelector("[data-only-new]")
-    ?.addEventListener("change", (event) =>
-      changeView({ allItems: !event.target.checked }),
-    );
   element
     .querySelector("[data-earlier]")
     ?.addEventListener("change", (event) =>
       changeView({ takeNumber: Number(event.target.value) }),
     );
+  bindRows({ element });
   bindLarge({ element });
 }

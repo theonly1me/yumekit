@@ -1,8 +1,11 @@
 import {
   chaptersOf,
   nextWorkOf,
+  reviewCountTextOf,
+  reviewTotalOf,
   takeTitleInTextOf,
   takeTitleOf,
+  type ReviewCounts,
   type Take,
 } from "@yumekit/project";
 import type { MediaTools } from "@yumekit/tools";
@@ -21,16 +24,16 @@ function dollarsOf(usd: number): string {
 export function sendSummaryOf(options: {
   take: Take | undefined;
   storyPlan: Parameters<typeof chaptersOf>[0];
-  notes: number;
+  counts: ReviewCounts;
   next: SendNext;
 }): string {
-  const { take, notes } = options;
+  const { take, counts } = options;
   const name =
     take === undefined
       ? "a take"
       : takeTitleInTextOf({ take, chapters: chaptersOf(options.storyPlan) });
-  if (notes > 0) {
-    return `You sent ${name} with ${String(notes)} ${notes === 1 ? "note" : "notes"}.`;
+  if (reviewTotalOf(counts) > 0) {
+    return `You sent ${name}: ${reviewCountTextOf(counts)}.`;
   }
   return options.next === "stop"
     ? `You approved ${name}, and stopped there.`

@@ -1,3 +1,8 @@
+import {
+  reviewCountTextOf,
+  reviewCountsOf,
+  reviewTotalOf,
+} from "@yumekit/project/takes";
 import type { Chapter, Take, TakeStep } from "./takeTypes.js";
 import { takesOfChapter } from "./verdicts.js";
 
@@ -28,9 +33,10 @@ function summaryOf(take: Take): string {
     (item) => item.kind === "asset" && item.replaces !== undefined,
   ).length;
   if (take.state === "sent") {
-    return take.notes.length === 0
+    const counts = reviewCountsOf(take.notes);
+    return reviewTotalOf(counts) === 0
       ? "You approved this take."
-      : `You sent ${String(take.notes.length)} ${take.notes.length === 1 ? "note" : "notes"} with this take.`;
+      : `You sent this take: ${reviewCountTextOf(counts)}.`;
   }
   if (remade > 0) {
     return `The lead made ${String(remade)} again from your notes.`;
@@ -43,9 +49,6 @@ export function TakeSlate(props: {
   takes: readonly Take[];
   chapters: Chapter[];
   progress: SlateProgress | undefined;
-  newCount: number;
-  isOnlyNew: boolean;
-  onOnlyNew: (isOnlyNew: boolean) => void;
   onPickTake: (takeId: string) => void;
 }) {
   const { take, progress } = props;
@@ -72,18 +75,8 @@ export function TakeSlate(props: {
             <i style={{ width: `${String((progress.share ?? 0.4) * 100)}%` }} />
           </div>
         )}
-        <div className="slate-controls">
-          <label className="switch">
-            <input
-              type="checkbox"
-              checked={props.isOnlyNew}
-              onChange={(event) => {
-                props.onOnlyNew(event.target.checked);
-              }}
-            />
-            Only new and waiting ({props.newCount})
-          </label>
-          {siblings.length < 2 ? undefined : (
+        {siblings.length < 2 ? undefined : (
+          <div className="slate-controls">
             <label className="earlier">
               <span className="hidden-label">Earlier takes</span>
               <select
@@ -99,8 +92,8 @@ export function TakeSlate(props: {
                 ))}
               </select>
             </label>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </header>
   );

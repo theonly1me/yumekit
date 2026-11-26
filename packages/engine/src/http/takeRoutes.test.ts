@@ -63,13 +63,13 @@ describe("the take routes", { timeout: 120_000 }, () => {
     expect(sent.status).toBe(202);
     const request = lastRequestOf(await chat.runs());
     expect(request).toContain(
-      'The picture "harbor": "Make the wall taller." Pin at 25% from the left and 50% from the top.',
+      '   Pin 1 at 25% from the left and 50% from the top: "Make the wall taller."',
     );
     expect(request).toContain('Approved, so keep them as they are: "ferry".');
     expect(entries).toContainEqual(
       expect.objectContaining({
         kind: "request",
-        text: "Take 1 of the pictures: 1 note for the lead.",
+        text: "Take 1 of the pictures: 1 to change.",
       }),
     );
     const listed = await rawRequest({
@@ -96,7 +96,7 @@ describe("the take routes", { timeout: 120_000 }, () => {
 
     expect(sent.status).toBe(202);
     expect(lastRequestOf(await chat.runs())).toContain(
-      "with no notes, so each item is approved",
+      "with no change, so each item is approved",
     );
     expect(await kindOf(before)).toBe("picture-not-approved");
     expect(await kindOf(after)).not.toBe("picture-not-approved");

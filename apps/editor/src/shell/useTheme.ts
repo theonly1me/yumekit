@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 
 export type Theme = "dark" | "light";
 
@@ -12,17 +12,35 @@ export function readTheme(): Theme {
   }
 }
 
+const store: { theme: Theme | undefined; listeners: Set<() => void> } = {
+  theme: undefined,
+  listeners: new Set(),
+};
+
+function shownTheme(): Theme {
+  store.theme ??= readTheme();
+  return store.theme;
+}
+
+function subscribe(listener: () => void): () => void {
+  store.listeners.add(listener);
+  return () => {
+    store.listeners.delete(listener);
+  };
+}
+
+function setTheme(theme: Theme): void {
+  store.theme = theme;
+  document.documentElement.dataset["theme"] = theme;
+  for (const listener of store.listeners) listener();
+  try {
+    window.localStorage.setItem(themeKey, theme);
+  } catch {
+    return;
+  }
+}
+
 export function useTheme() {
-  const [theme, setTheme] = useState<Theme>(readTheme);
-
-  useEffect(() => {
-    document.documentElement.dataset["theme"] = theme;
-    try {
-      window.localStorage.setItem(themeKey, theme);
-    } catch {
-      return;
-    }
-  }, [theme]);
-
+  const theme = useSyncExternalStore(subscribe, shownTheme);
   return { theme, setTheme };
 }

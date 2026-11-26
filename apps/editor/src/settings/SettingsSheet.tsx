@@ -16,6 +16,7 @@ import { ServicesGroup } from "./services/index.js";
 import { VideoStyleGroup } from "./VideoStyleGroup.js";
 import { BetweenScenesRow } from "./BetweenScenesRow.js";
 import { MoreSettings } from "./MoreSettings.js";
+import { ThemeRow } from "./ThemeRow.js";
 import "./settings.css";
 
 export function SettingsSheet(props: {
@@ -35,6 +36,7 @@ export function SettingsSheet(props: {
         <h2 id="settings-title">Settings</h2>
         <AiGroup client={props.client} chat={props.chat} />
         <LimitsGroup client={props.client} />
+        <ThemeRow />
         <MoreSettings isOpenAtStart={props.openServerId !== undefined}>
           <VideoStyleGroup client={props.client} videoStyle={props.videoStyle}>
             <LookRow client={props.client} look={props.look} />

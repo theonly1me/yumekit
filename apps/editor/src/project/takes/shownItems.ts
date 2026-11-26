@@ -4,9 +4,10 @@ import type { Take, TakeItem } from "./takeTypes.js";
 import { takesOfStep, verdictsOf, type Verdict } from "./verdicts.js";
 
 export type SectionId =
-  "cut" | "clips" | "music" | "cast" | "shots" | "pictures";
+  "story" | "cut" | "clips" | "music" | "cast" | "shots" | "pictures";
 
 export const sectionNames: Record<SectionId, string> = {
+  story: "The story",
   cut: "The cut",
   clips: "Clips",
   music: "Music",
@@ -16,6 +17,7 @@ export const sectionNames: Record<SectionId, string> = {
 };
 
 const sectionOrder: SectionId[] = [
+  "story",
   "cut",
   "clips",
   "music",
@@ -61,7 +63,7 @@ function sectionOf(options: {
   castSheetIds: Set<string>;
 }): SectionId {
   const { item, asset } = options;
-  if (item.kind !== "asset") return "cut";
+  if (item.kind !== "asset") return item.kind;
   if (asset?.kind === "video") return "clips";
   if (asset?.kind === "audio") return "music";
   if (options.castSheetIds.has(item.id)) return "cast";
@@ -133,4 +135,17 @@ export function shownItemsOf(options: {
       items: shown.filter((each) => each.section === section),
     }),
   );
+}
+
+export function reviewItemIdsOf(options: {
+  snapshot: Snapshot;
+  take: Take;
+}): string[] {
+  const shown = shownItemsOf({ ...options, withEarlier: true });
+  const replaced = shown.flatMap((each) =>
+    each.item.kind === "asset" && each.item.replaces !== undefined
+      ? [each.item.replaces]
+      : [],
+  );
+  return [...new Set([...shown.map((each) => each.item.id), ...replaced])];
 }

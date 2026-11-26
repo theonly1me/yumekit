@@ -1,7 +1,12 @@
 import { useState } from "react";
 import type { Snapshot } from "../../engine/snapshot.js";
-import { notesOfItem } from "../takes/notes/draftNotes.js";
-import type { TakeNotes } from "../takes/notes/useDraftNotes.js";
+import {
+  writeQuote,
+  type DraftChange,
+  type ItemDraft,
+} from "../takes/review/itemDrafts.js";
+import type { TakeReview } from "../takes/review/useTakeReview.js";
+import { SaveLine } from "../takes/rows/SaveLine.js";
 import {
   scriptParagraphsOf,
   storyParagraphsOf,
@@ -13,92 +18,66 @@ export const storyItemId = "story";
 
 function Paragraph(props: {
   paragraph: StoryParagraph;
-  notes: TakeNotes;
+  draft: ItemDraft;
+  canWrite: boolean;
   isOpen: boolean;
   onToggle: () => void;
+  onChange: (next: DraftChange) => void;
 }) {
-  const { paragraph, notes } = props;
-  const [words, setWords] = useState("");
-  const own = notesOfItem({ draft: notes.draft, itemId: storyItemId }).filter(
-    (note) =>
-      note.place.kind === "quote" && note.place.quote === paragraph.text,
+  const { paragraph } = props;
+  const quote = props.draft.quotes.find(
+    (each) => each.quote === paragraph.text,
   );
+  const hasNote = quote !== undefined;
   return (
     <div
       className="story-paragraph"
       data-open={props.isOpen}
-      data-has-notes={own.length > 0}
+      data-has-notes={hasNote}
     >
       {paragraph.label === "" ? undefined : (
         <h3 className="story-label">{paragraph.label}</h3>
       )}
       <p onClick={props.onToggle}>{paragraph.text}</p>
-      <button
-        type="button"
-        className="link"
-        aria-expanded={props.isOpen}
-        onClick={props.onToggle}
-      >
-        {own.length === 0
-          ? "Comment"
-          : `${String(own.length)} ${own.length === 1 ? "comment" : "comments"}`}
-      </button>
-      {own.length === 0 ? undefined : (
-        <ul className="story-notes">
-          {own.map((note) => (
-            <li key={note.id}>
-              {note.text}{" "}
-              <button
-                type="button"
-                className="remove"
-                onClick={() => {
-                  notes.remove(note.id);
-                }}
-              >
-                Remove
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-      {props.isOpen ? (
-        <form
-          className="note-form"
-          onSubmit={(event) => {
-            event.preventDefault();
-            if (words.trim() === "") return;
-            notes.add({
-              itemId: storyItemId,
-              place: { kind: "quote", quote: paragraph.text },
-              text: words.trim(),
-            });
-            setWords("");
-            props.onToggle();
+      {props.isOpen || hasNote ? (
+        <textarea
+          className="story-comment"
+          value={quote?.text ?? ""}
+          rows={2}
+          autoFocus={props.isOpen && !hasNote}
+          disabled={!props.canWrite}
+          placeholder="What should change in this paragraph?"
+          aria-label="Your note on this paragraph"
+          onChange={(event) => {
+            props.onChange(
+              writeQuote({
+                id: quote?.id ?? crypto.randomUUID(),
+                quote: paragraph.text,
+                text: event.target.value,
+              }),
+            );
           }}
+        />
+      ) : (
+        <button
+          type="button"
+          className="link"
+          aria-expanded={false}
+          onClick={props.onToggle}
         >
-          <input
-            type="text"
-            value={words}
-            autoFocus
-            placeholder="What should change in this paragraph?"
-            aria-label="Your note on this paragraph"
-            onChange={(event) => {
-              setWords(event.target.value);
-            }}
-          />
-          <button type="submit">Add</button>
-        </form>
-      ) : undefined}
+          Comment
+        </button>
+      )}
     </div>
   );
 }
 
 export function StoryReading(props: {
   snapshot: Snapshot;
-  notes: TakeNotes;
+  review: TakeReview;
   round: number;
 }) {
-  const { snapshot } = props;
+  const { snapshot, review } = props;
   const [openKey, setOpenKey] = useState<string>();
   const story = snapshot.bible.story;
   if (story === undefined) {
@@ -123,17 +102,30 @@ export function StoryReading(props: {
         </p>
         <h2>{snapshot.project.name}</h2>
         <p className="fact lead">
-          Click a paragraph to tell the lead what to change.
+          Click a paragraph to tell the lead what to change. Your notes save as
+          you type.
         </p>
+        {review.saveOf(storyItemId) === undefined ? undefined : (
+          <SaveLine
+            save={review.saveOf(storyItemId)}
+            onSaveAgain={() => {
+              review.saveAgain(storyItemId);
+            }}
+          />
+        )}
       </header>
       {paragraphs.map((paragraph) => (
         <Paragraph
           key={paragraph.key}
           paragraph={paragraph}
-          notes={props.notes}
+          draft={review.draftOf(storyItemId)}
+          canWrite={review.isLoaded}
           isOpen={openKey === paragraph.key}
           onToggle={() => {
             setOpenKey(openKey === paragraph.key ? undefined : paragraph.key);
+          }}
+          onChange={(next) => {
+            review.change({ itemId: storyItemId, next });
           }}
         />
       ))}

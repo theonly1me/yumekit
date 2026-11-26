@@ -50,6 +50,19 @@ const placeCount = (note: {
   [note.pin, note.seconds, note.quote].filter((place) => place !== undefined)
     .length;
 
+const verdictCount = (note: {
+  dropped?: unknown;
+  question?: unknown;
+  approved?: unknown;
+}) =>
+  [note.dropped, note.question, note.approved].filter(
+    (verdict) => verdict !== undefined,
+  ).length;
+
+export const takeTagSchema = z.string().trim().min(1).max(40);
+
+export const takeTagLimit = 12;
+
 export const takeNoteSchema = z
   .strictObject({
     itemId: z.string().min(1).max(64),
@@ -62,13 +75,20 @@ export const takeNoteSchema = z
       .exactOptional(),
     seconds: z.number().min(0).exactOptional(),
     quote: z.string().trim().min(1).max(takeTextLimit).exactOptional(),
+    tags: z.array(takeTagSchema).min(1).max(takeTagLimit).exactOptional(),
     dropped: z.literal(true).exactOptional(),
+    question: z.literal(true).exactOptional(),
+    approved: z.literal(true).exactOptional(),
+    use: z.literal(true).exactOptional(),
   })
   .refine((note) => placeCount(note) <= 1, {
     message: "A note has at most one of pin, seconds, and quote.",
   })
-  .refine((note) => note.text !== "" || note.dropped === true, {
-    message: "A note needs text, unless it drops the item.",
+  .refine((note) => verdictCount(note) <= 1, {
+    message: "A note has at most one of dropped, question, and approved.",
+  })
+  .refine((note) => note.use !== true || note.approved === true, {
+    message: "A note that picks the version to use also approves it.",
   });
 
 const timeSchema = z.iso.datetime();
