@@ -83,7 +83,7 @@ function baseItemOf(options: {
       : { kind: "story", id: storyItemId };
   }
   return snapshot.assets.some((asset) => asset.id === input.id)
-    ? { kind: "asset", id: input.id }
+    ? { kind: "asset", id: input.id, earlier: true }
     : undefined;
 }
 

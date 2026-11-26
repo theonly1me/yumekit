@@ -65,7 +65,7 @@ function Tile(props: {
             kind={kind}
             takeId={props.takeId}
           />
-          {shown.isNew && props.takeNumber > 1 ? (
+          {shown.origin === "new" && props.takeNumber > 1 ? (
             <span className="tile-new">New</span>
           ) : undefined}
           {isMarked ? (

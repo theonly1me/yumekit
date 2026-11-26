@@ -42,6 +42,31 @@ describe("a round of the lead's work as a take", { timeout: 60_000 }, () => {
     ]);
   });
 
+  it("marks an earlier picture that the lead names in ready_take as earlier, so it does not count as new in the take", async () => {
+    const harness = await startTakeHarness();
+    await harness.call({
+      name: "generate_asset",
+      arguments: picture("before"),
+    });
+    await harness.call({ name: "open_take", arguments: { step: "pictures" } });
+    await harness.call({
+      name: "generate_asset",
+      arguments: picture("harbor"),
+    });
+
+    await harness.call({
+      name: "ready_take",
+      arguments: {
+        items: ["harbor", "before"].map((id) => ({ id, note: `On ${id}.` })),
+      },
+    });
+
+    expect(harness.store.read().takes[0]?.items).toEqual([
+      { kind: "asset", id: "harbor", note: "On harbor." },
+      { kind: "asset", id: "before", note: "On before.", earlier: true },
+    ]);
+  });
+
   it("keeps the items of a ready take in the order that the lead names them", async () => {
     const harness = await startTakeHarness();
     await harness.call({ name: "open_take", arguments: { step: "pictures" } });

@@ -46,7 +46,7 @@ export function CompareView(props: {
     ...shown,
     item: { kind: "asset", id: props.olderId },
     asset: snapshot.assets.find((asset) => asset.id === props.olderId),
-    isNew: false,
+    origin: "approved",
   };
   return (
     <div className="compare-columns">
