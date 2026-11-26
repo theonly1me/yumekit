@@ -69,6 +69,15 @@ function amountOf(options: {
   }
 }
 
+export function priceAtDefaultsOf(
+  model: MediaModel,
+): MediaModelPrice | undefined {
+  return bestMatchOf({
+    prices: model.prices,
+    values: settingValuesOf({ model, input: {} }),
+  });
+}
+
 export function catalogPriceOf(options: {
   model: MediaModel;
   input: JsonObject;

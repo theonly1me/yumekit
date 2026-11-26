@@ -19,23 +19,38 @@ const keySchema = z.object({
   source: z.enum(["environment", "key-file", "missing"]),
 });
 
+const choiceModelSchema = z.object({
+  id: z.string(),
+  label: z.string(),
+  is_default: z.boolean(),
+  download: z
+    .object({ bytes: z.number(), ready: z.boolean() })
+    .nullable()
+    .default(null),
+  tested: z.boolean().nullable().default(null),
+  price_at_defaults: z
+    .object({
+      usd: z.number(),
+      unit: z.enum([
+        "second",
+        "image",
+        "minute",
+        "thousand-characters",
+        "call",
+      ]),
+    })
+    .nullable()
+    .default(null),
+  default_resolution: z.string().nullable().default(null),
+});
+
 const serviceSchema = z.object({
   server: z.string(),
   label: z.string(),
   state: z.enum(["ready", "needs-key", "key-not-working", "not-ready"]),
   key_problem: z.string().nullable().default(null),
   keys: z.array(keySchema),
-  models: z.array(
-    z.object({
-      id: z.string(),
-      label: z.string(),
-      is_default: z.boolean(),
-      download: z
-        .object({ bytes: z.number(), ready: z.boolean() })
-        .nullable()
-        .default(null),
-    }),
-  ),
+  models: z.array(choiceModelSchema),
 });
 
 const currentSchema = z.object({
@@ -70,6 +85,7 @@ export type MediaKind = z.infer<typeof kindSchema>;
 export type MediaChoices = z.infer<typeof mediaChoicesSchema>;
 export type MediaChoice = z.infer<typeof choiceSchema>;
 export type ChoiceService = z.infer<typeof serviceSchema>;
+export type ChoiceModel = z.infer<typeof choiceModelSchema>;
 export type CurrentPick = z.infer<typeof currentSchema>;
 
 export interface ModelTarget {
