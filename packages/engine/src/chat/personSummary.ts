@@ -1,6 +1,7 @@
 import { personSentenceOf } from "@yumekit/brain";
 import { scenesRowOf, type ProjectSnapshot } from "@yumekit/project";
 import { addedSoundSentenceOf } from "./addedSound.js";
+import { chapterSentenceOf } from "./chapterSummary.js";
 
 type SceneReference = { sceneId: string } | { clipId: string };
 
@@ -11,6 +12,7 @@ const sceneSentences: Record<string, (number: string) => string> = {
   remove_scene_clip: (number) => `You deleted scene ${number}.`,
   duplicate_scene_clip: (number) => `You duplicated scene ${number}.`,
   place_video: (number) => `You added a video clip to scene ${number}.`,
+  place_picture: (number) => `You put a picture in scene ${number}.`,
 };
 
 function referenceOf(options: {
@@ -20,7 +22,7 @@ function referenceOf(options: {
   const { input } = options;
   const sceneId = input["scene_id"];
   const clipId =
-    options.tool === "place_video"
+    options.tool === "place_video" || options.tool === "place_picture"
       ? input["replace_clip_id"]
       : input["clip_id"];
   if (options.tool === "put_scene" && typeof sceneId === "string") {
@@ -62,6 +64,8 @@ export function personSummaryOf(options: {
 }): string {
   const addedSound = addedSoundSentenceOf(options);
   if (addedSound !== undefined) return addedSound;
+  const chapters = chapterSentenceOf(options);
+  if (chapters !== undefined) return chapters;
   const sentence = sceneSentences[options.tool];
   const reference = referenceOf(options);
   const number =

@@ -52,6 +52,8 @@ import { registerGetShotBrief } from "../storyPlan/shotBrief/registerGetShotBrie
 import { registerOpenTake } from "../takes/registerOpenTake.js";
 import { registerReadyTake } from "../takes/registerReadyTake.js";
 import { registerSetApprovePicturesFirst } from "../takes/registerSetApprovePicturesFirst.js";
+import { registerSetChapters } from "../chapters/registerSetChapters.js";
+import { registerPlacePicture } from "../timeline/registerPlacePicture.js";
 import { clockedTool } from "../clock/clockedTool.js";
 import type { FilmClock } from "../clock/filmClock.js";
 import { createSerialWrites } from "./serialWrites.js";
@@ -97,6 +99,7 @@ export function harnessToolsOf(
   registerGetStoryGuide(context);
   registerSetStory(context);
   registerSetStoryPlan(context);
+  registerSetChapters(context);
   registerRecordLesson(context);
   registerGetShotBrief(context);
   registerOpenTake(context);
@@ -114,6 +117,7 @@ export function harnessToolsOf(
   registerTimelineTools(context);
   registerNarrationAndHistoryTools(context);
   registerPlaceVideo(context);
+  registerPlacePicture(context);
   registerPlaceSound(context);
   registerReplaceNarration(context);
   registerReplaceMusic(context);

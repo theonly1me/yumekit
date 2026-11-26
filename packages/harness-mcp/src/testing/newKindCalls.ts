@@ -59,3 +59,20 @@ export const askPersonCalls: ScriptedCall[] = [
     },
   },
 ];
+
+export const chapterCalls: ScriptedCall[] = [
+  {
+    name: "set_chapters",
+    input: {
+      chapters: [{ chapter_id: "lake", title: "The lake", shot_ids: ["dawn"] }],
+    },
+  },
+  {
+    name: "place_picture",
+    input: {
+      output_id: "wide",
+      asset_id: "still",
+      replace_clip_id: "video-clip",
+    },
+  },
+];

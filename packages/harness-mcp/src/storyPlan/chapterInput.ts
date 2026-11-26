@@ -2,22 +2,22 @@ import type { Chapter, StoryPlan } from "@yumekit/project";
 import { z } from "zod";
 import { idInput } from "../inputs.js";
 
+export const chapterInput = z.object({
+  chapter_id: idInput("The id of the chapter, for example 'the-harbor'."),
+  title: z
+    .string()
+    .trim()
+    .min(1)
+    .max(80)
+    .describe("The title of the chapter for the person."),
+  shot_ids: z
+    .array(idInput("A shot id of the plan."))
+    .min(1)
+    .describe("The shots of the chapter, in film order."),
+});
+
 export const chaptersInput = z
-  .array(
-    z.object({
-      chapter_id: idInput("The id of the chapter, for example 'the-harbor'."),
-      title: z
-        .string()
-        .trim()
-        .min(1)
-        .max(80)
-        .describe("The title of the chapter for the person."),
-      shot_ids: z
-        .array(idInput("A shot id of the plan."))
-        .min(1)
-        .describe("The shots of the chapter, in film order."),
-    }),
-  )
+  .array(chapterInput)
   .min(1)
   .max(40)
   .optional()

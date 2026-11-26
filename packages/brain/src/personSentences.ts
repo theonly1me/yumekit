@@ -16,6 +16,8 @@ const personSentencesByToolName: Record<string, string> = {
   remove_platform: "You removed a platform.",
   place_narration: "You added the voice.",
   place_video: "You added a video clip to a scene.",
+  place_picture: "You put a picture in a scene.",
+  set_chapters: "You changed the chapters.",
   generate_asset: "You made a new picture or sound.",
   import_asset: "You added a file to the project.",
   remove_asset: "You removed a file from the project.",
