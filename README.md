@@ -4,11 +4,17 @@ The open source video harness for AI agents.
 
 **Directed, not just generated.** Reels, explainers, trailers, and films, with one story, one cast, and one look in every shot.
 
-https://github.com/user-attachments/assets/f7c11c17-fc61-4ef2-8482-cb1943a13c23
+YUMEKIT_TRAILER_VIDEO
 
-_Unwritten_ started as a rough story. The lead agent wrote the whole story and the script, designed the cast, planned the shots, and cut the trailer. A person approved each step.
+This trailer was made with yumekit. Its new pictures, clips, and music cost $2.07, and it reuses shots of _Unwritten_. It is also on [YouTube](https://www.youtube.com/watch?v=3fW_o0VGqNc).
 
-## What the trailer cost
+## Made with yumekit: Unwritten
+
+[![Unwritten, an anime trailer made with yumekit](https://img.youtube.com/vi/Libmx_5CuEk/maxresdefault.jpg)](https://www.youtube.com/watch?v=Libmx_5CuEk)
+
+_Unwritten_ is a 56 second anime trailer. It started as a rough story. The lead agent wrote the whole story and the script, designed the cast, planned the shots, and cut the trailer. A person approved each step. [Watch it on YouTube](https://www.youtube.com/watch?v=Libmx_5CuEk).
+
+### What Unwritten cost
 
 | Part                                                              | Made with                             | Made     | In the trailer | Cost                   |
 | ----------------------------------------------------------------- | ------------------------------------- | -------- | -------------- | ---------------------- |
