@@ -571,3 +571,12 @@ The editor of the branch ran with the fake agent and the sample media server, wi
 
 1. Two open browsers do not see each other's review until a reload.
 2. A take of the voice can use the same rows when takes for the voice come.
+
+## Details of WP88
+
+These decisions came from the small fixes for version 0.1.1 on 2026-11-26.
+
+### The size of MiniMax H3 on fal
+
+1. MiniMax H3 (`minimax/h3`) makes 768P by default, in place of 2K. The three fal pages of the model (`text-to-video`, `image-to-video`, and `reference-to-video`, with their `llms.txt` pages, read on 2026-11-26) give 0.06 US dollars a second at 768P and 0.13 at 2K. The field `resolution` says: "480P and 768P are native generation modes; 2K and 4K upscale a 768P base result." So a clip at 2K is the clip at 768P made larger, for more than twice the price. A person who wants a larger clip picks 2K or 4K, or makes the clip sharper afterwards.
+2. The default of fal itself stays 2K. yumekit always sends `resolution`, so the default of yumekit decides.
