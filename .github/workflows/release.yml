@@ -1,0 +1,61 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+    environment: npm
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Check that the tag is on main
+        run: git merge-base --is-ancestor "$GITHUB_SHA" origin/main
+      - name: Check that the tag matches the version
+        run: |
+          version="$(node -p "require('./package.json').version")"
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "The tag $GITHUB_REF_NAME does not match the version $version in package.json."
+            exit 1
+          fi
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+      - uses: pnpm/action-setup@v6.1.1
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+      - name: Check the npm version for trusted publishing
+        run: |
+          npm --version
+          node -e "const [major, minor, patch] = process.argv[1].split('.').map(Number); const ok = major > 11 || (major === 11 && (minor > 5 || (minor === 5 && patch >= 1))); if (!ok) { console.error('Trusted publishing needs npm 11.5.1 or later.'); process.exit(1); }" "$(npm --version)"
+      - run: pnpm install --frozen-lockfile
+      - name: Read the runner image version
+        id: image
+        run: echo "version=$ImageVersion" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v6.1.0
+        with:
+          path: ~/.cache/ffmpeg-debs
+          key: ffmpeg-debs-${{ runner.os }}-${{ runner.arch }}-${{ steps.image.outputs.version }}
+      - run: bash scripts/ci/installFfmpeg.sh "$HOME/.cache/ffmpeg-debs"
+        timeout-minutes: 12
+      - run: bash scripts/ci/retryApt.sh 3 240 pnpm --filter @yumekit/scene exec playwright install --with-deps chromium
+        timeout-minutes: 15
+      - run: pnpm run pack-release
+      - run: pnpm run check-release
+      - name: Publish with the identity of this workflow
+        run: npm publish "release/yumekit-$VERSION.tgz" --access public
