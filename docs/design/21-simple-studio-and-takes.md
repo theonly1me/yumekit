@@ -424,3 +424,41 @@ These decisions came from the build of WP83 on 2026-11-26.
 28. `ready_take` keeps the items in the order in which the lead names them. The contact sheet orders each section by the shot of the plan, then by the cast, then by that order, so the order does not change with the time at which each file finished.
 29. The ask box says "Ask the lead, or drop files here". The state "This project has no video shape yet" of the editor has "Back to the project".
 30. "Open its takes" of a picked chapter block in "Edit by hand" opens the take view in a sheet: the ready take of the chapter, else its open take, else its newest take. A chapter with no take says so. The editor reads the takes and the chapters with `takeSchema` and `chapterSchema` of `@yumekit/project/takes` (item 27 of WP84).
+
+## Details of WP77
+
+These decisions came from the build of the skill and the guide on 2026-11-26.
+
+### Where each text lives
+
+1. Each principle has one home, and the other texts point to it. `skills/yumekit/SKILL.md` has the whole picture: the work with the person in six steps, "Story first", "Craft from the trailer runs", and the batches. `get_story_guide` has what the lead needs at each step. A tool description and a tool answer have what that tool needs.
+2. The guide starts with "Work with the person, one take at a time", before "Story first". It replaces "The order of work". The batches and the checks of each batch are now inside the steps of the pictures and the clips.
+3. The rules of the lead get rule 43 (questions in rounds) and rule 44 (takes, the price of the next step, and a new take of only the marked items). Rules 35, 36, 40, and 42 are shorter and send the detail to the guide. Step 6 of the server instructions names the steps and the takes in short, and points to the guide.
+4. Rule 7 changes: the lead renders the whole video only when the person asks for the file. The take of a cut renders one chapter with `render_video` and `chapter_id`.
+5. Rule 36 moves the faults into the note of each item and `what_to_check`. The time of each stage now goes in the line of the cut of the last chapter, because each turn of the take flow ends with one short line.
+
+### The flow
+
+6. A round of questions has 3 to 6 questions, each with 2 to 6 options in the words of the request where it can. The lead adds no "Other" option, because the card always has a line for the person's own words. It asks another round only when a choice that changes the story is still open.
+7. The story is a take: `open_take` with step `story`, `set_story`, then `ready_take` with the item `story`. The note gives the core of the story and the choice that the lead is least sure of. The line of `get_work` and of `set_story` for a story with no yes, the note of `set_story_plan`, and the input `approval` of `set_story` now say the take. A yes in the chat still works with `approval` `person-said-yes` (WP83, item 10).
+8. A trailer of up to a minute is one chapter. A longer film gets chapters of about 1 to 3 minutes in `set_story_plan`, and the lead says the split in one short message and goes on.
+9. The music is part of the take of the clips (WP80). So the guide puts the music before the cut: `set_tempo` with the tempo of the chosen music, cuts on its beats, and cards on its hits. The music candidates go into that take with a note on how each differs, and the person drops the others.
+10. `ready_take` reads the money left of the project and compares it with the estimate of the next step. When the estimate is more, its line tells the lead to say so before any work and to offer fewer items, the ones that matter most for the film. Its answer gives `money_left_usd`. When the estimate is more than 0, the line asks the lead to give the price of the next step. The hint of `over-money-left` (WP82) already covers a refused batch, so the guide does not repeat it.
+11. The description of `set_story_plan` says that `review_plan` is a second look of the critic when the person asks for one, and that no picture or clip waits for it. WP76 removed the gate (WP80, follow-up 1).
+
+### The craft
+
+12. Each lesson of the trailer runs sits in the section of its step, with its reason: the stakes in the first part of a trailer and in a fight; a wide shot before the close ones in the plan and in a fight; moments from other parts of the film in the trailer form; a place that people built and use in the sheets; one voice for each character in the video prompt; no jump of place inside one moment in "Space across a cut"; and the music before the cut. "Words on screen and spoken lines" stays as it was.
+13. "Fight one or two opponents, not ten" was a blanket rule, and the last film asked for one fight against many warriors. The guide now says that each opponent on screen needs its own design, place, attack, and reaction, and that a fight against many works as a run of short shots. The warning of `set_story_plan` for more than two opponents stays a note.
+14. The craft lines name no film and no character. They describe each fault, for example a pond in the middle of a road, or an enemy on a roof and then next to the hero.
+15. The easy way of the skill names the Start screen of WP83: a template, the box, and "Start". The questions come on a card, and each step comes back as a take.
+
+### The real check
+
+16. On 2026-11-26 the home server of the branch ran in a new temporary configuration folder and projects folder. The only media server was the sample server, and no media key was in the environment. Claude Code 2.1.332 was the lead, with its default model (Opus 5.5) and effort. The request was the trailer template: "A trailer, about 30 seconds." with a story of two lines about a girl who mends clocks in a mountain town, and empty lines for the characters, the look, what it must show, and the words on screen.
+17. Within 31 seconds of the start, the lead called `get_work`, `get_story_guide`, and `ask_person` with 6 questions of 3 or 4 options, for example "Keep it a mystery" and "You choose". It added no "Other" option and ended its turn with one sentence.
+18. The answers went through `POST /api/chat/answers`, one of them in the person's own words. In 41 seconds the lead opened a take of the story, wrote the story (one `set_story` failed on an id that two parts shared, and the second call worked), and called `ready_take`. Its note named the twist and the title as the choices that it was least sure of. The own words of the person (16, alone above the shop of her late grandfather) are in the story.
+19. After the yes, the lead wrote a plan of 7 shots and 4 cards, the cast, and the look in 164 seconds. The cards come from the story, for example "Every clock remembers who mended it". Then it stopped and said that the test service makes only placeholders, and offered a key or a film drawn by code. After "Make the pictures with the free test service anyway", it made the take of the pictures in 52 seconds: the sheets in one batch, the start pictures in one batch, one `check_design`, and `ready_take`. Each note names a risk, for example the hands of the baker, a name written in a picture, and a reflection that fades.
+20. The person sent that take with one note and a pin on the first shot: open wider on the village, with people who wave, to show that the town knows her. In 93 seconds the lead added a wide shot of the village stairs before the close shot at the workbench, with two people who wave. It kept the crowd to two and said why ("crowds tend to come out frozen or all looking alike"), and it kept the workbench shot in the take with a note to mark it if the person wants it gone.
+21. What the lead still does wrong: its first plan had no wide shot of the village and did not show the town that knows her, although the guide asks for both. It did not say what it took from the answers before the story. With no estimate from `ready_take`, it guessed "about $1 to 2" (with an en dash) and said that the sheets cost nothing. In the take after the note, it ran no `check_design` for the new picture, and said so.
+22. The evidence (the chat, the questions, the takes with the notes, the story and the plan, and a screenshot of take 2 of the pictures) is in the pull request.
