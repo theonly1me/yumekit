@@ -19,6 +19,7 @@ export function EditorSide(props: {
   pictureGroupFor: (target: { scene: Scene; clip: SceneClip }) => ReactNode;
   onLength: SceneEdits["resize"];
   onOpenAiSettings: () => void;
+  afterHistory: ReactNode;
 }) {
   const { client, snapshot, view, editorChat } = props;
   const { pickedClip, pickedScene } = view.facts;
@@ -57,11 +58,11 @@ export function EditorSide(props: {
         box={editorChat.box}
         files={editorChat.files}
         chip={editorChat.chip}
-        hasScenes={view.facts.mainClips.length > 0}
         isHidden={isScene}
         sceneNumberOf={editorChat.sceneNumberOf}
         onOpenAiSettings={props.onOpenAiSettings}
         runningWork={runningWork}
+        afterHistory={props.afterHistory}
       />
     </SidePanel>
   );

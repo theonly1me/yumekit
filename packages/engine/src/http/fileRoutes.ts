@@ -52,14 +52,14 @@ export const fileRoutes: Route[] = [
       });
     },
   },
-  {
+  ...[[anySegment], [anySegment, anySegment]].map((segments): Route => ({
     method: "GET",
-    pattern: ["api", "renders", anySegment],
+    pattern: ["api", "renders", ...segments],
     handle: (exchange) =>
       sendFileInside({
         exchange,
         folder: join(exchange.context.projectFolder, "renders"),
         segments: exchange.parameters,
       }),
-  },
+  })),
 ];

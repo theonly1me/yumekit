@@ -1,0 +1,61 @@
+.project-bar {
+  grid-area: bar;
+  display: flex;
+  align-items: center;
+  gap: 16px 28px;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--line);
+  min-width: 0;
+}
+
+.project-bar .bar-actions {
+  margin-left: auto;
+}
+
+.step-rail {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  counter-reset: step;
+}
+
+.step-rail li + li::before {
+  content: "";
+  display: inline-block;
+  width: 18px;
+  height: 1px;
+  margin: 0 6px;
+  vertical-align: middle;
+  background: var(--line-strong);
+}
+
+button.rail-step {
+  border: 0;
+  border-radius: 0;
+  padding: 4px 2px;
+  color: var(--muted);
+  font-weight: 400;
+}
+
+button.rail-step::before {
+  counter-increment: step;
+  content: counter(step) " ";
+  color: var(--faint);
+  font-variant-numeric: tabular-nums;
+}
+
+button.rail-step[data-status="now"] {
+  color: var(--text);
+}
+
+button.rail-step[data-status="next"] {
+  color: var(--faint);
+  opacity: 1;
+}
+
+button.rail-step[aria-current="step"] {
+  color: var(--text);
+  box-shadow: inset 0 -1px 0 var(--accent);
+}

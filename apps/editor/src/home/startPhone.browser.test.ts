@@ -17,7 +17,7 @@ afterAll(async () => {
 
 const typedRequest = "A calm tea ad";
 
-describe("the start screen and the Making screen on a phone", () => {
+describe("the start screen and the project screen on a phone", () => {
   it("fit 390 pixels, and the chat shows only the words that the person typed", async () => {
     const home = await runHome({
       making: { calls: scriptAndTwoScenes, ending: "done" },
@@ -27,16 +27,17 @@ describe("the start screen and the Making screen on a phone", () => {
       browser: await sharedBrowser(),
       url: home.url,
     });
+    await page.getByRole("button", { name: "A video" }).waitFor();
     await page.getByLabel("What do you want to make?").fill(typedRequest);
     expect(await pageWidthOf(page)).toEqual(fitsTheWindow);
 
-    await page.getByRole("button", { name: "Make the video" }).click();
-    await page.getByRole("heading", { name: "Making your video" }).waitFor();
+    await page.getByRole("button", { name: "Start", exact: true }).click();
+    await page
+      .getByRole("heading", { name: "The lead reads your request" })
+      .waitFor();
     expect(await pageWidthOf(page)).toEqual(fitsTheWindow);
 
     await home.finishRequest();
-    await page.getByRole("button", { name: "Open the editor" }).first().click();
-    await page.getByRole("button", { name: "Ask for a change" }).click();
     const request = page.locator(".entry.you p").first();
     await expect.poll(() => request.innerText()).toBe(typedRequest);
     expect(await pageWidthOf(page)).toEqual(fitsTheWindow);

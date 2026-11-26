@@ -1,0 +1,13 @@
+.entry.take-ready .answer-body {
+  display: grid;
+  gap: 10px;
+  justify-items: start;
+  padding: 12px 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--raised);
+}
+
+.entry.take-ready .answer-body p {
+  color: var(--text);
+}

@@ -64,7 +64,7 @@ describe("the event connection of the editor", () => {
     };
     page.on("requestfinished", finishServerList);
     page.on("requestfailed", finishServerList);
-    await page.goto(runningEngine().url);
+    await page.goto(`${runningEngine().url}#edit`);
     await openTools(page);
     const row = page.getByRole("button", { name: /Key test server/ });
     await expect.poll(() => row.textContent()).toContain("Needs a key");

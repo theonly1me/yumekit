@@ -1,7 +1,4 @@
-import { useMemo } from "react";
-import { z } from "zod";
-import { chatRequestsOf } from "./chat/chatRequests.js";
-import { sendFixedRequest } from "./parts/fixedRequests.js";
+import { lazy, Suspense, useMemo } from "react";
 import {
   createEngineClient,
   type EngineClient,
@@ -10,12 +7,15 @@ import type { Snapshot } from "./engine/snapshot.js";
 import { useProject } from "./engine/useProject.js";
 import { StartScreen } from "./home/StartScreen.js";
 import { useServerKind } from "./home/useServerKind.js";
-import { MakingFailure, MakingScreen } from "./making/MakingScreen.js";
-import { useMakingGate } from "./making/useMakingGate.js";
-import { Editor } from "./shell/Editor.js";
+import { ProjectScreen } from "./project/ProjectScreen.js";
+import { useReadySignal } from "./project/ready/useReadySignal.js";
+import { chaptersOf } from "./project/takes/verdicts.js";
+import { useScreen } from "./project/useScreen.js";
 import { StateScreen } from "./shell/StateScreen.js";
 
-const stopSchema = z.object({ stopped: z.boolean() });
+const Editor = lazy(() =>
+  import("./shell/Editor.js").then((module) => ({ default: module.Editor })),
+);
 
 function ProjectScreens(props: {
   client: EngineClient;
@@ -24,59 +24,37 @@ function ProjectScreens(props: {
   firstRequestFailure: string | undefined;
 }) {
   const { client, snapshot } = props;
-  const gate = useMakingGate({
-    client,
-    firstRequestFailure: props.firstRequestFailure,
+  const { screen, go } = useScreen();
+  useReadySignal({
+    takes: snapshot.takes ?? [],
+    chapters: chaptersOf(snapshot.bible.storyPlan),
+    projectName: snapshot.project.name,
   });
-  switch (gate.kind) {
-    case "loading":
-      return <StateScreen state={{ kind: "loading" }} />;
-    case "failure":
-      return (
-        <MakingFailure
-          failure={gate.failure}
-          onOpenEditor={gate.onOpenEditor}
-        />
-      );
-    case "making":
-      return (
-        <MakingScreen
-          client={client}
-          snapshot={snapshot}
-          chat={gate.chat}
-          onStop={() => {
-            client
-              .readJson({
-                path: "/api/chat/stop",
-                schema: stopSchema,
-                body: {},
-              })
-              .catch(() => undefined);
-          }}
-          onOpenEditor={gate.onOpenEditor}
-          onContinue={() =>
-            sendFixedRequest({
-              ask: async (request) =>
-                (await chatRequestsOf(client).ask(request)).ok,
-              request: { kind: "continue-after-the-plan" },
-            })
-          }
-          ask={async (request) => {
-            const asked = await chatRequestsOf(client).ask(request);
-            if (asked.ok) gate.onOpenEditor();
-            return asked.ok;
-          }}
-        />
-      );
-    case "editor":
-      return (
+  if (screen === "editor") {
+    return (
+      <Suspense fallback={<StateScreen state={{ kind: "loading" }} />}>
         <Editor
           client={client}
           snapshot={snapshot}
           projectFolder={props.projectFolder}
+          onBackToProject={() => {
+            go("project");
+          }}
         />
-      );
+      </Suspense>
+    );
   }
+  return (
+    <ProjectScreen
+      client={client}
+      snapshot={snapshot}
+      projectFolder={props.projectFolder}
+      startFailure={props.firstRequestFailure}
+      onEditByHand={() => {
+        go("editor");
+      }}
+    />
+  );
 }
 
 function Connected(props: {

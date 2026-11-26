@@ -13,6 +13,7 @@ import {
   listRecentProjects,
   recordRecentProject,
 } from "./recentProjects.js";
+import { stageUpload } from "./startFiles/stageUpload.js";
 
 type HomeExchange = Exchange<HomeContext>;
 
@@ -87,4 +88,5 @@ export const homeRoutes: Route<HomeContext>[] = [
     handle: createProjectRoute,
   },
   { method: "POST", pattern: ["api", "home", "open"], handle: openRecent },
+  { method: "POST", pattern: ["api", "home", "uploads"], handle: stageUpload },
 ];

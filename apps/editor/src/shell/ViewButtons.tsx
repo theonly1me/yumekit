@@ -1,8 +1,11 @@
 import { useState } from "react";
 
-export type BarViewId = "story" | "script" | "pictures" | "cast" | "files";
+export type BarViewId =
+  "project" | "takes" | "story" | "script" | "pictures" | "cast" | "files";
 
 const barViews: { id: BarViewId; label: string }[] = [
+  { id: "project", label: "Back to the project" },
+  { id: "takes", label: "Takes" },
   { id: "story", label: "Story" },
   { id: "script", label: "Script" },
   { id: "pictures", label: "Pictures" },
@@ -10,7 +13,10 @@ const barViews: { id: BarViewId; label: string }[] = [
   { id: "files", label: "Files" },
 ];
 
-function Buttons(props: { onView: (viewId: BarViewId) => void }) {
+function Buttons(props: {
+  takesCount: number;
+  onView: (viewId: BarViewId) => void;
+}) {
   return barViews.map((view) => (
     <button
       key={view.id}
@@ -20,16 +26,22 @@ function Buttons(props: { onView: (viewId: BarViewId) => void }) {
       }}
     >
       {view.label}
+      {view.id === "takes" && props.takesCount > 0 ? (
+        <span className="takes-count"> {props.takesCount}</span>
+      ) : undefined}
     </button>
   ));
 }
 
-export function ViewButtons(props: { onView: (viewId: BarViewId) => void }) {
+export function ViewButtons(props: {
+  takesCount: number;
+  onView: (viewId: BarViewId) => void;
+}) {
   const [isOpen, setOpen] = useState(false);
   return (
     <>
       <div className="bar-views">
-        <Buttons onView={props.onView} />
+        <Buttons takesCount={props.takesCount} onView={props.onView} />
       </div>
       <div
         className="bar-menu"
@@ -55,6 +67,7 @@ export function ViewButtons(props: { onView: (viewId: BarViewId) => void }) {
             aria-label="Open a view"
           >
             <Buttons
+              takesCount={props.takesCount}
               onView={(viewId) => {
                 setOpen(false);
                 props.onView(viewId);

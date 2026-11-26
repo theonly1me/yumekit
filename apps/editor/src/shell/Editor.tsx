@@ -11,8 +11,10 @@ import { Preview } from "../preview/Preview.js";
 import { sceneEditsOf } from "../scenes/sceneEdits.js";
 import { useDirectChanges } from "../scenes/useDirectChanges.js";
 import { useHistory } from "../scenePanel/history/useHistory.js";
+import { useTakesSheet } from "../project/takes/useTakesSheet.js";
 import { useSettingsSheet } from "../settings/useSettingsSheet.js";
 import { EditorSide } from "./EditorSide.js";
+import { NoVideoShape } from "./StateScreen.js";
 import { LowerArea } from "./LowerArea.js";
 import { TopBar } from "./TopBar.js";
 import { Transport } from "./Transport.js";
@@ -25,6 +27,7 @@ export function Editor(props: {
   client: EngineClient;
   snapshot: Snapshot;
   projectFolder: string;
+  onBackToProject: () => void;
 }) {
   const { client, snapshot, projectFolder } = props;
   const framesPerSecond = snapshot.project.framesPerSecond;
@@ -69,7 +72,8 @@ export function Editor(props: {
     playback.pause();
     stepSheet.open(stepId);
   };
-  const sheets = [exporting, clipTools, settings, stepSheet, cast];
+  const takes = useTakesSheet({ client, snapshot, onOpen: playback.pause });
+  const sheets = [exporting, clipTools, settings, stepSheet, cast, takes];
   const isSheetOpen = sheets.some((sheet) => sheet.isOpen);
   const openAiSettings = () => {
     playback.pause();
@@ -85,12 +89,7 @@ export function Editor(props: {
   const edits = sceneEditsOf({ changes, onPicked: view.setPicked });
   const { output, tab } = facts;
   if (output === undefined || tab === undefined) {
-    return (
-      <main className="state">
-        <h1>This project has no video shape yet</h1>
-        <p>Ask your agent to add a platform, for example YouTube.</p>
-      </main>
-    );
+    return <NoVideoShape onBackToProject={props.onBackToProject} />;
   }
   return (
     <div className="editor">
@@ -100,6 +99,9 @@ export function Editor(props: {
           theme={theme}
           onTheme={setTheme}
           exportLabel={exporting.label}
+          takesCount={takes.waitingCount}
+          onBackToProject={props.onBackToProject}
+          onTakes={takes.openLatest}
           onStepView={openStepView}
           onCast={cast.open}
           onSettings={openAiSettings}
@@ -162,6 +164,7 @@ export function Editor(props: {
             onEditText={view.editText}
             onMakeClip={clipTools.open}
             onOpenSound={openStepView}
+            onOpenTakes={takes.openChapter}
           />
         </main>
         <EditorSide
@@ -173,6 +176,7 @@ export function Editor(props: {
           pictureGroupFor={clipTools.entryFor}
           onLength={edits.resize}
           onOpenAiSettings={openAiSettings}
+          afterHistory={takes.readyLines}
         />
         <button
           type="button"

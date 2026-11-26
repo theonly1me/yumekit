@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef } from "react";
+import { useLayoutEffect, useRef, type ReactNode } from "react";
 import { AnswerView } from "./AnswerView.js";
 import { ChangeLine } from "./ChangeLine.js";
 import { MoneyNotice } from "./money/MoneyNotice.js";
@@ -18,6 +18,8 @@ export function ChatHistory(props: {
   sceneNumberOf: (clipId: string) => number | undefined;
   onSend: (input: AskInput) => void;
   onOpenAiSettings: () => void;
+  after?: ReactNode;
+  isMoneyElsewhere?: boolean;
 }) {
   const { chat } = props;
   const list = useRef<HTMLOListElement>(null);
@@ -32,7 +34,7 @@ export function ChatHistory(props: {
     element.scrollTop = isStuck.current
       ? element.scrollHeight
       : savedScrollTop.current;
-  }, [chat.entries, liveText, chat.startFailure, props.isHidden]);
+  }, [chat.entries, liveText, chat.startFailure, props.isHidden, props.after]);
 
   const retryActions = (entryId: string): NoticeAction[] => {
     const retry = retryOf({ entries: chat.entries, noticeId: entryId });
@@ -70,6 +72,7 @@ export function ChatHistory(props: {
           <AnswerView key={entry.id} answer={entry} text={chat.textOf(entry)} />
         );
       case "change":
+        if (entry.quiet === true) return undefined;
         return (
           <ChangeLine
             key={entry.id}
@@ -83,6 +86,9 @@ export function ChatHistory(props: {
           />
         );
       case "money":
+        if (props.isMoneyElsewhere === true && entry === newestOpenMoney) {
+          return undefined;
+        }
         return (
           <MoneyNotice
             key={entry.id}
@@ -125,6 +131,7 @@ export function ChatHistory(props: {
         </li>
       ) : undefined}
       {chat.entries.map(viewOf)}
+      {props.after}
       {chat.startFailure === undefined ? undefined : (
         <StartFailureView
           failure={chat.startFailure}

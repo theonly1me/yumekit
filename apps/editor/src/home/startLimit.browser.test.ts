@@ -1,5 +1,5 @@
 import { afterAll, describe, expect, it } from "vitest";
-import { closeBrowser, openEditor } from "../testing/editorPage.js";
+import { closeBrowser, openProject } from "../testing/editorPage.js";
 import { runHome, type RunningHome } from "../testing/runHome.js";
 
 const homes: RunningHome[] = [];
@@ -13,7 +13,7 @@ describe("a long request on the start screen", () => {
   it("keeps a brief of 20,000 characters, keeps no more, and says so", async () => {
     const home = await runHome({ making: { calls: [], ending: "done" } });
     homes.push(home);
-    const { page, close } = await openEditor(home.url);
+    const { page, close } = await openProject(home.url);
     const prompt = page.getByLabel("What do you want to make?");
     const limitLine = page
       .getByRole("status")

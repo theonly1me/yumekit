@@ -3,50 +3,13 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it, onTestFinished } from "vitest";
 import { z } from "zod";
-import { init, result, whole } from "../chat/testing/claudeLines.js";
-import { startChatEngine, type FakeStep } from "../chat/testing/chatEngine.js";
+import type { FakeStep } from "../chat/testing/chatEngine.js";
 import { rawRequest, withToken } from "../testing/rawRequest.js";
-
-function picture(assetId: string) {
-  return {
-    asset_id: assetId,
-    capability: "image",
-    input: { prompt: assetId, width_pixels: 32, height_pixels: 18 },
-  };
-}
-
-const leadMakesPictures: FakeStep[] = [
-  { print: init },
-  { callTool: { name: "open_take", input: { step: "pictures" } } },
-  {
-    callTool: {
-      name: "generate_assets",
-      input: { calls: [picture("harbor"), picture("ferry")] },
-    },
-  },
-  {
-    callTool: {
-      name: "ready_take",
-      input: {
-        items: [
-          { id: "harbor", note: "The harbor wall in fog." },
-          { id: "ferry", note: "The ferry at the dock." },
-        ],
-      },
-    },
-  },
-  { print: whole("Take 1 is ready for you.") },
-  { print: result("completed") },
-];
-
-function leadReads(extra: FakeStep[]): FakeStep[] {
-  return [
-    { print: init },
-    ...extra,
-    { print: whole("I read your notes.") },
-    { print: result("completed") },
-  ];
-}
+import {
+  lastRequestOf,
+  leadReads,
+  startWithReadyTake,
+} from "../testing/readyTake.js";
 
 function clipCall(saveResultTo: string): FakeStep {
   return {
@@ -68,22 +31,6 @@ async function kindOf(file: string): Promise<unknown> {
     .object({ data: z.object({ kind: z.string().optional() }) })
     .parse(JSON.parse(await readFile(file, "utf8")));
   return saved.data.kind;
-}
-
-async function startWithReadyTake(afterReady: FakeStep[] = []) {
-  const steps = [
-    ...leadMakesPictures.slice(0, -2),
-    ...afterReady,
-    ...leadMakesPictures.slice(-2),
-  ];
-  const chat = await startChatEngine({ steps });
-  await chat.ask({ text: "Make the pictures of the harbor." });
-  await chat.waitUntilIdle();
-  return chat;
-}
-
-function lastRequestOf(runs: string[][]): string {
-  return runs.at(-1)?.at(-1) ?? "";
 }
 
 const takesSchema = z.object({
@@ -122,7 +69,7 @@ describe("the take routes", { timeout: 120_000 }, () => {
     expect(entries).toContainEqual(
       expect.objectContaining({
         kind: "request",
-        text: "Take 1: 1 note for the lead.",
+        text: "Take 1 of the pictures: 1 note for the lead.",
       }),
     );
     const listed = await rawRequest({

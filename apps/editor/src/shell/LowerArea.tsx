@@ -44,6 +44,7 @@ export function LowerArea(props: {
   onEditText: () => void;
   onMakeClip: (clip: SceneClip) => void;
   onOpenSound: (part: SoundPartName) => void;
+  onOpenTakes: (chapterId: string) => void;
 }) {
   const { client, snapshot, output, mainClips, changes, edits } = props;
   const { editorChat } = props;
@@ -105,6 +106,7 @@ export function LowerArea(props: {
         pickedChapterId={pickedChapterId}
         onPickChapter={setPickedChapterId}
         onDropSceneInChapter={dropSceneInChapter}
+        onOpenTakes={props.onOpenTakes}
         onDropItem={({ assetId, clip }) => {
           const item = trayItemsOf(snapshot).find(
             (each) => each.assetId === assetId,

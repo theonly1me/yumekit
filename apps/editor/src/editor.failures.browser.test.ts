@@ -32,7 +32,7 @@ describe("the editor failure states", () => {
           .count(),
       )
       .toBe(1);
-    expect(editor.page.url()).toBe(`${runningEngine().origin}/`);
+    expect(editor.page.url()).toBe(`${runningEngine().origin}/#edit`);
     await editor.close();
   });
 

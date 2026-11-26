@@ -27,6 +27,7 @@ export function ScenesRow(props: {
   onPickCard: (clip: SceneClip) => void;
   onEditText: () => void;
   onMakeClip: (clip: SceneClip) => void;
+  onOpenTakes: (chapterId: string) => void;
 }) {
   const { snapshot, film, picked, changes, edits, editorChat } = props;
   const sceneFailure = changes.failureOf("scenes");
@@ -48,6 +49,7 @@ export function ScenesRow(props: {
           edits={props.chapterEdits}
           onPick={props.onPickChapter}
           onDropScene={props.onDropSceneInChapter}
+          onOpenTakes={props.onOpenTakes}
         />
       ) : undefined}
       {film.cards.length === 0 ? (

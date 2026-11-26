@@ -1,10 +1,10 @@
-import { readFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { afterAll, describe, expect, it } from "vitest";
 import { z } from "zod";
-import { closeBrowser, openEditor } from "../testing/editorPage.js";
-import { scriptAndTwoScenes } from "../testing/makingCalls.js";
+import { closeBrowser, openProject } from "../testing/editorPage.js";
 import { runHome, type RunningHome } from "../testing/runHome.js";
+import { startTemplates } from "./templates.js";
 
 const homes: RunningHome[] = [];
 
@@ -19,142 +19,105 @@ async function startHome(making: Parameters<typeof runHome>[0]["making"]) {
   return home;
 }
 
+const requestSchema = z.object({
+  details: z.string(),
+  files: z.array(z.object({ assetId: z.string(), name: z.string() })),
+});
+
+const chatSchema = z.object({
+  entries: z.array(z.looseObject({ kind: z.string() })),
+});
+
+async function fileOf(options: {
+  folder: string;
+  name: string;
+}): Promise<unknown> {
+  const text = await readFile(join(options.folder, options.name), "utf8");
+  const parsed: unknown = JSON.parse(text);
+  return parsed;
+}
+
 describe("the start screen", () => {
-  it("starts with No format, YouTube, TikTok, and 30 seconds, and keeps the button off while the prompt is empty", async () => {
+  it("starts for YouTube with the length open, puts a guide in the box from a template, and keeps Start off while the box is empty", async () => {
     const home = await startHome({ calls: [], ending: "done" });
-    const { page, close } = await openEditor(home.url);
-    const button = page.getByRole("button", { name: "Make the video" });
+    const { page, close } = await openProject(home.url);
+    const start = page.getByRole("button", { name: "Start", exact: true });
+    const box = page.getByLabel("What do you want to make?");
 
-    await expect
-      .poll(() => page.getByText("What do you want to make?").count())
-      .toBe(1);
-    const pressed = await page
-      .locator('[aria-pressed="true"]:not(.look-choice)')
-      .allTextContents();
-
-    expect(pressed).toEqual([
-      "No format",
-      "YouTube16:9, 1920 x 1080",
-      "TikTok9:16, 1080 x 1920",
-      "GraphicsEach scene is drawn by code. It is exact, and it costs nothing.",
-      "30 seconds",
-    ]);
+    await page.getByRole("button", { name: "A trailer" }).waitFor();
+    expect(await start.isDisabled()).toBe(true);
     expect(
       await page
-        .getByRole("switch", { name: "Show me the plan first" })
-        .isChecked(),
-    ).toBe(false);
-    expect(await button.isDisabled()).toBe(true);
-    await expect
-      .poll(() =>
-        page
-          .getByText("The AI is Claude Code on this computer. No key needed.")
-          .count(),
-      )
-      .toBe(1);
-    await page.getByLabel("What do you want to make?").fill("Tea");
-    expect(await button.isDisabled()).toBe(false);
-    await close();
-  });
+        .getByText("For YouTube. The lead asks about the length.")
+        .count(),
+    ).toBe(1);
+    await page.getByRole("button", { name: "A movie" }).click();
 
-  it("makes the project with the choices, opens the editor of the new project, and lists it as recent", async () => {
-    const home = await startHome({
-      calls: scriptAndTwoScenes,
-      ending: "done",
-    });
-    const { page, close } = await openEditor(home.url);
-    await page
-      .getByLabel("What do you want to make?")
-      .fill("Two scenes about tea.");
+    expect(await box.inputValue()).toBe(startTemplates[1]?.guide);
+    expect(
+      await box.evaluate((element) =>
+        element instanceof HTMLTextAreaElement ? element.selectionStart : -1,
+      ),
+    ).toBe("A movie, about 8 minutes.\nThe story: ".length);
+    expect(await start.isDisabled()).toBe(false);
+    await page.getByRole("button", { name: "Change" }).click();
     await page.getByRole("button", { name: /^TikTok/ }).click();
-    await page.getByRole("button", { name: /^Instagram post/ }).click();
-    await page.getByRole("button", { name: "15 seconds" }).click();
-    await page.getByRole("button", { name: "Make the video" }).click();
+    await page.getByRole("button", { name: "30 seconds" }).click();
+    expect(
+      await page.getByText("For YouTube and TikTok. About 30 seconds.").count(),
+    ).toBe(1);
+    await close();
+  });
 
-    await expect
-      .poll(() =>
-        page.getByRole("heading", { name: "Making your video" }).count(),
-      )
-      .toBe(1);
-    const project = z
-      .object({ outputs: z.array(z.object({ id: z.string() })) })
-      .parse(
-        JSON.parse(
-          await readFile(
-            join(home.projectsFolder, "two-scenes-about-tea", "project.json"),
-            "utf8",
-          ),
-        ),
-      );
+  it("sends the form of the template and the files of the box, and opens the project screen", async () => {
+    const home = await startHome({ calls: [], ending: "done" });
+    const { page, close } = await openProject(home.url);
+    const picture = join(home.root, "bell.svg");
+    await writeFile(
+      picture,
+      '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="18"/>',
+    );
+    await page.getByRole("button", { name: "A trailer" }).click();
+    await page.keyboard.type("a bell for the island");
+    await page.locator(".prompt-box input[type=file]").setInputFiles(picture);
+    await page.getByRole("button", { name: "Start", exact: true }).click();
+
+    await page
+      .getByRole("heading", { name: "The lead reads your request" })
+      .waitFor();
+    const folder = join(home.projectsFolder, "a-bell-for-the-island");
+    const chat = chatSchema.parse(
+      await fileOf({ folder, name: ".yumekit/chat/chat.json" }),
+    );
+    const request = requestSchema.parse(
+      chat.entries.find((entry) => entry.kind === "request"),
+    );
+    expect(request.details).toContain("Form: trailer.");
+    expect(request.files).toEqual([{ assetId: "bell", name: "bell.svg" }]);
+    expect(await fileOf({ folder, name: "project.json" })).toMatchObject({
+      name: "A bell for the island",
+      videoStyle: "ai-video",
+    });
     expect(new URL(page.url()).port).not.toBe(new URL(home.url).port);
-    expect(new URL(page.url()).search).toBe("");
-    expect(project.outputs.map((output) => output.id)).toEqual([
-      "wide",
-      "portrait",
-    ]);
     await home.finishRequest();
-    await page.getByRole("heading", { name: "Your video is ready" }).waitFor();
-    await page.getByRole("button", { name: "Open the editor" }).first().click();
-    await expect
-      .poll(() => page.getByRole("button", { name: "Export" }).count())
-      .toBe(1);
-
-    const again = await openEditor(home.url);
-    await again.page
-      .getByRole("button", { name: /^Two scenes about tea/ })
-      .click();
-    await expect
-      .poll(() => again.page.getByRole("button", { name: "Export" }).count())
-      .toBe(1);
-    expect(again.page.url()).toBe(page.url());
-    await again.close();
     await close();
   });
 
-  it("makes an AI video project, and shows the limit of AI video before the project exists", async () => {
+  it("opens the project screen and says what to do when no AI program is on the computer", async () => {
     const home = await startHome("no-agent");
-    const { page, close } = await openEditor(home.url);
-    const limitLine =
-      "yumekit makes at most 60 seconds of AI video for this project. You can change this in Settings.";
-    await page.getByLabel("What do you want to make?").fill("Waves");
-    expect(await page.getByText(limitLine).count()).toBe(0);
-
-    await page.getByRole("button", { name: /^AI video/ }).click();
-    await expect.poll(() => page.getByText(limitLine).count()).toBe(1);
-    await page.getByRole("button", { name: "Make the video" }).click();
-
-    await expect
-      .poll(() =>
-        readFile(join(home.projectsFolder, "waves", "project.json"), "utf8")
-          .then((text) =>
-            z.object({ videoStyle: z.string() }).parse(JSON.parse(text)),
-          )
-          .then(
-            (project) => project.videoStyle,
-            () => undefined,
-          ),
-      )
-      .toBe("ai-video");
-    await close();
-  });
-
-  it("opens the project and says what to do when no AI program is on the computer", async () => {
-    const home = await startHome("no-agent");
-    const { page, close } = await openEditor(home.url);
+    const { page, close } = await openProject(home.url);
     await page.getByLabel("What do you want to make?").fill("Tea");
-    await page.getByRole("button", { name: "Make the video" }).click();
+    await page.getByRole("button", { name: "Start", exact: true }).click();
 
+    await page
+      .getByRole("heading", { name: "No AI is on this computer" })
+      .waitFor();
+    expect(new URL(page.url()).search).toBe("");
+    await page.getByRole("button", { name: "Edit by hand" }).click();
     await expect
       .poll(() =>
-        page
-          .getByRole("heading", { name: "No AI is on this computer" })
-          .count(),
+        page.getByRole("button", { name: "Back to the project" }).count(),
       )
-      .toBe(1);
-    expect(new URL(page.url()).search).toBe("");
-    await page.getByRole("button", { name: "Open the editor" }).click();
-    await expect
-      .poll(() => page.getByRole("button", { name: "Export" }).count())
       .toBe(1);
     await close();
   });

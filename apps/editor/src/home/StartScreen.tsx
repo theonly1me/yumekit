@@ -1,41 +1,57 @@
-import { useState } from "react";
-import type { EngineClient } from "../engine/engineClient.js";
-import { projectLengths } from "./homeApi.js";
-import { PlatformChoices } from "./PlatformChoices.js";
-import { RecentProjects } from "./RecentProjects.js";
+import { useEffect, useRef, useState } from "react";
 import {
-  agentLineOf,
-  lengthLabelOf,
+  AddFilesButton,
+  DropHint,
+  FileChips,
+  useDropZone,
+} from "../chat/files/index.js";
+import type { EngineClient } from "../engine/engineClient.js";
+import { RecentProjects } from "./RecentProjects.js";
+import { StartPlaces } from "./StartPlaces.js";
+import {
+  agentProblemOf,
   longestRequestCharacters,
   requestLimitLineOf,
 } from "./startTexts.js";
+import {
+  firstGapOf,
+  howToLine,
+  isGuideText,
+  startTemplates,
+  type StartTemplate,
+} from "./templates.js";
 import { useStartChoices } from "./useStartChoices.js";
-import { VideoStyleChoices } from "../videoStyle/VideoStyleChoices.js";
-import { aiVideoLimitLineOf, usesAiVideo } from "../videoStyle/videoStyles.js";
-import { LookChoices } from "../looks/LookChoices.js";
-import { PlanFirstSwitch } from "./startFormats/PlanFirstSwitch.js";
-import { StartFormatChoices } from "./startFormats/StartFormatChoices.js";
-
-const examplePrompt =
-  "A 30 second video that explains my app to new users. Friendly, with a voice and music.";
-
-function actionLineOf(options: {
-  start: ReturnType<typeof useStartChoices>;
-}): string {
-  const { start } = options;
-  if (start.busy === "making") {
-    return "yumekit makes the project folder and starts the AI.";
-  }
-  if (start.platformIds.length === 0) return "Pick at least one place first.";
-  return start.home === undefined ? "" : agentLineOf(start.home.agents);
-}
+import "./startBox.css";
 
 export function StartScreen(props: { client: EngineClient }) {
   const start = useStartChoices(props.client);
-  const [isChangeShown, setChangeShown] = useState(false);
-  const isEmpty = start.request.trim() === "";
+  const drop = useDropZone(start.files.add);
+  const box = useRef<HTMLTextAreaElement>(null);
+  const [caret, setCaret] = useState<{ at: number }>();
   const canMake =
-    !isEmpty && start.platformIds.length > 0 && start.busy === "idle";
+    start.request.trim() !== "" &&
+    start.platformIds.length > 0 &&
+    start.busy === "idle" &&
+    !start.files.isAdding;
+  const agentProblem =
+    start.home === undefined ? undefined : agentProblemOf(start.home.agents);
+  const limitLine = requestLimitLineOf(start.request.length);
+
+  useEffect(() => {
+    if (caret === undefined) return;
+    box.current?.focus();
+    box.current?.setSelectionRange(caret.at, caret.at);
+  }, [caret]);
+
+  const choose = (template: StartTemplate) => {
+    const isSame = start.form === template.id;
+    start.setForm(isSame ? undefined : template.id);
+    if (!isGuideText(start.request)) return;
+    const guide = isSame ? "" : template.guide;
+    start.setRequest(guide);
+    setCaret({ at: firstGapOf(guide) });
+  };
+
   return (
     <main className="start">
       <div className="start-body">
@@ -50,122 +66,86 @@ export function StartScreen(props: { client: EngineClient }) {
           <label className="start-question" htmlFor="start-prompt">
             What do you want to make?
           </label>
-          <textarea
-            id="start-prompt"
-            rows={3}
-            maxLength={longestRequestCharacters}
-            placeholder={examplePrompt}
-            value={start.request}
-            onChange={(event) => {
-              start.setRequest(event.target.value);
-            }}
-          />
-          {requestLimitLineOf(start.request.length) === undefined ? null : (
+          <div className="template-chips" role="group" aria-label="Start from">
+            {startTemplates.map((template) => (
+              <button
+                key={template.id}
+                type="button"
+                className="template-chip"
+                aria-pressed={start.form === template.id}
+                onClick={() => {
+                  choose(template);
+                }}
+              >
+                {template.name}
+              </button>
+            ))}
+          </div>
+          <div
+            className="prompt-box"
+            data-dragging={drop.isDragging}
+            {...drop.zoneProps}
+          >
+            <textarea
+              id="start-prompt"
+              ref={box}
+              rows={start.form === undefined ? 4 : 7}
+              maxLength={longestRequestCharacters}
+              placeholder="Describe it. A rough story is enough."
+              value={start.request}
+              onChange={(event) => {
+                start.setRequest(event.target.value);
+              }}
+            />
+            <FileChips
+              files={start.files.items}
+              onRemove={start.files.remove}
+            />
+            <div className="prompt-foot">
+              <AddFilesButton onFiles={start.files.add} />
+              <button
+                type="submit"
+                className="primary"
+                disabled={!canMake}
+                aria-busy={start.busy === "making"}
+              >
+                {start.busy === "making" ? "Making the project" : "Start"}
+              </button>
+            </div>
+            <DropHint isShown={drop.isDragging} />
+          </div>
+          {limitLine === undefined ? undefined : (
             <p className="fact" role="status">
-              {requestLimitLineOf(start.request.length)}
+              {limitLine}
             </p>
           )}
-          <div className="start-group">
-            <h2>What kind of video?</h2>
-            <StartFormatChoices
-              chosen={start.formatId}
-              onChoose={start.setFormatId}
-            />
-          </div>
-          <div className="start-group">
-            <h2>Where will it go?</h2>
-            <p className="fact">
-              Pick one or more. You get one video for each, in its own shape.
+          <p className="how-to">{howToLine}</p>
+          <StartPlaces
+            platformIds={start.platformIds}
+            length={start.length}
+            onToggle={start.togglePlatform}
+            onLength={start.setLength}
+          />
+          {agentProblem === undefined ? undefined : (
+            <p className="fact change-failure" role="alert">
+              {agentProblem}
             </p>
-            <PlatformChoices
-              chosen={start.platformIds}
-              onToggle={start.togglePlatform}
-            />
-          </div>
-          <div className="start-group">
-            <h2>How the video is made</h2>
-            <VideoStyleChoices
-              chosen={start.videoStyle}
-              onChoose={start.setVideoStyle}
-            />
-            {usesAiVideo(start.videoStyle) ? (
-              <p className="fact">
-                {aiVideoLimitLineOf(
-                  start.home?.generated_video_limit_seconds ?? null,
-                )}
-              </p>
-            ) : undefined}
-          </div>
-          <div className="start-group">
-            <h2>How long?</h2>
-            <div className="segments" role="group" aria-label="Length">
-              {projectLengths.map((length) => (
-                <button
-                  type="button"
-                  key={length}
-                  aria-pressed={start.length === length}
-                  onClick={() => {
-                    start.setLength(length);
-                  }}
-                >
-                  {lengthLabelOf(length)}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="start-group">
-            <h2>Look</h2>
-            <LookChoices chosen={start.look} onChoose={start.setLook} />
-          </div>
-          <div className="start-go">
-            <button
-              type="submit"
-              className="primary large"
-              disabled={!canMake}
-              aria-busy={start.busy === "making"}
-            >
-              {start.busy === "making"
-                ? "Making the project"
-                : "Make the video"}
-            </button>
-            <PlanFirstSwitch
-              isOn={start.planFirst}
-              onChange={start.setPlanFirst}
-            />
-          </div>
-          <div className="start-action">
-            <p className="fact">
-              {actionLineOf({ start })}{" "}
-              {start.busy === "making" ? undefined : (
-                <button
-                  type="button"
-                  className="link"
-                  aria-expanded={isChangeShown}
-                  onClick={() => {
-                    setChangeShown(!isChangeShown);
-                  }}
-                >
-                  Change
-                </button>
-              )}
+          )}
+          {start.makeFailure === undefined ? undefined : (
+            <p className="fact change-failure" role="alert">
+              {start.makeFailure}
             </p>
-            {isChangeShown ? (
+          )}
+          {start.busy === "making" ? (
+            <div className="start-action">
               <p className="fact">
-                You can pick another AI in Settings of the editor, after the
-                project opens.
+                yumekit makes the project folder and starts the lead.
               </p>
-            ) : undefined}
-            {start.makeFailure === undefined ? undefined : (
-              <p className="fact change-failure" role="alert">
-                {start.makeFailure}
-              </p>
-            )}
-            {start.busy === "making" ? (
               <div className="progress small" aria-hidden="true">
                 <i />
               </div>
-            ) : undefined}
-          </div>
+            </div>
+          ) : undefined}
         </form>
         {start.loadFailure === undefined ? undefined : (
           <p className="fact change-failure" role="alert">

@@ -13,7 +13,6 @@ import "./styles/tracks.css";
 import "./styles/side.css";
 import "./styles/states.css";
 import "./home/start.css";
-import "./making/making.css";
 
 const rootElement = document.getElementById("root");
 

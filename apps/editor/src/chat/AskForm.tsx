@@ -84,7 +84,7 @@ export function AskForm(props: {
         placeholder={
           props.isRunning
             ? "Tell the AI something while it works"
-            : "Ask for a change, or drop files here"
+            : "Ask the lead, or drop files here"
         }
         value={box.draft}
         onChange={(event) => {

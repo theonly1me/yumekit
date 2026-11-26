@@ -1,6 +1,8 @@
 import { randomBytes } from "node:crypto";
+import { mkdtemp, rm } from "node:fs/promises";
 import { createServer, type Server } from "node:http";
-import { resolve } from "node:path";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
 import type { ServerCommand } from "../agents/agentTypes.js";
 import { findAgentPrograms } from "../chat/agentChoice.js";
 import { engineUrlOf } from "../engineFile/findRunningEngine.js";
@@ -50,6 +52,10 @@ export async function startHomeServer(options: {
     programs: await findAgentPrograms(),
     engines,
     creating: { queue: Promise.resolve() },
+    startFiles: {
+      folder: await mkdtemp(join(tmpdir(), "yumekit-start-files-")),
+      staged: new Map(),
+    },
   };
   server.on(
     "request",
@@ -69,6 +75,7 @@ export async function startHomeServer(options: {
   const close = async () => {
     await engines.closeAll();
     await closeServer(server);
+    await rm(context.startFiles.folder, { recursive: true, force: true });
   };
   return {
     ok: true,

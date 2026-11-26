@@ -5,6 +5,8 @@ import type { ChangeAuthor, ChangeEntry } from "./chatTypes.js";
 import type { StoreCommit, ToolCaller } from "./trackedStore.js";
 
 export const aiChangingSummary = "The AI is changing the project.";
+
+const takeTools = new Set(["open_take", "ready_take"]);
 export const agentChangeSummary = "An agent changed the project.";
 
 export interface ChangeLedger {
@@ -20,7 +22,7 @@ function summaryOf(caller: ToolCaller | undefined): string {
 }
 
 export function createChangeLedger(log: ChatLog): ChangeLedger {
-  let request: { changeId: string | undefined } | undefined;
+  let request: { changeId: string | undefined; isQuiet: boolean } | undefined;
   const changeIdsByAct = new Map<string, string>();
   const changeOf = (changeId: string) =>
     log
@@ -51,6 +53,11 @@ export function createChangeLedger(log: ChatLog): ChangeLedger {
       if (request.changeId === undefined) {
         request.changeId = newChange({ by: "ai", summary: aiChangingSummary });
       } else addStep({ changeId: request.changeId });
+      if (takeTools.has(caller.tool)) request.isQuiet = true;
+      const change = changeOf(request.changeId);
+      if (request.isQuiet && change !== undefined && change.quiet !== true) {
+        log.put({ ...change, quiet: true });
+      }
       return;
     }
     if (caller?.changeId !== undefined) {
@@ -105,7 +112,7 @@ export function createChangeLedger(log: ChatLog): ChangeLedger {
       }
     },
     beginRequest: () => {
-      request = { changeId: undefined };
+      request = { changeId: undefined, isQuiet: false };
     },
     endRequest: (summary) => {
       const changeId = request?.changeId;

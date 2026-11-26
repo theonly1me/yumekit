@@ -1,0 +1,28 @@
+.film {
+  display: grid;
+  gap: 14px;
+  max-width: 980px;
+}
+
+.film-title {
+  font-size: var(--step-1);
+  font-weight: 500;
+}
+
+.film .lead-note,
+.film .check-line {
+  font-size: var(--step--1);
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.film .lead-note span,
+.film .check-line span {
+  display: block;
+  font-size: var(--step--2);
+  color: var(--faint);
+}
+
+.film .check-line span {
+  color: var(--accent);
+}

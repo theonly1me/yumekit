@@ -19,7 +19,17 @@ export function takeFirstRequestFailure(): string | undefined {
   return kind;
 }
 
+const fileFailure: StartFailure = {
+  title: "A file did not reach the project",
+  lines: [
+    "The lead did not start, so nothing was spent. Add the file again in the chat, with your request.",
+  ],
+};
+
 export function startFailureOf(kind: string): StartFailure {
+  if (kind === "start-file-not-found" || kind.startsWith("upload-")) {
+    return fileFailure;
+  }
   switch (kind) {
     case "no-agent":
       return {

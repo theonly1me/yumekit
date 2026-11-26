@@ -6,7 +6,12 @@ export function TopBar(props: {
   theme: Theme;
   onTheme: (theme: Theme) => void;
   exportLabel: string;
-  onStepView: (stepId: Exclude<BarViewId, "cast">) => void;
+  takesCount: number;
+  onBackToProject: () => void;
+  onTakes: () => void;
+  onStepView: (
+    stepId: Exclude<BarViewId, "cast" | "project" | "takes">,
+  ) => void;
   onCast: () => void;
   onSettings: () => void;
   onExport: () => void;
@@ -29,8 +34,11 @@ export function TopBar(props: {
           Use the {otherTheme} theme
         </button>
         <ViewButtons
+          takesCount={props.takesCount}
           onView={(viewId) => {
-            if (viewId === "cast") props.onCast();
+            if (viewId === "project") props.onBackToProject();
+            else if (viewId === "takes") props.onTakes();
+            else if (viewId === "cast") props.onCast();
             else props.onStepView(viewId);
           }}
         />

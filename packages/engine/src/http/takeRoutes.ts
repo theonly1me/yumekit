@@ -5,9 +5,15 @@ import { isAgentCall } from "./chatRoutes.js";
 import { anySegment, type Exchange, type Route } from "./exchange.js";
 import { readJsonBody } from "./readJsonBody.js";
 import { sendJson, type Failure } from "./responses.js";
+import {
+  fewerRequestOf,
+  sendNextSchema,
+  sendSummaryOf,
+} from "./takeSendTexts.js";
 
 const sendBodySchema = z.strictObject({
   notes: z.array(takeNoteInput).max(500).default([]),
+  next: sendNextSchema,
 });
 
 function listTakes(exchange: Exchange): Promise<undefined> {
@@ -22,20 +28,6 @@ function listTakes(exchange: Exchange): Promise<undefined> {
     },
   });
   return Promise.resolve(undefined);
-}
-
-function summaryOf(options: {
-  exchange: Exchange;
-  takeId: string;
-  notes: number;
-}): string {
-  const take = options.exchange.context.store
-    .read()
-    .takes.find((candidate) => candidate.id === options.takeId);
-  const name = take === undefined ? "a take" : `take ${String(take.number)}`;
-  return options.notes === 0
-    ? `You approved ${name}.`
-    : `You sent ${name} with ${String(options.notes)} ${options.notes === 1 ? "note" : "notes"}.`;
 }
 
 async function sendTake(exchange: Exchange): Promise<Failure | undefined> {
@@ -53,12 +45,18 @@ async function sendTake(exchange: Exchange): Promise<Failure | undefined> {
   if (!body.ok) return body.failure;
   const { context } = exchange;
   const [takeId = ""] = exchange.parameters;
-  const { notes } = body.value;
+  const { notes, next } = body.value;
+  const { storyPlan } = context.store.read().bible;
   const sent = await context.chat.runToolCall({
     caller: {
       by: "person",
       tool: "send_take",
-      summary: summaryOf({ exchange, takeId, notes: notes.length }),
+      summary: sendSummaryOf({
+        take: context.store.read().takes.find((take) => take.id === takeId),
+        storyPlan,
+        notes: notes.length,
+        next,
+      }),
     },
     call: () => context.harness.sendTake({ takeId, notes }),
   });
@@ -66,9 +64,28 @@ async function sendTake(exchange: Exchange): Promise<Failure | undefined> {
     const { kind, message } = sent.failure;
     return { status: kind === "take-not-found" ? 404 : 409, kind, message };
   }
+  if (next === "stop") {
+    sendJson({
+      response: exchange.response,
+      status: 202,
+      body: { take: sent.value.take, entry: null },
+    });
+    return undefined;
+  }
+  const fewer =
+    next === "fewer"
+      ? await fewerRequestOf({
+          take: sent.value.take,
+          storyPlan,
+          mediaTools: context.mediaTools,
+        })
+      : undefined;
   const started = await context.chat.startRequest({
-    text: sent.value.text,
-    details: sent.value.details,
+    text: fewer?.text ?? sent.value.text,
+    details:
+      fewer === undefined
+        ? sent.value.details
+        : `${sent.value.details}\n${fewer.line}`,
     aboutClipId: undefined,
   });
   if (!started.ok) {

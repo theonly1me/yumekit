@@ -1,6 +1,5 @@
-import { useState } from "react";
-import { dollarsText } from "../../settings/dollarsText.js";
 import type { MoneyChoice, MoneyEntry } from "../chatSchemas.js";
+import { MoneyButtons, moneyLineOf } from "./MoneyButtons.js";
 import "./moneyNotice.css";
 
 function answerText(entry: MoneyEntry): string {
@@ -23,9 +22,7 @@ export function MoneyNotice(props: {
   onChoose: (choice: MoneyChoice) => Promise<string | undefined>;
 }) {
   const { entry } = props;
-  const [isSending, setSending] = useState(false);
-  const [failure, setFailure] = useState<string>();
-  const line = `The ${entry.what} cost about ${dollarsText(entry.estimateUsd)} and ${dollarsText(entry.leftUsd)} is left.`;
+  const line = moneyLineOf(entry);
   if (entry.choice !== null || !props.isNewestOpen) {
     return (
       <li className="entry notice money-notice" data-open="false">
@@ -35,54 +32,14 @@ export function MoneyNotice(props: {
       </li>
     );
   }
-  const choose = (choice: MoneyChoice) => {
-    setSending(true);
-    setFailure(undefined);
-    props
-      .onChoose(choice)
-      .then(setFailure, () => {
-        setFailure("yumekit could not send the choice. Try again.");
-      })
-      .finally(() => {
-        setSending(false);
-      });
-  };
   return (
     <li className="entry notice money-notice" data-open="true" role="alert">
       <p>{line} Nothing is spent until you pick.</p>
-      <div className="notice-actions">
-        <button
-          type="button"
-          className="primary"
-          disabled={isSending}
-          onClick={() => {
-            choose("raise");
-          }}
-        >
-          Raise this project to ${String(entry.raiseToUsd)}
-        </button>
-        {entry.callsThatFit === 0 ? undefined : (
-          <button
-            type="button"
-            disabled={isSending}
-            onClick={() => {
-              choose("fewer");
-            }}
-          >
-            Make fewer {entry.what} ({String(entry.callsThatFit)})
-          </button>
-        )}
-        <button
-          type="button"
-          disabled={isSending}
-          onClick={() => {
-            choose("stop");
-          }}
-        >
-          Stop here
-        </button>
-      </div>
-      {failure === undefined ? undefined : <p className="failure">{failure}</p>}
+      <MoneyButtons
+        entry={entry}
+        className="notice-actions"
+        onChoose={props.onChoose}
+      />
     </li>
   );
 }

@@ -16,7 +16,12 @@ import type { Outcome } from "../engineTypes.js";
 import type { Exchange } from "../http/exchange.js";
 import { readJsonBody } from "../http/readJsonBody.js";
 import { sendJson, type Failure } from "../http/responses.js";
-import { firstRequestOf, sendFirstRequest } from "./firstRequest.js";
+import {
+  firstRequestOf,
+  sendFirstRequest,
+  startForms,
+} from "./firstRequest.js";
+import { addStartFiles, startFileSchema } from "./startFiles/addStartFiles.js";
 import type { HomeContext } from "./homeContext.js";
 import { projectLengthSchema } from "./homeTypes.js";
 import { outputsForPlatforms } from "./projectOutputs.js";
@@ -38,6 +43,8 @@ const createBodySchema = z.strictObject({
   look: z.enum(lookIds).default("midnight"),
   format_id: z.enum(startFormatIds).default("free"),
   plan_first: z.boolean().default(false),
+  form: z.enum(startForms).optional(),
+  files: z.array(startFileSchema).max(20).default([]),
 });
 
 function notCreated(message: string): Failure {
@@ -109,16 +116,25 @@ export async function createProjectRoute(exchange: Exchange<HomeContext>) {
   await recordRecentProject({ folder, length });
   const engine = await exchange.context.engines.engineFor(folder);
   if (!engine.ok) return { status: 409, ...engine.failure };
-  const started = await sendFirstRequest({
+  const files = await addStartFiles({
     engine: engine.value,
-    request: firstRequestOf({
-      request,
-      platformIds,
-      length,
-      formatId,
-      planFirst,
-    }),
+    startFiles: exchange.context.startFiles,
+    files: body.value.files,
   });
+  const started = files.ok
+    ? await sendFirstRequest({
+        engine: engine.value,
+        request: firstRequestOf({
+          request,
+          platformIds,
+          length,
+          formatId,
+          planFirst,
+          form: body.value.form,
+          files: files.value,
+        }),
+      })
+    : files;
   const url = started.ok
     ? engine.value.url
     : `${engine.value.url}&first-request=${encodeURIComponent(started.failure.kind)}`;

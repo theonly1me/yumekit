@@ -49,7 +49,9 @@ describe("the person sends a take", { timeout: 60_000 }, () => {
       ],
     });
 
-    expect(sent.ok && sent.value.text).toBe("Take 1: 3 notes for the lead.");
+    expect(sent.ok && sent.value.text).toBe(
+      "Take 1 of the pictures: 3 notes for the lead.",
+    );
     expect(sent.ok && sent.value.details.split("\n")).toEqual([
       'The person sent take 1 ("take-1", the pictures of chapter "film") with 3 notes:',
       '1. The picture "harbor": "Make the wall taller." Pin at 25% from the left and 50% from the top.',
@@ -73,7 +75,9 @@ describe("the person sends a take", { timeout: 60_000 }, () => {
         ["ferry", true],
       ]),
     );
-    expect(sent.ok && sent.value.text).toBe("Take 1: all good. Go on.");
+    expect(sent.ok && sent.value.text).toBe(
+      "Take 1 of the pictures: all good. Go on.",
+    );
     expect(sent.ok && sent.value.details).toContain(
       'Go on to the next step now: open a take of clips for chapter "film"',
     );

@@ -1,7 +1,8 @@
 import { z } from "zod";
-import type { StartFormatId } from "@yumekit/project/start-formats";
+import type { FileUpload, SentFileInput } from "../chat/files/index.js";
 import type { EngineClient } from "../engine/engineClient.js";
 import type { VideoStyleId } from "../videoStyle/videoStyles.js";
+import type { StartForm } from "./templates.js";
 
 const lengthSchema = z.union([
   z.literal(15),
@@ -52,9 +53,8 @@ export function makeProject(options: {
   platformIds: string[];
   length: ProjectLength;
   videoStyle: VideoStyleId;
-  look: string;
-  formatId: StartFormatId;
-  planFirst: boolean;
+  form: StartForm | undefined;
+  files: SentFileInput[];
 }) {
   return options.client.readJson({
     path: "/api/home/projects",
@@ -64,11 +64,26 @@ export function makeProject(options: {
       platform_ids: options.platformIds,
       length: options.length,
       video_style: options.videoStyle,
-      look: options.look,
-      format_id: options.formatId,
-      plan_first: options.planFirst,
+      ...(options.form === undefined ? {} : { form: options.form }),
+      files: options.files.map((file) => ({
+        upload_id: file.assetId,
+        name: file.name,
+      })),
     },
   });
+}
+
+const stagedSchema = z.object({ upload: z.object({ id: z.string() }) });
+
+export function stagedUploadOf(client: EngineClient): FileUpload {
+  return async ({ file }) => {
+    const staged = await client.readJson({
+      path: `/api/home/uploads?${new URLSearchParams({ name: file.name }).toString()}`,
+      schema: stagedSchema,
+      file,
+    });
+    return staged.ok ? { ok: true, value: staged.value.upload.id } : staged;
+  };
 }
 
 export function openRecent(options: { client: EngineClient; folder: string }) {

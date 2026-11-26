@@ -1,6 +1,7 @@
 import {
   chaptersOf,
   takeStepNames,
+  takeTitleOf,
   type ProjectSnapshot,
   type Take,
 } from "@yumekit/project";
@@ -61,9 +62,13 @@ export function sentRequestOf(options: {
   const { snapshot, take } = options;
   const approved = approvedIdsOf(take);
   const name = takeNameOf(take);
+  const title = takeTitleOf({
+    take,
+    chapters: chaptersOf(snapshot.bible.storyPlan),
+  });
   if (take.notes.length === 0) {
     return {
-      text: `Take ${String(take.number)}: all good. Go on.`,
+      text: `${title}: all good. Go on.`,
       details: [
         `The person sent ${name} with no notes, so each item is approved: ${quoted(approved)}.`,
         nextStepOf(options),
@@ -73,7 +78,7 @@ export function sentRequestOf(options: {
   }
   const notes = countOf({ count: take.notes.length, word: "note" });
   return {
-    text: `Take ${String(take.number)}: ${notes} for the lead.`,
+    text: `${title}: ${notes} for the lead.`,
     details: [
       `The person sent ${name} with ${notes}:`,
       ...take.notes.map(
