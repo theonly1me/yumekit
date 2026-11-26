@@ -65,6 +65,7 @@ function initialState(
       tracks: [],
     })),
     assets: [],
+    takes: [],
     words: {},
   };
   const ruleFailure = checkRules(state);

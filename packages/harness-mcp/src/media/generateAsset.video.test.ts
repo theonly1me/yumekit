@@ -6,7 +6,7 @@ import { generateVideo } from "../testing/videoFixture.js";
 
 describe("generate_asset with the capability video", () => {
   it("passes the path of first_frame_asset_id as first_frame_path", async () => {
-    const harness = await startHarness();
+    const harness = await startHarness({ approvePicturesFirst: false });
     await harness.call({
       name: "generate_asset",
       arguments: {
@@ -35,7 +35,7 @@ describe("generate_asset with the capability video", () => {
   });
 
   it("records hasAudio from the file and the length in project frames", async () => {
-    const harness = await startHarness();
+    const harness = await startHarness({ approvePicturesFirst: false });
 
     const withSound = await generateVideo({
       harness,
@@ -65,7 +65,7 @@ describe("generate_asset with the capability video", () => {
   });
 
   it("shows has_audio for a video asset in list_assets", async () => {
-    const harness = await startHarness();
+    const harness = await startHarness({ approvePicturesFirst: false });
     await generateVideo({ harness, assetId: "loud", seconds: 1 });
 
     const listed = await harness.call({
@@ -79,7 +79,7 @@ describe("generate_asset with the capability video", () => {
   });
 
   it("keeps hasAudio when a repeated request reuses the file under a new id", async () => {
-    const harness = await startHarness();
+    const harness = await startHarness({ approvePicturesFirst: false });
     await generateVideo({ harness, assetId: "loud", seconds: 1 });
     const requestsBefore = harness.runRequests.length;
 

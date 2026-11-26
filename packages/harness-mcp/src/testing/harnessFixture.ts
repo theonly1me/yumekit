@@ -65,6 +65,8 @@ export interface Harness {
   }) => Promise<ToolCall>;
 }
 
+export type ToolCaller = Pick<Harness, "call">;
+
 export async function startHarness(
   options?: HarnessProjectOptions & { critic?: CriticScript | "none" },
 ): Promise<Harness> {

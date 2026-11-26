@@ -2,6 +2,7 @@ import type { Asset, WordTimings } from "./asset.js";
 import type { Bible } from "./bible.js";
 import type { Project } from "./project.js";
 import type { Scene } from "./scene.js";
+import type { Take } from "./takes.js";
 import type { Timeline } from "./timeline.js";
 
 export interface ProjectSnapshot {
@@ -14,6 +15,7 @@ export interface ProjectSnapshot {
   sharedCode: Record<string, string>;
   timelines: Timeline[];
   assets: Asset[];
+  takes: Take[];
 }
 
 export type ProjectState = Omit<ProjectSnapshot, "revision"> & {

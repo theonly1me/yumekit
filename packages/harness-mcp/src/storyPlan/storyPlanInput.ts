@@ -7,6 +7,7 @@ import {
   type Strike,
 } from "@yumekit/project";
 import { z } from "zod";
+import { chaptersInput, chaptersOfInput } from "./chapterInput.js";
 import {
   shotInput,
   type ShotInput,
@@ -40,6 +41,7 @@ export const setStoryPlanInput = {
     .max(musicIntensityRange.maximum)
     .optional()
     .describe("How strong the music is under the end card, 1 to 5."),
+  chapters: chaptersInput,
 };
 
 export type SetStoryPlanInput = z.infer<z.ZodObject<typeof setStoryPlanInput>>;
@@ -121,6 +123,11 @@ export function storyPlanOf(options: {
   earlier: StoryPlan | undefined;
 }): StoryPlan {
   const { input, earlier } = options;
+  const chapters = chaptersOfInput({
+    input: input.chapters,
+    earlier,
+    shotIds: input.shots.map((shot) => shot.shot_id),
+  });
   return {
     ...(input.form === undefined ? {} : { form: input.form }),
     logline: input.logline,
@@ -149,5 +156,6 @@ export function storyPlanOf(options: {
     ...(earlier?.planNotes === undefined
       ? {}
       : { planNotes: earlier.planNotes }),
+    ...(chapters === undefined ? {} : { chapters }),
   };
 }

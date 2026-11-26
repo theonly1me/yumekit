@@ -8,6 +8,8 @@ import {
   type HarnessProjectOptions,
 } from "./harnessProject.js";
 
+const closeMilliseconds = 30_000;
+
 export interface FunctionHarness {
   harness: Harness;
   store: ProjectStore;
@@ -35,6 +37,6 @@ export async function startFunctionHarness(
     }),
   });
   holder.harness = harness;
-  onTestFinished(() => harness.close());
+  onTestFinished(() => harness.close(), closeMilliseconds);
   return { harness, store };
 }

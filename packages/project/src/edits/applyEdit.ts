@@ -1,5 +1,6 @@
 import type { ProjectState } from "../format/state.js";
 import { setAssetMarks } from "./assetMarks.js";
+import { setApprovePicturesFirst, setChapters } from "./chapters.js";
 import { addAsset, removeAsset, setAssetWords } from "./assets.js";
 import { addClip, removeClip, updateClip } from "./clips.js";
 import type { Edit } from "./edit.js";
@@ -18,6 +19,8 @@ import {
   setVideoStyle,
 } from "./story.js";
 import { copyTimeline, setTimeline } from "./timelines.js";
+import { fillTake, openTake, readyTake } from "./takes/roundTakes.js";
+import { sendTake } from "./takes/sendTake.js";
 
 export async function applyEdit(options: {
   state: ProjectState;
@@ -74,5 +77,17 @@ export async function applyEdit(options: {
       return removeClip({ state, edit });
     case "copyTimeline":
       return copyTimeline({ state, edit });
+    case "setChapters":
+      return setChapters({ state, edit });
+    case "setApprovePicturesFirst":
+      return setApprovePicturesFirst({ state, edit });
+    case "openTake":
+      return openTake({ state, edit });
+    case "fillTake":
+      return fillTake({ state, edit });
+    case "readyTake":
+      return readyTake({ state, edit });
+    case "sendTake":
+      return sendTake({ state, edit });
   }
 }

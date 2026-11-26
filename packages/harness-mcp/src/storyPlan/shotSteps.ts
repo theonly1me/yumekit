@@ -7,6 +7,7 @@ import {
 } from "./continuity.js";
 import { isOpen, shortestCleanSeconds, shotNeedsDesign } from "./designGate.js";
 import { sheetLacksOf } from "./sheets.js";
+import { waitsForPerson } from "../takes/pictureApproval.js";
 import { sourceTextOf } from "./tryRules.js";
 
 export const batchSteps = [
@@ -87,7 +88,14 @@ export function shotStepOf(options: {
   if (needsDesign && startCheck === undefined) {
     return { kind: "check-start", shotId, assetId: start.id };
   }
-  return startCheck !== undefined && !isOpen(startCheck)
-    ? { kind: "start", shotId }
+  if (startCheck !== undefined && !isOpen(startCheck)) {
+    return { kind: "start", shotId };
+  }
+  return waitsForPerson({ snapshot, assetId: start.id })
+    ? {
+        kind: "waits",
+        shotId,
+        reason: `the person to approve its start picture "${start.id}" in a take`,
+      }
     : { kind: "clip", shotId, assetId: start.id };
 }

@@ -66,6 +66,8 @@ function createHarnessServer(options: {
 
 `set_video_style` follows the section "The video style" of document 15. `get_project` gives `graphics` for a project with no value. The descriptions of both tools say what each style means, and tell the agent to change the style only when the person asks.
 
+`set_story_plan` also takes `chapters` (document 21, T6). `set_approve_pictures_first` takes `approve_pictures_first` and makes the edit `setApprovePicturesFirst` (document 21, T10). Its description tells the agent to change it only when the person asks.
+
 `set_checks` follows document 20, C60. `get_project` and `get_work` give `draft` for a project with no value. The person picks it in Settings, and the description tells the agent to change it only when the person asks.
 
 `add_platform` and `remove_platform` follow the section "Platforms" of document 13. Each call is one `applyEdits` call, so it is one undo step. `add_output` is for a custom size. The descriptions of `add_output` and `add_platform` tell an agent this.
@@ -157,6 +159,15 @@ For a video, `generate_asset` reads `hasAudio` with `probeMedia`. It uses the si
 
 `import_asset` reads the kind, the size, and the length of the file with `probeMedia` from `@yumekit/render`. So it accepts image, audio, video, and font files. If a speech tool returns word timings, the harness stores them in the same edit. If two calls have the same capability, server, and input, the second call reuses the file of the first and does not call the tool.
 
+### Takes
+
+| Tool         | Input                                                                                                   | Edit        |
+| ------------ | ------------------------------------------------------------------------------------------------------- | ----------- |
+| `open_take`  | `step`, `chapter_id?`                                                                                   | `openTake`  |
+| `ready_take` | `items` (`id`, `note`, `what_to_check?`, `replaces_asset_id?`), `leave_out?`, `next_step_estimate_usd?` | `readyTake` |
+
+A take is one round of the lead's work for one chapter and one step (document 21, T7). While a take is open, `generate_asset` and `generate_assets` add each asset that they make to it with a `fillTake` edit in the same change, except a voice. The person sends a take through the engine (`POST /api/takes/<take id>/send`), not through a tool, so the lead cannot approve its own work.
+
 ### Helpers
 
 | Tool         | Input                               | Result                                                                                               |
@@ -178,7 +189,7 @@ For a video, `generate_asset` reads `hasAudio` with `probeMedia`. It uses the si
 | `check_music`    | `asset_id`                                                                              | The fit of a music track to the music map of the plan, its best start, and warnings, stored in the plan (document 20, C19)                                                                        |
 | `check_design`   | `asset_id` and `shot_id`, or `assets`; `cast_id?`, `region?`, `seconds?`, `design?`     | The design check run by the lead: the list, the crops next to the turnaround, and one stored check for each picture or clip of a batch (document 20, C54 and C62)                                 |
 
-The critic is a turn of the agent program of the person, started by the engine with a critic token. It has five tools that no other session sees: `view_for_review` (the frames and pictures of the open review, and closer looks), `give_clip_review`, `give_sheet_review`, `give_plan_review`, and `give_start_review`. The engine lists them only to the critic and refuses them to each other caller with `critic-only`. The critic may call nothing else (`critic-not-permitted`). A standalone `yumekit mcp` with no engine has no critic: the reviews fail with `no-critic`, and the five critic tools are not listed. The harness of the engine has 79 tools, and the lead sees 74 (`ask_person` of WP81 is new). The critic tools find their review by the review job of the call: the engine passes the job of the critic token, and a direct MCP client sends it as `_meta["yumekit/review-job"]`. `record_lesson` (document 20, C28) is with `set_story_plan`.
+The critic is a turn of the agent program of the person, started by the engine with a critic token. It has five tools that no other session sees: `view_for_review` (the frames and pictures of the open review, and closer looks), `give_clip_review`, `give_sheet_review`, `give_plan_review`, and `give_start_review`. The engine lists them only to the critic and refuses them to each other caller with `critic-only`. The critic may call nothing else (`critic-not-permitted`). A standalone `yumekit mcp` with no engine has no critic: the reviews fail with `no-critic`, and the five critic tools are not listed. The harness of the engine has 82 tools, and the lead sees 77 (`ask_person` of WP81 and `open_take`, `ready_take`, and `set_approve_pictures_first` of WP80 are new). The critic tools find their review by the review job of the call: the engine passes the job of the critic token, and a direct MCP client sends it as `_meta["yumekit/review-job"]`. `record_lesson` (document 20, C28) is with `set_story_plan`.
 
 ### See the result
 
@@ -205,6 +216,8 @@ The default scale is 0.25. An agent uses these tools after each scene and before
 An output with platforms renders once to `renders/<project name>-<platform id>.mp4` for its first platform in catalog order. Each other platform gets a hard link to that file, or a copy when the link fails. Each entry of `files` has `file` and `platform_id`. `file` is the first file. An output with no platform writes `renders/<output id>.mp4`, and its one entry has no `platform_id`.
 
 The project name in a file name is in lower case. Each run of characters that are not a letter or a digit becomes one hyphen. The name has at most 64 characters, with no hyphen at the start or the end. An empty result becomes `video`.
+
+`render_video` with `chapter_id` renders only the time of that chapter to `renders/chapters/<chapter id>-<output id>.mp4`, the cut of the chapter, and adds it to an open take of the cut of that chapter (document 21).
 
 `render_video` sends MCP progress notifications while it works. In milestone 1 it returns when the file is complete.
 

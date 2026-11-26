@@ -5,6 +5,7 @@ import {
 } from "../format/asset.js";
 import { sceneSchema, type Scene } from "../format/scene.js";
 import type { ProjectState } from "../format/state.js";
+import { takesFile, takesFileSchema, type Take } from "../format/takes.js";
 import { timelineSchema, type Timeline } from "../format/timeline.js";
 import { fail, succeed, type Outcome } from "../outcome.js";
 import { sceneCodeFile, timelineFile } from "../rules/ruleFailure.js";
@@ -109,4 +110,16 @@ export async function readWords(options: {
     words[assetId] = timings.value;
   }
   return succeed(words);
+}
+
+export async function readTakes(
+  source: FileSource,
+): Promise<Outcome<Take[], InvalidFile>> {
+  if ((await source.read(takesFile)) === undefined) return succeed([]);
+  const file = await readJsonFile({
+    source,
+    file: takesFile,
+    schema: takesFileSchema,
+  });
+  return file.ok ? succeed(file.value.takes) : file;
 }

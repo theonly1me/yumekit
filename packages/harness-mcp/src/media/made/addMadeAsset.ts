@@ -18,6 +18,7 @@ import {
 import type { GenerateAssetInput } from "../generateAssetInput.js";
 import { generatedMediaOf } from "../generatedFile.js";
 import { summaryOf } from "../reuseAsset.js";
+import { joinTakeEdits } from "../../takes/joinTake.js";
 import { wordsOfResult } from "../spreadWords.js";
 import { costTextOf, sourceCostOf, wireCostOf } from "./costFields.js";
 import { fitToAskedLength, lengthNoteOf } from "./fitAudio.js";
@@ -134,7 +135,7 @@ export async function addMadeAsset(options: {
     words === undefined ? "" : `, with ${String(words.length)} word timings`;
   return applyEditsResult({
     store: context.store,
-    edits: [edit],
+    edits: [edit, ...joinTakeEdits({ assetId: request.asset_id, tool })],
     line: [
       `Asset "${request.asset_id}" made by ${server}${lengthText}${wordsText}.`,
       costTextOf(run),

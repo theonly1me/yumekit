@@ -1,6 +1,7 @@
 export type { Outcome } from "./outcome.js";
 export type { JsonObject } from "./format/values.js";
 export {
+  approvePicturesFirstOf,
   checkModeOf,
   checkModes,
   videoStyleOf,
@@ -99,6 +100,7 @@ export {
   type ShotSize,
   type StoryPlan,
 } from "./format/storyPlan.js";
+export * from "./takes/index.js";
 export {
   reviewVerdicts,
   sheetVerdicts,

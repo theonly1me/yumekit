@@ -47,6 +47,7 @@ export interface HarnessProjectOptions {
   mediaToolsFile?: object;
   beforeConnect?: () => Promise<unknown>;
   withLocalVoice?: boolean;
+  approvePicturesFirst?: boolean;
 }
 
 export interface HarnessProject {
@@ -75,6 +76,11 @@ export async function startHarnessProject(
   });
   if (!created.ok) throw new Error(created.failure.message);
   const store = created.value;
+  if (options?.approvePicturesFirst === false) {
+    await store.applyEdits([
+      { kind: "setApprovePicturesFirst", approvePicturesFirst: false },
+    ]);
+  }
   if (options?.mediaToolsFile !== undefined) {
     await writeFile(
       join(store.folder, "media-tools.json"),

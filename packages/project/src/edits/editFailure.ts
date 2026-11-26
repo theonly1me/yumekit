@@ -1,5 +1,6 @@
 import type { ProjectState } from "../format/state.js";
 import type { Outcome } from "../outcome.js";
+import type { ChapterFailureKind } from "../rules/ruleFailure.js";
 
 export type EditFailureKind =
   | "id-in-use"
@@ -7,7 +8,8 @@ export type EditFailureKind =
   | "still-referenced"
   | "clips-overlap"
   | "invalid-value"
-  | "would-remove-the-work-of-the-person";
+  | "would-remove-the-work-of-the-person"
+  | ChapterFailureKind;
 
 export interface EditFailure {
   kind: EditFailureKind;

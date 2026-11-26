@@ -36,6 +36,7 @@ export const projectSchema = z.strictObject({
   outputs: z.array(outputSchema),
   videoStyle: videoStyleSchema.exactOptional(),
   checks: checkModeSchema.exactOptional(),
+  approvePicturesFirst: z.boolean().exactOptional(),
   look: lookSchema.exactOptional(),
   calm: z.boolean().exactOptional(),
   tempo: z.number().min(lowestTempo).max(highestTempo).exactOptional(),
@@ -56,4 +57,8 @@ export function videoStyleOf(project: Project): VideoStyle {
 
 export function checkModeOf(project: Project): CheckMode {
   return project.checks ?? "draft";
+}
+
+export function approvePicturesFirstOf(project: Project): boolean {
+  return project.approvePicturesFirst ?? true;
 }

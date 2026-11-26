@@ -1,4 +1,9 @@
-import { startHarness, type Harness, type ToolCall } from "./harnessFixture.js";
+import {
+  startHarness,
+  type Harness,
+  type ToolCall,
+  type ToolCaller,
+} from "./harnessFixture.js";
 import type { CriticScript } from "./criticFixture.js";
 
 export interface EntryDraft {
@@ -73,8 +78,9 @@ export function shotOf(draft: ShotDraft) {
 }
 
 export function setPlan(options: {
-  harness: Harness;
+  harness: ToolCaller;
   shots: ShotDraft[];
+  chapters?: object[];
 }): Promise<ToolCall> {
   return options.harness.call({
     name: "set_story_plan",
@@ -84,21 +90,24 @@ export function setPlan(options: {
       obstacle: "The steel cracks when it cools",
       change: "She learns to fold the steel",
       shots: options.shots.map(shotOf),
+      ...(options.chapters === undefined ? {} : { chapters: options.chapters }),
     },
   });
 }
 
-export async function passPlan(harness: Harness): Promise<ToolCall> {
+export async function passPlan(harness: ToolCaller): Promise<ToolCall> {
   return harness.call({ name: "review_plan" });
 }
 
 export async function startStoryHarness(options?: {
   videoStyle?: "graphics" | "ai-video" | "mix";
   critic?: CriticScript | "none";
+  approvePicturesFirst?: boolean;
 }): Promise<Harness> {
-  const harness = await startHarness(
-    options?.critic === undefined ? undefined : { critic: options.critic },
-  );
+  const harness = await startHarness({
+    approvePicturesFirst: options?.approvePicturesFirst ?? false,
+    ...(options?.critic === undefined ? {} : { critic: options.critic }),
+  });
   if (options?.videoStyle !== undefined) {
     await harness.call({
       name: "set_video_style",
@@ -109,7 +118,7 @@ export async function startStoryHarness(options?: {
 }
 
 export async function makeSheet(options: {
-  harness: Harness;
+  harness: ToolCaller;
   castId: string;
   kind: "person" | "place" | "prop";
   facts: string[];
@@ -143,7 +152,7 @@ export async function makeSheet(options: {
   }
 }
 
-export async function makeForgeSheets(harness: Harness): Promise<void> {
+export async function makeForgeSheets(harness: ToolCaller): Promise<void> {
   await makeSheet({
     harness,
     castId: "forge",
@@ -159,7 +168,7 @@ export async function makeForgeSheets(harness: Harness): Promise<void> {
 }
 
 export function shotCall(options: {
-  harness: Harness;
+  harness: ToolCaller;
   assetId: string;
   capability: "image" | "video";
   shotId?: string;

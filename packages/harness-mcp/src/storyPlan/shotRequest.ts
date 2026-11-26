@@ -10,6 +10,7 @@ import { briefFaultFailureOf } from "./briefFaultGate.js";
 import { continuityFailureOf } from "./continuity.js";
 import { keyPictureFailureOf } from "./designGate.js";
 import { firstFrameFailureOf } from "./firstFrameRule.js";
+import { pictureApprovalFailureOf } from "../takes/pictureApproval.js";
 import { withPlannedPrompt } from "./promptPlan.js";
 import { withSheetRequest } from "./sheetRequest.js";
 import { sheetFailureOf } from "./sheets.js";
@@ -121,8 +122,10 @@ export function withStory(options: {
   const { snapshot, request } = options;
   const plan = snapshot.bible.storyPlan;
   const shotId = request.shot_id;
-  const onlyFrame = firstFrameFailureOf(request);
-  if (onlyFrame !== undefined) return failed(onlyFrame);
+  const frameRefusal =
+    firstFrameFailureOf(request) ??
+    pictureApprovalFailureOf({ snapshot, request });
+  if (frameRefusal !== undefined) return failed(frameRefusal);
   if (shotId === undefined && needsShot(options)) {
     if (plan === undefined) return failed(planMissing());
     return failed({
