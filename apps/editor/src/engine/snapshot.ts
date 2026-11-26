@@ -1,3 +1,4 @@
+import { takeSchema } from "@yumekit/project/takes";
 import { z } from "zod";
 import { castEntrySchema } from "../cast/castEntries.js";
 import { storyPlanSchema } from "../parts/story/storyPlanSchema.js";
@@ -131,6 +132,7 @@ export const snapshotSchema = z.object({
   sceneCode: z.record(z.string(), z.string()),
   timelines: z.array(timelineSchema),
   assets: z.array(assetSchema),
+  takes: z.array(takeSchema).optional(),
 });
 
 export type Snapshot = z.infer<typeof snapshotSchema>;

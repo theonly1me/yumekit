@@ -308,3 +308,67 @@ These facts and choices came from the build of WP82 on 2026-11-26.
 24. AI footage is the hard case, so the rule follows it. A look at frames of the footage showed little loss at 700 kbps at 1080p, soft hair and wood grain at 500, and smeared detail at 350. At 720p, 500 kbps looked like 1080p at 700.
 25. The rule: a picture looks sharp when the video has at least 700 × (short side / 1080)^1.5 kbps. That is 700 at 1080, 381 at 720, and 207 at 480. Under that, Export says "This video looks soft under 10 MB." and offers "Make it 720p", or 480p when 720p is not enough. When 480p is not enough either, it says "This video is too long to look good under 10 MB. Pick a larger size." Under 100 kbps of video, it says "A file under 10 MB cannot hold this video. Pick at least N MB.", and Export is off.
 26. The expected size of "Best quality" is an upper bound, "Up to about N MB": the rate of the footage sample, 6.5 Mbps at 1080p and 30 frames a second, scaled by the pixels in a second. Drawn scenes make a much smaller file.
+
+## Details of WP84
+
+These choices came from the build of "Edit by hand" on 2026-11-26.
+
+### The change of the chapters
+
+1. The harness gets the tool `set_chapters`. It takes every chapter in film order, each with `chapter_id`, `title`, and `shot_ids`. The lead sees it too, because the person and the lead use the same commands.
+2. When the shots keep the order of the plan, the call is one `setChapters` edit. A move of a chapter, or of a scene into a chapter that is not next to it, also changes the order of the film, and the store keeps the chapters in the order of the shots. So the same call first puts the shots of the plan in the new order (`setBible`), then sends `setChapters`, then `setTimeline` for each output whose scenes row changes. It is still one undo step.
+3. The scenes row follows in runs. A run is the clip of a shot and the clips with no shot after it. The clips before the first clip of a shot stay first. The runs take the new order of their shots, and the clips play end to end from the first start frame, as with `move_scene_clip`.
+4. The sound of a video moves with its scene clip, to the start of the clip and no longer than the clip, when the video has one scene clip and one sound clip on the row.
+5. The editor builds the order of each chapter from the plan, with the shots that have a scene in the order of the scenes row. So a move of a chapter keeps an earlier change of the order inside a chapter.
+6. The chat names each change of the person: "You renamed chapter 1 to "The fog bank".", "You moved the line between chapter 1 and chapter 2.", "You split chapter 2.", "You joined chapter 2 and chapter 3.", "You moved the chapter "The island".", and "You moved a scene to another chapter."
+
+### Chapters in Edit by hand
+
+7. A film with more than one chapter shows the chapter row above the scene cards. Each block has the number and the title, the length and the count of scenes ("0:12, 3 scenes"), or "Not made yet, 3 shots" for a chapter with no scene, and the step.
+8. The step of a chapter comes from its newest take. A take that the person sent with no note means the next step. An approved cut is "Done". A chapter with no take is at "Story".
+9. A click on a block picks the chapter and shows "Rename", "Split at" the picked scene, and "Join with chapter N". A split needs a picked scene of the chapter with a shot that is not its first scene. The new chapter is "From" and the title of the scene, with the id `chapter-<n>`. "Open its takes" of the prototype waits for the take view of WP83.
+10. The scene cards sit in one group for each chapter, with the title above, and a line between two groups. A chapter with no scene shows "Not made yet" and takes a dropped scene.
+11. A scene dropped on a scene of another chapter goes before that scene. A scene dropped on a chapter block goes to the end of that chapter. A drop inside the same chapter works as before with `move_scene_clip`. A chapter dropped on another chapter takes its place. The line dropped on a scene makes that scene the first scene of the next chapter. A chapter that loses its last shot goes.
+12. A scene with no shot, for example a title card, stays with the scene before it, as the section "Chapters" says. Its move is a `move_scene_clip` call, and its chapter follows its place. A drop of such a scene into a chapter with no scene says: "This scene has no shot of the story, so it stays with the scene before it."
+
+### The keys
+
+13. Alt with Left or Right moves a picked chapter block by one place. Alt with Left or Right moves a picked scene by one place. At a line, the first press takes the scene across the line, so only the chapters change, and the next press moves it inside its new chapter.
+14. The line between two chapters is a separator in the cards and a slider in the detailed timeline. Left and Right move it by one scene.
+15. In the detailed timeline, Alt with Left or Right moves a scene clip by one place and the music by one second. Left and Right on the right edge of a scene or of the music change its length by one second.
+
+### The detailed timeline
+
+16. The rows are "From Takes", the ruler, "Chapters" (only with more than one chapter), and then each track as before. The scenes row and each music track change by drag. The voice, the captions, the sound of the videos, and the sounds stay as they were.
+17. A scene clip moves when the person drags its name onto another scene, with the rules of the cards. Its right edge changes its length in whole seconds with `resize_scene_clip`, to one second at least.
+18. The music moves and its right edge trims it in whole seconds with `update_clip`. It never starts before frame 0, never plays past the end of its file, and never ends after the last scene, unless it already did.
+19. The chapter row of the timeline has a block from the first to the last scene of each chapter. A block dropped on another block takes its place. The edge between two blocks moves to the nearest start of a scene, and a thin line shows the place while the person drags.
+20. While a drag or a key waits for the engine, the lane shows the new place. So two quick key presses add up.
+
+### The tray
+
+21. "From Takes" shows each picture and clip that the newest sent take approves, in the order of the takes. The person drags one onto a scene card or a scene clip. With the keyboard, the person picks a scene and presses the tile. With no picked scene, the line says: "Pick a scene first, then press the picture or the clip again."
+22. A clip goes in with `place_video` and `replace_clip_id`. A picture goes in with the new tool `place_picture`: an `image-pan` scene `picture-<asset id>` with the start, the length, and the transition of the replaced clip. Both calls give `remove_person_work`, because the person makes the change. Only the shown shape changes, as `place_video` works on one output.
+23. `place_picture` refuses a picture that the person dropped or asked to change in a take (`picture-not-approved`), and applies the design check of document 20 to a picture of a shot (`design-not-checked`, `design-break-in-range`).
+24. A clip of a shot goes only onto a scene of the chapter of its shot, so each chapter stays in one piece: "This clip belongs to chapter 1, "The harbor". Drop it on a scene of that chapter." A picture has no shot on the row, so it goes onto any scene.
+25. A refusal shows in plain words under the timeline or the cards, for example for `design-break-in-range`: "A person in it stops looking as designed, so it cannot fill this scene. Make the scene shorter, or ask the lead to make it again."
+
+### Hint lines
+
+26. "Edit by hand" lost the line "Pick a scene to change it. Drag a scene to move it." and the line under the preview ("Click the text in the video to change it", the platform, and the size). The scene actions show only for a picked scene. The empty states stay.
+27. `@yumekit/project/takes` also exports `takeSchema` and `chapterSchema`, so the editor reads the takes and the chapters of the snapshot.
+
+### Quick changes
+
+28. While a change of the chapters or of the order of the scenes waits for the engine, a further drop or key on the scenes and the chapters does nothing. So a quick second press never acts on the old order. The press after the new order shows works again.
+
+### The run
+
+The editor of the branch ran a film of three chapters, with nine shots made by the free sample server, the fake agent, and no key in the environment. The person approved the pictures and the clips of chapter 1 in three takes. Then, in "Edit by hand":
+
+1. A scene of chapter 1 dropped on a scene of chapter 2 moved into chapter 2 before it. The chat said "You moved a scene to another chapter."
+2. Chapter 3 dropped on chapter 1 went to the front, and its three scenes moved with it: "You moved the chapter "Snow on Hollin"." Two presses of Cmd+Z brought back the first order.
+3. The line between chapter 1 and chapter 2 dropped on the third scene made that scene the first scene of chapter 2, and no scene moved.
+4. "Split at" the fifth scene, "Rename", and "Join with chapter 3" each made one change with its own chat line.
+5. A drag of the right edge of scene 1 showed "6 seconds" in the clip while it moved, and made the scene 6 seconds long. The clips after it moved with it.
+6. The approved clip "bell-alt-clip" from the tray took the place of the scene of the bell. A clip of chapter 1 dropped on a scene of chapter 2 showed the refusal in plain words, and nothing changed.

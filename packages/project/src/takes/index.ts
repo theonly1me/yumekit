@@ -5,6 +5,7 @@ export {
   storyItemId,
   takeStates,
   takeSteps,
+  takeSchema,
   takeTextLimit,
   type Take,
   type TakeItem,
@@ -12,7 +13,7 @@ export {
   type TakeState,
   type TakeStep,
 } from "../format/takes.js";
-export type { Chapter } from "../format/storyPlan.js";
+export { chapterSchema, type Chapter } from "../format/storyPlan.js";
 export {
   chapterIdOfShot,
   chaptersOf,

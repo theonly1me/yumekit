@@ -109,12 +109,12 @@ The prototype is the reference for each screen. This list gives the behavior beh
 #### The editor
 
 1. A picked card shows its actions: "Edit text", the length with minus and plus, "Make a real video clip", "Duplicate", and "Delete". Minus and plus change the length by one second, with a minimum of one second.
-2. A card moves by drag, and also by the keys Left and Right with Alt on a picked card. Each move calls `move_scene_clip`.
+2. A card moves by drag, and also by the keys Left and Right with Alt on a picked card. Each move calls `move_scene_clip`. In a film with chapters, a move of a scene into another chapter calls `set_chapters` (document 21, "Details of WP84").
 3. The "+" between two cards opens one line: "Describe the new scene". The editor sends it to the chat as a request that names the two neighbor scenes.
 4. "Edit text" opens the Scene tab and puts the cursor in the first text field.
 5. A click on a text in the preview changes it in place (work package WP33). Before WP33, the click opens the Scene tab, as "Edit text" does.
 6. A sound row shows when its track exists. The voice row is the track with the voice clips. The captions row is the caption track. The music row is each other audio track, except `video-sound` and each `sounds` track. Each `sounds` track has the row "Sounds" (document 16, "Details of WP47"). The switch calls `set_track_off`. "Change" puts a start of a request in the prompt box, for example "Change the voice to ", and moves the cursor there.
-7. The detailed timeline is the read-only view of document 11. Drag and trim come later.
+7. The detailed timeline is the view of document 11. Since WP84, the person changes it by drag (document 21, T16).
 8. The Export button replaces Render. A platform row maps to its output. The sheet renders each needed output once.
 9. A change by the person shows in the chat as one line, for example "You changed the text of scene 4.", with "Undo".
 
@@ -132,7 +132,7 @@ WP29 made these choices where this document and the prototype give no rule.
 2. The prototype has the theme switch only in its review bar. The editor keeps it as a quiet text button in the top bar, before Settings. At the width of a phone, the button is not shown, and the theme stays as it is.
 3. The prototype has no control to remove a platform. The open list of "Add a platform" shows a quiet button "Remove <platform>" for each platform that the project has. It calls `remove_platform`. When the output has no other platform and the project has another output, the tool removes the output with its timeline. `Cmd+Z` brings it back.
 4. The platform tabs use the roles `tablist` and `tab`. A tab of an output with no platform shows the label of the output and its shape, such as "16:9". When a part of the shape is more than 32, the tab shows the size.
-5. The line under the preview gives the platform and the size only. The words "Click the text in the video to change it" come with WP33, because a click in the preview does nothing before then.
+5. The line under the preview gives the platform and the size only. The words "Click the text in the video to change it" come with WP33, because a click in the preview does nothing before then. WP84 removed the line, as the prototype has none (document 21, "Details of WP84").
 6. A click on a card picks it and moves the playhead to its start, as in the prototype. It does not open the Scene tab. A second click on the picked card removes the pick. The pick stays while the playhead moves, so item 5 of "Details of the editor" in document 11 applies only to the card that the playhead shows. The Scene tab is off when no scene is picked.
 7. A card shows the still of document 11 in a 16:9 box, with the full still in it. So a card has one size for each shape.
 8. A sound row shows the `text` or the `prompt` of the first clip of its track. The captions row shows "Word by word", because the caption scene shows one word at a time. A second music track gets the row "Music 2". The switch shows the stored state, so it changes when the new snapshot arrives.
@@ -279,7 +279,6 @@ WP26, WP27, and WP28 start together.
 
 ## Not in this version
 
-- Drag and trim in the detailed timeline.
 - A picker for the voice, the music, and the caption style. "Change" writes a request in this version.
 - An approval step for the script before the first pictures.
 - Safe areas for each platform, and publishing to a platform.

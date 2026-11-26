@@ -20,6 +20,15 @@ const plainFailures: Record<string, string> = {
   "not-found": "This platform is not in the project now.",
   "id-in-use":
     "Another shape of this project has the same name and another size. Ask your agent to remove that shape first.",
+  "clips-overlap":
+    "Another part of the video already plays there. Move it to a free place.",
+  "design-not-checked":
+    "Nobody has checked yet that the people in it look as designed, so it cannot go in the film. Ask the lead to check it.",
+  "design-break-in-range":
+    "A person in it stops looking as designed, so it cannot fill this scene. Make the scene shorter, or ask the lead to make it again.",
+  "picture-not-approved":
+    "You asked for a change to this picture in a take, so it stays out of the film.",
+  "no-story-plan": "This video has no story plan, so it has no chapters.",
 };
 
 export async function changeProject(options: {

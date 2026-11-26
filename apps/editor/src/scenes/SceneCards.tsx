@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
+import type { ChapterEdits } from "../chapters/chapterEdits.js";
+import { ChapterGroup, ChapterLine } from "../chapters/ChapterGroups.js";
+import type { ChapterCard, FilmChapters } from "../chapters/filmChapters.js";
 import { newSceneRequest } from "../chat/requestTexts.js";
-import type { Asset, Output, Scene, SceneClip } from "../engine/snapshot.js";
-import { sceneNameById } from "../names/index.js";
-import { secondsText } from "../timeline/clock.js";
+import type { SceneClip } from "../engine/snapshot.js";
 import {
   choiceOf,
   type TransitionChoice,
@@ -10,43 +11,36 @@ import {
 import { TransitionForm } from "../transitions/TransitionForm.js";
 import { TransitionMark } from "../transitions/TransitionMark.js";
 import { AddSceneForm } from "./AddSceneForm.js";
-import { SceneCard, type CardFacts } from "./SceneCard.js";
-import { stillKey } from "./useSceneStills.js";
+import { cardDropOf, cardFactsOf, type CardContext } from "./cardFacts.js";
+import type { DragKind } from "./dragData.js";
+import { SceneCard } from "./SceneCard.js";
 import { useScrollEdges } from "./useScrollEdges.js";
 import "./scenes.css";
 
-const videoComponent = "video-clip";
-
-export function isVideoScene(scene: Scene | undefined): boolean {
-  return (
-    scene?.source.kind === "kit" && scene.source.component === videoComponent
-  );
-}
+export { isVideoScene } from "./cardFacts.js";
 
 export function SceneCards(props: {
-  output: Output;
-  clips: SceneClip[];
-  scenes: Scene[];
-  assets: Asset[];
-  stills: ReadonlyMap<string, string>;
-  pickedClipId: string | undefined;
-  shownClipId: string | undefined;
-  framesPerSecond: number;
+  context: CardContext;
+  film: FilmChapters;
+  chapterEdits: ChapterEdits;
   onPick: (clip: SceneClip) => void;
-  onMove: (move: { clip: SceneClip; toIndex: number }) => void;
   onAddScene: (request: string) => void;
   onTransition: (change: { clip: SceneClip; kind: TransitionChoice }) => void;
+  onDropItem: (drop: { assetId: string; clip: SceneClip }) => void;
 }) {
-  const { output, clips, scenes, stills, framesPerSecond } = props;
-  const dragged = useRef<SceneClip | undefined>(undefined);
+  const { film, chapterEdits, context } = props;
+  const { pickedClipId } = context;
   const list = useRef<HTMLOListElement>(null);
   const keyMovedClipId = useRef<string | undefined>(undefined);
   const [addingAfter, setAddingAfter] = useState<number>();
   const [choosingInto, setChoosingInto] = useState<number>();
+  const [over, setOver] = useState<{ clipId: string; kind: DragKind }>();
+  const clips = film.cards.map((card) => card.clip);
   const choosingClip =
     choosingInto === undefined ? undefined : clips[choosingInto];
-  const order = clips.map((clip) => clip.id).join(" ");
-  const { pickedClipId } = props;
+  const order = film.cards
+    .map((card) => `${card.clip.id}:${card.chapterId}`)
+    .join(" ");
   const edges = useScrollEdges({ element: list, contentKey: order });
 
   useEffect(() => {
@@ -65,28 +59,11 @@ export function SceneCards(props: {
       ?.focus();
   }, [order]);
 
-  const cards: CardFacts[] = clips.map((...[clip, index]) => {
-    const scene = scenes.find((candidate) => candidate.id === clip.sceneId);
-    return {
-      clip,
-      index,
-      title: sceneNameById({
-        sceneId: clip.sceneId,
-        scenes,
-        assets: props.assets,
-      }),
-      lengthText: secondsText({ frames: clip.durationFrames, framesPerSecond }),
-      isVideo: isVideoScene(scene),
-      still: stills.get(stillKey({ outputId: output.id, clipId: clip.id })),
-      isPicked: clip.id === props.pickedClipId,
-      isShown: clip.id === props.shownClipId,
-    };
-  });
   const neighborOf = (index: number) => {
-    const card = cards[index];
+    const card = film.cards[index];
     return card === undefined
       ? undefined
-      : { number: index + 1, title: card.title };
+      : { number: index + 1, title: cardFactsOf({ card, context }).title };
   };
   const markAfter = (index: number) => {
     const next = clips[index + 1];
@@ -107,6 +84,42 @@ export function SceneCards(props: {
       />
     );
   };
+  const dropSceneInChapter = (drop: { clipId: string; chapterId: string }) => {
+    const card = film.cards.find((each) => each.clip.id === drop.clipId);
+    if (card !== undefined) {
+      chapterEdits.dropSceneInChapter({ card, chapterId: drop.chapterId });
+    }
+  };
+  const cardOf = (card: ChapterCard) => (
+    <SceneCard
+      key={card.clip.id}
+      card={cardFactsOf({ card, context })}
+      over={over?.clipId === card.clip.id ? over.kind : undefined}
+      drop={cardDropOf({
+        card,
+        film,
+        chapterEdits,
+        onDropItem: props.onDropItem,
+        onOver: (kind) => {
+          setOver(
+            kind === undefined ? undefined : { clipId: card.clip.id, kind },
+          );
+        },
+      })}
+      onPick={() => {
+        props.onPick(card.clip);
+      }}
+      onKeyMove={(step) => {
+        keyMovedClipId.current = card.clip.id;
+        chapterEdits.stepScene({ card, by: step });
+      }}
+      onAdd={() => {
+        setChoosingInto(undefined);
+        setAddingAfter(card.index);
+      }}
+      mark={markAfter(card.index)}
+    />
+  );
   return (
     <>
       <ol
@@ -116,35 +129,25 @@ export function SceneCards(props: {
         data-more-before={edges.hasMoreBefore}
         data-more-after={edges.hasMoreAfter}
       >
-        {cards.map((card) => (
-          <SceneCard
-            key={card.clip.id}
-            card={card}
-            onPick={() => {
-              props.onPick(card.clip);
-            }}
-            onKeyMove={(step) => {
-              const toIndex = card.index + step;
-              if (toIndex < 0 || toIndex >= clips.length) return;
-              keyMovedClipId.current = card.clip.id;
-              props.onMove({ clip: card.clip, toIndex });
-            }}
-            onDragStart={() => {
-              dragged.current = card.clip;
-            }}
-            onDrop={() => {
-              const clip = dragged.current;
-              dragged.current = undefined;
-              if (clip === undefined || clip.id === card.clip.id) return;
-              props.onMove({ clip, toIndex: card.index });
-            }}
-            onAdd={() => {
-              setChoosingInto(undefined);
-              setAddingAfter(card.index);
-            }}
-            mark={markAfter(card.index)}
-          />
-        ))}
+        {film.isSplit
+          ? film.chapters.map((...[chapter, index]) => (
+              <Fragment key={chapter.id}>
+                {index === 0 ? undefined : (
+                  <ChapterLine
+                    film={film}
+                    leftId={film.chapters[index - 1]?.id ?? ""}
+                    edits={chapterEdits}
+                  />
+                )}
+                <ChapterGroup
+                  chapter={chapter}
+                  onDropScene={dropSceneInChapter}
+                >
+                  {chapter.cards.map(cardOf)}
+                </ChapterGroup>
+              </Fragment>
+            ))
+          : film.cards.map(cardOf)}
       </ol>
       {choosingClip === undefined || choosingInto === undefined ? undefined : (
         <TransitionForm

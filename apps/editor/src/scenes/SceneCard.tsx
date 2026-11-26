@@ -1,5 +1,6 @@
 import type { KeyboardEvent, ReactNode } from "react";
 import type { SceneClip } from "../engine/snapshot.js";
+import { startDrag, type DragKind, type dropTargetProps } from "./dragData.js";
 
 export interface CardFacts {
   clip: SceneClip;
@@ -14,10 +15,10 @@ export interface CardFacts {
 
 export function SceneCard(props: {
   card: CardFacts;
+  over: DragKind | undefined;
+  drop: ReturnType<typeof dropTargetProps>;
   onPick: () => void;
   onKeyMove: (step: number) => void;
-  onDragStart: () => void;
-  onDrop: () => void;
   onAdd: () => void;
   mark?: ReactNode;
 }) {
@@ -35,22 +36,15 @@ export function SceneCard(props: {
         className="card"
         draggable
         data-card={card.clip.id}
+        data-over={props.over}
         aria-pressed={card.isPicked}
         data-shown={card.isShown}
         onClick={props.onPick}
         onKeyDown={onKeyDown}
         onDragStart={(event) => {
-          event.dataTransfer.effectAllowed = "move";
-          event.dataTransfer.setData("text/plain", card.clip.id);
-          props.onDragStart();
+          startDrag({ event, kind: "scene", id: card.clip.id });
         }}
-        onDragOver={(event) => {
-          event.preventDefault();
-        }}
-        onDrop={(event) => {
-          event.preventDefault();
-          props.onDrop();
-        }}
+        {...props.drop}
       >
         <span className="thumb">
           {card.still === undefined ? undefined : (

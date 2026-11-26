@@ -186,7 +186,12 @@ export async function runEngine(
     stop,
     remove: async () => {
       await stop();
-      await rm(root, { recursive: true, force: true });
+      await rm(root, {
+        recursive: true,
+        force: true,
+        maxRetries: 5,
+        retryDelay: 200,
+      });
     },
   };
 }

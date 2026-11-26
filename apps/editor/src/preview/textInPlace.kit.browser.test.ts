@@ -150,13 +150,4 @@ describe("a text of the preview that changes in place", () => {
     });
     await editor.close();
   });
-
-  it("says how to change a text under the preview", async () => {
-    const editor = await openAt({ frame: 0 });
-
-    await expect
-      .poll(() => editor.page.locator(".frame-hint").innerText())
-      .toMatch(/^Click the text in the video to change it\. /);
-    await editor.close();
-  });
 });

@@ -156,6 +156,7 @@ export function everyToolCall(importSourcePath: string): ScriptedCall[] {
       name: "place_video",
       input: { output_id: "wide", asset_id: "clip", start_frame: 30 },
     },
+    ...newKind.chapterCalls,
     {
       name: "generate_asset",
       input: {
