@@ -1,5 +1,6 @@
 import { join } from "node:path";
 import { readOptionalFile, writeFileAtomic } from "../agents/agentFiles.js";
+import { stoppedExportOf } from "../exports/exportEntry.js";
 import { chatFileSchema, type ChatEntry, type ChatFile } from "./chatTypes.js";
 
 export function chatFilePath(projectFolder: string): string {
@@ -21,6 +22,7 @@ function stoppedIfRunning(entry: ChatEntry): ChatEntry {
   if (entry.kind === "permission" && entry.state === "open") {
     return { ...entry, state: "ended" };
   }
+  if (entry.kind === "export") return stoppedExportOf(entry);
   return entry.kind === "answer" && entry.state === "running"
     ? { ...entry, state: "stopped" }
     : entry;

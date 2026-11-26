@@ -7,7 +7,10 @@ import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 import { installFakeAgent } from "./fakeAgent.js";
-import { pathOfTestPrograms } from "./testPrograms.js";
+import {
+  installRecordingPrograms,
+  pathOfTestPrograms,
+} from "./testPrograms.js";
 
 const runFile = promisify(execFile);
 export const cliMainFile = fileURLToPath(
@@ -44,6 +47,7 @@ export interface EngineOptions {
   mediaTools?: object;
   withChromium?: boolean;
   agentPrograms?: string[];
+  recordingPrograms?: string[];
   fakeAgent?: boolean;
   withVoiceServer?: boolean;
   environment?: Record<string, string>;
@@ -81,6 +85,11 @@ async function createProject(options: EngineOptions): Promise<{
       : {}),
     ...options.environment,
   };
+  await installRecordingPrograms({
+    root,
+    path: environment.PATH,
+    programs: options.recordingPrograms ?? [],
+  });
   const folder = join(root, "project");
   await runFile(
     process.execPath,

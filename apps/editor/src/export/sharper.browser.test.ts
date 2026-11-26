@@ -46,21 +46,27 @@ describe("Sharper in Export", () => {
     await expect
       .poll(
         () =>
-          sheet.getByRole("button", { name: "Show the sharper file" }).count(),
+          sheet
+            .locator(".exported-file")
+            .filter({ hasText: "Sharper copy" })
+            .count(),
         { timeout: 90_000 },
       )
       .toBe(1);
+    const exported = join(
+      runningEngine().projectFolder,
+      "exports",
+      "editor-test-wide.mp4",
+    );
+    expect((await stat(exported)).isFile()).toBe(true);
     const renders = join(runningEngine().projectFolder, "renders");
-    expect((await stat(join(renders, "wide.mp4"))).isFile()).toBe(true);
     const probe = await probeVideo(join(renders, "wide-sharper.mp4"));
     expect(probe.streams).toContainEqual({
       codec_type: "video",
       width: 640,
       height: 360,
     });
-    expect(
-      await sheet.getByRole("button", { name: "Show the file" }).count(),
-    ).toBe(1);
+    expect(await sheet.getByRole("button", { name: "Play" }).count()).toBe(2);
     expect(await requestTextsSent(runningEngine())).toContainEqual(
       expect.stringContaining(
         '1. make_sharper_copy {"output_id":"wide","server":"sample"',

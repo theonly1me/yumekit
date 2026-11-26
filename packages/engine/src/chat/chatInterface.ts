@@ -14,6 +14,7 @@ import type {
   RequestEntry,
   SteeringEntry,
 } from "./chatTypes.js";
+import type { ExportDesk } from "../exports/exportDesk.js";
 import type { HelperCall } from "./helpers/helperDesk.js";
 import type { PersonRequestInput } from "./questions/personRequest.js";
 import type { MoneyDesk } from "./money/moneyDesk.js";
@@ -44,6 +45,7 @@ export interface Chat {
   helperCallOf: (token: string | undefined) => HelperCall;
   money: MoneyDesk;
   permissions: ChatPermissions;
+  exports: ExportDesk;
   close: () => Promise<void>;
 }
 

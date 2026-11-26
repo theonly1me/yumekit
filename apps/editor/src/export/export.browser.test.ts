@@ -56,12 +56,9 @@ describe("export from the editor", () => {
     await sheet.getByRole("button", { name: "Export 1 video" }).click();
 
     await expect
-      .poll(
-        () => sheet.getByRole("button", { name: "Show the file" }).count(),
-        {
-          timeout: 60_000,
-        },
-      )
+      .poll(() => sheet.getByRole("button", { name: "Play" }).count(), {
+        timeout: 60_000,
+      })
       .toBe(1);
     const seenProgress = await page.evaluate(
       () => document.body.dataset["seenProgress"] ?? "",
@@ -75,10 +72,17 @@ describe("export from the editor", () => {
     expect(await sheet.getByText("Your video is ready").count()).toBe(1);
     expect(
       await sheet
-        .getByText("project/renders", { exact: true })
+        .getByText("project/exports", { exact: true })
         .getAttribute("title"),
-    ).toMatch(/[\\/]project[\\/]renders$/);
-    const file = join(runningEngine().projectFolder, "renders", "wide.mp4");
+    ).toMatch(/[\\/]project[\\/]exports$/);
+    const file = join(
+      runningEngine().projectFolder,
+      "exports",
+      "editor-test-wide.mp4",
+    );
+    expect(await sheet.locator(".exported-path code").innerText()).toMatch(
+      /[\\/]project[\\/]exports[\\/]editor-test-wide\.mp4$/,
+    );
     const probe = await probeVideo(file);
     expect(probe.format.duration).toBeCloseTo(4, 1);
     expect(probe.streams).toContainEqual({
@@ -89,7 +93,7 @@ describe("export from the editor", () => {
 
     const [video] = await Promise.all([
       page.waitForEvent("popup"),
-      sheet.getByRole("button", { name: "Show the file" }).click(),
+      sheet.getByRole("button", { name: "Play" }).click(),
     ]);
     await video.waitForURL(/^blob:/);
     await close();
@@ -145,10 +149,9 @@ describe("export from the editor", () => {
     await topButton.click();
     const reopened = page.getByRole("dialog");
     await expect
-      .poll(
-        () => reopened.getByRole("button", { name: "Show the file" }).count(),
-        { timeout: 60_000 },
-      )
+      .poll(() => reopened.getByRole("button", { name: "Play" }).count(), {
+        timeout: 60_000,
+      })
       .toBe(1);
     expect(
       await reopened.getByRole("checkbox", { name: /^Wide/ }).isChecked(),

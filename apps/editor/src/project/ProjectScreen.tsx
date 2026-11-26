@@ -40,6 +40,7 @@ export function ProjectScreen(props: {
     client,
     snapshot,
     projectFolder: props.projectFolder,
+    entries: chat.entries,
     onShowScene: props.onEditByHand,
   });
   const settings = useSettingsSheet({
@@ -96,6 +97,7 @@ export function ProjectScreen(props: {
               snapshot={snapshot}
               work={work}
               running={running}
+              exports={exporting.exports}
             />
           </div>
           {money === undefined ? (

@@ -1,6 +1,7 @@
 import type { WorkItem } from "../../chat/running/workSchema.js";
 import type { EngineClient } from "../../engine/engineClient.js";
 import type { Snapshot } from "../../engine/snapshot.js";
+import type { Exports } from "../../export/useExports.js";
 import { FilmView } from "../film/FilmView.js";
 import { StoryReading } from "../story/StoryReading.js";
 import { TakeView } from "../takes/TakeView.js";
@@ -14,6 +15,7 @@ export function WorkBody(props: {
   snapshot: Snapshot;
   work: ProjectWork;
   running: WorkItem[];
+  exports: Exports;
 }) {
   const { client, snapshot, work } = props;
   const { state, facts } = work;
@@ -40,6 +42,10 @@ export function WorkBody(props: {
           take={state.take}
           chapterLine={chapterLineOf(facts)}
           review={work.review}
+          exports={props.exports}
+          onPickTake={(takeId) => {
+            work.show({ choice: { kind: "take", takeId } });
+          }}
         />
       );
     case "making":

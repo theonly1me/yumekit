@@ -1,4 +1,5 @@
 import { reviewCountsOf, reviewTotalOf } from "@yumekit/project/takes";
+import type { NewerTake } from "../takes/newerTake.js";
 import type { Take } from "../takes/takeTypes.js";
 import type { WorkState } from "../work/workState.js";
 import {
@@ -11,6 +12,7 @@ import {
   upperFirst,
 } from "./footWords.js";
 import { moneyActionOf, type MoneyLeft } from "./moneyAction.js";
+import { goToNewest, replacedActionOf } from "./replacedAction.js";
 
 export type ActionId =
   | "send"
@@ -43,23 +45,20 @@ function takeActionOf(options: {
   take: Take;
   noteCount: number;
   countText: string;
-  latestTakeId: string | undefined;
+  newer: NewerTake | undefined;
   takeCost: number;
 }): NextAction {
-  const { take, noteCount } = options;
+  const { take, noteCount, newer } = options;
   if (take.state === "sent") {
-    const isLatest =
-      options.latestTakeId === undefined || options.latestTakeId === take.id;
     return {
       line:
         reviewTotalOf(reviewCountsOf(take.notes)) === 0
           ? "You approved this take."
           : "Your review of this take went to the lead.",
-      buttons: isLatest
-        ? []
-        : [primary({ id: "open-latest", label: "Open the latest take" })],
+      buttons: newer === undefined ? [] : [goToNewest(newer)],
     };
   }
+  if (newer !== undefined) return replacedActionOf(newer);
   if (noteCount === 0) {
     const line =
       options.countText === ""
@@ -80,8 +79,10 @@ function storyActionOf(options: {
   take: Take | undefined;
   noteCount: number;
   isStoryApproved: boolean;
+  newer: NewerTake | undefined;
 }): NextAction {
-  const viaTake = options.take?.state === "ready";
+  const viaTake =
+    options.take?.state === "ready" && options.newer === undefined;
   if (options.noteCount > 0) {
     return {
       line: `${String(options.noteCount)} ${options.noteCount === 1 ? "note" : "notes"} on the story.`,
@@ -112,11 +113,15 @@ function filmActionOf(options: {
   noteCount: number;
   countText: string;
   hasNextChapter: boolean;
+  newer: NewerTake | undefined;
 }): NextAction {
-  const { take } = options;
+  const { take, newer } = options;
   if (take === undefined) return { line: "", buttons: [] };
   if (take.state === "open") {
     return { line: "The lead puts the cut together.", buttons: [] };
+  }
+  if (take.state === "ready" && newer !== undefined) {
+    return replacedActionOf(newer);
   }
   if (take.state === "ready") {
     return options.noteCount > 0
@@ -128,6 +133,9 @@ function filmActionOf(options: {
           line: "Watch it once at full speed.",
           buttons: [primary({ id: "send", label: "Approve the cut" })],
         };
+  }
+  if (newer !== undefined) {
+    return { line: "You sent this cut earlier.", buttons: [goToNewest(newer)] };
   }
   if (reviewTotalOf(reviewCountsOf(take.notes)) > 0) {
     return { line: "Your review of the cut went to the lead.", buttons: [] };
@@ -150,7 +158,7 @@ export function nextActionOf(options: {
   state: WorkState;
   noteCount: number;
   countText: string;
-  latestTakeId: string | undefined;
+  newer: NewerTake | undefined;
   isStoryApproved: boolean;
   hasNextChapter: boolean;
   isLeadRunning: boolean;

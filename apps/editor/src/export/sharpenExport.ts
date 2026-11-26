@@ -70,11 +70,14 @@ export async function withSharperCopy(options: {
         made.platformId === undefined ||
         request.platformIds.includes(made.platformId),
     )
-    .map((made) => {
-      const file = sharperFileOf(made.file);
+    .map((made): MadeFile => {
+      const file = sharperFileOf(made.renderPath);
+      const fileName = fileNameOf(file);
       return {
         file,
-        fileName: fileNameOf(file),
+        fileName,
+        renderPath: file,
+        served: { folder: "renders", fileName },
         platformId: made.platformId,
         isSharper: true,
       };

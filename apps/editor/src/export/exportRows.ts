@@ -32,10 +32,7 @@ export function exportRowsOf(snapshot: Snapshot): ExportRow[] {
     shape: tab.shape,
     output: tab.output,
     platformId: tab.platformId,
-    fileName:
-      tab.platformId === undefined
-        ? `${tab.output.id}.mp4`
-        : `${projectFileName}-${tab.platformId}.mp4`,
+    fileName: `${projectFileName}-${tab.platformId ?? tab.output.id}.mp4`,
     lengthFrames: lengthFramesOf(
       timelineOf({ snapshot, outputId: tab.output.id }),
     ),

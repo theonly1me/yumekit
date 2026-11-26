@@ -1,0 +1,90 @@
+.exported-file {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 12px 14px 14px;
+  border: 1px solid var(--line-strong);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+  background: var(--raised);
+}
+
+.exported-name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 12px;
+  font-size: var(--step-0);
+  color: var(--text);
+}
+
+.exported-name strong {
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.exported-name span {
+  font-size: var(--step--1);
+  color: var(--muted);
+}
+
+.exported-path {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 10px;
+  min-width: 0;
+}
+
+.exported-path code {
+  flex: 1 1 260px;
+  min-width: 0;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: var(--well);
+  color: var(--muted);
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: var(--step--2);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  user-select: all;
+}
+
+.exported-path .link {
+  flex: 0 0 auto;
+  font-size: var(--step--1);
+}
+
+.exported-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.exported-note {
+  font-size: var(--step--1);
+}
+
+.export-done {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.export-done > p:first-child {
+  color: var(--text);
+}
+
+.export-running {
+  display: grid;
+  gap: 8px;
+}
+
+.export-running .progress {
+  max-width: 420px;
+}
+
+.export-failed {
+  color: var(--accent);
+  font-size: var(--step--1);
+}

@@ -2,7 +2,7 @@ import type { ChatEntry } from "../../chat/chatSchemas.js";
 import { shownRequestTextOf } from "../../chat/requestEntryText.js";
 import type { Snapshot } from "../../engine/snapshot.js";
 import type { Chapter, Take } from "../takes/takeTypes.js";
-import { chaptersOf, takesOfChapter } from "../takes/verdicts.js";
+import { chaptersOf } from "../takes/verdicts.js";
 import { autoChapterIdOf } from "./workState.js";
 
 export interface ProjectFacts {
@@ -61,18 +61,6 @@ export function takeCostOf(options: {
       asset?.source.kind === "tool" ? (asset.source.costUsd ?? 0) : 0;
     return sum + cost;
   }, 0);
-}
-
-export function latestTakeIdOf(options: {
-  takes: readonly Take[];
-  take: Take;
-}): string | undefined {
-  const { take } = options;
-  const siblings =
-    take.chapterId === undefined
-      ? options.takes.filter((each) => each.step === take.step)
-      : takesOfChapter({ takes: options.takes, chapterId: take.chapterId });
-  return siblings.at(-1)?.id;
 }
 
 export function chapterLineOf(facts: ProjectFacts): string {

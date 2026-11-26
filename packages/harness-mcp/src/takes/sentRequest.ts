@@ -41,7 +41,7 @@ function nextStepOf(options: {
       );
       const next = chapters[index + 1];
       return next === undefined
-        ? "This was the last chapter. Tell the person in one short line that the film is ready to export."
+        ? "This was the last chapter. yumekit now exports the film for each platform to the exports folder of the project, and shows the person where each file is. Do not render the film again. Tell the person in one short line that the film is done."
         : `Go on to chapter "${next.id}" (${next.title}) now: open a take of pictures for it.`;
     }
   }

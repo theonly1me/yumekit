@@ -18,6 +18,7 @@ my-project/
   assets/files/<assetId>.<ext>  the media file
   assets/files/<assetId>.words.json   word timings of a speech asset
   renders/                      finished files (not in git)
+  exports/                      the exported films of the person (not in git, document 21, "Details of WP93")
   .yumekit/                     undo history and cache (not in git)
   .yumekit/spending.json        the record of paid calls (document 15, "Details of WP64")
   .yumekit/requests.json        the record of media requests (document 20, "Details of WP73")
@@ -26,7 +27,7 @@ my-project/
   .cache/                       frame pictures of video assets (not in git)
 ```
 
-`createProject` writes a `.gitignore` with `renders/`, `.yumekit/`, `.cache/`, and the agent files `.mcp.json`, `.codex/config.toml`, and `.cursor/mcp.json`. The agent files hold full paths of one computer (document 11, "Agent setup").
+`createProject` writes a `.gitignore` with `renders/`, `exports/`, `.yumekit/`, `.cache/`, and the agent files `.mcp.json`, `.codex/config.toml`, and `.cursor/mcp.json`. The agent files hold full paths of one computer (document 11, "Agent setup").
 
 ## Schemas
 

@@ -1,4 +1,5 @@
 import {
+  isTakeReplaced,
   reviewCountTextOf,
   reviewCountsOf,
   reviewTotalOf,
@@ -17,6 +18,19 @@ const stepNames: Record<TakeStep, string> = {
   clips: "Clips and music",
   cut: "The cut",
 };
+
+function menuLabelOf(options: {
+  take: Take;
+  takes: readonly Take[];
+  index: number;
+}): string {
+  const { take } = options;
+  const label = `Take ${String(take.number)}, ${stepNames[take.step].toLowerCase()}`;
+  if (options.index === 0) return `${label} (newest)`;
+  return take.state === "sent" || !isTakeReplaced(options)
+    ? label
+    : `${label} (replaced)`;
+}
 
 function chapterLineOf(options: { take: Take; chapters: Chapter[] }): string {
   const { take, chapters } = options;
@@ -85,9 +99,9 @@ export function TakeSlate(props: {
                   props.onPickTake(event.target.value);
                 }}
               >
-                {siblings.map((each) => (
+                {siblings.toReversed().map((...[each, index]) => (
                   <option key={each.id} value={each.id}>
-                    Take {each.number}, {stepNames[each.step].toLowerCase()}
+                    {menuLabelOf({ take: each, takes: props.takes, index })}
                   </option>
                 ))}
               </select>

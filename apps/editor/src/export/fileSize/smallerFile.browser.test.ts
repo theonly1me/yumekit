@@ -50,25 +50,24 @@ describe("the smaller file in Export", () => {
     expect(await exportButton.isDisabled()).toBe(true);
 
     await ownSize.fill("0.3");
-    expect(await sheet.getByText("wide-under-0.3mb.mp4").count()).toBe(1);
+    expect(
+      await sheet.getByText("editor-test-wide-under-0.3mb.mp4").count(),
+    ).toBe(1);
     await exportButton.click();
 
     await expect
-      .poll(
-        () => sheet.getByRole("button", { name: "Show the file" }).count(),
-        {
-          timeout: 60_000,
-        },
-      )
+      .poll(() => sheet.getByRole("button", { name: "Play" }).count(), {
+        timeout: 60_000,
+      })
       .toBe(1);
     const file = join(
       runningEngine().projectFolder,
-      "renders",
-      "wide-under-0.3mb.mp4",
+      "exports",
+      "editor-test-wide-under-0.3mb.mp4",
     );
     const bytes = (await stat(file)).size;
     expect(bytes).toBeLessThanOrEqual(300_000);
-    expect(await sheet.locator(".real-size").innerText()).toBe(
+    expect(await sheet.locator(".exported-name span").innerText()).toBe(
       `${String(Math.round(bytes / 10_000) / 100)} MB, 180p`,
     );
     expect((await probeVideo(file)).streams).toContainEqual({

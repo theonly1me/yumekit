@@ -98,6 +98,14 @@
   padding-left: 0;
 }
 
-.export-row .real-size {
-  margin-left: auto;
+.export-made {
+  display: grid;
+  flex-basis: 100%;
+  gap: 8px;
+  min-width: 0;
+}
+
+.export-start-failure {
+  color: var(--accent);
+  font-size: var(--step--1);
 }

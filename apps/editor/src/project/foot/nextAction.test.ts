@@ -15,7 +15,7 @@ function actionOf(options: {
     money: undefined,
     noteCount: 0,
     countText: "",
-    latestTakeId: undefined,
+    newer: undefined,
     isStoryApproved: false,
     hasNextChapter: false,
     isLeadRunning: true,
@@ -115,5 +115,27 @@ describe("the one next action", () => {
         countText: "1 to change",
       }).buttons.map((button) => button.label),
     ).toEqual(["Send the review to the lead"]);
+  });
+
+  it("gives a replaced take no send, only the way to the newest take", () => {
+    const replacedBy = takeOf({ id: "take-5", number: 5, state: "sent" });
+    const newest = takeOf({ id: "take-6", number: 6, state: "open" });
+
+    expect(
+      nextActionOf({
+        money: undefined,
+        noteCount: 0,
+        countText: "",
+        newer: { newest, replacedBy },
+        isStoryApproved: true,
+        hasNextChapter: false,
+        isLeadRunning: true,
+        takeCost: 0,
+        state: { kind: "take", take: { ...pictures, number: 2 } },
+      }),
+    ).toEqual({
+      line: "Take 5 replaced this take, so it is only to look at.",
+      buttons: [{ id: "open-latest", label: "Go to take 6", isPrimary: true }],
+    });
   });
 });
