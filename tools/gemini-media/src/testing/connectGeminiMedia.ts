@@ -1,4 +1,4 @@
-import { mkdtemp } from "node:fs/promises";
+import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
@@ -9,6 +9,7 @@ import {
   type Progress,
 } from "@modelcontextprotocol/sdk/types.js";
 import { createGeminiMediaServer } from "../createGeminiMediaServer.ts";
+import { onTestFinished } from "vitest";
 
 export const placeholderKey = "placeholder-gemini-key-7f3a";
 
@@ -78,8 +79,10 @@ export function resultText(result: CallToolResult): string {
     .join("\n");
 }
 
-export function temporaryFolder(): Promise<string> {
-  return mkdtemp(join(tmpdir(), "yumekit-gemini-media-"));
+export async function temporaryFolder(): Promise<string> {
+  const folder = await mkdtemp(join(tmpdir(), "yumekit-gemini-media-"));
+  onTestFinished(() => rm(folder, { recursive: true, force: true }));
+  return folder;
 }
 
 export async function outputDirectory(): Promise<string> {

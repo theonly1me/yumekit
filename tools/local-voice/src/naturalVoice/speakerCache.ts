@@ -1,16 +1,18 @@
 import { createHash } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { Outcome } from "../toolResults.ts";
 import type { LoadSpeaker, NaturalSpeaker } from "./naturalSpeaker.ts";
 
 type LoadedSpeaker = Promise<Outcome<NaturalSpeaker, string>>;
 
-async function wordListPathOf(lines: string[]): Promise<string> {
-  const text = `${[...lines].sort().join("\n")}\n`;
+async function wordListPathOf(options: {
+  lines: string[];
+  modelFolder: string;
+}): Promise<string> {
+  const text = `${[...options.lines].sort().join("\n")}\n`;
   const name = createHash("sha256").update(text).digest("hex").slice(0, 16);
-  const folder = join(tmpdir(), "yumekit-voice-words");
+  const folder = join(options.modelFolder, "word-lists");
   await mkdir(folder, { recursive: true, mode: 0o700 });
   const path = join(folder, `${name}.txt`);
   await writeFile(path, text);
@@ -47,7 +49,7 @@ export function createSpeakerCache(options: {
       }
       const key = [...lines].sort().join("\n");
       if (withWords?.key !== key) {
-        const path = await wordListPathOf(lines);
+        const path = await wordListPathOf({ lines, modelFolder: folder });
         withWords = {
           key,
           speaker: options.loadSpeaker({ folder, wordListPaths: [path] }),

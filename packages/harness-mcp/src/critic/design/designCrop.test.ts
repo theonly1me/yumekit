@@ -1,5 +1,4 @@
-import { mkdtemp, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
+import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { passSheetAnswerOf } from "../../testing/criticFixture.js";
@@ -11,6 +10,7 @@ import {
 import type { Harness, ToolCall } from "../../testing/harnessFixture.js";
 import { probeVideo } from "../../testing/probeVideo.js";
 import { shotCall } from "../../testing/storyFixture.js";
+import { temporaryFolder } from "../../testing/temporaryFolder.js";
 
 const passWithDesign = {
   start: (brief: string) => ({
@@ -20,7 +20,7 @@ const passWithDesign = {
 };
 
 async function pictureHeightsOf(view: ToolCall): Promise<number[]> {
-  const folder = await mkdtemp(join(tmpdir(), "design-crop-"));
+  const folder = await temporaryFolder();
   const images = view.result.content.flatMap((content) =>
     content.type === "image" ? [content.data] : [],
   );
