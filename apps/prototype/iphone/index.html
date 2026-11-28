@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>iPhone · yumekit</title>
+    <link rel="stylesheet" href="../fonts.css" />
+    <link rel="stylesheet" href="../tokens.css" />
+    <link rel="stylesheet" href="layout.css" />
+    <link rel="stylesheet" href="screens.css" />
+    <link rel="stylesheet" href="adaptive.css" />
+  </head>
+  <body>
+    <div class="workbench">
+      <aside class="review">
+        <a href="../">‹ Desktop prototype</a>
+        <h1>YumeKit for iPhone</h1>
+        <p>Direct a film on your Mac from your phone.</p>
+        <nav aria-label="Preview a screen" id="shortcuts"></nav>
+        <button id="theme" type="button"></button>
+      </aside>
+      <main class="device" aria-label="iPhone preview">
+        <div class="status" aria-hidden="true">
+          <span>9:41</span><span class="island"></span><span>▮▮▮ ▰</span>
+        </div>
+        <div id="phone" tabindex="-1"></div>
+        <div class="handle" aria-hidden="true"></div>
+      </main>
+    </div>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

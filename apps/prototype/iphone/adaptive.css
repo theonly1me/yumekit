@@ -1,0 +1,64 @@
+@media (max-width: 680px) {
+  .workbench {
+    display: block;
+    background: var(--ground);
+    padding: 0;
+  }
+  .review {
+    display: none;
+  }
+  .device {
+    border: 0;
+    border-radius: 0;
+    height: 100svh;
+    min-height: 0;
+    box-shadow: none;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .status,
+  .handle {
+    display: none;
+  }
+  .phone-bar {
+    padding-top: 8px;
+  }
+}
+@media (max-height: 600px) and (min-width: 681px) {
+  .device {
+    height: 90svh;
+    min-height: 0;
+  }
+}
+.frames {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 16px 0;
+}
+.frames button {
+  position: relative;
+  padding: 2px;
+  border: 2px solid transparent;
+  border-radius: 9px;
+  overflow: hidden;
+}
+.frames button[aria-pressed="true"] {
+  border-color: var(--accent);
+}
+.frames button span {
+  display: block;
+  aspect-ratio: 16/9;
+  border-radius: 5px;
+  overflow: hidden;
+}
+.frames small {
+  position: absolute;
+  bottom: 7px;
+  left: 8px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  color: white;
+  background: #161616d9;
+  font-variant-numeric: tabular-nums;
+}
