@@ -1,3 +1,7 @@
+import { activeSection, projectHeader, projectNav } from "./projectNav.js";
+import { footer } from "./dock.js";
+import { viewedTake } from "./takeHistory.js";
+import { takeList, review } from "./review.js";
 import { projectActions } from "./actions.js";
 import { templates } from "../templates.js";
 import { currentTheme, setTheme, storedTheme } from "../theme.js";
@@ -10,7 +14,7 @@ import {
   project,
   share,
   studio,
-  takes,
+  chat,
 } from "./views.js";
 
 const phone = document.querySelector("#phone");
@@ -19,7 +23,9 @@ const screens = {
   studio,
   create,
   project,
-  takes,
+  takes: takeList,
+  review,
+  chat,
   export: exportView,
   connection,
   share,
@@ -28,7 +34,8 @@ const labels = {
   studio: "Studio",
   create: "New project",
   project: "Project",
-  takes: "Review a take",
+  takes: "Takes",
+  chat: "Chat",
   export: "Export",
   connection: "Pairing",
 };
@@ -36,52 +43,13 @@ const parent = {
   studio: "studio",
   create: "studio",
   project: "studio",
-  takes: "project",
-  export: "project",
+  takes: "studio",
+  review: "takes",
+  chat: "studio",
+  export: "studio",
   connection: "studio",
   share: "export",
 };
-
-function footer() {
-  switch (session.page) {
-    case "studio":
-      return button({
-        action: "create",
-        label: "+ New project",
-        style: "primary",
-        disabled: !session.online,
-      });
-    case "create":
-      return button({
-        action: "start",
-        label: "Start project",
-        style: "primary",
-        disabled: !session.draft.trim(),
-      });
-    case "takes":
-      return button({
-        action: "submit",
-        label: Object.values(session.project.notes).some(Boolean)
-          ? "Send take with changes"
-          : "Approve take",
-        style: "primary",
-      });
-    case "export":
-      return button({ action: "share", label: "Share film", style: "primary" });
-    case "connection":
-      return button({
-        action: "connect",
-        label: session.paired
-          ? session.online
-            ? "Preview offline"
-            : "Reconnect"
-          : "Preview pairing",
-        style: "primary",
-      });
-    default:
-      return "";
-  }
-}
 
 function render() {
   const home = session.page === "studio";
@@ -93,9 +61,11 @@ function render() {
   });
   const bar = home
     ? `<strong>yumekit</strong>${host}`
-    : `${back}<small>${labels[session.page] ?? "Share"}</small>`;
+    : activeSection(session.page)
+      ? projectHeader()
+      : `${back}<small>${labels[session.page] ?? "Share"}</small>`;
   const dock = footer();
-  phone.innerHTML = `<header class="phone-bar">${bar}</header><section class="screen">${screens[session.page]()}</section>${dock ? `<footer class="dock">${dock}</footer>` : ""}`;
+  phone.innerHTML = `<header class="phone-bar">${bar}</header><section class="screen">${screens[session.page]()}</section>${dock ? `<footer class="dock">${dock}</footer>` : ""}${projectNav()}`;
   shortcuts.innerHTML = Object.entries(labels)
     .map(
       ([key, label]) =>
@@ -113,7 +83,6 @@ function go(page) {
 
 function openProject(p) {
   session.project = p;
-  session.shot = 0;
   session.feedback = "";
   go(session.online ? "project" : "connection");
 }
@@ -123,6 +92,11 @@ const actions = projectActions({ go, render, phone, openProject, parent });
 phone.addEventListener("click", (event) => {
   const el = event.target.closest("button");
   if (!el) return;
+  if (el.dataset.section) go(el.dataset.section);
+  if (el.dataset.take) {
+    session.project.selectedTake = Number(el.dataset.take);
+    go("review");
+  }
   if (el.dataset.action) actions[el.dataset.action]();
   if (el.dataset.project !== undefined)
     openProject(projects[Number(el.dataset.project)]);
@@ -134,7 +108,7 @@ phone.addEventListener("click", (event) => {
     phone.querySelector("#brief").focus();
   }
   if (el.dataset.shot !== undefined) {
-    session.shot = Number(el.dataset.shot);
+    viewedTake(session.project).shot = Number(el.dataset.shot);
     session.editingNote = false;
     render();
   }
@@ -151,13 +125,17 @@ phone.addEventListener("input", ({ target }) => {
     phone.querySelector('[data-action="send"]').disabled = !target.value.trim();
   }
   if (target.id === "shot-note") {
-    session.project.notes[session.project.scenes[session.shot].id] =
-      target.value.trim();
+    const take = viewedTake(session.project);
+    take.notes[take.scenes[take.shot].id] = target.value.trim();
     phone.querySelector("footer").innerHTML = footer();
   }
 });
 
 phone.addEventListener("change", ({ target }) => {
+  if (target.id === "take-picker") {
+    session.project.selectedTake = Number(target.value);
+    go("review");
+  }
   if (target.id === "format") session.format = target.value;
   if (target.id === "media") {
     session.files.push(...Array.from(target.files, (file) => file.name));
@@ -175,15 +153,10 @@ shortcuts.addEventListener("click", (event) => {
     session.online = true;
     session.paired = true;
   }
-  if (page === "takes" || page === "project") {
+  if (page === "takes" || page === "project" || page === "chat") {
     session.project = bell;
-    session.shot = 0;
   }
   if (page === "export") session.project = film;
-  if (page === "takes" && bell.stage !== "Pictures") {
-    bell.stage = "Pictures";
-    bell.notes = {};
-  }
   go(page);
 });
 

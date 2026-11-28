@@ -1,0 +1,49 @@
+.project-nav {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  flex: none;
+  border-top: 1px solid var(--line);
+  background: var(--surface);
+  padding: 4px 6px;
+}
+.project-nav button {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 3px;
+  padding: 5px 2px;
+  background: none;
+  border: 0;
+  border-radius: 8px;
+  min-height: 52px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.15;
+}
+.project-nav button[aria-current="page"] {
+  background: var(--raised);
+  color: var(--accent);
+  font-weight: 650;
+}
+.project-nav svg {
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.65;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.host-project {
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.take-picker select {
+  max-width: 74%;
+  font-size: 14px;
+}
+.section-head h2 {
+  margin-bottom: 0;
+}
