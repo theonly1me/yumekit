@@ -1,4 +1,5 @@
-import { bell, newProject, projects, session } from "./projects.js";
+import { addPictureTake, finishCut, submitTake } from "./takeHistory.js";
+import { newProject, projects, session } from "./projects.js";
 export function projectActions({ go, render, phone, openProject, parent }) {
   return {
     back: () => go(parent[session.page]),
@@ -6,18 +7,18 @@ export function projectActions({ go, render, phone, openProject, parent }) {
     connection: () => go("connection"),
     share: () => go("share"),
     export: () => go("export"),
+    project: () => go("project"),
     takes: () => go("takes"),
+    latest: () => {
+      session.project.selectedTake = session.project.takes.at(-1)?.number;
+      go("review");
+    },
     pictures: () => {
-      const p = session.project;
-      p.scenes = bell.scenes;
-      p.notes = {};
-      p.take += 1;
-      p.stage = "Pictures";
-      session.shot = 0;
-      go("takes");
+      addPictureTake(session.project);
+      go("review");
     },
     finish: () => {
-      session.project.stage = "Finished";
+      finishCut(session.project);
       session.feedback = "";
       go("export");
     },
@@ -42,18 +43,8 @@ export function projectActions({ go, render, phone, openProject, parent }) {
       phone.querySelector("#shot-note")?.focus();
     },
     submit: () => {
-      const p = session.project;
-      const notes = p.scenes
-        .filter((s) => p.notes[s.id])
-        .map((s) => `${s.title}: ${p.notes[s.id]}`);
-      p.messages.push({
-        author: "You",
-        body: notes.length
-          ? notes.join("\n")
-          : "I approve these pictures. Continue to clips.",
-      });
-      p.stage = notes.length ? "Changes requested" : "Clips";
-      go("project");
+      submitTake(session.project);
+      go("takes");
     },
     send: () => {
       const p = session.project;

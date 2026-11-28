@@ -1,4 +1,4 @@
-import { firstFilmScenes } from "../film.js";
+import { addPictureTake, finishCut, submitTake } from "./takeHistory.js";
 
 export function newProject({ title, brief, files, format }) {
   return {
@@ -7,10 +7,9 @@ export function newProject({ title, brief, files, format }) {
     files,
     format,
     messages: [],
-    scenes: [],
-    notes: {},
+    takes: [],
+    selectedTake: undefined,
     stage: "Story",
-    take: 0,
   };
 }
 
@@ -20,7 +19,7 @@ export const film = newProject({
   files: [],
   format: "YouTube",
 });
-film.stage = "Finished";
+finishCut(film);
 
 export const bell = newProject({
   title: "The Ninth Bell",
@@ -28,11 +27,10 @@ export const bell = newProject({
   files: [],
   format: "YouTube",
 });
-bell.scenes = firstFilmScenes
-  .filter((scene) => scene.chapterId === "c2")
-  .slice(0, 3);
-bell.stage = "Pictures";
-bell.take = 2;
+const first = addPictureTake(bell);
+first.notes[first.scenes[0].id] = "Bring Wren closer as the ferry leaves.";
+submitTake(bell);
+addPictureTake(bell);
 export const projects = [bell, film];
 
 export const session = {
@@ -40,7 +38,6 @@ export const session = {
   page: "studio",
   online: true,
   paired: true,
-  shot: 0,
   draft: "",
   format: "YouTube",
   files: [],
